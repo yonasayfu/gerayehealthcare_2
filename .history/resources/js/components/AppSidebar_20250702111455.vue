@@ -21,7 +21,7 @@ import {
   CalendarClock,
   Stethoscope,
   MessageCircle,
-  Receipt,
+  FileInvoice,
   ShieldCheck,
   PackageCheck,
   ClipboardList,
@@ -66,7 +66,7 @@ const mainNavItems: NavGroup[] = [
     items: [
       { title: 'Staff', href: '/dashboard/staff', icon: UserCog },
       { title: 'Messages', href: '/dashboard/messages', icon: MessageCircle },
-      { title: 'Invoices', href: '/dashboard/invoices', icon: Receipt },
+      { title: 'Invoices', href: '/dashboard/invoices', icon: FileInvoice },
       { title: 'Insurance Claims', href: '/dashboard/insurance', icon: ShieldCheck },
       { title: 'Inventory Items', href: '/dashboard/inventory', icon: PackageCheck },
       { title: 'Admin Task Tracking', href: '/dashboard/tasks', icon: ClipboardList },
