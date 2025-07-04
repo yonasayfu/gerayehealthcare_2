@@ -1,7 +1,6 @@
 <?php
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

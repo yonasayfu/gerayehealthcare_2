@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PatientSeeder::class,
             StaffSeeder::class,
-            CaregiverAssignmentSeeder::class,
+            
         ]);
         User::factory()->create([
             'name' => 'Test HomeCareUser',

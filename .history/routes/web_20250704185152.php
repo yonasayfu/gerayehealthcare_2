@@ -1,7 +1,6 @@
 <?php
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,10 +24,9 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function () 
     Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export'); // (optional)
     // 👨‍⚕️ Staff Module (FIXED)
     Route::resource('staff', StaffController::class); // ✅ consistent with 'patients'
-  // 🗓️ Caregiver Assignments Module (FIXED ORDER)
-    Route::get('assignments/export', [CaregiverAssignmentController::class, 'export'])->name('assignments.export');
-    Route::resource('assignments', CaregiverAssignmentController::class);
-
+ // 🗓️ Caregiver Assignments Module (Add these two lines)
+    Route::resource('assignments', App\Http\Controllers\Admin\CaregiverAssignmentController::class);
+    Route::get('assignments/export', [App\Http\Controllers\Admin\CaregiverAssignmentController::class, 'export'])->name('assignments.export');
 
     // Static views (optional for other tools, not staff)
     // Route::view('assignments', 'Admin/CaregiverAssignments/Index')->name('assignments.index');
