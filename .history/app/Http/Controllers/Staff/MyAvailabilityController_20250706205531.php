@@ -78,7 +78,7 @@ class MyAvailabilityController extends Controller
 
         return response()->json($events);
     }
-
+}
     /**
      * Update an existing availability slot for the authenticated staff member.
      */

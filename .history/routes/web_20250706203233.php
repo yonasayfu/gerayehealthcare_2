@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserController; // Import the new controller
 use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use Illuminate\Support\Facades\Route;
@@ -34,7 +34,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
-        Route::resource('users', UserController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
+        Route::resource('users', UserController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value); // ADD THIS LINE
 
         // --- PLACEHOLDER ROUTES FOR FUTURE MODULES ---
         Route::get('visits', [PlaceholderController::class, 'index'])->name('visits.index');
@@ -49,23 +49,21 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('international', [PlaceholderController::class, 'index'])->name('international.index');
         Route::get('events', [PlaceholderController::class, 'index'])->name('events.index');
         Route::get('networks', [PlaceholderController::class, 'index'])->name('networks.index');
+        // Route::get('roles', [PlaceholderController::class, 'index'])->name('roles.index');
     });
 
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
-        // The page to view the calendar
         Route::get('my-availability', [MyAvailabilityController::class, 'index'])->name('my-availability.index');
-        
-        // THIS IS THE NEW ROUTE TO FIX THE ERROR
-        Route::get('my-availability/events', [MyAvailabilityController::class, 'getEvents'])->name('my-availability.events');
+         // The routes for the calendar to interact with
+    Route::post('my-availability', [MyAvailabilityController::class, 'store'])->name('my-availability.store');
+    Route::put('my-availability/{availability}', [MyAvailabilityController::class, 'update'])->name('my-availability.update');
+    Route::delete('my-availability/{availability}', [MyAvailabilityController::class, 'destroy'])->name('my-availability.destroy');
 
-        // The routes for the calendar to interact with
-        Route::post('my-availability', [MyAvailabilityController::class, 'store'])->name('my-availability.store');
-        Route::put('my-availability/{availability}', [MyAvailabilityController::class, 'update'])->name('my-availability.update');
-        Route::delete('my-availability/{availability}', [MyAvailabilityController::class, 'destroy'])->name('my-availability.destroy');
     });
+
 // Additional modules
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

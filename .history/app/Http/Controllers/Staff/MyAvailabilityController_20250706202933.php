@@ -48,36 +48,6 @@ class MyAvailabilityController extends Controller
 
         return response()->json(['message' => 'Availability created.'], 201);
     }
- public function getEvents(Request $request)
-    {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-        ]);
-
-        $staff = Auth::user()->staff;
-
-        $availabilities = $staff->availabilities()
-            ->where('start_time', '>=', $request->start)
-            ->where('end_time', '<=', $request->end)
-            ->get();
-
-        $events = $availabilities->map(function ($availability) {
-            return [
-                'id' => $availability->id,
-                'title' => $availability->status, // Just show the status
-                'start' => $availability->start_time->toIso8601String(),
-                'end' => $availability->end_time->toIso8601String(),
-                'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'extendedProps' => [
-                    'status' => $availability->status,
-                ]
-            ];
-        });
-
-        return response()->json($events);
-    }
 
     /**
      * Update an existing availability slot for the authenticated staff member.

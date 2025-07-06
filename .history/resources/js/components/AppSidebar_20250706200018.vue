@@ -18,9 +18,9 @@ const page = usePage()
 const user = computed(() => page.props.auth.user)
 const userRoles = computed(() => user.value?.roles || [])
 
-// Helper function to check permissions
+// Helper function to check for permissions
 const can = (permission) => {
-    if (!user.value) return false;
+    if (!user.value || !user.value.roles) return false;
     // Super Admin bypasses all permission checks
     if (user.value.roles.includes('Super Admin')) return true;
     if (!user.value.permissions) return false;
@@ -104,12 +104,26 @@ const mainNavItems = computed(() => {
 
 
 const openGroups = ref({})
-const toggleGroup = (groupName: string) => { openGroups.value[groupName] = !openGroups.value[groupName] }
+
+const toggleGroup = (groupName: string) => {
+  openGroups.value[groupName] = !openGroups.value[groupName]
+}
+
 const footerNavItems = [
-  { title: 'Github Repo', href: 'https://github.com/laravel/vue-starter-kit', icon: Folder },
-  { title: 'Documentation', href: 'https://laravel.com/docs/starter-kits#vue', icon: BookOpen },
+  {
+    title: 'Github Repo',
+    href: 'https://github.com/laravel/vue-starter-kit',
+    icon: Folder,
+  },
+  {
+    title: 'Documentation',
+    href: 'https://laravel.com/docs/starter-kits#vue',
+    icon: BookOpen,
+  },
 ]
+
 const isSidebarCollapsed = ref(false);
+
 </script>
 
 <template>
@@ -123,6 +137,7 @@ const isSidebarCollapsed = ref(false);
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
+
     <SidebarContent class="flex-grow overflow-y-auto custom-scrollbar">
       <div v-if="user">
         <div v-for="group in mainNavItems" :key="group.group">
@@ -133,6 +148,7 @@ const isSidebarCollapsed = ref(false);
             </span>
             <component :is="openGroups[group.group] !== false ? ChevronDown : ChevronRight" class="h-4 w-4" />
           </SidebarMenuButton>
+
           <SidebarMenu v-if="openGroups[group.group] !== false">
             <template v-for="item in group.items" :key="item.title">
               <SidebarMenuItem v-if="!item.permission || can(item.permission)">
@@ -148,6 +164,7 @@ const isSidebarCollapsed = ref(false);
         </div>
       </div>
     </SidebarContent>
+
     <SidebarFooter>
       <NavFooter :items="footerNavItems" :is-collapsed="isSidebarCollapsed" />
       <NavUser v-if="user" :is-collapsed="isSidebarCollapsed" />
