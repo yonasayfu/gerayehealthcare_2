@@ -3,12 +3,12 @@
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use App\Http\Controllers\Admin\PatientController;
-use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\UserController; // Import the new controller
 use App\Http\Controllers\PlaceholderController;
-use App\Http\Controllers\Staff\MyAvailabilityController;
+use App\Http\Controllers\Staff\MyAvailabilityController; // Import the new controller
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,10 +31,13 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])->name('staff-availabilities.events');
         Route::resource('staff-availabilities', StaffAvailabilityController::class)->only(['index', 'store', 'update', 'destroy']);
-
-        // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
+// --- ROLE MANAGEMENT (Super Admin Only) ---
+        
+Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
+   // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
         Route::resource('users', UserController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value); // ADD THIS LINE
+
 
         // --- PLACEHOLDER ROUTES FOR FUTURE MODULES ---
         Route::get('visits', [PlaceholderController::class, 'index'])->name('visits.index');

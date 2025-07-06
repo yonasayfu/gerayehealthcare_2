@@ -76,8 +76,7 @@ const allAdminNavItems = [
       superAdminOnly: true, // This is a custom flag to hide this from regular Admins
       items: [
            { title: 'Role Management', routeName: 'admin.roles.index', icon: Users },
-               { title: 'User Management', routeName: 'admin.users.index', icon: UserCog },
-     
+           
       ]
   }
 ];
