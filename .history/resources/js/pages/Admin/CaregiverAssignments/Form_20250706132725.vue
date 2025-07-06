@@ -2,41 +2,28 @@
 import { computed } from 'vue';
 
 const props = defineProps<{
-  form: any;
-  // Make the props optional to handle cases where they might not be passed
-  patients?: Array<{ id: number; full_name: string }>;
-  staff?: Array<{ id: number; first_name: string; last_name: string }>;
-}>();
+  form: any,
+  patients: Array<{ id: number; full_name: string }>,
+  staff: Array<{ id: number; first_name: string; last_name: string }>,
+}>()
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(['submit'])
 
-// Use a computed property with a fallback to prevent errors
+// Combine staff first and last names for the dropdown options
 const staffOptions = computed(() => {
-  // If props.staff doesn't exist or is not an array, return an empty array
-  if (!Array.isArray(props.staff)) {
-    return [];
-  }
   return props.staff.map(s => ({
     id: s.id,
-    fullName: `${s.first_name || ''} ${s.last_name || ''}`.trim(),
+    fullName: `${s.first_name} ${s.last_name}`
   }));
 });
 
-// Use a computed property for patients as well for safety
-const patientOptions = computed(() => {
-    return Array.isArray(props.patients) ? props.patients : [];
-});
-
-// Helper to format date for datetime-local input, with a null check
+// Helper to format date for datetime-local input
 const formatDateTimeForInput = (dateString) => {
     if (!dateString) return '';
-    try {
-        const date = new Date(dateString);
-        date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-        return date.toISOString().slice(0, 16);
-    } catch (e) {
-        return ''; // Return empty string if date is invalid
-    }
+    const date = new Date(dateString);
+    // Adjust for timezone offset to display correctly in local time
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+    return date.toISOString().slice(0, 16);
 };
 </script>
 
@@ -59,7 +46,7 @@ const formatDateTimeForInput = (dateString) => {
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
               <option value="">Select a patient</option>
-              <option v-for="patient in patientOptions" :key="patient.id" :value="patient.id">
+              <option v-for="patient in patients" :key="patient.id" :value="patient.id">
                 {{ patient.full_name }}
               </option>
             </select>

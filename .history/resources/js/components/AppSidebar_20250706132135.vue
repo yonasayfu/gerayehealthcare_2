@@ -53,9 +53,9 @@ const allAdminNavItems = [
       { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck },
        { title: 'Messages', routeName: 'admin.messages.index', icon: MessageCircle },
        { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
-       { title: 'Insurance Claims', routeName: 'admin.insurance.index', icon: ShieldCheck },
-       { title: 'Inventory Items', routeName: 'admin.inventory.index', icon: PackageCheck },
-       { title: 'Admin Task Tracking', routeName: 'admin.tasks.index', icon: ClipboardList },
+      // { title: 'Insurance Claims', routeName: 'admin.insurance.index', icon: ShieldCheck },
+      // { title: 'Inventory Items', routeName: 'admin.inventory.index', icon: PackageCheck },
+      // { title: 'Admin Task Tracking', routeName: 'admin.tasks.index', icon: ClipboardList },
     ],
   },
   {

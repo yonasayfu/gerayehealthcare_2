@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('international', [PlaceholderController::class, 'index'])->name('international.index');
         Route::get('events', [PlaceholderController::class, 'index'])->name('events.index');
         Route::get('networks', [PlaceholderController::class, 'index'])->name('networks.index');
-        // Route::get('roles', [PlaceholderController::class, 'index'])->name('roles.index');
+        Route::get('roles', [PlaceholderController::class, 'index'])->name('roles.index');
     });
 
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
