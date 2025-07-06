@@ -25,7 +25,7 @@ class CaregiverAssignmentController extends Controller
             })->orWhereHas('staff', function ($q) use ($search) {
                 $q->where('first_name', 'ilike', "%{$search}%")
                       ->orWhere('last_name', 'ilike', "%{$search}%");
-            })->orWhere('status', 'ilike', "%{$search}%");
+            })->orWhere('status', 'like', "%{$search}%");
         }
         if ($request->filled('sort')) {
             $query->orderBy($request->sort, $request->get('direction', 'asc'));

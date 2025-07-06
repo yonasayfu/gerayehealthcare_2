@@ -23,9 +23,9 @@ class CaregiverAssignmentController extends Controller
             $query->whereHas('patient', function ($q) use ($search) {
                 $q->where('full_name', 'ilike', "%{$search}%");
             })->orWhereHas('staff', function ($q) use ($search) {
-                $q->where('first_name', 'ilike', "%{$search}%")
-                      ->orWhere('last_name', 'ilike', "%{$search}%");
-            })->orWhere('status', 'ilike', "%{$search}%");
+                $q->where('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%");
+            })->orWhere('status', 'like', "%{$search}%");
         }
         if ($request->filled('sort')) {
             $query->orderBy($request->sort, $request->get('direction', 'asc'));
