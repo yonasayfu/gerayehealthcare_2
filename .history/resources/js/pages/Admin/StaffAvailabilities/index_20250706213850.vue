@@ -16,17 +16,13 @@ const breadcrumbs = [
   { title: 'Staff Availabilities', href: route('admin.staff-availabilities.index') },
 ]
 
-// Reactive state for filters and sorting
 const filters = ref({
   staff_id: props.filters.staff_id || '',
   status: props.filters.status || '',
   start_date: props.filters.start_date || '',
   end_date: props.filters.end_date || '',
-  sort: props.filters.sort || 'start_time',
-  direction: props.filters.direction || 'desc',
 })
 
-// Watch for changes and trigger API request
 watch(filters, debounce(() => {
   router.get(route('admin.staff-availabilities.index'), { ...filters.value }, {
     preserveState: true,
@@ -56,6 +52,7 @@ const openEditModal = (availability) => {
     form.id = availability.id;
     form.staff_id = availability.staff_id;
     form.status = availability.status;
+    // Format dates for datetime-local input
     form.start_time = availability.start_time.slice(0, 16);
     form.end_time = availability.end_time.slice(0, 16);
     showModal.value = true;
@@ -79,16 +76,6 @@ function destroy(id: number) {
     router.delete(route('admin.staff-availabilities.destroy', id), {
         preserveScroll: true,
     })
-  }
-}
-
-// Function to handle column sorting
-function toggleSort(field: string) {
-  if (filters.value.sort === field) {
-    filters.value.direction = filters.value.direction === 'asc' ? 'desc' : 'asc'
-  } else {
-    filters.value.sort = field
-    filters.value.direction = 'asc'
   }
 }
 
@@ -156,18 +143,10 @@ const formatDate = (dateString) => {
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('staff_id')">
-                Staff Member <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
-                Status <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('start_time')">
-                Start Time <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('end_time')">
-                End Time <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
+              <th class="px-6 py-3">Staff Member</th>
+              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3">Start Time</th>
+              <th class="px-6 py-3">End Time</th>
               <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
