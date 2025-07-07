@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip, MapPin } from 'lucide-vue-next' // 1. MapPin is imported
+import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip, MapPin } from 'lucide-vue-next' // Import MapPin
 import debounce from 'lodash/debounce'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
@@ -88,7 +88,8 @@ const formatDate = (dateString: string | null) => {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('scheduled_at')">Scheduled At <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">Status <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
               <th class="px-6 py-3">Documents</th>
-              <th class="px-6 py-3">Location</th> <th class="px-6 py-3 text-right">Actions</th>
+              <th class="px-6 py-3">Location</th>
+              <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -108,7 +109,7 @@ const formatDate = (dateString: string | null) => {
               <td class="px-6 py-4">
                 <a
                   v-if="visit.check_in_latitude && visit.check_in_longitude"
-                  :href="`https://www.google.com/maps/search/?api=1&query=LATITUDE,LONGITUDE?q=$${visit.check_in_latitude},${visit.check_in_longitude}`"
+                  :href="`https://www.google.com/maps/search/?api=1&query=LATITUDE,LONGITUDE`"
                   target="_blank"
                   class="text-blue-600 hover:text-blue-800"
                   title="View Check-in Location"

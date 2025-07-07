@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
-// Import Storage facade
+use Illuminate\Support\Facades\Storage; // Import Storage facade
 
 class VisitService extends Model
 {
@@ -23,9 +22,9 @@ class VisitService extends Model
         'vitals_file',
         'status',
         'check_in_latitude',
-        'check_in_longitude',
-        'check_out_latitude',
-        'check_out_longitude',
+    'check_in_longitude',
+    'check_out_latitude',
+    'check_out_longitude',
     ];
 
     protected $casts = [

@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
-use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\Admin\VisitServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -69,11 +68,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::post('my-availability', [MyAvailabilityController::class, 'store'])->name('my-availability.store');
         Route::put('my-availability/{availability}', [MyAvailabilityController::class, 'update'])->name('my-availability.update');
         Route::delete('my-availability/{availability}', [MyAvailabilityController::class, 'destroy'])->name('my-availability.destroy');
-           // --- Staff's "My Visits" Routes ---
-        Route::get('my-visits', [MyVisitController::class, 'index'])->name('my-visits.index');
-        Route::post('my-visits/{visit}/check-in', [MyVisitController::class, 'checkIn'])->name('my-visits.check-in');
-        Route::post('my-visits/{visit}/check-out', [MyVisitController::class, 'checkOut'])->name('my-visits.check-out');
-   
+        
     });
 // Additional modules
 require __DIR__ . '/settings.php';

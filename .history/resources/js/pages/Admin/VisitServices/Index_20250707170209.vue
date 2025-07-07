@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip, MapPin } from 'lucide-vue-next' // 1. MapPin is imported
+import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
@@ -88,7 +88,7 @@ const formatDate = (dateString: string | null) => {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('scheduled_at')">Scheduled At <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">Status <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
               <th class="px-6 py-3">Documents</th>
-              <th class="px-6 py-3">Location</th> <th class="px-6 py-3 text-right">Actions</th>
+              <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -105,17 +105,6 @@ const formatDate = (dateString: string | null) => {
                   <a v-if="visit.vitals_file_url" :href="visit.vitals_file_url" target="_blank" class="text-teal-600 hover:text-teal-800" title="View Vitals"><Paperclip class="w-4 h-4" /></a>
                 </div>
               </td>
-              <td class="px-6 py-4">
-                <a
-                  v-if="visit.check_in_latitude && visit.check_in_longitude"
-                  :href="`https://www.google.com/maps/search/?api=1&query=LATITUDE,LONGITUDE?q=$${visit.check_in_latitude},${visit.check_in_longitude}`"
-                  target="_blank"
-                  class="text-blue-600 hover:text-blue-800"
-                  title="View Check-in Location"
-                >
-                  <MapPin class="w-5 h-5" />
-                </a>
-              </td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link :href="route('admin.visit-services.edit', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
@@ -124,7 +113,7 @@ const formatDate = (dateString: string | null) => {
               </td>
             </tr>
             <tr v-if="visitServices.data.length === 0">
-              <td colspan="7" class="text-center px-6 py-4 text-gray-400">No visits found.</td>
+              <td colspan="6" class="text-center px-6 py-4 text-gray-400">No visits found.</td>
             </tr>
           </tbody>
         </table>
