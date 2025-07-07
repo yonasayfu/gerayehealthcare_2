@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\CaregiverAssignment; // Import the CaregiverAssignment model
+use App\Models\CaregiverAssignment;
 use App\Models\StaffAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,14 +17,65 @@ class MyAvailabilityController extends Controller
     public function index()
     {
         $staff = Auth::user()->staff;
-
         if (!$staff) {
             abort(403, 'You do not have a staff profile.');
         }
+        return Inertia::render('Staff/MyAvailability/Index', ['staff' => $staff]);
+    }
 
-        return Inertia::render('Staff/MyAvailability/Index', [
-            'staff' => $staff,
+    /**
+     * Fetch a unified list of events (availabilities AND assignments) for the calendar.
+     */
+    public function getEvents(Request $request)
+    {
+        $request->validate([
+            'start' => 'required|date',
+            'end' => 'required|date|after_or_equal:start',
         ]);
+
+        $staff = Auth::user()->staff;
+
+        // 1. Fetch self-declared availability
+        $availabilities = $staff->availabilities()
+            ->where('start_time', '>=', $request->start)
+            ->where('end_time', '<=', $request->end)
+            ->get();
+
+        $availabilityEvents = $availabilities->map(function ($availability) {
+            return [
+                'id' => 'avail_' . $availability->id, // Unique prefix
+                'title' => $availability->status,
+                'start' => $availability->start_time->toIso8601String(),
+                'end' => $availability->end_time->toIso8601String(),
+                'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
+                'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
+                'editable' => true, // Staff can edit their own availability
+            ];
+        });
+
+        // 2. Fetch official assignments
+        $assignments = CaregiverAssignment::with('patient')
+            ->where('staff_id', $staff->id)
+            ->where('shift_start', '>=', $request->start)
+            ->where('shift_end', '<=', $request->end)
+            ->get();
+
+        $assignmentEvents = $assignments->map(function ($assignment) {
+            return [
+                'id' => 'assign_' . $assignment->id, // Unique prefix
+                'title' => 'Shift: ' . $assignment->patient->full_name,
+                'start' => $assignment->shift_start->toIso8601String(),
+                'end' => $assignment->shift_end->toIso8601String(),
+                'backgroundColor' => '#007bff', // A distinct color for assignments
+                'borderColor' => '#007bff',
+                'editable' => false, // Staff CANNOT edit official assignments from this calendar
+            ];
+        });
+
+        // 3. Merge the two collections and return as a single JSON response
+        $allEvents = $availabilityEvents->merge($assignmentEvents);
+
+        return response()->json($allEvents);
     }
 
     /**
@@ -38,74 +89,9 @@ class MyAvailabilityController extends Controller
             'status' => 'required|string|in:Available,Unavailable',
         ]);
 
-        $staff = Auth::user()->staff;
-
-        $staff->availabilities()->create([
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'status' => $request->status,
-        ]);
+        Auth::user()->staff->availabilities()->create($request->all());
 
         return response()->json(['message' => 'Availability created.'], 201);
-    }
-
-    /**
-     * THIS IS THE UPDATED METHOD
-     * It now fetches both self-declared availability and official assignments.
-     */
-    public function getEvents(Request $request)
-    {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-        ]);
-
-        $staff = Auth::user()->staff;
-        if (!$staff) {
-            return response()->json([]);
-        }
-
-        // 1. Fetch self-declared availability
-        $availabilities = $staff->availabilities()
-            ->where('start_time', '>=', $request->start)
-            ->where('end_time', '<=', $request->end)
-            ->get();
-
-        $availabilityEvents = $availabilities->map(function ($availability) {
-            return [
-                'id' => 'avail_' . $availability->id,
-                'title' => $availability->status,
-                'start' => $availability->start_time->toIso8601String(),
-                'end' => $availability->end_time->toIso8601String(),
-                'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'editable' => true, // Staff can edit their own availability
-            ];
-        });
-
-        // 2. Fetch official assignments
-        $assignments = CaregiverAssignment::with('patient')
-            ->where('staff_id', $staff->id)
-            ->where('shift_start', '<', $request->end)
-            ->where('shift_end', '>', $request->start)
-            ->get();
-
-        $assignmentEvents = $assignments->map(function ($assignment) {
-            return [
-                'id' => 'assign_' . $assignment->id,
-                'title' => 'Shift: ' . $assignment->patient->full_name,
-                'start' => $assignment->shift_start->toIso8601String(),
-                'end' => $assignment->shift_end->toIso8601String(),
-                'backgroundColor' => '#007bff', // A distinct blue color for assignments
-                'borderColor' => '#007bff',
-                'editable' => false, // Staff CANNOT edit official assignments
-            ];
-        });
-
-        // 3. Merge the two collections and return as a single JSON response
-        $allEvents = $availabilityEvents->merge($assignmentEvents);
-
-        return response()->json($allEvents);
     }
 
     /**
