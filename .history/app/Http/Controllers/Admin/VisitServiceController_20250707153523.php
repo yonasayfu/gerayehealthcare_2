@@ -7,7 +7,7 @@ use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage; // Import Storage facade
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,18 +18,16 @@ class VisitServiceController extends Controller
      */
     public function index(Request $request): Response
     {
-        // ... (The top part of this method remains the same) ...
         $query = VisitService::with(['patient', 'staff']);
 
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->whereHas('patient', function ($patientQuery) use ($search) {
-                    $patientQuery->where('full_name', 'ilike', "%{$search}%");
+                    $patientQuery->where('full_name', 'like', "%{$search}%");
                 })->orWhereHas('staff', function ($staffQuery) use ($search) {
-                    $staffQuery->where('first_name', 'ilike', "%{$search}%")
-                               ->orWhere('last_name', 'ilike', "%{$search}%");
-                               
+                    $staffQuery->where('first_name', 'like', "%{$search}%")
+                               ->orWhere('last_name', 'like', "%{$search}%");
                 });
             });
         }
@@ -44,8 +42,6 @@ class VisitServiceController extends Controller
 
         $perPage = $request->input('per_page', 10);
         $visitServices = $query->paginate($perPage)->withQueryString();
-
-        // The manual ->transform() block has been REMOVED.
 
         return Inertia::render('Admin/VisitServices/Index', [
             'visitServices' => $visitServices,
@@ -69,15 +65,14 @@ class VisitServiceController extends Controller
      */
     public function store(Request $request)
     {
-        // ... This method remains unchanged ...
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => 'required|exists:staff,id',
             'scheduled_at' => 'required|date',
             'status' => 'required|string|max:255',
             'visit_notes' => 'nullable|string',
-            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048', // New
+            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',       // New
         ]);
 
         if ($request->hasFile('prescription_file')) {
@@ -93,25 +88,29 @@ class VisitServiceController extends Controller
         return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
     }
 
+
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(VisitService $visitService): Response
     {
-        // The manual addition of `_file_url` has been REMOVED.
+        // Add file URLs to the visitService object for the frontend
+        $visitService->prescription_file_url = $visitService->prescription_file ? Storage::url($visitService->prescription_file) : null;
+        $visitService->vitals_file_url = $visitService->vitals_file ? Storage::url($visitService->vitals_file) : null;
+
         return Inertia::render('Admin/VisitServices/Edit', [
             'visitService' => $visitService->load(['patient', 'staff']),
             'patients' => Patient::all(['id', 'full_name']),
             'staff' => Staff::all(['id', 'first_name', 'last_name']),
         ]);
     }
-    
-    // ... update() and destroy() methods remain unchanged ...
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, VisitService $visitService)
     {
+        // Use post method spoofing for file uploads with Inertia
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => 'required|exists:staff,id',
@@ -123,6 +122,7 @@ class VisitServiceController extends Controller
         ]);
 
         if ($request->hasFile('prescription_file')) {
+            // Delete old file if it exists
             if ($visitService->prescription_file) {
                 Storage::disk('public')->delete($visitService->prescription_file);
             }
@@ -130,6 +130,7 @@ class VisitServiceController extends Controller
         }
 
         if ($request->hasFile('vitals_file')) {
+            // Delete old file if it exists
             if ($visitService->vitals_file) {
                 Storage::disk('public')->delete($visitService->vitals_file);
             }
@@ -146,6 +147,7 @@ class VisitServiceController extends Controller
      */
     public function destroy(VisitService $visitService)
     {
+        // Delete associated files from storage
         if ($visitService->prescription_file) {
             Storage::disk('public')->delete($visitService->prescription_file);
         }
@@ -157,5 +159,4 @@ class VisitServiceController extends Controller
 
         return redirect()->back()->with('success', 'Visit cancelled successfully.');
     }
-
 }

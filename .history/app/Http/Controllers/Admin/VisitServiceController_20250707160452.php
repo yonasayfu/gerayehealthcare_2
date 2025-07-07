@@ -27,8 +27,8 @@ class VisitServiceController extends Controller
                 $q->whereHas('patient', function ($patientQuery) use ($search) {
                     $patientQuery->where('full_name', 'ilike', "%{$search}%");
                 })->orWhereHas('staff', function ($staffQuery) use ($search) {
-                    $staffQuery->where('first_name', 'ilike', "%{$search}%")
-                               ->orWhere('last_name', 'ilike', "%{$search}%");
+                    $staffQuery->where('first_name', 'like', "%{$search}%")
+                               ->orWhere('last_name', 'like', "%{$search}%");
                                
                 });
             });
