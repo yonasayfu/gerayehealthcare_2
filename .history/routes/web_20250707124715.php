@@ -9,7 +9,6 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
-use App\Http\Controllers\Admin\VisitServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,8 +31,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])->name('staff-availabilities.events');
         Route::resource('staff-availabilities', StaffAvailabilityController::class)->only(['index', 'store', 'update', 'destroy']);
-Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
-Route::resource('visit-services', VisitServiceController::class);
 
         // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);

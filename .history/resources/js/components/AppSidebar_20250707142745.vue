@@ -40,7 +40,7 @@ const allAdminNavItems = [
       { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
       { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
       { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
-       { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
+       { title: 'Visit Services', routeName: 'admin.visits.index', icon: Stethoscope, permission: 'view visits' },
     ],
   },
   {

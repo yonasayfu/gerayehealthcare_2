@@ -30,7 +30,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@geraye.com',
             'password' => bcrypt('password'),
         ]);
-        //$adminUser->assignRole(RoleEnum::ADMIN);
-        $adminUser->assignRole(RoleEnum::ADMIN->value);
+        $adminUser->assignRole(RoleEnum::ADMIN);
     }
 }

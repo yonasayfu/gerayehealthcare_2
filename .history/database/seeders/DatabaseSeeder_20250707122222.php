@@ -22,15 +22,13 @@ class DatabaseSeeder extends Seeder
             'email' => 'superadmin@geraye.com',
             'password' => bcrypt('password'),
         ]);
-        //$superAdminUser->assignRole(RoleEnum::SUPER_ADMIN);
-        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN);
 
         $adminUser = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@geraye.com',
             'password' => bcrypt('password'),
         ]);
-        //$adminUser->assignRole(RoleEnum::ADMIN);
-        $adminUser->assignRole(RoleEnum::ADMIN->value);
+        $adminUser->assignRole(RoleEnum::ADMIN);
     }
 }

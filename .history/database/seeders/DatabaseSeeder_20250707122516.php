@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'superadmin@geraye.com',
             'password' => bcrypt('password'),
         ]);
-        //$superAdminUser->assignRole(RoleEnum::SUPER_ADMIN);
+        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN);
         $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
 
         $adminUser = User::factory()->create([
@@ -30,7 +30,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@geraye.com',
             'password' => bcrypt('password'),
         ]);
-        //$adminUser->assignRole(RoleEnum::ADMIN);
-        $adminUser->assignRole(RoleEnum::ADMIN->value);
+        $adminUser->assignRole(RoleEnum::ADMIN);
     }
 }
