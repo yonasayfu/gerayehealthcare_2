@@ -43,7 +43,7 @@ function submit() {
 }
 </script>
 
-
+// The <template> section remains unchanged.
 
 <template>
   <Head :title="`Edit Visit #${visitService.id}`" />
