@@ -18,29 +18,34 @@ class StaffPayoutController extends Controller
      */
    public function index()
 {
-    // This query gets the UNPAID earnings for the table
-    $staffWithUnpaidEarnings = Staff::withCount([
-        'visitServices as unpaid_visits_count' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed'),
-        'visitServices as unique_patients_count' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed')->select(DB::raw('count(distinct(patient_id))')),
+    $staffWithEarnings = Staff::withCount([
+        'visitServices as unpaid_visits_count' => function ($query) {
+            $query->where('is_paid_to_staff', false)->where('status', 'Completed');
+        },
+        'visitServices as unique_patients_count' => function ($query) {
+            $query->where('is_paid_to_staff', false)
+                  ->where('status', 'Completed')
+                  ->select(DB::raw('count(distinct(patient_id))'));
+        }
     ])
-    ->withSum(['visitServices as total_unpaid_cost' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed')], 'cost')
+    ->withSum([
+        'visitServices as total_unpaid_cost' => function ($query) {
+            $query->where('is_paid_to_staff', false)->where('status', 'Completed');
+        }
+    ], 'cost')
     ->orderBy('first_name')
     ->get()
     ->map(function ($staff) {
-        $staff->total_hours_logged = $staff->unpaid_visits_count;
+        // Assuming each visit is 1 hour for "Hours Logged"
+        $staff->total_hours_logged = $staff->unpaid_visits_count; 
         return $staff;
     });
 
-    // This NEW query gets the TOTAL PAID earnings for the performance chart
-    $staffWithTotalPayouts = Staff::has('payouts') // Only get staff who have been paid at least once
-        ->withSum('payouts', 'total_amount')
-        ->get();
-
     return Inertia::render('Admin/StaffPayouts/Index', [
-        'staffWithEarnings' => $staffWithUnpaidEarnings,
-        'performanceData' => $staffWithTotalPayouts, // Pass new data to the view
+        'staffWithEarnings' => $staffWithEarnings,
     ]);
 }
+
     /**
      * Store a new payout for a specific staff member.
      */

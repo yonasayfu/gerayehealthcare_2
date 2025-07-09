@@ -19,11 +19,6 @@ const props = defineProps<{
     total_hours_logged: number;
     total_unpaid_cost: string | null;
   }>;
-  performanceData: Array<{ // New prop for chart data
-    first_name: string;
-    last_name: string;
-    payouts_sum_total_amount: string;
-  }>
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -36,7 +31,7 @@ const form = useForm({
 });
 
 const processPayout = (staffId: number, staffName: string, amount: string) => {
-  if (confirm(`Are you sure you want to process a payout of ${formatCurrency(amount)} for ${staffName}?`)) {
+  if (confirm(`Are you sure you want to process a payout of $${formatCurrency(amount)} for ${staffName}?`)) {
     form.transform(() => ({
       staff_id: staffId,
     })).post(route('admin.staff-payouts.store'), {
@@ -50,15 +45,15 @@ const formatCurrency = (value: string | null) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 };
 
-// Updated Chart Data to use performanceData
+// Chart Data and Options
 const chartData = computed(() => ({
-  labels: props.performanceData.map(s => `${s.first_name} ${s.last_name}`),
+  labels: props.staffWithEarnings.map(s => `${s.first_name} ${s.last_name}`),
   datasets: [
     {
-      label: 'Total Paid Earnings ($)',
-      backgroundColor: '#16a34a', // Green color for "paid"
-      borderColor: '#16a34a',
-      data: props.performanceData.map(s => parseFloat(s.payouts_sum_total_amount || '0')),
+      label: 'Total Unpaid Earnings ($)',
+      backgroundColor: '#4f46e5',
+      borderColor: '#4f46e5',
+      data: props.staffWithEarnings.map(s => parseFloat(s.total_unpaid_cost || '0')),
     },
   ],
 }));
@@ -72,7 +67,7 @@ const chartOptions = {
     },
     title: {
         display: true,
-        text: 'Staff Performance: Total Earnings Paid Out'
+        text: 'Staff Unpaid Earnings Comparison'
     }
   },
 };
@@ -88,9 +83,13 @@ const chartOptions = {
         <p class="text-sm text-muted-foreground">Review earnings, performance metrics, and process payments for staff.</p>
       </div>
 
+      <div class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow h-80">
+          <Bar :data="chartData" :options="chartOptions" />
+      </div>
+
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
-           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
+          <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
               <th class="px-6 py-3">Staff Member</th>
               <th class="px-6 py-3 text-center">Unpaid Visits</th>
@@ -126,11 +125,6 @@ const chartOptions = {
           </tbody>
         </table>
       </div>
-
-       <div v-if="performanceData.length > 0" class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow h-80">
-          <Bar :data="chartData" :options="chartOptions" />
-      </div>
-
     </div>
   </AppLayout>
 </template>
