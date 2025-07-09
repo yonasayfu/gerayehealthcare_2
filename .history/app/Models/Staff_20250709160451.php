@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Import HasMany
 
 class Staff extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+     protected $fillable = [
         'first_name',
         'last_name',
         'email',
@@ -23,28 +22,23 @@ class Staff extends Model
         'hire_date',
         'photo',
         'user_id',
-        'hourly_rate',
+        'hourly_rate', // Add this line
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function assignments(): HasMany
-    {
-        return $this->hasMany(CaregiverAssignment::class);
-    }
-
     /**
-     * Get all of the visit services for the staff member.
+     * Get all of the availability slots for the staff member.
+     * THIS IS THE NEW METHOD THAT FIXES THE ERROR.
      */
-    public function visitServices(): HasMany
+    public function availabilities(): HasMany
     {
-        return $this->hasMany(VisitService::class);
+        return $this->hasMany(StaffAvailability::class);
     }
-
-    /**
+     /**
      * Get the payout history for the staff member.
      */
     public function payouts(): HasMany

@@ -12,7 +12,6 @@ import {
   Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
   ChevronRight, CalendarCheck, UserCheck, Settings,
-  DollarSign,
 } from 'lucide-vue-next'
 
 const page = usePage()

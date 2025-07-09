@@ -61,39 +61,7 @@ class VisitServiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    /**
- * Store a newly created resource in storage.
- */
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-        'scheduled_at' => 'required|date',
-        'status' => 'required|string|max:255',
-        'visit_notes' => 'nullable|string',
-        'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-    ]);
-
-    // --- Add this new block to calculate the cost ---
-    $staff = Staff::find($validated['staff_id']);
-    // Assuming a 1-hour visit duration for cost calculation
-    $visitCost = $staff->hourly_rate * 1; 
-    $validated['cost'] = $visitCost;
-    // ---------------------------------------------
-
-    if ($request->hasFile('prescription_file')) {
-        $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-    }
-    if ($request->hasFile('vitals_file')) {
-        $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
-    }
-
-    VisitService::create($validated);
-
-    return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
-}
+    
     // edit() method remains the same...
     public function edit(VisitService $visitService): Response
     {
@@ -107,47 +75,41 @@ public function store(Request $request)
     /**
      * Update the specified resource in storage.
      */
-   /**
- * Update the specified resource in storage.
- */
-public function update(Request $request, VisitService $visitService)
-{
-    $request->merge(['visit_id' => $visitService->id]);
+    public function update(Request $request, VisitService $visitService)
+    {
+        // 3. Add the current visit's ID to the request so our rule can ignore it
+        $request->merge(['visit_id' => $visitService->id]);
 
-    $validated = $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-        'scheduled_at' => 'required|date',
-        'status' => 'required|string|max:255',
-        'visit_notes' => 'nullable|string',
-        'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-    ]);
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            // 4. Apply the rule on update
+            'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
+            'scheduled_at' => 'required|date',
+            'status' => 'required|string|max:255',
+            'visit_notes' => 'nullable|string',
+            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
 
-    // --- Add this new block to recalculate the cost ---
-    $staff = Staff::find($validated['staff_id']);
-    // Assuming a 1-hour visit duration for cost calculation
-    $visitCost = $staff->hourly_rate * 1; 
-    $validated['cost'] = $visitCost;
-    // ------------------------------------------------
-
-    if ($request->hasFile('prescription_file')) {
-        if ($visitService->prescription_file) {
-            Storage::disk('public')->delete($visitService->prescription_file);
+        if ($request->hasFile('prescription_file')) {
+            if ($visitService->prescription_file) {
+                Storage::disk('public')->delete($visitService->prescription_file);
+            }
+            $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
         }
-        $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-    }
-    if ($request->hasFile('vitals_file')) {
-        if ($visitService->vitals_file) {
-            Storage::disk('public')->delete($visitService->vitals_file);
+
+        if ($request->hasFile('vitals_file')) {
+            if ($visitService->vitals_file) {
+                Storage::disk('public')->delete($visitService->vitals_file);
+            }
+            $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
         }
-        $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
+
+        $visitService->update($validated);
+
+        return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');
     }
 
-    $visitService->update($validated);
-
-    return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');
-}
 
     // destroy() method remains the same...
     public function destroy(VisitService $visitService)

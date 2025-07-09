@@ -82,7 +82,7 @@ class StaffController extends Controller
             'status' => 'required|in:Active,Inactive',
             'hire_date' => 'nullable|date',
             'photo' => 'nullable|image|max:2048',
-            'hourly_rate' => 'nullable|numeric|min:0',
+            
         ]);
 
         if ($request->hasFile('photo')) {

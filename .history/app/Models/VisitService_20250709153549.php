@@ -22,8 +22,7 @@ class VisitService extends Model
         'prescription_file',
         'vitals_file',
         'status',
-        'cost',
-        'is_paid_to_staff', 
+        
         'check_in_latitude',
         'check_in_longitude',
         'check_out_latitude',

@@ -13,7 +13,6 @@ use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\MessageController; 
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Admin\StaffPayoutController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,7 +34,7 @@ Route::post('/notifications/{notification}/read', [NotificationController::class
     ->middleware(['auth', 'verified'])
     ->name('notifications.markAsRead');
 
-
+    
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')
@@ -55,10 +54,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
         Route::resource('visit-services', VisitServiceController::class);
 
-          // --- Staff Payouts Routes ---
-        Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
-        Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
-   
         // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
         Route::resource('users', UserController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);

@@ -12,7 +12,6 @@ import {
   Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
   ChevronRight, CalendarCheck, UserCheck, Settings,
-  DollarSign,
 } from 'lucide-vue-next'
 
 const page = usePage()
@@ -57,8 +56,7 @@ const allAdminNavItems = [
     items: [
       { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
       { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
-       { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign }, // Add this line
-     
+      
     ],
   },
   {

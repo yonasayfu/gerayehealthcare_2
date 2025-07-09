@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
 
+// @ts-ignore: defineProps is a macro provided by Vue SFC compiler
 const props = defineProps<{
   staff: {
     id: number
@@ -15,19 +16,18 @@ const props = defineProps<{
     department: string | null
     status: 'Active' | 'Inactive'
     hire_date: string | null
-    photo: string | null
-    hourly_rate: string | number | null // Corrected type definition
+    photo: string | null // Path to the existing photo
+    hourly_rate: props.staff.hourly_rate || '',
   }
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
-  { title: 'Dashboard', href: route('admin.staff.index') },
-  { title: 'Staff', href: route('admin.staff.index') },
-  { title: 'Edit', href: route('admin.staff.edit', { staff: props.staff.id }) },
+  { title: 'Dashboard', href: '/dashboard' },
+  { title: 'Staff', href: '/dashboard/staff' },
+  { title: 'Edit', href: `/dashboard/staff/${props.staff.id}/edit` },
 ]
 
 const form = useForm({
-  _method: 'PUT', // Method spoofing for PUT request
   first_name: props.staff.first_name,
   last_name: props.staff.last_name,
   email: props.staff.email,
@@ -36,17 +36,27 @@ const form = useForm({
   department: props.staff.department,
   status: props.staff.status,
   hire_date: props.staff.hire_date,
-  hourly_rate: props.staff.hourly_rate || '', // Added hourly_rate to the form
-  photo: null as File | null,
+  photo: null as File | null, // To hold the new photo file for upload
+  _method: 'put', // Add _method here for method spoofing
 });
-
 function submit() {
-  // Use form.post for multipart/form-data with method spoofing
-  form.post(route('admin.staff.update', { staff: props.staff.id }), {
+  form.post(`/dashboard/staff/${props.staff.id}`, {
+    method: 'post',
     onSuccess: () => {
-      form.reset('photo'); // Only reset the photo field on success
+      form.photo = null;
+    },
+    onError: (errors: Record<string, string>) => {
+      console.error('Form submission errors:', errors);
     },
   });
+}
+
+// Function to handle file input change
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  if (target.files && target.files[0]) {
+    form.photo = target.files[0];
+  }
 }
 </script>
 
@@ -61,11 +71,11 @@ function submit() {
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-background p-6 shadow-sm space-y-6">
-        <Form :form="form" :existingPhoto="staff.photo" />
+        <Form :form="form" :errors="form.errors" :existingPhoto="staff.photo" @file-change="handleFileChange" />
 
         <div class="flex justify-end space-x-3">
           <Link
-            :href="route('admin.staff.index')"
+            href="/dashboard/staff"
             class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-muted/30 transition"
           >
             Cancel
