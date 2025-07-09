@@ -7,12 +7,10 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\MessageController; 
-use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\VisitServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,14 +23,7 @@ Route::get('/messages/{recipient?}', [MessageController::class, 'index'])
 Route::post('/messages', [MessageController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('messages.store');
-// --- Notification API Routes ---
-Route::get('/notifications', [NotificationController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('notifications.index');
 
-Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
-    ->middleware(['auth', 'verified'])
-    ->name('notifications.markAsRead');
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')
@@ -49,8 +40,8 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])->name('staff-availabilities.events');
         Route::resource('staff-availabilities', StaffAvailabilityController::class)->only(['index', 'store', 'update', 'destroy']);
-        Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
-        Route::resource('visit-services', VisitServiceController::class);
+Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
+Route::resource('visit-services', VisitServiceController::class);
 
         // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
@@ -77,7 +68,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     ->group(function () {
         // The page to view the calendar
         Route::get('my-availability', [MyAvailabilityController::class, 'index'])->name('my-availability.index');
-
+        
         // THIS IS THE NEW ROUTE TO FIX THE ERROR
         Route::get('my-availability/events', [MyAvailabilityController::class, 'getEvents'])->name('my-availability.events');
 
@@ -85,11 +76,11 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::post('my-availability', [MyAvailabilityController::class, 'store'])->name('my-availability.store');
         Route::put('my-availability/{availability}', [MyAvailabilityController::class, 'update'])->name('my-availability.update');
         Route::delete('my-availability/{availability}', [MyAvailabilityController::class, 'destroy'])->name('my-availability.destroy');
-        // --- Staff's "My Visits" Routes ---
+           // --- Staff's "My Visits" Routes ---
         Route::get('my-visits', [MyVisitController::class, 'index'])->name('my-visits.index');
         Route::post('my-visits/{visit}/check-in', [MyVisitController::class, 'checkIn'])->name('my-visits.check-in');
         Route::post('my-visits/{visit}/check-out', [MyVisitController::class, 'checkOut'])->name('my-visits.check-out');
-
+   
     });
 // Additional modules
 require __DIR__ . '/settings.php';

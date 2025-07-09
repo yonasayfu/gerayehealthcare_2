@@ -17,7 +17,6 @@ class DatabaseSeeder extends Seeder
             CaregiverAssignmentSeeder::class,
         ]);
         \App\Models\VisitService::factory(5)->create();
-        
         $superAdminUser = User::factory()->create([
             'name' => 'Super Admin',
             'email' => 'superadmin@geraye.com',

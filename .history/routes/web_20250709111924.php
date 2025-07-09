@@ -12,7 +12,6 @@ use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\MessageController; 
-use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,14 +24,7 @@ Route::get('/messages/{recipient?}', [MessageController::class, 'index'])
 Route::post('/messages', [MessageController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('messages.store');
-// --- Notification API Routes ---
-Route::get('/notifications', [NotificationController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('notifications.index');
 
-Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
-    ->middleware(['auth', 'verified'])
-    ->name('notifications.markAsRead');
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')

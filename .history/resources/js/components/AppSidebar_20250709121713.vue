@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavFooter from '@/components/NavFooter.vue'
-//import NavUser from '@/components/NavUser.vue'
+import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
