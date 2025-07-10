@@ -32,8 +32,7 @@ const form = useForm({
   scheduled_at: formattedDate,
   status: props.visitService.status,
   visit_notes: props.visitService.visit_notes || '',
-  // This line is the fix:
-  service_description: props.visitService.service_description || '', 
+  service_description: props.visitService.service_description || '', // Add this line
   prescription_file: null,
   vitals_file: null,
 });

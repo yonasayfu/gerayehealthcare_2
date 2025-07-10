@@ -58,8 +58,6 @@ const allAdminNavItems = [
       { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
       { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
        { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign }, // Add this line
-          { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt }, // Add this line
-      
      
     ],
   },
@@ -94,8 +92,7 @@ const mainNavItems = computed(() => {
                 items: [
                     { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
                     { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
-                    { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign }, // Add this line
-                   
+                    
                     { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck }
                 ]
             },

@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Storage;
 // Import Storage facade
 
@@ -20,13 +19,11 @@ class VisitService extends Model
         'check_in_time',
         'check_out_time',
         'visit_notes',
-        'service_description',
         'prescription_file',
         'vitals_file',
         'status',
         'cost',
         'is_paid_to_staff', 
-        'is_invoiced', 
         'check_in_latitude',
         'check_in_longitude',
         'check_out_latitude',
@@ -84,11 +81,5 @@ class VisitService extends Model
         }
         return null;
     }
-    /**
-     * The invoice item associated with this visit.
-     */
-    public function invoiceItem(): HasOne
-    {
-        return $this->hasOne(InvoiceItem::class);
-    }
+    
 }

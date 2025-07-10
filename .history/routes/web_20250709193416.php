@@ -15,7 +15,6 @@ use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\MessageController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-use App\Http\Controllers\Admin\InvoiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -70,7 +69,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // --- PLACEHOLDER ROUTES FOR FUTURE MODULES ---
         // Route::get('visits', [PlaceholderController::class, 'index'])->name('visits.index');
         Route::get('messages', [PlaceholderController::class, 'index'])->name('messages.index');
-        //Route::get('invoices', [PlaceholderController::class, 'index'])->name('invoices.index');
+        Route::get('invoices', [PlaceholderController::class, 'index'])->name('invoices.index');
         Route::get('insurance', [PlaceholderController::class, 'index'])->name('insurance.index');
         Route::get('inventory', [PlaceholderController::class, 'index'])->name('inventory.index');
         Route::get('tasks', [PlaceholderController::class, 'index'])->name('tasks.index');

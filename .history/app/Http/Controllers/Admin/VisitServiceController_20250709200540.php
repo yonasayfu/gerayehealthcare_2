@@ -89,7 +89,7 @@ class VisitServiceController extends Controller
         ]);
     }
 
-     public function update(Request $request, VisitService $visitService)
+    public function update(Request $request, VisitService $visitService)
     {
         $request->merge(['visit_id' => $visitService->id]);
 
@@ -107,29 +107,18 @@ class VisitServiceController extends Controller
         $staff = Staff::find($validated['staff_id']);
         $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
 
-        // --- THIS IS THE FIX ---
-        // Handle prescription file only if a new one is uploaded
         if ($request->hasFile('prescription_file')) {
             if ($visitService->prescription_file) {
                 Storage::disk('public')->delete($visitService->prescription_file);
             }
             $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-        } else {
-            // If no new file is uploaded, remove it from the validated data
-            // so the existing database value is not overwritten with null.
-            unset($validated['prescription_file']);
         }
-
-        // Handle vitals file only if a new one is uploaded
         if ($request->hasFile('vitals_file')) {
             if ($visitService->vitals_file) {
                 Storage::disk('public')->delete($visitService->vitals_file);
             }
             $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
-        } else {
-            unset($validated['vitals_file']);
         }
-        // --- END OF FIX ---
 
         $visitService->update($validated);
         return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');

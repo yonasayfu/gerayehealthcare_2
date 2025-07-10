@@ -19,11 +19,7 @@ const formattedDate = props.visitService.scheduled_at
   ? format(new Date(props.visitService.scheduled_at), "yyyy-MM-dd'T'HH:mm")
   : ''
 
-const breadcrumbs: BreadcrumbItemType[] = [
-  { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Visit Services', href: route('admin.visit-services.index') },
-  { title: `Edit Visit #${props.visitService.id}`, href: route('admin.visit-services.edit', props.visitService.id) },
-];
+  
 
 const form = useForm({
   _method: 'PUT',
@@ -32,8 +28,7 @@ const form = useForm({
   scheduled_at: formattedDate,
   status: props.visitService.status,
   visit_notes: props.visitService.visit_notes || '',
-  // This line is the fix:
-  service_description: props.visitService.service_description || '', 
+  service_description: props.visitService.service_description || '', // Add this line
   prescription_file: null,
   vitals_file: null,
 });

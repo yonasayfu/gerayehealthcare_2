@@ -11,11 +11,9 @@ use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\PlaceholderController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\MessageController; 
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-use App\Http\Controllers\Admin\InvoiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -60,8 +58,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
           // --- Staff Payouts Routes ---
         Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
         Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
-     // --- Invoicing Routes ---
-        Route::resource('invoices', InvoiceController::class)->except(['edit', 'update', 'destroy']);
    
         // --- ROLE & USER MANAGEMENT (Super Admin Only) ---
         Route::resource('roles', RoleController::class)->middleware('role:' . RoleEnum::SUPER_ADMIN->value);
@@ -70,7 +66,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // --- PLACEHOLDER ROUTES FOR FUTURE MODULES ---
         // Route::get('visits', [PlaceholderController::class, 'index'])->name('visits.index');
         Route::get('messages', [PlaceholderController::class, 'index'])->name('messages.index');
-        //Route::get('invoices', [PlaceholderController::class, 'index'])->name('invoices.index');
+        Route::get('invoices', [PlaceholderController::class, 'index'])->name('invoices.index');
         Route::get('insurance', [PlaceholderController::class, 'index'])->name('insurance.index');
         Route::get('inventory', [PlaceholderController::class, 'index'])->name('inventory.index');
         Route::get('tasks', [PlaceholderController::class, 'index'])->name('tasks.index');
@@ -101,9 +97,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::post('my-visits/{visit}/check-in', [MyVisitController::class, 'checkIn'])->name('my-visits.check-in');
         Route::post('my-visits/{visit}/check-out', [MyVisitController::class, 'checkOut'])->name('my-visits.check-out');
 
-          // --- Staff's "My Earnings" Route ---
-        Route::get('my-earnings', [MyEarningsController::class, 'index'])->name('my-earnings.index');
-   
+        
 
     });
 // Additional modules

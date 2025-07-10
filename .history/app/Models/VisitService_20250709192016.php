@@ -20,7 +20,6 @@ class VisitService extends Model
         'check_in_time',
         'check_out_time',
         'visit_notes',
-        'service_description',
         'prescription_file',
         'vitals_file',
         'status',

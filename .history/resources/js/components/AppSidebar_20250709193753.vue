@@ -59,7 +59,10 @@ const allAdminNavItems = [
       { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
        { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign }, // Add this line
           { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt }, // Add this line
-      
+      { title: 'Visit Types', routeName: 'admin.visit-types.index', icon: ClipboardList, permission: 'view visit types' },
+      { title: 'Visit Statuses', routeName: 'admin.visit-statuses.index', icon: Hospital, permission: 'view visit statuses' },
+      { title: 'Visit Reasons', routeName: 'admin.visit-reasons.index', icon: ArrowBigRight, permission: 'view visit reasons' },
+      { title: 'Notifications', routeName: 'admin.notifications.index', icon
      
     ],
   },
