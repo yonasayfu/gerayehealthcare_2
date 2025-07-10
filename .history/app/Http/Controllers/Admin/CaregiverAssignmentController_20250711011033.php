@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\CaregiverAssignment;
+use App\Models\Patient;
+use App\Models\Staff;
+use App\Rules\StaffIsAvailableForShift; // Import our new rule
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+Inertia\Response; 
+use Barryvdh\DomPDF\Facade\Pdf;
+
+use Illuminate\Support\Facades\Response;
+
+
+class CaregiverAssignmentController extends Controller
+{
+      /**
+     * Display a listing of the resource.
+     */
+   public function index(Request $request): Response
+    {
+        $query = CaregiverAssignment::with(['patient', 'staff']);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('patient', fn($q) => $q->where('full_name', 'ilike', "%{$search}%"))
+                  ->orWhereHas('staff', fn($q) => $q->where('first_name', 'ilike', "%{$search}%"));
+        }
+
+        if ($request->filled('sort')) {
+            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        }
+
+        $assignments = $query->paginate($request->input('per_page', 10))->withQueryString();
+
+        return Inertia::render('Admin/CaregiverAssignments/Index', [
+            'assignments' => $assignments,
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
+        ]);
+    }
+    
+    
+     public function create()
+    {
+        return Inertia::render('Admin/CaregiverAssignments/Create', [
+            // THE FIX IS HERE:
+            'staff' => Staff::where('status', 'Active')->orderBy('first_name')->get(),
+            'patients' => Patient::orderBy('full_name')->get()
+        ]);
+    }
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'staff_id' => 'required|exists:staff,id',
+            'status' => 'required|string|max:255',
+            'shift_end' => 'required|date|after_or_equal:shift_start',
+            // Use our custom rule for shift_start
+            'shift_start' => [
+                'required',
+                'date',
+                new StaffIsAvailableForShift($request->staff_id, $request->shift_end)
+            ],
+        ]);
+
+        CaregiverAssignment::create($request->all());
+
+        return redirect()->route('admin.assignments.index')->with('success', 'Assignment created successfully.');
+    }
+
+    // ... show() and edit() methods remain the same ...
+     public function show(CaregiverAssignment $assignment)
+    {
+        $assignment->load(['staff', 'patient']);
+        return Inertia::render('Admin/CaregiverAssignments/Show', [
+            'assignment' => $assignment,
+        ]);
+    }
+     public function edit(CaregiverAssignment $assignment)
+    {
+        $assignment->load('staff', 'patient');
+        return Inertia::render('Admin/CaregiverAssignments/Edit', [
+            'assignment' => $assignment,
+            // THE FIX IS HERE:
+            'staff' => Staff::where('status', 'Active')->orderBy('first_name')->get(),
+            'patients' => Patient::orderBy('full_name')->get()
+        ]);
+    }
+
+    public function update(Request $request, CaregiverAssignment $assignment)
+    {
+        $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'staff_id' => 'required|exists:staff,id',
+            'status' => 'required|string|max:255',
+            'shift_end' => 'required|date|after_or_equal:shift_start',
+            // Use our custom rule, ignoring the current assignment ID
+            'shift_start' => [
+                'required',
+                'date',
+                new StaffIsAvailableForShift($request->staff_id, $request->shift_end, $assignment->id)
+            ],
+        ]);
+
+        $assignment->update($request->all());
+
+        return redirect()->route('admin.assignments.index')->with('success', 'Assignment updated successfully.');
+    }
+
+    // ... destroy() and export() methods remain the same ...
+    public function destroy(CaregiverAssignment $assignment)
+    {
+        $assignment->delete();
+        return back();
+    }
+    public function export(Request $request)
+    {
+        $type = $request->get('type');
+        $assignments = CaregiverAssignment::with(['staff', 'patient'])->get();
+        if ($type === 'csv') {
+            $csvData = "Patient Name,Staff Name,Shift Start,Shift End,Status\n";
+            foreach ($assignments as $a) {
+                $patientName = $a->patient->full_name ?? 'N/A';
+                $staffName = ($a->staff->first_name ?? '') . ' ' . ($a->staff->last_name ?? '');
+                $csvData .= "\"{$patientName}\",\"{$staffName}\",\"{$a->shift_start}\",\"{$a->shift_end}\",\"{$a->status}\"\n";
+            }
+            return Response::make($csvData, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="assignments.csv"']);
+        }
+        if ($type === 'pdf') {
+            $pdf = Pdf::loadView('pdf.assignments', ['assignments' => $assignments])->setPaper('a4', 'landscape');
+            return $pdf->stream('assignments.pdf');
+        }
+        return abort(400, 'Invalid export type');
+    }
+}
