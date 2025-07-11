@@ -115,7 +115,7 @@ const mainNavItems = computed<SidebarNavGroup[]>(() => {
                     { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
                     { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
                     { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
-                    { title: 'My Tasks',           routeName: 'staff.task-delegations.index',icon: ClipboardList },
+                    
                     { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff }
                 ]
             },

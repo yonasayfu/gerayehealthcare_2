@@ -115,7 +115,8 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::get('my-earnings', [MyEarningsController::class, 'index'])->name('my-earnings.index');
 // --- Standard Leave Request Route for Staff ---
 Route::resource('leave-requests', StaffLeaveRequestController::class)->only(['index', 'store']);
-Route::get('my-tasks', [\App\Http\Controllers\Staff\TaskDelegationController::class, 'index'])->name('task-delegations.index');
+{ title: 'My Tasks',           routeName: 'staff.task-delegations.index',icon: ClipboardList },
+    
         
     });
 
