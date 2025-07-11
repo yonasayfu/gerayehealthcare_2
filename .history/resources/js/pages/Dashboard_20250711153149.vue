@@ -42,7 +42,7 @@ const formatDate = (dateString: string) => {
     <div class="space-y-6 p-4 md:p-6">
       <template v-if="stats">
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          <Link :href="route('staff.my-visits.index')" class="block rounded-xl border border-border bg-white p-5 shadow-sm transition hover:border-primary dark:border-sidebar-border dark:bg-background">
+          <div class="rounded-xl border border-border bg-white p-5 shadow-sm dark:border-sidebar-border dark:bg-background">
             <div class="flex items-center gap-4">
               <CalendarClock class="h-8 w-8 text-primary" />
               <div>
@@ -50,8 +50,8 @@ const formatDate = (dateString: string) => {
                 <p class="text-2xl font-semibold">{{ stats.upcomingVisitsCount }}</p>
               </div>
             </div>
-          </Link>
-          <Link :href="route('staff.my-earnings.index')" class="block rounded-xl border border-border bg-white p-5 shadow-sm transition hover:border-primary dark:border-sidebar-border dark:bg-background">
+          </div>
+          <div class="rounded-xl border border-border bg-white p-5 shadow-sm dark:border-sidebar-border dark:bg-background">
             <div class="flex items-center gap-4">
               <FileText class="h-8 w-8 text-primary" />
               <div>
@@ -59,8 +59,8 @@ const formatDate = (dateString: string) => {
                 <p class="text-2xl font-semibold">{{ stats.unpaidVisitsCount }}</p>
               </div>
             </div>
-          </Link>
-          <Link :href="route('staff.my-earnings.index')" class="block rounded-xl border border-border bg-white p-5 shadow-sm transition hover:border-primary dark:border-sidebar-border dark:bg-background">
+          </div>
+          <div class="rounded-xl border border-border bg-white p-5 shadow-sm dark:border-sidebar-border dark:bg-background">
             <div class="flex items-center gap-4">
               <DollarSign class="h-8 w-8 text-primary" />
               <div>
@@ -68,7 +68,7 @@ const formatDate = (dateString: string) => {
                 <p class="text-2xl font-semibold">${{ stats.unpaidEarnings }}</p>
               </div>
             </div>
-          </Link>
+          </div>
         </div>
 
         <div class="rounded-xl border border-border bg-white shadow-sm dark:border-sidebar-border dark:bg-background">

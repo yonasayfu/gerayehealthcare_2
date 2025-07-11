@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-
+/Users/yonassayfu/Herd/Geraye/app/Http/Controllers/Admin/StaffPayoutController.php
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\MessageController;

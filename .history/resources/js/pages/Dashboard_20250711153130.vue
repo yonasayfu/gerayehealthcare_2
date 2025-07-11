@@ -35,12 +35,7 @@ const formatDate = (dateString: string) => {
 };
 </script>
 
-<template>
-  <Head title="Dashboard" />
-
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-4 md:p-6">
-      <template v-if="stats">
+<template v-if="stats">
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
           <Link :href="route('staff.my-visits.index')" class="block rounded-xl border border-border bg-white p-5 shadow-sm transition hover:border-primary dark:border-sidebar-border dark:bg-background">
             <div class="flex items-center gap-4">
@@ -106,12 +101,3 @@ const formatDate = (dateString: string) => {
           </div>
         </div>
       </template>
-
-      <template v-else>
-        <div class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
-            Welcome to your dashboard. Select a section from the sidebar to begin.
-        </div>
-      </template>
-    </div>
-  </AppLayout>
-</template>

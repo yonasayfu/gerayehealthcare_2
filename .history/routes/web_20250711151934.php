@@ -3,8 +3,6 @@
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use App\Http\Controllers\Admin\DashboardController; // <-- ADD THIS
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController; // <-- RENAME THIS
-
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\RoleController;
@@ -12,7 +10,6 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\MessageController;
@@ -20,8 +17,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController; // <-- ADD THIS
-
 use Illuminate\Support\Facades\Auth; // <-- ADD THIS
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;

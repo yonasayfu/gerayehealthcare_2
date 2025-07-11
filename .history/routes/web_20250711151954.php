@@ -3,8 +3,6 @@
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use App\Http\Controllers\Admin\DashboardController; // <-- ADD THIS
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController; // <-- RENAME THIS
-
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\RoleController;
@@ -12,7 +10,6 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\MessageController;
