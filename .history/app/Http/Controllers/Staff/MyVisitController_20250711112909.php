@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service; // <-- THIS IS THE FIX
 use App\Models\VisitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,12 +19,13 @@ class MyVisitController extends Controller
         $staff = Auth::user()->staff;
 
         if (!$staff) {
+            // Handle case where user is not linked to a staff profile
             return redirect()->route('dashboard')->with('error', 'You do not have a staff profile.');
         }
 
         $visits = VisitService::with('patient')
             ->where('staff_id', $staff->id)
-            ->orderBy('scheduled_at', 'desc')
+            ->orderBy('scheduled_at', 'asc')
             ->paginate(10);
 
         return Inertia::render('Staff/MyVisits/Index', [
@@ -38,8 +38,9 @@ class MyVisitController extends Controller
      */
     public function checkIn(Request $request, VisitService $visit)
     {
+        // Authorization: Ensure the visit belongs to the authenticated staff
         if ($visit->staff_id !== Auth::user()->staff->id) {
-            abort(403);
+            return back()->with('error', 'You are not authorized to check in for this visit.');
         }
 
         $validated = $request->validate([
@@ -62,8 +63,9 @@ class MyVisitController extends Controller
      */
     public function checkOut(Request $request, VisitService $visit)
     {
+        // Authorization: Ensure the visit belongs to the authenticated staff
         if ($visit->staff_id !== Auth::user()->staff->id) {
-            abort(403);
+            return back()->with('error', 'You are not authorized to check out for this visit.');
         }
 
         $validated = $request->validate([
@@ -80,8 +82,7 @@ class MyVisitController extends Controller
 
         return back()->with('success', 'Checked out successfully.');
     }
-
-    /**
+     /**
      * Show the form for filing a post-visit report.
      */
     public function showReportForm(VisitService $visit)

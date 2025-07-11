@@ -84,10 +84,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::post('my-visits/{visit}/check-in', [MyVisitController::class, 'checkIn'])->name('my-visits.check-in');
         Route::post('my-visits/{visit}/check-out', [MyVisitController::class, 'checkOut'])->name('my-visits.check-out');
 
-         // --- NEW Post-Visit Reporting Routes ---
-        Route::get('my-visits/{visit}/report', [MyVisitController::class, 'showReportForm'])->name('my-visits.report.create');
-        Route::post('my-visits/{visit}/report', [MyVisitController::class, 'storeReport'])->name('my-visits.report.store');
-
+        
         Route::get('my-earnings', [MyEarningsController::class, 'index'])->name('my-earnings.index');
     });
 
