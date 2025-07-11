@@ -20,7 +20,6 @@ use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestContro
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\Admin\TaskDelegationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -82,13 +81,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
      ->parameters(['admin-leave-requests' => 'leave_request'])
      ->only(['index', 'update']);
 
-     Route::get('task-delegations/export', [TaskDelegationController::class, 'export'])
-     ->name('task-delegations.export');
-
-// 2) Resource routes WITHOUT show
-Route::resource('task-delegations', TaskDelegationController::class)
-     ->parameters(['task-delegations' => 'task_delegation'])
-     ->except(['show']);
         // System Management (Super Admin Only)
         Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);

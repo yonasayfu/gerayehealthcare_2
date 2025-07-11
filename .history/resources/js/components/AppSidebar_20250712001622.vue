@@ -77,7 +77,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
       { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
       { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-      { title: 'Task Delegations',    routeName: 'admin.task-delegations.index',    icon: ClipboardList,   permission: 'view task delegations' },
       
       { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
     ],

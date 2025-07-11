@@ -81,15 +81,19 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
      ->parameters(['admin-leave-requests' => 'leave_request'])
      ->only(['index', 'update']);
+Route::resource('task-delegations', TaskDelegationController::class)
+     ->parameters(['task-delegations' => 'task_delegation']);
+        // System Management (Super Admin Only)
 
-     Route::get('task-delegations/export', [TaskDelegationController::class, 'export'])
+        // Export CSV / PDF for Task Delegations
+Route::get('task-delegations/export', [TaskDelegationController::class, 'export'])
      ->name('task-delegations.export');
 
-// 2) Resource routes WITHOUT show
+// Then your resource routes
 Route::resource('task-delegations', TaskDelegationController::class)
-     ->parameters(['task-delegations' => 'task_delegation'])
-     ->except(['show']);
-        // System Management (Super Admin Only)
+     ->parameters(['task-delegations' => 'task_delegation']);
+
+     
         Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
