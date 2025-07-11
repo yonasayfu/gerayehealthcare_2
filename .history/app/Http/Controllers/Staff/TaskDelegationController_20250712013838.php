@@ -42,7 +42,16 @@ class TaskDelegationController extends Controller
                          ->with('success','Task created.');
     }
 
-    
+    public function update(Request $request, TaskDelegation $task_delegation)
+    {
+        $data = $request->validate([
+            'status' => 'required|in:Pending,In Progress,Completed',
+        ]);
+
+        $task_delegation->update($data);
+
+        return back()->with('success','Task status updated.');
+    }
     public function update(Request $request, TaskDelegation $task_delegation)
     {
         $data = $request->validate([

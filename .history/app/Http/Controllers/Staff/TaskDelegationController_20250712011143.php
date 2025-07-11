@@ -42,7 +42,6 @@ class TaskDelegationController extends Controller
                          ->with('success','Task created.');
     }
 
-    
     public function update(Request $request, TaskDelegation $task_delegation)
     {
         $data = $request->validate([
@@ -51,7 +50,6 @@ class TaskDelegationController extends Controller
 
         $task_delegation->update($data);
 
-        // Use Inertia::location to force a fresh re-fetch of the index props
-        return Inertia::location(route('staff.task-delegations.index'));
+        return back()->with('success','Task status updated.');
     }
 }

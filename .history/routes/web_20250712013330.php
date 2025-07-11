@@ -38,7 +38,7 @@ use App\Http\Controllers\NotificationController;
 |--------------------------------------------------------------------------
 */
 
-// Public & General
+// Public
 Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
 // Shared Dashboard
@@ -102,7 +102,7 @@ Route::middleware(['auth','verified','role:' . RoleEnum::SUPER_ADMIN->value . '|
               ->parameters(['admin-leave-requests' => 'leave_request'])
               ->only(['index','update']);
 
-         // Task Delegations (Admin)
+         // *** Task Delegations (Admin) ***
          Route::get('task-delegations/export', [AdminTaskController::class,'export'])
               ->name('task-delegations.export');
          Route::resource('task-delegations', AdminTaskController::class)
@@ -151,13 +151,10 @@ Route::middleware(['auth','verified','role:' . RoleEnum::STAFF->value])
          Route::resource('leave-requests', StaffLeaveRequestController::class)
               ->only(['index','store']);
 
-         // Staff Task Delegations (now on /dashboard/my-tasks)
-         Route::get('my-tasks', [StaffTaskController::class,'index'])
-              ->name('task-delegations.index');
-         Route::post('my-tasks', [StaffTaskController::class,'store'])
-              ->name('task-delegations.store');
-         Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class,'update'])
-              ->name('task-delegations.update');
+         // Staff Task Delegations
+         Route::resource('task-delegations', StaffTaskController::class)
+              ->only(['index','store','update'])
+              ->parameters(['task-delegations' => 'task_delegation']);
      });
 
 // Auth & Settings

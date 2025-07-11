@@ -41,7 +41,6 @@ use App\Http\Controllers\NotificationController;
 // Public & General
 Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
-// Shared Dashboard
 Route::get('dashboard', function () {
     $user = Auth::user();
     if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::ADMIN->value])) {
@@ -52,7 +51,7 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth','verified'])->name('dashboard');
 
-// Messaging & Notifications
+// Messaging & Notifications (all authenticated)
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/messages/{recipient?}', [MessageController::class,'index'])->name('messages.index');
     Route::post('/messages', [MessageController::class,'store'])->name('messages.store');
@@ -66,6 +65,9 @@ Route::middleware(['auth','verified','role:' . RoleEnum::SUPER_ADMIN->value . '|
      ->prefix('dashboard')
      ->name('admin.')
      ->group(function () {
+         // Dashboard
+         Route::get('/', [AdminDashboardController::class,'index'])->name('dashboard');
+
          // Patients
          Route::get('patients/export', [PatientController::class,'export'])->name('patients.export');
          Route::resource('patients', PatientController::class);
@@ -102,9 +104,11 @@ Route::middleware(['auth','verified','role:' . RoleEnum::SUPER_ADMIN->value . '|
               ->parameters(['admin-leave-requests' => 'leave_request'])
               ->only(['index','update']);
 
-         // Task Delegations (Admin)
+         // Task Delegations Export (CSV/PDF)
          Route::get('task-delegations/export', [AdminTaskController::class,'export'])
               ->name('task-delegations.export');
+
+         // Task Delegations CRUD (except show)
          Route::resource('task-delegations', AdminTaskController::class)
               ->parameters(['task-delegations' => 'task_delegation'])
               ->except(['show']);
@@ -121,6 +125,9 @@ Route::middleware(['auth','verified','role:' . RoleEnum::STAFF->value])
      ->prefix('dashboard')
      ->name('staff.')
      ->group(function () {
+         // Dashboard
+         Route::get('/', [StaffDashboardController::class,'index'])->name('dashboard');
+
          // My Availability
          Route::get('my-availability', [MyAvailabilityController::class,'index'])
               ->name('my-availability.index');
@@ -151,13 +158,10 @@ Route::middleware(['auth','verified','role:' . RoleEnum::STAFF->value])
          Route::resource('leave-requests', StaffLeaveRequestController::class)
               ->only(['index','store']);
 
-         // Staff Task Delegations (now on /dashboard/my-tasks)
-         Route::get('my-tasks', [StaffTaskController::class,'index'])
-              ->name('task-delegations.index');
-         Route::post('my-tasks', [StaffTaskController::class,'store'])
-              ->name('task-delegations.store');
-         Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class,'update'])
-              ->name('task-delegations.update');
+         // Staff Task Delegations (index, store, update)
+         Route::resource('task-delegations', StaffTaskController::class)
+              ->only(['index','store','update'])
+              ->parameters(['task-delegations' => 'task_delegation']);
      });
 
 // Auth & Settings
