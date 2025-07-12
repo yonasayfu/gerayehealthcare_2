@@ -9,6 +9,6 @@ class TaskDelegationSeeder extends Seeder
 {
     public function run(): void
     {
-        TaskDelegation::factory()->count(3)->create();
+        TaskDelegation::factory()->count()->create();
     }
 }

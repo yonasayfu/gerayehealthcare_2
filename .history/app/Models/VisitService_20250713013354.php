@@ -15,7 +15,7 @@ class VisitService extends Model
     protected $fillable = [
         'patient_id',
         'staff_id',
-        'assignment_id',
+        
         'scheduled_at',
         'check_in_time',
         'check_out_time',

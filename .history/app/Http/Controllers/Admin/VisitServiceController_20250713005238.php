@@ -22,6 +22,7 @@ class VisitServiceController extends Controller
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
+                // Using 'ilike' for case-insensitive search in PostgreSQL
                 $q->whereHas('patient', fn($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
                     ->orWhereHas('staff', fn($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
             });
@@ -39,38 +40,37 @@ class VisitServiceController extends Controller
     {
         return Inertia::render('Admin/VisitServices/Create', [
             'patients' => Patient::orderBy('full_name')->get(['id', 'full_name']),
+            // THE FIX IS HERE:
             'staff' => Staff::where('status', 'Active')->orderBy('first_name')->get(['id', 'first_name', 'last_name']),
         ]);
     }
 
    public function store(Request $request)
 {
+    // Your existing validation is correct.
     $validated = $request->validate([
         'patient_id' => 'required|exists:patients,id',
-        // Using the simple validation for now
-        'staff_id' => ['required', 'exists:staff,id'], 
+        // 'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
+        //'staff_id' => ['required', 'exists:staff,id'],
         'scheduled_at' => 'required|date',
         'status' => 'required|string|max:255',
         'visit_notes' => 'nullable|string',
-        'service_description' => 'nullable|string|max:500',
-        'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        // ... other fields
     ]);
 
-    // --- CHECKPOINT 1: Let's see the data right after validation ---
-    // The test will stop here and print the content of $validated.
-    //dd($validated, '--- This is Checkpoint 1: Validated Data ---');
-
-
-    // The code below will not run yet.
-     $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
+    // --- THE FINAL FIX IS HERE ---
+    // Find the currently 'Assigned' record for this patient and staff.
+    $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                        ->where('staff_id', $validated['staff_id'])
-                                       ->where('status', 'Assigned') // This query is correct.
+                                       ->where('status', 'Assigned') // This makes the query specific
                                        ->latest('id')
                                        ->first();
-    
-    $validated['assignment_id'] = $assignment?->id;
 
+    // Add the assignment_id to our validated data array.
+    $validated['assignment_id'] = $assignment?->id;
+    // --- END OF FIX ---
+
+    // Your existing logic for cost and file uploads is correct.
     $staff = Staff::find($validated['staff_id']);
     $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
 
@@ -86,61 +86,65 @@ class VisitServiceController extends Controller
     return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
 }
 
+    /**
+     * Display the specified resource.
+     */
+    public function show(VisitService $visitService): Response
+    {
+        return Inertia::render('Admin/VisitServices/Show', [
+            'visitService' => $visitService->load(['patient', 'staff']),
+        ]);
+    }
+
     public function edit(VisitService $visitService): Response
     {
         return Inertia::render('Admin/VisitServices/Edit', [
             'visitService' => $visitService->load(['patient', 'staff']),
             'patients' => Patient::orderBy('full_name')->get(['id', 'full_name']),
+            // THE FIX IS HERE:
             'staff' => Staff::where('status', 'Active')->orderBy('first_name')->get(['id', 'first_name', 'last_name']),
         ]);
     }
 
     public function update(Request $request, VisitService $visitService)
-    {
-        $request->merge(['visit_id' => $visitService->id]);
+{
+    $request->merge(['visit_id' => $visitService->id]);
 
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-            'scheduled_at' => 'required|date',
-            'status' => 'required|string|max:255',
-            'visit_notes' => 'nullable|string',
-            'service_description' => 'nullable|string|max:500',
-            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+    $validated = $request->validate([
+        'patient_id' => 'required|exists:patients,id',
+        'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
+        'scheduled_at' => 'required|date',
+        // ... other validation rules
+    ]);
 
-        $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
-                                           ->where('staff_id', $validated['staff_id'])
-                                           ->where('status', 'Assigned')
-                                           ->latest('id')
-                                           ->first();
-        $validated['assignment_id'] = $assignment?->id;
+    // --- ADD THIS LOGIC BLOCK TO THE UPDATE METHOD ---
+    $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
+                                       ->where('staff_id', $validated['staff_id'])
+                                       ->where('status', 'Assigned')
+                                       ->latest('id')
+                                       ->first();
+                                       
+    $validated['assignment_id'] = $assignment?->id;
+    // --- END OF BLOCK ---
 
-        $staff = Staff::find($validated['staff_id']);
-        $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
+    $staff = Staff::find($validated['staff_id']);
+    $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
 
-        if ($request->hasFile('prescription_file')) {
-            if ($visitService->prescription_file) {
-                Storage::disk('public')->delete($visitService->prescription_file);
-            }
-            $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-        } else {
-            unset($validated['prescription_file']);
-        }
-
-        if ($request->hasFile('vitals_file')) {
-            if ($visitService->vitals_file) {
-                Storage::disk('public')->delete($visitService->vitals_file);
-            }
-            $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
-        } else {
-            unset($validated['vitals_file']);
-        }
-
-        $visitService->update($validated);
-        return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');
+    // Your file handling logic is correct.
+    if ($request->hasFile('prescription_file')) {
+        // ...
+    } else {
+        unset($validated['prescription_file']);
     }
+    if ($request->hasFile('vitals_file')) {
+        // ...
+    } else {
+        unset($validated['vitals_file']);
+    }
+
+    $visitService->update($validated);
+    return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');
+}
 
     public function destroy(VisitService $visitService)
     {

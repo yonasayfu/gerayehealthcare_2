@@ -59,13 +59,13 @@ class VisitServiceController extends Controller
 
     // --- CHECKPOINT 1: Let's see the data right after validation ---
     // The test will stop here and print the content of $validated.
-    //dd($validated, '--- This is Checkpoint 1: Validated Data ---');
+    dd($validated, '--- This is Checkpoint 1: Validated Data ---');
 
 
     // The code below will not run yet.
-     $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
+    $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                        ->where('staff_id', $validated['staff_id'])
-                                       ->where('status', 'Assigned') // This query is correct.
+                                       ->where('status', 'Assigned')
                                        ->latest('id')
                                        ->first();
     

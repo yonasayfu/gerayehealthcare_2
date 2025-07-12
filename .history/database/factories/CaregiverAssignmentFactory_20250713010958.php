@@ -22,9 +22,13 @@ class CaregiverAssignmentFactory extends Factory
         $shift_end = (clone $shift_start)->modify('+8 hours');
 
         return [
-            // This now creates a new Patient and a new non-admin Staff member for each assignment.
+            // --- THIS IS THE FIX ---
+            // Instead of finding a random record, this tells the factory to
+            // create a new Patient and a new Staff member for this assignment.
             'patient_id' => Patient::factory(),
-            'staff_id' => Staff::factory()->state(['role' => 'Nurse']), 
+            'staff_id' => Staff::factory()->state(['role' => 'Nurse']), // Creates a non-admin staff member
+
+            // --- Your existing logic remains the same ---
             'shift_start' => $shift_start,
             'shift_end' => $shift_end,
             'status' => $this->faker->randomElement(['Assigned', 'In Progress', 'Completed', 'Cancelled']),

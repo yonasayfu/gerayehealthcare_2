@@ -43,48 +43,47 @@ class VisitServiceController extends Controller
         ]);
     }
 
-   public function store(Request $request)
-{
-    $validated = $request->validate([
-        'patient_id' => 'required|exists:patients,id',
-        // Using the simple validation for now
-        'staff_id' => ['required', 'exists:staff,id'], 
-        'scheduled_at' => 'required|date',
-        'status' => 'required|string|max:255',
-        'visit_notes' => 'nullable|string',
-        'service_description' => 'nullable|string|max:500',
-        'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-    ]);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'patient_id' => 'required|exists:patients,id',
+            'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
+            'scheduled_at' => 'required|date',
+            'status' => 'required|string|max:255',
+            'visit_notes' => 'nullable|string',
+            'service_description' => 'nullable|string|max:500',
+            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
 
-    // --- CHECKPOINT 1: Let's see the data right after validation ---
-    // The test will stop here and print the content of $validated.
-    //dd($validated, '--- This is Checkpoint 1: Validated Data ---');
+        $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
+                                           ->where('staff_id', $validated['staff_id'])
+                                           ->where('status', 'Assigned')
+                                           ->latest('id')
+                                           ->first();
+        $validated['assignment_id'] = $assignment?->id;
 
+        $staff = Staff::find($validated['staff_id']);
+        $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
 
-    // The code below will not run yet.
-     $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
-                                       ->where('staff_id', $validated['staff_id'])
-                                       ->where('status', 'Assigned') // This query is correct.
-                                       ->latest('id')
-                                       ->first();
-    
-    $validated['assignment_id'] = $assignment?->id;
+        if ($request->hasFile('prescription_file')) {
+            $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
+        }
+        if ($request->hasFile('vitals_file')) {
+            $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
+        }
 
-    $staff = Staff::find($validated['staff_id']);
-    $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
-
-    if ($request->hasFile('prescription_file')) {
-        $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-    }
-    if ($request->hasFile('vitals_file')) {
-        $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
+        VisitService::create($validated);
+        
+        return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
     }
 
-    VisitService::create($validated);
-    
-    return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
-}
+    public function show(VisitService $visitService): Response
+    {
+        return Inertia::render('Admin/VisitServices/Show', [
+            'visitService' => $visitService->load(['patient', 'staff']),
+        ]);
+    }
 
     public function edit(VisitService $visitService): Response
     {
