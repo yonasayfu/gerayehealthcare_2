@@ -182,6 +182,8 @@ function destroy(id: number) {
     display: none !important;
   }
   /* HIDE BREADCRUMBS AND TOP NAV (from AppSidebarLayout.vue) */
+  /* This rule targets the header component (AppSidebarHeader) and sidebar (AppSidebar)
+     if they are rendered by AppSidebarLayout and marked with print:hidden */
   .app-sidebar-header, .app-sidebar {
       display: none !important;
   }
@@ -203,26 +205,26 @@ function destroy(id: number) {
   .print-header-content {
       padding-top: 0.5cm !important;
       padding-bottom: 0.5cm !important;
-      margin-bottom: 0.8cm !important;
+      margin-bottom: 0.8cm !important; /* Increase space below header */
   }
 
   .print-logo {
       max-width: 150px; /* Adjust as needed */
       max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      margin-bottom: 0.5rem; /* Space between logo and clinic name */
+      display: block; /* Ensure it takes its own line */
+      margin-left: auto; /* Center the logo */
+      margin-right: auto; /* Center the logo */
   }
 
   .print-clinic-name {
-      font-size: 1.8rem !important;
+      font-size: 1.8rem !important; /* Increased font size for clinic name */
       margin-bottom: 0.2rem !important;
       line-height: 1.2 !important;
   }
 
   .print-document-title {
-      font-size: 0.9rem !important;
+      font-size: 0.9rem !important; /* Increased font size for document title */
       color: #555 !important;
   }
 
@@ -231,12 +233,13 @@ function destroy(id: number) {
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
-    padding: 1cm !important;
+    padding: 1cm !important; /* Slightly reduce overall padding for content */
     margin: 0 !important;
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
 
+    /* KEY: Adjust scale factor for better fit with larger fonts */
     transform: scale(0.98); /* Less aggressive scaling. Adjust if it goes to 2 pages */
     transform-origin: top left;
   }
@@ -257,11 +260,11 @@ function destroy(id: number) {
     margin-bottom: 0.6rem !important;
   }
 
-  /* TYPOGRAPHY ADJUSTMENTS */
-  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
-  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
-  .text-sm { font-size: 0.8rem !important; }
-  .text-xs { font-size: 0.75rem !important; }
+  /* TYPOGRAPHY ADJUSTMENTS (Increased Font Sizes) */
+  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; } /* Section Titles */
+  p { font-size: 0.85rem !important; line-height: 1.4 !important; } /* General text increased */
+  .text-sm { font-size: 0.8rem !important; } /* Labels, general small text */
+  .text-xs { font-size: 0.75rem !important; } /* Footer text, etc. */
   .font-medium { font-weight: 600 !important; }
 
   /* BORDER STYLES */
@@ -274,26 +277,17 @@ function destroy(id: number) {
   /* GRID LAYOUT FOR DATA FIELDS (Two-column "Label: Value" format) */
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* Force 2 equal columns */
-    gap: 0.8rem 0 !important; /* Vertical gap, horizontal gap is now handled by padding */
+    gap: 0.8rem 2.5rem !important; /* Vertical gap smaller, horizontal gap increased */
     page-break-inside: avoid !important;
   }
 
-  /* Style individual data items within the grid for visual grouping */
+  /* Style individual data items within the grid */
   .grid > div {
     display: flex !important;
     flex-direction: row !important;
     align-items: baseline !important;
-    gap: 0.4rem !important; /* Gap between label and value */
+    gap: 0.4rem !important;
     padding: 0.1rem 0 !important;
-  }
-
-  /* Add a subtle dashed vertical line between the two columns */
-  .grid > div:nth-child(odd) { /* Targets items in the left column */
-    border-right: 1px dashed #eee !important; /* Subtle dashed line */
-    padding-right: 1.5rem !important; /* Space between content and line */
-  }
-  .grid > div:nth-child(even) { /* Targets items in the right column */
-    padding-left: 1.5rem !important; /* Space between line and content */
   }
 
   .grid > div p:first-child { /* The Label */

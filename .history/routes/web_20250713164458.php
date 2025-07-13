@@ -66,7 +66,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
-        // Patients
+         // Patients
         Route::get('patients/export', [PatientController::class, 'export'])->name('patients.export');
 
         // CORRECTED print-all route:

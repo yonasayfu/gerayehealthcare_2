@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue' // Import 'computed'
+import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue'
-import { format } from 'date-fns' // Keep this import
+import Pagination from '@/components/Pagination.vue' // Ensure this path is correct
+
 
 const props = defineProps<{
   patients: any; // Ideally, define a more specific type for patients data
@@ -21,11 +21,6 @@ const search = ref(props.filters.search || '')
 const sortField = ref(props.filters.sort || '')
 const sortDirection = ref(props.filters.direction || 'asc')
 const perPage = ref(props.filters.per_page || 10)
-
-// Create a computed property for the formatted date string
-const formattedGeneratedDate = computed(() => {
-  return format(new Date(), 'PPP p'); // Use the imported format function here
-});
 
 // Trigger search, sort, pagination
 watch([search, sortField, sortDirection, perPage], debounce(() => {
@@ -60,10 +55,20 @@ function printCurrentView() {
   window.print()
 }
 
-const printAllPatients = () => {
-    // This will call your PatientController@export method with type=pdf
-    window.open(route('admin.patients.export', { type: 'pdf' }), '_blank');
-};
+function printAllPatients() {
+  // Opens the dedicated print-all route in a new tab/window
+  // This route will fetch all data and trigger print on load
+  const printWindow = window.open(route('admin.patients.printAll'), '_blank');
+  if (printWindow) {
+    // Optional: Add logic to close the window after print (might need a slight delay)
+    // printWindow.onload = () => {
+    //   printWindow.print();
+    //   // setTimeout(() => { printWindow.close(); }, 1000); // Give browser time to show print dialog
+    // };
+  } else {
+    alert("Please allow pop-ups for this site to print all patients.");
+  }
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -162,8 +167,7 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
                 Source <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 text-right print:hidden">Actions</th>
-            </tr>
+              <th class="px-6 py-3 text-right print:hidden">Actions</th> </tr>
           </thead>
           <tbody>
             <tr v-for="patient in patients.data" :key="patient.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
@@ -174,8 +178,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
-              <td class="px-6 py-4 text-right print:hidden">
-                <div class="inline-flex items-center justify-end space-x-2">
+              <td class="px-6 py-4 text-right print:hidden"> <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.patients.show', patient.id)"
                     class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
@@ -207,7 +210,8 @@ function toggleSort(field: string) {
       
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
+            <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
 
     </div>
   </AppLayout>

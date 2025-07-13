@@ -163,15 +163,5 @@ class PatientController extends Controller
         $pdf = Pdf::loadView('pdf.patient-single', ['patient' => $patient])->setPaper('a4', 'portrait');
         return $pdf->stream("patient-{$patient->patient_code}.pdf");
     }
-    public function printAll(Request $request)
-    {
-        $patients = Patient::orderBy('full_name')->get(); // Fetch all patients, ordered
-
-        // Render a dedicated Inertia component for printing all data
-        // This component will be similar to your Index.vue but optimized for print,
-        // perhaps without pagination controls or search bars.
-        return Inertia::render('Admin/Patients/PrintAll', [
-            'patients' => $patients,
-        ]);
-    }
+    
 }

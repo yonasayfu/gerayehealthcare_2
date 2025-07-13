@@ -68,7 +68,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
     ->group(function () {
         // Patients
         Route::get('patients/export', [PatientController::class, 'export'])->name('patients.export');
-
+Route::get('patients/print-all', [PatientController::class, 'printAll'])->name('patients.printAll');
         // CORRECTED print-all route:
         // - URI: 'patients/print-all' (combined with group prefix 'dashboard' -> /dashboard/patients/print-all)
         // - Name: 'patients.printAll' (combined with group name 'admin.' -> admin.patients.printAll)

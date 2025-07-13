@@ -8,10 +8,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['submit'])
-
-// Define options for dropdowns here
-const genders = ['Male', 'Female', 'Other', 'Prefer not to say']
-const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
 </script>
 
 <template>
@@ -23,6 +19,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
       </p>
 
       <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <!-- Full Name -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Full Name</label>
           <div class="mt-2">
@@ -37,6 +34,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Fayda ID -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Fayda ID</label>
           <div class="mt-2">
@@ -51,6 +49,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Source -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Source</label>
           <div class="mt-2">
@@ -58,8 +57,11 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
               v-model="form.source"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
-              <option :value="null">Select source</option>
-              <option v-for="sourceOption in sources" :key="sourceOption" :value="sourceOption">{{ sourceOption }}</option>
+              <option value="">Select source</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Website">Website</option>
+              <option value="Referral">Referral</option>
+              <option value="Walk-in">Walk-in</option>
             </select>
             <div v-if="form.errors.source" class="text-red-500 text-sm mt-1">
               {{ form.errors.source }}
@@ -67,6 +69,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Phone Number -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Phone Number</label>
           <div class="mt-2">
@@ -84,19 +87,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
-        <div class="sm:col-span-3">
-          <label class="block text-sm font-medium text-gray-900 dark:text-white">Email Address</label>
-          <div class="mt-2">
-            <input
-              type="email"
-              v-model="form.email"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-            />
-            <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">
-              {{ form.errors.email }}
-            </div>
-          </div>
-        </div>
+        <!-- Gender -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Gender</label>
           <div class="mt-2">
@@ -104,8 +95,9 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
               v-model="form.gender"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
-              <option :value="null">Select gender</option>
-              <option v-for="genderOption in genders" :key="genderOption" :value="genderOption">{{ genderOption }}</option>
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
             </select>
             <div v-if="form.errors.gender" class="text-red-500 text-sm mt-1">
               {{ form.errors.gender }}
@@ -113,6 +105,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Date of Birth -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Date of Birth</label>
           <div class="mt-2">
@@ -127,6 +120,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Address -->
         <div class="col-span-full">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Address</label>
           <div class="mt-2">
@@ -141,6 +135,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Emergency Contact -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Emergency Contact</label>
           <div class="mt-2">
@@ -155,6 +150,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
           </div>
         </div>
 
+        <!-- Geolocation -->
         <div class="sm:col-span-3">
           <label class="block text-sm font-medium text-gray-900 dark:text-white">Geolocation</label>
           <div class="mt-2">

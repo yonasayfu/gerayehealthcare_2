@@ -60,10 +60,18 @@ function printCurrentView() {
   window.print()
 }
 
-const printAllPatients = () => {
-    // This will call your PatientController@export method with type=pdf
-    window.open(route('admin.patients.export', { type: 'pdf' }), '_blank');
-};
+function printAllPatients() {
+  const printWindow = window.open(route('admin.patients.printAll'), '_blank');
+  if (printWindow) {
+    // Optional: Add logic to close the window after print (might need a slight delay)
+    // printWindow.onload = () => {
+    //   printWindow.print();
+    //   // setTimeout(() => { printWindow.close(); }, 1000); // Give browser time to show print dialog
+    // };
+  } else {
+    alert("Please allow pop-ups for this site to print all patients.");
+  }
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
