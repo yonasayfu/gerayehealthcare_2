@@ -4,38 +4,53 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
 
+const props = defineProps<{
+  patient: {
+    id: number
+    full_name: string
+    fayda_id: string | null // <-- ADD THIS LINE
+    date_of_birth: string | null
+    gender: string | null
+    address: string | null
+    phone_number: string | null
+    email: string | null
+    emergency_contact: string | null
+    geolocation: string | null
+  }
+}>()
+
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Patients', href: route('admin.patients.index') },
-  { title: 'Create', href: route('admin.patients.create') },
+  { title: 'Edit', href: route('admin.patients.edit', props.patient.id) },
 ]
 
 const form = useForm({
-  full_name: '',
-  fayda_id: '',
-  date_of_birth: '',
-  gender: '',
-  address: '',
-  phone_number: '',
-  source: '',
-  emergency_contact: '',
-  geolocation: '',
+  full_name: props.patient.full_name,
+  fayda_id: props.patient.fayda_id, // <-- ADD THIS LINE
+  date_of_birth: props.patient.date_of_birth,
+  gender: props.patient.gender,
+  address: props.patient.address,
+  phone_number: props.patient.phone_number,
+  email: props.patient.email,
+  emergency_contact: props.patient.emergency_contact,
+  geolocation: props.patient.geolocation,
 })
 
 function submit() {
-  form.post(route('admin.patients.store'))
+  form.put(route('admin.patients.update', props.patient.id))
 }
 </script>
 
 <template>
-  <Head title="Create Patient" />
+  <Head title="Edit Patient" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
       <!-- Header -->
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Create Patient</h1>
-        <p class="text-sm text-muted-foreground">Fill in the form to register a new patient.</p>
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Patient</h1>
+        <p class="text-sm text-muted-foreground">Update patient details as necessary.</p>
       </div>
 
       <!-- Form Card -->
@@ -55,7 +70,7 @@ function submit() {
             :disabled="form.processing"
             class="inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-md text-sm font-medium transition"
           >
-            {{ form.processing ? 'Saving...' : 'Save Patient' }}
+            {{ form.processing ? 'Saving...' : 'Save Changes' }}
           </button>
         </div>
       </div>

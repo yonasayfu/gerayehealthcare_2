@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str; // Import Str facade for UUID generation
-use Carbon\Carbon; // Import Carbon for date handling in age calculation
 
 class Patient extends Model
 {
@@ -13,16 +12,15 @@ class Patient extends Model
 
     protected $fillable = [
         'full_name',
-        'fayda_id',
+        'fayda_id',          // Make sure this is fillable if set via form
         'date_of_birth',
         'gender',
         'address',
         'phone_number',
-        'email', // Ensure 'email' is fillable if you want to store it
+        'email',             // Make sure this is fillable
         'emergency_contact',
         'source',
         'geolocation',
-        'patient_code', // It's good to keep this fillable too, in case you manually set it sometimes
         'registered_by_staff_id', // Add if using staff to register patients
         'registered_by_caregiver_id', // Add if using caregivers to register patients
     ];
@@ -34,38 +32,14 @@ class Patient extends Model
      */
     protected static function booted()
     {
-        // Automatically generate a unique patient_code before creation if it's empty
+        // Automatically generate a unique patient_code before creation
         static::creating(function ($patient) {
             if (empty($patient->patient_code)) {
                 $patient->patient_code = (string) Str::uuid(); // Generates a UUID
+                // Alternative for a simpler, less secure but unique code:
+                // $patient->patient_code = 'PAT-' . uniqid();
             }
         });
-    }
-
-    /**
-     * Get the full name of the patient.
-     *
-     * @return string
-     */
-    public function getFullNameAttribute()
-    {
-        // Return existing full_name or a default 'Unknown Patient'
-        return $this->attributes['full_name'] ?? 'Unknown Patient';
-    }
-
-    /**
-     * Get the patient's age based on date_of_birth.
-     *
-     * @return int|null
-     */
-    public function getAgeAttribute()
-    {
-        if (!$this->date_of_birth) {
-            return null;
-        }
-
-        // Use Carbon to calculate age from date_of_birth to now
-        return Carbon::parse($this->date_of_birth)->age;
     }
 
     /**
@@ -85,6 +59,15 @@ class Patient extends Model
     public function registeredByCaregiver()
     {
         // Adjust 'App\Models\Caregiver' if your Caregiver model is in a different namespace
-        return $this->belongsTo(CaregiverAssignment::class, 'registered_by_caregiver_id');
+        return $this->belongsTo(Caregiver::class, 'registered_by_caregiver_id');
     }
+
+    // You can also add a polymorphic relationship if a patient can be registered
+    // by multiple types of entities (Staff, Caregiver, Admin, etc.)
+    /*
+    public function registeredBy()
+    {
+        return $this->morphTo();
+    }
+    */
 }

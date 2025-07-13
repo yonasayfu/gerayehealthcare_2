@@ -9,7 +9,6 @@ class PatientFactory extends Factory
     {
         return [
             'full_name' => $this->faker->name,
-            'patient_code' => 'P' . str_pad($this->faker->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
             'fayda_id' => $this->faker->unique()->numerify('##############'),
             
             'date_of_birth' => $this->faker->date,
@@ -18,8 +17,6 @@ class PatientFactory extends Factory
             'phone_number' => $this->faker->unique()->phoneNumber,
             'email' => $this->faker->unique()->safeEmail,
             'emergency_contact' => $this->faker->name . ' - ' . $this->faker->phoneNumber,
-            'source' => $this->faker->randomElement(['TikTok', 'Website', 'Referral', 'Walk-in']),
-            
             'geolocation' => $this->faker->latitude . ',' . $this->faker->longitude,
         ];
     }

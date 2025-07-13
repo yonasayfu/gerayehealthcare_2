@@ -2,15 +2,12 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
+import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next' // <-- Import Eye icon
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue' // Ensure this path is correct
+import Pagination from '@/components/Pagination.vue'
 
 
-const props = defineProps<{
-  patients: any; // Ideally, define a more specific type for patients data
-  filters: any;
-}>()
+const props = defineProps<{ patients: any; filters: any }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -24,18 +21,12 @@ const perPage = ref(props.filters.per_page || 10)
 
 // Trigger search, sort, pagination
 watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
+  router.get(route('admin.patients.index'), {
     search: search.value,
+    sort: sortField.value,
     direction: sortDirection.value,
     per_page: perPage.value,
-  };
-
-  // Only add sort parameter if sortField.value is not an empty string
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-
-  router.get(route('admin.patients.index'), params, {
+  }, {
     preserveState: true,
     replace: true,
   })
@@ -71,6 +62,7 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
 
+      <!-- Header + Actions -->
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Patients</h1>
@@ -92,7 +84,9 @@ function toggleSort(field: string) {
         </div>
       </div>
 
+      <!-- Filters -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <!-- Search -->
         <div class="relative w-full md:w-1/3">
           <input
             type="text"
@@ -106,6 +100,7 @@ function toggleSort(field: string) {
           </svg>
         </div>
 
+        <!-- Pagination Dropdown -->
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
@@ -117,6 +112,7 @@ function toggleSort(field: string) {
         </div>
       </div>
 
+      <!-- Table -->
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
@@ -124,42 +120,32 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('full_name')">
                 Name <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('patient_code')">
-                Patient Code <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('fayda_id')">
                 Fayda ID <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('date_of_birth')">
-                Age <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gender')">
-                Gender <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('email')">
+                Email <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone_number')">
                 Phone <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
-                Source <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
+              <th class="px-6 py-3">Gender</th>
               <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="patient in patients.data" :key="patient.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
               <td class="px-6 py-4">{{ patient.full_name }}</td>
-              <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.fayda_id ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.age ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.patients.show', patient.id)"
                     class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-                    title="View Details"
+                    title="View"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
@@ -177,7 +163,7 @@ function toggleSort(field: string) {
               </td>
             </tr>
             <tr v-if="patients.data.length === 0">
-              <td colspan="8" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
+              <td colspan="6" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
             </tr>
           </tbody>
         </table>

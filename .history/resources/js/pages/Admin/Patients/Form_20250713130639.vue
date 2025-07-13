@@ -2,7 +2,7 @@
 const props = defineProps<{
   form: any,
   localErrors?: {
-    source?: string,
+    email?: string,
     phone_number?: string,
   }
 }>()
@@ -49,22 +49,20 @@ const emit = defineEmits(['submit'])
           </div>
         </div>
 
-        <!-- Source -->
+        <!-- Email -->
         <div class="sm:col-span-3">
-          <label class="block text-sm font-medium text-gray-900 dark:text-white">Source</label>
+          <label class="block text-sm font-medium text-gray-900 dark:text-white">Email</label>
           <div class="mt-2">
-            <select
-              v-model="form.source"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
-            >
-              <option value="">Select source</option>
-              <option value="TikTok">TikTok</option>
-              <option value="Website">Website</option>
-              <option value="Referral">Referral</option>
-              <option value="Walk-in">Walk-in</option>
-            </select>
-            <div v-if="form.errors.source" class="text-red-500 text-sm mt-1">
-              {{ form.errors.source }}
+            <input
+              type="email"
+              v-model="form.email"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+            />
+            <div v-if="props.localErrors?.email" class="text-red-500 text-sm mt-1">
+              {{ props.localErrors.email }}
+            </div>
+            <div v-else-if="form.errors.email" class="text-red-500 text-sm mt-1">
+              {{ form.errors.email }}
             </div>
           </div>
         </div>

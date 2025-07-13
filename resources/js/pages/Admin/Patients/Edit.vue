@@ -8,11 +8,12 @@ const props = defineProps<{
   patient: {
     id: number
     full_name: string
+    fayda_id: string | null // <-- ADD THIS LINE
     date_of_birth: string | null
     gender: string | null
     address: string | null
     phone_number: string | null
-    email: string | null
+    source: string | null
     emergency_contact: string | null
     geolocation: string | null
   }
@@ -26,11 +27,12 @@ const breadcrumbs: BreadcrumbItemType[] = [
 
 const form = useForm({
   full_name: props.patient.full_name,
+  fayda_id: props.patient.fayda_id, // <-- ADD THIS LINE
   date_of_birth: props.patient.date_of_birth,
   gender: props.patient.gender,
   address: props.patient.address,
   phone_number: props.patient.phone_number,
-  email: props.patient.email,
+  source: props.patient.source,
   emergency_contact: props.patient.emergency_contact,
   geolocation: props.patient.geolocation,
 })

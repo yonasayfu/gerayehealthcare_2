@@ -68,6 +68,7 @@ Route::middleware(['auth','verified','role:' . RoleEnum::SUPER_ADMIN->value . '|
      ->group(function () {
          // Patients
          Route::get('patients/export', [PatientController::class,'export'])->name('patients.export');
+         Route::get('patients/{patient}/print', [PatientController::class,'printSingle'])->name('patients.print');
          Route::resource('patients', PatientController::class);
 
          // Caregiver Assignments

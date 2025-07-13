@@ -5,7 +5,7 @@
     <title>Patient Export - Geraye</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 20px;
             font-size: 12px;
             color: #333;
@@ -54,8 +54,10 @@
             <tr>
                 <th>#</th>
                 <th>Full Name</th>
-                <th>Email</th>
+                <th>Patient Code</th>
+                <th>Source</th>
                 <th>Phone</th>
+                <th>Address</th>
                 <th>Gender</th>
                 <th>Emergency Contact</th>
             </tr>
@@ -65,8 +67,10 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $p->full_name }}</td>
-                    <td>{{ $p->email }}</td>
+                    <td>{{ $p->patient_code ?? '-' }}</td>
+                    <td>{{ $p->source ?? '-' }}</td>
                     <td>{{ $p->phone_number }}</td>
+                    <td>{{ $p->address ?? '-' }}</td>
                     <td>{{ $p->gender }}</td>
                     <td>{{ $p->emergency_contact }}</td>
                 </tr>

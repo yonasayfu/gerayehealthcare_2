@@ -15,7 +15,7 @@ class StaffSeeder extends Seeder
     public function run(): void
     {
         // Create 20 staff members using the factory
-        Staff::factory()->count(15)->create()->each(function ($staff) {
+        Staff::factory()->count()->create()->each(function ($staff) {
             
             // For each staff member, create a corresponding user account.
             // This prevents issues if an email from the factory already exists in the users table.

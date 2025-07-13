@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue' // Ensure this path is correct
+import Pagination from '@/components/Pagination.vue'
 
 
 const props = defineProps<{
@@ -130,14 +130,17 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('fayda_id')">
                 Fayda ID <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone_number')">
+                Phone <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('email')">
+                Email <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('date_of_birth')">
                 Age <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gender')">
                 Gender <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone_number')">
-                Phone <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
                 Source <ArrowUpDown class="inline w-4 h-4 ml-1" />
@@ -150,9 +153,10 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ patient.full_name }}</td>
               <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.fayda_id ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.age ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
@@ -177,7 +181,7 @@ function toggleSort(field: string) {
               </td>
             </tr>
             <tr v-if="patients.data.length === 0">
-              <td colspan="8" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
+              <td colspan="9" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
             </tr>
           </tbody>
         </table>

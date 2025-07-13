@@ -85,6 +85,6 @@ class Patient extends Model
     public function registeredByCaregiver()
     {
         // Adjust 'App\Models\Caregiver' if your Caregiver model is in a different namespace
-        return $this->belongsTo(CaregiverAssignment::class, 'registered_by_caregiver_id');
+        return $this->belongsTo(CaregiverAss::class, 'registered_by_caregiver_id');
     }
 }

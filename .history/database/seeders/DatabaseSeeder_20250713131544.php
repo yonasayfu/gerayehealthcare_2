@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create sample data using factories
-        \App\Models\VisitService::factory(15)->create();
+        \App\Models\VisitService::factory(1)->create();
         \App\Models\Message::factory(15)->create();
 
         // --- THE FIX IS HERE ---

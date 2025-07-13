@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue' // Ensure this path is correct
+import Pagination from '@/components/Pagination.vue'
 
 
 const props = defineProps<{
@@ -30,10 +30,11 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
     per_page: perPage.value,
   };
 
-  // Only add sort parameter if sortField.value is not an empty string
+  // --- FIX: Only add sort parameter if sortField.value is not an empty string ---
   if (sortField.value) {
     params.sort = sortField.value;
   }
+  // --- END FIX ---
 
   router.get(route('admin.patients.index'), params, {
     preserveState: true,
@@ -130,17 +131,27 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('fayda_id')">
                 Fayda ID <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('date_of_birth')">
-                Age <ArrowUpDown class="inline w-4 h-4 ml-1" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gender')">
-                Gender <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
+                Source <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone_number')">
                 Phone <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
-                Source <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('email')">
+                Email <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('address')">
+                Address <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gender')">
+                Gender <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('date_of_birth')">
+                Age <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              </th>
+              <th class="px-6 py-3">Registered By</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('created_at')">
+                Created Date <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
               <th class="px-6 py-3 text-right">Actions</th>
             </tr>
@@ -150,16 +161,27 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ patient.full_name }}</td>
               <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.fayda_id ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.age ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.email ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.address ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.age ?? '-' }}</td> <td class="px-6 py-4">
+                <span v-if="patient.registered_by_staff">
+                  Staff: {{ patient.registered_by_staff.name }}
+                </span>
+                <span v-else-if="patient.registered_by_caregiver">
+                  Caregiver: {{ patient.registered_by_caregiver.name }}
+                </span>
+                <span v-else>-</span>
+              </td>
+              <td class="px-6 py-4">{{ new Date(patient.created_at).toLocaleDateString() }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.patients.show', patient.id)"
                     class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-                    title="View Details"
+                    title="View"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
@@ -177,7 +199,7 @@ function toggleSort(field: string) {
               </td>
             </tr>
             <tr v-if="patients.data.length === 0">
-              <td colspan="8" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
+              <td colspan="12" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
             </tr>
           </tbody>
         </table>
