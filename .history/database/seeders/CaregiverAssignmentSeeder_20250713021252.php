@@ -13,6 +13,6 @@ class CaregiverAssignmentSeeder extends Seeder
      */
     public function run(): void
     {
-        CaregiverAssignment::factory(2)->create();
+        CaregiverAssignment::factory()->create();
     }
 }

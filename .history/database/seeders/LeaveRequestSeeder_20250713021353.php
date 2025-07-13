@@ -10,6 +10,6 @@ class LeaveRequestSeeder extends Seeder
     public function run(): void
     {
         // Create 25 leave requests for various staff members
-        LeaveRequest::factory()->count(2)->create();
+        LeaveRequest::factory()->count(3)->create();
     }
 }

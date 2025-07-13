@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class MyAvailabilityController extends Controller
@@ -21,6 +20,9 @@ class MyAvailabilityController extends Controller
         ]);
     }
 
+   /**
+     * Fetch events for the calendar.
+     */
     public function getEvents(Request $request)
     {
         $request->validate([
@@ -31,22 +33,23 @@ class MyAvailabilityController extends Controller
         $staffId = Auth::user()->staff->id;
 
         // Get personal availability slots
-        $availabilities = StaffAvailability::where('staff_id', $staffId)
-            ->where('start_time', '>=', $request->start)
+        $availabilities = StaffAvailability::where('staff_id', '>=', $request->start)
             ->where('end_time', '<=', $request->end)
             ->get();
 
         $availabilityEvents = $availabilities->map(function ($availability) {
-            // The model accessors already handle timezone conversion from UTC to local timezone
-            // So we can directly use the attributes without additional conversion
+            // THE FIX: Explicitly convert the time to the app's configured timezone
             return [
                 'id' => $availability->id,
                 'title' => $availability->status,
-                'start' => $availability->start_time->format('Y-m-d H:i:s'),
-                'end' => $availability->end_time->format('Y-m-d H:i:s'),
+                'start' => $availability->start_time->setTimezone(config('app.timezone'))->toDateTimeString(),
+                'end' => $availability->end_time->setTimezone(config('app.timezone'))->toDateTimeString(),
                 'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
                 'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'extendedProps' => ['status' => $availability->status, 'is_editable' => true],
+                'extendedProps' => [
+                    'status' => $availability->status,
+                    'is_editable' => true,
+                ]
             ];
         });
 
@@ -59,16 +62,19 @@ class MyAvailabilityController extends Controller
             ->get();
 
         $visitEvents = $visits->map(function ($visit) {
-            $startTime = Carbon::parse($visit->scheduled_at, 'UTC')->setTimezone(config('app.timezone'));
+            // THE FIX: Explicitly convert the time here as well
+            $startTime = $visit->scheduled_at->setTimezone(config('app.timezone'));
             $endTime = $startTime->copy()->addHour();
             return [
                 'id' => 'visit_' . $visit->id,
                 'title' => 'Visit: ' . $visit->patient->full_name,
-                'start' => $startTime->format('Y-m-d H:i:s'),
-                'end' => $endTime->format('Y-m-d H:i:s'),
+                'start' => $startTime->toDateTimeString(),
+                'end' => $endTime->toDateTimeString(),
                 'backgroundColor' => '#0284c7',
                 'borderColor' => '#0284c7',
-                'extendedProps' => ['is_editable' => false],
+                'extendedProps' => [
+                    'is_editable' => false,
+                ]
             ];
         });
 
@@ -85,16 +91,6 @@ class MyAvailabilityController extends Controller
             'end_time' => 'required|date|after_or_equal:start_time',
             'status' => 'required|string|in:Available,Unavailable',
         ]);
-
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
 
         Auth::user()->staff->availabilities()->create($validated);
 
@@ -115,17 +111,6 @@ class MyAvailabilityController extends Controller
             'end_time' => 'required|date|after_or_equal:start_time',
             'status' => 'required|string|in:Available,Unavailable',
         ]);
-
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->where('id', '<>', $availability->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
 
         $availability->update($validated);
 

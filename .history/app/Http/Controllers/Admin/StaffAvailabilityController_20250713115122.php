@@ -14,7 +14,7 @@ class StaffAvailabilityController extends Controller
      * Fetch availability events for the FullCalendar component.
      * Responds with JSON.
      */
-public function getCalendarEvents(Request $request)
+  public function getCalendarEvents(Request $request)
     {
         $request->validate([
             'start' => 'required|date',
@@ -31,18 +31,26 @@ public function getCalendarEvents(Request $request)
 
         $availabilities = $query->get();
 
+        // This will stop on the VERY FIRST event and show us what's happening.
+        if ($availabilities->isNotEmpty()) {
+            $firstAvailability = $availabilities->first();
+
+            // This will stop the code and print out the state of the date at each step.
+            dd([
+                '1. Raw Value From Database (UTC)' => $firstAvailability->getRawOriginal('start_time'),
+                '2. Carbon Object After Model Accessor' => $firstAvailability->start_time->toDateTimeString(),
+                '3. Carbon Object\'s Timezone' => $firstAvailability->start_time->getTimezone()->getName(),
+            ]);
+        }
+        
+        // The code below will not be reached.
         $events = $availabilities->map(function ($availability) {
             return [
                 'id' => $availability->id,
                 'title' => $availability->staff->first_name . ' (' . $availability->status . ')',
                 'start' => $availability->start_time->format('Y-m-d H:i:s'),
                 'end' => $availability->end_time->format('Y-m-d H:i:s'),
-                'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'extendedProps' => [
-                    'staff_name' => $availability->staff->first_name . ' ' . $availability->staff->last_name,
-                    'status' => $availability->status,
-                ]
+                // ...
             ];
         });
 
@@ -88,7 +96,7 @@ public function getCalendarEvents(Request $request)
     /**
      * Store a new availability slot.
      */
-public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'staff_id' => 'required|exists:staff,id',
@@ -97,17 +105,7 @@ public function store(Request $request)
             'status' => 'required|string|in:Available,Unavailable',
         ]);
 
-        // Check for overlapping availability
-        $overlap = StaffAvailability::where('staff_id', $request->staff_id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
-        $availability = StaffAvailability::create($request->only(['staff_id', 'start_time', 'end_time', 'status']));
+        $availability = StaffAvailability::create($request->all());
 
         return back()->with('success', 'Availability slot created.');
     }
@@ -115,24 +113,13 @@ public function store(Request $request)
     /**
      * Update an existing availability slot.
      */
-public function update(Request $request, StaffAvailability $availability)
+    public function update(Request $request, StaffAvailability $availability)
     {
         $request->validate([
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time',
             'status' => 'required|string|in:Available,Unavailable',
         ]);
-
-        // Check for overlapping availability
-        $overlap = StaffAvailability::where('staff_id', $availability->staff_id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->where('id', '<>', $availability->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
 
         $availability->update($request->only(['start_time', 'end_time', 'status']));
 

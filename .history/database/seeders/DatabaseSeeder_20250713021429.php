@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Create sample data using factories
-        \App\Models\VisitService::factory(2)->create();
-        \App\Models\Message::factory(2)->create();
+        \App\Models\VisitService::factory(1)->create();
+        \App\Models\Message::factory()->create();
 
         // --- THE FIX IS HERE ---
         // Use updateOrCreate to safely create or update the admin users.

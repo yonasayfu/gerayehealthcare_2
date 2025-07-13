@@ -29,6 +29,7 @@ class MyAvailabilityController extends Controller
         ]);
 
         $staffId = Auth::user()->staff->id;
+        $appTimezone = config('app.timezone');
 
         // Get personal availability slots
         $availabilities = StaffAvailability::where('staff_id', $staffId)
@@ -36,14 +37,16 @@ class MyAvailabilityController extends Controller
             ->where('end_time', '<=', $request->end)
             ->get();
 
-        $availabilityEvents = $availabilities->map(function ($availability) {
-            // The model accessors already handle timezone conversion from UTC to local timezone
-            // So we can directly use the attributes without additional conversion
+        $availabilityEvents = $availabilities->map(function ($availability) use ($appTimezone) {
+            // THE FIX: Force the timezone conversion and then format to a simple string
+            $startTime = Carbon::parse($availability->start_time)->setTimezone($appTimezone);
+            $endTime = Carbon::parse($availability->end_time)->setTimezone($appTimezone);
+
             return [
                 'id' => $availability->id,
                 'title' => $availability->status,
-                'start' => $availability->start_time->format('Y-m-d H:i:s'),
-                'end' => $availability->end_time->format('Y-m-d H:i:s'),
+                'start' => $startTime->format('Y-m-d H:i:s'),
+                'end' => $endTime->format('Y-m-d H:i:s'),
                 'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
                 'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
                 'extendedProps' => ['status' => $availability->status, 'is_editable' => true],
@@ -58,8 +61,8 @@ class MyAvailabilityController extends Controller
             ->with('patient')
             ->get();
 
-        $visitEvents = $visits->map(function ($visit) {
-            $startTime = Carbon::parse($visit->scheduled_at, 'UTC')->setTimezone(config('app.timezone'));
+        $visitEvents = $visits->map(function ($visit) use ($appTimezone) {
+            $startTime = Carbon::parse($visit->scheduled_at)->setTimezone($appTimezone);
             $endTime = $startTime->copy()->addHour();
             return [
                 'id' => 'visit_' . $visit->id,
@@ -86,16 +89,6 @@ class MyAvailabilityController extends Controller
             'status' => 'required|string|in:Available,Unavailable',
         ]);
 
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
         Auth::user()->staff->availabilities()->create($validated);
 
         return back()->with('success', 'Availability created.');
@@ -115,17 +108,6 @@ class MyAvailabilityController extends Controller
             'end_time' => 'required|date|after_or_equal:start_time',
             'status' => 'required|string|in:Available,Unavailable',
         ]);
-
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->where('id', '<>', $availability->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
 
         $availability->update($validated);
 

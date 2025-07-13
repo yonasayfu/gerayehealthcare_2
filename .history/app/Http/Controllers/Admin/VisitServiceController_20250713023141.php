@@ -6,17 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Rules\StaffIsAvailableForVisit;
+use App\Rules\StaffIsAvailableForVisit; // Make sure this is imported
 use App\Models\CaregiverAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Carbon; // Make sure Carbon is imported
 use Inertia\Inertia;
 use Inertia\Response;
 
 class VisitServiceController extends Controller
 {
-    // ... index, create, show, edit, destroy methods remain the same ...
+    // ... index(), create(), show(), edit(), destroy() methods remain the same ...
+    
     public function index(Request $request): Response
     {
         $query = VisitService::with(['patient', 'staff']);
@@ -48,6 +48,7 @@ class VisitServiceController extends Controller
 
     public function store(Request $request)
     {
+        // THE FIX: Re-enable your custom validation rule
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
@@ -58,21 +59,6 @@ class VisitServiceController extends Controller
             'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
-
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
-        }
-
 
         $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                            ->where('staff_id', $validated['staff_id'])
@@ -110,6 +96,7 @@ class VisitServiceController extends Controller
     {
         $request->merge(['visit_id' => $visitService->id]);
 
+        // THE FIX: Ensure the custom rule is also active here
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
@@ -120,21 +107,6 @@ class VisitServiceController extends Controller
             'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
-        
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->where('id', '!=', $visitService->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
-        }
 
         $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                            ->where('staff_id', $validated['staff_id'])

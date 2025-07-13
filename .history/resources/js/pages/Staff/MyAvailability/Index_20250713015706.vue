@@ -95,27 +95,22 @@ const submitForm = () => {
         closeModal();
     };
 
-    // Transform the data to send datetime-local values as local time strings
+    // 1. Configure the transform on the original 'form' object
     form.transform((data) => ({
         ...data,
-        start_time: data.start_time.replace('T', ' ') + ':00',
-        end_time: data.end_time.replace('T', ' ') + ':00',
+        start_time: new Date(data.start_time).toISOString(),
+        end_time: new Date(data.end_time).toISOString(),
     }));
 
+    // 2. Call .put() or .post() on the original 'form' object
     if (isEditMode.value) {
         form.put(route('staff.my-availability.update', { availability: form.id }), {
             onSuccess: onFinish,
-            onError: () => {
-                // Don't close modal on error, so user can see error message
-            },
             preserveScroll: true
         });
     } else {
         form.post(route('staff.my-availability.store'), {
             onSuccess: onFinish,
-            onError: () => {
-                // Don't close modal on error, so user can see error message
-            },
             preserveScroll: true
         });
     }
@@ -174,12 +169,6 @@ const deleteAvailability = () => {
                 <input type="datetime-local" v-model="form.end_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600" required />
                 <div v-if="form.errors.end_time" class="text-red-500 text-sm mt-1">{{ form.errors.end_time }}</div>
             </div>
-            
-            <!-- Error Message -->
-            <div v-if="form.errors.error" class="text-red-500 text-sm mt-1 p-3 bg-red-50 border border-red-200 rounded">
-                {{ form.errors.error }}
-            </div>
-            
           <div class="mt-6 flex justify-between items-center">
             <div>
                 <button v-if="form.id" @click.prevent="deleteAvailability" type="button" class="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50" :disabled="form.processing">

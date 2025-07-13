@@ -62,15 +62,15 @@ const openEditModal = (availability) => {
 };
 
 const submit = () => {
-    const onFinish = () => {
+    const onSuccess = () => {
         showModal.value = false;
         form.reset();
     };
 
     if (isEditMode.value) {
-        form.put(route('admin.staff-availabilities.update', form.id), { onFinish });
+        form.put(route('admin.staff-availabilities.update', form.id), { onSuccess });
     } else {
-        form.post(route('admin.staff-availabilities.store'), { onFinish });
+        form.post(route('admin.staff-availabilities.store'), { onSuccess });
     }
 };
 
@@ -230,6 +230,12 @@ const formatDate = (dateString) => {
                     <input type="datetime-local" v-model="form.end_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700" />
                     <div v-if="form.errors.end_time" class="text-red-500 text-sm mt-1">{{ form.errors.end_time }}</div>
                 </div>
+                
+                <!-- Error Message -->
+                <div v-if="form.errors.error" class="text-red-500 text-sm mt-1 p-3 bg-red-50 border border-red-200 rounded">
+                    {{ form.errors.error }}
+                </div>
+                
                 <div class="flex justify-end space-x-3 pt-4">
                     <button @click="showModal = false" type="button" class="px-4 py-2 border rounded-md">Cancel</button>
                     <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">

@@ -23,6 +23,20 @@ class StaffAvailability extends Model
         'end_time' => 'datetime',
     ];
 
+    // --- START: THIS IS THE MISSING FIX ---
+    // This function intercepts the start_time when it's read
+    // and forces it into your local 'Africa/Addis_Ababa' timezone.
+    public function getStartTimeAttribute($value): Carbon
+    {
+        return Carbon::parse($value)->setTimezone(config('app.timezone'));
+    }
+
+    // This does the same for the end_time.
+    public function getEndTimeAttribute($value): Carbon
+    {
+        return Carbon::parse($value)->setTimezone(config('app.timezone'));
+    }
+    // --- END: THIS IS THE MISSING FIX ---
 
     public function staff(): BelongsTo
     {

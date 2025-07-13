@@ -59,20 +59,10 @@ class VisitServiceController extends Controller
             'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
-        }
-
+        // --- START: TIMEZONE FIX ---
+        // Convert the incoming local time to UTC before saving
+        $validated['scheduled_at'] = Carbon::parse($validated['scheduled_at'], config('app.timezone'))->utc();
+        // --- END: TIMEZONE FIX ---
 
         $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                            ->where('staff_id', $validated['staff_id'])
@@ -121,20 +111,10 @@ class VisitServiceController extends Controller
             'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
         
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->where('id', '!=', $visitService->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
-        }
+        // --- START: TIMEZONE FIX ---
+        // Convert the incoming local time to UTC before saving
+        $validated['scheduled_at'] = Carbon::parse($validated['scheduled_at'], config('app.timezone'))->utc();
+        // --- END: TIMEZONE FIX ---
 
         $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
                                            ->where('staff_id', $validated['staff_id'])

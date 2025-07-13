@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Carbon; // <-- Import Carbon
 
 class VisitService extends Model
 {
@@ -34,17 +34,19 @@ class VisitService extends Model
         'check_in_time' => 'datetime',
         'check_out_time' => 'datetime',
     ];
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
+    
     protected $appends = [
         'prescription_file_url',
         'vitals_file_url',
     ];
 
+    // --- START: NEW TIMEZONE FIX ---
+    public function getScheduledAtAttribute($value): Carbon
+    {
+        return Carbon::parse($value)->setTimezone(config('app.timezone'));
+    }
+    // --- END: NEW TIMEZONE FIX ---
+    
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
@@ -54,12 +56,8 @@ class VisitService extends Model
     {
         return $this->belongsTo(Staff::class);
     }
-
-    /**
-     * Get the URL for the prescription file.
-     *
-     * @return string|null
-     */
+    
+    // ... your other get...UrlAttribute methods
     public function getPrescriptionFileUrlAttribute(): ?string
     {
         if ($this->prescription_file) {
@@ -68,11 +66,6 @@ class VisitService extends Model
         return null;
     }
 
-    /**
-     * Get the URL for the vitals file.
-     *
-     * @return string|null
-     */
     public function getVitalsFileUrlAttribute(): ?string
     {
         if ($this->vitals_file) {
