@@ -47,11 +47,6 @@ watch(search, (value) => {
   fetchMessages(selectedConversation.value?.id, value);
 });
 
-const form = useForm({
-  receiver_id: selectedConversation.value?.id || null,
-  message: '',
-});
-
 const scrollToBottom = () => {
   nextTick(() => {
     if (chatContainer.value) {
