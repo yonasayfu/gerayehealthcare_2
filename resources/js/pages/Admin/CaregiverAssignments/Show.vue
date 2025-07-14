@@ -54,12 +54,15 @@ const formatTime = (dateString) => {
             <p class="text-sm text-muted-foreground">Detailed view of the assignment record.</p>
         </div>
         <div class="flex items-center gap-2">
-            <Link :href="route('assignments.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
+            <Link :href="route('admin.assignments.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
                 Back to List
             </Link>
-            <Link :href="route('assignments.edit', assignment.id)" class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-sm">
+            <Link :href="route('admin.assignments.edit', assignment.id)" class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-sm">
                 Edit Assignment
             </Link>
+            <a :href="route('admin.assignments.print', assignment.id)" target="_blank" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
+                Print
+            </a>
         </div>
       </div>
 

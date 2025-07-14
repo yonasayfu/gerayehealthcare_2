@@ -9,6 +9,8 @@ use App\Models\Staff;
 use App\Rules\StaffIsAvailableForShift;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Notifications\NewCaregiverAssignment;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Response as InertiaResponse; // Use an alias to avoid conflicts
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response as LaravelResponse; // Use an alias for Laravel's Response
@@ -30,6 +32,8 @@ class CaregiverAssignmentController extends Controller
 
         if ($request->filled('sort')) {
             $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        } else {
+            $query->orderBy('created_at', 'desc');
         }
 
         $assignments = $query->paginate($request->input('per_page', 10))->withQueryString();
@@ -62,7 +66,13 @@ class CaregiverAssignmentController extends Controller
             ],
         ]);
 
-        CaregiverAssignment::create($request->all());
+        $assignment = CaregiverAssignment::create($request->all());
+
+        // Notify the assigned staff member
+        $staff = Staff::find($request->staff_id);
+        if ($staff) {
+            Notification::send($staff, new NewCaregiverAssignment($assignment));
+        }
 
         return redirect()->route('admin.assignments.index')->with('success', 'Assignment created successfully.');
     }
@@ -101,6 +111,12 @@ class CaregiverAssignmentController extends Controller
 
         $assignment->update($request->all());
 
+        // Notify the assigned staff member
+        $staff = Staff::find($request->staff_id);
+        if ($staff) {
+            Notification::send($staff, new NewCaregiverAssignment($assignment));
+        }
+
         return redirect()->route('admin.assignments.index')->with('success', 'Assignment updated successfully.');
     }
 
@@ -108,6 +124,21 @@ class CaregiverAssignmentController extends Controller
     {
         $assignment->delete();
         return back()->with('success', 'Assignment deleted successfully.');
+    }
+
+    public function printAll(Request $request)
+    {
+        $assignments = CaregiverAssignment::with(['patient', 'staff'])->get();
+
+        $pdf = Pdf::loadView('pdf.assignments-all', ['assignments' => $assignments])->setPaper('a4', 'landscape');
+        return $pdf->stream('assignments-all.pdf');
+    }
+
+    public function printSingle(CaregiverAssignment $assignment)
+    {
+        $assignment->load(['staff', 'patient']);
+        $pdf = Pdf::loadView('pdf.assignment-single', ['assignment' => $assignment])->setPaper('a4', 'portrait');
+        return $pdf->stream("assignment-{$assignment->id}.pdf");
     }
 
     public function export(Request $request)

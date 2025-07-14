@@ -67,37 +67,7 @@ function printTable() {
 
 // New function to handle printing all records
 function printAllRecords() {
-    isPrintingAll.value = true;
-    router.get('/dashboard/assignments', {
-        ...props.filters, // Keep current filters
-        per_page: props.assignments.total, // Fetch all records
-    }, {
-        preserveState: true,
-        replace: true,
-        onSuccess: () => {
-            // Use nextTick to ensure the DOM is updated before printing
-            import('vue').then(({ nextTick }) => {
-                nextTick(() => {
-                    window.print();
-                    // Restore previous pagination setting after printing
-                    router.get('/dashboard/assignments', {
-                        ...props.filters,
-                        per_page: perPage.value,
-                    }, {
-                        preserveState: true,
-                        replace: true,
-                        onFinish: () => {
-                            isPrintingAll.value = false;
-                        }
-                    });
-                });
-            });
-        },
-        onError: () => {
-            isPrintingAll.value = false;
-            alert('Could not fetch all records for printing.');
-        }
-    });
+    window.open(route('admin.assignments.printAll'), '_blank');
 }
 
 
@@ -205,6 +175,9 @@ const formatDate = (dateString) => {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                 Status <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
               </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('created_at')">
+                Date Created <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
+              </th>
               <th class="px-6 py-3 text-right no-print">Actions</th>
             </tr>
           </thead>
@@ -223,6 +196,7 @@ const formatDate = (dateString) => {
                   'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                 ]">{{ assignment.status }}</span>
               </td>
+              <td class="px-6 py-4">{{ formatDate(assignment.created_at) }}</td>
               <td class="px-6 py-4 text-right no-print">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
