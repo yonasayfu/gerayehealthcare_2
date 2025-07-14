@@ -57,7 +57,12 @@ function exportData(type: 'csv' | 'pdf') {
 }
 
 function printCurrentView() {
-  window.print()
+  const params = {
+    search: search.value,
+    sort: sortField.value,
+    direction: sortDirection.value,
+  };
+  window.open(route('admin.patients.printCurrent', params), '_blank');
 }
 
 const printAllPatients = () => {

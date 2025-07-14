@@ -54,7 +54,7 @@ Route::get('dashboard', function () {
 
 // Messaging & Notifications
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/messages/{recipient?}', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
@@ -73,6 +73,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // - URI: 'patients/print-all' (combined with group prefix 'dashboard' -> /dashboard/patients/print-all)
         // - Name: 'patients.printAll' (combined with group name 'admin.' -> admin.patients.printAll)
         Route::get('patients/print-all', [PatientController::class, 'printAll'])->name('patients.printAll');
+        Route::get('patients/print-current', [PatientController::class, 'printCurrent'])->name('patients.printCurrent');
 
         // printSingle route (already correctly defined relative to the group)
         Route::get('patients/{patient}/print', [PatientController::class, 'printSingle'])->name('patients.print');

@@ -12,7 +12,7 @@ use Inertia\Inertia;
 class MessageController extends Controller
 {
     // The index() method remains unchanged...
-    public function index(User $recipient = null)
+    public function getData(Request $request, User $recipient = null)
     {
         $user = Auth::user();
         $messages = [];
@@ -32,11 +32,16 @@ class MessageController extends Controller
             })->with(['sender', 'receiver'])->orderBy('created_at', 'asc')->get();
         }
 
-        $conversations = User::where('id', '!=', $user->id)
-            ->orderBy('name', 'asc')
-            ->get();
+        $conversations = User::where('id', '!=', $user->id);
 
-        return Inertia::render('Messages/Index', [
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $conversations->where('name', 'ilike', "%{$search}%");
+        }
+
+        $conversations = $conversations->orderBy('name', 'asc')->get();
+
+        return response()->json([
             'conversations' => $conversations,
             'selectedConversation' => $recipient ? $recipient->load('staff') : null,
             'messages' => $messages,

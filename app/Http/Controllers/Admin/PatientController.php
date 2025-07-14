@@ -163,6 +163,28 @@ class PatientController extends Controller
         $pdf = Pdf::loadView('pdf.patient-single', ['patient' => $patient])->setPaper('a4', 'portrait');
         return $pdf->stream("patient-{$patient->patient_code}.pdf");
     }
+    public function printCurrent(Request $request)
+    {
+        $query = Patient::query();
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('full_name', 'ilike', "%{$search}%")
+                  ->orWhere('email', 'ilike', "%{$search}%");
+        }
+
+        if ($request->filled('sort') && !empty($request->input('sort'))) {
+            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $patients = $query->get(); // Get all filtered patients, no pagination
+
+        $pdf = Pdf::loadView('pdf.patients-current', ['patients' => $patients])->setPaper('a4', 'landscape');
+        return $pdf->stream('patients-current.pdf');
+    }
+
     public function printAll(Request $request)
     {
         $patients = Patient::orderBy('full_name')->get(); // Fetch all patients, ordered

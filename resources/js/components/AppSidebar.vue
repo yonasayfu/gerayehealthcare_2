@@ -51,9 +51,7 @@ const isStaff = computed(() => userRoles.value.includes('Staff'))
 const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
-    items: [
-        { title: 'Messages', routeName: 'messages.index', icon: MessageCircle },
-    ],
+    items: [],
 };
 
 const allAdminNavItems: SidebarNavGroup[] = [
