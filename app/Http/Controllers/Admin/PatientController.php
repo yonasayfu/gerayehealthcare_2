@@ -179,7 +179,7 @@ class PatientController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $patients = $query->get(); // Get all filtered patients, no pagination
+        $patients = $query->paginate($request->input('per_page', 10), ['*'], 'page', $request->input('page', 1));
 
         $pdf = Pdf::loadView('pdf.patients-current', ['patients' => $patients])->setPaper('a4', 'landscape');
         return $pdf->stream('patients-current.pdf');

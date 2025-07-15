@@ -11,13 +11,22 @@ class NotificationController extends Controller
     /**
      * Fetch the authenticated user's unread notifications.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        
-        return response()->json([
+
+        // If AJAX or expects JSON, return JSON
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'unread_count' => $user->unreadNotifications->count(),
+                'notifications' => $user->unreadNotifications->take(10),
+            ]);
+        }
+
+        // Otherwise, return an Inertia page (if you have one)
+        return Inertia::render('Notifications', [
             'unread_count' => $user->unreadNotifications->count(),
-            'notifications' => $user->unreadNotifications->take(10), // Get up to 10 recent unread
+            'notifications' => $user->unreadNotifications->take(10),
         ]);
     }
 
