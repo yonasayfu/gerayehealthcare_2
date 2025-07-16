@@ -151,7 +151,7 @@ class MessageController extends Controller
             return response()->json(['error' => 'Attachment not found.'], 404);
         }
 
-        return Storage::download(storage_path('app/public/' . $message->attachment_path), $message->attachment_filename);
+        return Storage::disk('public')->download($message->attachment_path, $message->attachment_filename);
     }
 
     /**
