@@ -60,3 +60,14 @@ Final UI Fix: The staff calendar was updated to show a unified view of both thei
 
 Current Project Status
 The application is in a stable, secure, and working state. The foundational RBAC system is complete, and the core scheduling logic (availability and conflict detection) is functional. The project is ready to proceed with the next feature module.
+
+## Day 6: Visit & Service Management
+
+With the foundational modules in place, the next logical step is to build the **Visit & Service Management** module. This module is critical for tracking the actual services provided to patients.
+
+### Plan:
+
+1.  **Database:** Create the `visit_services` table migration and model.
+2.  **Backend:** Implement the `VisitServiceController` with full CRUD functionality.
+3.  **Frontend:** Develop the Vue components for managing visit services (`Index`, `Create`, `Edit`, `Show`, `Form`).
+4.  **Routes & Navigation:** Add the necessary routes and update the sidebar.

@@ -9,5 +9,4 @@ This document outlines the mandatory process for all development tasks.
 5. **Explain Every Step**: Each response containing code must be accompanied by a high-level explanation of the changes made and the purpose of the new code.
 6. **Simplicity & Clarity**: Every task and code change must be kept as simple and focused as possible. We will avoid making massive or complex changes in a single step.
 7. **Final Review**: At the end of a feature's development, the AI will provide a summary of the changes made and confirm the completion of all checklist items.
-8. **Documentation Update**: After significant development progress or feature completion, the AI will update relevant `.md` files (e.g., `PROJECT_ROADMAP.md`, `DATABASE_SCHEMA.md`, `Routes.md`, `AppSidebar.md`) to reflect the current state for easy understanding by other AI agents.
-9. **Module Summary for Documentation**: After a feature is complete, the AI will provide a concise summary of the module's functionality, purpose, and key features. This is for your records and for creating end-user documentation and training materials.
+8. **Module Summary for Documentation**: After a feature is complete, the AI will provide a concise summary of the module's functionality, purpose, and key features. This is for your records and for creating end-user documentation and training materials.
