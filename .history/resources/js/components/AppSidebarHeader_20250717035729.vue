@@ -33,7 +33,7 @@ const unreadCount = ref(0)
 const showNotifications = ref(false)
 
 const page = usePage() // Initialize usePage
-const { toggleSidebar } = useSidebar() // Initialize useSidebar
+const { toggle } = useSidebar() // Initialize useSidebar
 
 const isDashboardRoute = computed(() => {
     return page.url.startsWith('/admin/dashboard') // Adjust this based on your actual dashboard route
@@ -75,8 +75,9 @@ onUnmounted(() => {
 <template>
     <header class="bg-background/50 flex h-14 items-center gap-3 px-4 backdrop-blur-xl lg:h-[60px]">
         <div class="flex items-center gap-3">
-            <Button variant="ghost" size="icon" class="size-9 flex md:hidden lg:flex" @click="toggleSidebar">
-                <PanelLeft />
+            </Button>
+            <Button variant="ghost" size="icon" class="size-9" @click="$inertia.visit(route('settings.profile'))">
+                <Settings />
             </Button>
             <h1 v-if="isDashboardRoute" class="text-3xl font-bold">Dashboard</h1>
             <Breadcrumb v-else>
