@@ -23,6 +23,6 @@ withDefaults(defineProps<Props>(), {
       <AppSidebarHeader :breadcrumbs="breadcrumbs" class="print:hidden" />
       <slot />
     </AppContent>
-    <FloatingChatButton class="print:hidden" /> <!-- Add the floating chat button here -->
+    <FloatingChatButton /> <!-- Add the floating chat button here -->
   </AppShell>
 </template>
