@@ -1,0 +1,90 @@
+<script setup lang="ts">
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import AdminStatCard from '@/components/AdminStatCard.vue';
+import RecentSales from '@/components/RecentSales.vue';
+import { DollarSign, Users, CreditCard, Calendar } from 'lucide-vue-next';
+import { Bar } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
+
+const chartData = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  datasets: [
+    {
+      label: 'Total Revenue',
+      backgroundColor: '#3b82f6',
+      data: [4000, 3000, 2000, 2780, 1890, 2390, 3490, 2000, 2780, 1890, 2390, 3490],
+    },
+  ],
+}
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+}
+
+const props = defineProps({
+  stats: {
+    type: Object,
+    required: true,
+  },
+  recentVisits: {
+    type: Array,
+    required: true,
+  },
+});
+</script>
+
+<template>
+  <Head title="Admin Dashboard" />
+
+  <AppLayout>
+    <div class="flex-1 space-y-4 p-8 pt-6">
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <AdminStatCard
+          title="Total Appointments"
+          :value="stats.total_appointments"
+          change="+20.1% from last month"
+          :icon="Calendar"
+          color="indigo"
+        />
+        <AdminStatCard
+          title="New Patients"
+          :value="stats.new_patients"
+          change="+180.1% from last month"
+          :icon="Users"
+          color="green"
+        />
+        <AdminStatCard
+          title="Operations"
+          :value="stats.operations"
+          change="-19% from last month"
+          :icon="CreditCard"
+          color="purple"
+        />
+        <AdminStatCard
+          title="Total Revenue"
+          :value="`$${stats.total_revenue}`"
+          change="+20.1% from last month"
+          :icon="DollarSign"
+          color="orange"
+        />
+      </div>
+      <div class="gap-4 space-y-4 md:grid-cols-2 lg:grid lg:grid-cols-7 lg:space-y-0">
+        <div data-slot="card" class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 col-span-4">
+          <div data-slot="card-header" class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-[data-slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6">
+            <div data-slot="card-title" class="leading-none font-semibold">Patient Visits by Gender</div>
+            <div data-slot="card-action" class="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
+              <button type="button" role="combobox" aria-controls="radix-«r3l»" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-slot="select-trigger" data-size="default" class="border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*='text-'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"><span data-slot="select-value" style="pointer-events: none;">2025</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down size-4 opacity-50" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </div>
+          </div>
+          <div data-slot="card-content" class="px-6">
+          <p class="text-sm text-muted-foreground">You made 265 sales this month.</p>
+          <RecentSales />
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
