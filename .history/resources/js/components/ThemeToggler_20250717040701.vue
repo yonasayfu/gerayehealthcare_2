@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useColorMode } from '@vueuse/core' // Removed BasicColorSchema
+import { useColorMode } from '@vueuse/core'
 import { Sun, Moon, Palette } from 'lucide-vue-next' // Add Palette icon
 import { Button } from '@/components/ui/button'
 import {
@@ -10,9 +10,6 @@ import {
 } from '@/components/ui/dropdown-menu' // Import dropdown components
 import Cookies from 'js-cookie'
 
-// Define a union type for your themes
-type AppTheme = 'theme-light' | 'theme-dark' | 'theme-emerald' | 'theme-rose' | 'theme-purple';
-
 const themes = [
   { name: 'Light', value: 'theme-light' },
   { name: 'Dark', value: 'theme-dark' }, // This is the "light blue black" theme
@@ -21,7 +18,7 @@ const themes = [
   { name: 'Purple', value: 'theme-purple' },
 ]
 
-const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed BasicColorSchema
+const mode = useColorMode({
   attribute: 'class',
   modes: {
     'theme-light': 'theme-light',
@@ -34,13 +31,13 @@ const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed B
   storage: {
     getItem: (key) => {
       const value = Cookies.get(key)
-      return value ? (value as AppTheme) : null
+      return value ? value : null
     },
     setItem: (key, value) => {
       // Remove all existing theme classes before setting the new one
       document.documentElement.classList.remove(...themes.map(t => t.value));
       document.documentElement.classList.add(value);
-      Cookies.set(key, value as string, { expires: 365, path: '/' })
+      Cookies.set(key, value, { expires: 365, path: '/' })
     },
     removeItem: (key) => {
       Cookies.remove(key)
@@ -50,7 +47,7 @@ const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed B
   }
 })
 
-const setTheme = (themeValue: AppTheme) => { // Explicitly type themeValue
+const setTheme = (themeValue: string) => {
   mode.value = themeValue
 }
 </script>
@@ -72,6 +69,3 @@ const setTheme = (themeValue: AppTheme) => { // Explicitly type themeValue
       >
         {{ themeOption.name }}
       </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-</template>

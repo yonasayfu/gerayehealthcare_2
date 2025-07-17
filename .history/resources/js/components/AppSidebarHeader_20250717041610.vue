@@ -112,14 +112,6 @@ onUnmounted(() => {
                     @click="showNotifications = !showNotifications"
                 >
                     <Bell class="animate-tada" />
-                    <span v-if="unreadCount > 0" class="bg-destructive absolute -end-0.5 -top-0.5 block size-2 shrink-0 rounded-full"></span>
-                </Button>
-                <div v-if="showNotifications" class="absolute right-0 mt-2 w-80 overflow-hidden rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
-                    <div class="border-b px-4 py-2 text-sm font-semibold text-gray-800 dark:border-gray-700 dark:text-gray-100">
-                        Notifications ({{ unreadCount }} unread)
-                    </div>
-                    <div v-if="notifications.length === 0" class="p-4 text-sm text-gray-500 dark:text-gray-400">
-                        No new notifications.
                     </div>
                     <div v-else class="max-h-60 overflow-y-auto custom-scrollbar">
                         <a

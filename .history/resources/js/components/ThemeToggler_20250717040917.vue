@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useColorMode } from '@vueuse/core' // Removed BasicColorSchema
+import { useColorMode, BasicColorSchema } from '@vueuse/core' // Import BasicColorSchema
 import { Sun, Moon, Palette } from 'lucide-vue-next' // Add Palette icon
 import { Button } from '@/components/ui/button'
 import {
@@ -21,7 +21,7 @@ const themes = [
   { name: 'Purple', value: 'theme-purple' },
 ]
 
-const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed BasicColorSchema
+const mode = useColorMode<AppTheme | BasicColorSchema>({ // Explicitly type useColorMode
   attribute: 'class',
   modes: {
     'theme-light': 'theme-light',
@@ -32,17 +32,17 @@ const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed B
   },
   storageKey: 'appearance',
   storage: {
-    getItem: (key) => {
+    getItem: (key: string) => { // Explicitly type key
       const value = Cookies.get(key)
-      return value ? (value as AppTheme) : null
+      return value ? (value as AppTheme) : null // Cast value
     },
-    setItem: (key, value) => {
+    setItem: (key: string, value: AppTheme) => { // Explicitly type key and value
       // Remove all existing theme classes before setting the new one
       document.documentElement.classList.remove(...themes.map(t => t.value));
       document.documentElement.classList.add(value);
-      Cookies.set(key, value as string, { expires: 365, path: '/' })
+      Cookies.set(key, value, { expires: 365, path: '/' })
     },
-    removeItem: (key) => {
+    removeItem: (key: string) => { // Explicitly type key
       Cookies.remove(key)
       // Optionally remove all theme classes if storage is cleared
       document.documentElement.classList.remove(...themes.map(t => t.value));
@@ -50,9 +50,6 @@ const mode = useColorMode<AppTheme>({ // Explicitly type useColorMode, removed B
   }
 })
 
-const setTheme = (themeValue: AppTheme) => { // Explicitly type themeValue
-  mode.value = themeValue
-}
 </script>
 
 <template>
