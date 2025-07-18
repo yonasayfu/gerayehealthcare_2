@@ -4,9 +4,6 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    # Remove the buildFilter if you want all files to be included in the build context.
-    # If you keep it, ensure it covers all files needed for npm install, composer install, etc.
-    # The current paths look okay, but sometimes this can cause subtle issues if not comprehensive.
     buildFilter:
       paths:
         - Dockerfile
@@ -24,9 +21,9 @@ services:
         - composer.lock
         - package.json
         - package-lock.json
-        - vite.config.js # Add if you have it
-        - .env.example # Good practice to include
-    # Removed buildCommand: 'curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer && composer install --no-dev && php artisan config:cache && php artisan migrate --force'
+        - vite.config.js # Include if you use Vite
+        - .env.example
+    # IMPORTANT: The 'buildCommand' line has been REMOVED from here.
     envVars:
       - key: APP_ENV
         value: production
