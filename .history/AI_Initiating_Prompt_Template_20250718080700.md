@@ -9,13 +9,10 @@ To ensure you have the most up-to-date context, I have just updated the followin
 *   **`Routes.md`**: This file now includes the actual resource routes for the "Visit Services" module, replacing the previous placeholder.
 *   **`AppSidebar.md`**: The navigation link for all moduel
 
-*   **`Patient_FrontView.md`**: which hold/has all front end files ( index,Form,Create,Edit,Show,PrintAll), This template is the one you follow for consitency for our front end implemntation.if any moduel need to implment this featrue you shold follow this template design, in the template there are CRUD,print current view, PrintAll,export,Pagination,Sort. 
-
-*   **`Patient_BackEnd.md`**: which hold/has all Back end files ( Controller,Model and Migration), 
-
+*   **`Patient_FrontView.md`**: which hold/has all front end files ( index,Form,Create,Edit,Show,PrintAll), This template is the one you follow for consitency for our front end implemntation.if any moduel need to implment this featrue you shold follow this template design, in the template there are CRUD,print current view, PrintAll,export,Pagination,Sort&
 *   **`STANDARD_WORKFLOW.md`**: A new step has been added to this document emphasizing the importance of updating relevant `.md` files after significant progress for clear communication among AI agents.
 
-Please review and understand the updated content of these six documents: `STANDARD_WORKFLOW.md`, `PROJECT_ROADMAP.md`, `DATABASE_SCHEMA.md`, `Patient_FrontView.md`, Patient_BackEnd.md,`Routes.md`, and `AppSidebar.md`.
+Please review and understand the updated content of these six documents: `STANDARD_WORKFLOW.md`, `PROJECT_ROADMAP.md`, `DATABASE_SCHEMA.md`, `MODULE_IMPLEMENTATION_TEMPLATE.md`, `Routes.md`, and `AppSidebar.md`.
 
 After you have thoroughly reviewed and understood all the updated documents, please confirm this by responding with: "I have reviewed the updated project documentation and am ready to proceed with the unfinished modules, starting with ....."
 

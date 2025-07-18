@@ -11,7 +11,7 @@ To ensure you have the most up-to-date context, I have just updated the followin
 
 *   **`Patient_FrontView.md`**: which hold/has all front end files ( index,Form,Create,Edit,Show,PrintAll), This template is the one you follow for consitency for our front end implemntation.if any moduel need to implment this featrue you shold follow this template design, in the template there are CRUD,print current view, PrintAll,export,Pagination,Sort. 
 
-*   **`Patient_BackEnd.md`**: which hold/has all Back end files ( Controller,Model and Migration), 
+*   **`Patient_Back.md`**: which hold/has all front end files ( index,Form,Create,Edit,Show,PrintAll), 
 
 *   **`STANDARD_WORKFLOW.md`**: A new step has been added to this document emphasizing the importance of updating relevant `.md` files after significant progress for clear communication among AI agents.
 
