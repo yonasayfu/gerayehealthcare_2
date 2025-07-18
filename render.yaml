@@ -23,7 +23,7 @@ services:
         - package-lock.json
         - vite.config.js # Include if you use Vite
         - .env.example
-    # IMPORTANT: The 'buildCommand' line has been REMOVED from here.
+    # >>> THE 'buildCommand' LINE MUST NOT BE HERE <<<
     envVars:
       - key: APP_ENV
         value: production
