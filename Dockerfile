@@ -10,8 +10,20 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     curl \
+    # Install additional common PHP extensions for Laravel applications
+    && apt-get install -y \
+        php8.2-mbstring \
+        php8.2-exif \
+        php8.2-gd \
+        php8.2-intl \
+        php8.2-xml \
+        php8.2-bcmath \
+        php8.2-sockets \
+        php8.2-tokenizer \
+        php8.2-fileinfo \
+        # Add more if your app specifically needs them
     && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    && docker-php-ext-install pdo pdo_pgsql zip mbstring exif gd intl xml bcmath sockets tokenizer fileinfo
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -23,18 +35,17 @@ WORKDIR /var/www/html
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy Composer files and install PHP dependencies (only production dependencies)
-# Copy these files before copying the entire app to leverage Docker cache
+# Running composer install with --verbose to get detailed error messages
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --verbose
 
 # Install Node.js and npm (using Node.js 20.x from NodeSource for consistency and proper PATH setup)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get update \
     && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/* # Clean up apt cache
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy Node.js package files and install frontend dependencies
-# Copy these files before copying the entire app to leverage Docker cache
 COPY package.json package-lock.json ./
 RUN npm install
 
