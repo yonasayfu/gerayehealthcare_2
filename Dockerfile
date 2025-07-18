@@ -1,6 +1,8 @@
 FROM php:8.2-apache
 
-# Install system dependencies (non-PHP-specific)
+# Install system dependencies (non-PHP-specific libraries)
+# This single RUN command installs tools like bash, git, unzip, curl,
+# and database client libraries (libpq-dev for PostgreSQL)
 RUN apt-get update && apt-get install -y \
     bash \
     git \
@@ -11,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions using the recommended docker-php-ext-install helper
+# Install PHP extensions using the recommended 'docker-php-ext-install' helper script
+# This script is specifically designed for official PHP Docker images
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -26,20 +29,22 @@ RUN docker-php-ext-install \
     tokenizer \
     fileinfo
 
-# Enable Apache mod_rewrite
+# Enable Apache mod_rewrite module
 RUN a2enmod rewrite
 
-# Set working directory inside the container
+# Set the working directory for the application inside the container
 WORKDIR /var/www/html
 
-# Install Composer
+# Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy Composer files and install PHP dependencies (only production dependencies)
+# Copy Composer dependency files and install PHP dependencies
+# Using --verbose to provide detailed output if there are any issues
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --verbose
 
-# Install Node.js and npm (using Node.js 20.x from NodeSource for consistency and proper PATH setup)
+# Install Node.js and npm (using Node.js 20.x from NodeSource)
+# This sets up Node.js so you can build frontend assets
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get update \
     && apt-get install -y nodejs \
@@ -53,17 +58,20 @@ RUN npm install
 COPY . .
 
 # Build frontend assets for production
+# Using --verbose for detailed output during the build process
 RUN npm run build -- --verbose
 
-# Optimize Laravel for production environments
+# Optimize Laravel for a production environment
+# These commands cache configuration, routes, and views for faster performance
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
 # Run Laravel database migrations
+# The --force flag is essential for non-interactive environments like Docker builds
 RUN php artisan migrate --force
 
-# Set proper permissions for the web server to access files
+# Set proper permissions for the web server (www-data user) to access files
 RUN chown -R www-data:www-data /var/www/html \
     && find /var/www/html -type f -exec chmod 644 {} \; \
     && find /var/www/html -type d -exec chmod 755 {} \; \
@@ -71,9 +79,11 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Configure Apache's DocumentRoot to point to Laravel's public directory
+# This ensures Apache serves your application from the correct entry point
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Add a custom Apache configuration file for Laravel, enabling .htaccess support
+# Add a custom Apache configuration file for Laravel to enable .htaccess support
+# This is crucial for Laravel's URL rewriting (mod_rewrite)
 RUN echo '<Directory /var/www/html/public>\n\
     Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
@@ -81,8 +91,9 @@ RUN echo '<Directory /var/www/html/public>\n\
 </Directory>' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
-# Expose port 80
+# Expose port 80, which is the default HTTP port Apache listens on
 EXPOSE 80
 
 # Command to run when the container starts
+# 'apache2-foreground' keeps Apache running in the foreground, essential for Docker containers
 CMD ["apache2-foreground"]
