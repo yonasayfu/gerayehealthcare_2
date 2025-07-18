@@ -1,7 +1,6 @@
 FROM php:8.2-apache
 
-# Install system dependencies
-# Ensure bash is available, git, unzip, libpq-dev, libzip-dev, zip, curl
+# Install system dependencies (non-PHP-specific)
 RUN apt-get update && apt-get install -y \
     bash \
     git \
@@ -10,20 +9,22 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     curl \
-    # Install additional common PHP extensions for Laravel applications
-    && apt-get install -y \
-        php8.2-mbstring \
-        php8.2-exif \
-        php8.2-gd \
-        php8.2-intl \
-        php8.2-xml \
-        php8.2-bcmath \
-        php8.2-sockets \
-        php8.2-tokenizer \
-        php8.2-fileinfo \
-        # Add more if your app specifically needs them
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring exif gd intl xml bcmath sockets tokenizer fileinfo
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions using the recommended docker-php-ext-install helper
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    zip \
+    mbstring \
+    exif \
+    gd \
+    intl \
+    xml \
+    bcmath \
+    sockets \
+    tokenizer \
+    fileinfo
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -35,7 +36,6 @@ WORKDIR /var/www/html
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy Composer files and install PHP dependencies (only production dependencies)
-# Running composer install with --verbose to get detailed error messages
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --verbose
 
@@ -53,17 +53,14 @@ RUN npm install
 COPY . .
 
 # Build frontend assets for production
-# Added --verbose for more output in logs in case of failure
 RUN npm run build -- --verbose
 
 # Optimize Laravel for production environments
-# Caching configuration, routes, and views for faster performance
 RUN php artisan config:cache
 RUN php artisan route:cache
 RUN php artisan view:cache
 
 # Run Laravel database migrations
-# The --force flag is used for non-interactive environments like Docker builds
 RUN php artisan migrate --force
 
 # Set proper permissions for the web server to access files
@@ -74,11 +71,9 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Configure Apache's DocumentRoot to point to Laravel's public directory
-# This ensures Apache serves your application from the correct entry point
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
 # Add a custom Apache configuration file for Laravel, enabling .htaccess support
-# This is crucial for Laravel's URL rewriting (mod_rewrite)
 RUN echo '<Directory /var/www/html/public>\n\
     Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
@@ -86,9 +81,8 @@ RUN echo '<Directory /var/www/html/public>\n\
 </Directory>' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
-# Expose port 80, which is the default HTTP port Apache listens on
+# Expose port 80
 EXPOSE 80
 
 # Command to run when the container starts
-# 'apache2-foreground' keeps Apache running in the foreground, essential for Docker
 CMD ["apache2-foreground"]
