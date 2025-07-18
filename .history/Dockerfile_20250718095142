@@ -28,7 +28,6 @@ RUN composer install --no-dev --optimize-autoloader
 # Install Node.js and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get update \
-    && apt-get install -y nodejs
 
 # Copy Node.js package files and install dependencies
 COPY package.json package-lock.json ./
