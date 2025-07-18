@@ -1,16 +1,15 @@
 FROM php:8.2-apache
 
 # Install system dependencies
-# Ensure bash is available, git, unzip, libpq-dev, libzip-dev, zip, curl
+# Install git, unzip, libpq-dev (for PostgreSQL), libzip-dev (for zip extension), zip, curl
 RUN apt-get update && apt-get install -y \
-    bash \
     git \
     unzip \
     libpq-dev \
     libzip-dev \
     zip \
     curl \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/* \ # Clean up apt cache to reduce image size
     && docker-php-ext-install pdo pdo_pgsql zip
 
 # Enable Apache mod_rewrite
@@ -27,7 +26,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
 
-# Install Node.js and npm (using Node.js 20.x from NodeSource for consistency and proper PATH setup)
+# Install Node.js and npm (using Node.js 20.x, a stable LTS version)
+# Add NodeSource GPG key and repository, then install nodejs
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get update \
     && apt-get install -y nodejs \
@@ -42,8 +42,7 @@ RUN npm install
 COPY . .
 
 # Build frontend assets for production
-# Added --verbose for more output in logs in case of failure
-RUN npm run build -- --verbose
+RUN npm run build
 
 # Optimize Laravel for production environments
 # Caching configuration, routes, and views for faster performance

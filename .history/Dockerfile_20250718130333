@@ -3,14 +3,14 @@ FROM php:8.2-apache
 # Install system dependencies
 # Ensure bash is available, git, unzip, libpq-dev, libzip-dev, zip, curl
 RUN apt-get update && apt-get install -y \
-    bash \
+    bash \ # Added bash for robustness
     git \
     unzip \
     libpq-dev \
     libzip-dev \
     zip \
     curl \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/* \ # Clean up apt cache to reduce image size
     && docker-php-ext-install pdo pdo_pgsql zip
 
 # Enable Apache mod_rewrite
