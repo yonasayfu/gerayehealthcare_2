@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
 # Install system dependencies (non-PHP-specific libraries and dev headers for PHP extensions)
-# Added libraries like libpng-dev, libjpeg-dev, libicu-dev, libexif-dev
+# Added libfreetype-dev (for GD) and libxml2-dev (for XML)
 RUN apt-get update && apt-get install -y \
     bash \
     git \
@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libicu-dev \
     libexif-dev \
+    libfreetype-dev \ # Added this for GD extension
+    libxml2-dev \   # Added this for XML extension
     zip \
     curl \
     && rm -rf /var/lib/apt/lists/*
