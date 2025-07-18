@@ -1,7 +1,7 @@
 FROM php:8.2-apache
 
 # Install system dependencies (non-PHP-specific libraries and dev headers for PHP extensions)
-# No spaces after the backslashes '\' and no blank lines within this block
+# Added libfreetype-dev (for GD) and libxml2-dev (for XML)
 RUN apt-get update && apt-get install -y \
     bash \
     git \
@@ -12,13 +12,14 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libicu-dev \
     libexif-dev \
-    libfreetype-dev \
-    libxml2-dev \
+    libfreetype-dev \ # Added this for GD extension
+    libxml2-dev \   # Added this for XML extension
     zip \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions using the recommended 'docker-php-ext-install' helper script
+# These extensions now have their system dependencies handled by the previous RUN command
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
