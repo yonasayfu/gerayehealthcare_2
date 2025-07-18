@@ -1,20 +1,23 @@
 FROM php:8.2-apache
 
-# Install system dependencies (non-PHP-specific libraries)
-# This single RUN command installs tools like bash, git, unzip, curl,
-# and database client libraries (libpq-dev for PostgreSQL)
+# Install system dependencies (non-PHP-specific libraries and dev headers for PHP extensions)
+# Added libraries like libpng-dev, libjpeg-dev, libicu-dev, libexif-dev
 RUN apt-get update && apt-get install -y \
     bash \
     git \
     unzip \
     libpq-dev \
     libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libicu-dev \
+    libexif-dev \
     zip \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions using the recommended 'docker-php-ext-install' helper script
-# This script is specifically designed for official PHP Docker images
+# These extensions now have their system dependencies handled by the previous RUN command
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
@@ -91,9 +94,8 @@ RUN echo '<Directory /var/www/html/public>\n\
 </Directory>' > /etc/apache2/conf-available/laravel.conf \
     && a2enconf laravel
 
-# Expose port 80, which is the default HTTP port Apache listens on
+# Expose port 80
 EXPOSE 80
 
 # Command to run when the container starts
-# 'apache2-foreground' keeps Apache running in the foreground, essential for Docker containers
 CMD ["apache2-foreground"]
