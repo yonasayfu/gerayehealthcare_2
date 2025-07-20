@@ -1,0 +1,1 @@
+.print-only{display:none}@media print{body *{visibility:hidden!important}.print-only{display:block!important}#print-header,#print-header *{visibility:visible!important;position:static}#assignments-table,#assignments-table *{visibility:visible!important}#assignments-table{position:absolute!important;left:0;top:120px;width:100%}.no-print{display:none!important}}

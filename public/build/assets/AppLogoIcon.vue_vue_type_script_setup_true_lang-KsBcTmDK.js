@@ -1,0 +1,1 @@
+import{d as o,c as s,o as a,C as r}from"./app-B9ZmK4zT.js";const t="/images/geraye_logo.jpeg",p=o({inheritAttrs:!1,__name:"AppLogoIcon",props:{className:{}},setup(n){return(e,c)=>(a(),s("img",r({src:t,class:e.className},e.$attrs,{alt:"Geraye Logo",class:"h-8 w-auto border-none"}),null,16))}});export{p as _};
