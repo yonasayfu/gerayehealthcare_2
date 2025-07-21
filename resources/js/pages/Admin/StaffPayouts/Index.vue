@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
-import { DollarSign } from 'lucide-vue-next';
+import type { StaffPayout } from '@/types/staff-payout';
+import { DollarSign, Edit, Trash2 } from 'lucide-vue-next';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { computed } from 'vue';
@@ -23,7 +24,8 @@ const props = defineProps<{
     first_name: string;
     last_name: string;
     payouts_sum_total_amount: string;
-  }>
+  }>;
+  staffPayouts: Array<StaffPayout>; // Add this prop for individual payouts history
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -45,7 +47,15 @@ const processPayout = (staffId: number, staffName: string, amount: string) => {
   }
 };
 
-const formatCurrency = (value: string | null) => {
+const deletePayout = (payoutId: number) => {
+  if (confirm('Are you sure you want to delete this payout? This action cannot be undone.')) {
+    Link.delete(route('admin.staff-payouts.destroy', payoutId), {
+      preserveScroll: true,
+    });
+  }
+};
+
+const formatCurrency = (value: string | null): string => {
   const amount = parseFloat(value || '0');
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 };
@@ -83,9 +93,14 @@ const chartOptions = {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Payouts & Performance</h1>
-        <p class="text-sm text-muted-foreground">Review earnings, performance metrics, and process payments for staff.</p>
+      <div class="flex items-center justify-between rounded-lg bg-muted/40 p-4 shadow-sm">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Payouts & Performance</h1>
+          <p class="text-sm text-muted-foreground">Review earnings, performance metrics, and process payments for staff.</p>
+        </div>
+        <Link :href="route('admin.staff-payouts.create')" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+          Create New Payout
+        </Link>
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
@@ -106,22 +121,70 @@ const chartOptions = {
               <td class="px-6 py-4 text-center">{{ staff.unpaid_visits_count }}</td>
               <td class="px-6 py-4 text-center">{{ staff.unique_patients_count }}</td>
               <td class="px-6 py-4 text-center">{{ staff.total_hours_logged }}</td>
-              <td class="px-6 py-4 font-semibold text-green-600">{{ formatCurrency(staff.total_unpaid_cost) }}</td>
+              <td class="px-6 py-4 font-semibold text-green-600">{{ formatCurrency(staff.total_unpaid_cost ?? '0') }}</td>
               <td class="px-6 py-4 text-right">
-                <button
-                  v-if="staff.unpaid_visits_count > 0"
-                  @click="processPayout(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost)"
-                  :disabled="form.processing && form.staff_id === staff.id"
-                  class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition disabled:opacity-50"
-                >
-                  <DollarSign class="h-4 w-4" />
-                  {{ (form.processing && form.staff_id === staff.id) ? 'Processing...' : 'Process Payout' }}
-                </button>
-                <span v-else class="text-xs text-gray-400">No pending payments</span>
+                <div class="flex items-center justify-end gap-2">
+                  <button
+                    v-if="staff.unpaid_visits_count > 0"
+                    @click="processPayout(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost ?? '0')"
+                    :disabled="form.processing && form.staff_id === staff.id"
+                    class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition disabled:opacity-50"
+                  >
+                    <DollarSign class="h-4 w-4" />
+                    {{ (form.processing && form.staff_id === staff.id) ? 'Processing...' : 'Process Payout' }}
+                  </button>
+                  <span v-else class="text-xs text-gray-400">No pending payments</span>
+                </div>
               </td>
             </tr>
             <tr v-if="staffWithEarnings.length === 0">
               <td colspan="6" class="text-center px-6 py-4 text-gray-400">No staff with unpaid visits found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
+        <h2 class="text-lg font-semibold p-4 border-b">Individual Payouts History</h2>
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+          <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
+            <tr>
+              <th class="px-6 py-3">ID</th>
+              <th class="px-6 py-3">Staff Member</th>
+              <th class="px-6 py-3">Amount</th>
+              <th class="px-6 py-3">Payout Date</th>
+              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="payout in staffPayouts" :key="payout.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+              <td class="px-6 py-4">{{ payout.id }}</td>
+              <td class="px-6 py-4">{{ payout.staff.first_name }} {{ payout.staff.last_name }}</td>
+              <td class="px-6 py-4 font-semibold">{{ formatCurrency(payout.amount) }}</td>
+              <td class="px-6 py-4">{{ new Date(payout.payout_date).toLocaleDateString() }}</td>
+              <td class="px-6 py-4">
+                <span :class="{
+                  'text-yellow-600': payout.status === 'Pending',
+                  'text-green-600': payout.status === 'Processed',
+                  'text-red-600': payout.status === 'Cancelled',
+                }">
+                  {{ payout.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <Link :href="route('admin.staff-payouts.edit', payout.id)" class="inline-flex items-center gap-1 text-sm px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
+                    <Edit class="h-4 w-4" /> Edit
+                  </Link>
+                  <button @click="deletePayout(payout.id)" class="inline-flex items-center gap-1 text-sm px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition">
+                    <Trash2 class="h-4 w-4" /> Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="staffPayouts.length === 0">
+              <td colspan="6" class="text-center px-6 py-4 text-gray-400">No individual payouts found.</td>
             </tr>
           </tbody>
         </table>
