@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "890a2057f574fce8825da956d55f3105",
+    "content-hash": "fb2beb28f0964ed2e6da2fc3d4afc063",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -2459,6 +2459,58 @@
                 "source": "https://github.com/Masterminds/html5-php/tree/2.9.0"
             },
             "time": "2024-03-31T07:05:07+00:00"
+        },
+        {
+            "name": "mdmasudsikdar71/chapa-payment-gateway-laravel",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mdmasudsikdar71/chapa-payment-gateway-laravel.git",
+                "reference": "4eb04be0dc107c801e44ac6dfd1dff137f7df1f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mdmasudsikdar71/chapa-payment-gateway-laravel/zipball/4eb04be0dc107c801e44ac6dfd1dff137f7df1f6",
+                "reference": "4eb04be0dc107c801e44ac6dfd1dff137f7df1f6",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.8"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.6",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "MDMasudSikdar\\Chapa\\ChapaServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MDMasudSikdar\\Chapa\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "MD Masud Sikdar",
+                    "email": "masudsikdar85@gmail.com",
+                    "role": "Software Engineer"
+                }
+            ],
+            "description": "Laravel package for Chapa Payment Gateway",
+            "support": {
+                "issues": "https://github.com/mdmasudsikdar71/chapa-payment-gateway-laravel/issues",
+                "source": "https://github.com/mdmasudsikdar71/chapa-payment-gateway-laravel/tree/v1.0.0"
+            },
+            "time": "2024-02-27T22:38:10+00:00"
         },
         {
             "name": "monolog/monolog",

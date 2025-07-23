@@ -15,12 +15,13 @@
         "laravel/framework": "^12.0",
         "laravel/nightwatch": "^1.11",
         "laravel/tinker": "^2.10.1",
+        "mdmasudsikdar71/chapa-payment-gateway-laravel": "*",
         "spatie/laravel-permission": "^6.20",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/pail": "^1.2.2",
+        "laravel/pail": "*",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
