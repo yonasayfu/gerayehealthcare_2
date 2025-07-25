@@ -23,7 +23,7 @@ import {
   LayoutGrid, UserPlus, UserCog, CalendarClock, Stethoscope, MessageCircle,
   Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
-  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Search
+  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Search, Warehouse, Package, FileText, Wrench, Bell
 } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -93,6 +93,18 @@ const allAdminNavItems: SidebarNavGroup[] = [
     ],
   },
   {
+    group: 'Inventory Management',
+    icon: Warehouse,
+    items: [
+      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
+      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
+      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
+      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
+      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+    ],
+  },
+  {
     group: 'Integrations',
     icon: Globe2,
     items: [],
@@ -151,38 +163,38 @@ const isSidebarCollapsed = ref(false);
     </SidebarHeader>
     <SidebarContent>
         <SidebarMenu>
-          <Collapsible
-            v-for="group in mainNavItems"
-            :key="group.group"
-            as-child
-            :default-open="true"
-            class="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger as-child>
-                <SidebarMenuButton :tooltip="group.group" class="font-semibold text-lg text-sidebar-foreground">
-                  <component :is="group.icon" />
-                  <span>{{ group.group }}</span>
-                  <ChevronRight class="ml-auto h-5 w-5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                 <SidebarMenu>
-                    <template v-for="item in group.items" :key="item.title">
-                      <SidebarMenuItem v-if="!item.permission || can(item.permission)">
-                        <SidebarMenuButton as-child>
-                          <Link :href="item.routeName ? route(item.routeName) : '#'" class="flex items-center gap-2 px-2 py-1 text-sm">
-                            <component :is="item.icon" class="h-4 w-4" />
-                            <span v-if="!isSidebarCollapsed">{{ item.title }}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    </template>
-                  </SidebarMenu>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        </SidebarMenu>
+              <div v-for="group in mainNavItems" :key="group.group" class="mb-2">
+                <Collapsible
+                  as-child
+                  :default-open="true"
+                  class="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger as-child>
+                      <SidebarMenuButton :tooltip="group.group" class="font-semibold text-lg text-sidebar-foreground py-2 px-3 rounded-md hover:bg-muted/50 w-full text-left flex items-center gap-2">
+                        <component :is="group.icon" class="h-5 w-5" />
+                        <span>{{ group.group }}</span>
+                        <ChevronRight class="ml-auto h-5 w-5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                       <SidebarMenu>
+                          <template v-for="item in group.items" :key="item.title">
+                            <SidebarMenuItem v-if="!item.permission || can(item.permission)">
+                              <SidebarMenuButton as-child>
+                                <Link :href="item.routeName ? route(item.routeName) : '#'" class="flex items-center gap-2 px-2 py-1 text-sm hover:bg-muted/30 rounded-md w-full">
+                                  <component :is="item.icon" class="h-4 w-4" />
+                                  <span v-if="!isSidebarCollapsed">{{ item.title }}</span>
+                                </Link>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          </template>
+                        </SidebarMenu>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              </div>
+            </SidebarMenu>
     </SidebarContent>
     <SidebarFooter />
   </Sidebar>

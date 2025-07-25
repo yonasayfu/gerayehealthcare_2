@@ -91,6 +91,14 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Visit Services
         Route::resource('visit-services', VisitServiceController::class);
 
+        // Inventory Management
+        Route::resource('suppliers', App\Http\Controllers\Admin\SupplierController::class);
+        Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class);
+        Route::resource('inventory-requests', App\Http\Controllers\Admin\InventoryRequestController::class);
+        Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class);
+        Route::resource('inventory-maintenance-records', App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class);
+        Route::resource('inventory-alerts', App\Http\Controllers\Admin\InventoryAlertController::class);
+
         // Staff
         Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export');
         Route::resource('staff', StaffController::class);
