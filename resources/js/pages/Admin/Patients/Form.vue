@@ -34,7 +34,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="text"
               v-model="form.full_name"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.full_name" class="text-red-500 text-sm mt-1">
               {{ form.errors.full_name }}
@@ -48,7 +48,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="text"
               v-model="form.fayda_id"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.fayda_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.fayda_id }}
@@ -78,7 +78,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="text"
               v-model="form.phone_number"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="props.localErrors?.phone_number" class="text-red-500 text-sm mt-1">
               {{ props.localErrors.phone_number }}
@@ -95,7 +95,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="email"
               v-model="form.email"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">
               {{ form.errors.email }}
@@ -125,7 +125,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
               type="date"
               v-model="form.date_of_birth"
               required
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.date_of_birth" class="text-red-500 text-sm mt-1">
               {{ form.errors.date_of_birth }}
@@ -139,7 +139,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="text"
               v-model="form.address"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.address" class="text-red-500 text-sm mt-1">
               {{ form.errors.address }}
@@ -153,7 +153,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
             <input
               type="text"
               v-model="form.emergency_contact"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.emergency_contact" class="text-red-500 text-sm mt-1">
               {{ form.errors.emergency_contact }}
@@ -168,7 +168,7 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
               type="text"
               v-model="form.geolocation"
               placeholder="e.g., 9.012345,38.765432"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.geolocation" class="text-red-500 text-sm mt-1">
               {{ form.errors.geolocation }}

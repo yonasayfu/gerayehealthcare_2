@@ -27,7 +27,7 @@ const submit = () => {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6">
       <div class="max-w-2xl mx-auto">
-        <div class="rounded-lg bg-white dark:bg-gray-900 p-6 shadow-sm">
+        <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
           <h1 class="text-xl font-semibold mb-4">Add New Service</h1>
           <ServiceForm :form="form" />
           <div class="flex justify-end gap-4 mt-6">

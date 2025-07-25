@@ -115,7 +115,7 @@ const formatDate = (dateString: string | null) => {
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
-                  <Link :href="route('admin.visit-services.show', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600" title="View Details"><FileText class="w-4 h-4" /></Link>
+                  
                   <Link :href="route('admin.visit-services.edit', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
                   <button @click="destroy(visit.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Cancel Visit"><Trash2 class="w-4 h-4" /></button>
                 </div>

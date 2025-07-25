@@ -31,7 +31,7 @@ const submit = () => {
         <p class="text-sm text-muted-foreground">{{ user.email }}</p>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 max-w-xl">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <form @submit.prevent="submit" class="space-y-6">
           <div>
             <label for="role" class="block text-sm font-medium text-gray-900 dark:text-white">Assign Role</label>

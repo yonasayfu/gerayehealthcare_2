@@ -34,7 +34,7 @@ const submit = () => {
       </div>
       
       <!-- Form Card -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <Form :form="form" @submit="submit" />
         
         <!-- Actions -->

@@ -39,7 +39,7 @@ function submit() {
         <p class="text-sm text-muted-foreground">Fill in the details to add a new patient.</p>
       </div>
 
-      <div class="rounded-lg border border-border bg-white dark:bg-background p-6 shadow-sm space-y-6">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <Form :form="form" />
 
         <div class="flex justify-end space-x-3">

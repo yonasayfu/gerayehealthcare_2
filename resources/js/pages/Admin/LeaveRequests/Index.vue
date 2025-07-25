@@ -199,7 +199,7 @@ const statusColor = (status: string) => {
   <Head title="Leave Requests Management" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="rounded-xl border border-border bg-white shadow-sm dark:border-sidebar-border dark:bg-background">
+    <div class="rounded-xl bg-white shadow-sm dark:border-sidebar-border dark:bg-background">
       <div class="border-b p-5">
         <h2 class="text-lg font-semibold">Staff Leave Requests</h2>
         <p class="mt-1 text-sm text-muted-foreground">Review and manage all time-off requests from staff.</p>

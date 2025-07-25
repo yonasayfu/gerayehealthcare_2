@@ -42,7 +42,7 @@ function submit() {
     { title: 'Task Delegations', href: route('admin.task-delegations.index') },
     { title: `Edit: ${props.task.title}`, href: '' }
   ]">
-    <div class="p-6 bg-white rounded-lg shadow">
+    <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
       <Link :href="route('admin.task-delegations.index')" class="text-blue-600">← Back</Link>
       <h2 class="text-xl font-semibold mt-4">Edit Task</h2>
 

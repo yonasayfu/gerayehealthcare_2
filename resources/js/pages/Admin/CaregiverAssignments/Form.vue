@@ -56,7 +56,7 @@ const formatDateTimeForInput = (dateString: string): string => {
           <div class="mt-2">
             <select
               v-model="form.patient_id"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
               <option value="">Select a patient</option>
               <option v-for="patient in patientOptions" :key="patient.id" :value="patient.id">
@@ -75,7 +75,7 @@ const formatDateTimeForInput = (dateString: string): string => {
           <div class="mt-2">
             <select
               v-model="form.staff_id"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
               <option value="">Select a staff member</option>
               <option v-for="staffMember in staffOptions" :key="staffMember.id" :value="staffMember.id">
@@ -96,7 +96,7 @@ const formatDateTimeForInput = (dateString: string): string => {
               type="datetime-local"
               :value="formatDateTimeForInput(form.shift_start)"
               @input="form.shift_start = $event.target.value"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.shift_start" class="text-red-500 text-sm mt-1">
               {{ form.errors.shift_start }}
@@ -112,7 +112,7 @@ const formatDateTimeForInput = (dateString: string): string => {
               type="datetime-local"
               :value="formatDateTimeForInput(form.shift_end)"
               @input="form.shift_end = $event.target.value"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
             <div v-if="form.errors.shift_end" class="text-red-500 text-sm mt-1">
               {{ form.errors.shift_end }}
@@ -126,7 +126,7 @@ const formatDateTimeForInput = (dateString: string): string => {
           <div class="mt-2">
             <select
               v-model="form.status"
-              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
+              class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             >
               <option>Assigned</option>
               <option>In Progress</option>

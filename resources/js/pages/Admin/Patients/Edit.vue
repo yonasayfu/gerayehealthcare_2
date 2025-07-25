@@ -44,7 +44,7 @@ function submit() {
       </div>
 
       <!-- Form Card -->
-      <div class="rounded-lg border border-border bg-white dark:bg-background p-6 shadow-sm space-y-6">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <Form :form="form" />
 
         <!-- Actions -->

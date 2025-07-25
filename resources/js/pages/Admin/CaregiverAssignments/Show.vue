@@ -67,7 +67,7 @@ const formatTime = (dateString) => {
       </div>
 
       <!-- Details Card -->
-      <div class="rounded-lg border border-border bg-white dark:bg-gray-900 shadow-sm">
+      <div class="rounded-lg bg-white dark:bg-gray-900 shadow-sm">
         <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Patient Info -->
             <div class="space-y-4">

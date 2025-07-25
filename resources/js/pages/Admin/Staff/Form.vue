@@ -17,7 +17,7 @@ defineProps<{
         type="text"
         placeholder="First Name"
         required
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.first_name">{{ form.errors.first_name }}</span>
     </div>
@@ -30,7 +30,7 @@ defineProps<{
         type="text"
         placeholder="Last Name"
         required
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.last_name">{{ form.errors.last_name }}</span>
     </div>
@@ -43,7 +43,7 @@ defineProps<{
         type="email"
         placeholder="Email"
         required
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.email">{{ form.errors.email }}</span>
     </div>
@@ -55,7 +55,7 @@ defineProps<{
         v-model="form.phone"
         type="text"
         placeholder="Phone"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.phone">{{ form.errors.phone }}</span>
     </div>
@@ -67,7 +67,7 @@ defineProps<{
         v-model="form.position"
         type="text"
         placeholder="Position"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.position">{{ form.errors.position }}</span>
     </div>
@@ -81,7 +81,7 @@ defineProps<{
         step="0.01"
         min="0"
         placeholder="e.g., 50.00"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.hourly_rate">{{ form.errors.hourly_rate }}</span>
     </div>
@@ -93,7 +93,7 @@ defineProps<{
         v-model="form.department"
         type="text"
         placeholder="Department"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.department">{{ form.errors.department }}</span>
     </div>
@@ -101,7 +101,7 @@ defineProps<{
     <!-- Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Status</label>
-      <select v-model="form.status" class="w-full mt-1 p-2 border rounded-md">
+      <select v-model="form.status" class="w-full mt-1 p-2 rounded-md">
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
       </select>
@@ -114,7 +114,7 @@ defineProps<{
       <input
         v-model="form.hire_date"
         type="date"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.hire_date">{{ form.errors.hire_date }}</span>
     </div>
@@ -125,7 +125,7 @@ defineProps<{
       <input
         type="file"
         @input="form.photo = $event.target.files[0]"
-        class="w-full mt-1 p-2 border rounded-md"
+        class="w-full mt-1 p-2 rounded-md"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.photo">{{ form.errors.photo }}</span>
 

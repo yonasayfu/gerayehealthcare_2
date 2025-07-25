@@ -52,7 +52,7 @@ const submit = () => {
       </div>
 
       <form v-if="selectedPatient" @submit.prevent="submit">
-        <div class="p-4 bg-white rounded-lg shadow space-y-4">
+        <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
           <h2 class="text-lg font-semibold">Step 2: Select Billable Visits</h2>
           
           <div v-if="billableVisits.length === 0" class="text-center text-gray-500 py-4">

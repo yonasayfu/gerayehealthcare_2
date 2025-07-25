@@ -33,7 +33,7 @@ const submit = () => {
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
             <Form :form="form" :all-permissions="allPermissions" @submit="submit" />
             <div class="mt-6 flex justify-end space-x-4 border-t dark:border-gray-700 pt-6">
                 <Link :href="route('admin.roles.index')" class="px-4 py-2 border rounded-md text-sm font-medium">Cancel</Link>

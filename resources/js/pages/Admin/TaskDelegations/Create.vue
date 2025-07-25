@@ -65,7 +65,7 @@ function submit() {
 
         <div>
           <Label for="notes">Notes (optional)</Label>
-          <textarea id="notes" v-model="form.notes" class="w-full rounded border-gray-300"></textarea>
+          <textarea id="notes" v-model="form.notes" class="w-full rounded"></textarea>
           <div v-if="form.errors.notes" class="text-red-600 text-xs">{{ form.errors.notes }}</div>
         </div>
 

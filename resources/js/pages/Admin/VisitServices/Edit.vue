@@ -61,7 +61,7 @@ function submit() {
         <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Visit Service</h1>
         <p class="text-sm text-muted-foreground">Update the details for visit #{{ visitService.id }}.</p>
       </div>
-      <div class="rounded-lg border border-border bg-white dark:bg-background p-6 shadow-sm space-y-6">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <VisitServiceForm :form="form" :patients="props.patients" :staff="props.staff" :visit-service="props.visitService" />
         <div class="flex justify-end space-x-3">
           <Link :href="route('admin.visit-services.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-muted/30 transition">Cancel</Link>

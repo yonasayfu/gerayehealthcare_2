@@ -10,17 +10,17 @@ defineProps<{
   <div class="space-y-4">
     <div>
       <label for="name" class="block text-sm font-medium">Service Name</label>
-      <input id="name" v-model="form.name" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
+      <input id="name" v-model="form.name" type="text" class="mt-1 block w-full rounded-md shadow-sm" required />
       <div v-if="form.errors.name" class="text-sm text-red-600 mt-1">{{ form.errors.name }}</div>
     </div>
     <div>
       <label for="price" class="block text-sm font-medium">Price ($)</label>
-      <input id="price" v-model="form.price" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required />
+      <input id="price" v-model="form.price" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-md shadow-sm" required />
       <div v-if="form.errors.price" class="text-sm text-red-600 mt-1">{{ form.errors.price }}</div>
     </div>
     <div>
       <label for="description" class="block text-sm font-medium">Description</label>
-      <textarea id="description" v-model="form.description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+      <textarea id="description" v-model="form.description" rows="3" class="mt-1 block w-full rounded-md shadow-sm"></textarea>
       <div v-if="form.errors.description" class="text-sm text-red-600 mt-1">{{ form.errors.description }}</div>
     </div>
     <div class="flex items-center gap-4">

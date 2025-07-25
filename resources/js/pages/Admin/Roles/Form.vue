@@ -27,7 +27,7 @@ watch(selectedPermissions, (newVal) => {
           type="text"
           id="name"
           v-model="form.name"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800"
+          class="block w-full rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800"
           placeholder="e.g., Finance Manager"
         />
         <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>

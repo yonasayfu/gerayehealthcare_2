@@ -21,7 +21,7 @@ const submit = () => {
   <AppLayout>
     <div class="p-6">
       <h1 class="text-xl font-semibold mb-4">Create New Role</h1>
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
         <Form :form="form" :all-permissions="permissions" @submit="submit" />
         <div class="mt-6 flex justify-end space-x-4">
           <Link :href="route('admin.roles.index')" class="px-4 py-2 border rounded-md">Cancel</Link>
