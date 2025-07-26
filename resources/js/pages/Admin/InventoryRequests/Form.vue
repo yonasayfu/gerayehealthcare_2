@@ -3,19 +3,11 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
   form: Object, // Inertia form object
+  staffList: Array,
+  inventoryItems: Array,
 });
 
 const emit = defineEmits(['submit']);
-
-// These would typically come from backend props
-const staffList = [
-  { id: 1, first_name: 'John', last_name: 'Doe' },
-  { id: 2, first_name: 'Jane', last_name: 'Smith' },
-];
-const inventoryItems = [
-  { id: 1, name: 'Stethoscope' },
-  { id: 2, name: 'Wheelchair' },
-];
 const priorities = ['Low', 'Normal', 'High', 'Urgent'];
 const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Fulfilled'];
 

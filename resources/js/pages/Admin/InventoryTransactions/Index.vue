@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import debounce from 'lodash/debounce';
+import { ArrowUpDown, Printer, Download, Eye } from 'lucide-vue-next';
+import Pagination from '@/components/Pagination.vue';
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -10,12 +13,36 @@ const breadcrumbs = [
 
 const props = defineProps({
   inventoryTransactions: Object, // Paginated list of inventory transactions
+  filters: { // Add filters prop with a default empty object
+    type: Object,
+    default: () => ({}),
+  },
 });
 
-const search = ref('');
-const filters = ref({});
+const search = ref(props.filters.search || '');
+const filters = ref({
+  search: props.filters.search || '',
+  sort_by: props.filters.sort_by || 'created_at',
+  sort_direction: props.filters.sort_direction || 'desc',
+});
 
-// Implement search and filter logic here later
+const toggleSort = (column: string) => {
+  if (filters.value.sort_by === column) {
+    filters.value.sort_direction = filters.value.sort_direction === 'asc' ? 'desc' : 'asc';
+  } else {
+    filters.value.sort_by = column;
+    filters.value.sort_direction = 'asc';
+  }
+};
+
+watch(search, debounce(() => {
+  filters.value.search = search.value;
+  router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
+}, 300));
+
+watch(filters, () => {
+  router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
+}, { deep: true });
 
 </script>
 
@@ -29,6 +56,18 @@ const filters = ref({});
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <!-- Transactions are typically created via other actions, not directly here -->
+        <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Download class="h-4 w-4" /> Export
+        </a>
+        <a :href="route('admin.inventory-transactions.generatePdf')" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Download class="h-4 w-4" /> PDF
+        </a>
+        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Printer class="h-4 w-4" /> Print All
+        </button>
+        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Printer class="h-4 w-4" /> Print Current
+        </button>
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
@@ -42,13 +81,14 @@ const filters = ref({});
           <table class="min-w-full text-left text-sm">
             <thead>
               <tr>
-                <th class="p-2">Item</th>
-                <th class="p-2">Type</th>
-                <th class="p-2">Quantity</th>
-                <th class="p-2">From</th>
-                <th class="p-2">To</th>
-                <th class="p-2">Performed By</th>
-                <th class="p-2">Date</th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('item_id')">Item <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('transaction_type')">Type <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('quantity')">Quantity <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('from_location')">From <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('to_location')">To <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('performed_by_id')">Performed By <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('created_at')">Date <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -60,6 +100,11 @@ const filters = ref({});
                 <td class="p-2">{{ transaction.to_location }}</td>
                 <td class="p-2">{{ transaction.performed_by.first_name }} {{ transaction.performed_by.last_name }}</td>
                 <td class="p-2">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
+                <td class="p-2 text-right">
+                  <div class="inline-flex items-center justify-end space-x-2">
+                    <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600" title="View Details"><Eye class="w-4 h-4" /></Link>
+                  </div>
+                </td>
               </tr>
               <tr v-if="inventoryTransactions.data.length === 0">
                 <td colspan="7" class="text-center p-4 text-muted-foreground">No inventory transactions found.</td>
@@ -70,7 +115,7 @@ const filters = ref({});
 
         <!-- Pagination -->
         <div class="mt-4">
-          <!-- Pagination links will go here -->
+          <Pagination :links="inventoryTransactions.links" />
         </div>
       </div>
     </div>

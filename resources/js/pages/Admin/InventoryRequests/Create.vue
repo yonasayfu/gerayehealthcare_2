@@ -3,6 +3,11 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import Form from './Form.vue';
 
+const props = defineProps({
+  staffList: Array,
+  inventoryItems: Array,
+});
+
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Inventory Requests', href: route('admin.inventory-requests.index') },

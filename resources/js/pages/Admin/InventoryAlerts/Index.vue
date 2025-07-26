@@ -31,6 +31,18 @@ const filters = ref({});
         <Link :href="route('admin.inventory-alerts.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
           Create New Alert
         </Link>
+        <a :href="route('admin.inventory-alerts.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Download class="h-4 w-4" /> Export
+        </a>
+        <a :href="route('admin.inventory-alerts.generatePdf')" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Download class="h-4 w-4" /> PDF
+        </a>
+        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Printer class="h-4 w-4" /> Print All
+        </button>
+        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <Printer class="h-4 w-4" /> Print Current
+        </button>
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
@@ -58,7 +70,11 @@ const filters = ref({});
                 <td class="p-2">{{ alert.message }}</td>
                 <td class="p-2">{{ alert.is_active ? 'Active' : 'Inactive' }}</td>
                 <td class="p-2 text-right">
-                  <Link :href="route('admin.inventory-alerts.edit', alert.id)" class="text-blue-600 hover:underline">Edit</Link>
+                  <div class="inline-flex items-center justify-end space-x-2">
+                    <Link :href="route('admin.inventory-alerts.show', alert.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600" title="View Details"><Eye class="w-4 h-4" /></Link>
+                    <Link :href="route('admin.inventory-alerts.edit', alert.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
+                    <button @click="destroy(alert.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900 text-red-600" title="Delete"><Trash2 class="w-4 h-4" /></button>
+                  </div>
                 </td>
               </tr>
               <tr v-if="inventoryAlerts.data.length === 0">
@@ -70,7 +86,7 @@ const filters = ref({});
 
         <!-- Pagination -->
         <div class="mt-4">
-          <!-- Pagination links will go here -->
+          <Pagination :links="inventoryAlerts.links" />
         </div>
       </div>
     </div>

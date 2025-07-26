@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use League\Csv\Writer;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryAlertController extends Controller
 {
@@ -29,6 +32,75 @@ class InventoryAlertController extends Controller
             'inventoryAlerts' => $inventoryAlerts,
             'filters' => $request->all('search'),
         ]);
+    }
+
+    public function export(): StreamedResponse
+    {
+        $inventoryAlerts = InventoryAlert::with('item')->get();
+
+        $csv = Writer::createFromString('');
+        $csv->insertOne(['ID', 'Item', 'Alert Type', 'Threshold Value', 'Message', 'Is Active', 'Triggered At']);
+
+        foreach ($inventoryAlerts as $alert) {
+            $csv->insertOne([
+                $alert->id,
+                $alert->item->name ?? 'N/A',
+                $alert->alert_type,
+                $alert->threshold_value,
+                $alert->message,
+                $alert->is_active ? 'Yes' : 'No',
+                $alert->triggered_at,
+            ]);
+        }
+
+        return response()->streamDownload(function () use ($csv) {
+            echo $csv->toString();
+        }, 'inventory_alerts.csv', [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="inventory_alerts.csv"',
+        ]);
+    }
+
+    public function printAll(Request $request)
+    {
+        $query = InventoryAlert::with('item');
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('alert_type', 'like', "%$search%")
+                  ->orWhere('message', 'like', "%$search%")
+                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
+        }
+
+        $inventoryAlerts = $query->get();
+
+        return Inertia::render('Admin/InventoryAlerts/PrintAll', [
+            'inventoryAlerts' => $inventoryAlerts,
+        ]);
+    }
+
+    public function printSingle(InventoryAlert $inventoryAlert)
+    {
+        return Inertia::render('Admin/InventoryAlerts/PrintSingle', [
+            'inventoryAlert' => $inventoryAlert->load('item'),
+        ]);
+    }
+
+    public function generatePdf(Request $request)
+    {
+        $query = InventoryAlert::with('item');
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('alert_type', 'like', "%$search%")
+                  ->orWhere('message', 'like', "%$search%")
+                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
+        }
+
+        $inventoryAlerts = $query->get();
+
+        $pdf = Pdf::loadView('pdf.inventory-alerts', ['inventoryAlerts' => $inventoryAlerts])->setPaper('a4', 'landscape');
+        return $pdf->stream('inventory_alerts.pdf');
     }
 
     public function create()

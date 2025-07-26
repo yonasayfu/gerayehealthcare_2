@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             CaregiverAssignmentSeeder::class,
             ServiceSeeder::class, 
             LeaveRequestSeeder::class,
+            InventorySeeder::class,
         ]);
 
         // Create sample data using factories

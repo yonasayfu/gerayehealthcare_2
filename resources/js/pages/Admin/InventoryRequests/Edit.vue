@@ -5,6 +5,8 @@ import Form from './Form.vue';
 
 const props = defineProps({
   inventoryRequest: Object, // The inventory request to edit
+  staffList: Array,
+  inventoryItems: Array,
 });
 
 const breadcrumbs = [

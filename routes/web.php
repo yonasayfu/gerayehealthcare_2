@@ -92,12 +92,45 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::resource('visit-services', VisitServiceController::class);
 
         // Inventory Management
+        Route::get('suppliers/export', [App\Http\Controllers\Admin\SupplierController::class, 'export'])->name('suppliers.export');
+        Route::get('suppliers/import', [App\Http\Controllers\Admin\SupplierController::class, 'createImport'])->name('suppliers.import.create');
+        Route::post('suppliers/import', [App\Http\Controllers\Admin\SupplierController::class, 'storeImport'])->name('suppliers.import.store');
+        Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
+        Route::get('suppliers/pdf', [App\Http\Controllers\Admin\SupplierController::class, 'generatePdf'])->name('suppliers.generatePdf');
+        Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');
         Route::resource('suppliers', App\Http\Controllers\Admin\SupplierController::class);
+        Route::get('inventory-items/export', [App\Http\Controllers\Admin\InventoryItemController::class, 'export'])->name('inventory-items.export');
+        Route::get('inventory-items/print-all', [App\Http\Controllers\Admin\InventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
+        Route::get('inventory-items/pdf', [App\Http\Controllers\Admin\InventoryItemController::class, 'generatePdf'])->name('inventory-items.generatePdf');
+        Route::get('inventory-items/{inventory_item}/print', [App\Http\Controllers\Admin\InventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
         Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class);
+
+        Route::get('inventory-requests/export', [App\Http\Controllers\Admin\InventoryRequestController::class, 'export'])->name('inventory-requests.export');
+        Route::get('inventory-requests/print-all', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printAll'])->name('inventory-requests.printAll');
+        Route::get('inventory-requests/pdf', [App\Http\Controllers\Admin\InventoryRequestController::class, 'generatePdf'])->name('inventory-requests.generatePdf');
+        Route::get('inventory-requests/{inventory_request}/print', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printSingle'])->name('inventory-requests.printSingle');
         Route::resource('inventory-requests', App\Http\Controllers\Admin\InventoryRequestController::class);
+
+        Route::get('inventory-transactions/print-all', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printAll'])->name('inventory-transactions.printAll');
+        Route::get('inventory-transactions/pdf', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'generatePdf'])->name('inventory-transactions.generatePdf');
+        Route::get('inventory-transactions/{inventory_transaction}/print', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printSingle'])->name('inventory-transactions.printSingle');
         Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class);
+
+        Route::get('inventory-maintenance-records/print-all', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printAll'])->name('inventory-maintenance-records.printAll');
+        Route::get('inventory-maintenance-records/export', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'export'])->name('inventory-maintenance-records.export');
+        Route::get('inventory-maintenance-records/pdf', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'generatePdf'])->name('inventory-maintenance-records.generatePdf');
+        Route::get('inventory-maintenance-records/{inventory_maintenance_record}/print', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printSingle'])->name('inventory-maintenance-records.printSingle');
         Route::resource('inventory-maintenance-records', App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class);
+
+        Route::get('inventory-alerts/export', [App\Http\Controllers\Admin\InventoryAlertController::class, 'export'])->name('inventory-alerts.export');
+        Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');
+        Route::get('inventory-alerts/pdf', [App\Http\Controllers\Admin\InventoryAlertController::class, 'generatePdf'])->name('inventory-alerts.generatePdf');
+        Route::get('inventory-alerts/{inventory_alert}/print', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printSingle'])->name('inventory-alerts.printSingle');
         Route::resource('inventory-alerts', App\Http\Controllers\Admin\InventoryAlertController::class);
+        Route::get('inventory-alerts/export', [App\Http\Controllers\Admin\InventoryAlertController::class, 'export'])->name('inventory-alerts.export');
+        Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');
+        Route::get('inventory-alerts/pdf', [App\Http\Controllers\Admin\InventoryAlertController::class, 'generatePdf'])->name('inventory-alerts.generatePdf');
+        Route::get('inventory-alerts/{inventory_alert}/print', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printSingle'])->name('inventory-alerts.printSingle');
 
         // Staff
         Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export');
