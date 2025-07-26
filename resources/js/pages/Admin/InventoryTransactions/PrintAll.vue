@@ -1,9 +1,34 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import { format } from 'date-fns';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps({
-  inventoryTransactions: Object, // List of inventory transactions to print
+  inventoryTransactions: {
+    type: [Object, Array],
+    default: () => []
+  },
+});
+
+const transactions = computed(() => {
+  return Array.isArray(props.inventoryTransactions) ? props.inventoryTransactions : [props.inventoryTransactions];
+});
+
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+    if (transactions.value.length > 0) {
+      window.print();
+    }
+  }, 500);
+
+  window.onafterprint = () => {
+    setTimeout(() => {
+      window.close();
+    }, 50);
+  };
 });
 
 </script>

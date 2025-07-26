@@ -17,14 +17,15 @@ const formattedGeneratedDate = computed(() => {
 });
 
 onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+
   window.onafterprint = () => {
-    // Add a small delay (e.g., 10-50 milliseconds) before closing
     setTimeout(() => {
       window.close();
-    }, 50); // Try 50ms, you can adjust this value
+    }, 50);
   };
-
-  window.print();
 });
 </script>
 
@@ -64,7 +65,9 @@ onMounted(() => {
             <td class="px-6 py-4">{{ s.status }}</td>
             <td class="px-6 py-4">{{ s.hire_date ? format(new Date(s.hire_date), 'yyyy-MM-dd') : '-' }}</td>
           </tr>
-          <tr v-if="staff.length === 0">
+          if (staffMembers.value.length > 0) {
+      window.print();
+    }
             <td colspan="8" class="text-center px-6 py-4 text-gray-400">No staff found.</td>
           </tr>
         </tbody>

@@ -200,7 +200,6 @@ const printCurrentRequests = () => {
             <p>Document Generated: {{ formattedGeneratedDate }}</p> 
         </div>
       </div>
-    </div>
   </AppLayout>
 </template>
 
