@@ -20,11 +20,20 @@ const { taskDelegations, filters } = defineProps<{
       status: string
     }>
     links: { url: string | null; label: string; active: boolean }[]
+    meta: {
+      current_page: number;
+      from: number;
+      last_page: number;
+      per_page: number;
+      to: number;
+      total: number;
+    };
   }
   filters: {
     search: string | null
     sort_by: string
     sort_order: 'asc' | 'desc'
+    per_page: number
   }
 }>()
 
@@ -40,11 +49,12 @@ const breadcrumbs = [
 const search    = ref(filters.search || '')
 const sortBy    = ref(filters.sort_by)
 const sortOrder = ref(filters.sort_order)
+const perPage   = ref(filters.per_page || 10)
 
-watch([search, sortBy, sortOrder], debounce(() => {
+watch([search, sortBy, sortOrder, perPage], debounce(([searchValue, sort_byValue, sort_orderValue, perPageValue]) => {
   router.get(
     route('admin.task-delegations.index'),
-    { search: search.value, sort_by: sortBy.value, sort_order: sortOrder.value },
+    { search: searchValue, sort_by: sort_byValue, sort_order: sort_orderValue, per_page: perPageValue },
     { preserveState: true, replace: true }
   )
 }, 500))
@@ -84,7 +94,7 @@ function printTable() { window.print() }
         <div class="flex flex-wrap gap-2">
           <Link
             :href="route('admin.task-delegations.create')"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded"
           >+ Assign Task</Link>
           <button @click="exportCSV" class="inline-flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
             <Download class="h-4 w-4" /> CSV
@@ -137,14 +147,25 @@ function printTable() { window.print() }
               <td class="px-6 py-4">{{ new Date(task.due_date).toLocaleDateString() }}</td>
               <td class="px-6 py-4">{{ task.status }}</td>
               <td class="px-6 py-4 text-right">
-                <Link
-                  :href="route('admin.task-delegations.edit', { task_delegation: task.id })"
-                  class="text-blue-600 mr-2"
-                  title="Edit"
-                ><Edit3 /></Link>
-                <button @click="destroy(task.id)" class="text-red-600" title="Delete">
-                  <Trash2 />
-                </button>
+                <div class="inline-flex items-center justify-end space-x-2">
+                  <Link
+                    :href="route('admin.task-delegations.show', { task_delegation: task.id })"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </Link>
+                  <Link
+                    :href="route('admin.task-delegations.edit', { task_delegation: task.id })"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    title="Edit"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <button @click="destroy(task.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
               </td>
             </tr>
             <tr v-if="!taskDelegations.data.length">
@@ -156,12 +177,18 @@ function printTable() { window.print() }
         </table>
       </div>
 
-      <!-- 4. Pagination at the bottom -->
-      <Pagination
-        v-if="taskDelegations.data.length"
-        :links="taskDelegations.links"
-        class="mt-4 flex justify-center"
-      />
+      <div class="flex justify-between items-center mt-6">
+        <div class="flex items-center gap-2">
+          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
+          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <Pagination v-if="taskDelegations.data.length" :links="taskDelegations.links" />
+      </div>
     </div>
   </AppLayout>
 </template>

@@ -23,6 +23,7 @@ const props = defineProps<{
     search: string | null;
     sort_by: string;
     sort_order: 'asc' | 'desc';
+    per_page: number;
   };
 }>();
 
@@ -35,6 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 const searchInput = ref(props.filters.search || '');
 const currentSortBy = ref(props.filters.sort_by);
 const currentSortOrder = ref(props.filters.sort_order);
+const perPage = ref(props.filters.per_page || 10);
 
 // Watch for changes in searchInput and trigger search after a delay
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -62,6 +64,7 @@ const applyFilters = (options?: { preserveState?: boolean; preserveScroll?: bool
       search: searchInput.value,
       sort_by: currentSortBy.value,
       sort_order: currentSortOrder.value,
+      per_page: perPage.value,
     },
     {
       preserveState: options?.preserveState ?? true,
@@ -273,11 +276,17 @@ const statusColor = (status: string) => {
         <div v-else class="py-10 text-center text-muted-foreground">
           <p>There are no leave requests to review.</p>
         </div>
-        <div v-if="leaveRequests.links.length > 3" class="mt-4 flex justify-end">
-           <Link v-for="(link, index) in leaveRequests.links" :key="index" :href="link.url || '#'"
-                class="px-4 py-2 text-sm"
-                :class="{ 'font-bold text-primary': link.active, 'text-muted-foreground': !link.active }"
-                v-html="link.label" />
+        <div class="flex justify-between items-center mt-4">
+          <div class="flex items-center gap-2">
+            <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
+            <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+          <Pagination v-if="leaveRequests.data.length > 0" :links="leaveRequests.links" />
         </div>
       </div>
     </div>

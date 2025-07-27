@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
+import { ref, watch, onMounted } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { DollarSign } from 'lucide-vue-next';
@@ -9,16 +10,29 @@ import { computed } from 'vue';
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
+import Pagination from '@/components/Pagination.vue';
+
 const props = defineProps<{
-  staffWithEarnings: Array<{
-    id: number;
-    first_name: string;
-    last_name: string;
-    unpaid_visits_count: number;
-    unique_patients_count: number;
-    total_hours_logged: number;
-    total_unpaid_cost: string | null;
-  }>;
+  staffWithEarnings: {
+    data: Array<{
+      id: number;
+      first_name: string;
+      last_name: string;
+      unpaid_visits_count: number;
+      unique_patients_count: number;
+      total_hours_logged: number;
+      total_unpaid_cost: string | null;
+    }>;
+    links: Array<any>;
+    meta: { // Add meta for pagination details
+      current_page: number;
+      from: number;
+      last_page: number;
+      per_page: number;
+      to: number;
+      total: number;
+    };
+  };
   performanceData: Array<{ // New prop for chart data
     first_name: string;
     last_name: string;
@@ -31,8 +45,16 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Staff Payouts', href: route('admin.staff-payouts.index') },
 ];
 
+const perPage = ref(10);
+
 const form = useForm({
   staff_id: null,
+  per_page: perPage.value,
+});
+
+watch(perPage, (value) => {
+  form.per_page = value;
+  form.get(route('admin.staff-payouts.index'), { preserveState: true });
 });
 
 const processPayout = (staffId: number, staffName: string, amount: string) => {
@@ -125,6 +147,19 @@ const chartOptions = {
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="flex justify-between items-center mt-6">
+        <div class="flex items-center gap-2">
+          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
+          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <Pagination v-if="staffWithEarnings.data.length > 0" :links="staffWithEarnings.links" />
       </div>
 
        <div v-if="performanceData.length > 0" class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow h-80">
