@@ -128,10 +128,25 @@ class CaregiverAssignmentController extends Controller
 
     public function printAll(Request $request)
     {
-        $assignments = CaregiverAssignment::with(['patient', 'staff'])->get();
+        $query = CaregiverAssignment::with(['patient', 'staff']);
 
-        $pdf = Pdf::loadView('pdf.assignments-all', ['assignments' => $assignments])->setPaper('a4', 'landscape');
-        return $pdf->stream('assignments-all.pdf');
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('patient', fn($q) => $q->where('full_name', 'ilike', "%{$search}%"))
+                  ->orWhereHas('staff', fn($q) => $q->where('first_name', 'ilike', "%{$search}%"));
+        }
+
+        if ($request->filled('sort')) {
+            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $assignments = $query->get();
+
+        return Inertia::render('Admin/CaregiverAssignments/PrintAll', [
+            'assignments' => $assignments,
+        ]);
     }
 
     public function printSingle(CaregiverAssignment $assignment)
@@ -156,10 +171,7 @@ class CaregiverAssignmentController extends Controller
             return LaravelResponse::make($csvData, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="assignments.csv"']);
         }
 
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.assignments', ['assignments' => $assignments])->setPaper('a4', 'landscape');
-            return $pdf->stream('assignments.pdf');
-        }
+        
 
         return abort(400, 'Invalid export type');
     }

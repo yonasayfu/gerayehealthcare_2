@@ -44,7 +44,7 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf') {
+function exportData(type: 'csv') {
   const form = document.createElement('form');
   form.method = 'GET';
   form.action = `/dashboard/assignments/export`;
@@ -61,13 +61,14 @@ function exportData(type: 'csv' | 'pdf') {
   document.body.removeChild(form);
 }
 
-function printTable() {
-  window.print()
-}
-
 // New function to handle printing all records
 function printAllRecords() {
-    window.open(route('admin.assignments.printAll'), '_blank');
+    const url = route('admin.assignments.printAll', { ...props.filters });
+    window.open(url, '_blank');
+}
+
+function printCurrentView() {
+  window.print();
 }
 
 
