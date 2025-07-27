@@ -98,11 +98,13 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
         Route::get('suppliers/pdf', [App\Http\Controllers\Admin\SupplierController::class, 'generatePdf'])->name('suppliers.generatePdf');
         Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');
+        Route::get('suppliers/{supplier}/pdf-single', [App\Http\Controllers\Admin\SupplierController::class, 'generateSinglePdf'])->name('suppliers.generateSinglePdf');
         Route::resource('suppliers', App\Http\Controllers\Admin\SupplierController::class);
         Route::get('inventory-items/export', [App\Http\Controllers\Admin\InventoryItemController::class, 'export'])->name('inventory-items.export');
         Route::get('inventory-items/print-all', [App\Http\Controllers\Admin\InventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
         Route::get('inventory-items/pdf', [App\Http\Controllers\Admin\InventoryItemController::class, 'generatePdf'])->name('inventory-items.generatePdf');
         Route::get('inventory-items/{inventory_item}/print', [App\Http\Controllers\Admin\InventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
+        Route::get('inventory-items/{inventory_item}/pdf-single', [App\Http\Controllers\Admin\InventoryItemController::class, 'generateSinglePdf'])->name('inventory-items.generateSinglePdf');
         Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class);
 
         Route::get('inventory-requests/export', [App\Http\Controllers\Admin\InventoryRequestController::class, 'export'])->name('inventory-requests.export');
@@ -127,6 +129,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');
         Route::get('inventory-alerts/pdf', [App\Http\Controllers\Admin\InventoryAlertController::class, 'generatePdf'])->name('inventory-alerts.generatePdf');
         Route::get('inventory-alerts/{inventory_alert}/print', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printSingle'])->name('inventory-alerts.printSingle');
+        Route::get('inventory-alerts/count', [App\Http\Controllers\Admin\InventoryAlertController::class, 'count'])->name('inventory-alerts.count');
         Route::resource('inventory-alerts', App\Http\Controllers\Admin\InventoryAlertController::class);
         Route::get('inventory-alerts/export', [App\Http\Controllers\Admin\InventoryAlertController::class, 'export'])->name('inventory-alerts.export');
         Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');

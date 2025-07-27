@@ -17,24 +17,13 @@ const requests = computed(() => {
 const isLoading = ref(true);
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-    if (requests.value.length > 0) {
-      window.print();
-    }
-  }, 500);
-
-  window.onafterprint = () => {
-    setTimeout(() => {
-      window.close();
-    }, 50);
-  };
+  isLoading.value = false;
 });
 
 </script>
 
 <template>
-  <Head title="Print All Inventory Requests" />
+  <Head title="Print All Inventory Items" />
 
   <div class="print-document">
     <div v-if="isLoading" class="loading-indicator">
@@ -48,7 +37,7 @@ onMounted(() => {
     <div v-else>
       <div class="print-header">
         <img src="/images/geraye_logo.jpeg" alt="Geraye Healthcare Logo" style="max-width: 150px; margin-bottom: 10px;">
-        <h1>All Inventory Requests</h1>
+        <h1>All Inventory Items</h1>
         <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 

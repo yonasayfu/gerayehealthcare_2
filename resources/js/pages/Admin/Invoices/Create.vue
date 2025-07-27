@@ -54,7 +54,7 @@ const submit = () => {
         <div class="p-6 space-y-6">
             <div class="p-4 bg-white rounded-lg shadow">
                 <label for="patient" class="block text-sm font-medium text-gray-700">Step 1: Select a Patient</label>
-                <select id="patient" v-model="selectedPatient" class="mt-1 block w-full md:w-1/3 rounded-md border-gray-300 shadow-sm">
+                <select id="patient" v-model="selectedPatient" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                   <option disabled value="">-- Select a Patient --</option>
                   <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.full_name }}</option>
                 </select>
@@ -79,11 +79,11 @@ const submit = () => {
                   <div class="grid md:grid-cols-2 gap-4 pt-4 border-t">
                       <div>
                           <label for="invoice_date" class="block text-sm font-medium">Invoice Date</label>
-                          <input type="date" v-model="form.invoice_date" id="invoice_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                          <input type="date" v-model="form.invoice_date" id="invoice_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                       </div>
                       <div>
                           <label for="due_date" class="block text-sm font-medium">Due Date</label>
-                          <input type="date" v-model="form.due_date" id="due_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" />
+                          <input type="date" v-model="form.due_date" id="due_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                       </div>
                   </div>
                 </div>
@@ -91,7 +91,7 @@ const submit = () => {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <button type="submit" :disabled="form.processing || form.visit_ids.length === 0" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
+            <button type="submit" :disabled="form.processing || form.visit_ids.length === 0" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
               Generate Invoice
             </button>
         </div>

@@ -47,7 +47,7 @@
    <header style="text-align: center; margin-bottom: 20px;">
     <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 50px; margin-bottom: 8px;">
     <h1 style="margin: 0;">Geraye Home-to-Home Care</h1>
-    <p style="margin: 0;">Inventory Requests Export</p>
+    <p style="margin: 0;">Inventory Items Export</p>
 </header>
 
     <table>

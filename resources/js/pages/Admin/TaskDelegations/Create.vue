@@ -40,13 +40,13 @@ function submit() {
             <div class="mt-4 space-y-4">
                 <div>
                   <Label for="title">Title</Label>
-                  <Input id="title" v-model="form.title" />
+                  <Input id="title" v-model="form.title" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                   <div v-if="form.errors.title" class="text-red-600 text-xs">{{ form.errors.title }}</div>
                 </div>
 
                 <div>
                   <Label for="assigned_to">Assign To</Label>
-                  <select v-model="form.assigned_to" id="assigned_to" class="form-select w-full">
+                  <select v-model="form.assigned_to" id="assigned_to" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                     <option disabled value="">Select staff…</option>
                     <option v-for="s in staffList" :key="s.id" :value="s.id">
                       {{ s.first_name }} {{ s.last_name }}
@@ -57,13 +57,13 @@ function submit() {
 
                 <div>
                   <Label for="due_date">Due Date</Label>
-                  <Input type="date" id="due_date" v-model="form.due_date" />
+                  <Input type="date" id="due_date" v-model="form.due_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                   <div v-if="form.errors.due_date" class="text-red-600 text-xs">{{ form.errors.due_date }}</div>
                 </div>
 
                 <div>
                   <Label for="status">Status</Label>
-                  <select v-model="form.status" id="status" class="form-select w-full">
+                  <select v-model="form.status" id="status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                     <option>Pending</option>
                     <option>In Progress</option>
                     <option>Completed</option>
@@ -73,14 +73,16 @@ function submit() {
 
                 <div>
                   <Label for="notes">Notes (optional)</Label>
-                  <textarea id="notes" v-model="form.notes" class="w-full rounded"></textarea>
+                  <textarea id="notes" v-model="form.notes" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"></textarea>
                   <div v-if="form.errors.notes" class="text-red-600 text-xs">{{ form.errors.notes }}</div>
                 </div>
             </div>
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <Button @click="submit" :disabled="form.processing">Assign</Button>
+            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+              {{ form.processing ? 'Assigning...' : 'Assign' }}
+            </button>
         </div>
 
     </div>

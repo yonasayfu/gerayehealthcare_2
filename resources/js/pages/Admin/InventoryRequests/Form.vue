@@ -24,7 +24,7 @@ const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Ful
         <div class="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
           <div class="sm:col-span-3">
             <label for="requester_id" class="block text-sm font-medium text-gray-900 dark:text-white">Requester</label>
-            <select id="requester_id" v-model="form.requester_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800" required>
+            <select id="requester_id" v-model="form.requester_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required>
               <option :value="null">Select Requester</option>
               <option v-for="staff in staffList" :key="staff.id" :value="staff.id">{{ staff.first_name }} {{ staff.last_name }}</option>
             </select>
@@ -33,7 +33,7 @@ const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Ful
 
           <div class="sm:col-span-3">
             <label for="item_id" class="block text-sm font-medium text-gray-900 dark:text-white">Item</label>
-            <select id="item_id" v-model="form.item_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800" required>
+            <select id="item_id" v-model="form.item_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required>
               <option :value="null">Select Item</option>
               <option v-for="item in inventoryItems" :key="item.id" :value="item.id">{{ item.name }}</option>
             </select>
@@ -42,25 +42,25 @@ const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Ful
 
           <div class="sm:col-span-3">
             <label for="quantity_requested" class="block text-sm font-medium text-gray-900 dark:text-white">Quantity Requested</label>
-            <input type="number" id="quantity_requested" v-model="form.quantity_requested" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800" min="1" required />
+            <input type="number" id="quantity_requested" v-model="form.quantity_requested" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" min="1" required />
             <div v-if="form.errors.quantity_requested" class="text-red-500 text-sm mt-1">{{ form.errors.quantity_requested }}</div>
           </div>
 
           <div class="sm:col-span-3">
             <label for="needed_by_date" class="block text-sm font-medium text-gray-900 dark:text-white">Needed By Date</label>
-            <input type="date" id="needed_by_date" v-model="form.needed_by_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800" />
+            <input type="date" id="needed_by_date" v-model="form.needed_by_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
             <div v-if="form.errors.needed_by_date" class="text-red-500 text-sm mt-1">{{ form.errors.needed_by_date }}</div>
           </div>
 
           <div class="col-span-full">
             <label for="reason" class="block text-sm font-medium text-gray-900 dark:text-white">Reason for Request</label>
-            <textarea id="reason" v-model="form.reason" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800"></textarea>
+            <textarea id="reason" v-model="form.reason" rows="3" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"></textarea>
             <div v-if="form.errors.reason" class="text-red-500 text-sm mt-1">{{ form.errors.reason }}</div>
           </div>
 
           <div class="sm:col-span-3">
             <label for="priority" class="block text-sm font-medium text-gray-900 dark:text-white">Priority</label>
-            <select id="priority" v-model="form.priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+            <select id="priority" v-model="form.priority" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
               <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
             </select>
             <div v-if="form.errors.priority" class="text-red-500 text-sm mt-1">{{ form.errors.priority }}</div>
@@ -68,7 +68,7 @@ const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Ful
 
           <div class="sm:col-span-3" v-if="form.status">
             <label for="status" class="block text-sm font-medium text-gray-900 dark:text-white">Status</label>
-            <select id="status" v-model="form.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+            <select id="status" v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
               <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
             </select>
             <div v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</div>
@@ -76,13 +76,13 @@ const statuses = ['Pending', 'Approved', 'Rejected', 'Fulfilled', 'Partially Ful
 
           <div class="sm:col-span-3" v-if="form.status === 'Approved' || form.status === 'Partially Fulfilled' || form.status === 'Fulfilled'">
             <label for="quantity_approved" class="block text-sm font-medium text-gray-900 dark:text-white">Quantity Approved</label>
-            <input type="number" id="quantity_approved" v-model="form.quantity_approved" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800" :max="form.quantity_requested" min="0" />
+            <input type="number" id="quantity_approved" v-model="form.quantity_approved" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" :max="form.quantity_requested" min="0" />
             <div v-if="form.errors.quantity_approved" class="text-red-500 text-sm mt-1">{{ form.errors.quantity_approved }}</div>
           </div>
 
           <div class="sm:col-span-3" v-if="form.status === 'Approved' || form.status === 'Rejected'">
             <label for="approver_id" class="block text-sm font-medium text-gray-900 dark:text-white">Approver</label>
-            <select id="approver_id" v-model="form.approver_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+            <select id="approver_id" v-model="form.approver_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
               <option :value="null">Select Approver</option>
               <option v-for="staff in staffList" :key="staff.id" :value="staff.id">{{ staff.first_name }} {{ staff.last_name }}</option>
             </select>

@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Inventory Requests', href: route('admin.inventory-requests.index') },
+  { title: 'Inventory Items', href: route('admin.inventory-requests.index') },
 ];
 
 const props = defineProps({
@@ -63,14 +63,14 @@ const downloadCsv = () => {
 
 
 const printAllRequests = () => {
-  const url = route('admin.inventory-requests.printAll', { ...props.filters });
+  const url = route('admin.inventory-requests.generatePdf', { ...props.filters });
   window.open(url, '_blank');
 };
 
 </script>
 
 <template>
-  <Head title="Inventory Requests" />
+  <Head title="Inventory Items" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
@@ -96,25 +96,26 @@ const printAllRequests = () => {
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Requests</h1>
-          <p class="text-sm text-muted-foreground">Manage all requests for inventory items.</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Items</h1>
+            <p class="text-sm text-muted-foreground">Manage all requests for inventory items.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <Link :href="route('admin.inventory-requests.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+              Create New Request
+            </Link>
+            <a :href="route('admin.inventory-requests.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+              <Download class="h-4 w-4" /> Export
+            </a>
+            <a :href="route('admin.inventory-requests.generatePdf')" target="_blank" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+              <Download class="h-4 w-4" /> PDF
+            </a>
+            <button @click="printAllRequests" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+              <Printer class="h-4 w-4" /> Print All
+            </button>
+          </div>
         </div>
-        <Link :href="route('admin.inventory-requests.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          Create New Request
-        </Link>
-        <a :href="route('admin.inventory-requests.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Download class="h-4 w-4" /> Export
-        </a>
-        <a :href="route('admin.inventory-requests.generatePdf')" target="_blank" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Download class="h-4 w-4" /> PDF
-        </a>
-        <button @click="printAllRequests" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Printer class="h-4 w-4" /> Print All
-        </button>
-        <button @click="printCurrentView" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Printer class="h-4 w-4" /> Print Current
-        </button>
       </div>
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
@@ -139,11 +140,11 @@ const printAllRequests = () => {
         </div>
       </div>
 
-      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent" v-if="inventoryRequests && inventoryRequests.data">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
-            <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Requests List (Current View)</p>
+            <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Items List (Current View)</p>
             <hr class="my-3 border-gray-300 print:my-2">
         </div>
         <table class="min-w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
@@ -158,7 +159,7 @@ const printAllRequests = () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="request in inventoryRequests.data" :key="request.id" class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+              <tr v-for="request in inventoryRequests.data" :key="request.id" class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                 <td class="p-2">{{ request.requester.first_name }} {{ request.requester.last_name }}</td>
                 <td class="p-2">{{ request.item.name }}</td>
                 <td class="p-2">{{ request.quantity_requested }}</td>
@@ -172,7 +173,7 @@ const printAllRequests = () => {
                   </div>
                 </td>
               </tr>
-              <tr v-if="inventoryRequests.data.length === 0">
+              <tr>
                 <td colspan="6" class="text-center p-4 text-muted-foreground">No inventory requests found.</td>
               </tr>
             </tbody>
@@ -184,12 +185,11 @@ const printAllRequests = () => {
       
         <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> 
+            <p>Document Generated: {{ formattedGeneratedDate }}</p>
         </div>
       </div>
-    </div>
+      
   </AppLayout>
 </template>
 
-<style>
 

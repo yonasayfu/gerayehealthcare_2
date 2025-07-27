@@ -126,9 +126,8 @@ class SupplierController extends Controller
 
         $suppliers = $query->get();
 
-        return Inertia::render('Admin/Suppliers/PrintAll', [
-            'supplier' => $suppliers,
-        ]);
+        $pdf = Pdf::loadView('pdf.suppliers', ['suppliers' => $suppliers])->setPaper('a4', 'landscape');
+        return $pdf->stream('suppliers.pdf');
     }
 
     public function show(Supplier $supplier)
@@ -143,6 +142,12 @@ class SupplierController extends Controller
         return Inertia::render('Admin/Suppliers/PrintSingle', [
             'supplier' => $supplier,
         ]);
+    }
+
+    public function generateSinglePdf(Supplier $supplier)
+    {
+        $pdf = Pdf::loadView('pdf.suppliers_single_pdf', ['supplier' => $supplier]);
+        return $pdf->stream('supplier_' . $supplier->id . '.pdf');
     }
 
     public function generatePdf(Request $request)

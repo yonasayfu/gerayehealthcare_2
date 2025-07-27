@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Inventory Requests Report</title>
+    <title>Inventory Items Report</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 0; font-size: 10pt; }
         .container { width: 100%; margin: 0 auto; padding: 20mm; }
@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Inventory Requests Report</h1>
+        <h1>Inventory Items Report</h1>
         <table>
             <thead>
                 <tr>

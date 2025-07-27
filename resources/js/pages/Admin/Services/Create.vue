@@ -41,12 +41,9 @@ const submit = () => {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex justify-end gap-4 mt-6">
-              <Link :href="route('admin.services.index')" class="px-4 py-2 border rounded-md text-sm">Cancel</Link>
-              <button @click="submit" :disabled="form.processing" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm disabled:opacity-50">
-                {{ form.processing ? 'Saving...' : 'Save Service' }}
-              </button>
-            </div>
+            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+              {{ form.processing ? 'Saving...' : 'Save Service' }}
+            </button>
         </div>
 
     </div>

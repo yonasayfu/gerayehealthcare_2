@@ -22,9 +22,9 @@ const { toast } = useToast();
 
 const props = defineProps<{
   conversations: Array<any>;
-  selectedConversation: Object | null;
+  selectedConversation: object | null;
   messages: Array<any>;
-  filters: Object;
+  filters: object;
 }>();
 
 const conversations = ref(props.conversations);

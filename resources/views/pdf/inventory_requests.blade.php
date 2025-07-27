@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Inventory Requests</title>
+    <title>Inventory Items</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,7 +35,7 @@
 <body>
     <div class="header">
         <img src="{{ public_path('logo.png') }}" alt="Logo">
-        <h1>Inventory Requests Report</h1>
+        <h1>Inventory Items Report</h1>
     </div>
     <table>
         <thead>

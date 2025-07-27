@@ -34,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Head title="Print All Inventory Transactions" />
+  <Head title="Print All Inventory Maintenance" />
 
   <div class="print-document">
     <div v-if="isLoading" class="loading-indicator">
@@ -48,7 +48,7 @@ onMounted(() => {
     <div v-else>
       <div class="print-header">
         <img src="/images/geraye_logo.jpeg" alt="Geraye Healthcare Logo" style="max-width: 150px; margin-bottom: 10px;">
-        <h1>All Inventory Transactions</h1>
+        <h1>All Inventory Maintenance</h1>
         <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 

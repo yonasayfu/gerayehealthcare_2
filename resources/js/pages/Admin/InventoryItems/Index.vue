@@ -64,11 +64,18 @@ function exportData(type: 'csv') {
   window.open(route('admin.inventory-items.export', { type }), '_blank');
 }
 
-
+function downloadPdf() {
+  const url = route('admin.inventory-items.generatePdf', { ...props.filters });
+  window.open(url, '_blank');
+}
 
 const printAllInventoryItems = () => {
-  const url = route('admin.inventory-items.printAll', { ...props.filters });
+  const url = route('admin.inventory-items.generatePdf', { ...props.filters });
   window.open(url, '_blank');
+};
+
+const printCurrentView = () => {
+  window.print();
 };
 
 function toggleSort(field: string) {
@@ -97,16 +104,16 @@ function toggleSort(field: string) {
           <Link :href="route('admin.inventory-items.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add New Item
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <FileText class="h-4 w-4" /> PDF
           </button>
-          <button @click="printAllInventoryItems" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printAllInventoryItems" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md">
             <Printer class="h-4 w-4" /> Print All
           </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md">
             <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
@@ -125,7 +132,7 @@ function toggleSort(field: string) {
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" @change="perPage = Number($event.target.value)" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>

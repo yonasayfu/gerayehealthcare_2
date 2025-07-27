@@ -17,18 +17,7 @@ const props = defineProps({
 const isLoading = ref(true);
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-    if (props.inventoryItems.length > 0) {
-      window.print();
-    }
-  }, 500);
-
-  window.onafterprint = () => {
-    setTimeout(() => {
-      window.close();
-    }, 50);
-  };
+  isLoading.value = false;
 });
 
 </script>

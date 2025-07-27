@@ -31,11 +31,12 @@ class InventoryItemController extends Controller
             $query->orderBy($sortField, $sortDirection);
         }
 
-        $inventoryItems = $query->paginate(10);
+        $perPage = $request->input('per_page', 10);
+        $inventoryItems = $query->paginate($perPage);
 
         return Inertia::render('Admin/InventoryItems/Index', [
             'inventoryItems' => $inventoryItems,
-            'filters' => $request->all('search'),
+            'filters' => $request->all('search', 'sort', 'direction', 'per_page'),
         ]);
     }
 
@@ -143,7 +144,33 @@ class InventoryItemController extends Controller
         ]);
     }
 
-    
+    public function generateSinglePdf(InventoryItem $inventoryItem)
+    {
+        $pdf = Pdf::loadView('pdf.inventory_items_single_pdf', ['inventoryItem' => $inventoryItem]);
+        return $pdf->stream('inventory_item_' . $inventoryItem->id . '.pdf');
+    }
+
+    public function generatePdf(Request $request)
+    {
+        $query = InventoryItem::query();
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%$search%")
+                  ->orWhere('serial_number', 'like', "%$search%");
+        }
+
+        if ($request->has('sort')) {
+            $sortField = $request->input('sort');
+            $sortDirection = $request->input('direction', 'asc');
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        $inventoryItems = $query->get();
+
+        $pdf = Pdf::loadView('pdf.inventory-items', ['inventoryItems' => $inventoryItems]);
+        return $pdf->stream('inventory-items.pdf');
+    }
 
     /**
      * Show the form for editing the specified resource.

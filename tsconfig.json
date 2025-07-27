@@ -41,9 +41,8 @@
         "types": [
             "vite/client",
             "./resources/js/types",
-            "vue/compiler-sfc",
-            "vue/runtime-dom"
-        ] /* Specify type package names to be included without being referenced in a source file. */,
+            "vue/compiler-sfc"
+        ], /* Specify type package names to be included without being referenced in a source file. */
         "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
         // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
         // "moduleSuffixes": [],                             /* List of file name suffixes to search when resolving a module. */

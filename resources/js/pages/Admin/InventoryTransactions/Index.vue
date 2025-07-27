@@ -8,7 +8,7 @@ import Pagination from '@/components/Pagination.vue';
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Inventory Transactions', href: route('admin.inventory-transactions.index') },
+  { title: 'Inventory Maintenance', href: route('admin.inventory-transactions.index') },
 ];
 
 const props = defineProps({
@@ -44,36 +44,31 @@ watch(filters, () => {
   router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
 }, { deep: true });
 
-const printAllTransactions = () => {
-  const url = route('admin.inventory-transactions.printAll', { ...filters.value });
+const generatePdf = () => {
+  const url = route('admin.inventory-transactions.generatePdf', { ...filters.value });
   window.open(url, '_blank');
-};
-
-const printCurrentView = () => {
-  window.print();
 };
 
 </script>
 
 <template>
-  <Head title="Inventory Transactions" />
+  <Head title="Inventory Maintenance" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Maintenance</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
-        <!-- Transactions are typically created via other actions, not directly here -->
-        <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Download class="h-4 w-4" /> Export
-        </a>
-        <button @click="printAllTransactions" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Printer class="h-4 w-4" /> Print All
-        </button>
-        <button @click="printCurrentView" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Printer class="h-4 w-4" /> Print Current
-        </button>
+        <div class="flex items-center gap-2">
+          <!-- Transactions are typically created via other actions, not directly here -->
+          <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+            <Download class="h-4 w-4" /> Export
+          </a>
+          <button @click="generatePdf" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+            <Download class="h-4 w-4" /> PDF
+          </button>
+        </div>
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
@@ -82,7 +77,7 @@ const printCurrentView = () => {
           <input type="text" v-model="search" placeholder="Search transactions..." class="w-full rounded-md border-gray-300 shadow-sm" />
         </div>
 
-        <!-- Inventory Transactions Table -->
+        <!-- Inventory Maintenance Table -->
         <div class="overflow-x-auto">
           <table class="min-w-full text-left text-sm">
             <thead>

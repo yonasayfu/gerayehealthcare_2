@@ -17,13 +17,7 @@ const suppliers = computed(() => {
 const isLoading = ref(true);
 
 onMounted(() => {
-  // Simulate a small delay to allow data to be available
-  setTimeout(() => {
-    isLoading.value = false;
-    if (suppliers.value.length > 0) {
-      window.print();
-    }
-  }, 500);
+  isLoading.value = false;
 });
 
 </script>
