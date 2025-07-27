@@ -44,6 +44,15 @@ watch(filters, () => {
   router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
 }, { deep: true });
 
+const printAllTransactions = () => {
+  const url = route('admin.inventory-transactions.printAll', { ...filters.value });
+  window.open(url, '_blank');
+};
+
+const printCurrentView = () => {
+  window.print();
+};
+
 </script>
 
 <template>
@@ -59,13 +68,10 @@ watch(filters, () => {
         <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
           <Download class="h-4 w-4" /> Export
         </a>
-        <a :href="route('admin.inventory-transactions.generatePdf')" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-          <Download class="h-4 w-4" /> PDF
-        </a>
-        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+        <button @click="printAllTransactions" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
           <Printer class="h-4 w-4" /> Print All
         </button>
-        <button class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+        <button @click="printCurrentView" class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
           <Printer class="h-4 w-4" /> Print Current
         </button>
       </div>

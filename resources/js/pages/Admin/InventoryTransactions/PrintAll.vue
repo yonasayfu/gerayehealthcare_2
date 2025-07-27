@@ -37,35 +37,50 @@ onMounted(() => {
   <Head title="Print All Inventory Transactions" />
 
   <div class="print-document">
-    <div class="print-header">
-      <h1>All Inventory Transactions</h1>
-      <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
+    <div v-if="isLoading" class="loading-indicator">
+      <p>Loading print preview...</p>
     </div>
 
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Type</th>
-          <th>Quantity</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Performed By</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="transaction in inventoryTransactions" :key="transaction.id">
-          <td>{{ transaction.item.name }}</td>
-          <td>{{ transaction.transaction_type }}</td>
-          <td>{{ transaction.quantity }}</td>
-          <td>{{ transaction.from_location }}</td>
-          <td>{{ transaction.to_location }}</td>
-          <td>{{ transaction.performed_by.first_name }} {{ transaction.performed_by.last_name }}</td>
-          <td>{{ transaction.created_at ? format(new Date(transaction.created_at), 'PPP') : '-' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else-if="transactions.length === 0" class="no-data-message">
+      <p>No inventory transactions found to print.</p>
+    </div>
+
+    <div v-else>
+      <div class="print-header">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Healthcare Logo" style="max-width: 150px; margin-bottom: 10px;">
+        <h1>All Inventory Transactions</h1>
+        <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
+
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Performed By</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="transaction in transactions" :key="transaction.id">
+            <td>{{ transaction.item.name }}</td>
+            <td>{{ transaction.transaction_type }}</td>
+            <td>{{ transaction.quantity }}</td>
+            <td>{{ transaction.from_location }}</td>
+            <td>{{ transaction.to_location }}</td>
+            <td>{{ transaction.performed_by.first_name }} {{ transaction.performed_by.last_name }}</td>
+            <td>{{ transaction.created_at ? format(new Date(transaction.created_at), 'PPP') : '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="print-footer">
+        <hr class="my-2 border-gray-300">
+        <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
+    </div>
   </div>
 </template>
 

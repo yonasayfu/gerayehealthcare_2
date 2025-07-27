@@ -199,8 +199,7 @@ const printCurrentRequests = () => {
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> 
         </div>
-      </div>
-  </AppLayout>
+      </AppLayout>
 </template>
 
 <style>
