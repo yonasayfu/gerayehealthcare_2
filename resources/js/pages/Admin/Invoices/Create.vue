@@ -97,13 +97,17 @@ function submit() {
                       </div>
                   </div>
                 </div>
+            <div class="flex justify-end pt-4">
+                    <button type="submit" :disabled="form.processing || form.visit_ids.length === 0" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
+                      Generate Invoice
+                    </button>
+                  </div>
+                </div>
             </form>
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <button type="submit" :disabled="form.processing || form.visit_ids.length === 0" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-              Generate Invoice
-            </button>
+            <!-- The button is now inside the form, so this div can be empty or removed if no other elements are needed here -->
         </div>
 
     </div>
