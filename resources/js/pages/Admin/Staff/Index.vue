@@ -95,7 +95,7 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all staff records here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.staff.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.staff.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add Staff
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
@@ -119,7 +119,7 @@ function toggleSort(field: string) {
             type="text"
             v-model="search"
             placeholder="Search staff..."
-            class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
           />
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>

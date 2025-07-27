@@ -112,7 +112,7 @@ const formatDate = (dateString) => {
             <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Availability Records</h1>
             <p class="text-sm text-muted-foreground">Review and manage all staff availability slots.</p>
         </div>
-        <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+        <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
           <PlusCircle class="h-4 w-4" />
           Add New Slot
         </button>
@@ -126,7 +126,7 @@ const formatDate = (dateString) => {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staff Member</label>
-                <select v-model="filters.staff_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+                <select v-model="filters.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                     <option value="">All Staff</option>
                     <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
                         {{ getStaffFullName(staff) }}
@@ -135,7 +135,7 @@ const formatDate = (dateString) => {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                <select v-model="filters.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+                <select v-model="filters.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                     <option value="">All Statuses</option>
                     <option value="Available">Available</option>
                     <option value="Unavailable">Unavailable</option>
@@ -143,11 +143,11 @@ const formatDate = (dateString) => {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">From Date</label>
-                <input type="date" v-model="filters.start_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+                <input type="date" v-model="filters.start_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">To Date</label>
-                <input type="date" v-model="filters.end_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-800">
+                <input type="date" v-model="filters.end_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
             </div>
         </div>
       </div>
@@ -237,8 +237,8 @@ const formatDate = (dateString) => {
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-4">
-                    <button @click="showModal = false" type="button" class="px-4 py-2 border rounded-md">Cancel</button>
-                    <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
+                    <button @click="showModal = false" type="button" class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100">Cancel</button>
+                    <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-cyan-600 text-white rounded-md disabled:opacity-50 hover:bg-cyan-700">
                         {{ form.processing ? 'Saving...' : 'Save Slot' }}
                     </button>
                 </div>

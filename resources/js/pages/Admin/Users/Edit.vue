@@ -43,7 +43,7 @@ const submit = () => {
                 <select
                   id="role"
                   v-model="form.role"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700"
+                  class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                 >
                   <option v-for="roleName in roles" :key="roleName" :value="roleName">
                     {{ roleName }}
@@ -55,12 +55,9 @@ const submit = () => {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex justify-end space-x-4">
-              <Link :href="route('admin.users.index')" class="px-4 py-2 border rounded-md text-sm font-medium">Cancel</Link>
-              <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50">
-                {{ form.processing ? 'Saving...' : 'Update Role' }}
-              </button>
-            </div>
+            <button type="submit" @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+              {{ form.processing ? 'Saving...' : 'Update Role' }}
+            </button>
         </div>
 
     </div>

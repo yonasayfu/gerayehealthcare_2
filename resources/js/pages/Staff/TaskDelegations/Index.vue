@@ -63,7 +63,7 @@ function markDone(id: number) {
         <button
           type="submit"
           :disabled="form.processing"
-          class="bg-blue-600 text-white px-4 py-2 rounded"
+          class="bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700"
         >
           Add
         </button>

@@ -58,7 +58,7 @@ function submit() {
                 <!-- Title -->
                 <div>
                   <Label for="title">Title</Label>
-                  <Input id="title" v-model="form.title" />
+                  <Input id="title" v-model="form.title" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                   <div v-if="form.errors.title" class="text-red-600 text-xs">{{ form.errors.title }}</div>
                 </div>
 
@@ -102,7 +102,9 @@ function submit() {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <Button @click="submit" :disabled="form.processing">Save</Button>
+            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+              {{ form.processing ? 'Saving...' : 'Save' }}
+            </button>
         </div>
 
     </div>

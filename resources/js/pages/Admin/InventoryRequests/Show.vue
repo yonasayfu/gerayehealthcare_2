@@ -141,9 +141,9 @@ function destroy(id: number) {
               </button>
               <Link
                 :href="route('admin.inventory-requests.edit', inventoryRequest.id)"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition"
+                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
-                <Edit3 class="w-4 h-4" /> Edit Request
+                Edit Request
               </Link>
               <button @click="destroy(inventoryRequest.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
                 <Trash2 class="w-4 h-4" /> Delete Request

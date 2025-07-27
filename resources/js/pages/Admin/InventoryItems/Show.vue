@@ -138,8 +138,8 @@ function downloadPdf() {
                 <Printer class="h-4 w-4" /> Download PDF
               </button>
               <Link :href="route('admin.inventory-items.edit', props.inventoryItem.id)"
-                class="inline-flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm px-4 py-2 rounded-md transition dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                <Edit3 class="w-4 h-4" /> Edit Item
+                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                Edit Item
               </Link>
             </div>
         </div>

@@ -134,7 +134,7 @@ const formatDate = (dateString: string | null) => {
               v-if="visit.status === 'Pending'"
               @click="handleLocationAction(visit, 'check-in')"
               :disabled="processingVisitId === visit.id"
-              class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-md text-sm font-medium transition"
+              class="inline-flex items-center px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 text-white rounded-md text-sm font-medium transition"
             >
               {{ processingVisitId === visit.id ? 'Checking In...' : 'Check In' }}
             </button>

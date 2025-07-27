@@ -102,8 +102,8 @@ const printAllRequests = () => {
             <p class="text-sm text-muted-foreground">Manage all requests for inventory items.</p>
           </div>
           <div class="flex items-center gap-2">
-            <Link :href="route('admin.inventory-requests.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
-              Create New Request
+            <Link :href="route('admin.inventory-requests.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+              + Create New Request
             </Link>
             <a :href="route('admin.inventory-requests.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
               <Download class="h-4 w-4" /> Export

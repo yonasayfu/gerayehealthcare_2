@@ -109,7 +109,7 @@ class InventoryTransactionController extends Controller
 
     public function show(InventoryTransaction $inventoryTransaction)
     {
-        return Inertia::render('Admin/InventoryTransactions/PrintSingle', [
+        return Inertia::render('Admin/InventoryTransactions/Show', [
             'inventoryTransaction' => $inventoryTransaction->load(['item', 'performedBy']),
         ]);
     }

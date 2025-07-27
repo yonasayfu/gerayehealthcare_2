@@ -112,7 +112,7 @@ const chartOptions = {
                   v-if="staff.unpaid_visits_count > 0"
                   @click="processPayout(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost)"
                   :disabled="form.processing && form.staff_id === staff.id"
-                  class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition disabled:opacity-50"
+                  class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-md transition disabled:opacity-50"
                 >
                   <DollarSign class="h-4 w-4" />
                   {{ (form.processing && form.staff_id === staff.id) ? 'Processing...' : 'Process Payout' }}

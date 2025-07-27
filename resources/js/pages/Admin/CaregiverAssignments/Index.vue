@@ -112,7 +112,7 @@ const formatDate = (dateString) => {
           <p class="text-sm text-muted-foreground">Manage all staff and patient assignments here.</p>
         </div>
         <div class="flex flex-wrap gap-2 no-print">
-          <Link :href="route('admin.assignments.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.assignments.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add Assignment
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">

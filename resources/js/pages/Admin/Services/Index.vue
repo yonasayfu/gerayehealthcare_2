@@ -47,7 +47,7 @@ const formatCurrency = (value: number | string) => {
           <h1 class="text-xl font-semibold">Services Price List</h1>
           <p class="text-sm text-muted-foreground">Manage the billable services your organization offers.</p>
         </div>
-        <Link :href="route('admin.services.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+        <Link :href="route('admin.services.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
           <Plus class="h-4 w-4" /> Add New Service
         </Link>
       </div>

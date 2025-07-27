@@ -33,7 +33,7 @@ const formatDate = (dateString: string) => {
           <h1 class="text-xl font-semibold">Invoices</h1>
           <p class="text-sm text-muted-foreground">Review and manage all patient invoices.</p>
         </div>
-        <Link :href="route('admin.invoices.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+        <Link :href="route('admin.invoices.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
           <Plus class="h-4 w-4" /> Create Invoice
         </Link>
       </div>

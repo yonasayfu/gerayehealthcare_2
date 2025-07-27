@@ -107,7 +107,7 @@ const destroy = (id: number) => {
           <p class="text-sm text-muted-foreground">Track and manage maintenance activities for inventory items.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.inventory-maintenance-records.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.inventory-maintenance-records.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add New Record
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">

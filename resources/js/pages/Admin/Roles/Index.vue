@@ -36,7 +36,7 @@ function destroy(id: number) {
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Role Management</h1>
           <p class="text-sm text-muted-foreground">Create and manage user roles and their permissions.</p>
         </div>
-        <Link :href="route('admin.roles.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+        <Link :href="route('admin.roles.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
           + Add New Role
         </Link>
       </div>

@@ -108,7 +108,9 @@ const statusColor = (status: string) => {
             <InputError :message="form.errors.reason" class="mt-2" />
           </div>
           <div class="md:col-span-2">
-            <Button type="submit" :disabled="form.processing">Submit Request</Button>
+            <Button type="submit" :disabled="form.processing" class="bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+              Submit Request
+            </Button>
           </div>
         </form>
       </div>

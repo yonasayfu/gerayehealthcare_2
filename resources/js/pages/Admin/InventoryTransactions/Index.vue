@@ -62,10 +62,10 @@ const generatePdf = () => {
         </div>
         <div class="flex items-center gap-2">
           <!-- Transactions are typically created via other actions, not directly here -->
-          <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Download class="h-4 w-4" /> Export
           </a>
-          <button @click="generatePdf" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+          <button @click="generatePdf" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> PDF
           </button>
         </div>
@@ -74,7 +74,7 @@ const generatePdf = () => {
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
         <!-- Search and Filter Section -->
         <div class="mb-4">
-          <input type="text" v-model="search" placeholder="Search transactions..." class="w-full rounded-md border-gray-300 shadow-sm" />
+          <input type="text" v-model="search" placeholder="Search transactions..." class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
         </div>
 
         <!-- Inventory Maintenance Table -->

@@ -101,7 +101,7 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all medical equipment and supplies.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.inventory-items.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.inventory-items.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add New Item
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">

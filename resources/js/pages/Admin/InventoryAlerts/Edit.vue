@@ -45,14 +45,9 @@ function submit() {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex justify-end space-x-3">
-              <Link :href="route('admin.inventory-alerts.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-muted/30 transition">
-                Cancel
-              </Link>
-              <button @click="submit" :disabled="form.processing" class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-md text-sm font-medium transition">
-                {{ form.processing ? 'Saving...' : 'Save Changes' }}
-              </button>
-            </div>
+            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+              {{ form.processing ? 'Saving...' : 'Save Changes' }}
+            </button>
         </div>
 
     </div>
