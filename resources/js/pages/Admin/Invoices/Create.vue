@@ -32,9 +32,19 @@ watch(selectedPatient, (newPatientId) => {
   });
 });
 
-const submit = () => {
-  form.post(route('admin.invoices.store'));
-};
+function submit() {
+  console.log('Submitting form with data:', form.data()); // Add this line
+  form.post(route('admin.invoices.store'), {
+    onSuccess: () => {
+      console.log('Invoice created successfully!');
+      // Optionally, redirect or show a success message
+    },
+    onError: (errors) => {
+      console.error('Error creating invoice:', errors);
+      // Display errors to the user
+    },
+  });
+}
 </script>
 
 <template>
