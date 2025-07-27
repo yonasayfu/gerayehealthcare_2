@@ -41,7 +41,11 @@ function submit() {
     },
     onError: (errors) => {
       console.error('Error creating invoice:', errors);
-      // Display errors to the user
+      let errorMessage = 'An unknown error occurred.';
+      if (typeof errors === 'object' && errors !== null) {
+        errorMessage = Object.values(errors).flat().join('\n');
+      }
+      alert('Error creating invoice:\n' + errorMessage);
     },
   });
 }
