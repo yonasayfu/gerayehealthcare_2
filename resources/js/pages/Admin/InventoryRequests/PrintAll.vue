@@ -37,33 +37,48 @@ onMounted(() => {
   <Head title="Print All Inventory Requests" />
 
   <div class="print-document">
-    <div class="print-header">
-      <h1>All Inventory Requests</h1>
-      <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
+    <div v-if="isLoading" class="loading-indicator">
+      <p>Loading print preview...</p>
     </div>
 
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th>Requester</th>
-          <th>Item</th>
-          <th>Quantity Requested</th>
-          <th>Status</th>
-          <th>Priority</th>
-          <th>Needed By Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="request in inventoryRequests" :key="request.id">
-          <td>{{ request.requester.first_name }} {{ request.requester.last_name }}</td>
-          <td>{{ request.item.name }}</td>
-          <td>{{ request.quantity_requested }}</td>
-          <td>{{ request.status }}</td>
-          <td>{{ request.priority }}</td>
-          <td>{{ request.needed_by_date ? format(new Date(request.needed_by_date), 'PPP') : '-' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else-if="requests.length === 0" class="no-data-message">
+      <p>No inventory requests found to print.</p>
+    </div>
+
+    <div v-else>
+      <div class="print-header">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Healthcare Logo" style="max-width: 150px; margin-bottom: 10px;">
+        <h1>All Inventory Requests</h1>
+        <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
+
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Requester</th>
+            <th>Item</th>
+            <th>Quantity Requested</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Needed By Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="request in requests" :key="request.id">
+            <td>{{ request.requester.first_name }} {{ request.requester.last_name }}</td>
+            <td>{{ request.item.name }}</td>
+            <td>{{ request.quantity_requested }}</td>
+            <td>{{ request.status }}</td>
+            <td>{{ request.priority }}</td>
+            <td>{{ request.needed_by_date ? format(new Date(request.needed_by_date), 'PPP') : '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="print-footer">
+        <hr class="my-2 border-gray-300">
+        <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
+    </div>
   </div>
 </template>
 

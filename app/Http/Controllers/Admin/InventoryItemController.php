@@ -143,21 +143,7 @@ class InventoryItemController extends Controller
         ]);
     }
 
-    public function generatePdf(Request $request)
-    {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        $inventoryItems = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory-items', ['inventoryItems' => $inventoryItems])->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory_items.pdf');
-    }
+    
 
     /**
      * Show the form for editing the specified resource.

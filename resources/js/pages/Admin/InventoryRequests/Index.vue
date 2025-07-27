@@ -60,24 +60,11 @@ const downloadCsv = () => {
   window.open(route('admin.inventory-requests.export'), '_blank');
 };
 
-const downloadPdf = () => {
-  window.open(route('admin.inventory-requests.generatePdf'), '_blank');
-};
+
 
 const printAllRequests = () => {
-  window.open(route('admin.inventory-requests.printAll'), '_blank');
-};
-
-const printCurrentRequests = () => {
-  console.log('Attempting to print current view...');
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  const url = route('admin.inventory-requests.printAll', { ...props.filters });
+  window.open(url, '_blank');
 };
 
 </script>

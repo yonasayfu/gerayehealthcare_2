@@ -64,22 +64,11 @@ function exportData(type: 'csv') {
   window.open(route('admin.inventory-items.export', { type }), '_blank');
 }
 
-function downloadPdf() {
-  window.open(route('admin.inventory-items.generatePdf'), '_blank');
-}
 
-function printCurrentView() {
-  console.log('Attempting to print current view...');
-  try {
-    window.print();
-  } catch (error) {
-    console.error('Print failed:', error);
-    alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-  }
-}
 
 const printAllInventoryItems = () => {
-    window.open(route('admin.inventory-items.printAll'), '_blank');
+  const url = route('admin.inventory-items.printAll', { ...props.filters });
+  window.open(url, '_blank');
 };
 
 function toggleSort(field: string) {
