@@ -31,110 +31,115 @@ function printPage() {
   <Head :title="`Staff: ${props.staff.first_name} ${props.staff.last_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="p-6 space-y-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Details: {{ staff.first_name }} {{ staff.last_name }}</h1>
-          <p class="text-sm text-muted-foreground">View comprehensive information about this staff member.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Document
-          </button>
-          <Link :href="route('admin.staff.edit', props.staff.id)"
-            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
-            <Edit3 class="w-4 h-4" /> Edit Staff
-          </Link>
-          <!-- Assuming delete functionality might be added later, similar to patients -->
-          <!-- <button @click="destroy(staff.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-            <Trash2 class="w-4 h-4" /> Delete Staff
-          </button> -->
-        </div>
-      </div>
+    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-      <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
-
-        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
-            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home-to-Home Care</h1>
-            <p class="text-gray-600 dark:text-gray-400 print-document-title">Staff Record Document</p>
-            <hr class="my-3 border-gray-300 print:my-2">
+        <div class="flex items-start justify-between p-5 border-b rounded-t">
+            <h3 class="text-xl font-semibold">
+                Staff Details: {{ staff.first_name }} {{ staff.last_name }}
+            </h3>
+            <Link :href="route('admin.staff.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </Link>
         </div>
 
-        <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Staff Identification</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-            <div>
-              <p class="text-sm text-muted-foreground">First Name:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.first_name }}</p>
+        <div class="p-6 space-y-6">
+            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+
+                <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+                    <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home-to-Home Care</h1>
+                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Staff Record Document</p>
+                    <hr class="my-3 border-gray-300 print:my-2">
+                </div>
+
+                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Staff Identification</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+                    <div>
+                      <p class="text-sm text-muted-foreground">First Name:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.first_name }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Last Name:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.last_name }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Email:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.email ?? '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+                    <div>
+                      <p class="text-sm text-muted-foreground">Phone:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.phone ?? '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Employment Details</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+                    <div>
+                      <p class="text-sm text-muted-foreground">Position:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.position ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Department:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.department ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Status:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.status ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Hire Date:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.hire_date ? format(new Date(staff.hire_date), 'PPP') : '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Hourly Rate:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ typeof staff.hourly_rate === 'number' ? `${staff.hourly_rate.toFixed(2)}` : '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">System Information</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+                    <div>
+                      <p class="text-sm text-muted-foreground">Created At:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.created_at ? format(new Date(staff.created_at), 'PPP p') : '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Last Updated:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.updated_at ? format(new Date(staff.updated_at), 'PPP p') : '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
+                    <hr class="my-2 border-gray-300">
+                    <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
+                </div>
+
             </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Last Name:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.last_name }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Email:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.email ?? '-' }}</p>
-            </div>
-          </div>
         </div>
 
-        <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-            <div>
-              <p class="text-sm text-muted-foreground">Phone:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.phone ?? '-' }}</p>
+        <div class="p-6 border-t border-gray-200 rounded-b">
+            <div class="flex flex-wrap gap-2">
+              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+                <Printer class="h-4 w-4" /> Print Document
+              </button>
+              <Link :href="route('admin.staff.edit', props.staff.id)"
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
+                <Edit3 class="w-4 h-4" /> Edit Staff
+              </Link>
             </div>
-          </div>
         </div>
 
-        <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Employment Details</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-            <div>
-              <p class="text-sm text-muted-foreground">Position:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.position ?? '-' }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Department:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.department ?? '-' }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Status:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.status ?? '-' }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Hire Date:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.hire_date ? format(new Date(staff.hire_date), 'PPP') : '-' }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Hourly Rate:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ typeof staff.hourly_rate === 'number' ? `$${staff.hourly_rate.toFixed(2)}` : '-' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">System Information</h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-            <div>
-              <p class="text-sm text-muted-foreground">Created At:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.created_at ? format(new Date(staff.created_at), 'PPP p') : '-' }}</p>
-            </div>
-            <div>
-              <p class="text-sm text-muted-foreground">Last Updated:</p>
-              <p class="font-medium text-gray-900 dark:text-white">{{ staff.updated_at ? format(new Date(staff.updated_at), 'PPP p') : '-' }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
-        </div>
-
-      </div>
     </div>
   </AppLayout>
 </template>
