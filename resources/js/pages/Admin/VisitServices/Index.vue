@@ -9,8 +9,19 @@ import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
 
 const props = defineProps<{
-  visitServices: any
-  filters: any
+  visitServices: {
+    data: Array<any>;
+    links: Array<any>;
+    meta: {
+      current_page: number;
+      from: number;
+      last_page: number;
+      per_page: number;
+      to: number;
+      total: number;
+    };
+  };
+  filters: any;
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -21,7 +32,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
 const search = ref(props.filters.search || '')
 const sortField = ref(props.filters.sort_by || 'scheduled_at')
 const sortDirection = ref(props.filters.sort_direction || 'desc')
-const perPage = ref(props.filters.per_page || 10)
+const perPage = ref(props.visitServices.meta.per_page || 10)
 
 watch([search, sortField, sortDirection, perPage], debounce(() => {
   router.get(route('admin.visit-services.index'), {
@@ -64,7 +75,7 @@ const formatDate = (dateString: string | null) => {
           <p class="text-sm text-muted-foreground">Manage all scheduled patient visits.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.visit-services.create')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.visit-services.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Plus class="h-4 w-4" /> Schedule Visit
           </Link>
         </div>
@@ -116,6 +127,7 @@ const formatDate = (dateString: string | null) => {
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
                   
+                  <Link :href="route('admin.visit-services.show', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500" title="View Details"><Eye class="w-4 h-4" /></Link>
                   <Link :href="route('admin.visit-services.edit', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
                   <button @click="destroy(visit.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Cancel Visit"><Trash2 class="w-4 h-4" /></button>
                 </div>
@@ -128,8 +140,18 @@ const formatDate = (dateString: string | null) => {
         </table>
       </div>
 
-      <!-- THE FIX IS HERE -->
-      <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" class="mt-6 flex justify-center" />
+      <div class="flex justify-between items-center mt-6">
+        <div class="flex items-center gap-2">
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" />
+      </div>
       
     </div>
   </AppLayout>
