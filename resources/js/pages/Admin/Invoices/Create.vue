@@ -96,8 +96,7 @@ function submit() {
                           <input type="date" v-model="form.due_date" id="due_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                       </div>
                   </div>
-                </div>
-            <div class="flex justify-end pt-4">
+                  <div class="flex justify-end pt-4">
                     <button type="submit" :disabled="form.processing || form.visit_ids.length === 0" class="px-4 py-2 bg-green-600 text-white rounded-md disabled:opacity-50">
                       Generate Invoice
                     </button>
