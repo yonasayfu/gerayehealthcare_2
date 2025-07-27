@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
+import axios from 'axios'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
@@ -28,6 +29,7 @@ interface SidebarNavItem {
   href?: string;
   icon: FunctionalComponent<LucideProps>;
   permission?: string;
+  notificationCount?: number; // Add this line
 }
 
 interface SidebarNavGroup {
@@ -98,7 +100,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
       { title: 'Maintenance', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
       { title: 'Transactions', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
-      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts', notificationCount: inventoryAlertCount },
     ],
   },
   {
@@ -215,6 +217,16 @@ const toggleAllGroups = (event?: Event) => {
 }
 
 const isSidebarCollapsed = ref(false);
+const inventoryAlertCount = ref(0);
+
+onMounted(async () => {
+  try {
+    const response = await axios.get(route('admin.inventory-alerts.count'));
+    inventoryAlertCount.value = response.data.count;
+  } catch (error) {
+    console.error('Error fetching inventory alert count:', error);
+  }
+});
 </script>
 
 <template>
@@ -273,6 +285,9 @@ const isSidebarCollapsed = ref(false);
                                             @click.stop>
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
+                                            <span v-if="item.notificationCount && item.notificationCount > 0" class="ml-auto inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                                                {{ item.notificationCount }}
+                                            </span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
