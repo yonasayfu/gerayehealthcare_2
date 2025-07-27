@@ -209,12 +209,25 @@ const statusColor = (status: string) => {
       </div>
 
       <div class="p-5">
-        <div class="mb-4">
-          <Input
-            v-model="searchInput"
-            placeholder="Search by staff name, reason, or status..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-          />
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+          <div class="relative w-full md:w-1/3">
+            <input
+              type="text"
+              v-model="searchInput"
+              placeholder="Search by staff name, reason, or status..."
+              class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
+            />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
+            <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
 
         <div v-if="leaveRequests.data.length > 0" class="overflow-x-auto">
