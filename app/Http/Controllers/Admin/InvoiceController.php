@@ -87,7 +87,7 @@ class InvoiceController extends Controller
                 $invoice->items()->create([
                     'visit_service_id' => $visit->id,
                     'description' => $visit->service_description ?: 'Standard Visit',
-                    'cost' => $visit->cost,
+                    'cost' => $visit->cost ?? 0.00,
                 ]);
 
                 // 4. Mark the visit as having been invoiced
