@@ -66,7 +66,7 @@ const communicationNavGroup: SidebarNavGroup = {
     items: [],
 };
 
-const allAdminNavItems: SidebarNavGroup[] = [
+const allAdminNavItems = computed<SidebarNavGroup[]>(() => [
   {
     group: 'Patient Management',
     icon: UserPlus,
@@ -100,7 +100,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
       { title: 'Maintenance', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
       { title: 'Transactions', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
-      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts', notificationCount: inventoryAlertCount },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts', notificationCount: inventoryAlertCount.value },
     ],
   },
   {
@@ -117,7 +117,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
           { title: 'User Management', routeName: 'admin.users.index', icon: UserCog, permission: 'manage users' },
       ]
   }
-];
+]);
 
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
