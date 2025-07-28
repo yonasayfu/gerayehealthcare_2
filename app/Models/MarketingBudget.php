@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
+
+class MarketingBudget extends Model
+{
+    protected $fillable = [
+        'campaign_id',
+        'platform_id',
+        'budget_name',
+        'description',
+        'allocated_amount',
+        'spent_amount',
+        'period_start',
+        'period_end',
+        'status',
+    ];
+
+    protected $casts = [
+        'period_start' => 'date',
+        'period_end' => 'date',
+    ];
+
+    public function campaign()
+    {
+        return $this->belongsTo(MarketingCampaign::class);
+    }
+
+    public function platform()
+    {
+        return $this->belongsTo(MarketingPlatform::class);
+    }
+}

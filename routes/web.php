@@ -225,3 +225,4 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
 // Auth & Settings
 require __DIR__ . '/auth.php';
 require __DIR__ . '/settings.php';
+require __DIR__ . '/marketing.php';

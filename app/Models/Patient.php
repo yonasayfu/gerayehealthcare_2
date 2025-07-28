@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\LeadSource;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingLead;
 use Illuminate\Support\Facades\DB; // Import DB facade for transactions
 
 class Patient extends Model
@@ -25,10 +28,19 @@ class Patient extends Model
         'geolocation',
         'patient_code', // It's good to keep this fillable too, in case you manually set it sometimes
         'registered_by_staff_id', // Add if using staff to register patients
+        'acquisition_source_id',
+        'marketing_campaign_id',
+        'utm_campaign',
+        'utm_source',
+        'utm_medium',
+        'lead_id',
+        'acquisition_cost',
+        'acquisition_date',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
+        'acquisition_date' => 'datetime',
     ];
 
     /**
@@ -100,6 +112,21 @@ class Patient extends Model
     {
         // Adjust 'App\Models\Staff' if your Staff model is in a different namespace
         return $this->belongsTo(Staff::class, 'registered_by_staff_id');
+    }
+
+    public function acquisitionSource()
+    {
+        return $this->belongsTo(LeadSource::class, 'acquisition_source_id');
+    }
+
+    public function marketingCampaign()
+    {
+        return $this->belongsTo(MarketingCampaign::class, 'marketing_campaign_id');
+    }
+
+    public function lead()
+    {
+        return $this->belongsTo(MarketingLead::class, 'lead_id');
     }
 
 }

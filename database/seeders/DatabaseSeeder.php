@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class, 
             LeaveRequestSeeder::class,
             InventorySeeder::class,
+            MarketingModuleMainSeeder::class,
         ]);
 
         // Create sample data using factories

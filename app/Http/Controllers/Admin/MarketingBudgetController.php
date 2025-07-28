@@ -1,0 +1,122 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreMarketingBudgetRequest;
+use App\Http\Requests\UpdateMarketingBudgetRequest;
+use App\Models\MarketingBudget;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class MarketingBudgetController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request): \Inertia\Response
+    {
+        $query = MarketingBudget::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('budget_name', 'ilike', "%{$search}%");
+        }
+
+        // Filtering
+        if ($request->filled('campaign_id')) {
+            $query->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('platform_id')) {
+            $query->where('platform_id', $request->input('platform_id'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('period_start')) {
+            $query->where('period_start', '>=', $request->input('period_start'));
+        }
+        if ($request->filled('period_end')) {
+            $query->where('period_end', '<=', $request->input('period_end'));
+        }
+
+        // Sorting
+        if ($request->filled('sort') && !empty($request->input('sort'))) {
+            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $marketingBudgets = $query->with(['campaign', 'platform'])
+                                   ->paginate($request->input('per_page', 10))
+                                   ->withQueryString();
+
+        return Inertia::render('Admin/MarketingBudgets/Index', [
+            'marketingBudgets' => $marketingBudgets,
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'platform_id', 'status', 'period_start', 'period_end']),
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return Inertia::render('Admin/MarketingBudgets/Create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreMarketingBudgetRequest $request)
+    {
+        MarketingBudget::create($request->validated());
+
+        return redirect()->route('admin.marketing-budgets.index')->with('success', 'Marketing Budget created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(MarketingBudget $marketingBudget)
+    {
+        $marketingBudget->load(['campaign', 'platform']);
+
+        return Inertia::render('Admin/MarketingBudgets/Show', [
+            'marketingBudget' => $marketingBudget,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(MarketingBudget $marketingBudget)
+    {
+        $marketingBudget->load(['campaign', 'platform']);
+
+        return Inertia::render('Admin/MarketingBudgets/Edit', [
+            'marketingBudget' => $marketingBudget,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateMarketingBudgetRequest $request, MarketingBudget $marketingBudget)
+    {
+        $marketingBudget->update($request->validated());
+
+        return redirect()->route('admin.marketing-budgets.index')->with('success', 'Marketing Budget updated successfully.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(MarketingBudget $marketingBudget)
+    {
+        $marketingBudget->delete();
+
+        return back()->with('success', 'Marketing Budget deleted successfully.');
+    }
+}

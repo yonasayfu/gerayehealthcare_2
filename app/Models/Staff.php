@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\MarketingTask;
 
 class Staff extends Model
 {
@@ -90,5 +91,10 @@ class Staff extends Model
     public function leaveRequests(): HasMany // <-- ADD THIS FUNCTION
     {
         return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function doctorTasks(): HasMany
+    {
+        return $this->hasMany(MarketingTask::class, 'doctor_id');
     }
 }
