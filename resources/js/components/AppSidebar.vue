@@ -123,10 +123,10 @@ const allAdminNavItems = computed<SidebarNavGroup[]>(() => {
 
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
-        return allAdminNavItems;
+        return allAdminNavItems.value;
     }
     if (isAdmin.value) {
-        return allAdminNavItems.filter(group => !group.superAdminOnly);
+        return allAdminNavItems.value.filter(group => !group.superAdminOnly);
     }
     if (isStaff.value) {
         return [
