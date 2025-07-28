@@ -162,6 +162,9 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
             ->parameters(['admin-leave-requests' => 'leave_request'])
             ->only(['index', 'update']);
 
+        // Global Search
+        Route::get('global-search', [App\Http\Controllers\Admin\GlobalSearchController::class, 'search'])->name('global-search');
+
         // Task Delegations (Admin)
         Route::get('task-delegations/export', [AdminTaskController::class, 'export'])
             ->name('task-delegations.export');

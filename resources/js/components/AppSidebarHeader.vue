@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import axios from 'axios'
 import { eventBus } from '@/lib/eventBus'
 import { Bell, MessageSquareText, Search, Settings, PanelLeft } from 'lucide-vue-next'
+import GlobalSearch from '@/components/GlobalSearch.vue'; // Import GlobalSearch
 import { formatDistanceToNow } from 'date-fns'
 import NavUser from '@/components/NavUser.vue'
 import ThemeToggler from '@/components/ThemeToggler.vue'
@@ -95,8 +96,7 @@ onUnmounted(() => {
                 </BreadcrumbList>
             </Breadcrumb>
             <div class="relative flex-1 max-w-sm ml-4"> <!-- Added ml-4 for spacing -->
-                <Search class="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input placeholder="Search..." class="w-full pl-10 pr-4" />
+                <GlobalSearch />
             </div>
         </div>
         <div class="flex items-center gap-4 ml-auto">
