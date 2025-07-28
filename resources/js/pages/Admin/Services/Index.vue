@@ -20,7 +20,10 @@ const props = defineProps<{
       total: number;
     };
   };
-  filters: any;
+  filters: { // Add filters prop with a default empty object
+    type: Object,
+    default: () => ({}),
+  },
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [

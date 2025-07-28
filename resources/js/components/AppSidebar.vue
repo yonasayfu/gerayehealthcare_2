@@ -29,7 +29,7 @@ interface SidebarNavItem {
   href?: string;
   icon: FunctionalComponent<LucideProps>;
   permission?: string;
-  notificationCount?: number; // Add this line
+  notificationCount?: number;
 }
 
 interface SidebarNavGroup {
@@ -285,9 +285,6 @@ onMounted(async () => {
                                             @click.stop>
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
-                                            <span v-if="item.notificationCount && item.notificationCount > 0" class="ml-auto inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                                                {{ item.notificationCount }}
-                                            </span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
