@@ -22,8 +22,15 @@ const breadcrumbs = [
 
 const props = defineProps<{
   maintenanceRecords: InventoryMaintenanceRecordPagination;
-  filters: InventoryMaintenanceRecordFilters;
-}>();
+  filters: {
+    type: Object,
+    default: () => ({
+      search: '',
+      sort: '',
+      direction: 'asc',
+      per_page: 10,
+    }),
+  },
 
 const search = ref(props.filters.search || '');
 const sortField = ref(props.filters.sort || '');

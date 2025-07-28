@@ -22,7 +22,13 @@ const props = defineProps<{
       total: number;
     };
   };
-}>();
+  filters: {
+    type: Object,
+    default: () => ({
+      search: '',
+      per_page: 10,
+    }),
+  },
 
 const search = ref(props.filters.search || '');
 const perPage = ref(props.inventoryAlerts.meta.per_page || 10);

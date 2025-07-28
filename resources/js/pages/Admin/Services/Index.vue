@@ -20,9 +20,14 @@ const props = defineProps<{
       total: number;
     };
   };
-  filters: { // Add filters prop with a default empty object
+  filters: {
     type: Object,
-    default: () => ({}),
+    default: () => ({
+      search: '',
+      sort_by: '',
+      sort_order: 'asc',
+      per_page: 10,
+    }),
   },
 }>();
 

@@ -20,12 +20,14 @@ import { ChevronUp, ChevronDown } from 'lucide-vue-next';
 const props = defineProps<{
   leaveRequests: LeaveRequestsPagination;
   filters: {
-    search: string | null;
-    sort_by: string;
-    sort_order: 'asc' | 'desc';
-    per_page: number;
-  };
-}>();
+    type: Object,
+    default: () => ({
+      search: '',
+      sort_by: 'created_at',
+      sort_order: 'desc',
+      per_page: 10,
+    }),
+  },
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: route('dashboard') },

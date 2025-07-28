@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
@@ -28,7 +28,6 @@ interface SidebarNavItem {
   href?: string;
   icon: FunctionalComponent<LucideProps>;
   permission?: string;
-  notificationCount?: number;
 }
 
 interface SidebarNavGroup {
@@ -65,61 +64,58 @@ const communicationNavGroup: SidebarNavGroup = {
     items: [],
 };
 
-const allAdminNavItems = computed<SidebarNavGroup[]>(() => {
-  const items: SidebarNavGroup[] = [
+const allAdminNavItems: SidebarNavGroup[] = [
+  {
+    group: 'Patient Management',
+    icon: UserPlus,
+    items: [
+      { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
+      { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
+      { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
+      { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
+    ],
+  },
+  communicationNavGroup,
+  {
+    group: 'Administrative Tools',
+    icon: UserCog,
+    items: [
+      { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
+      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
+      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
+      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
+      { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
+      { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
+    ],
+  },
+  {
+    group: 'Inventory Management',
+    icon: Warehouse,
+    items: [
+      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
+      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
+      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
+      { title: 'Maintenance', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
+      { title: 'Transactions', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+    ],
+  },
+  {
+    group: 'Integrations',
+    icon: Globe2,
+    items: [],
+  },
     {
-      group: 'Patient Management',
-      icon: UserPlus,
+      group: 'System Management',
+      icon: Settings,
+      superAdminOnly: true,
       items: [
-        { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
-        { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
-        { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
-        { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
-      ],
-    },
-    communicationNavGroup,
-    {
-      group: 'Administrative Tools',
-      icon: UserCog,
-      items: [
-        { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
-        { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
-        { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
-        { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
-        { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-        { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
-        { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
-      ],
-    },
-    {
-      group: 'Inventory Management',
-      icon: Warehouse,
-      items: [
-        { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
-        { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
-        { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
-        { title: 'Maintenance', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
-        { title: 'Transactions', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
-        { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts', notificationCount: inventoryAlertCount.value },
-      ],
-    },
-    {
-      group: 'Integrations',
-      icon: Globe2,
-      items: [],
-    },
-      {
-        group: 'System Management',
-        icon: Settings,
-        superAdminOnly: true,
-        items: [
-            { title: 'Role Management', routeName: 'admin.roles.index', icon: Users, permission: 'manage roles' },
-            { title: 'User Management', routeName: 'admin.users.index', icon: UserCog, permission: 'manage users' },
-        ]
-    }
-  ];
-  return items;
-});
+          { title: 'Role Management', routeName: 'admin.roles.index', icon: Users, permission: 'manage roles' },
+          { title: 'User Management', routeName: 'admin.users.index', icon: UserCog, permission: 'manage users' },
+      ]
+  }
+];
 
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
@@ -219,16 +215,6 @@ const toggleAllGroups = (event?: Event) => {
 }
 
 const isSidebarCollapsed = ref(false);
-const inventoryAlertCount = ref(0);
-
-onMounted(async () => {
-  try {
-    const response = await axios.get(route('admin.inventory-alerts.count'));
-    inventoryAlertCount.value = response.data.count;
-  } catch (error) {
-    console.error('Error fetching inventory alert count:', error);
-  }
-});
 </script>
 
 <template>

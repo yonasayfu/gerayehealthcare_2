@@ -30,22 +30,15 @@ const { taskDelegations, filters } = defineProps<{
     };
   }
   filters: {
-    search: string | null
-    sort_by: string
-    sort_order: 'asc' | 'desc'
-    per_page: number
-  }
+    type: Object,
+    default: () => ({
+      search: '',
+      sort_by: 'due_date',
+      sort_order: 'asc',
+      per_page: 10,
+    }),
+  },
 }>()
-
-// Breadcrumb trail
-const breadcrumbs = [
-  { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Task Delegations', href: route('admin.task-delegations.index') },
-]
-
-// ————————————————
-// 2. Reactive search & sort state
-// ————————————————
 const search    = ref(filters.search || '')
 const sortBy    = ref(filters.sort_by)
 const sortOrder = ref(filters.sort_order)
