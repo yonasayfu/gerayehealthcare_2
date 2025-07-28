@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
