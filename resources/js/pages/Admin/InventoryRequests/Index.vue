@@ -105,13 +105,13 @@ const printAllRequests = () => {
             <Link :href="route('admin.inventory-requests.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md font-semibold shadow-sm transition">
               + Create New Request
             </Link>
-            <a :href="route('admin.inventory-requests.export')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md font-semibold shadow-sm transition">
+            <Link :href="route('admin.inventory-requests.export')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
               <Download class="h-4 w-4" /> Export CSV
-            </a>
-            <a :href="route('admin.inventory-requests.generatePdf')" target="_blank" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md font-semibold shadow-sm transition">
+            </Link>
+            <Link :href="route('admin.inventory-requests.generatePdf')" target="_blank" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
               <Download class="h-4 w-4" /> Export PDF
-            </a>
-            <button @click="printAllRequests" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md font-semibold shadow-sm transition">
+            </Link>
+            <button @click="printAllRequests" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
               <Printer class="h-4 w-4" /> Print All
             </button>
           </div>

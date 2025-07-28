@@ -35,7 +35,7 @@ const filters = ref({
   end_date: props.filters.end_date || '',
   sort: props.filters.sort || 'start_time',
   direction: props.filters.direction || 'desc',
-  per_page: props.availabilities.meta.per_page || 10,
+  per_page: props.availabilities?.meta?.per_page || 10,
 })
 
 // Watch for changes and trigger API request
@@ -211,35 +211,35 @@ const formatDate = (dateString) => {
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-75" @click.self="showModal = false">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.5);" @click.self="showModal = false">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-2xl">
             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {{ isEditMode ? 'Edit' : 'Create' }} Availability Slot
             </h3>
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium">Staff Member</label>
-                    <select v-model="form.staff_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staff Member</label>
+                    <select v-model="form.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                         <option disabled value="">Please select a staff member</option>
                         <option v-for="staff in staffList" :key="staff.id" :value="staff.id">{{ getStaffFullName(staff) }}</option>
                     </select>
                     <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">{{ form.errors.staff_id }}</div>
                 </div>
                  <div>
-                    <label class="block text-sm font-medium">Status</label>
-                    <select v-model="form.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                    <select v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                         <option>Available</option>
                         <option>Unavailable</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium">Start Time</label>
-                    <input type="datetime-local" v-model="form.start_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700" />
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Time</label>
+                    <input type="datetime-local" v-model="form.start_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                     <div v-if="form.errors.start_time" class="text-red-500 text-sm mt-1">{{ form.errors.start_time }}</div>
                 </div>
                  <div>
-                    <label class="block text-sm font-medium">End Time</label>
-                    <input type="datetime-local" v-model="form.end_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700" />
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Time</label>
+                    <input type="datetime-local" v-model="form.end_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                     <div v-if="form.errors.end_time" class="text-red-500 text-sm mt-1">{{ form.errors.end_time }}</div>
                 </div>
                 
