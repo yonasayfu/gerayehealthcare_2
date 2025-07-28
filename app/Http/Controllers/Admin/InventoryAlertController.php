@@ -33,7 +33,10 @@ class InventoryAlertController extends Controller
 
         return Inertia::render('Admin/InventoryAlerts/Index', [
             'inventoryAlerts' => $inventoryAlerts,
-            'filters' => $request->only(['search', 'per_page']),
+            'filters' => [
+                'search' => $request->input('search'),
+                'per_page' => $request->input('per_page', 10),
+            ],
         ]);
     }
 
