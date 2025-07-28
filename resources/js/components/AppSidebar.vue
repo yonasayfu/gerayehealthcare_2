@@ -39,6 +39,11 @@ interface SidebarNavGroup {
 
 import { type AppPageProps } from '@/types';
 
+const props = defineProps<{
+  unreadCount?: number;
+  inventoryAlertCount?: number; // Add this line
+}>()
+
 const page = usePage<AppPageProps>();
 const user = computed(() => page.props.auth.user);
 const userRoles = computed(() => user.value?.roles || []);
@@ -96,8 +101,8 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
       { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
       { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
-      { title: 'Maintenance', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
-      { title: 'Transactions', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
       { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
     ],
   },
@@ -119,10 +124,10 @@ const allAdminNavItems: SidebarNavGroup[] = [
 
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
-        return allAdminNavItems.value;
+        return allAdminNavItems;
     }
     if (isAdmin.value) {
-        return allAdminNavItems.value.filter(group => !group.superAdminOnly);
+        return allAdminNavItems.filter(group => !group.superAdminOnly);
     }
     if (isStaff.value) {
         return [
@@ -273,6 +278,7 @@ const isSidebarCollapsed = ref(false);
                                             @click.stop>
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
+                                            <span v-if="item.title === 'Alerts' && inventoryAlertCount > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>

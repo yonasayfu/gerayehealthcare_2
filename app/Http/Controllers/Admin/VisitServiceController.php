@@ -97,6 +97,13 @@ class VisitServiceController extends Controller
         return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
     }
 
+    public function show(VisitService $visitService): Response
+    {
+        return Inertia::render('Admin/VisitServices/Show', [
+            'visitService' => $visitService->load(['patient', 'staff']),
+        ]);
+    }
+
     public function edit(VisitService $visitService): Response
     {
         return Inertia::render('Admin/VisitServices/Edit', [

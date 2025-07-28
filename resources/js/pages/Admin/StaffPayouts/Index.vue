@@ -110,6 +110,21 @@ const chartOptions = {
         <p class="text-sm text-muted-foreground">Review earnings, performance metrics, and process payments for staff.</p>
       </div>
 
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="relative w-full md:w-1/3">
+          <!-- Search input can go here if needed in the future -->
+        </div>
+        <div class="flex items-center gap-2">
+          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
+          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
            <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
@@ -123,7 +138,7 @@ const chartOptions = {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="staff in staffWithEarnings" :key="staff.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <tr v-for="staff in staffWithEarnings?.data" :key="staff.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
               <td class="px-6 py-4 font-medium">{{ staff.first_name }} {{ staff.last_name }}</td>
               <td class="px-6 py-4 text-center">{{ staff.unpaid_visits_count }}</td>
               <td class="px-6 py-4 text-center">{{ staff.unique_patients_count }}</td>
@@ -142,7 +157,7 @@ const chartOptions = {
                 <span v-else class="text-xs text-gray-400">No pending payments</span>
               </td>
             </tr>
-            <tr v-if="staffWithEarnings.length === 0">
+            <tr v-if="staffWithEarnings?.data?.length === 0">
               <td colspan="6" class="text-center px-6 py-4 text-gray-400">No staff with unpaid visits found.</td>
             </tr>
           </tbody>
@@ -150,16 +165,7 @@ const chartOptions = {
       </div>
 
       <div class="flex justify-between items-center mt-6">
-        <div class="flex items-center gap-2">
-          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
-          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-        <Pagination v-if="staffWithEarnings.data.length > 0" :links="staffWithEarnings.links" />
+        <Pagination v-if="staffWithEarnings?.data?.length > 0" :links="staffWithEarnings.links" />
       </div>
 
        <div v-if="performanceData.length > 0" class="p-4 bg-white dark:bg-gray-900 rounded-lg shadow h-80">

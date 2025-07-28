@@ -211,7 +211,7 @@ const formatDate = (dateString) => {
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50" @click.self="showModal = false">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 dark:bg-opacity-75" @click.self="showModal = false">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {{ isEditMode ? 'Edit' : 'Create' }} Availability Slot

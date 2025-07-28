@@ -57,7 +57,7 @@ class LeaveRequestController extends Controller
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        $leaveRequests = $query->paginate(15)->withQueryString();
+        $leaveRequests = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/LeaveRequests/Index', [
             'leaveRequests' => $leaveRequests,

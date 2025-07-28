@@ -31,6 +31,7 @@ const props = defineProps<{
       per_page: 10,
     }),
   },
+}>();
 
 const search = ref(props.filters.search || '');
 const sortField = ref(props.filters.sort || '');
@@ -220,15 +221,6 @@ const destroy = (id: number) => {
       </div>
 
       <div class="flex justify-between items-center mt-6">
-        <div class="flex items-center gap-2">
-          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
-          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
         <Pagination v-if="maintenanceRecords.data.length > 0" :links="maintenanceRecords.links" />
       </div>
       

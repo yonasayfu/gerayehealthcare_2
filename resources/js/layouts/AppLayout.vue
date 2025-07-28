@@ -17,6 +17,7 @@ withDefaults(defineProps<Props>(), {
 
 const notifications = ref<any[]>([]);
 const unreadCount = ref(0);
+const inventoryAlertCount = ref(0); // New ref for inventory alerts
 const showNotifications = ref(false);
 
 const fetchNotifications = async () => {
@@ -26,6 +27,16 @@ const fetchNotifications = async () => {
     unreadCount.value = response.data.unread_count;
   } catch (error) {
     console.error('Error fetching notifications:', error);
+  }
+};
+
+const fetchInventoryAlertCount = async () => {
+  try {
+    const response = await axios.get(route('admin.inventory-alerts.count'));
+    inventoryAlertCount.value = response.data.count;
+    
+  } catch (error) {
+    console.error('Error fetching inventory alert count:', error);
   }
 };
 
@@ -43,6 +54,7 @@ const markAsRead = async (notificationId: string, conversationId: number | null 
 
 onMounted(() => {
   fetchNotifications();
+  fetchInventoryAlertCount(); // Fetch inventory alert count on mount
   // Optionally, poll for new notifications every X seconds
   // setInterval(fetchNotifications, 30000); // e.g., every 30 seconds
 });
@@ -53,7 +65,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <AppSidebarLayout :breadcrumbs="breadcrumbs">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount">
     <slot />
   </AppSidebarLayout>
 </template>

@@ -18,8 +18,8 @@ class InventoryRequestFactory extends Factory
     public function definition(): array
     {
         return [
-            'requester_id' => \App\Models\Staff::factory(),
-            'approver_id' => \App\Models\Staff::factory(),
+            'requester_id' => \App\Models\Staff::all()->random()->id,
+            'approver_id' => \App\Models\Staff::all()->random()->id,
             'item_id' => \App\Models\InventoryItem::factory(),
             'quantity_requested' => $this->faker->numberBetween(1, 5),
             'quantity_approved' => $this->faker->numberBetween(1, 5),

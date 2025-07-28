@@ -3,7 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Pagination from '@/components/Pagination.vue'; // Import the component
-import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip, MapPin, FileText } from 'lucide-vue-next'
+import { Edit3, Trash2, ArrowUpDown, Plus, Paperclip, MapPin, FileText, Eye } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
@@ -32,7 +32,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
 const search = ref(props.filters.search || '')
 const sortField = ref(props.filters.sort_by || 'scheduled_at')
 const sortDirection = ref(props.filters.sort_direction || 'desc')
-const perPage = ref(props.visitServices.meta.per_page || 10)
+const perPage = ref(props.visitServices?.meta?.per_page || 10)
 
 watch([search, sortField, sortDirection, perPage], debounce(() => {
   router.get(route('admin.visit-services.index'), {

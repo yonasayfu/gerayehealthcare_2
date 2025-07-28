@@ -28,6 +28,7 @@ const props = defineProps<{
       per_page: 10,
     }),
   },
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -53,13 +54,6 @@ watch(searchInput, (newValue) => {
 
 // Function to apply filters (search and sort)
 const applyFilters = (options?: { preserveState?: boolean; preserveScroll?: boolean }) => {
-  console.log('Applying filters (manual trigger):', {
-    search: searchInput.value,
-    sort_by: currentSortBy.value,
-    sort_order: currentSortOrder.value,
-    options
-  }); // Debug log for filters
-
   router.get(
     route('admin.admin-leave-requests.index'),
     {
@@ -111,39 +105,19 @@ const form = useForm({
 
 // Function to open the dialog and set the selected request
 const openUpdateDialog = (request: LeaveRequest, status: 'Approved' | 'Denied') => {
-  console.log('--- openUpdateDialog Triggered ---');
-  console.log('Request object received:', request);
-  console.log('Intended status for form:', status); // Make sure this is 'Approved' or 'Denied'
-
   selectedRequest.value = request;
   form.status = status; // This should set 'Approved' or 'Denied'
   form.admin_notes = request.admin_notes || ''; // Ensure notes are pre-filled if existing
   isDialogOpen.value = true; // THIS IS KEY: Set to true to open the dialog
-
-  console.log('selectedRequest.value SET TO:', selectedRequest.value);
-  console.log('form.status SET TO:', form.status); // Verify it's set correctly here
-  console.log('isDialogOpen SET TO:', isDialogOpen.value);
-  console.log('-------------------------------');
 };
 
 // Function to submit the update
 const updateRequestStatus = () => {
-  console.log('updateRequestStatus function entered.'); // New debug log
   if (!selectedRequest.value) {
     console.error('ERROR: No selectedRequest.value. Dialog should not have been confirmed without one.');
     isDialogOpen.value = false; // Close dialog if somehow opened without request
     return;
   }
-
-  console.log('--- updateRequestStatus Triggered (Submitting) ---');
-  console.log('Request ID for submission:', selectedRequest.value.id);
-  console.log('Form data being sent:');
-  console.log('  Status:', form.status); // Verify THIS value just before sending
-  console.log('  Admin Notes:', form.admin_notes);
-  console.log('  Form processing state:', form.processing);
-  console.log('-------------------------------');
-
-  
 
   form.put(route('admin.admin-leave-requests.update', selectedRequest.value.id), {
     preserveScroll: true,
@@ -151,14 +125,8 @@ const updateRequestStatus = () => {
     // When the backend responds with Inertia::location, it automatically performs a new GET request
     // and updates the page props. So, we don't need to manually trigger applyFilters() here.
     onSuccess: (page) => {
-      console.log('--- Inertia PUT request SUCCESS! ---');
-      console.log('Backend instructed Inertia::location to refresh.');
-      // The page props are already refreshed by the Inertia::location call from the backend.
       isDialogOpen.value = false; // Close the dialog
       form.reset(); // Reset form fields
-      console.log('Dialog closed, form reset.');
-      console.log('-------------------------------');
-      // Flash message will be available in AppLayout's usePage().props.flash.success
     },
     onError: (errors) => {
       console.error('--- Inertia PUT request FAILED! ---');
@@ -169,11 +137,8 @@ const updateRequestStatus = () => {
       } else {
         alert('An unknown error occurred during update. Check console and network tab.');
       }
-      console.log('-------------------------------');
     },
     onFinish: () => {
-      console.log('--- Inertia PUT request finished (success or failure). ---');
-      console.log('-------------------------------');
     }
   });
 };
@@ -292,15 +257,6 @@ const statusColor = (status: string) => {
           <p>There are no leave requests to review.</p>
         </div>
         <div class="flex justify-between items-center mt-4">
-          <div class="flex items-center gap-2">
-            <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
-            <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
           <Pagination v-if="leaveRequests.data.length > 0" :links="leaveRequests.links" />
         </div>
       </div>

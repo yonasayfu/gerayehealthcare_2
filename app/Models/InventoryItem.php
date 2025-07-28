@@ -25,6 +25,8 @@ class InventoryItem extends Model
         'maintenance_schedule',
         'notes',
         'status',
+        'quantity_on_hand',
+        'reorder_level',
     ];
 
     public function supplier()

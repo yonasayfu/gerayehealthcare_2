@@ -37,7 +37,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
 ];
 
 const search = ref(props.filters.search || '');
-const perPage = ref(props.services.meta.per_page || 10);
+const perPage = ref(props.services?.meta?.per_page || 10);
 
 watch([search, perPage], debounce(([searchValue, perPageValue]) => {
     router.get(route('admin.services.index'), { search: searchValue, per_page: perPageValue }, {

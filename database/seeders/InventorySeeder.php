@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Supplier;
 use App\Models\InventoryItem;
@@ -19,6 +20,9 @@ class InventorySeeder extends Seeder
      */
     public function run(): void
     {
+        DB::statement('TRUNCATE TABLE inventory_alerts RESTART IDENTITY CASCADE;');
+        DB::statement('TRUNCATE TABLE inventory_items RESTART IDENTITY CASCADE;');
+
         Supplier::factory(5)->create();
         InventoryItem::factory(20)->create();
         InventoryRequest::factory(15)->create();

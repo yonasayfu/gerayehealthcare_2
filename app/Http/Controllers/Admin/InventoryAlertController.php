@@ -29,7 +29,7 @@ class InventoryAlertController extends Controller
                   ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
         }
 
-        $inventoryAlerts = $query->paginate(10);
+        $inventoryAlerts = $query->paginate($perPage);
 
         return Inertia::render('Admin/InventoryAlerts/Index', [
             'inventoryAlerts' => $inventoryAlerts,

@@ -20,7 +20,6 @@ createInertiaApp({
             .component('AppLayout', AppLayout)
             .mount(el);
     },
-    progress: {
         color: '#4B5563',
     },
 });

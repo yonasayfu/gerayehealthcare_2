@@ -1,47 +1,41 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2, Package, User, Calendar, Tag } from 'lucide-vue-next'
-import type { BreadcrumbItemType } from '@/types'
-import { format } from 'date-fns'
+import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
+import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
+import { format } from 'date-fns' // For date formatting
+
 
 const props = defineProps<{
-  inventoryTransaction: any; // Define a more specific type if available
+  inventoryTransaction: any; // Ideally, define a more specific type for inventory transaction data
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Inventory Transactions', href: route('admin.inventory-transactions.index') },
-  { title: `Transaction: ${props.inventoryTransaction.id}`, href: route('admin.inventory-transactions.show', props.inventoryTransaction.id) },
+  { title: props.inventoryTransaction.id, href: route('admin.inventory-transactions.show', props.inventoryTransaction.id) },
 ]
 
 function printPage() {
+  // Add a small delay to ensure the DOM is ready for printing.
+  // This can sometimes resolve issues where the print dialog doesn't appear
+  // or content is not rendered correctly.
   setTimeout(() => {
     try {
       window.print();
     } catch (error) {
       console.error('Print failed:', error);
+      // Optionally, provide user feedback if print fails
       alert('Failed to open print dialog. Please check your browser settings or try again.');
     }
-  }, 100);
+  }, 100); // 100ms delay
 }
 
 function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this inventory transaction record?')) {
+  if (confirm('Are you sure you want to delete this transaction?')) {
     router.delete(route('admin.inventory-transactions.destroy', id))
   }
 }
-
-const formatDate = (dateString: string | null) => {
-  if (!dateString) return 'N/A';
-  return format(new Date(dateString), 'MMM dd, yyyy');
-};
-
-const formatDateTime = (dateString: string | null) => {
-  if (!dateString) return 'N/A';
-  return format(new Date(dateString), 'MMM dd, yyyy hh:mm a');
-};
-
 </script>
 
 <template>
@@ -52,7 +46,7 @@ const formatDateTime = (dateString: string | null) => {
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Inventory Transaction Details: #{{ inventoryTransaction.id }}
+                Inventory Transaction Details: {{ inventoryTransaction.id }}
             </h3>
             <Link :href="route('admin.inventory-transactions.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -65,7 +59,7 @@ const formatDateTime = (dateString: string | null) => {
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                     <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
-                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Transaction Record Document</p>
+                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Transaction Document</p>
                     <hr class="my-3 border-gray-300 print:my-2">
                 </div>
 
@@ -73,68 +67,46 @@ const formatDateTime = (dateString: string | null) => {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Transaction Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Transaction ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">#{{ inventoryTransaction.id }}</p>
-                    </div>
-                    <div>
                       <p class="text-sm text-muted-foreground">Item:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.item?.name ?? 'N/A' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.item?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Transaction Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.transaction_type ?? 'N/A' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.transaction_type ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Quantity:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.quantity ?? 'N/A' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.quantity ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">From Location:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.from_location ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">To Location:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.to_location ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Performed By:</p>
                       <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.performed_by?.first_name }} {{ inventoryTransaction.performed_by?.last_name }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ formatDateTime(inventoryTransaction.created_at) }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Locations & Assignments</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">From Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.from_location ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">To Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.to_location ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">From Assigned To Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.from_assigned_to_type ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">From Assigned To ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.from_assigned_to_id ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">To Assigned To Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.to_assigned_to_type ?? 'N/A' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">To Assigned To ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.to_assigned_to_id ?? 'N/A' }}</p>
+                      <p class="text-sm text-muted-foreground">Notes:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.notes ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
-                  <div class="grid grid-cols-1 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div class="col-span-full">
-                      <p class="text-sm text-muted-foreground">Notes:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.notes ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Administrative Details</h2>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+                    <div>
+                      <p class="text-sm text-muted-foreground">Created At:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.created_at ? format(new Date(inventoryTransaction.created_at), 'PPP p') : '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Updated At:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.updated_at ? format(new Date(inventoryTransaction.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -142,7 +114,7 @@ const formatDateTime = (dateString: string | null) => {
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
                     <hr class="my-2 border-gray-300">
                     <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
-                </div>
+                    </div>
 
             </div>
         </div>
@@ -152,6 +124,13 @@ const formatDateTime = (dateString: string | null) => {
               <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
+              <!-- Edit route for inventory transactions is not defined in web.php, so I'm commenting this out -->
+              <!-- <Link
+                :href="route('admin.inventory-transactions.edit', inventoryTransaction.id)"
+                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              >
+                Edit Transaction
+              </Link> -->
               <button @click="destroy(inventoryTransaction.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
                 <Trash2 class="w-4 h-4" /> Delete Transaction
               </button>

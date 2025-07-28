@@ -7,17 +7,21 @@ import FloatingChatButton from '@/components/FloatingChatButton.vue'; // Import 
 import type { BreadcrumbItemType } from '@/types'
 
 interface Props {
-  breadcrumbs?: BreadcrumbItemType[]
+  breadcrumbs?: BreadcrumbItemType[];
+  unreadCount?: number;
+  inventoryAlertCount?: number; // New prop
 }
 
 withDefaults(defineProps<Props>(), {
   breadcrumbs: () => [],
-})
+  unreadCount: 0,
+  inventoryAlertCount: 0, // Default value
+});
 </script>
 
 <template>
   <AppShell variant="sidebar">
-    <AppSidebar class="print:hidden" /> 
+    <AppSidebar class="print:hidden" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount"/> 
     
     <AppContent variant="sidebar">
       <AppSidebarHeader :breadcrumbs="breadcrumbs" class="print:hidden" />

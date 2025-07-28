@@ -22,7 +22,7 @@ class InventoryAlertFactory extends Factory
             'alert_type' => $this->faker->randomElement(['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue Return']),
             'threshold_value' => $this->faker->word,
             'message' => $this->faker->sentence,
-            'is_active' => $this->faker->boolean,
+            'is_active' => true,
             'triggered_at' => Carbon::instance($this->faker->dateTimeBetween('-1 month', 'now'))->format('Y-m-d H:i:s'),
         ];
     }

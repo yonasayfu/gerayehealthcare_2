@@ -31,7 +31,7 @@ class InventoryMaintenanceRecordController extends Controller
                   ->orWhereHas('item', fn($q) => $q->where('name', 'ilike', "%$search%"));
         }
 
-        $maintenanceRecords = $query->paginate(10);
+        $maintenanceRecords = $query->paginate($perPage);
 
         return Inertia::render('Admin/InventoryMaintenanceRecords/Index', [
             'maintenanceRecords' => $maintenanceRecords,

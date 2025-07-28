@@ -33,6 +33,8 @@ class InventoryItemFactory extends Factory
             'maintenance_schedule' => $this->faker->sentence,
             'notes' => $this->faker->paragraph,
             'status' => $this->faker->randomElement(['Available', 'In Use', 'Under Maintenance', 'Lost', 'Damaged', 'Retired']),
+            'quantity_on_hand' => $this->faker->numberBetween(0, 20), // More likely to be low
+            'reorder_level' => $this->faker->numberBetween(5, 15),
         ];
     }
 }

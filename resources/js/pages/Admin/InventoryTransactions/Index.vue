@@ -20,6 +20,7 @@ const props = defineProps({
 });
 
 const search = ref(props.filters.search || '');
+const perPage = ref(props.filters.per_page || 10);
 const filters = ref({
   search: props.filters.search || '',
   sort_by: props.filters.sort_by || 'created_at',
@@ -35,13 +36,13 @@ const toggleSort = (column: string) => {
   }
 };
 
-watch(search, debounce(() => {
+watch([search, perPage], debounce(() => {
   filters.value.search = search.value;
   router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
 }, 300));
 
 watch(filters, () => {
-  router.get(route('admin.inventory-transactions.index'), filters.value, { preserveState: true, replace: true });
+  router.get(route('admin.inventory-transactions.index'), { ...filters.value, per_page: perPage.value }, { preserveState: true, replace: true });
 }, { deep: true });
 
 const generatePdf = () => {
@@ -73,8 +74,19 @@ const generatePdf = () => {
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
         <!-- Search and Filter Section -->
-        <div class="mb-4">
-          <input type="text" v-model="search" placeholder="Search transactions..." class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+          <div class="relative w-full md:w-1/3">
+            <input type="text" v-model="search" placeholder="Search transactions..." class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
+          </div>
+          <div>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
 
         <!-- Inventory Maintenance Table -->

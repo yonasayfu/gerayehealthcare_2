@@ -25,7 +25,7 @@ class InventoryTransactionController extends Controller
                   ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
         }
 
-        $inventoryTransactions = $query->paginate(10);
+        $inventoryTransactions = $query->paginate($request->input('per_page', 10));
 
         return Inertia::render('Admin/InventoryTransactions/Index', [
             'inventoryTransactions' => $inventoryTransactions,

@@ -166,8 +166,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('task-delegations/export', [AdminTaskController::class, 'export'])
             ->name('task-delegations.export');
         Route::resource('task-delegations', AdminTaskController::class)
-            ->parameters(['task-delegations' => 'task_delegation'])
-            ->except(['show']);
+            ->parameters(['task-delegations' => 'task_delegation']);
 
         // System Management (Super Admin only)
         Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
