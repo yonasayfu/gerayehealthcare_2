@@ -18,6 +18,10 @@ use App\Http\Controllers\Staff\MarketingTaskController as StaffMarketingTaskCont
 Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('marketing-campaigns/export', [AdminMarketingCampaignController::class, 'export'])->name('marketing-campaigns.export');
+        Route::get('marketing-campaigns/print-all', [AdminMarketingCampaignController::class, 'printAll'])->name('marketing-campaigns.printAll');
+        Route::get('marketing-campaigns/print-current', [AdminMarketingCampaignController::class, 'printCurrent'])->name('marketing-campaigns.printCurrent');
+        Route::get('marketing-campaigns/{marketing_campaign}/print', [AdminMarketingCampaignController::class, 'printSingle'])->name('marketing-campaigns.printSingle');
         Route::resource('marketing-campaigns', AdminMarketingCampaignController::class);
         Route::resource('marketing-leads', AdminMarketingLeadController::class);
         Route::resource('landing-pages', AdminLandingPageController::class);

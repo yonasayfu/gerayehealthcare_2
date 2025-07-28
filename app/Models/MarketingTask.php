@@ -7,10 +7,12 @@ use App\Models\MarketingCampaign;
 use App\Models\Staff;
 use App\Models\CampaignContent;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 class MarketingTask extends Model
 {
+    use HasFactory;
     protected static function booted()
     {
         static::creating(function ($task) {

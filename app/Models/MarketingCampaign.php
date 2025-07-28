@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\MarketingPlatform;
 use App\Models\Staff;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 class MarketingCampaign extends Model
 {
+    use HasFactory;
     protected static function booted()
     {
         static::creating(function ($campaign) {

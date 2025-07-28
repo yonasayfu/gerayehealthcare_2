@@ -110,4 +110,3 @@ class MarketingPlatformController extends Controller
 
         return back()->with('success', 'Marketing Platform status updated successfully.');
     }
-}

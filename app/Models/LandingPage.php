@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\MarketingCampaign;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 class LandingPage extends Model
 {
+    use HasFactory;
     protected static function booted()
     {
         static::creating(function ($landingPage) {

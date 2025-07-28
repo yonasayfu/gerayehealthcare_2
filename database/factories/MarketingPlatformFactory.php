@@ -17,7 +17,10 @@ class MarketingPlatformFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->unique()->company() . ' ' . $this->faker->randomElement(['Ads', 'Platform']),
+            'api_endpoint' => $this->faker->url(),
+            'api_credentials' => $this->faker->sha256(),
+            'is_active' => $this->faker->boolean(80),
         ];
     }
 }

@@ -8,10 +8,12 @@ use App\Models\LandingPage;
 use App\Models\Staff;
 use App\Models\Patient;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 class MarketingLead extends Model
 {
+    use HasFactory;
     protected static function booted()
     {
         static::creating(function ($lead) {

@@ -97,23 +97,21 @@ function destroy(id: number) {
 }
 
 function exportData(type: 'csv' | 'pdf') {
-  // Implement export logic later if needed, similar to PatientController
-  alert(`Exporting ${type} is not yet implemented for Marketing Campaigns.`);
+  window.open(route('admin.marketing-campaigns.export', { type }), '_blank');
 }
 
 function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  const currentFilters = props.filters;
+  const queryString = Object.keys(currentFilters)
+    .filter(key => currentFilters[key] !== undefined && currentFilters[key] !== null && currentFilters[key] !== '')
+    .map(key => `${key}=${currentFilters[key]}`)
+    .join('&');
+
+  window.open(route('admin.marketing-campaigns.printCurrent') + (queryString ? `?${queryString}` : ''), '_blank');
 }
 
 const printAllCampaigns = () => {
-    alert('Printing all campaigns is not yet implemented.');
+    window.open(route('admin.marketing-campaigns.printAll'), '_blank');
 };
 
 function toggleSort(field: string) {
