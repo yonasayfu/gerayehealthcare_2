@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import InputLabel from '@/components/InputLabel.vue'
-import TextInput from '@/components/TextInput.vue'
+import InputLabel from '@/components/ui/label/Label.vue'
+import TextInput from '@/components/ui/input/Input.vue'
 import InputError from '@/components/InputError.vue'
-import PrimaryButton from '@/components/PrimaryButton.vue'
+import PrimaryButton from '@/components/ui/button/Button.vue'
 import { format } from 'date-fns'
 
 interface MarketingCampaign {
