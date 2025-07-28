@@ -1,0 +1,301 @@
+<script setup lang="ts">
+import { Head, Link, useForm } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import InputLabel from '@/components/ui/label/Label.vue'
+import TextInput from '@/components/ui/input/Input.vue'
+import InputError from '@/components/InputError.vue'
+import PrimaryButton from '@/components/ui/button/Button.vue'
+
+interface MarketingLead {
+  id: number;
+  lead_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  country: string;
+  utm_source: string;
+  utm_campaign: string;
+  utm_medium: string;
+  landing_page_id: number;
+  lead_score: number;
+  status: string;
+  assigned_staff_id: number;
+  converted_patient_id: number;
+  conversion_date: string;
+  notes: string;
+  source_campaign_id: number;
+}
+
+const props = defineProps<{
+  marketingLead: MarketingLead;
+}>()
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Marketing Leads', href: route('admin.marketing-leads.index') },
+  { title: `${props.marketingLead.first_name} ${props.marketingLead.last_name}`, href: route('admin.marketing-leads.show', props.marketingLead.id) },
+  { title: 'Edit', href: route('admin.marketing-leads.edit', props.marketingLead.id) },
+]
+
+const form = useForm({
+  first_name: props.marketingLead.first_name,
+  last_name: props.marketingLead.last_name,
+  email: props.marketingLead.email,
+  phone: props.marketingLead.phone,
+  country: props.marketingLead.country,
+  utm_source: props.marketingLead.utm_source,
+  utm_campaign: props.marketingLead.utm_campaign,
+  utm_medium: props.marketingLead.utm_medium,
+  landing_page_id: props.marketingLead.landing_page_id,
+  lead_score: props.marketingLead.lead_score,
+  status: props.marketingLead.status,
+  assigned_staff_id: props.marketingLead.assigned_staff_id,
+  converted_patient_id: props.marketingLead.converted_patient_id,
+  conversion_date: props.marketingLead.conversion_date,
+  notes: props.marketingLead.notes,
+  source_campaign_id: props.marketingLead.source_campaign_id,
+});
+
+const submit = () => {
+  form.put(route('admin.marketing-leads.update', props.marketingLead.id));
+};
+
+// Dummy data for select options (replace with actual data from props if available)
+const campaigns = [
+  { id: 1, campaign_name: 'Summer Sale 2024' },
+  { id: 2, campaign_name: 'New Patient Drive' },
+];
+
+const landingPages = [
+  { id: 1, page_title: 'Homepage Offer' },
+  { id: 2, page_title: 'Contact Us Form' },
+];
+
+const staffMembers = [
+  { id: 1, full_name: 'John Doe' },
+  { id: 2, full_name: 'Jane Smith' },
+];
+
+const patients = [
+  { id: 1, full_name: 'Patient A' },
+  { id: 2, full_name: 'Patient B' },
+];
+
+const statuses = [
+  'New',
+  'Contacted',
+  'Qualified',
+  'Converted',
+  'Lost',
+];
+</script>
+
+<template>
+  <Head :title="`Edit ${marketingLead.first_name} ${marketingLead.last_name}`" />
+
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="space-y-6 p-6">
+      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Marketing Lead</h1>
+        <p class="text-sm text-muted-foreground">Update the details of the marketing lead.</p>
+      </div>
+
+      <form @submit.prevent="submit" class="space-y-6 bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
+        <div>
+          <InputLabel for="first_name" value="First Name" />
+          <TextInput
+            id="first_name"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.first_name"
+            required
+            autofocus
+          />
+          <InputError class="mt-2" :message="form.errors.first_name" />
+        </div>
+
+        <div>
+          <InputLabel for="last_name" value="Last Name" />
+          <TextInput
+            id="last_name"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.last_name"
+            required
+          />
+          <InputError class="mt-2" :message="form.errors.last_name" />
+        </div>
+
+        <div>
+          <InputLabel for="email" value="Email" />
+          <TextInput
+            id="email"
+            type="email"
+            class="mt-1 block w-full"
+            v-model="form.email"
+          />
+          <InputError class="mt-2" :message="form.errors.email" />
+        </div>
+
+        <div>
+          <InputLabel for="phone" value="Phone" />
+          <TextInput
+            id="phone"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.phone"
+          />
+          <InputError class="mt-2" :message="form.errors.phone" />
+        </div>
+
+        <div>
+          <InputLabel for="country" value="Country" />
+          <TextInput
+            id="country"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.country"
+          />
+          <InputError class="mt-2" :message="form.errors.country" />
+        </div>
+
+        <div>
+          <InputLabel for="utm_source" value="UTM Source" />
+          <TextInput
+            id="utm_source"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.utm_source"
+          />
+          <InputError class="mt-2" :message="form.errors.utm_source" />
+        </div>
+
+        <div>
+          <InputLabel for="utm_campaign" value="UTM Campaign" />
+          <TextInput
+            id="utm_campaign"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.utm_campaign"
+          />
+          <InputError class="mt-2" :message="form.errors.utm_campaign" />
+        </div>
+
+        <div>
+          <InputLabel for="utm_medium" value="UTM Medium" />
+          <TextInput
+            id="utm_medium"
+            type="text"
+            class="mt-1 block w-full"
+            v-model="form.utm_medium"
+          />
+          <InputError class="mt-2" :message="form.errors.utm_medium" />
+        </div>
+
+        <div>
+          <InputLabel for="source_campaign_id" value="Source Campaign" />
+          <select
+            id="source_campaign_id"
+            v-model="form.source_campaign_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">Select a Campaign</option>
+            <option v-for="campaign in campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>
+          </select>
+          <InputError class="mt-2" :message="form.errors.source_campaign_id" />
+        </div>
+
+        <div>
+          <InputLabel for="landing_page_id" value="Landing Page" />
+          <select
+            id="landing_page_id"
+            v-model="form.landing_page_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">Select a Landing Page</option>
+            <option v-for="page in landingPages" :key="page.id" :value="page.id">{{ page.page_title }}</option>
+          </select>
+          <InputError class="mt-2" :message="form.errors.landing_page_id" />
+        </div>
+
+        <div>
+          <InputLabel for="lead_score" value="Lead Score" />
+          <TextInput
+            id="lead_score"
+            type="number"
+            class="mt-1 block w-full"
+            v-model="form.lead_score"
+          />
+          <InputError class="mt-2" :message="form.errors.lead_score" />
+        </div>
+
+        <div>
+          <InputLabel for="status" value="Status" />
+          <select
+            id="status"
+            v-model="form.status"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+            required
+          >
+            <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+          </select>
+          <InputError class="mt-2" :message="form.errors.status" />
+        </div>
+
+        <div>
+          <InputLabel for="assigned_staff_id" value="Assigned Staff" />
+          <select
+            id="assigned_staff_id"
+            v-model="form.assigned_staff_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">Select Staff</option>
+            <option v-for="staff in staffMembers" :key="staff.id" :value="staff.id">{{ staff.full_name }}</option>
+          </select>
+          <InputError class="mt-2" :message="form.errors.assigned_staff_id" />
+        </div>
+
+        <div>
+          <InputLabel for="converted_patient_id" value="Converted Patient" />
+          <select
+            id="converted_patient_id"
+            v-model="form.converted_patient_id"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">Select Patient</option>
+            <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.full_name }}</option>
+          </select>
+          <InputError class="mt-2" :message="form.errors.converted_patient_id" />
+        </div>
+
+        <div>
+          <InputLabel for="conversion_date" value="Conversion Date" />
+          <TextInput
+            id="conversion_date"
+            type="date"
+            class="mt-1 block w-full"
+            v-model="form.conversion_date"
+          />
+          <InputError class="mt-2" :message="form.errors.conversion_date" />
+        </div>
+
+        <div>
+          <InputLabel for="notes" value="Notes" />
+          <textarea
+            id="notes"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+            v-model="form.notes"
+          ></textarea>
+          <InputError class="mt-2" :message="form.errors.notes" />
+        </div>
+
+        <div class="flex items-center justify-end">
+          <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+            Update Lead
+          </PrimaryButton>
+        </div>
+      </form>
+    </div>
+  </AppLayout>
+</template>
