@@ -19,7 +19,7 @@ import {
   Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
   ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Search, Warehouse, Package, FileText, Wrench, Bell,
-  ChevronUp, Minimize2, Maximize2
+  ChevronUp, Minimize2, Maximize2, GitFork, BarChart
 } from 'lucide-vue-next'
 
 interface SidebarNavItem {
@@ -82,6 +82,21 @@ const allAdminNavItems: SidebarNavGroup[] = [
   },
   communicationNavGroup,
   {
+    group: 'Marketing Management',
+    icon: Megaphone,
+    items: [
+      { title: 'Campaigns', routeName: 'admin.marketing-campaigns.index', icon: Megaphone, permission: 'manage marketing' },
+      { title: 'Leads', routeName: 'admin.marketing-leads.index', icon: Users, permission: 'manage marketing' },
+      { title: 'Landing Pages', routeName: 'admin.landing-pages.index', icon: Globe2, permission: 'manage marketing' },
+      { title: 'Platforms', routeName: 'admin.marketing-platforms.index', icon: Package, permission: 'manage marketing' },
+      { title: 'Lead Sources', routeName: 'admin.lead-sources.index', icon: GitFork, permission: 'manage marketing' },
+      { title: 'Budgets', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage marketing' },
+      { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
+      { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'manage marketing' },
+      { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
+    ],
+  },
+  {
     group: 'Administrative Tools',
     icon: UserCog,
     items: [
@@ -140,7 +155,10 @@ const mainNavItems = computed<SidebarNavGroup[]>(() => {
                     { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
                     { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
                     { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
-                    { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff }
+                    { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
+                    { title: 'My Campaigns', routeName: 'staff.marketing-campaigns.index', icon: Megaphone },
+                    { title: 'My Leads', routeName: 'staff.marketing-leads.index', icon: Users },
+                    { title: 'My Marketing Tasks', routeName: 'staff.marketing-tasks.index', icon: ClipboardList },
                 ]
             },
             communicationNavGroup,
