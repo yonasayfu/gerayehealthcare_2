@@ -1,46 +1,4 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
-import { format } from 'date-fns'
-
-interface MarketingCampaign {
-  id: number;
-  campaign_code: string;
-  campaign_name: string;
-  campaign_type: string;
-  target_audience: Record<string, any>;
-  budget_allocated: number;
-  budget_spent: number;
-  start_date: string;
-  end_date: string;
-  status: string;
-  utm_campaign: string;
-  utm_source: string;
-  utm_medium: string;
-  goals: Record<string, any>;
-  platform: { name: string };
-  assigned_staff: { full_name: string };
-  created_by_staff: { full_name: string };
-  created_at: string;
-  updated_at: string;
-}
-
-const props = defineProps<{
-  marketingCampaign: MarketingCampaign;
-}>()
-
-const breadcrumbs = [
-  { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Marketing Campaigns', href: route('admin.marketing-campaigns.index') },
-  { title: props.marketingCampaign.campaign_name, href: route('admin.marketing-campaigns.show', props.marketingCampaign.id) },
-]
-
-const formatJson = (json: Record<string, any>) => {
-  return JSON.stringify(json, null, 2);
-};
-</script>
-
-<script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
