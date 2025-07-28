@@ -66,7 +66,7 @@ const communicationNavGroup: SidebarNavGroup = {
     items: [],
 };
 
-const allAdminNavItems = computed<SidebarNavGroup[]>(() => [
+const allAdminNavItems: SidebarNavGroup[] = [
   {
     group: 'Patient Management',
     icon: UserPlus,
@@ -117,7 +117,7 @@ const allAdminNavItems = computed<SidebarNavGroup[]>(() => [
           { title: 'User Management', routeName: 'admin.users.index', icon: UserCog, permission: 'manage users' },
       ]
   }
-]);
+];
 
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
