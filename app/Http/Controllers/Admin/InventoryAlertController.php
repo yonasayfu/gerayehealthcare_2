@@ -17,6 +17,9 @@ class InventoryAlertController extends Controller
      */
     public function index(Request $request)
     {
+        $search = $request->input('search');
+        $perPage = $request->input('per_page', 10);
+
         $query = InventoryAlert::with('item');
 
         if ($request->has('search')) {
@@ -30,7 +33,7 @@ class InventoryAlertController extends Controller
 
         return Inertia::render('Admin/InventoryAlerts/Index', [
             'inventoryAlerts' => $inventoryAlerts,
-            'filters' => $request->all('search'),
+            'filters' => $request->only(['search', 'per_page']),
         ]);
     }
 

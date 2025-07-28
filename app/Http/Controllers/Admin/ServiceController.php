@@ -23,7 +23,7 @@ class ServiceController extends Controller
 
         return Inertia::render('Admin/Services/Index', [
             'services' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'per_page']),
         ]);
     }
 
