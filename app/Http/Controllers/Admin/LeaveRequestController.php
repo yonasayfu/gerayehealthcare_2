@@ -18,6 +18,7 @@ class LeaveRequestController extends Controller
         $search = $request->input('search');
         $sortBy = $request->input('sort_by', 'created_at');
         $sortOrder = $request->input('sort_order', 'desc');
+        $perPage = $request->input('per_page', 10);
 
         // Define valid sortable columns.
         $validSortColumns = ['created_at', 'start_date', 'end_date', 'status', 'staff_first_name'];
@@ -64,6 +65,7 @@ class LeaveRequestController extends Controller
                 'search' => $search,
                 'sort_by' => $sortBy,
                 'sort_order' => $sortOrder,
+                'per_page' => $perPage,
             ],
         ]);
     }
