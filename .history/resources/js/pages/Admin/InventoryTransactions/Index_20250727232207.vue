@@ -52,12 +52,12 @@ const generatePdf = () => {
 </script>
 
 <template>
-  <Head title="Inventory Transactions" />
+  <Head title="Inventory transactions" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Maintenance</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <div class="flex items-center gap-2">

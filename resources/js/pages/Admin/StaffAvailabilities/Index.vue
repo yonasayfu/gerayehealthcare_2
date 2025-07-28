@@ -6,7 +6,18 @@ import { Trash2, ArrowUpDown, Filter, Edit3, PlusCircle } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 
 const props = defineProps<{
-  availabilities: any;
+  availabilities: {
+    data: Array<any>;
+    links: Array<any>;
+    meta: {
+      current_page: number;
+      from: number;
+      last_page: number;
+      per_page: number;
+      to: number;
+      total: number;
+    };
+  };
   filters: any;
   staffList: Array<{ id: number; first_name: string; last_name: string }>;
 }>()
@@ -24,6 +35,7 @@ const filters = ref({
   end_date: props.filters.end_date || '',
   sort: props.filters.sort || 'start_time',
   direction: props.filters.direction || 'desc',
+  per_page: props.availabilities.meta.per_page || 10,
 })
 
 // Watch for changes and trigger API request
@@ -199,7 +211,7 @@ const formatDate = (dateString) => {
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" @click.self="showModal = false">
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50" @click.self="showModal = false">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-lg">
             <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">
                 {{ isEditMode ? 'Edit' : 'Create' }} Availability Slot
