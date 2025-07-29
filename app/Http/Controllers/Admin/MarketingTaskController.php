@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateMarketingTaskRequest;
 use App\Models\MarketingTask;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\MarketingTasksExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MarketingTaskController extends Controller
 {
@@ -126,5 +129,68 @@ class MarketingTaskController extends Controller
         $marketingTask->delete();
 
         return back()->with('success', 'Marketing Task deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->input('type');
+        if ($type === 'csv') {
+            return Excel::download(new MarketingTasksExport, 'marketing-tasks.csv');
+        } elseif ($type === 'pdf') {
+            $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
+            $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'));
+            return $pdf->download('marketing-tasks.pdf');
+        }
+        return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printAll(Request $request)
+    {
+        $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
+        return Inertia::render('Admin/MarketingTasks/PrintAll', [
+            'marketingTasks' => $marketingTasks,
+        ]);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = MarketingTask::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%")
+                  ->orWhere('task_code', 'ilike', "%{$search}%");
+        }
+
+        // Filtering
+        if ($request->filled('campaign_id')) {
+            $query->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('assigned_to_staff_id')) {
+            $query->where('assigned_to_staff_id', $request->input('assigned_to_staff_id'));
+        }
+        if ($request->filled('doctor_id')) {
+            $query->where('doctor_id', $request->input('doctor_id'));
+        }
+        if ($request->filled('task_type')) {
+            $query->where('task_type', $request->input('task_type'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('scheduled_at_start')) {
+            $query->where('scheduled_at', '>=', $request->input('scheduled_at_start'));
+        }
+        if ($request->filled('scheduled_at_end')) {
+            $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
+        }
+
+        $marketingTasks = $query->with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
+
+        return Inertia::render('Admin/MarketingTasks/PrintCurrent', [
+            'marketingTasks' => $marketingTasks,
+        ]);
     }
 }

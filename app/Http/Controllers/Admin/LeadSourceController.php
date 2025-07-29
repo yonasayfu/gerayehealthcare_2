@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateLeadSourceRequest;
 use App\Models\LeadSource;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\LeadSourcesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LeadSourceController extends Controller
 {
@@ -110,5 +113,49 @@ class LeadSourceController extends Controller
         $leadSource->save();
 
         return back()->with('success', 'Lead Source status updated successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->input('type');
+        if ($type === 'csv') {
+            return Excel::download(new LeadSourcesExport, 'lead-sources.csv');
+        } elseif ($type === 'pdf') {
+            $leadSources = LeadSource::all();
+            $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'));
+            return $pdf->download('lead-sources.pdf');
+        }
+        return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printAll(Request $request)
+    {
+        $leadSources = LeadSource::all();
+        return Inertia::render('Admin/LeadSources/PrintAll', [
+            'leadSources' => $leadSources,
+        ]);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = LeadSource::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'ilike', "%{$search}%")
+                  ->orWhere('category', 'ilike', "%{$search}%");
+        }
+
+        // Filtering
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->input('is_active'));
+        }
+
+        $leadSources = $query->get();
+
+        return Inertia::render('Admin/LeadSources/PrintCurrent', [
+            'leadSources' => $leadSources,
+        ]);
     }
 }

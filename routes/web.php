@@ -157,6 +157,36 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Services
         Route::resource('services', ServiceController::class);
 
+        // Marketing Platforms
+        Route::get('marketing-platforms/export', [App\Http\Controllers\Admin\MarketingPlatformController::class, 'export'])->name('marketing-platforms.export');
+        Route::get('marketing-platforms/print-all', [App\Http\Controllers\Admin\MarketingPlatformController::class, 'printAll'])->name('marketing-platforms.printAll');
+        Route::get('marketing-platforms/print-current', [App\Http\Controllers\Admin\MarketingPlatformController::class, 'printCurrent'])->name('marketing-platforms.printCurrent');
+        Route::resource('marketing-platforms', App\Http\Controllers\Admin\MarketingPlatformController::class);
+
+        // Marketing Budgets
+        Route::get('marketing-budgets/export', [App\Http\Controllers\Admin\MarketingBudgetController::class, 'export'])->name('marketing-budgets.export');
+        Route::get('marketing-budgets/print-all', [App\Http\Controllers\Admin\MarketingBudgetController::class, 'printAll'])->name('marketing-budgets.printAll');
+        Route::get('marketing-budgets/print-current', [App\Http\Controllers\Admin\MarketingBudgetController::class, 'printCurrent'])->name('marketing-budgets.printCurrent');
+        Route::resource('marketing-budgets', App\Http\Controllers\Admin\MarketingBudgetController::class);
+
+        // Campaign Contents
+        Route::get('campaign-contents/export', [App\Http\Controllers\Admin\CampaignContentController::class, 'export'])->name('campaign-contents.export');
+        Route::get('campaign-contents/print-all', [App\Http\Controllers\Admin\CampaignContentController::class, 'printAll'])->name('campaign-contents.printAll');
+        Route::get('campaign-contents/print-current', [App\Http\Controllers\Admin\CampaignContentController::class, 'printCurrent'])->name('campaign-contents.printCurrent');
+        Route::resource('campaign-contents', App\Http\Controllers\Admin\CampaignContentController::class);
+
+        // Lead Sources
+        Route::get('lead-sources/export', [App\Http\Controllers\Admin\LeadSourceController::class, 'export'])->name('lead-sources.export');
+        Route::get('lead-sources/print-all', [App\Http\Controllers\Admin\LeadSourceController::class, 'printAll'])->name('lead-sources.printAll');
+        Route::get('lead-sources/print-current', [App\Http\Controllers\Admin\LeadSourceController::class, 'printCurrent'])->name('lead-sources.printCurrent');
+        Route::resource('lead-sources', App\Http\Controllers\Admin\LeadSourceController::class);
+
+        // Marketing Tasks
+        Route::get('marketing-tasks/export', [App\Http\Controllers\Admin\MarketingTaskController::class, 'export'])->name('marketing-tasks.export');
+        Route::get('marketing-tasks/print-all', [App\Http\Controllers\Admin\MarketingTaskController::class, 'printAll'])->name('marketing-tasks.printAll');
+        Route::get('marketing-tasks/print-current', [App\Http\Controllers\Admin\MarketingTaskController::class, 'printCurrent'])->name('marketing-tasks.printCurrent');
+        Route::resource('marketing-tasks', App\Http\Controllers\Admin\MarketingTaskController::class);
+
         // Admin Leave Requests
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])

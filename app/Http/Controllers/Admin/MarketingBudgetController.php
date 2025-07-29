@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateMarketingBudgetRequest;
 use App\Models\MarketingBudget;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\MarketingBudgetsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MarketingBudgetController extends Controller
 {
@@ -118,5 +121,60 @@ class MarketingBudgetController extends Controller
         $marketingBudget->delete();
 
         return back()->with('success', 'Marketing Budget deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->input('type');
+        if ($type === 'csv') {
+            return Excel::download(new MarketingBudgetsExport, 'marketing-budgets.csv');
+        } elseif ($type === 'pdf') {
+            $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
+            $pdf = Pdf::loadView('pdf.marketing-budgets', compact('marketingBudgets'));
+            return $pdf->download('marketing-budgets.pdf');
+        }
+        return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printAll(Request $request)
+    {
+        $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
+        return Inertia::render('Admin/MarketingBudgets/PrintAll', [
+            'marketingBudgets' => $marketingBudgets,
+        ]);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = MarketingBudget::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('budget_name', 'ilike', "%{$search}%");
+        }
+
+        // Filtering
+        if ($request->filled('campaign_id')) {
+            $query->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('platform_id')) {
+            $query->where('platform_id', $request->input('platform_id'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('period_start')) {
+            $query->where('period_start', '>=', $request->input('period_start'));
+        }
+        if ($request->filled('period_end')) {
+            $query->where('period_end', '<=', $request->input('period_end'));
+        }
+
+        $marketingBudgets = $query->with(['campaign', 'platform'])->get();
+
+        return Inertia::render('Admin/MarketingBudgets/PrintCurrent', [
+            'marketingBudgets' => $marketingBudgets,
+        ]);
     }
 }

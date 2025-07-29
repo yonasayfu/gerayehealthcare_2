@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateMarketingPlatformRequest;
 use App\Models\MarketingPlatform;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\MarketingPlatformsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MarketingPlatformController extends Controller
 {
@@ -109,5 +112,53 @@ class MarketingPlatformController extends Controller
         $marketingPlatform->save();
 
         return back()->with('success', 'Marketing Platform status updated successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->input('type');
+        if ($type === 'csv') {
+            return Excel::download(new MarketingPlatformsExport, 'marketing-platforms.csv');
+        } elseif ($type === 'pdf') {
+            $marketingPlatforms = MarketingPlatform::all();
+            $pdf = Pdf::loadView('pdf.marketing-platforms', compact('marketingPlatforms'));
+            return $pdf->stream('marketing-platforms.pdf');
+        }
+        return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printAll()
+    {
+        $marketingPlatforms = MarketingPlatform::all();
+        return Inertia::render('Admin/MarketingPlatforms/PrintAll', [
+            'marketingPlatforms' => $marketingPlatforms,
+        ]);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = MarketingPlatform::query();
+
+        // Apply filters from the request
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'ilike', "%{$search}%");
+        }
+
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->input('is_active'));
+        }
+
+        if ($request->filled('sort') && !empty($request->input('sort'))) {
+            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $marketingPlatforms = $query->get();
+
+        return Inertia::render('Admin/MarketingPlatforms/PrintCurrent', [
+            'marketingPlatforms' => $marketingPlatforms,
+        ]);
     }
 }

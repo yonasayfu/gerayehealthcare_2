@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import InputLabel from '@/components/ui/label/Label.vue'
-import TextInput from '@/components/ui/input/Input.vue'
-import InputError from '@/components/InputError.vue'
-import PrimaryButton from '@/components/ui/button/Button.vue'
+import Form from './Form.vue' // Import the new Form component
 
 interface MarketingBudget {
   id: number;
@@ -21,6 +18,9 @@ interface MarketingBudget {
 
 const props = defineProps<{
   marketingBudget: MarketingBudget;
+  campaigns: Array<any>;
+  platforms: Array<any>;
+  statuses: Array<string>;
 }>()
 
 const breadcrumbs = [
@@ -45,154 +45,35 @@ const form = useForm({
 const submit = () => {
   form.put(route('admin.marketing-budgets.update', props.marketingBudget.id));
 };
-
-// Dummy data for select options (replace with actual data from props if available)
-const campaigns = [
-  { id: 1, campaign_name: 'Summer Sale 2024' },
-  { id: 2, campaign_name: 'New Patient Drive' },
-];
-
-const platforms = [
-  { id: 1, name: 'TikTok' },
-  { id: 2, name: 'Meta' },
-  { id: 3, name: 'Google' },
-];
-
-const statuses = [
-  'Planned',
-  'Active',
-  'Completed',
-  'Overspent',
-];
 </script>
 
 <template>
   <Head :title="`Edit ${marketingBudget.budget_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Marketing Budget</h1>
-        <p class="text-sm text-muted-foreground">Update the details of the marketing budget.</p>
-      </div>
+    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-      <form @submit.prevent="submit" class="space-y-6 bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
-        <div>
-          <InputLabel for="budget_name" value="Budget Name" />
-          <TextInput
-            id="budget_name"
-            type="text"
-            class="mt-1 block w-full"
-            v-model="form.budget_name"
-            required
-            autofocus
-          />
-          <InputError class="mt-2" :message="form.errors.budget_name" />
+        <div class="flex items-start justify-between p-5 border-b rounded-t">
+            <h3 class="text-xl font-semibold">
+                Edit Marketing Budget
+            </h3>
+            <Link :href="route('admin.marketing-budgets.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </Link>
         </div>
 
-        <div>
-          <InputLabel for="campaign_id" value="Campaign" />
-          <select
-            id="campaign_id"
-            v-model="form.campaign_id"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
-          >
-            <option value="">Select a Campaign</option>
-            <option v-for="campaign in campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>
-          </select>
-          <InputError class="mt-2" :message="form.errors.campaign_id" />
-        </div>
+        <form @submit.prevent="submit">
+            <div class="p-6 space-y-6">
+                <Form :form="form" :campaigns="props.campaigns" :platforms="props.platforms" :statuses="props.statuses" />
+            </div>
 
-        <div>
-          <InputLabel for="platform_id" value="Platform" />
-          <select
-            id="platform_id"
-            v-model="form.platform_id"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
-          >
-            <option value="">Select a Platform</option>
-            <option v-for="platform in platforms" :key="platform.id" :value="platform.id">{{ platform.name }}</option>
-          </select>
-          <InputError class="mt-2" :message="form.errors.platform_id" />
-        </div>
+            <div class="p-6 border-t border-gray-200 rounded-b">
+                <button :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+                  {{ form.processing ? 'Saving...' : 'Save Changes' }}
+                </button>
+            </div>
+        </form>
 
-        <div>
-          <InputLabel for="description" value="Description" />
-          <textarea
-            id="description"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
-            v-model="form.description"
-          ></textarea>
-          <InputError class="mt-2" :message="form.errors.description" />
-        </div>
-
-        <div>
-          <InputLabel for="allocated_amount" value="Allocated Amount" />
-          <TextInput
-            id="allocated_amount"
-            type="number"
-            step="0.01"
-            class="mt-1 block w-full"
-            v-model="form.allocated_amount"
-            required
-          />
-          <InputError class="mt-2" :message="form.errors.allocated_amount" />
-        </div>
-
-        <div>
-          <InputLabel for="spent_amount" value="Spent Amount" />
-          <TextInput
-            id="spent_amount"
-            type="number"
-            step="0.01"
-            class="mt-1 block w-full"
-            v-model="form.spent_amount"
-          />
-          <InputError class="mt-2" :message="form.errors.spent_amount" />
-        </div>
-
-        <div>
-          <InputLabel for="period_start" value="Period Start Date" />
-          <TextInput
-            id="period_start"
-            type="date"
-            class="mt-1 block w-full"
-            v-model="form.period_start"
-            required
-          />
-          <InputError class="mt-2" :message="form.errors.period_start" />
-        </div>
-
-        <div>
-          <InputLabel for="period_end" value="Period End Date" />
-          <TextInput
-            id="period_end"
-            type="date"
-            class="mt-1 block w-full"
-            v-model="form.period_end"
-          />
-          <InputError class="mt-2" :message="form.errors.period_end" />
-        </div>
-
-        <div>
-          <InputLabel for="status" value="Status" />
-          <select
-            id="status"
-            v-model="form.status"
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
-            required
-          >
-            <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
-          </select>
-          <InputError class="mt-2" :message="form.errors.status" />
-        </div>
-
-        <div class="flex items-center justify-end">
-          <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-            Update Budget
-          </PrimaryButton>
-        </div>
-      </form>
     </div>
   </AppLayout>
 </template>

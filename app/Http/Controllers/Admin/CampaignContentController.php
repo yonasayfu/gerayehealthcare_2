@@ -8,6 +8,9 @@ use App\Http\Requests\UpdateCampaignContentRequest;
 use App\Models\CampaignContent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Exports\CampaignContentsExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class CampaignContentController extends Controller
 {
@@ -122,5 +125,64 @@ class CampaignContentController extends Controller
         $campaignContent->delete();
 
         return back()->with('success', 'Campaign Content deleted successfully.');
+    }
+
+    public function export(Request $request)
+    {
+        $type = $request->input('type');
+        if ($type === 'csv') {
+            return Excel::download(new CampaignContentsExport, 'campaign-contents.csv');
+        } elseif ($type === 'pdf') {
+            $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
+            $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'));
+            return $pdf->download('campaign-contents.pdf');
+        }
+        return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printAll(Request $request)
+    {
+        $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
+        return Inertia::render('Admin/CampaignContents/PrintAll', [
+            'campaignContents' => $campaignContents,
+        ]);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = CampaignContent::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('title', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%");
+        }
+
+        // Filtering
+        if ($request->filled('campaign_id')) {
+            $query->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('platform_id')) {
+            $query->where('platform_id', $request->input('platform_id'));
+        }
+        if ($request->filled('content_type')) {
+            $query->where('content_type', $request->input('content_type'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('scheduled_post_date_start')) {
+            $query->where('scheduled_post_date', '>=', $request->input('scheduled_post_date_start'));
+        }
+        if ($request->filled('scheduled_post_date_end')) {
+            $query->where('scheduled_post_date', '<=', $request->input('scheduled_post_date_end'));
+        }
+
+        $campaignContents = $query->with(['campaign', 'platform'])->get();
+
+        return Inertia::render('Admin/CampaignContents/PrintCurrent', [
+            'campaignContents' => $campaignContents,
+        ]);
     }
 }

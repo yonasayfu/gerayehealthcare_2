@@ -101,15 +101,15 @@ function destroy(id: number) {
 }
 
 function exportData(type: 'csv' | 'pdf') {
-  alert(`Exporting ${type} is not yet implemented for Marketing Tasks.`);
+  window.open(route('admin.marketing-tasks.export', { type }), '_blank');
 }
 
 function printCurrentView() {
-  alert('Printing current view is not yet implemented for Marketing Tasks.');
+  window.print();
 }
 
 const printAllTasks = () => {
-    alert('Printing all tasks is not yet implemented.');
+    window.open(route('admin.marketing-tasks.printAll'), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -158,7 +158,7 @@ function toggleSort(field: string) {
             type="text"
             v-model="search"
             placeholder="Search tasks..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 pr-10"
           />
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
@@ -249,7 +249,7 @@ function toggleSort(field: string) {
 
       <Pagination v-if="marketingTasks.data.length > 0" :links="marketingTasks.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
@@ -311,6 +311,8 @@ function toggleSort(field: string) {
   .space-y-6.p-6 {
     padding: 0 !important;
     margin: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
   }
 
   /* Table specific print styles */
@@ -320,8 +322,7 @@ function toggleSort(field: string) {
     background-color: transparent !important; /* No background color */
     overflow: visible !important; /* Essential to prevent clipping */
     padding: 1cm; /* Inner padding for the table */
-    transform: scale(0.97); /* Slight scale down to fit wide tables */
-    transform-origin: top left;
+    page-break-after: auto !important;
   }
 
   .print-table {
@@ -370,6 +371,10 @@ function toggleSort(field: string) {
   .print-table tbody tr:last-child {
     border-bottom: 1px solid #ddd !important;
   }
+  .print-table-row {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 
   /* Hide actions column for print */
   .print-table th:last-child,
@@ -386,6 +391,7 @@ function toggleSort(field: string) {
   .print-footer {
     display: block !important;
     text-align: center;
+    position: relative; /* Changed from fixed */
     margin-top: 1cm;
     font-size: 0.75rem !important;
     color: #666 !important;
