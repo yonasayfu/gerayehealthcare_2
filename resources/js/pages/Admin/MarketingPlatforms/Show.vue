@@ -48,7 +48,7 @@ function destroy(id: number) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Marketing Platform Details: {{ marketingPlatform.name }}
             </h3>
@@ -57,7 +57,7 @@ function destroy(id: number) {
             </Link>
         </div>
 
-        <div class="p-6 space-y-6 print:hidden">
+        <div class="p-6 space-y-6 main-content-display print:hidden print-only">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8">
 
                 <div class="border-b pb-4 mb-4">
@@ -186,26 +186,13 @@ function destroy(id: number) {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    padding-bottom: 2cm !important; /* Add padding for fixed footer */
     overflow: visible !important;
   }
 
-  /* Elements to hide during print */
-  .print\:hidden {
+  /* Hide all elements that are not explicitly part of the print content */
+  body > *:not(.print-only) {
     display: none !important;
   }
-  /* HIDE BREADCRUMBS AND TOP NAV (from AppSidebarLayout.vue) */
-  .app-sidebar-header, .app-sidebar {
-      display: none !important;
-  }
-  /* Fallback/more general selectors if the above doesn't catch it all */
-  body > header,
-  body > nav,
-  [role="banner"],
-  [role="navigation"] {
-      display: none !important;
-  }
-
 
   /* Elements to show only during print */
   .hidden.print\:block {

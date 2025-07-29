@@ -85,7 +85,9 @@ function printCurrentView() {
 }
 
 const printAllPlatforms = () => {
-    window.open(route('admin.marketing-platforms.printAll'), '_blank');
+    // This opens the PDF in a new tab. Whether it downloads or previews inline
+    // depends on the user's browser settings and PDF viewer configuration.
+    window.open(route('admin.marketing-platforms.export', { type: 'pdf' }), '_blank');
 };
 
 function toggleSort(field: string) {
