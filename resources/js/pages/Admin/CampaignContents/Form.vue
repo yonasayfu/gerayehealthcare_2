@@ -1,0 +1,134 @@
+<script setup lang="ts">
+import InputLabel from '@/components/ui/label/Label.vue'
+import TextInput from '@/components/ui/input/Input.vue'
+import InputError from '@/components/InputError.vue'
+
+const props = defineProps({
+  form: Object, // This form object will be passed from Create.vue or Edit.vue
+  campaigns: Array, // Prop for campaigns data
+  platforms: Array, // Prop for platforms data
+  contentTypes: Array, // Prop for contentTypes data
+  statuses: Array, // Prop for statuses data
+});
+</script>
+
+<template>
+  <div>
+    <InputLabel for="title" value="Title" />
+    <TextInput
+      id="title"
+      type="text"
+      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      v-model="props.form.title"
+      required
+      autofocus
+    />
+    <InputError class="mt-2" :message="props.form.errors.title" />
+  </div>
+
+  <div>
+    <InputLabel for="campaign_id" value="Campaign" />
+    <select
+      id="campaign_id"
+      v-model="props.form.campaign_id"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+    >
+      <option value="">Select a Campaign</option>
+      <option v-for="campaign in props.campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>
+    </select>
+    <InputError class="mt-2" :message="props.form.errors.campaign_id" />
+  </div>
+
+  <div>
+    <InputLabel for="platform_id" value="Platform" />
+    <select
+      id="platform_id"
+      v-model="props.form.platform_id"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+    >
+      <option value="">Select a Platform</option>
+      <option v-for="platform in props.platforms" :key="platform.id" :value="platform.id">{{ platform.name }}</option>
+    </select>
+    <InputError class="mt-2" :message="props.form.errors.platform_id" />
+  </div>
+
+  <div>
+    <InputLabel for="content_type" value="Content Type" />
+    <select
+      id="content_type"
+      v-model="props.form.content_type"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+      required
+    >
+      <option value="">Select a Type</option>
+      <option v-for="type in props.contentTypes" :key="type" :value="type">{{ type }}</option>
+    </select>
+    <InputError class="mt-2" :message="props.form.errors.content_type" />
+  </div>
+
+  <div>
+    <InputLabel for="description" value="Description" />
+    <textarea
+      id="description"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50 p-2.5"
+      v-model="props.form.description"
+    ></textarea>
+    <InputError class="mt-2" :message="props.form.errors.description" />
+  </div>
+
+  <div>
+    <InputLabel for="media_url" value="Media URL" />
+    <TextInput
+      id="media_url"
+      type="url"
+      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      v-model="props.form.media_url"
+    />
+    <InputError class="mt-2" :message="props.form.errors.media_url" />
+  </div>
+
+  <div>
+    <InputLabel for="scheduled_post_date" value="Scheduled Post Date" />
+    <TextInput
+      id="scheduled_post_date"
+      type="datetime-local"
+      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      v-model="props.form.scheduled_post_date"
+    />
+    <InputError class="mt-2" :message="props.form.errors.scheduled_post_date" />
+  </div>
+
+  <div>
+    <InputLabel for="actual_post_date" value="Actual Post Date" />
+    <TextInput
+      id="actual_post_date"
+      type="datetime-local"
+      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      v-model="props.form.actual_post_date"
+    />
+    <InputError class="mt-2" :message="props.form.errors.actual_post_date" />
+  </div>
+
+  <div>
+    <InputLabel for="status" value="Status" />
+    <select
+      id="status"
+      v-model="props.form.status"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+      required
+    >
+      <option v-for="s in props.statuses" :key="s" :value="s">{{ s }}</option>
+    </select>
+    <InputError class="mt-2" :message="props.form.errors.status" />
+  </div>
+
+  <div>
+    <InputLabel for="engagement_metrics" value="Engagement Metrics (JSON)" />
+    <textarea
+      id="engagement_metrics"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50 p-2.5"
+      v-model="props.form.engagement_metrics"
+    ></textarea>
+    <InputError class="mt-2" :message="props.form.errors.engagement_metrics" />
+  </div>
+</template>
