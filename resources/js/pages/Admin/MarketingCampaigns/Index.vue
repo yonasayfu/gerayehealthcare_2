@@ -101,13 +101,7 @@ function exportData(type: 'csv' | 'pdf') {
 }
 
 function printCurrentView() {
-  const currentFilters = props.filters;
-  const queryString = Object.keys(currentFilters)
-    .filter(key => currentFilters[key] !== undefined && currentFilters[key] !== null && currentFilters[key] !== '')
-    .map(key => `${key}=${currentFilters[key]}`)
-    .join('&');
-
-  window.open(route('admin.marketing-campaigns.printCurrent') + (queryString ? `?${queryString}` : ''), '_blank');
+  window.print();
 }
 
 const printAllCampaigns = () => {

@@ -7,6 +7,7 @@ import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
+// Define a type for MarketingLead (adjust based on your actual model structure)
 interface MarketingLead {
   id: number;
   lead_code: string;
@@ -15,15 +16,15 @@ interface MarketingLead {
   email: string;
   phone: string;
   status: string;
-  source_campaign: { campaign_name: string };
-  landing_page: { page_title: string };
-  assigned_staff: { full_name: string };
-  converted_patient: { full_name: string };
+  sourceCampaign: { campaign_name: string }; // Assuming sourceCampaign is eager loaded
+  assignedStaff: { full_name: string }; // Assuming assignedStaff is eager loaded
+  // Add other fields as needed
 }
 
+// Define a type for pagination data
 interface MarketingLeadPagination {
   data: MarketingLead[];
-  links: any[];
+  links: any[]; // Adjust with a more specific type if available
   current_page: number;
   from: number;
   last_page: number;
@@ -41,8 +42,6 @@ const props = defineProps<{
     per_page?: number;
     status?: string;
     source_campaign_id?: number;
-    landing_page_id?: number;
-    assigned_staff_id?: number;
   };
 }>()
 
@@ -57,22 +56,18 @@ const sortDirection = ref(props.filters.direction || 'asc')
 const perPage = ref(props.filters.per_page || 10)
 const status = ref(props.filters.status || '')
 const sourceCampaignId = ref(props.filters.source_campaign_id || '')
-const landingPageId = ref(props.filters.landing_page_id || '')
-const assignedStaffId = ref(props.filters.assigned_staff_id || '')
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage, status, sourceCampaignId, landingPageId, assignedStaffId], debounce(() => {
+watch([search, sortField, sortDirection, perPage, status, sourceCampaignId], debounce(() => {
   const params: Record<string, string | number> = {
     search: search.value,
     direction: sortDirection.value,
     per_page: perPage.value,
     status: status.value,
     source_campaign_id: sourceCampaignId.value,
-    landing_page_id: landingPageId.value,
-    assigned_staff_id: assignedStaffId.value,
   };
 
   if (sortField.value) {
@@ -92,15 +87,15 @@ function destroy(id: number) {
 }
 
 function exportData(type: 'csv' | 'pdf') {
-  alert(`Exporting ${type} is not yet implemented for Marketing Leads.`);
+  window.open(route('admin.marketing-leads.export', { type }), '_blank');
 }
 
 function printCurrentView() {
-  alert('Printing current view is not yet implemented for Marketing Leads.');
+  window.print();
 }
 
 const printAllLeads = () => {
-    alert('Printing all leads is not yet implemented.');
+    window.open(route('admin.marketing-leads.printAll'), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -182,21 +177,15 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('lead_code')">
                 Lead Code <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('email')">
-                Email <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone')">
-                Phone <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
+              <th class="px-6 py-3">Email</th>
+              <th class="px-6 py-3">Phone</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source_campaign_id')">
                 Source Campaign <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('landing_page_id')">
-                Landing Page <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
+              <th class="px-6 py-3">Assigned Staff</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
           </thead>
@@ -207,8 +196,8 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ lead.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.phone ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.status ?? '-' }}</td>
-              <td class="px-6 py-4">{{ lead.source_campaign?.campaign_name ?? '-' }}</td>
-              <td class="px-6 py-4">{{ lead.landing_page?.page_title ?? '-' }}</td>
+              <td class="px-6 py-4">{{ JSON.stringify(lead.sourceCampaign) }}</td>
+              <td class="px-6 py-4">{{ JSON.stringify(lead.assignedStaff) }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
@@ -301,7 +290,7 @@ function toggleSort(field: string) {
   /* Main content container adjustments */
   .space-y-6.p-6 {
     padding: 0 !important;
-    margin: 0 !important;
+    margin: 0 !import
   }
 
   /* Table specific print styles */
@@ -342,16 +331,6 @@ function toggleSort(field: string) {
     font-size: 0.7rem !important; /* Header font size */
     white-space: nowrap; /* Keep header text on one line if possible */
   }
-
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Name */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Lead Code */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Email */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Phone */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* Status */
-  .print-table th:nth-child(6), .print-table td:nth-child(6) { width: 15%; } /* Source Campaign */
-  .print-table th:nth-child(7), .print-table td:nth-child(7) { width: 10%; } /* Landing Page */
-
 
   .print-table tbody tr:nth-child(even) {
     background-color: #f9f9f9 !important; /* Subtle zebra striping */

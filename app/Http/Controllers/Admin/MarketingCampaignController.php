@@ -144,7 +144,26 @@ class MarketingCampaignController extends Controller
         if ($type === 'csv') {
             $csvData = "Campaign Code,Campaign Name,Platform,Type,Status,Start Date,End Date,Budget Allocated,Budget Spent,Assigned Staff,Created By\n";
             foreach ($campaigns as $campaign) {
-                $csvData .= "\"{$campaign->campaign_code}\",\"{$campaign->campaign_name}\",\"{$campaign->platform->name ?? '-'}\",\"{$campaign->campaign_type}\",\"{$campaign->status}\",\"{$campaign->start_date}\",\"{$campaign->end_date}\",\"{$campaign->budget_allocated}\",\"{$campaign->budget_spent}\",\"{$campaign->assignedStaff->full_name ?? '-'}\",\"{$campaign->createdByStaff->full_name ?? '-'}\"\n";
+                $row = [
+                    $campaign->campaign_code ?? '-',
+                    $campaign->campaign_name ?? '-',
+                    $campaign->platform->name ?? '-',
+                    $campaign->campaign_type ?? '-',
+                    $campaign->status ?? '-',
+                    $campaign->start_date ?? '-',
+                    $campaign->end_date ?? '-',
+                    (string)($campaign->budget_allocated ?? '0'),
+                    (string)($campaign->budget_spent ?? '0'),
+                    $campaign->assignedStaff->full_name ?? '-',
+                    $campaign->createdByStaff->full_name ?? '-',
+                ];
+                // Escape each value for CSV (e.g., double quotes inside values)
+                $escapedRow = array_map(function($value) {
+                    $value = str_replace('"', '""', (string) $value);
+                    return '"' . $value . '"';
+                }, $row);
+                $csvData .= implode(',', $escapedRow) . "
+";
             }
 
             return Response::make($csvData, 200, [
@@ -212,8 +231,7 @@ class MarketingCampaignController extends Controller
     {
         $campaigns = MarketingCampaign::with(['platform', 'assignedStaff', 'createdByStaff'])->orderBy('campaign_name')->get();
 
-        return Inertia::render('Admin/MarketingCampaigns/PrintAll', [
-            'marketingCampaigns' => $campaigns,
-        ]);
+        $pdf = Pdf::loadView('pdf.marketing.campaigns', ['campaigns' => $campaigns])->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing_campaigns_all.pdf');
     }
 }

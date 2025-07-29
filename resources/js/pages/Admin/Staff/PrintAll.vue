@@ -17,9 +17,9 @@ const formattedGeneratedDate = computed(() => {
 });
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 500);
+  if (props.staff.length > 0) {
+    window.print();
+  }
 
   window.onafterprint = () => {
     setTimeout(() => {
@@ -55,6 +55,9 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
+          <tr v-if="staff.length === 0">
+            <td colspan="8" class="text-center px-6 py-4 text-gray-400">No staff found.</td>
+          </tr>
           <tr v-for="(s, index) in staff" :key="s.id" class="border-b print-table-row">
             <td class="px-6 py-4">{{ index + 1 }}</td>
             <td class="px-6 py-4">{{ s.first_name }} {{ s.last_name }}</td>
@@ -64,11 +67,6 @@ onMounted(() => {
             <td class="px-6 py-4">{{ s.department ?? '-' }}</td>
             <td class="px-6 py-4">{{ s.status }}</td>
             <td class="px-6 py-4">{{ s.hire_date ? format(new Date(s.hire_date), 'yyyy-MM-dd') : '-' }}</td>
-          </tr>
-          if (staffMembers.value.length > 0) {
-      window.print();
-    }
-            <td colspan="8" class="text-center px-6 py-4 text-gray-400">No staff found.</td>
           </tr>
         </tbody>
       </table>

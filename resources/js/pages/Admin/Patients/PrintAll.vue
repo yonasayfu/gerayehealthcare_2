@@ -17,9 +17,9 @@ const formattedGeneratedDate = computed(() => {
 });
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 500);
+  if (props.patients.length > 0) {
+    window.print();
+  }
 
   window.onafterprint = () => {
     setTimeout(() => {
@@ -66,6 +66,9 @@ function calculateAge(dob: string) {
           </tr>
         </thead>
         <tbody>
+          <tr v-if="patients.length === 0">
+            <td colspan="7" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
+          </tr>
           <tr v-for="patient in patients" :key="patient.id" class="border-b print-table-row">
             <td class="px-6 py-4">{{ patient.full_name }}</td>
             <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
@@ -74,11 +77,6 @@ function calculateAge(dob: string) {
             <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
             <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
             <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
-          </tr>
-          if (props.patients.length > 0) {
-      window.print();
-    }
-            <td colspan="7" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
           </tr>
         </tbody>
       </table>

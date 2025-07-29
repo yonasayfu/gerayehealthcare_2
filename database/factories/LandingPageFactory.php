@@ -17,7 +17,10 @@ class LandingPageFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'page_title' => $this->faker->sentence(3),
+            'page_url' => $this->faker->url,
+            'conversion_rate' => $this->faker->randomFloat(2, 0, 1),
+            'notes' => $this->faker->paragraph,
         ];
     }
 }

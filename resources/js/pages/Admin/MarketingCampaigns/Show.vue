@@ -62,9 +62,9 @@ function destroy(id: number) {
   <Head :title="`Campaign: ${marketingCampaign.campaign_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Campaign Details: {{ marketingCampaign.campaign_name }}
             </h3>
@@ -73,7 +73,7 @@ function destroy(id: number) {
             </Link>
         </div>
 
-        <div class="p-6 space-y-6">
+        <div class="p-6 space-y-6 print:p-0">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
@@ -193,7 +193,7 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
