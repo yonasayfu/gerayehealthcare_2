@@ -221,10 +221,9 @@ class MarketingCampaignController extends Controller
         }
 
         $campaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                           ->paginate($request->input('per_page', 10), ['*'], 'page', $request->input('page', 1));
+                           ->paginate($request->input('per_page', 10))->appends($request->except('page'));
 
-        $pdf = Pdf::loadView('pdf.marketing.campaigns-current', ['campaigns' => $campaigns])->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing_campaigns-current.pdf');
+        return Inertia::render('Admin/MarketingCampaigns/PrintCurrent', ['campaigns' => $campaigns->items()]);
     }
 
     public function printAll(Request $request)

@@ -7,23 +7,22 @@ import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
+// Define a type for LandingPage (adjust based on your actual model structure)
 interface LandingPage {
   id: number;
   page_code: string;
   page_title: string;
   page_url: string;
-  template_used: string;
   language: string;
-  views: number;
-  submissions: number;
-  conversion_rate: number;
   is_active: boolean;
-  campaign: { campaign_name: string };
+  campaign: { campaign_name: string }; // Assuming campaign is eager loaded
+  // Add other fields as needed
 }
 
+// Define a type for pagination data
 interface LandingPagePagination {
   data: LandingPage[];
-  links: any[];
+  links: any[]; // Adjust with a more specific type if available
   current_page: number;
   from: number;
   last_page: number;
@@ -89,15 +88,15 @@ function destroy(id: number) {
 }
 
 function exportData(type: 'csv' | 'pdf') {
-  alert(`Exporting ${type} is not yet implemented for Landing Pages.`);
+  window.open(route('admin.landing-pages.export', { type }), '_blank');
 }
 
 function printCurrentView() {
-  alert('Printing current view is not yet implemented for Landing Pages.');
+  window.print();
 }
 
 const printAllPages = () => {
-    alert('Printing all landing pages is not yet implemented.');
+    window.open(route('admin.landing-pages.printAll'), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -123,7 +122,7 @@ function toggleSort(field: string) {
         </div>
         <div class="flex flex-wrap gap-2">
           <Link :href="route('admin.landing-pages.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Landing Page
+            + Add Page
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> CSV
@@ -179,20 +178,15 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('page_code')">
                 Page Code <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('page_url')">
-                URL <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+              <th class="px-6 py-3">URL</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('language')">
+                Language <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('is_active')">
+                Active <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('campaign_id')">
                 Campaign <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('views')">
-                Views <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('submissions')">
-                Submissions <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('conversion_rate')">
-                Conversion Rate <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
@@ -201,11 +195,10 @@ function toggleSort(field: string) {
             <tr v-for="page in landingPages.data" :key="page.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
               <td class="px-6 py-4">{{ page.page_title }}</td>
               <td class="px-6 py-4">{{ page.page_code ?? '-' }}</td>
-              <td class="px-6 py-4"><a :href="page.page_url" target="_blank" class="text-cyan-600 hover:underline">{{ page.page_url }}</a></td>
+              <td class="px-6 py-4">{{ page.page_url ?? '-' }}</td>
+              <td class="px-6 py-4">{{ page.language ?? '-' }}</td>
+              <td class="px-6 py-4">{{ page.is_active ? 'Yes' : 'No' }}</td>
               <td class="px-6 py-4">{{ page.campaign?.campaign_name ?? '-' }}</td>
-              <td class="px-6 py-4">{{ page.views ?? '-' }}</td>
-              <td class="px-6 py-4">{{ page.submissions ?? '-' }}</td>
-              <td class="px-6 py-4">{{ page.conversion_rate ?? '-' }}%</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
@@ -229,7 +222,7 @@ function toggleSort(field: string) {
               </td>
             </tr>
             <tr v-if="landingPages.data.length === 0">
-              <td colspan="8" class="text-center px-6 py-4 text-gray-400">No landing pages found.</td>
+              <td colspan="7" class="text-center px-6 py-4 text-gray-400">No landing pages found.</td>
             </tr>
           </tbody>
         </table>
@@ -237,7 +230,7 @@ function toggleSort(field: string) {
 
       <Pagination v-if="landingPages.data.length > 0" :links="landingPages.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
@@ -259,6 +252,7 @@ function toggleSort(field: string) {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-bottom: 2cm !important; /* Add padding for fixed footer */
     overflow: visible !important;
   }
 
@@ -340,23 +334,13 @@ function toggleSort(field: string) {
     white-space: nowrap; /* Keep header text on one line if possible */
   }
 
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Page Title */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Page Code */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* URL */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Campaign */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* Views */
-  .print-table th:nth-child(6), .print-table td:nth-child(6) { width: 15%; } /* Submissions */
-  .print-table th:nth-child(7), .print-table td:nth-child(7) { width: 10%; } /* Conversion Rate */
-
-
   .print-table tbody tr:nth-child(even) {
     background-color: #f9f9f9 !important; /* Subtle zebra striping */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
+  .print-table-row {
+    page-break-inside: avoid !important;
   }
 
   /* Hide actions column for print */
@@ -374,6 +358,9 @@ function toggleSort(field: string) {
   .print-footer {
     display: block !important;
     text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     margin-top: 1cm;
     font-size: 0.75rem !important;
     color: #666 !important;

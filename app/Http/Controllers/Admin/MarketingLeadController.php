@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use App\Exports\MarketingLeadsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Models\MarketingCampaign;
 use App\Models\LandingPage;
@@ -162,7 +163,8 @@ class MarketingLeadController extends Controller
         $query = $this->getFilteredQuery($request);
         $leads = $query->get();
 
-        return Inertia::render('Admin/MarketingLeads/PrintAll', ['leads' => $leads]);
+        $pdf = Pdf::loadView('pdf.marketing-leads', ['leads' => $leads])->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-leads.pdf');
     }
 
     private function getFilteredQuery(Request $request)

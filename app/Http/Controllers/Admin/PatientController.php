@@ -187,21 +187,16 @@ class PatientController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $patients = $query->paginate($request->input('per_page', 10), ['*'], 'page', $request->input('page', 1));
+        $patients = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
 
-        $pdf = Pdf::loadView('pdf.patients-current', ['patients' => $patients])->setPaper('a4', 'landscape');
-        return $pdf->stream('patients-current.pdf');
+        return Inertia::render('Admin/Patients/PrintCurrent', ['patients' => $patients->items()]);
     }
 
     public function printAll(Request $request)
     {
         $patients = Patient::orderBy('full_name')->get(); // Fetch all patients, ordered
 
-        // Render a dedicated Inertia component for printing all data
-        // This component will be similar to your Index.vue but optimized for print,
-        // perhaps without pagination controls or search bars.
-        return Inertia::render('Admin/Patients/PrintAll', [
-            'patients' => $patients,
-        ]);
+        $pdf = Pdf::loadView('pdf.patients', ['patients' => $patients])->setPaper('a4', 'landscape');
+        return $pdf->stream('patients.pdf');
     }
 }

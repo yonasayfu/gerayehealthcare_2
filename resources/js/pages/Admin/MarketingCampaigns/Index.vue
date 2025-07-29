@@ -245,7 +245,7 @@ function toggleSort(field: string) {
 
       <Pagination v-if="marketingCampaigns.data.length > 0" :links="marketingCampaigns.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
@@ -267,6 +267,7 @@ function toggleSort(field: string) {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-bottom: 2cm !important; /* Add padding for fixed footer */
     overflow: visible !important;
   }
 
@@ -382,6 +383,9 @@ function toggleSort(field: string) {
   .print-footer {
     display: block !important;
     text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     margin-top: 1cm;
     font-size: 0.75rem !important;
     color: #666 !important;

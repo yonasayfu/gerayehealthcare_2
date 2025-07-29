@@ -196,8 +196,8 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ lead.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.phone ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.status ?? '-' }}</td>
-              <td class="px-6 py-4">{{ JSON.stringify(lead.sourceCampaign) }}</td>
-              <td class="px-6 py-4">{{ JSON.stringify(lead.assignedStaff) }}</td>
+              <td class="px-6 py-4">{{ lead.sourceCampaign?.campaign_name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ lead.assignedStaff?.full_name ?? '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
@@ -229,7 +229,7 @@ function toggleSort(field: string) {
 
       <Pagination v-if="marketingLeads.data.length > 0" :links="marketingLeads.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
@@ -251,6 +251,7 @@ function toggleSort(field: string) {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-bottom: 2cm !important; /* Add padding for fixed footer */
     overflow: visible !important;
   }
 
@@ -290,7 +291,7 @@ function toggleSort(field: string) {
   /* Main content container adjustments */
   .space-y-6.p-6 {
     padding: 0 !important;
-    margin: 0 !import
+    margin: 0 !important;
   }
 
   /* Table specific print styles */
@@ -356,6 +357,9 @@ function toggleSort(field: string) {
   .print-footer {
     display: block !important;
     text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     margin-top: 1cm;
     font-size: 0.75rem !important;
     color: #666 !important;
