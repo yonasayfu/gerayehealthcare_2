@@ -6,19 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCampaignContentRequest;
 use App\Http\Requests\UpdateCampaignContentRequest;
 use App\Models\CampaignContent;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Exports\CampaignContentsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CampaignContentController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): \Inertia\Response
     {
+        $this->authorize('viewAny', CampaignContent::class);
+
         $query = CampaignContent::query();
 
         // Search
@@ -62,6 +69,8 @@ class CampaignContentController extends Controller
         return Inertia::render('Admin/CampaignContents/Index', [
             'campaignContents' => $campaignContents,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'platform_id', 'content_type', 'status', 'scheduled_post_date_start', 'scheduled_post_date_end']),
+            'campaigns' => MarketingCampaign::all(),
+            'platforms' => MarketingPlatform::all(),
         ]);
     }
 
@@ -70,7 +79,14 @@ class CampaignContentController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/CampaignContents/Create');
+        $this->authorize('create', CampaignContent::class);
+
+        return Inertia::render('Admin/CampaignContents/Create', [
+            'campaigns' => MarketingCampaign::all(),
+            'platforms' => MarketingPlatform::all(),
+            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
+            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
+        ]);
     }
 
     /**
@@ -78,6 +94,8 @@ class CampaignContentController extends Controller
      */
     public function store(StoreCampaignContentRequest $request)
     {
+        $this->authorize('create', CampaignContent::class);
+
         CampaignContent::create($request->validated());
 
         return redirect()->route('admin.campaign-contents.index')->with('success', 'Campaign Content created successfully.');
@@ -88,6 +106,8 @@ class CampaignContentController extends Controller
      */
     public function show(CampaignContent $campaignContent)
     {
+        $this->authorize('view', $campaignContent);
+
         $campaignContent->load(['campaign', 'platform']);
 
         return Inertia::render('Admin/CampaignContents/Show', [
@@ -100,10 +120,16 @@ class CampaignContentController extends Controller
      */
     public function edit(CampaignContent $campaignContent)
     {
+        $this->authorize('update', $campaignContent);
+
         $campaignContent->load(['campaign', 'platform']);
 
         return Inertia::render('Admin/CampaignContents/Edit', [
             'campaignContent' => $campaignContent,
+            'campaigns' => MarketingCampaign::all(),
+            'platforms' => MarketingPlatform::all(),
+            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
+            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
         ]);
     }
 
@@ -112,6 +138,8 @@ class CampaignContentController extends Controller
      */
     public function update(UpdateCampaignContentRequest $request, CampaignContent $campaignContent)
     {
+        $this->authorize('update', $campaignContent);
+
         $campaignContent->update($request->validated());
 
         return redirect()->route('admin.campaign-contents.index')->with('success', 'Campaign Content updated successfully.');
@@ -122,6 +150,8 @@ class CampaignContentController extends Controller
      */
     public function destroy(CampaignContent $campaignContent)
     {
+        $this->authorize('delete', $campaignContent);
+
         $campaignContent->delete();
 
         return back()->with('success', 'Campaign Content deleted successfully.');
@@ -129,6 +159,8 @@ class CampaignContentController extends Controller
 
     public function export(Request $request)
     {
+        $this->authorize('viewAny', CampaignContent::class);
+
         $type = $request->input('type');
         if ($type === 'csv') {
             return Excel::download(new CampaignContentsExport, 'campaign-contents.csv');
@@ -142,14 +174,17 @@ class CampaignContentController extends Controller
 
     public function printAll(Request $request)
     {
+        $this->authorize('viewAny', CampaignContent::class);
+
         $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
-        return Inertia::render('Admin/CampaignContents/PrintAll', [
-            'campaignContents' => $campaignContents,
-        ]);
+        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
+        return $pdf->stream('campaign-contents.pdf');
     }
 
     public function printCurrent(Request $request)
     {
+        $this->authorize('viewAny', CampaignContent::class);
+
         $query = CampaignContent::query();
 
         // Search
@@ -181,8 +216,7 @@ class CampaignContentController extends Controller
 
         $campaignContents = $query->with(['campaign', 'platform'])->get();
 
-        return Inertia::render('Admin/CampaignContents/PrintCurrent', [
-            'campaignContents' => $campaignContents,
-        ]);
+        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
+        return $pdf->stream('campaign-contents-current.pdf');
     }
 }

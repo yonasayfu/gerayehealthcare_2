@@ -54,7 +54,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div class="p-6 space-y-6">
-                <Form :form="form" :campaigns="props.campaigns" :staffMembers="props.staffMembers" :contents="props.contents" :taskTypes="props.taskTypes" :statuses="props.statuses" />
+                <Form :form="form" :campaigns="props.campaigns" :staffs="props.staffMembers" :campaignContents="props.contents" :taskTypes="props.taskTypes" :statuses="props.statuses" />
             </div>
 
             <div class="p-6 border-t border-gray-200 rounded-b">

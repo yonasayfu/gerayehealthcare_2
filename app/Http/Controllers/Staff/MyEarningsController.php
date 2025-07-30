@@ -25,7 +25,7 @@ class MyEarningsController extends Controller
         // Fetch the payout history
         $payoutHistory = $staff->payouts()
             ->orderBy('payout_date', 'desc')
-            ->paginate(10, ['*'], 'payouts_page');
+            ->paginate(5, ['*'], 'payouts_page');
 
         // Fetch current work that has not yet been included in a payout
         $pendingVisits = $staff->visitServices()

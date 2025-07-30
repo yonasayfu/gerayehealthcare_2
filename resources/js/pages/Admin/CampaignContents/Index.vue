@@ -31,6 +31,8 @@ interface CampaignContentPagination {
 
 const props = defineProps<{
   campaignContents: CampaignContentPagination;
+  campaigns: any[];
+  platforms: any[];
   filters: {
     search?: string;
     sort?: string;
@@ -98,13 +100,25 @@ function exportData(type: 'csv' | 'pdf') {
   window.open(route('admin.campaign-contents.export', { type }), '_blank');
 }
 
-function printCurrentView() {
-  window.print();
+function printAllContents() {
+  window.open(route('admin.campaign-contents.printAll'), '_blank');
 }
 
-const printAllContents = () => {
-    window.open(route('admin.campaign-contents.printAll'), '_blank');
-};
+function printCurrentView() {
+    const params = {
+        search: search.value,
+        sort: sortField.value,
+        direction: sortDirection.value,
+        campaign_id: campaignId.value,
+        platform_id: platformId.value,
+        content_type: contentType.value,
+        status: status.value,
+        scheduled_post_date_start: scheduledPostDateStart.value,
+        scheduled_post_date_end: scheduledPostDateEnd.value,
+    };
+    const url = route('admin.campaign-contents.printCurrent', params);
+    window.open(url, '_blank');
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -123,11 +137,11 @@ function toggleSort(field: string) {
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Campaign Contents</h1>
-          <p class="text-sm text-muted-foreground">Manage all campaign contents here.</p>
+        <div class="flex-grow min-w-0">
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Campaign Contents Management</h1>
+          <p class="text-sm text-muted-foreground">Manage all campaign contents here, including creation, editing, and deletion.</p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex-shrink-0 flex flex-wrap gap-2">
           <Link :href="route('admin.campaign-contents.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add Content
           </Link>
@@ -156,7 +170,16 @@ function toggleSort(field: string) {
           />
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
-
+        <div class="flex gap-4">
+          <select v-model="campaignId" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+            <option value="">All Campaigns</option>
+            <option v-for="campaign in campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>
+          </select>
+          <select v-model="platformId" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+            <option value="">All Platforms</option>
+            <option v-for="platform in platforms" :key="platform.id" :value="platform.id">{{ platform.name }}</option>
+          </select>
+        </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
@@ -171,7 +194,7 @@ function toggleSort(field: string) {
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
+            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Campaign Contents List (Current View)</p>
             <hr class="my-3 border-gray-300 print:my-2">
         </div>
@@ -252,7 +275,7 @@ function toggleSort(field: string) {
 @media print {
   @page {
     size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
+    margin: 1cm; /* Increased margin for more room */
   }
 
   body {
@@ -262,6 +285,7 @@ function toggleSort(field: string) {
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    font-size: 10pt; /* Base font size for print */
   }
 
   /* Hide elements */
@@ -275,27 +299,27 @@ function toggleSort(field: string) {
       text-align: center;
       padding-top: 0.5cm;
       padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
+      margin-bottom: 1cm; /* More space below header */
   }
   .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
+      max-width: 180px; /* Slightly larger logo */
+      max-height: 60px; /* Slightly larger logo */
       margin-bottom: 0.5rem;
       display: block;
       margin-left: auto;
       margin-right: auto;
   }
   .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
+      font-size: 1.8rem !important; /* Larger clinic name */
+      margin-bottom: 0.3rem !important;
       line-height: 1.2 !important;
       font-weight: bold;
   }
   .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
+      font-size: 1rem !important; /* Larger document title */
+      color: #333 !important;
   }
-  hr { border-color: #ccc !important; }
+  hr { border-color: #999 !important; }
 
   /* Main content container adjustments */
   .space-y-6.p-6 {
@@ -311,27 +335,27 @@ function toggleSort(field: string) {
     border-radius: 0 !important;
     background-color: transparent !important; /* No background color */
     overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
+    padding: 0; /* Remove inner padding, controlled by page margin */
     page-break-after: auto !important;
   }
 
   .print-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
+    font-size: 9pt; /* Adjust table body font size */
     table-layout: fixed; /* Helps with column width distribution */
   }
 
   .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
+    background-color: #e0e0e0 !important; /* Slightly darker header background */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     text-transform: uppercase !important;
   }
 
   .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
+    border: 1px solid #bbb !important; /* Darker borders for better visibility */
+    padding: 0.5rem 0.75rem !important; /* Increased cell padding */
     color: #000 !important;
     vertical-align: top !important; /* Align content to top of cell */
     word-break: break-word; /* Allow long words to break */
@@ -339,7 +363,7 @@ function toggleSort(field: string) {
 
   .print-table th {
     font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
+    font-size: 9pt; /* Header font size */
     white-space: nowrap; /* Keep header text on one line if possible */
   }
 
@@ -353,12 +377,12 @@ function toggleSort(field: string) {
 
 
   .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
+    background-color: #f0f0f0 !important; /* Subtle zebra striping */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
+    border-bottom: 1px solid #bbb !important;
   }
   .print-table-row {
     page-break-inside: avoid !important;
@@ -381,12 +405,12 @@ function toggleSort(field: string) {
     display: block !important;
     text-align: center;
     position: relative; /* Changed from fixed */
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
+    margin-top: 1.5cm; /* More space above footer */
+    font-size: 8pt; /* Smaller footer font */
+    color: #444 !important;
   }
   .print-footer hr {
-    border-color: #ccc !important;
+    border-color: #999 !important;
   }
 }
 </style>

@@ -6,19 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMarketingTaskRequest;
 use App\Http\Requests\UpdateMarketingTaskRequest;
 use App\Models\MarketingTask;
+use App\Models\MarketingCampaign;
+use App\Models\Staff;
+use App\Models\CampaignContent;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Exports\MarketingTasksExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MarketingTaskController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): \Inertia\Response
     {
+        $this->authorize('viewAny', MarketingTask::class);
+
         $query = MarketingTask::query();
 
         // Search
@@ -52,20 +60,18 @@ class MarketingTaskController extends Controller
             $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
         }
 
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('scheduled_at', 'asc');
-        }
-
-        $marketingTasks = $query->with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])
+        $marketingTasks = $query->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])
                                  ->paginate($request->input('per_page', 10))
                                  ->withQueryString();
 
-        return Inertia::render('Admin/MarketingTasks/Index', [
+                return Inertia::render('Admin/MarketingTasks/Index', [
             'marketingTasks' => $marketingTasks,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'assigned_to_staff_id', 'doctor_id', 'task_type', 'status', 'scheduled_at_start', 'scheduled_at_end']),
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'assigned_to_staff_id', 'doctor_id', 'task_type', 'status', 'scheduled_at_start', 'scheduled_at_end', 'related_content_id']),
+            'campaigns' => MarketingCampaign::all(),
+            'staffs' => Staff::with('user')->get(),
+            'campaignContents' => CampaignContent::all(),
+            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
+            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
         ]);
     }
 
@@ -74,7 +80,15 @@ class MarketingTaskController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/MarketingTasks/Create');
+        $this->authorize('create', MarketingTask::class);
+
+                return Inertia::render('Admin/MarketingTasks/Create', [
+            'campaigns' => MarketingCampaign::all(),
+            'staffs' => Staff::with('user')->get(),
+            'campaignContents' => CampaignContent::all(),
+            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
+            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
+        ]);
     }
 
     /**
@@ -82,6 +96,8 @@ class MarketingTaskController extends Controller
      */
     public function store(StoreMarketingTaskRequest $request)
     {
+        $this->authorize('create', MarketingTask::class);
+
         MarketingTask::create($request->validated());
 
         return redirect()->route('admin.marketing-tasks.index')->with('success', 'Marketing Task created successfully.');
@@ -92,9 +108,11 @@ class MarketingTaskController extends Controller
      */
     public function show(MarketingTask $marketingTask)
     {
-        $marketingTask->load(['campaign', 'assignedToStaff', 'relatedContent', 'doctor']);
+        $this->authorize('view', $marketingTask);
 
-        return Inertia::render('Admin/MarketingTasks/Show', [
+        $marketingTask->load(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user']);
+
+                return Inertia::render('Admin/MarketingTasks/Show', [
             'marketingTask' => $marketingTask,
         ]);
     }
@@ -104,10 +122,17 @@ class MarketingTaskController extends Controller
      */
     public function edit(MarketingTask $marketingTask)
     {
-        $marketingTask->load(['campaign', 'assignedToStaff', 'relatedContent', 'doctor']);
+        $this->authorize('update', $marketingTask);
 
-        return Inertia::render('Admin/MarketingTasks/Edit', [
+        $marketingTask->load(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user']);
+
+                return Inertia::render('Admin/MarketingTasks/Edit', [
             'marketingTask' => $marketingTask,
+            'campaigns' => MarketingCampaign::all(),
+            'staffs' => Staff::with('user')->get(),
+            'campaignContents' => CampaignContent::all(),
+            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
+            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
         ]);
     }
 
@@ -116,6 +141,8 @@ class MarketingTaskController extends Controller
      */
     public function update(UpdateMarketingTaskRequest $request, MarketingTask $marketingTask)
     {
+        $this->authorize('update', $marketingTask);
+
         $marketingTask->update($request->validated());
 
         return redirect()->route('admin.marketing-tasks.index')->with('success', 'Marketing Task updated successfully.');
@@ -126,6 +153,8 @@ class MarketingTaskController extends Controller
      */
     public function destroy(MarketingTask $marketingTask)
     {
+        $this->authorize('delete', $marketingTask);
+
         $marketingTask->delete();
 
         return back()->with('success', 'Marketing Task deleted successfully.');
@@ -133,12 +162,14 @@ class MarketingTaskController extends Controller
 
     public function export(Request $request)
     {
+        $this->authorize('viewAny', MarketingTask::class);
+
         $type = $request->input('type');
         if ($type === 'csv') {
             return Excel::download(new MarketingTasksExport, 'marketing-tasks.csv');
         } elseif ($type === 'pdf') {
-            $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
-            $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'));
+            $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
+            $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
             return $pdf->download('marketing-tasks.pdf');
         }
         return redirect()->back()->with('error', 'Invalid export type.');
@@ -146,14 +177,17 @@ class MarketingTaskController extends Controller
 
     public function printAll(Request $request)
     {
-        $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
-        return Inertia::render('Admin/MarketingTasks/PrintAll', [
-            'marketingTasks' => $marketingTasks,
-        ]);
+        $this->authorize('viewAny', MarketingTask::class);
+
+        $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
+        $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-tasks.pdf');
     }
 
     public function printCurrent(Request $request)
     {
+        $this->authorize('viewAny', MarketingTask::class);
+
         $query = MarketingTask::query();
 
         // Search
@@ -187,10 +221,9 @@ class MarketingTaskController extends Controller
             $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
         }
 
-        $marketingTasks = $query->with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])->get();
+        $marketingTasks = $query->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
 
-        return Inertia::render('Admin/MarketingTasks/PrintCurrent', [
-            'marketingTasks' => $marketingTasks,
-        ]);
+        $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-tasks-current.pdf');
     }
 }

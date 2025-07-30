@@ -130,9 +130,8 @@ class MarketingPlatformController extends Controller
     public function printAll()
     {
         $marketingPlatforms = MarketingPlatform::all();
-        return Inertia::render('Admin/MarketingPlatforms/PrintAll', [
-            'marketingPlatforms' => $marketingPlatforms,
-        ]);
+        $pdf = Pdf::loadView('pdf.marketing-platforms', compact('marketingPlatforms'))->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-platforms-all.pdf', ['Content-Disposition' => 'inline; filename="marketing-platforms-all.pdf"']);
     }
 
     public function printCurrent(Request $request)
@@ -157,8 +156,7 @@ class MarketingPlatformController extends Controller
 
         $marketingPlatforms = $query->get();
 
-        return Inertia::render('Admin/MarketingPlatforms/PrintCurrent', [
-            'marketingPlatforms' => $marketingPlatforms,
-        ]);
+        $pdf = Pdf::loadView('pdf.marketing-platforms', compact('marketingPlatforms'))->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-platforms-current.pdf', ['Content-Disposition' => 'inline; filename="marketing-platforms-current.pdf"']);
     }
 }

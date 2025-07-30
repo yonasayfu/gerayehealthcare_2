@@ -66,7 +66,15 @@ class MarketingBudgetController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/MarketingBudgets/Create');
+        $campaigns = \App\Models\MarketingCampaign::all();
+        $platforms = \App\Models\MarketingPlatform::all();
+        $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
+
+        return Inertia::render('Admin/MarketingBudgets/Create', [
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+            'statuses' => $statuses,
+        ]);
     }
 
     /**
@@ -97,9 +105,15 @@ class MarketingBudgetController extends Controller
     public function edit(MarketingBudget $marketingBudget)
     {
         $marketingBudget->load(['campaign', 'platform']);
+        $campaigns = \App\Models\MarketingCampaign::all();
+        $platforms = \App\Models\MarketingPlatform::all();
+        $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
 
         return Inertia::render('Admin/MarketingBudgets/Edit', [
             'marketingBudget' => $marketingBudget,
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+            'statuses' => $statuses,
         ]);
     }
 
@@ -108,9 +122,16 @@ class MarketingBudgetController extends Controller
      */
     public function update(UpdateMarketingBudgetRequest $request, MarketingBudget $marketingBudget)
     {
-        $marketingBudget->update($request->validated());
+        \Log::info('MarketingBudget update request data:', $request->validated());
+        $updated = $marketingBudget->update($request->validated());
+        $marketingBudget->refresh(); // Refresh the model to get the latest data from the database
+        \Log::info('MarketingBudget update result:', ['updated' => $updated, 'marketingBudget' => $marketingBudget->toArray()]);
 
-        return redirect()->route('admin.marketing-budgets.index')->with('success', 'Marketing Budget updated successfully.');
+        if ($updated) {
+            return redirect()->route('admin.marketing-budgets.index')->with('success', 'Marketing Budget updated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to update Marketing Budget.');
+        }
     }
 
     /**
@@ -131,7 +152,7 @@ class MarketingBudgetController extends Controller
         } elseif ($type === 'pdf') {
             $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
             $pdf = Pdf::loadView('pdf.marketing-budgets', compact('marketingBudgets'));
-            return $pdf->download('marketing-budgets.pdf');
+            return $pdf->stream('marketing-budgets.pdf');
         }
         return redirect()->back()->with('error', 'Invalid export type.');
     }

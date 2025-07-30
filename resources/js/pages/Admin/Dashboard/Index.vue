@@ -4,7 +4,8 @@ import { Head } from '@inertiajs/vue3';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import DashboardTabs from '@/components/DashboardTabs.vue';
 import StatCard from '@/components/StatCard.vue';
-import { ref } from 'vue'; // Import ref
+import { ref, onMounted, computed } from 'vue'; // Import ref, onMounted, and computed
+
 import { DollarSign, Users, CreditCard, Activity } from 'lucide-vue-next';
 // Removed RecentSales as it's no longer directly used in the template
 import { Bar, Pie } from 'vue-chartjs'
@@ -18,36 +19,41 @@ function handleTabChange(tab: string) {
   currentTab.value = tab;
 }
 
-const barChartData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+const barChartData = computed(() => ({
+  labels: campaignPerformanceData.value.map(item => item.date),
   datasets: [
     {
-      label: 'Monthly Patient Registrations',
+      label: 'Impressions',
       backgroundColor: '#3b82f6',
-      data: [400, 300, 500, 450, 600, 550, 700, 650, 800, 750, 900, 850],
+      data: campaignPerformanceData.value.map(item => item.impressions),
+    },
+    {
+      label: 'Clicks',
+      backgroundColor: '#66BB6A',
+      data: campaignPerformanceData.value.map(item => item.clicks),
     },
   ],
-}
+}));
 
 const barChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-}
+};
 
-const pieChartData = {
-  labels: ['Cardiology', 'Pediatrics', 'Orthopedics', 'Dermatology'],
+const pieChartData = computed(() => ({
+  labels: trafficSourceData.value.map(item => item.utm_source),
   datasets: [
     {
-      backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350'],
-      data: [300, 50, 100, 75],
+      backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#9C27B0', '#FFC107'],
+      data: trafficSourceData.value.map(item => item.lead_count),
     },
   ],
-}
+}));
 
 const pieChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
-}
+};
 
 const recentAppointments = [
   { patient: 'John Doe', date: '2025-07-15', time: '10:00 AM', status: 'Completed' },
@@ -62,6 +68,66 @@ const props = defineProps({
     required: false,
   },
 });
+
+const dashboardStats = ref({
+  totalLeads: 0,
+  convertedLeads: 0,
+  conversionRate: 0,
+  totalMarketingSpend: 0,
+  patientsAcquired: 0,
+  cpa: 0,
+  revenueGenerated: 0,
+  roi: 0,
+});
+
+const campaignPerformanceData = ref([]);
+const trafficSourceData = ref([]);
+const conversionFunnelData = ref({});
+
+const fetchDashboardData = async () => {
+  try {
+    const response = await axios.get(route('api.admin.marketing-analytics.dashboardData'));
+    dashboardStats.value = response.data;
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+  }
+};
+
+const fetchCampaignPerformance = async () => {
+  try {
+    const response = await axios.get(route('api.admin.marketing-analytics.campaignPerformance'));
+    campaignPerformanceData.value = response.data.data; // Assuming paginated data
+  } catch (error) {
+    console.error('Error fetching campaign performance:', error);
+  }
+};
+
+const fetchTrafficSourceDistribution = async () => {
+  try {
+    const response = await axios.get(route('api.admin.marketing-analytics.trafficSourceDistribution'));
+    trafficSourceData.value = response.data;
+  } catch (error) {
+    console.error('Error fetching traffic source distribution:', error);
+  }
+};
+
+const fetchConversionFunnel = async () => {
+  try {
+    const response = await axios.get(route('api.admin.marketing-analytics.conversionFunnel'));
+    conversionFunnelData.value = response.data;
+  } catch (error) {
+    console.error('Error fetching conversion funnel:', error);
+  }
+};
+
+watch(currentTab, (newTab) => {
+  if (newTab === 'Analytics') {
+    fetchDashboardData();
+    fetchCampaignPerformance();
+    fetchTrafficSourceDistribution();
+    fetchConversionFunnel();
+  }
+}, { immediate: true }); // Fetch data immediately if the initial tab is 'Analytics'
 </script>
 
 <template>
@@ -75,32 +141,60 @@ const props = defineProps({
         <!-- Row 1: Stat Cards -->
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Total Patients"
-            value="1,234"
-            change="+15% from last month"
+            title="Total Leads"
+            :value="dashboardStats.totalLeads.toLocaleString()"
+            change=""
             :icon="Users"
             color="bg-blue-100"
           />
           <StatCard
-            title="Active Staff"
-            value="250"
-            change="+5% from last month"
+            title="Converted Leads"
+            :value="dashboardStats.convertedLeads.toLocaleString()"
+            change=""
             :icon="Activity"
             color="bg-green-100"
           />
           <StatCard
-            title="Completed Visits"
-            value="876"
-            change="+10% from last month"
+            title="Conversion Rate"
+            :value="dashboardStats.conversionRate + '%'"
+            change=""
             :icon="CreditCard"
             color="bg-yellow-100"
           />
           <StatCard
-            title="Pending Tasks"
-            value="42"
-            change="-5% from last week"
+            title="Total Marketing Spend"
+            :value="dashboardStats.totalMarketingSpend.toLocaleString()"
+            change=""
             :icon="DollarSign"
             color="bg-red-100"
+          />
+          <StatCard
+            title="Patients Acquired"
+            :value="dashboardStats.patientsAcquired.toLocaleString()"
+            change=""
+            :icon="Users"
+            color="bg-purple-100"
+          />
+          <StatCard
+            title="Cost Per Acquisition (CPA)"
+            :value="dashboardStats.cpa.toLocaleString()"
+            change=""
+            :icon="DollarSign"
+            color="bg-orange-100"
+          />
+          <StatCard
+            title="Revenue Generated"
+            :value="dashboardStats.revenueGenerated.toLocaleString()"
+            change=""
+            :icon="CreditCard"
+            color="bg-teal-100"
+          />
+          <StatCard
+            title="Return on Investment (ROI)"
+            :value="dashboardStats.roi + '%'"
+            change=""
+            :icon="Activity"
+            color="bg-pink-100"
           />
         </div>
 
@@ -144,28 +238,13 @@ const props = defineProps({
         </div>
       </div>
 
-      <div v-else-if="currentTab === 'Analytics'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-        <h3 class="text-xl font-semibold mb-2">Service Analytics</h3>
-        <p class="text-muted-foreground mb-4">Key performance indicators for services and marketing campaigns.</p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 class="text-lg font-medium mb-2">Service Volume by Type</h4>
-            <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
-              <li>Home Visits: 750 (60%)</li>
-              <li>Teleconsultations: 300 (25%)</li>
-              <li>Clinic Appointments: 150 (15%)</li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-medium mb-2">Marketing Campaign Performance (Last Month)</h4>
-            <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
-              <li>TikTok Ads: +200 new patients (ROI: 150%)</li>
-              <li>Facebook Ads: +100 new patients (ROI: 120%)</li>
-              <li>Referral Program: +50 new patients</li>
-            </ul>
-          </div>
-        </div>
+      <div v-else-if="currentTab === 'Analytics'">
+        <MarketingAnalyticsDashboard
+          :dashboardStats="dashboardStats"
+          :campaignPerformanceData="campaignPerformanceData"
+          :trafficSourceData="trafficSourceData"
+          :conversionFunnelData="conversionFunnelData"
+        />
       </div>
 
       <div v-else-if="currentTab === 'Reports'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">

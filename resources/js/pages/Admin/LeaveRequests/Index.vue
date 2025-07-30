@@ -25,7 +25,7 @@ const props = defineProps<{
       search: '',
       sort_by: 'created_at',
       sort_order: 'desc',
-      per_page: 10,
+      per_page: 5,
     }),
   },
 }>();

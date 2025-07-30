@@ -54,7 +54,10 @@ class LeadSourceController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/LeadSources/Create');
+        $categories = ['Online', 'Offline', 'Referral', 'Event', 'Other']; // Define your categories here
+        return Inertia::render('Admin/LeadSources/Create', [
+            'categories' => $categories,
+        ]);
     }
 
     /**
@@ -82,8 +85,10 @@ class LeadSourceController extends Controller
      */
     public function edit(LeadSource $leadSource)
     {
+        $categories = ['Online', 'Offline', 'Referral', 'Event', 'Other']; // Define your categories here
         return Inertia::render('Admin/LeadSources/Edit', [
             'leadSource' => $leadSource,
+            'categories' => $categories,
         ]);
     }
 
@@ -122,8 +127,8 @@ class LeadSourceController extends Controller
             return Excel::download(new LeadSourcesExport, 'lead-sources.csv');
         } elseif ($type === 'pdf') {
             $leadSources = LeadSource::all();
-            $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'));
-            return $pdf->download('lead-sources.pdf');
+            $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
+            return $pdf->stream('lead-sources.pdf');
         }
         return redirect()->back()->with('error', 'Invalid export type.');
     }
@@ -131,9 +136,14 @@ class LeadSourceController extends Controller
     public function printAll(Request $request)
     {
         $leadSources = LeadSource::all();
-        return Inertia::render('Admin/LeadSources/PrintAll', [
-            'leadSources' => $leadSources,
-        ]);
+        $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
+        return $pdf->stream('lead-sources.pdf');
+    }
+
+    public function printSingle(LeadSource $leadSource)
+    {
+        $pdf = Pdf::loadView('pdf.lead-source-single', ['leadSource' => $leadSource])->setPaper('a4', 'portrait');
+        return $pdf->stream("lead-source-{$leadSource->id}.pdf");
     }
 
     public function printCurrent(Request $request)
@@ -154,8 +164,7 @@ class LeadSourceController extends Controller
 
         $leadSources = $query->get();
 
-        return Inertia::render('Admin/LeadSources/PrintCurrent', [
-            'leadSources' => $leadSources,
-        ]);
+        $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
+        return $pdf->stream('lead-sources-current.pdf');
     }
 }

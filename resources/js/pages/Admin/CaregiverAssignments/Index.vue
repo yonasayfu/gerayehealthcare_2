@@ -98,7 +98,7 @@ const formatDate = (dateString) => {
   <!-- Custom Print Header -->
   <div id="print-header" class="hidden print-only">
     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
-    <h1 style="text-align: center; margin: 0; font-size: 20px;">Geraye Home-to-Home Care</h1>
+    <h1 style="text-align: center; margin: 0; font-size: 20px;">Geraye Home Care Services</h1>
     <p style="text-align: center; margin: 0; font-size: 14px;">Caregiver Assignment Records</p>
   </div>
 

@@ -27,7 +27,7 @@ const props = defineProps<{
     type: Object,
     default: () => ({
       search: '',
-      per_page: 10,
+      per_page: 5,
     }),
   },
 }>();

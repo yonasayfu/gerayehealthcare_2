@@ -43,7 +43,7 @@ function downloadPdf() {
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                   <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-                  <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
+                  <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
                   <p class="text-gray-600 dark:text-gray-400 print-document-title">Supplier Details</p>
                   <hr class="my-2 border-gray-300 print:my-2">
                 </div>

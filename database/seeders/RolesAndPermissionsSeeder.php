@@ -22,6 +22,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view staff', 'create staff', 'edit staff', 'delete staff',
             'view assignments', 'create assignments', 'edit assignments', 'delete assignments',
             'manage roles', 'manage users',
+            'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents', 'restore_campaign_contents', 'force_delete_campaign_contents',
+            'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks', 'restore_marketing_tasks', 'force_delete_marketing_tasks',
         ];
 
         foreach ($permissions as $permission) {
@@ -42,6 +44,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'view patients', 'create patients', 'edit patients', 'delete patients',
             'view staff', 'create staff', 'edit staff', 'delete staff',
             'view assignments', 'create assignments', 'edit assignments', 'delete assignments',
+            'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents',
+            'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks',
         ]);
 
         // Assign permissions to the 'Staff' role

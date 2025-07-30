@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\MarketingBudget;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,6 @@ class MarketingBudgetsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        MarketingBudget::factory()->count(20)->create();
     }
 }

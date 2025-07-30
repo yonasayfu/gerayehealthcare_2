@@ -4,24 +4,30 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
 import { format } from 'date-fns' // For date formatting
 
-interface LeadSource {
+interface MarketingTask {
   id: number;
-  name: string;
-  category: string;
+  task_code: string;
+  title: string;
   description: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  task_type: string;
+  status: string;
+  scheduled_at: string;
+  completed_at: string;
+  notes: string;
+  campaign: { campaign_name: string };
+  assigned_to_staff: { user: { name: string } };
+  related_content: { title: string };
+  doctor: { user: { name: string } };
 }
 
 const props = defineProps<{
-  leadSource: LeadSource;
+  marketingTask: MarketingTask;
 }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Lead Sources', href: route('admin.lead-sources.index') },
-  { title: props.leadSource.name, href: route('admin.lead-sources.show', props.leadSource.id) },
+  { title: 'Marketing Tasks', href: route('admin.marketing-tasks.index') },
+  { title: props.marketingTask.title, href: route('admin.marketing-tasks.show', props.marketingTask.id) },
 ]
 
 function printPage() {
@@ -36,23 +42,23 @@ function printPage() {
 }
 
 function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this lead source?')) {
-    router.delete(route('admin.lead-sources.destroy', id))
+  if (confirm('Are you sure you want to delete this marketing task?')) {
+    router.delete(route('admin.marketing-tasks.destroy', id))
   }
 }
 </script>
 
 <template>
-  <Head :title="`Lead Source: ${leadSource.name}`" />
+  <Head :title="`Marketing Task: ${marketingTask.title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Lead Source Details: {{ leadSource.name }}
+                Marketing Task Details: {{ marketingTask.title }}
             </h3>
-            <Link :href="route('admin.lead-sources.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+            <Link :href="route('admin.marketing-tasks.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </Link>
         </div>
@@ -62,41 +68,65 @@ function destroy(id: number) {
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
-                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Lead Source Record</p>
+                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Marketing Task Record</p>
                     <hr class="my-3 border-gray-300 print:my-2">
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Source Details</h2>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Task Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Source Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ leadSource.name }}</p>
+                      <p class="text-sm text-muted-foreground">Task Code:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_code ?? '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Category:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ leadSource.category ?? '-' }}</p>
+                      <p class="text-sm text-muted-foreground">Title:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.title ?? '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Is Active:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ leadSource.is_active ? 'Yes' : 'No' }}</p>
+                      <p class="text-sm text-muted-foreground">Task Type:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_type ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Status:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.status ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Campaign:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.campaign?.campaign_name ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Assigned To:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.assigned_to_staff?.user?.name ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Related Content:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.related_content?.title ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Doctor:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.doctor?.user?.name ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Scheduled At:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.scheduled_at ? format(new Date(marketingTask.scheduled_at), 'PPP p') : '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Completed At:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.completed_at ? format(new Date(marketingTask.completed_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Timestamps</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ leadSource.created_at ? format(new Date(leadSource.created_at), 'PPP p') : '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ leadSource.updated_at ? format(new Date(leadSource.updated_at), 'PPP p') : '-' }}</p>
-                    </div>
-                  </div>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Description</h2>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.description ?? '-' }}</p>
+                </div>
+
+                <div>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.notes ?? '-' }}</p>
                 </div>
 
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
@@ -113,13 +143,13 @@ function destroy(id: number) {
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <Link
-                :href="route('admin.lead-sources.edit', leadSource.id)"
+                :href="route('admin.marketing-tasks.edit', marketingTask.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
-                Edit Source
+                Edit Task
               </Link>
-              <button @click="destroy(leadSource.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Source
+              <button @click="destroy(marketingTask.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
+                <Trash2 class="w-4 h-4" /> Delete Task
               </button>
             </div>
         </div>

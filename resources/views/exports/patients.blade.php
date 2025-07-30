@@ -18,8 +18,8 @@
     <div class="header">
         {{-- You might want to dynamically get your hospital name/logo here --}}
         {{-- Assuming you have a logo at public/images/geraye_logo.jpeg --}}
-        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Hospital Logo" class="logo">
-        <h2>Geraye Hospital</h2>
+        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Home Care Services Logo" class="logo">
+        <h2>Geraye Home Care Services</h2>
         <p>All Patient Records Export</p>
         <p>Generated: {{ now()->toDateTimeString() }}</p>
     </div>

@@ -14,16 +14,16 @@ interface MarketingTask {
   completed_at: string;
   notes: string;
   campaign_id: number;
-  assigned_to_staff_id: number;
-  related_content_id: number;
-  doctor_id: number;
+  assigned_to_staff_id: number | null;
+  related_content_id: number | null;
+  doctor_id: number | null;
 }
 
 const props = defineProps<{
   marketingTask: MarketingTask;
   campaigns: Array<any>;
-  staffMembers: Array<any>;
-  contents: Array<any>;
+  staffs: Array<any>;
+  campaignContents: Array<any>;
   taskTypes: Array<string>;
   statuses: Array<string>;
 }>()
@@ -38,9 +38,9 @@ const breadcrumbs = [
 const form = useForm({
   task_code: props.marketingTask.task_code,
   campaign_id: props.marketingTask.campaign_id,
-  assigned_to_staff_id: props.marketingTask.assigned_to_staff_id,
-  related_content_id: props.marketingTask.related_content_id,
-  doctor_id: props.marketingTask.doctor_id,
+  assigned_to_staff_id: props.marketingTask.assigned_to_staff_id ?? null,
+  related_content_id: props.marketingTask.related_content_id ?? null,
+  doctor_id: props.marketingTask.doctor_id ?? null,
   task_type: props.marketingTask.task_type,
   title: props.marketingTask.title,
   description: props.marketingTask.description,
@@ -72,7 +72,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div class="p-6 space-y-6">
-                <Form :form="form" :campaigns="props.campaigns" :staffMembers="props.staffMembers" :contents="props.contents" :taskTypes="props.taskTypes" :statuses="props.statuses" />
+                <Form :form="form" :campaigns="props.campaigns" :staffs="props.staffs" :campaignContents="props.campaignContents" :taskTypes="props.taskTypes" :statuses="props.statuses" />
             </div>
 
             <div class="p-6 border-t border-gray-200 rounded-b">

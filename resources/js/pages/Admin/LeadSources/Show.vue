@@ -49,7 +49,7 @@ function destroy(id: number) {
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
+            <h3 class="text-xl font-semibold print:hidden">
                 Lead Source Details: {{ leadSource.name }}
             </h3>
             <Link :href="route('admin.lead-sources.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
@@ -62,7 +62,7 @@ function destroy(id: number) {
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
+                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
                     <p class="text-gray-600 dark:text-gray-400 print-document-title">Lead Source Record</p>
                     <hr class="my-3 border-gray-300 print:my-2">
                 </div>

@@ -27,7 +27,7 @@ onMounted(() => {
 
   <div class="print-document">
     <div class="print-header">
-      <img src="/images/geraye_logo.jpeg" alt="Geraye Healthcare Logo" style="max-width: 150px; margin-bottom: 10px;">
+      <img src="/images/geraye_logo.jpeg" alt="Geraye Home Care Services Logo" style="max-width: 150px; margin-bottom: 10px;">
       <h1>All Inventory Items</h1>
       <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
     </div>

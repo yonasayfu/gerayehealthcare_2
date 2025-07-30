@@ -68,7 +68,7 @@
 <body>
     <div class="header">
         <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo">
-        <h1>Geraye Home-to-Home Care</h1>
+        <h1>Geraye Home Care Services</h1>
         <p>Supplier Details Report</p>
     </div>
 

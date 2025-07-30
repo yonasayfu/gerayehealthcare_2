@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import TextInput from '@/components/ui/input/Input.vue'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
@@ -16,9 +17,7 @@ interface MarketingTask {
   scheduled_at: string;
   completed_at: string;
   campaign: { campaign_name: string };
-  assigned_to_staff: { full_name: string };
   related_content: { title: string };
-  doctor: { full_name: string };
 }
 
 interface MarketingTaskPagination {
@@ -34,6 +33,9 @@ interface MarketingTaskPagination {
 
 const props = defineProps<{
   marketingTasks: MarketingTaskPagination;
+  campaigns: any[];
+  staffs: any[];
+  taskTypes: string[];
   filters: {
     search?: string;
     sort?: string;
@@ -41,11 +43,7 @@ const props = defineProps<{
     per_page?: number;
     campaign_id?: number;
     assigned_to_staff_id?: number;
-    doctor_id?: number;
     task_type?: string;
-    status?: string;
-    scheduled_at_start?: string;
-    scheduled_at_end?: string;
   };
 }>()
 
@@ -57,31 +55,23 @@ const breadcrumbs = [
 const search = ref(props.filters.search || '')
 const sortField = ref(props.filters.sort || '')
 const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 10)
+const perPage = ref(props.filters.per_page || 5)
 const campaignId = ref(props.filters.campaign_id || '')
 const assignedToStaffId = ref(props.filters.assigned_to_staff_id || '')
-const doctorId = ref(props.filters.doctor_id || '')
 const taskType = ref(props.filters.task_type || '')
-const status = ref(props.filters.status || '')
-const scheduledAtStart = ref(props.filters.scheduled_at_start || '')
-const scheduledAtEnd = ref(props.filters.scheduled_at_end || '')
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage, campaignId, assignedToStaffId, doctorId, taskType, status, scheduledAtStart, scheduledAtEnd], debounce(() => {
+watch([search, sortField, sortDirection, perPage, campaignId, assignedToStaffId, taskType], debounce(() => {
   const params: Record<string, string | number> = {
     search: search.value,
     direction: sortDirection.value,
     per_page: perPage.value,
     campaign_id: campaignId.value,
     assigned_to_staff_id: assignedToStaffId.value,
-    doctor_id: doctorId.value,
     task_type: taskType.value,
-    status: status.value,
-    scheduled_at_start: scheduledAtStart.value,
-    scheduled_at_end: scheduledAtEnd.value,
   };
 
   if (sortField.value) {
@@ -105,7 +95,16 @@ function exportData(type: 'csv' | 'pdf') {
 }
 
 function printCurrentView() {
-  window.print();
+    const params = {
+        search: search.value,
+        sort: sortField.value,
+        direction: sortDirection.value,
+        campaign_id: campaignId.value,
+        assigned_to_staff_id: assignedToStaffId.value,
+        task_type: taskType.value,
+    };
+    const url = route('admin.marketing-tasks.printCurrent', params);
+    window.open(url, '_blank');
 }
 
 const printAllTasks = () => {
@@ -120,6 +119,16 @@ function toggleSort(field: string) {
     sortDirection.value = 'asc'
   }
 }
+
+function clearFilters() {
+  search.value = '';
+  sortField.value = '';
+  sortDirection.value = 'asc';
+  perPage.value = 10;
+  campaignId.value = '';
+  assignedToStaffId.value = '';
+  taskType.value = '';
+}
 </script>
 
 <template>
@@ -129,11 +138,11 @@ function toggleSort(field: string) {
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Marketing Tasks</h1>
-          <p class="text-sm text-muted-foreground">Manage all marketing tasks here.</p>
+        <div class="flex-grow min-w-0">
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Marketing Tasks Management</h1>
+          <p class="text-sm text-muted-foreground">Manage all marketing tasks here, including creation, editing, and deletion.</p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex-shrink-0 flex flex-wrap gap-2">
           <Link :href="route('admin.marketing-tasks.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             + Add Task
           </Link>
@@ -152,19 +161,22 @@ function toggleSort(field: string) {
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+
+
+
+
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 print:hidden">
         <div class="relative w-full md:w-1/3">
-          <input
+          <TextInput
             type="text"
             v-model="search"
             placeholder="Search tasks..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 pr-10"
+            class="block w-full pr-10"
           />
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
-
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
             <option value="10">10</option>
             <option value="25">25</option>
@@ -174,10 +186,44 @@ function toggleSort(field: string) {
         </div>
       </div>
 
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 print:hidden">
+        <div>
+          <label for="campaignId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Campaign:</label>
+          <select v-model="campaignId" id="campaignId" class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5">
+            <option value="">All Campaigns</option>
+            <option v-for="campaign in campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="assignedToStaffId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Assigned To Staff:</label>
+          <select v-model="assignedToStaffId" id="assignedToStaffId" class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5">
+            <option value="">All Staff</option>
+            <option v-for="staff in staffs" :key="staff.id" :value="staff.id">{{ staff.user?.name ?? '-' }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="taskType" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Task Type:</label>
+          <select v-model="taskType" id="taskType" class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5">
+            <option value="">All Task Types</option>
+            <option v-for="type in taskTypes" :key="type" :value="type">{{ type }}</option>
+          </select>
+        </div>
+
+        
+
+        <div class="col-span-full flex items-end">
+          <button @click="clearFilters" class="w-full inline-flex items-center justify-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Hospital</h1>
+            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Marketing Tasks List (Current View)</p>
             <hr class="my-3 border-gray-300 print:my-2">
         </div>
@@ -217,7 +263,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ task.task_type ?? '-' }}</td>
               <td class="px-6 py-4">{{ task.status ?? '-' }}</td>
               <td class="px-6 py-4">{{ task.scheduled_at ? format(new Date(task.scheduled_at), 'PPP p') : '-' }}</td>
-              <td class="px-6 py-4">{{ task.assigned_to_staff?.full_name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ task.assigned_to_staff?.user?.name ?? '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
@@ -311,8 +357,6 @@ function toggleSort(field: string) {
   .space-y-6.p-6 {
     padding: 0 !important;
     margin: 0 !important;
-    height: auto !important;
-    min-height: auto !important;
   }
 
   /* Table specific print styles */
@@ -322,7 +366,8 @@ function toggleSort(field: string) {
     background-color: transparent !important; /* No background color */
     overflow: visible !important; /* Essential to prevent clipping */
     padding: 1cm; /* Inner padding for the table */
-    page-break-after: auto !important;
+    transform: scale(0.97); /* Slight scale down to fit wide tables */
+    transform-origin: top left;
   }
 
   .print-table {

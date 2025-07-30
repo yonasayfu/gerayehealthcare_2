@@ -28,7 +28,7 @@ const props = defineProps<{
       current_page: number;
       from: number;
       last_page: number;
-      per_page: number;
+      per_page: 10,
       to: number;
       total: number;
     };

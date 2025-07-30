@@ -22,7 +22,7 @@ class StaffFactory extends Factory
             'status' => $this->faker->randomElement(['Active', 'Inactive']),
             'hire_date' => $this->faker->date(),
             'photo' => 'images/staff/placeholder.jpg',
-            'user_id' => null,
+            'user_id' => \App\Models\User::factory(),
         ];
     }
 }

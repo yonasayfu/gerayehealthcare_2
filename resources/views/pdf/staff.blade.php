@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Staff Export - Geraye</title>
+    <title>Staff Export - Geraye Home Care Services</title>
     <style>
         /* Print-specific styles adapted from PrintAll.vue */
         body {
@@ -101,7 +101,7 @@
     <div class="print-container">
         <div class="print-header-content">
             <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" class="print-logo">
-            <h1 class="print-clinic-name">Geraye Home-to-Home Care</h1>
+            <h1 class="print-clinic-name">Geraye Home Care Services</h1>
             <p class="print-document-title">All Staff Records</p>
             <hr class="my-3 border-gray-300 print:my-2">
         </div>

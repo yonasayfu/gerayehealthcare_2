@@ -7,6 +7,9 @@ const props = defineProps({
   form: Object, // This form object will be passed from Create.vue or Edit.vue
   categories: Array, // Prop for categories data
 });
+
+console.log('Form.vue - categories prop:', props.categories);
+console.log('Form.vue - form.category initial:', props.form.category);
 </script>
 
 <template>

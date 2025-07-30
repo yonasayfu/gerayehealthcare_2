@@ -22,7 +22,10 @@ class UpdateMarketingPlatformRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'api_endpoint' => ['nullable', 'url', 'max:255'],
+            'api_credentials' => ['nullable', 'string'],
+            'is_active' => ['boolean'],
         ];
     }
 }

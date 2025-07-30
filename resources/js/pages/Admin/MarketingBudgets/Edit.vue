@@ -37,8 +37,8 @@ const form = useForm({
   description: props.marketingBudget.description,
   allocated_amount: props.marketingBudget.allocated_amount,
   spent_amount: props.marketingBudget.spent_amount,
-  period_start: props.marketingBudget.period_start,
-  period_end: props.marketingBudget.period_end,
+  period_start: props.marketingBudget.period_start ? new Date(props.marketingBudget.period_start).toISOString().slice(0, 10) : '',
+  period_end: props.marketingBudget.period_end ? new Date(props.marketingBudget.period_end).toISOString().slice(0, 10) : '',
   status: props.marketingBudget.status,
 });
 

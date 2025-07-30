@@ -17,7 +17,10 @@ class LeadSourceFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->unique()->word . ' Lead Source',
+            'category' => $this->faker->randomElement(['Online', 'Offline', 'Referral', 'Event', 'Other']),
+            'description' => $this->faker->sentence,
+            'is_active' => $this->faker->boolean,
         ];
     }
 }

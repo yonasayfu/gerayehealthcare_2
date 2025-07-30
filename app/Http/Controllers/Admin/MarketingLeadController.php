@@ -153,9 +153,19 @@ class MarketingLeadController extends Controller
             return Excel::download(new MarketingLeadsExport($leads), 'marketing-leads.csv');
         }
 
-        // PDF export logic can be added here if needed
+        if ($type === 'pdf') {
+            $pdf = Pdf::loadView('pdf.marketing-leads', ['leads' => $leads])->setPaper('a4', 'landscape');
+            return $pdf->stream('marketing-leads.pdf');
+        }
 
         return redirect()->back()->with('error', 'Invalid export type.');
+    }
+
+    public function printSingle(MarketingLead $marketingLead)
+    {
+        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
+        $pdf = Pdf::loadView('pdf.marketing-lead-single', ['lead' => $marketingLead])->setPaper('a4', 'portrait');
+        return $pdf->stream("marketing-lead-{$marketingLead->lead_code}.pdf");
     }
 
     public function printAll(Request $request)
@@ -165,6 +175,14 @@ class MarketingLeadController extends Controller
 
         $pdf = Pdf::loadView('pdf.marketing-leads', ['leads' => $leads])->setPaper('a4', 'landscape');
         return $pdf->stream('marketing-leads.pdf');
+    }
+
+    public function printCurrent(Request $request)
+    {
+        $query = $this->getFilteredQuery($request);
+        $leads = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+
+        return Inertia::render('Admin/MarketingLeads/PrintCurrent', ['leads' => $leads->items()]);
     }
 
     private function getFilteredQuery(Request $request)

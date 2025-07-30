@@ -30,6 +30,9 @@ const form = useForm({
   is_active: props.leadSource.is_active,
 });
 
+console.log('Edit.vue - leadSource.category:', props.leadSource.category);
+console.log('Edit.vue - form.category initial:', form.category);
+
 const submit = () => {
   form.put(route('admin.lead-sources.update', props.leadSource.id));
 };

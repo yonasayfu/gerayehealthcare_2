@@ -88,7 +88,7 @@
 <body>
     <header>
         <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" class="logo">
-        <h1>Geraye Home-to-Home Care</h1>
+        <h1>Geraye Home Care Services</h1>
         <p class="subtitle">Patient Record Card</p>
     </header>
 
@@ -150,7 +150,7 @@
 
     <div class="footer">
         <p>Generated on {{ now()->format('F j, Y, g:i a') }}</p>
-        <p>Geraye Home-to-Home Care - Patient Record System</p>
+        <p>Geraye Home Care Services - Patient Record System</p>
     </div>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Marketing Campaigns List (Current View) - Geraye</title>
+    <title>Marketing Campaigns List (Current View) - Geraye Home Care Services</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,7 +46,7 @@
 <body>
    <header style="text-align: center; margin-bottom: 30px;">
     <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
-    <h1 style="margin: 0;">Geraye Home-to-Home Care</h1>
+    <h1 style="margin: 0;">Geraye Home Care Services</h1>
     <p style="margin: 0;">Marketing Campaigns List (Current View)</p>
 </header>
 

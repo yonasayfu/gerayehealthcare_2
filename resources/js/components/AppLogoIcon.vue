@@ -19,7 +19,7 @@ const logoPath = '/images/geraye_logo.jpeg';
     :src="logoPath"
     :class="className"
     v-bind="$attrs"
-    alt="Geraye Logo"
+    alt="Geraye Home Care Services Logo"
     class="h-8 w-auto border-none"
   />
 </template>

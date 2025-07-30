@@ -35,7 +35,7 @@ onMounted(() => {
   <div class="print-container">
     <div class="print-header-content">
         <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-        <h1 class="print-clinic-name">Geraye Hospital</h1>
+        <h1 class="print-clinic-name">Geraye Home Care Services</h1>
         <p class="print-document-title">All Marketing Leads</p>
         <hr class="my-3 border-gray-300 print:my-2">
     </div>

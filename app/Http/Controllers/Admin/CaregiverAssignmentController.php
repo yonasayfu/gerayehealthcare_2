@@ -36,7 +36,7 @@ class CaregiverAssignmentController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $assignments = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $assignments = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/CaregiverAssignments/Index', [
             'assignments' => $assignments,

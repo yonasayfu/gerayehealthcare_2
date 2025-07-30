@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Task Delegations Export – Geraye</title>
+    <title>Task Delegations Export – Geraye Home Care Services</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -45,7 +45,7 @@
 <body>
    <header>
     <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
-    <h1>Geraye Home-to-Home Care</h1>
+    <h1>Geraye Home Care Services</h1>
     <p>Task Delegations Export</p>
 </header>
 
