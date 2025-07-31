@@ -4,7 +4,7 @@ import { Head } from '@inertiajs/vue3';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import DashboardTabs from '@/components/DashboardTabs.vue';
 import StatCard from '@/components/StatCard.vue';
-import { ref, onMounted, computed } from 'vue'; // Import ref, onMounted, and computed
+import { ref, onMounted, computed, watch } from 'vue'; // Import ref, onMounted, and computed
 
 import { DollarSign, Users, CreditCard, Activity } from 'lucide-vue-next';
 // Removed RecentSales as it's no longer directly used in the template

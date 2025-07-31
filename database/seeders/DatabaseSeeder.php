@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             CampaignContentSeeder::class,
             MarketingTaskSeeder::class,
             LeadSourceSeeder::class,
+            MrXInsuranceScenarioSeeder::class,
         ]);
 
         // Create sample data using factories

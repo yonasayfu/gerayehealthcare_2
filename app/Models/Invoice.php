@@ -13,6 +13,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'patient_id',
+        'service_id', // Added service_id
         'invoice_number',
         'invoice_date',
         'due_date',
@@ -22,6 +23,16 @@ class Invoice extends Model
         'status',
         'paid_at',
     ];
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
+    }
+
+    public function visitService(): BelongsTo
+    {
+        return $this->belongsTo(VisitService::class, 'service_id');
+    }
 
     protected $casts = [
         'invoice_date' => 'date',

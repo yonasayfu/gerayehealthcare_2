@@ -174,6 +174,47 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Services
         Route::resource('services', ServiceController::class);
 
+        // Insurance
+        Route::get('insurance-companies/export', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'export'])->name('insurance-companies.export');
+        Route::get('insurance-companies/print-all', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printAll'])->name('insurance-companies.printAll');
+        Route::get('insurance-companies/print-current', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printCurrent'])->name('insurance-companies.printCurrent');
+        Route::get('insurance-companies/{insurance_company}/print', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printSingle'])->name('insurance-companies.print');
+        Route::resource('insurance-companies', App\Http\Controllers\Insurance\InsuranceCompanyController::class);
+        Route::get('corporate-clients/export', [App\Http\Controllers\Insurance\CorporateClientController::class, 'export'])->name('corporate-clients.export');
+        Route::get('corporate-clients/print-all', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printAll'])->name('corporate-clients.printAll');
+        Route::get('corporate-clients/print-current', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printCurrent'])->name('corporate-clients.printCurrent');
+        Route::get('corporate-clients/{corporate_client}/print', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printSingle'])->name('corporate-clients.print');
+        Route::resource('corporate-clients', App\Http\Controllers\Insurance\CorporateClientController::class);
+        Route::get('insurance-policies/export', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'export'])->name('insurance-policies.export');
+        Route::get('insurance-policies/print-all', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printAll'])->name('insurance-policies.printAll');
+        Route::get('insurance-policies/print-current', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printCurrent'])->name('insurance-policies.printCurrent');
+        Route::get('insurance-policies/{insurance_policy}/print', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printSingle'])->name('insurance-policies.print');
+        Route::resource('insurance-policies', App\Http\Controllers\Insurance\InsurancePolicyController::class);
+        Route::get('employee-insurance-records/export', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'export'])->name('employee-insurance-records.export');
+        Route::get('employee-insurance-records/print-all', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printAll'])->name('employee-insurance-records.printAll');
+        Route::get('employee-insurance-records/print-current', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printCurrent'])->name('employee-insurance-records.printCurrent');
+        Route::get('employee-insurance-records/{employee_insurance_record}/print', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printSingle'])->name('employee-insurance-records.print');
+        Route::resource('employee-insurance-records', App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class);
+        Route::get('insurance-claims/export', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'export'])->name('insurance-claims.export');
+        Route::get('insurance-claims/print-all', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printAll'])->name('insurance-claims.printAll');
+        Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
+        Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
+        Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
+        Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
+        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
+        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
+        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
+        Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
+        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
+        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
+        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
+        Route::resource('exchange-rates', App\Http\Controllers\Insurance\ExchangeRateController::class);
+        Route::get('ethiopian-calendar-days/export', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'export'])->name('ethiopian-calendar-days.export');
+        Route::get('ethiopian-calendar-days/print-all', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printAll'])->name('ethiopian-calendar-days.printAll');
+        Route::get('ethiopian-calendar-days/print-current', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printCurrent'])->name('ethiopian-calendar-days.printCurrent');
+        Route::get('ethiopian-calendar-days/{ethiopian_calendar_day}/print', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printSingle'])->name('ethiopian-calendar-days.print');
+        Route::resource('ethiopian-calendar-days', App\Http\Controllers\Insurance\EthiopianCalendarDayController::class);
+
         
 
         

@@ -13,7 +13,6 @@ class PatientFactory extends Factory
 
         return [
             'full_name' => $this->faker->name,
-            'patient_code' => 'P' . str_pad($this->faker->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
             'fayda_id' => $this->faker->unique()->numerify('##############'),
             
             'date_of_birth' => $this->faker->date,

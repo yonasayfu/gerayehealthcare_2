@@ -24,6 +24,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage roles', 'manage users',
             'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents', 'restore_campaign_contents', 'force_delete_campaign_contents',
             'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks', 'restore_marketing_tasks', 'force_delete_marketing_tasks',
+            'view insurance companies', 'create insurance companies', 'update insurance companies', 'delete insurance companies',
+            'view corporate clients', 'create corporate clients', 'update corporate clients', 'delete corporate clients',
+            'view insurance policies', 'create insurance policies', 'update insurance policies', 'delete insurance policies',
+            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'delete employee insurance records',
+            'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
+            'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
+            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
         ];
 
         foreach ($permissions as $permission) {
@@ -46,6 +53,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'view assignments', 'create assignments', 'edit assignments', 'delete assignments',
             'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents',
             'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks',
+            'view insurance companies', 'create insurance companies', 'update insurance companies', 'delete insurance companies',
+            'view corporate clients', 'create corporate clients', 'update corporate clients', 'delete corporate clients',
+            'view insurance policies', 'create insurance policies', 'update insurance policies', 'delete insurance policies',
+            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'delete employee insurance records',
+            'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
+            'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
+            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
         ]);
 
         // Assign permissions to the 'Staff' role
