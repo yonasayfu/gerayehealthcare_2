@@ -54,7 +54,7 @@ class MarketingCampaignController extends Controller
         }
 
         $marketingCampaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                                    ->paginate($request->input('per_page', 10))
+                                    ->paginate($request->input('per_page', 5))
                                     ->withQueryString();
 
         return Inertia::render('Admin/MarketingCampaigns/Index', [
@@ -221,7 +221,7 @@ class MarketingCampaignController extends Controller
         }
 
         $campaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                           ->paginate($request->input('per_page', 10))->appends($request->except('page'));
+                           ->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/MarketingCampaigns/PrintCurrent', ['campaigns' => $campaigns->items()]);
     }

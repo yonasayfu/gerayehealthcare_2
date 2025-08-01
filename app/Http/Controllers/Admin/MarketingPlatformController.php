@@ -39,7 +39,7 @@ class MarketingPlatformController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $marketingPlatforms = $query->paginate($request->input('per_page', 10))
+        $marketingPlatforms = $query->paginate($request->input('per_page', 5))
                                     ->withQueryString();
 
         return Inertia::render('Admin/MarketingPlatforms/Index', [

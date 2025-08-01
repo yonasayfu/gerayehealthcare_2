@@ -31,7 +31,7 @@ class CorporateClientController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $corporateClients = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $corporateClients = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Insurance/CorporateClients/Index', [
             'corporateClients' => $corporateClients,
@@ -172,7 +172,7 @@ class CorporateClientController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $corporateClients = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $corporateClients = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Insurance/CorporateClients/PrintCurrent', ['corporateClients' => $corporateClients->items()]);
     }

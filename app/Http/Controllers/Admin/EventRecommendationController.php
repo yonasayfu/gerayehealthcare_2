@@ -45,7 +45,7 @@ class EventRecommendationController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $recommendations = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $recommendations = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/EventRecommendations/Index', [
             'recommendations' => $recommendations,
@@ -193,7 +193,7 @@ class EventRecommendationController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $recommendations = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $recommendations = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/EventRecommendations/PrintCurrent', ['recommendations' => $recommendations->items()]);
     }

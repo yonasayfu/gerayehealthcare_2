@@ -40,7 +40,7 @@ class LeadSourceController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $leadSources = $query->paginate($request->input('per_page', 10))
+        $leadSources = $query->paginate($request->input('per_page', 5))
                              ->withQueryString();
 
         return Inertia::render('Admin/LeadSources/Index', [

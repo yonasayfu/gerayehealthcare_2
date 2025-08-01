@@ -43,7 +43,7 @@ class EventBroadcastController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $broadcasts = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $broadcasts = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/EventBroadcasts/Index', [
             'broadcasts' => $broadcasts,
@@ -173,7 +173,7 @@ class EventBroadcastController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $broadcasts = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $broadcasts = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/EventBroadcasts/PrintCurrent', ['broadcasts' => $broadcasts->items()]);
     }

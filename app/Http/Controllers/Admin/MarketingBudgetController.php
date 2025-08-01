@@ -52,7 +52,7 @@ class MarketingBudgetController extends Controller
         }
 
         $marketingBudgets = $query->with(['campaign', 'platform'])
-                                   ->paginate($request->input('per_page', 10))
+                                   ->paginate($request->input('per_page', 5))
                                    ->withQueryString();
 
         return Inertia::render('Admin/MarketingBudgets/Index', [

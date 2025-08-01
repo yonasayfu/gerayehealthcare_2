@@ -61,7 +61,7 @@ class MarketingCampaignController extends Controller
         }
 
         $marketingCampaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                                    ->paginate($request->input('per_page', 10))
+                                    ->paginate($request->input('per_page', 5))
                                     ->withQueryString();
 
         return Inertia::render('Staff/MarketingCampaigns/Index', [

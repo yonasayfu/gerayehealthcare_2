@@ -59,7 +59,7 @@ class MarketingLeadController extends Controller
         }
 
         $marketingLeads = $query->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'])
-                               ->paginate($request->input('per_page', 10))
+                               ->paginate($request->input('per_page', 5))
                                ->withQueryString();
 
         // Temporarily dump data for debugging
@@ -180,7 +180,7 @@ class MarketingLeadController extends Controller
     public function printCurrent(Request $request)
     {
         $query = $this->getFilteredQuery($request);
-        $leads = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $leads = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/MarketingLeads/PrintCurrent', ['leads' => $leads->items()]);
     }

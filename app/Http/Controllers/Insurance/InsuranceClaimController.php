@@ -33,7 +33,7 @@ class InsuranceClaimController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $insuranceClaims = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $insuranceClaims = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Insurance/Claims/Index', [
             'insuranceClaims' => $insuranceClaims,
@@ -194,7 +194,7 @@ class InsuranceClaimController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $insuranceClaims = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $insuranceClaims = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Insurance/Claims/PrintCurrent', ['insuranceClaims' => $insuranceClaims->items()]);
     }

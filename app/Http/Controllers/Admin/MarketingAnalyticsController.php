@@ -99,7 +99,7 @@ class MarketingAnalyticsController extends Controller
 
         $performanceData = $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
                                  ->groupBy('date')
-                                 ->paginate($request->input('per_page', 10))
+                                 ->paginate($request->input('per_page', 5))
                                  ->withQueryString();
 
         return response()->json($performanceData);
@@ -177,7 +177,7 @@ class MarketingAnalyticsController extends Controller
         $performanceData = $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
                                  ->groupBy('date')
                                  ->orderBy('date')
-                                 ->paginate($request->input('per_page', 10));
+                                 ->paginate($request->input('per_page', 5));
 
         $pdf = Pdf::loadView('pdf.marketing.campaign_performance_current', ['performanceData' => $performanceData->items()])->setPaper('a4', 'landscape');
         return $pdf->stream('campaign_performance_current.pdf');

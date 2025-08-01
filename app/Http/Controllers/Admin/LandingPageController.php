@@ -149,7 +149,7 @@ class LandingPageController extends Controller
     public function printCurrent(Request $request)
     {
         $query = $this->getFilteredQuery($request);
-        $pages = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $pages = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/LandingPages/PrintCurrent', ['pages' => $pages->items()]);
     }

@@ -31,7 +31,7 @@ class InsurancePolicyController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $insurancePolicies = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $insurancePolicies = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Insurance/Policies/Index', [
             'insurancePolicies' => $insurancePolicies,
@@ -172,7 +172,7 @@ class InsurancePolicyController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $insurancePolicies = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $insurancePolicies = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Insurance/Policies/PrintCurrent', ['insurancePolicies' => $insurancePolicies->items()]);
     }

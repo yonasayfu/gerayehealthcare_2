@@ -31,7 +31,7 @@ class EmployeeInsuranceRecordController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $employeeInsuranceRecords = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $employeeInsuranceRecords = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Insurance/EmployeeInsuranceRecords/Index', [
             'employeeInsuranceRecords' => $employeeInsuranceRecords,
@@ -176,7 +176,7 @@ class EmployeeInsuranceRecordController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $employeeInsuranceRecords = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $employeeInsuranceRecords = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Insurance/EmployeeInsuranceRecords/PrintCurrent', ['employeeInsuranceRecords' => $employeeInsuranceRecords->items()]);
     }

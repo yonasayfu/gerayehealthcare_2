@@ -42,7 +42,7 @@ class EventStaffAssignmentController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $assignments = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $assignments = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/EventStaffAssignments/Index', [
             'assignments' => $assignments,
@@ -167,7 +167,7 @@ class EventStaffAssignmentController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $assignments = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $assignments = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/EventStaffAssignments/PrintCurrent', ['assignments' => $assignments->items()]);
     }

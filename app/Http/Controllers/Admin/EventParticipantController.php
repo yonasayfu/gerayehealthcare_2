@@ -42,7 +42,7 @@ class EventParticipantController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $participants = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $participants = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/EventParticipants/Index', [
             'participants' => $participants,
@@ -169,7 +169,7 @@ class EventParticipantController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $participants = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $participants = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/EventParticipants/PrintCurrent', ['participants' => $participants->items()]);
     }

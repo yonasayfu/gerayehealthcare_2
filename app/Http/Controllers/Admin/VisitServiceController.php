@@ -33,7 +33,7 @@ class VisitServiceController extends Controller
         $query->orderBy($request->input('sort_by', 'scheduled_at'), $request->input('sort_direction', 'desc'));
 
         return Inertia::render('Admin/VisitServices/Index', [
-            'visitServices' => $query->paginate($request->input('per_page', 10))->withQueryString(),
+            'visitServices' => $query->paginate($request->input('per_page', 5))->withQueryString(),
             'filters' => $request->only(['search', 'sort_by', 'sort_direction', 'per_page']),
         ]);
     }

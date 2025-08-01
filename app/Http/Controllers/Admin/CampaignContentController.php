@@ -63,7 +63,7 @@ class CampaignContentController extends Controller
         }
 
         $campaignContents = $query->with(['campaign', 'platform'])
-                                   ->paginate($request->input('per_page', 10))
+                                   ->paginate($request->input('per_page', 5))
                                    ->withQueryString();
 
         return Inertia::render('Admin/CampaignContents/Index', [

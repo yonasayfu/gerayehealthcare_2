@@ -56,7 +56,7 @@ class MarketingLeadController extends Controller
         }
 
         $marketingLeads = $query->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'])
-                               ->paginate($request->input('per_page', 10))
+                               ->paginate($request->input('per_page', 5))
                                ->withQueryString();
 
         return Inertia::render('Staff/MarketingLeads/Index', [

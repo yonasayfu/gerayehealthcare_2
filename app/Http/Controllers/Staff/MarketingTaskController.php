@@ -64,7 +64,7 @@ class MarketingTaskController extends Controller
         }
 
         $marketingTasks = $query->with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])
-                                 ->paginate($request->input('per_page', 10))
+                                 ->paginate($request->input('per_page', 5))
                                  ->withQueryString();
 
         return Inertia::render('Staff/MarketingTasks/Index', [

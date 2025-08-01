@@ -39,7 +39,7 @@ class EventController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $events = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $events = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/Events/Index', [
             'events' => $events,
@@ -151,7 +151,7 @@ class EventController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $events = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $events = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/Events/PrintCurrent', ['events' => $events->items()]);
     }

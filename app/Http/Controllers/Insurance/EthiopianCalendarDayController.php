@@ -31,7 +31,7 @@ class EthiopianCalendarDayController extends Controller
             $query->orderBy('gregorian_date', 'desc');
         }
 
-        $ethiopianCalendarDays = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $ethiopianCalendarDays = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Insurance/EthiopianCalendarDays/Index', [
             'ethiopianCalendarDays' => $ethiopianCalendarDays,
@@ -166,7 +166,7 @@ class EthiopianCalendarDayController extends Controller
             $query->orderBy('gregorian_date', 'desc');
         }
 
-        $ethiopianCalendarDays = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $ethiopianCalendarDays = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Insurance/EthiopianCalendarDays/PrintCurrent', ['ethiopianCalendarDays' => $ethiopianCalendarDays->items()]);
     }

@@ -29,7 +29,7 @@ class StaffController extends Controller
         }
 
         // Using paginate() for full pagination links
-        $staff = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $staff = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/Staff/Index', [
             'staff' => $staff,

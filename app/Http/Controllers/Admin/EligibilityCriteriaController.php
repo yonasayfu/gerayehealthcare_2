@@ -42,7 +42,7 @@ class EligibilityCriteriaController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $criteria = $query->paginate($request->input('per_page', 10))->withQueryString();
+        $criteria = $query->paginate($request->input('per_page', 5))->withQueryString();
 
         return Inertia::render('Admin/EligibilityCriteria/Index', [
             'criteria' => $criteria,
@@ -169,7 +169,7 @@ class EligibilityCriteriaController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $criteria = $query->paginate($request->input('per_page', 10))->appends($request->except('page'));
+        $criteria = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
 
         return Inertia::render('Admin/EligibilityCriteria/PrintCurrent', ['criteria' => $criteria->items()]);
     }
