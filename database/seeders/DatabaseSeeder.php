@@ -28,11 +28,12 @@ class DatabaseSeeder extends Seeder
             MarketingTaskSeeder::class,
             LeadSourceSeeder::class,
             MrXInsuranceScenarioSeeder::class,
+            PagumeCampaignSeeder::class,
         ]);
 
         // Create sample data using factories
-        \App\Models\VisitService::factory(15)->create();
-        \App\Models\Message::factory(15)->create();
+        \App\Models\VisitService::factory(5)->create();
+        \App\Models\Message::factory(5)->create();
 
         // --- THE FIX IS HERE ---
         // Use updateOrCreate to safely create or update the admin users.

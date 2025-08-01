@@ -13,6 +13,6 @@ class MarketingLeadsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingLead::factory()->count(20)->create();
+        MarketingLead::factory()->count(5)->create();
     }
 }

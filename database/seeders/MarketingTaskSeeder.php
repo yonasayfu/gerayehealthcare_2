@@ -13,6 +13,6 @@ class MarketingTaskSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingTask::factory()->count(20)->create();
+        MarketingTask::factory()->count(5)->create();
     }
 }

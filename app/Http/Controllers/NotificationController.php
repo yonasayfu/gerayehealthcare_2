@@ -36,9 +36,12 @@ class NotificationController extends Controller
     public function markAsRead(DatabaseNotification $notification)
     {
         // Authorization: Ensure the notification belongs to the authenticated user
-        if ($notification->notifiable_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
+$user = Auth::user();
+Log::info('User roles:', ['roles' => $user->roles->pluck('name')]);
+
+if ($notification->notifiable_id !== Auth::id()) {
+    abort(403, 'Unauthorized action.');
+}
 
         $notification->markAsRead();
 

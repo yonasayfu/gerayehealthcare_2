@@ -133,6 +133,7 @@ class MrXInsuranceScenarioSeeder extends Seeder
                 'grand_total' => $totalAmount,
                 'amount' => $totalAmount,
                 'status' => 'Pending',
+                'insurance_company_id' => $nyalaInsurance->id,
             ]
         );
 

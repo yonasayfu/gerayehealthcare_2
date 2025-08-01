@@ -1,50 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ethiopian Calendar Day Details</title>
+    <title>Ethiopian Calendar Day - {{ $ethiopianCalendarDay->gregorian_date }}</title>
     <style>
-        body { font-family: sans-serif; }
-        .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .detail-table th, .detail-table td { border: 1px solid black; padding: 8px; text-align: left; }
-        .detail-table th { background-color: #f2f2f2; }
+        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; color: #333; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 20px; margin: 0; }
+        p { font-size: 14px; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 8px 10px; border: 1px solid #999; text-align: left; }
+        th { background-color: #f3f3f3; }
+        .footer { text-align: right; margin-top: 30px; font-size: 11px; }
+        .detail-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .detail-section:last-child { border-bottom: none; }
+        .detail-row { display: flex; margin-bottom: 5px; }
+        .detail-label { font-weight: bold; width: 150px; /* Adjust as needed */ }
+        .detail-value { flex-grow: 1; }
     </style>
 </head>
 <body>
-    <h1>Ethiopian Calendar Day Details</h1>
+    <header>
+        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
+        <h1>Geraye Home Care Services</h1>
+        <p>Ethiopian Calendar Day Details</p>
+    </header>
 
-    <table class="detail-table">
-        <tr>
-            <th>ID</th>
-            <td>{{ $ethiopianCalendarDay->id }}</td>
-        </tr>
-        <tr>
-            <th>Gregorian Date</th>
-            <td>{{ $ethiopianCalendarDay->gregorian_date }}</td>
-        </tr>
-        <tr>
-            <th>Ethiopian Date</th>
-            <td>{{ $ethiopianCalendarDay->ethiopian_date }}</td>
-        </tr>
-        <tr>
-            <th>Description</th>
-            <td>{{ $ethiopianCalendarDay->description }}</td>
-        </tr>
-        <tr>
-            <th>Is Holiday</th>
-            <td>{{ $ethiopianCalendarDay->is_holiday ? 'Yes' : 'No' }}</td>
-        </tr>
-        <tr>
-            <th>Region</th>
-            <td>{{ $ethiopianCalendarDay->region }}</td>
-        </tr>
-        <tr>
-            <th>Created At</th>
-            <td>{{ $ethiopianCalendarDay->created_at }}</td>
-        </tr>
-        <tr>
-            <th>Updated At</th>
-            <td>{{ $ethiopianCalendarDay->updated_at }}</td>
-        </tr>
-    </table>
+    <div class="detail-section">
+        <h2>Day Information</h2>
+        <div class="detail-row"><span class="detail-label">Gregorian Date:</span> <span class="detail-value">{{ $ethiopianCalendarDay->gregorian_date }}</span></div>
+        <div class="detail-row"><span class="detail-label">Ethiopian Date:</span> <span class="detail-value">{{ $ethiopianCalendarDay->ethiopian_date }}</span></div>
+        <div class="detail-row"><span class="detail-label">Description:</span> <span class="detail-value">{{ $ethiopianCalendarDay->description }}</span></div>
+        <div class="detail-row"><span class="detail-label">Is Holiday:</span> <span class="detail-value">{{ $ethiopianCalendarDay->is_holiday ? 'Yes' : 'No' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Region:</span> <span class="detail-value">{{ $ethiopianCalendarDay->region }}</span></div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now()->format('F j, Y, g:i a') }}
+    </div>
 </body>
 </html>

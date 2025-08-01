@@ -1,102 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Insurance Claim Details</title>
+    <title>Insurance Claim - {{ $insuranceClaim->id }}</title>
     <style>
-        body { font-family: sans-serif; }
-        .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .detail-table th, .detail-table td { border: 1px solid black; padding: 8px; text-align: left; }
-        .detail-table th { background-color: #f2f2f2; }
+        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; color: #333; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { font-size: 20px; margin: 0; }
+        p { font-size: 14px; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 8px 10px; border: 1px solid #999; text-align: left; }
+        th { background-color: #f3f3f3; }
+        .footer { text-align: right; margin-top: 30px; font-size: 11px; }
+        .detail-section { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .detail-section:last-child { border-bottom: none; }
+        .detail-row { display: flex; margin-bottom: 5px; }
+        .detail-label { font-weight: bold; width: 150px; /* Adjust as needed */ }
+        .detail-value { flex-grow: 1; }
     </style>
 </head>
 <body>
-    <h1>Insurance Claim Details</h1>
+    <header>
+        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
+        <h1>Geraye Home Care Services</h1>
+        <p>Insurance Claim Details</p>
+    </header>
 
-    <table class="detail-table">
-        <tr>
-            <th>ID</th>
-            <td>{{ $insuranceClaim->id }}</td>
-        </tr>
-        <tr>
-            <th>Patient ID</th>
-            <td>{{ $insuranceClaim->patient_id }}</td>
-        </tr>
-        <tr>
-            <th>Invoice ID</th>
-            <td>{{ $insuranceClaim->invoice_id }}</td>
-        </tr>
-        <tr>
-            <th>Insurance Company ID</th>
-            <td>{{ $insuranceClaim->insurance_company_id }}</td>
-        </tr>
-        <tr>
-            <th>Policy ID</th>
-            <td>{{ $insuranceClaim->policy_id }}</td>
-        </tr>
-        <tr>
-            <th>Claim Status</th>
-            <td>{{ $insuranceClaim->claim_status }}</td>
-        </tr>
-        <tr>
-            <th>Coverage Amount</th>
-            <td>{{ $insuranceClaim->coverage_amount }}</td>
-        </tr>
-        <tr>
-            <th>Paid Amount</th>
-            <td>{{ $insuranceClaim->paid_amount }}</td>
-        </tr>
-        <tr>
-            <th>Submitted At</th>
-            <td>{{ $insuranceClaim->submitted_at }}</td>
-        </tr>
-        <tr>
-            <th>Processed At</th>
-            <td>{{ $insuranceClaim->processed_at }}</td>
-        </tr>
-        <tr>
-            <th>Payment Due Date</th>
-            <td>{{ $insuranceClaim->payment_due_date }}</td>
-        </tr>
-        <tr>
-            <th>Payment Received At</th>
-            <td>{{ $insuranceClaim->payment_received_at }}</td>
-        </tr>
-        <tr>
-            <th>Payment Method</th>
-            <td>{{ $insuranceClaim->payment_method }}</td>
-        </tr>
-        <tr>
-            <th>Reimbursement Required</th>
-            <td>{{ $insuranceClaim->reimbursement_required ? 'Yes' : 'No' }}</td>
-        </tr>
-        <tr>
-            <th>Receipt Number</th>
-            <td>{{ $insuranceClaim->receipt_number }}</td>
-        </tr>
-        <tr>
-            <th>Is Pre-Authorized</th>
-            <td>{{ $insuranceClaim->is_pre_authorized ? 'Yes' : 'No' }}</td>
-        </tr>
-        <tr>
-            <th>Pre-Authorization Code</th>
-            <td>{{ $insuranceClaim->pre_authorization_code }}</td>
-        </tr>
-        <tr>
-            <th>Denial Reason</th>
-            <td>{{ $insuranceClaim->denial_reason }}</td>
-        </tr>
-        <tr>
-            <th>Translated Notes</th>
-            <td>{{ $insuranceClaim->translated_notes }}</td>
-        </tr>
-        <tr>
-            <th>Created At</th>
-            <td>{{ $insuranceClaim->created_at }}</td>
-        </tr>
-        <tr>
-            <th>Updated At</th>
-            <td>{{ $insuranceClaim->updated_at }}</td>
-        </tr>
-    </table>
+    <div class="detail-section">
+        <h2>Claim Information</h2>
+        <div class="detail-row"><span class="detail-label">Claim ID:</span> <span class="detail-value">{{ $insuranceClaim->id }}</span></div>
+        <div class="detail-row"><span class="detail-label">Patient ID:</span> <span class="detail-value">{{ $insuranceClaim->patient_id }}</span></div>
+        <div class="detail-row"><span class="detail-label">Invoice ID:</span> <span class="detail-value">{{ $insuranceClaim->invoice_id }}</span></div>
+        <div class="detail-row"><span class="detail-label">Insurance Company ID:</span> <span class="detail-value">{{ $insuranceClaim->insurance_company_id }}</span></div>
+        <div class="detail-row"><span class="detail-label">Policy ID:</span> <span class="detail-value">{{ $insuranceClaim->policy_id }}</span></div>
+        <div class="detail-row"><span class="detail-label">Claim Status:</span> <span class="detail-value">{{ $insuranceClaim->claim_status }}</span></div>
+        <div class="detail-row"><span class="detail-label">Coverage Amount:</span> <span class="detail-value">{{ $insuranceClaim->coverage_amount }}</span></div>
+        <div class="detail-row"><span class="detail-label">Paid Amount:</span> <span class="detail-value">{{ $insuranceClaim->paid_amount }}</span></div>
+        <div class="detail-row"><span class="detail-label">Submitted At:</span> <span class="detail-value">{{ $insuranceClaim->submitted_at }}</span></div>
+        <div class="detail-row"><span class="detail-label">Processed At:</span> <span class="detail-value">{{ $insuranceClaim->processed_at }}</span></div>
+        <div class="detail-row"><span class="detail-label">Payment Due Date:</span> <span class="detail-value">{{ $insuranceClaim->payment_due_date }}</span></div>
+        <div class="detail-row"><span class="detail-label">Payment Received At:</span> <span class="detail-value">{{ $insuranceClaim->payment_received_at }}</span></div>
+        <div class="detail-row"><span class="detail-label">Payment Method:</span> <span class="detail-value">{{ $insuranceClaim->payment_method }}</span></div>
+        <div class="detail-row"><span class="detail-label">Reimbursement Required:</span> <span class="detail-value">{{ $insuranceClaim->reimbursement_required ? 'Yes' : 'No' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Receipt Number:</span> <span class="detail-value">{{ $insuranceClaim->receipt_number }}</span></div>
+        <div class="detail-row"><span class="detail-label">Is Pre-Authorized:</span> <span class="detail-value">{{ $insuranceClaim->is_pre_authorized ? 'Yes' : 'No' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Pre-Authorization Code:</span> <span class="detail-value">{{ $insuranceClaim->pre_authorization_code }}</span></div>
+        <div class="detail-row"><span class="detail-label">Denial Reason:</span> <span class="detail-value">{{ $insuranceClaim->denial_reason }}</span></div>
+        <div class="detail-row"><span class="detail-label">Translated Notes:</span> <span class="detail-value">{{ $insuranceClaim->translated_notes }}</span></div>
+    </div>
+
+    <div class="footer">
+        Generated on {{ now()->format('F j, Y, g:i a') }}
+    </div>
 </body>
 </html>

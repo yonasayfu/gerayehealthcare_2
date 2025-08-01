@@ -13,6 +13,6 @@ class CampaignContentSeeder extends Seeder
      */
     public function run(): void
     {
-        CampaignContent::factory()->count(20)->create();
+        CampaignContent::factory()->count(5)->create();
     }
 }

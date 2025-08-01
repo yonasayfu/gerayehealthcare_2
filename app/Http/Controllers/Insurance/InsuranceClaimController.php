@@ -8,6 +8,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InsuranceClaimEmail;
 use Inertia\Inertia;
 
 class InsuranceClaimController extends Controller
@@ -83,7 +85,7 @@ class InsuranceClaimController extends Controller
      */
     public function show(string $id)
     {
-        $insuranceClaim = InsuranceClaim::findOrFail($id);
+        $insuranceClaim = InsuranceClaim::with(['patient', 'invoice'])->findOrFail($id);
         return Inertia::render('Insurance/Claims/Show', [
             'insuranceClaim' => $insuranceClaim,
         ]);
@@ -203,5 +205,48 @@ class InsuranceClaimController extends Controller
 
         $pdf = Pdf::loadView('pdf.insurance_claims', ['insuranceClaims' => $insuranceClaims])->setPaper('a4', 'landscape');
         return $pdf->stream('insurance_claims.pdf');
+    }
+
+    public function sendClaimEmail(Request $request, string $id)
+    {
+        $insuranceClaim = InsuranceClaim::with(['invoice.patient', 'invoice.visitService'])->findOrFail($id);
+
+        $request->validate([
+            'recipient_email' => 'required|email',
+            'subject' => 'required|string',
+            'message' => 'nullable|string',
+        ]);
+
+        try {
+            // Generate PDF
+            $pdf = Pdf::loadView('pdf.insurance_claim_single', ['insuranceClaim' => $insuranceClaim])->setPaper('a4', 'portrait');
+            $pdfPath = storage_path('app/public/temp_claim_' . $insuranceClaim->id . '.pdf');
+            $pdf->save($pdfPath);
+
+            // Send email
+            Mail::to($request->input('recipient_email'))
+                ->send(new InsuranceClaimEmail($insuranceClaim, $pdfPath));
+
+            // Update claim status
+            $insuranceClaim->update([
+                'email_sent_at' => now(),
+                'email_status' => 'Sent',
+            ]);
+
+            // Clean up temporary PDF file
+            unlink($pdfPath);
+
+            return Redirect::back()->with('success', 'Insurance claim email sent successfully!');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            logger()->error('Failed to send insurance claim email: ' . $e->getMessage());
+
+            // Update claim status to failed
+            $insuranceClaim->update([
+                'email_status' => 'Failed',
+            ]);
+
+            return Redirect::back()->with('error', 'Failed to send insurance claim email. Please try again.');
+        }
     }
 }

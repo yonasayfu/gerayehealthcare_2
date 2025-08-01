@@ -32,8 +32,20 @@ class MarketingLeadFactory extends Factory
             'lead_score' => $this->faker->numberBetween(1, 100),
             'status' => $this->faker->randomElement(['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted']),
             'assigned_staff_id' => Staff::all()->random()->id,
-            'converted_patient_id' => \App\Models\Patient::factory(),
-            'conversion_date' => $this->faker->optional()->dateTimeBetween('-1 year', 'now'),
+            'converted_patient_id' => function (array $attributes) {
+                if ($attributes['status'] === 'Converted') {
+                    return \App\Models\Patient::updateOrCreate([
+                        'email' => $attributes['email']], [
+                        'full_name' => $attributes['first_name'] . ' ' . $attributes['last_name'],
+                        'phone_number' => $attributes['phone'],
+                        'patient_code' => 'PAT-' . str_pad(\App\Models\Patient::count() + 1, 5, '0', STR_PAD_LEFT),
+                    ])->id;
+                }
+                return null;
+            },
+            'conversion_date' => function (array $attributes) {
+                return $attributes['status'] === 'Converted' ? $this->faker->optional()->dateTimeBetween('-1 year', 'now') : null;
+            },
             'notes' => $this->faker->paragraph,
         ];
     }

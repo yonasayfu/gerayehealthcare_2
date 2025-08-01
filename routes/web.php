@@ -17,6 +17,12 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPayoutController;
 use App\Http\Controllers\Admin\TaskDelegationController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\EligibilityCriteriaController;
+use App\Http\Controllers\Admin\EventRecommendationController;
+use App\Http\Controllers\Admin\EventParticipantController;
+use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\EventBroadcastController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
@@ -54,20 +60,7 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Debug Route for Permissions
-Route::get('/debug-permissions', function () {
-    if (Auth::check()) {
-        $user = Auth::user();
-        $permissions = $user->getAllPermissions()->pluck('name');
-        return response()->json([
-            'user_id' => $user->id,
-            'user_roles' => $user->getRoleNames(),
-            'user_permissions' => $permissions,
-            'has_view_any_campaign_contents' => $user->hasPermissionTo('view_any_campaign_contents'),
-        ]);
-    } else {
-        return response()->json(['message' => 'User not authenticated.'], 401);
-    }
-})->middleware(['auth', 'verified']);
+
 
 // Messaging & Notifications
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -76,8 +69,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
-        ->name('notifications.markAsRead');
+            ->name('notifications.markAsRead');
 });
+
+
 
 // Admin & Super Admin
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
@@ -199,6 +194,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('insurance-claims/print-all', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printAll'])->name('insurance-claims.printAll');
         Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
         Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
+        Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
         Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
         Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
         Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
@@ -215,9 +211,46 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('ethiopian-calendar-days/{ethiopian_calendar_day}/print', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printSingle'])->name('ethiopian-calendar-days.print');
         Route::resource('ethiopian-calendar-days', App\Http\Controllers\Insurance\EthiopianCalendarDayController::class);
 
-        
+        // Events
+        Route::get('events/export', [EventController::class, 'export'])->name('events.export');
+        Route::get('events/print-all', [EventController::class, 'printAll'])->name('events.printAll');
+        Route::get('events/print-current', [EventController::class, 'printCurrent'])->name('events.printCurrent');
+        Route::get('events/{event}/print', [EventController::class, 'printSingle'])->name('events.print');
+        Route::resource('events', EventController::class);
 
-        
+        // Eligibility Criteria
+        Route::resource('eligibility-criteria', EligibilityCriteriaController::class);
+        Route::get('eligibility-criteria/export', [EligibilityCriteriaController::class, 'export'])->name('eligibility-criteria.export');
+        Route::get('eligibility-criteria/print-all', [EligibilityCriteriaController::class, 'printAll'])->name('eligibility-criteria.printAll');
+        Route::get('eligibility-criteria/print-current', [EligibilityCriteriaController::class, 'printCurrent'])->name('eligibility-criteria.printCurrent');
+        Route::get('eligibility-criteria/{eligibility_criterion}/print', [EligibilityCriteriaController::class, 'printSingle'])->name('eligibility-criteria.print');
+
+        Route::resource('event-recommendations', EventRecommendationController::class);
+        Route::get('event-recommendations/export', [EventRecommendationController::class, 'export'])->name('event-recommendations.export');
+        Route::get('event-recommendations/print-all', [EventRecommendationController::class, 'printAll'])->name('event-recommendations.printAll');
+        Route::get('event-recommendations/print-current', [EventRecommendationController::class, 'printCurrent'])->name('event-recommendations.printCurrent');
+        Route::get('event-recommendations/{event_recommendation}/print', [EventRecommendationController::class, 'printSingle'])->name('event-recommendations.print');
+
+        // Event Participants
+        Route::resource('event-participants', EventParticipantController::class);
+        Route::get('event-participants/export', [EventParticipantController::class, 'export'])->name('event-participants.export');
+        Route::get('event-participants/print-all', [EventParticipantController::class, 'printAll'])->name('event-participants.printAll');
+        Route::get('event-participants/print-current', [EventParticipantController::class, 'printCurrent'])->name('event-participants.printCurrent');
+        Route::get('event-participants/{event_participant}/print', [EventParticipantController::class, 'printSingle'])->name('event-participants.print');
+
+        // Event Staff Assignments
+        Route::resource('event-staff-assignments', EventStaffAssignmentController::class);
+        Route::get('event-staff-assignments/export', [EventStaffAssignmentController::class, 'export'])->name('event-staff-assignments.export');
+        Route::get('event-staff-assignments/print-all', [EventStaffAssignmentController::class, 'printAll'])->name('event-staff-assignments.printAll');
+        Route::get('event-staff-assignments/print-current', [EventStaffAssignmentController::class, 'printCurrent'])->name('event-staff-assignments.printCurrent');
+        Route::get('event-staff-assignments/{event_staff_assignment}/print', [EventStaffAssignmentController::class, 'printSingle'])->name('event-staff-assignments.print');
+
+        // Event Broadcasts
+        Route::resource('event-broadcasts', EventBroadcastController::class);
+        Route::get('event-broadcasts/export', [EventBroadcastController::class, 'export'])->name('event-broadcasts.export');
+        Route::get('event-broadcasts/print-all', [EventBroadcastController::class, 'printAll'])->name('event-broadcasts.printAll');
+        Route::get('event-broadcasts/print-current', [EventBroadcastController::class, 'printCurrent'])->name('event-broadcasts.printCurrent');
+        Route::get('event-broadcasts/{event_broadcast}/print', [EventBroadcastController::class, 'printSingle'])->name('event-broadcasts.print');
 
         // Admin Leave Requests
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)

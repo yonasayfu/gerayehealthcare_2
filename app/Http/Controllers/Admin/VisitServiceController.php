@@ -8,6 +8,7 @@ use App\Models\Staff;
 use App\Models\VisitService;
 use App\Rules\StaffIsAvailableForVisit;
 use App\Models\CaregiverAssignment;
+use App\Models\EventStaffAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon; // Make sure Carbon is imported
@@ -93,6 +94,17 @@ class VisitServiceController extends Controller
         }
 
         VisitService::create($validated);
+
+        // Log staff contribution to event_staff_assignments if event_id is present
+        if (isset($validated['event_id'])) {
+            EventStaffAssignment::firstOrCreate(
+                [
+                    'event_id' => $validated['event_id'],
+                    'staff_id' => $validated['staff_id'],
+                ],
+                ['role' => 'Attended'] // Default role for staff attending an event
+            );
+        }
         
         return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
     }

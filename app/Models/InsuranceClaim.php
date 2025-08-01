@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InsuranceClaim extends Model
 {
@@ -28,5 +29,21 @@ class InsuranceClaim extends Model
         'pre_authorization_code',
         'denial_reason',
         'translated_notes',
+        'email_sent_at',
+        'email_status',
     ];
+
+    protected $casts = [
+        'email_sent_at' => 'datetime',
+    ];
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class);
+    }
 }

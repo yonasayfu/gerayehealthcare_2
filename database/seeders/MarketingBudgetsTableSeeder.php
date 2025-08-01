@@ -13,6 +13,6 @@ class MarketingBudgetsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingBudget::factory()->count(20)->create();
+        MarketingBudget::factory()->count(5)->create();
     }
 }

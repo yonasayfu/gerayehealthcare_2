@@ -24,10 +24,10 @@ class InventorySeeder extends Seeder
         DB::statement('TRUNCATE TABLE inventory_items RESTART IDENTITY CASCADE;');
 
         Supplier::factory(5)->create();
-        InventoryItem::factory(20)->create();
-        InventoryRequest::factory(15)->create();
-        InventoryTransaction::factory(30)->create();
-        InventoryMaintenanceRecord::factory(10)->create();
-        InventoryAlert::factory(8)->create();
+        InventoryItem::factory(5)->create();
+        InventoryRequest::factory(5)->create();
+        InventoryTransaction::factory(5)->create();
+        InventoryMaintenanceRecord::factory(5)->create();
+        InventoryAlert::factory(5)->create();
     }
 }

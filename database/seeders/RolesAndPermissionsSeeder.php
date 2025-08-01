@@ -31,6 +31,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
             'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
             'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
+            'view events', 'create events', 'edit events', 'delete events',
+            'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria', 'delete eligibility criteria',
+            'view event recommendations', 'create event recommendations', 'edit event recommendations', 'delete event recommendations',
+            'view event participants', 'create event participants', 'edit event participants', 'delete event participants',
+            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments', 'delete event staff assignments',
+            'view event broadcasts', 'create event broadcasts', 'edit event broadcasts', 'delete event broadcasts',
         ];
 
         foreach ($permissions as $permission) {
@@ -60,6 +66,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
             'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
             'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
+            'view events', 'create events', 'edit events', 'delete events',
+            'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria', 'delete eligibility criteria',
+            'view event recommendations', 'create event recommendations', 'edit event recommendations', 'delete event recommendations',
+            'view event participants', 'create event participants', 'edit event participants', 'delete event participants',
+            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments', 'delete event staff assignments',
+            'view event broadcasts', 'create event broadcasts', 'edit event broadcasts', 'delete event broadcasts',
         ]);
 
         // Assign permissions to the 'Staff' role

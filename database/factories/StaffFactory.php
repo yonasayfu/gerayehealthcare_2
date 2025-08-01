@@ -22,7 +22,13 @@ class StaffFactory extends Factory
             'status' => $this->faker->randomElement(['Active', 'Inactive']),
             'hire_date' => $this->faker->date(),
             'photo' => 'images/staff/placeholder.jpg',
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => function (array $attributes) {
+                return \App\Models\User::updateOrCreate([
+                    'email' => $attributes['email']], [
+                    'name' => $attributes['first_name'] . ' ' . $attributes['last_name'],
+                    'password' => bcrypt('password'),
+                ])->id;
+            },
         ];
     }
 }

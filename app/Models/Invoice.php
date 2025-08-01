@@ -22,6 +22,7 @@ class Invoice extends Model
         'grand_total',
         'status',
         'paid_at',
+        'insurance_company_id',
     ];
 
     public function service(): BelongsTo
@@ -69,5 +70,10 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function insuranceCompany(): BelongsTo
+    {
+        return $this->belongsTo(InsuranceCompany::class);
     }
 }

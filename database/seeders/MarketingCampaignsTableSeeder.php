@@ -13,6 +13,6 @@ class MarketingCampaignsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingCampaign::factory(15)->create();
+        MarketingCampaign::factory(5)->create();
     }
 }

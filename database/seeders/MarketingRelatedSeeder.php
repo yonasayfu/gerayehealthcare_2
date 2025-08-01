@@ -26,6 +26,6 @@ class MarketingRelatedSeeder extends Seeder
         MarketingPlatform::factory()->count(5)->create();
 
         // Create Marketing Campaigns, which depend on platforms and staff
-        MarketingCampaign::factory()->count(10)->create();
+        MarketingCampaign::factory()->count(5)->create();
     }
 }
