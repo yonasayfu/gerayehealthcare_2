@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
@@ -17,6 +19,7 @@ use Inertia\Response;
 
 class VisitServiceController extends Controller
 {
+    use ExportableTrait;
     // ... index, create, show, edit, destroy methods remain the same ...
     public function index(Request $request): Response
     {
@@ -201,133 +204,16 @@ class VisitServiceController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $visitServices = VisitService::with(['patient', 'staff'])->get();
-
-        if ($type === 'csv') {
-            $csvData = "Patient Name,Staff Name,Scheduled At,Status,Service Description\n";
-            foreach ($visitServices as $visit) {
-                $patientName = $visit->patient->full_name ?? 'N/A';
-                $staffName = ($visit->staff->first_name ?? '') . ' ' . ($visit->staff->last_name ?? '');
-                $scheduledAt = $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('Y-m-d H:i') : 'N/A';
-                $serviceDescription = str_replace('"', '""', $visit->service_description ?? '-');
-                $csvData .= "\"{$patientName}\",\"{$staffName}\",\"{$scheduledAt}\",\"{$visit->status}\",\"{$serviceDescription}\"\n";
-            }
-            return \Illuminate\Support\Facades\Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="visit_services.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $visitServices->map(function($visit) {
-                return [
-                    'patient_name' => $visit->patient->full_name ?? 'N/A',
-                    'staff_name' => ($visit->staff->first_name ?? '') . ' ' . ($visit->staff->last_name ?? ''),
-                    'scheduled_at' => $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('Y-m-d H:i') : 'N/A',
-                    'status' => $visit->status,
-                    'service_description' => $visit->service_description ?? '-',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'patient_name', 'label' => 'Patient Name'],
-                ['key' => 'staff_name', 'label' => 'Staff Name'],
-                ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'service_description', 'label' => 'Service Description'],
-            ];
-
-            $title = 'Visit Services List';
-            $documentTitle = 'Visit Services List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('visit_services.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
     }
 
     public function printAll(Request $request)
     {
-        $query = VisitService::with(['patient', 'staff']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('patient', fn($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
-                    ->orWhereHas('staff', fn($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
-            });
-        }
-
-        $visitServices = $query->get();
-
-        $data = $visitServices->map(function($visit) {
-            return [
-                'patient_name' => $visit->patient->full_name ?? 'N/A',
-                'staff_name' => ($visit->staff->first_name ?? '') . ' ' . ($visit->staff->last_name ?? ''),
-                'scheduled_at' => $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('Y-m-d H:i') : 'N/A',
-                'status' => $visit->status,
-                'service_description' => $visit->service_description ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'patient_name', 'label' => 'Patient Name'],
-            ['key' => 'staff_name', 'label' => 'Staff Name'],
-            ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'service_description', 'label' => 'Service Description'],
-        ];
-
-        $title = 'Visit Services List';
-        $documentTitle = 'Visit Services List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('visit_services_all.pdf');
+        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = VisitService::with(['patient', 'staff']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('patient', fn($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
-                    ->orWhereHas('staff', fn($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
-            });
-        }
-
-        $query->orderBy($request->input('sort_by', 'scheduled_at'), $request->input('sort_direction', 'desc'));
-
-        $visitServices = $query->get();
-
-        $data = $visitServices->map(function($visit) {
-            return [
-                'patient_name' => $visit->patient->full_name ?? 'N/A',
-                'staff_name' => ($visit->staff->first_name ?? '') . ' ' . ($visit->staff->last_name ?? ''),
-                'scheduled_at' => $visit->scheduled_at ? \Carbon\Carbon::parse($visit->scheduled_at)->format('Y-m-d H:i') : 'N/A',
-                'status' => $visit->status,
-                'service_description' => $visit->service_description ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'patient_name', 'label' => 'Patient Name'],
-            ['key' => 'staff_name', 'label' => 'Staff Name'],
-            ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'service_description', 'label' => 'Service Description'],
-        ];
-
-        $title = 'Visit Services List (Current View)';
-        $documentTitle = 'Visit Services List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('visit_services_current.pdf');
+        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryAlertController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -40,73 +43,26 @@ class InventoryAlertController extends Controller
         ]);
     }
 
-    public function export(): StreamedResponse
+    public function export(Request $request)
     {
-        $inventoryAlerts = InventoryAlert::with('item')->get();
-
-        $csv = Writer::createFromString('');
-        $csv->insertOne(['ID', 'Item', 'Alert Type', 'Threshold Value', 'Message', 'Is Active', 'Triggered At']);
-
-        foreach ($inventoryAlerts as $alert) {
-            $csv->insertOne([
-                $alert->id,
-                $alert->item->name ?? 'N/A',
-                $alert->alert_type,
-                $alert->threshold_value,
-                $alert->message,
-                $alert->is_active ? 'Yes' : 'No',
-                $alert->triggered_at,
-            ]);
-        }
-
-        return response()->streamDownload(function () use ($csv) {
-            echo $csv->toString();
-        }, 'inventory_alerts.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_alerts.csv"',
-        ]);
+        return $this->handleExport($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
     }
 
     public function printAll(Request $request)
     {
-        $query = InventoryAlert::with('item');
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
-        }
-
-        $inventoryAlerts = $query->get();
-
-        return Inertia::render('Admin/InventoryAlerts/PrintAll', [
-            'inventoryAlerts' => $inventoryAlerts,
-        ]);
+        return $this->handlePrintAll($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
     }
 
     public function printSingle(InventoryAlert $inventoryAlert)
     {
-        return Inertia::render('Admin/InventoryAlerts/PrintSingle', [
-            'inventoryAlert' => $inventoryAlert->load('item'),
-        ]);
+        return $this->handlePrintSingle($inventoryAlert, AdditionalExportConfigs::getInventoryAlertConfig());
     }
 
     public function generatePdf(Request $request)
     {
-        $query = InventoryAlert::with('item');
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
-        }
-
-        $inventoryAlerts = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory-alerts', ['inventoryAlerts' => $inventoryAlerts])->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory_alerts.pdf');
+        // Use the centralized PDF generation through export
+        $request->merge(['type' => 'pdf']);
+        return $this->handleExport($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
     }
 
     public function create()

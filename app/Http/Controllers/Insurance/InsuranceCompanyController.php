@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Response;
+use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 
 class InsuranceCompanyController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -125,61 +129,21 @@ class InsuranceCompanyController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $insuranceCompanies = InsuranceCompany::select('name', 'contact_person', 'contact_email', 'contact_phone', 'address')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Name,Contact Person,Contact Email,Contact Phone,Address\n";
-            foreach ($insuranceCompanies as $company) {
-                $csvData .= "\"{$company->name}\",\"{$company->contact_person}\",\"{$company->contact_email}\",\"{$company->contact_phone}\",\"{$company->address}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=\"insurance_companies.csv\"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.insurance_companies', ['insuranceCompanies' => $insuranceCompanies])->setPaper('a4', 'landscape');
-            return $pdf->stream('insurance_companies.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, InsuranceCompany::class, AdditionalExportConfigs::getInsuranceCompanyConfig());
     }
 
     public function printSingle(InsuranceCompany $insuranceCompany)
     {
-        $pdf = Pdf::loadView('pdf.insurance_company_single', ['insuranceCompany' => $insuranceCompany])->setPaper('a4', 'portrait');
-        return $pdf->stream("insurance_company-{$insuranceCompany->id}.pdf");
+        return $this->handlePrintSingle($insuranceCompany, AdditionalExportConfigs::getInsuranceCompanyConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = InsuranceCompany::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('contact_email', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insuranceCompanies = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/Companies/PrintCurrent', ['insuranceCompanies' => $insuranceCompanies->items()]);
+        return $this->handlePrintCurrent($request, InsuranceCompany::class, AdditionalExportConfigs::getInsuranceCompanyConfig());
     }
 
     public function printAll(Request $request)
     {
-        $insuranceCompanies = InsuranceCompany::orderBy('name')->get();
-
-        $pdf = Pdf::loadView('pdf.insurance_companies', ['insuranceCompanies' => $insuranceCompanies])->setPaper('a4', 'landscape');
-        return $pdf->stream('insurance_companies.pdf');
+        return $this->handlePrintAll($request, InsuranceCompany::class, AdditionalExportConfigs::getInsuranceCompanyConfig());
     }
 }

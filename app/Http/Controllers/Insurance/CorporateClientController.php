@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\CorporateClient;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Inertia\Inertia;
 
 class CorporateClientController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -127,61 +130,21 @@ class CorporateClientController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $corporateClients = CorporateClient::select('organization_name', 'contact_person', 'contact_email', 'contact_phone', 'tin_number', 'trade_license_number', 'address')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Organization Name,Contact Person,Contact Email,Contact Phone,TIN Number,Trade License Number,Address\n";
-            foreach ($corporateClients as $client) {
-                $csvData .= "\"{$client->organization_name}\",\"{$client->contact_person}\",\"{$client->contact_email}\",\"{$client->contact_phone}\",\"{$client->tin_number}\",\"{$client->trade_license_number}\",\"{$client->address}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="corporate_clients.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.corporate_clients', ['corporateClients' => $corporateClients])->setPaper('a4', 'landscape');
-            return $pdf->stream('corporate_clients.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, CorporateClient::class, AdditionalExportConfigs::getCorporateClientConfig());
     }
 
     public function printSingle(CorporateClient $corporateClient)
     {
-        $pdf = Pdf::loadView('pdf.corporate_client_single', ['corporateClient' => $corporateClient])->setPaper('a4', 'portrait');
-        return $pdf->stream("corporate_client-{$corporateClient->id}.pdf");
+        return $this->handlePrintSingle($corporateClient, AdditionalExportConfigs::getCorporateClientConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = CorporateClient::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('organization_name', 'ilike', "%{$search}%")
-                  ->orWhere('contact_email', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $corporateClients = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/CorporateClients/PrintCurrent', ['corporateClients' => $corporateClients->items()]);
+        return $this->handlePrintCurrent($request, CorporateClient::class, AdditionalExportConfigs::getCorporateClientConfig());
     }
 
     public function printAll(Request $request)
     {
-        $corporateClients = CorporateClient::orderBy('organization_name')->get();
-
-        $pdf = Pdf::loadView('pdf.corporate_clients', ['corporateClients' => $corporateClients])->setPaper('a4', 'landscape');
-        return $pdf->stream('corporate_clients.pdf');
+        return $this->handlePrintAll($request, CorporateClient::class, AdditionalExportConfigs::getCorporateClientConfig());
     }
 }

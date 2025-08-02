@@ -3,19 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\MarketingLead;
 use App\Models\MarketingCampaign;
 use App\Models\CampaignMetric;
 use App\Models\MarketingBudget;
 use App\Models\Patient;
 use App\Models\LeadSource;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class MarketingAnalyticsController extends Controller
 {
+    use ExportableTrait;
     public function dashboardData(Request $request)
     {
         $totalLeads = MarketingLead::count();
@@ -161,26 +164,12 @@ class MarketingAnalyticsController extends Controller
 
     public function printAllCampaignPerformance(Request $request)
     {
-        $query = $this->getFilteredCampaignMetricsQuery($request);
-        $performanceData = $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
-                                 ->groupBy('date')
-                                 ->orderBy('date')
-                                 ->get();
-
-        $pdf = Pdf::loadView('pdf.marketing.campaign_performance_all', ['performanceData' => $performanceData])->setPaper('a4', 'landscape');
-        return $pdf->stream('campaign_performance_all.pdf');
+        return $this->handlePrintAll($request, CampaignMetric::class, AdditionalExportConfigs::getCampaignMetricConfig());
     }
 
     public function printCurrentCampaignPerformance(Request $request)
     {
-        $query = $this->getFilteredCampaignMetricsQuery($request);
-        $performanceData = $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
-                                 ->groupBy('date')
-                                 ->orderBy('date')
-                                 ->paginate($request->input('per_page', 5));
-
-        $pdf = Pdf::loadView('pdf.marketing.campaign_performance_current', ['performanceData' => $performanceData->items()])->setPaper('a4', 'landscape');
-        return $pdf->stream('campaign_performance_current.pdf');
+        return $this->handlePrintCurrent($request, CampaignMetric::class, AdditionalExportConfigs::getCampaignMetricConfig());
     }
 
     private function getFilteredCampaignMetricsQuery(Request $request)

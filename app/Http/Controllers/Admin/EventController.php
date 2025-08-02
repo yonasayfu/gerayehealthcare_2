@@ -8,9 +8,12 @@ use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 
 class EventController extends Controller
 {
+    use ExportableTrait;
     public function __construct()
     {
         $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
@@ -106,145 +109,26 @@ class EventController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $events = Event::select('title', 'description', 'event_date', 'is_free_service', 'broadcast_status')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Title,Description,Event Date,Is Free Service,Broadcast Status\n";
-            foreach ($events as $event) {
-                $csvData .= "\"{$event->title}\",\"{$event->description}\",\"{$event->event_date}\",\"{$event->is_free_service}\",\"{$event->broadcast_status}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="events.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $events->map(function($event) {
-                return [
-                    'title' => $event->title,
-                    'description' => $event->description,
-                    'event_date' => $event->event_date,
-                    'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
-                    'broadcast_status' => $event->broadcast_status,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'title', 'label' => 'Title'],
-                ['key' => 'description', 'label' => 'Description'],
-                ['key' => 'event_date', 'label' => 'Event Date'],
-                ['key' => 'is_free_service', 'label' => 'Free Service'],
-                ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-            ];
-
-            $title = 'Events List';
-            $documentTitle = 'Events List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('events.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, Event::class, ExportConfig::getEventConfig());
     }
 
     public function printSingle(Event $event)
     {
-        $data = [
-            ['label' => 'Title', 'value' => $event->title],
-            ['label' => 'Description', 'value' => $event->description],
-            ['label' => 'Event Date', 'value' => $event->event_date],
-            ['label' => 'Free Service', 'value' => $event->is_free_service ? 'Yes' : 'No'],
-            ['label' => 'Broadcast Status', 'value' => $event->broadcast_status],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Event Details';
-        $documentTitle = 'Event Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("event-{$event->id}.pdf");
+        $config = ExportConfig::getEventConfig()['single_record'];
+        $config['title'] = 'Event Details - ' . $event->title;
+        $config['document_title'] = 'Event Details';
+        $config['filename'] = "event-{$event->id}.pdf";
+        
+        return $this->generateSingleRecordPdf($event, $config);
     }
 
     public function printCurrent(Request $request)
     {
-        $query = Event::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $events = $query->get();
-
-        $data = $events->map(function($event) {
-            return [
-                'title' => $event->title,
-                'description' => $event->description,
-                'event_date' => $event->event_date,
-                'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
-                'broadcast_status' => $event->broadcast_status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'title', 'label' => 'Title'],
-            ['key' => 'description', 'label' => 'Description'],
-            ['key' => 'event_date', 'label' => 'Event Date'],
-            ['key' => 'is_free_service', 'label' => 'Free Service'],
-            ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-        ];
-
-        $title = 'Events List (Current View)';
-        $documentTitle = 'Events List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('events-current.pdf');
+        return $this->handlePrintCurrent($request, Event::class, ExportConfig::getEventConfig());
     }
 
     public function printAll(Request $request)
     {
-        $events = Event::orderBy('title')->get();
-
-        $data = $events->map(function($event) {
-            return [
-                'title' => $event->title,
-                'description' => $event->description,
-                'event_date' => $event->event_date,
-                'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
-                'broadcast_status' => $event->broadcast_status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'title', 'label' => 'Title'],
-            ['key' => 'description', 'label' => 'Description'],
-            ['key' => 'event_date', 'label' => 'Event Date'],
-            ['key' => 'is_free_service', 'label' => 'Free Service'],
-            ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-        ];
-
-        $title = 'Events List';
-        $documentTitle = 'Events List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('events.pdf');
+        return $this->handlePrintAll($request, Event::class, ExportConfig::getEventConfig());
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreLandingPageRequest;
 use App\Http\Requests\UpdateLandingPageRequest;
 use App\Models\LandingPage;
@@ -15,6 +17,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LandingPageController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -125,147 +128,19 @@ class LandingPageController extends Controller
 
     public function export(Request $request, $type)
     {
-        $query = $this->getFilteredQuery($request);
-        $pages = $query->get();
-
-        if ($type === 'csv') {
-            return Excel::download(new LandingPagesExport($pages), 'landing-pages.csv');
-        }
-
-        } elseif ($type === 'pdf') {
-            $data = $pages->map(function($page, $index) {
-                return [
-                    'index' => $index + 1,
-                    'page_title' => $page->page_title,
-                    'page_url' => $page->page_url,
-                    'page_code' => $page->page_code,
-                    'campaign_name' => $page->campaign->campaign_name ?? '-',
-                    'is_active' => $page->is_active ? 'Yes' : 'No',
-                    'language' => $page->language,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'index', 'label' => '#'],
-                ['key' => 'page_title', 'label' => 'Page Title'],
-                ['key' => 'page_url', 'label' => 'Page URL'],
-                ['key' => 'page_code', 'label' => 'Page Code'],
-                ['key' => 'campaign_name', 'label' => 'Campaign'],
-                ['key' => 'is_active', 'label' => 'Active'],
-                ['key' => 'language', 'label' => 'Language'],
-            ];
-
-            $title = 'Landing Pages Export - Geraye Home Care Services';
-            $documentTitle = 'Landing Pages Export';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->download('landing-pages.pdf');
-        }
-
-        return redirect()->back()->with('error', 'Invalid export type.');
+        $request->merge(['type' => $type]);
+        return $this->handleExport($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
     }
 
     public function printAll(Request $request)
     {
-        $query = $this->getFilteredQuery($request);
-        $pages = $query->get();
-
-        $data = $pages->map(function($page, $index) {
-            return [
-                'index' => $index + 1,
-                'page_title' => $page->page_title,
-                'page_url' => $page->page_url,
-                'page_code' => $page->page_code,
-                'campaign_name' => $page->campaign->campaign_name ?? '-',
-                'is_active' => $page->is_active ? 'Yes' : 'No',
-                'language' => $page->language,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'page_title', 'label' => 'Page Title'],
-            ['key' => 'page_url', 'label' => 'Page URL'],
-            ['key' => 'page_code', 'label' => 'Page Code'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'is_active', 'label' => 'Active'],
-            ['key' => 'language', 'label' => 'Language'],
-        ];
-
-        $title = 'Landing Pages List';
-        $documentTitle = 'Landing Pages List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('landing-pages.pdf');
+        return $this->handlePrintAll($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = $this->getFilteredQuery($request);
-        $pages = $query->get();
-
-        $data = $pages->map(function($page, $index) {
-            return [
-                'index' => $index + 1,
-                'page_title' => $page->page_title,
-                'page_url' => $page->page_url,
-                'page_code' => $page->page_code,
-                'campaign_name' => $page->campaign->campaign_name ?? '-',
-                'is_active' => $page->is_active ? 'Yes' : 'No',
-                'language' => $page->language,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'page_title', 'label' => 'Page Title'],
-            ['key' => 'page_url', 'label' => 'Page URL'],
-            ['key' => 'page_code', 'label' => 'Page Code'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'is_active', 'label' => 'Active'],
-            ['key' => 'language', 'label' => 'Language'],
-        ];
-
-        $title = 'Landing Pages List (Current View)';
-        $documentTitle = 'Landing Pages List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('landing-pages-current.pdf');
+        return $this->handlePrintCurrent($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
     }
 
-    private function getFilteredQuery(Request $request)
-    {
-        $query = LandingPage::query();
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('page_title', 'ilike', "%{$search}%")
-                  ->orWhere('page_url', 'ilike', "%{$search}%")
-                  ->orWhere('page_code', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-        if ($request->filled('language')) {
-            $query->where('language', $request->input('language'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        return $query->with(['campaign']);
-    }
 }

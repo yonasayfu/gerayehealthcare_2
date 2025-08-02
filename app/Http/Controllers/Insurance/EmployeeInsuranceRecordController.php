@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\EmployeeInsuranceRecord;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Inertia\Inertia;
 
 class EmployeeInsuranceRecordController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -131,61 +134,21 @@ class EmployeeInsuranceRecordController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $employeeInsuranceRecords = EmployeeInsuranceRecord::select('kebele_id', 'woreda', 'region', 'federal_id', 'ministry_department', 'employee_id_number', 'verified')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Kebele ID,Woreda,Region,Federal ID,Ministry Department,Employee ID Number,Verified\n";
-            foreach ($employeeInsuranceRecords as $record) {
-                $csvData .= "\"{$record->kebele_id}\",\"{$record->woreda}\",\"{$record->region}\",\"{$record->federal_id}\",\"{$record->ministry_department}\",\"{$record->employee_id_number}\",\"{$record->verified}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="employee_insurance_records.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.employee_insurance_records', ['employeeInsuranceRecords' => $employeeInsuranceRecords])->setPaper('a4', 'landscape');
-            return $pdf->stream('employee_insurance_records.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, EmployeeInsuranceRecord::class, AdditionalExportConfigs::getEmployeeInsuranceRecordConfig());
     }
 
     public function printSingle(EmployeeInsuranceRecord $employeeInsuranceRecord)
     {
-        $pdf = Pdf::loadView('pdf.employee_insurance_record_single', ['employeeInsuranceRecord' => $employeeInsuranceRecord])->setPaper('a4', 'portrait');
-        return $pdf->stream("employee_insurance_record-{$employeeInsuranceRecord->id}.pdf");
+        return $this->handlePrintSingle($employeeInsuranceRecord, AdditionalExportConfigs::getEmployeeInsuranceRecordConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = EmployeeInsuranceRecord::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('kebele_id', 'ilike', "%{$search}%")
-                  ->orWhere('employee_id_number', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $employeeInsuranceRecords = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/EmployeeInsuranceRecords/PrintCurrent', ['employeeInsuranceRecords' => $employeeInsuranceRecords->items()]);
+        return $this->handlePrintCurrent($request, EmployeeInsuranceRecord::class, AdditionalExportConfigs::getEmployeeInsuranceRecordConfig());
     }
 
     public function printAll(Request $request)
     {
-        $employeeInsuranceRecords = EmployeeInsuranceRecord::orderBy('kebele_id')->get();
-
-        $pdf = Pdf::loadView('pdf.employee_insurance_records', ['employeeInsuranceRecords' => $employeeInsuranceRecords])->setPaper('a4', 'landscape');
-        return $pdf->stream('employee_insurance_records.pdf');
+        return $this->handlePrintAll($request, EmployeeInsuranceRecord::class, AdditionalExportConfigs::getEmployeeInsuranceRecordConfig());
     }
 }

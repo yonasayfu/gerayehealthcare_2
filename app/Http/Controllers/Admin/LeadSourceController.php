@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreLeadSourceRequest;
 use App\Http\Requests\UpdateLeadSourceRequest;
 use App\Models\LeadSource;
@@ -14,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LeadSourceController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -122,120 +125,21 @@ class LeadSourceController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new LeadSourcesExport, 'lead-sources.csv');
-        } elseif ($type === 'pdf') {
-            $data = $leadSources->map(function($source) {
-                return [
-                    'name' => $source->name,
-                    'category' => $source->category ?? '-',
-                    'is_active' => $source->is_active ? 'Yes' : 'No',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'name', 'label' => 'Name'],
-                ['key' => 'category', 'label' => 'Category'],
-                ['key' => 'is_active', 'label' => 'Active'],
-            ];
-
-            $title = 'Lead Sources List';
-            $documentTitle = 'Lead Sources List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('lead-sources.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
+        return $this->handleExport($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
     }
 
     public function printAll(Request $request)
     {
-        $leadSources = LeadSource::all();
-        $data = $leadSources->map(function($source) {
-            return [
-                'name' => $source->name,
-                'category' => $source->category ?? '-',
-                'is_active' => $source->is_active ? 'Yes' : 'No',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'category', 'label' => 'Category'],
-            ['key' => 'is_active', 'label' => 'Active'],
-        ];
-
-        $title = 'Lead Sources List';
-        $documentTitle = 'Lead Sources List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('lead-sources.pdf');
+        return $this->handlePrintAll($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
     }
 
     public function printSingle(LeadSource $leadSource)
     {
-        $data = [
-            ['label' => 'Name', 'value' => $leadSource->name],
-            ['label' => 'Category', 'value' => $leadSource->category],
-            ['label' => 'Description', 'value' => $leadSource->description],
-            ['label' => 'Active', 'value' => $leadSource->is_active ? 'Yes' : 'No'],
-            ['label' => 'Created At', 'value' => \Carbon\Carbon::parse($leadSource->created_at)->format('M d, Y H:i')],
-            ['label' => 'Updated At', 'value' => \Carbon\Carbon::parse($leadSource->updated_at)->format('M d, Y H:i')],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Lead Source Details';
-        $documentTitle = 'Lead Source Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("lead-source-{$leadSource->id}.pdf");
+        return $this->handlePrintSingle($leadSource, AdditionalExportConfigs::getLeadSourceConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = LeadSource::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('category', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-
-        $leadSources = $query->get();
-
-        $data = $leadSources->map(function($source) {
-            return [
-                'name' => $source->name,
-                'category' => $source->category ?? '-',
-                'is_active' => $source->is_active ? 'Yes' : 'No',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'category', 'label' => 'Category'],
-            ['key' => 'is_active', 'label' => 'Active'],
-        ];
-
-        $title = 'Lead Sources List (Current View)';
-        $documentTitle = 'Lead Sources List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('lead-sources-current.pdf');
+        return $this->handlePrintCurrent($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
     }
 }

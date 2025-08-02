@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 use App\Models\Staff;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ use Inertia\Inertia;
 
 class StaffController extends Controller
 {
+    use ExportableTrait;
       public function index(Request $request): \Inertia\Response
     {
         $query = Staff::query();
@@ -114,55 +117,8 @@ class StaffController extends Controller
     }
 
     public function export(Request $request)
-{
-    $type = $request->get('type');
-
-    $staff = Staff::select('first_name', 'last_name', 'email', 'phone', 'position', 'department', 'status', 'hire_date')->get();
-
-    if ($type === 'csv') {
-        $csvData = "Full Name,Email,Phone,Position,Department,Status,Hire Date\n";
-        foreach ($staff as $s) {
-            $csvData .= "\"{$s->first_name} {$s->last_name}\",\"{$s->email}\",\"{$s->phone}\",\"{$s->position}\",\"{$s->department}\",\"{$s->status}\",\"{$s->hire_date}\"\n";
-        }
-
-        return \Response::make($csvData, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="staff.csv"',
-        ]);
+    {
+        return $this->handleExport($request, Staff::class, ExportConfig::getStaffConfig());
     }
-
-    if ($type === 'pdf') {
-        $data = $staff->map(function($s) {
-            return [
-                'full_name' => $s->first_name . ' ' . $s->last_name,
-                'email' => $s->email ?? '-',
-                'phone' => $s->phone ?? '-',
-                'position' => $s->position ?? '-',
-                'department' => $s->department ?? '-',
-                'status' => $s->status,
-                'hire_date' => \Carbon\Carbon::parse($s->hire_date)->format('Y-m-d'),
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'full_name', 'label' => 'Full Name'],
-            ['key' => 'email', 'label' => 'Email'],
-            ['key' => 'phone', 'label' => 'Phone'],
-            ['key' => 'position', 'label' => 'Position'],
-            ['key' => 'department', 'label' => 'Department'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'hire_date', 'label' => 'Hire Date'],
-        ];
-
-        $title = 'Staff Export - Geraye Home Care Services';
-        $documentTitle = 'All Staff Records';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('staff.pdf');
-    }
-
-    return abort(400, 'Invalid export type');
-}
 
 }

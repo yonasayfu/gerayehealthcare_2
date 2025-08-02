@@ -1,47 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Inventory Items Report</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; font-size: 10pt; }
-        .container { width: 100%; margin: 0 auto; padding: 20mm; }
-        h1 { text-align: center; margin-bottom: 15mm; font-size: 18pt; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 10mm; }
-        th, td { border: 1px solid #ccc; padding: 8pt; text-align: left; }
-        th { background-color: #f0f0f0; font-weight: bold; }
-        .footer { text-align: center; margin-top: 20mm; font-size: 8pt; color: #777; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Inventory Items Report</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Requester</th>
-                    <th>Item</th>
-                    <th>Quantity Requested</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                    <th>Needed By Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($inventoryRequests as $request)
-                <tr>
-                    <td>{{ $request->requester->first_name }} {{ $request->requester->last_name }}</td>
-                    <td>{{ $request->item.name }}</td>
-                    <td>{{ $request->quantity_requested }}</td>
-                    <td>{{ $request->status }}</td>
-                    <td>{{ $request->priority }}</td>
-                    <td>{{ $request->needed_by_date }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="footer">
-            Generated on: {{ date('Y-m-d H:i:s') }}
-        </div>
-    </div>
-</body>
-</html>
+<x-printable-report
+    title="Inventory Requests Report"
+    :data="$inventoryRequests->map(function($request, $index) {
+        return [
+            'index' => $index + 1,
+            'requester' => ($request->requester->first_name ?? '') . ' ' . ($request->requester->last_name ?? ''),
+            'item_name' => $request->item->name ?? 'N/A',
+            'quantity_requested' => $request->quantity_requested ?? 0,
+            'status' => $request->status ?? 'N/A',
+            'priority' => $request->priority ?? 'N/A',
+            'needed_by_date' => $request->needed_by_date ? \Carbon\Carbon::parse($request->needed_by_date)->format('Y-m-d') : 'N/A',
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'index', 'label' => '#'],
+        ['key' => 'requester', 'label' => 'Requester'],
+        ['key' => 'item_name', 'label' => 'Item'],
+        ['key' => 'quantity_requested', 'label' => 'Quantity Requested'],
+        ['key' => 'status', 'label' => 'Status'],
+        ['key' => 'priority', 'label' => 'Priority'],
+        ['key' => 'needed_by_date', 'label' => 'Needed By Date'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Inventory Requests Report',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

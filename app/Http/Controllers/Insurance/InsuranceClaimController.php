@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InsuranceClaim;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -14,6 +16,7 @@ use Inertia\Inertia;
 
 class InsuranceClaimController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -149,62 +152,22 @@ class InsuranceClaimController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $insuranceClaims = InsuranceClaim::select('claim_status', 'coverage_amount', 'paid_amount', 'submitted_at', 'processed_at', 'payment_due_date', 'payment_received_at', 'payment_method', 'reimbursement_required', 'receipt_number', 'is_pre_authorized', 'pre_authorization_code', 'denial_reason')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Claim Status,Coverage Amount,Paid Amount,Submitted At,Processed At,Payment Due Date,Payment Received At,Payment Method,Reimbursement Required,Receipt Number,Is Pre-Authorized,Pre-Authorization Code,Denial Reason\n";
-            foreach ($insuranceClaims as $claim) {
-                $csvData .= "\"{$claim->claim_status}\",\"{$claim->coverage_amount}\",\"{$claim->paid_amount}\",\"{$claim->submitted_at}\",\"{$claim->processed_at}\",\"{$claim->payment_due_date}\",\"{$claim->payment_received_at}\",\"{$claim->payment_method}\",\"{$claim->reimbursement_required}\",\"{$claim->receipt_number}\",\"{$claim->is_pre_authorized}\",\"{$claim->pre_authorization_code}\",\"{$claim->denial_reason}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="insurance_claims.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.insurance_claims', ['insuranceClaims' => $insuranceClaims])->setPaper('a4', 'landscape');
-            return $pdf->stream('insurance_claims.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, InsuranceClaim::class, AdditionalExportConfigs::getInsuranceClaimConfig());
     }
 
     public function printSingle(InsuranceClaim $insuranceClaim)
     {
-        $pdf = Pdf::loadView('pdf.insurance_claim_single', ['insuranceClaim' => $insuranceClaim])->setPaper('a4', 'portrait');
-        return $pdf->stream("insurance_claim-{$insuranceClaim->id}.pdf");
+        return $this->handlePrintSingle($insuranceClaim, AdditionalExportConfigs::getInsuranceClaimConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = InsuranceClaim::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('claim_status', 'ilike', "%{$search}%")
-                  ->orWhere('receipt_number', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insuranceClaims = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/Claims/PrintCurrent', ['insuranceClaims' => $insuranceClaims->items()]);
+        return $this->handlePrintCurrent($request, InsuranceClaim::class, AdditionalExportConfigs::getInsuranceClaimConfig());
     }
 
     public function printAll(Request $request)
     {
-        $insuranceClaims = InsuranceClaim::orderBy('claim_status')->get();
-
-        $pdf = Pdf::loadView('pdf.insurance_claims', ['insuranceClaims' => $insuranceClaims])->setPaper('a4', 'landscape');
-        return $pdf->stream('insurance_claims.pdf');
+        return $this->handlePrintAll($request, InsuranceClaim::class, AdditionalExportConfigs::getInsuranceClaimConfig());
     }
 
     public function sendClaimEmail(Request $request, string $id)

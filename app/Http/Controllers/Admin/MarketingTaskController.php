@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreMarketingTaskRequest;
 use App\Http\Requests\UpdateMarketingTaskRequest;
 use App\Models\MarketingTask;
@@ -18,7 +20,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MarketingTaskController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, ExportableTrait;
 
     /**
      * Display a listing of the resource.
@@ -162,146 +164,16 @@ class MarketingTaskController extends Controller
 
     public function export(Request $request)
     {
-        $this->authorize('viewAny', MarketingTask::class);
-
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new MarketingTasksExport, 'marketing-tasks.csv');
-        } elseif ($type === 'pdf') {
-            $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-            $data = $marketingTasks->map(function($task) {
-                return [
-                    'task_code' => $task->task_code,
-                    'title' => $task->title,
-                    'campaign_name' => $task->campaign->campaign_name ?? '-',
-                    'assigned_to' => $task->assignedToStaff->user->name ?? '-',
-                    'task_type' => $task->task_type,
-                    'status' => $task->status,
-                    'scheduled_at' => $task->scheduled_at ? $task->scheduled_at->format('Y-m-d H:i') : '-',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'task_code', 'label' => 'Task Code'],
-                ['key' => 'title', 'label' => 'Title'],
-                ['key' => 'campaign_name', 'label' => 'Campaign'],
-                ['key' => 'assigned_to', 'label' => 'Assigned To'],
-                ['key' => 'task_type', 'label' => 'Type'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-            ];
-
-            $title = 'Marketing Tasks List';
-            $documentTitle = 'Marketing Tasks List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->download('marketing-tasks.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
+        return $this->handleExport($request, MarketingTask::class, AdditionalExportConfigs::getMarketingTaskConfig());
     }
 
     public function printAll(Request $request)
     {
-        $this->authorize('viewAny', MarketingTask::class);
-
-        $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-        $data = $marketingTasks->map(function($task) {
-            return [
-                'task_code' => $task->task_code,
-                'title' => $task->title,
-                'campaign_name' => $task->campaign->campaign_name ?? '-',
-                'assigned_to' => $task->assignedToStaff->user->name ?? '-',
-                'task_type' => $task->task_type,
-                'status' => $task->status,
-                'scheduled_at' => $task->scheduled_at ? $task->scheduled_at->format('Y-m-d H:i') : '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'task_code', 'label' => 'Task Code'],
-            ['key' => 'title', 'label' => 'Title'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'assigned_to', 'label' => 'Assigned To'],
-            ['key' => 'task_type', 'label' => 'Type'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-        ];
-
-        $title = 'Marketing Tasks List';
-        $documentTitle = 'Marketing Tasks List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-tasks.pdf');
+        return $this->handlePrintAll($request, MarketingTask::class, AdditionalExportConfigs::getMarketingTaskConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $this->authorize('viewAny', MarketingTask::class);
-
-        $query = MarketingTask::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%")
-                  ->orWhere('task_code', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('assigned_to_staff_id')) {
-            $query->where('assigned_to_staff_id', $request->input('assigned_to_staff_id'));
-        }
-        if ($request->filled('doctor_id')) {
-            $query->where('doctor_id', $request->input('doctor_id'));
-        }
-        if ($request->filled('task_type')) {
-            $query->where('task_type', $request->input('task_type'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('scheduled_at_start')) {
-            $query->where('scheduled_at', '>=', $request->input('scheduled_at_start'));
-        }
-        if ($request->filled('scheduled_at_end')) {
-            $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
-        }
-
-        $marketingTasks = $query->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-
-        $data = $marketingTasks->map(function($task) {
-            return [
-                'task_code' => $task->task_code,
-                'title' => $task->title,
-                'campaign_name' => $task->campaign->campaign_name ?? '-',
-                'assigned_to' => $task->assignedToStaff->user->name ?? '-',
-                'task_type' => $task->task_type,
-                'status' => $task->status,
-                'scheduled_at' => $task->scheduled_at ? $task->scheduled_at->format('Y-m-d H:i') : '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'task_code', 'label' => 'Task Code'],
-            ['key' => 'title', 'label' => 'Title'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'assigned_to', 'label' => 'Assigned To'],
-            ['key' => 'task_type', 'label' => 'Type'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-        ];
-
-        $title = 'Marketing Tasks List (Current View)';
-        $documentTitle = 'Marketing Tasks List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-tasks-current.pdf');
+        return $this->handlePrintCurrent($request, MarketingTask::class, AdditionalExportConfigs::getMarketingTaskConfig());
     }
 }

@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\EventStaffAssignment;
+use App\Models\Event;
+use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
@@ -11,6 +17,7 @@ use App\Http\Controllers\Controller;
 
 class EventStaffAssignmentController extends Controller
 {
+    use ExportableTrait;
     public function __construct()
     {
         $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
@@ -125,128 +132,21 @@ class EventStaffAssignmentController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $assignments = EventStaffAssignment::select('event_id', 'staff_id', 'role')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Event ID,Staff ID,Role\n";            foreach ($assignments as $assignment) {                $csvData .= "\"{$assignment->event_id}\",\"{$assignment->staff_id}\",\"{$assignment->role}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=\"event-staff-assignments.csv\"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $assignments->map(function($assignment) {
-                return [
-                    'event_id' => $assignment->event_id,
-                    'staff_id' => $assignment->staff_id,
-                    'role' => $assignment->role,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'event_id', 'label' => 'Event ID'],
-                ['key' => 'staff_id', 'label' => 'Staff ID'],
-                ['key' => 'role', 'label' => 'Role'],
-            ];
-
-            $title = 'Event Staff Assignments List';
-            $documentTitle = 'Event Staff Assignments List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('event-staff-assignments.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
     }
 
     public function printSingle(EventStaffAssignment $eventStaffAssignment)
     {
-        $data = [
-            ['label' => 'Event ID', 'value' => $eventStaffAssignment->event_id],
-            ['label' => 'Staff ID', 'value' => $eventStaffAssignment->staff_id],
-            ['label' => 'Role', 'value' => $eventStaffAssignment->role],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Event Staff Assignment Details';
-        $documentTitle = 'Event Staff Assignment Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("event-staff-assignment-{$eventStaffAssignment->id}.pdf");
+        return $this->handlePrintSingle($eventStaffAssignment, AdditionalExportConfigs::getEventStaffAssignmentConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = EventStaffAssignment::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('role', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $assignments = $query->get();
-
-        $data = $assignments->map(function($assignment) {
-            return [
-                'event_id' => $assignment->event_id,
-                'staff_id' => $assignment->staff_id,
-                'role' => $assignment->role,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'event_id', 'label' => 'Event ID'],
-            ['key' => 'staff_id', 'label' => 'Staff ID'],
-            ['key' => 'role', 'label' => 'Role'],
-        ];
-
-        $title = 'Event Staff Assignments List (Current View)';
-        $documentTitle = 'Event Staff Assignments List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('event-staff-assignments-current.pdf');
+        return $this->handlePrintCurrent($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
     }
 
     public function printAll(Request $request)
     {
-        $assignments = EventStaffAssignment::orderBy('role')->get();
-
-        $data = $assignments->map(function($assignment) {
-            return [
-                'event_id' => $assignment->event_id,
-                'staff_id' => $assignment->staff_id,
-                'role' => $assignment->role,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'event_id', 'label' => 'Event ID'],
-            ['key' => 'staff_id', 'label' => 'Staff ID'],
-            ['key' => 'role', 'label' => 'Role'],
-        ];
-
-        $title = 'Event Staff Assignments List';
-        $documentTitle = 'Event Staff Assignments List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('event-staff-assignments.pdf');
+        return $this->handlePrintAll($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
     }
 }

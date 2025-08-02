@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\EthiopianCalendarDay;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Inertia\Inertia;
 
 class EthiopianCalendarDayController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -121,61 +124,21 @@ class EthiopianCalendarDayController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $ethiopianCalendarDays = EthiopianCalendarDay::select('gregorian_date', 'ethiopian_date', 'description', 'is_holiday', 'region')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Gregorian Date,Ethiopian Date,Description,Is Holiday,Region\n";
-            foreach ($ethiopianCalendarDays as $day) {
-                $csvData .= "\"{$day->gregorian_date}\",\"{$day->ethiopian_date}\",\"{$day->description}\",\"{$day->is_holiday}\",\"{$day->region}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="ethiopian_calendar_days.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.ethiopian_calendar_days', ['ethiopianCalendarDays' => $ethiopianCalendarDays])->setPaper('a4', 'landscape');
-            return $pdf->stream('ethiopian_calendar_days.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, EthiopianCalendarDay::class, AdditionalExportConfigs::getEthiopianCalendarDayConfig());
     }
 
     public function printSingle(EthiopianCalendarDay $ethiopianCalendarDay)
     {
-        $pdf = Pdf::loadView('pdf.ethiopian_calendar_day_single', ['ethiopianCalendarDay' => $ethiopianCalendarDay])->setPaper('a4', 'portrait');
-        return $pdf->stream("ethiopian_calendar_day-{$ethiopianCalendarDay->id}.pdf");
+        return $this->handlePrintSingle($ethiopianCalendarDay, AdditionalExportConfigs::getEthiopianCalendarDayConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = EthiopianCalendarDay::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('description', 'ilike', "%{$search}%")
-                  ->orWhere('ethiopian_date', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('gregorian_date', 'desc');
-        }
-
-        $ethiopianCalendarDays = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/EthiopianCalendarDays/PrintCurrent', ['ethiopianCalendarDays' => $ethiopianCalendarDays->items()]);
+        return $this->handlePrintCurrent($request, EthiopianCalendarDay::class, AdditionalExportConfigs::getEthiopianCalendarDayConfig());
     }
 
     public function printAll(Request $request)
     {
-        $ethiopianCalendarDays = EthiopianCalendarDay::orderBy('gregorian_date')->get();
-
-        $pdf = Pdf::loadView('pdf.ethiopian_calendar_days', ['ethiopianCalendarDays' => $ethiopianCalendarDays])->setPaper('a4', 'landscape');
-        return $pdf->stream('ethiopian_calendar_days.pdf');
+        return $this->handlePrintAll($request, EthiopianCalendarDay::class, AdditionalExportConfigs::getEthiopianCalendarDayConfig());
     }
 }

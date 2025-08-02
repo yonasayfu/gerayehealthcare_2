@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InventoryRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryRequestController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -52,81 +55,24 @@ class InventoryRequestController extends Controller
         ]);
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request)
     {
-        $query = InventoryRequest::with(['requester', 'approver', 'item']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->whereHas('item', fn($q) => $q->where('name', 'like', "%$search%"))
-                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%"));
-        }
-
-        if ($request->has('sort_by') && $request->has('sort_direction')) {
-            $sortBy = $request->input('sort_by');
-            $sortDirection = $request->input('sort_direction');
-
-            if ($sortBy === 'requester_id') {
-                $query->join('staff', 'inventory_requests.requester_id', '=', 'staff.id')
-                      ->orderBy('staff.first_name', $sortDirection)
-                      ->select('inventory_requests.*');
-            } elseif ($sortBy === 'item_id') {
-                $query->join('inventory_items', 'inventory_requests.item_id', '=', 'inventory_items.id')
-                      ->orderBy('inventory_items.name', $sortDirection)
-                      ->select('inventory_requests.*');
-            } else {
-                $query->orderBy($sortBy, $sortDirection);
-            }
-        }
-
-        $inventoryRequests = $query->get();
-
-        $csvContent = view('exports.inventory_requests', compact('inventoryRequests'))->render();
-
-        return response()->streamDownload(function () use ($csvContent) {
-            echo $csvContent;
-        }, 'inventory_requests.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_requests.csv"',
-        ]);
+        return $this->handleExport($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
     }
 
     public function printAll(Request $request)
     {
-        $query = InventoryRequest::with(['requester', 'approver', 'item']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->whereHas('item', fn($q) => $q->where('name', 'like', "%$search%"))
-                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%"));
-        }
-
-        $inventoryRequests = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory_requests_pdf', ['inventoryRequests' => $inventoryRequests])->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory_requests_all.pdf');
+        return $this->handlePrintAll($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
     }
 
     public function printSingle(InventoryRequest $inventoryRequest)
     {
-        $pdf = Pdf::loadView('pdf.inventory_requests_single_pdf', ['inventoryRequest' => $inventoryRequest->load(['requester', 'approver', 'item'])])->setPaper('a4', 'portrait');
-        return $pdf->stream('inventory_request_' . $inventoryRequest->id . '.pdf');
+        return $this->handlePrintSingle($inventoryRequest, AdditionalExportConfigs::getInventoryRequestConfig());
     }
 
     public function generatePdf(Request $request)
     {
-        $query = InventoryRequest::with(['requester', 'approver', 'item']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->whereHas('item', fn($q) => $q->where('name', 'like', "%$search%"))
-                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%$search%")->orWhere('last_name', 'like', "%$search%"));
-        }
-
-        $inventoryRequests = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory_requests_pdf', ['inventoryRequests' => $inventoryRequests])->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory_requests.pdf');
+        return $this->handlePrintCurrent($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
     }
 
     public function create()

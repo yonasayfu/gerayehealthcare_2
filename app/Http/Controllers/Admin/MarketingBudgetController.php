@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreMarketingBudgetRequest;
 use App\Http\Requests\UpdateMarketingBudgetRequest;
 use App\Models\MarketingBudget;
@@ -14,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class MarketingBudgetController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -146,138 +149,16 @@ class MarketingBudgetController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new MarketingBudgetsExport, 'marketing-budgets.csv');
-        } elseif ($type === 'pdf') {
-            $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
-            $data = $marketingBudgets->map(function($budget) {
-                return [
-                    'budget_name' => $budget->budget_name,
-                    'campaign_name' => $budget->campaign->campaign_name ?? '-',
-                    'platform_name' => $budget->platform->name ?? '-',
-                    'allocated_amount' => $budget->allocated_amount,
-                    'spent_amount' => $budget->spent_amount,
-                    'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
-                    'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
-                    'status' => $budget->status,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'budget_name', 'label' => 'Budget Name'],
-                ['key' => 'campaign_name', 'label' => 'Campaign'],
-                ['key' => 'platform_name', 'label' => 'Platform'],
-                ['key' => 'allocated_amount', 'label' => 'Allocated'],
-                ['key' => 'spent_amount', 'label' => 'Spent'],
-                ['key' => 'period_start', 'label' => 'Start Date'],
-                ['key' => 'period_end', 'label' => 'End Date'],
-                ['key' => 'status', 'label' => 'Status'],
-            ];
-
-            $title = 'Marketing Budgets List';
-            $documentTitle = 'Marketing Budgets List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('marketing-budgets.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
+        return $this->handleExport($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
     }
 
     public function printAll(Request $request)
     {
-        $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
-        $data = $marketingBudgets->map(function($budget) {
-            return [
-                'budget_name' => $budget->budget_name,
-                'campaign_name' => $budget->campaign->campaign_name ?? '-',
-                'platform_name' => $budget->platform->name ?? '-',
-                'allocated_amount' => $budget->allocated_amount,
-                'spent_amount' => $budget->spent_amount,
-                'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
-                'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
-                'status' => $budget->status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'budget_name', 'label' => 'Budget Name'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'platform_name', 'label' => 'Platform'],
-            ['key' => 'allocated_amount', 'label' => 'Allocated'],
-            ['key' => 'spent_amount', 'label' => 'Spent'],
-            ['key' => 'period_start', 'label' => 'Start Date'],
-            ['key' => 'period_end', 'label' => 'End Date'],
-            ['key' => 'status', 'label' => 'Status'],
-        ];
-
-        $title = 'Marketing Budgets List';
-        $documentTitle = 'Marketing Budgets List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-budgets.pdf');
+        return $this->handlePrintAll($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = MarketingBudget::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('budget_name', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('period_start')) {
-            $query->where('period_start', '>=', $request->input('period_start'));
-        }
-        if ($request->filled('period_end')) {
-            $query->where('period_end', '<=', $request->input('period_end'));
-        }
-
-        $marketingBudgets = $query->with(['campaign', 'platform'])->get();
-
-        $data = $marketingBudgets->map(function($budget) {
-            return [
-                'budget_name' => $budget->budget_name,
-                'campaign_name' => $budget->campaign->campaign_name ?? '-',
-                'platform_name' => $budget->platform->name ?? '-',
-                'allocated_amount' => $budget->allocated_amount,
-                'spent_amount' => $budget->spent_amount,
-                'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
-                'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
-                'status' => $budget->status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'budget_name', 'label' => 'Budget Name'],
-            ['key' => 'campaign_name', 'label' => 'Campaign'],
-            ['key' => 'platform_name', 'label' => 'Platform'],
-            ['key' => 'allocated_amount', 'label' => 'Allocated'],
-            ['key' => 'spent_amount', 'label' => 'Spent'],
-            ['key' => 'period_start', 'label' => 'Start Date'],
-            ['key' => 'period_end', 'label' => 'End Date'],
-            ['key' => 'status', 'label' => 'Status'],
-        ];
-
-        $title = 'Marketing Budgets List (Current View)';
-        $documentTitle = 'Marketing Budgets List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-budgets-current.pdf');
+        return $this->handlePrintCurrent($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
     }
 }

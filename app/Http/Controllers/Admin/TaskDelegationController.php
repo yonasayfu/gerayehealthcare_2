@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\TaskDelegation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -11,6 +13,7 @@ use Inertia\Inertia;
 
 class TaskDelegationController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -121,53 +124,6 @@ public function show(TaskDelegation $task_delegation)
      */
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $tasks = TaskDelegation::with('assignee')->get();
-
-        if ($type === 'csv') {
-            // Build CSV string
-            $csv = "Title,Assigned To,Due Date,Status,Notes\n";
-            foreach ($tasks as $t) {
-                $name = "{$t->assignee->first_name} {$t->assignee->last_name}";
-                $csv .= "\"{$t->title}\",\"{$name}\",\"{$t->due_date}\",\"{$t->status}\",\"" . str_replace('"', '""', $t->notes) . "\"\n";
-            }
-            return LaravelResponse::make(
-                $csv,
-                200,
-                [
-                    'Content-Type' => 'text/csv',
-                    'Content-Disposition' => 'attachment; filename="tasks.csv"',
-                ]
-            );
-        }
-
-        if ($type === 'pdf') {
-            $data = $tasks->map(function($t) {
-                return [
-                    'title' => $t->title,
-                    'assigned_to' => $t->assignee->first_name . ' ' . $t->assignee->last_name,
-                    'due_date' => \Carbon\Carbon::parse($t->due_date)->format('Y-m-d'),
-                    'status' => $t->status,
-                    'notes' => $t->notes,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'title', 'label' => 'Title'],
-                ['key' => 'assigned_to', 'label' => 'Assigned To'],
-                ['key' => 'due_date', 'label' => 'Due Date'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'notes', 'label' => 'Notes'],
-            ];
-
-            $title = 'Task Delegations Export – Geraye Home Care Services';
-            $documentTitle = 'Task Delegations Export';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('tasks.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, TaskDelegation::class, AdditionalExportConfigs::getTaskDelegationConfig());
     }
 }

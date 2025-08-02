@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreMarketingPlatformRequest;
 use App\Http\Requests\UpdateMarketingPlatformRequest;
 use App\Models\MarketingPlatform;
@@ -14,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class MarketingPlatformController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -116,101 +119,16 @@ class MarketingPlatformController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new MarketingPlatformsExport, 'marketing-platforms.csv');
-        } elseif ($type === 'pdf') {
-            $marketingPlatforms = MarketingPlatform::all();
-            $data = $marketingPlatforms->map(function($platform) {
-                return [
-                    'name' => $platform->name,
-                    'api_endpoint' => $platform->api_endpoint ?? '-',
-                    'is_active' => $platform->is_active ? 'Yes' : 'No',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'name', 'label' => 'Name'],
-                ['key' => 'api_endpoint', 'label' => 'API Endpoint'],
-                ['key' => 'is_active', 'label' => 'Active'],
-            ];
-
-            $title = 'Marketing Platforms List';
-            $documentTitle = 'Marketing Platforms List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('marketing-platforms.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
+        return $this->handleExport($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
     }
 
     public function printAll(Request $request)
     {
-        $marketingPlatforms = MarketingPlatform::all();
-        $data = $marketingPlatforms->map(function($platform) {
-            return [
-                'name' => $platform->name,
-                'api_endpoint' => $platform->api_endpoint ?? '-',
-                'is_active' => $platform->is_active ? 'Yes' : 'No',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'api_endpoint', 'label' => 'API Endpoint'],
-            ['key' => 'is_active', 'label' => 'Active'],
-        ];
-
-        $title = 'Marketing Platforms List';
-        $documentTitle = 'Marketing Platforms List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-platforms-all.pdf');
+        return $this->handlePrintAll($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = MarketingPlatform::query();
-
-        // Apply filters from the request
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%$search%");
-        }
-
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $marketingPlatforms = $query->get();
-
-        $data = $marketingPlatforms->map(function($platform) {
-            return [
-                'name' => $platform->name,
-                'api_endpoint' => $platform->api_endpoint ?? '-',
-                'is_active' => $platform->is_active ? 'Yes' : 'No',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'api_endpoint', 'label' => 'API Endpoint'],
-            ['key' => 'is_active', 'label' => 'Active'],
-        ];
-
-        $title = 'Marketing Platforms List (Current View)';
-        $documentTitle = 'Marketing Platforms List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-platforms-current.pdf');
+        return $this->handlePrintCurrent($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
     }
 }

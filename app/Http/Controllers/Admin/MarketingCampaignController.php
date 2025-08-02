@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingCampaignRequest;
-use App\Http\Requests\UpdateMarketingCampaignRequest;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
+use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
 
 class MarketingCampaignController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -138,236 +141,21 @@ class MarketingCampaignController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $campaigns = MarketingCampaign::with(['platform', 'assignedStaff', 'createdByStaff'])->get();
-
-        if ($type === 'csv') {
-            $csvData = "Campaign Code,Campaign Name,Platform,Type,Status,Start Date,End Date,Budget Allocated,Budget Spent,Assigned Staff,Created By\n";
-            foreach ($campaigns as $campaign) {
-                $row = [
-                    $campaign->campaign_code ?? '-',
-                    $campaign->campaign_name ?? '-',
-                    $campaign->platform->name ?? '-',
-                    $campaign->campaign_type ?? '-',
-                    $campaign->status ?? '-',
-                    $campaign->start_date ?? '-',
-                    $campaign->end_date ?? '-',
-                    (string)($campaign->budget_allocated ?? '0'),
-                    (string)($campaign->budget_spent ?? '0'),
-                    $campaign->assignedStaff->full_name ?? '-',
-                    $campaign->createdByStaff->full_name ?? '-',
-                ];
-                // Escape each value for CSV (e.g., double quotes inside values)
-                $escapedRow = array_map(function($value) {
-                    $value = str_replace('"', '""', (string) $value);
-                    return '"' . $value . '"';
-                }, $row);
-                $csvData .= implode(',', $escapedRow) . "
-";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="marketing_campaigns.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $campaigns->map(function($campaign) {
-                return [
-                    'campaign_code' => $campaign->campaign_code ?? '-',
-                    'campaign_name' => $campaign->campaign_name,
-                    'platform_name' => $campaign->platform->name ?? '-',
-                    'campaign_type' => $campaign->campaign_type ?? '-',
-                    'status' => $campaign->status ?? '-',
-                    'start_date' => $campaign->start_date ?? '-',
-                    'end_date' => $campaign->end_date ?? '-',
-                    'budget_allocated' => number_format($campaign->budget_allocated ?? 0, 2),
-                    'budget_spent' => number_format($campaign->budget_spent ?? 0, 2),
-                    'assigned_staff' => $campaign->assignedStaff->full_name ?? '-',
-                    'created_by' => $campaign->createdByStaff->full_name ?? '-',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'campaign_code', 'label' => 'Code'],
-                ['key' => 'campaign_name', 'label' => 'Campaign Name'],
-                ['key' => 'platform_name', 'label' => 'Platform'],
-                ['key' => 'campaign_type', 'label' => 'Type'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'start_date', 'label' => 'Start Date'],
-                ['key' => 'end_date', 'label' => 'End Date'],
-                ['key' => 'budget_allocated', 'label' => 'Allocated'],
-                ['key' => 'budget_spent', 'label' => 'Spent'],
-                ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-                ['key' => 'created_by', 'label' => 'Created By'],
-            ];
-
-            $title = 'Marketing Campaigns List';
-            $documentTitle = 'Marketing Campaigns List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->download('marketing_campaigns.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
     }
 
     public function printSingle(MarketingCampaign $marketingCampaign)
     {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-
-        $data = [
-            ['label' => 'Campaign Name', 'value' => $marketingCampaign->campaign_name],
-            ['label' => 'Campaign Code', 'value' => $marketingCampaign->campaign_code ?? '-'],
-            ['label' => 'Platform', 'value' => $marketingCampaign->platform->name ?? '-'],
-            ['label' => 'Campaign Type', 'value' => $marketingCampaign->campaign_type ?? '-'],
-            ['label' => 'Status', 'value' => $marketingCampaign->status ?? '-'],
-            ['label' => 'Start Date', 'value' => $marketingCampaign->start_date ?? '-'],
-            ['label' => 'End Date', 'value' => $marketingCampaign->end_date ?? '-'],
-            ['label' => 'Budget Allocated', 'value' => number_format($marketingCampaign->budget_allocated ?? 0, 2)],
-            ['label' => 'Budget Spent', 'value' => number_format($marketingCampaign->budget_spent ?? 0, 2)],
-            ['label' => 'UTM Campaign', 'value' => $marketingCampaign->utm_campaign ?? '-'],
-            ['label' => 'UTM Source', 'value' => $marketingCampaign->utm_source ?? '-'],
-            ['label' => 'UTM Medium', 'value' => $marketingCampaign->utm_medium ?? '-'],
-            ['label' => 'Assigned Staff', 'value' => $marketingCampaign->assignedStaff->full_name ?? '-'],
-            ['label' => 'Created By', 'value' => $marketingCampaign->createdByStaff->full_name ?? '-'],
-            ['label' => 'Created At', 'value' => \Carbon\Carbon::parse($marketingCampaign->created_at)->format('F j, Y, g:i a')],
-            ['label' => 'Updated At', 'value' => \Carbon\Carbon::parse($marketingCampaign->updated_at)->format('F j, Y, g:i a')],
-            ['label' => 'Target Audience', 'value' => json_encode($marketingCampaign->target_audience, JSON_PRETTY_PRINT)],
-            ['label' => 'Goals', 'value' => json_encode($marketingCampaign->goals, JSON_PRETTY_PRINT)],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Marketing Campaign Details';
-        $documentTitle = 'Marketing Campaign Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("marketing_campaign_" . $marketingCampaign->campaign_code . ".pdf");
+        return $this->handlePrintSingle($marketingCampaign, AdditionalExportConfigs::getMarketingCampaignConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = MarketingCampaign::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('campaign_name', 'ilike', "%{$search}%")
-                  ->orWhere('campaign_code', 'ilike', "%{$search}%")
-                  ->orWhere('utm_campaign', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('campaign_type')) {
-            $query->where('campaign_type', $request->input('campaign_type'));
-        }
-        if ($request->filled('start_date')) {
-            $query->where('start_date', '>=', $request->input('start_date'));
-        }
-        if ($request->filled('end_date')) {
-            $query->where('end_date', '<=', $request->input('end_date'));
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $campaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])->get();
-
-        $data = $campaigns->map(function($campaign, $index) {
-            return [
-                'index' => $index + 1,
-                'campaign_name' => $campaign->campaign_name,
-                'campaign_code' => $campaign->campaign_code ?? '-',
-                'platform_name' => $campaign->platform->name ?? '-',
-                'campaign_type' => $campaign->campaign_type ?? '-',
-                'status' => $campaign->status ?? '-',
-                'start_date' => $campaign->start_date ?? '-',
-                'end_date' => $campaign->end_date ?? '-',
-                'budget_allocated' => number_format($campaign->budget_allocated ?? 0, 2),
-                'budget_spent' => number_format($campaign->budget_spent ?? 0, 2),
-                'assigned_staff' => $campaign->assignedStaff->full_name ?? '-',
-                'created_by' => $campaign->createdByStaff->full_name ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'campaign_name', 'label' => 'Campaign Name'],
-            ['key' => 'campaign_code', 'label' => 'Code'],
-            ['key' => 'platform_name', 'label' => 'Platform'],
-            ['key' => 'campaign_type', 'label' => 'Type'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'start_date', 'label' => 'Start Date'],
-            ['key' => 'end_date', 'label' => 'End Date'],
-            ['key' => 'budget_allocated', 'label' => 'Budget Allocated'],
-            ['key' => 'budget_spent', 'label' => 'Budget Spent'],
-            ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-            ['key' => 'created_by', 'label' => 'Created By'],
-        ];
-
-        $title = 'Marketing Campaigns List (Current View)';
-        $documentTitle = 'Marketing Campaigns List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-campaigns-current.pdf');
+        return $this->handlePrintCurrent($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
     }
 
     public function printAll(Request $request)
     {
-        $campaigns = MarketingCampaign::with(['platform', 'assignedStaff', 'createdByStaff'])->orderBy('campaign_name')->get();
-
-        $data = $campaigns->map(function($campaign, $index) {
-            return [
-                'index' => $index + 1,
-                'campaign_name' => $campaign->campaign_name,
-                'campaign_code' => $campaign->campaign_code ?? '-',
-                'platform_name' => $campaign->platform->name ?? '-',
-                'campaign_type' => $campaign->campaign_type ?? '-',
-                'status' => $campaign->status ?? '-',
-                'start_date' => $campaign->start_date ?? '-',
-                'end_date' => $campaign->end_date ?? '-',
-                'budget_allocated' => number_format($campaign->budget_allocated ?? 0, 2),
-                'budget_spent' => number_format($campaign->budget_spent ?? 0, 2),
-                'assigned_staff' => $campaign->assignedStaff->full_name ?? '-',
-                'created_by' => $campaign->createdByStaff->full_name ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'campaign_name', 'label' => 'Campaign Name'],
-            ['key' => 'campaign_code', 'label' => 'Code'],
-            ['key' => 'platform_name', 'label' => 'Platform'],
-            ['key' => 'campaign_type', 'label' => 'Type'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'start_date', 'label' => 'Start Date'],
-            ['key' => 'end_date', 'label' => 'End Date'],
-            ['key' => 'budget_allocated', 'label' => 'Budget Allocated'],
-            ['key' => 'budget_spent', 'label' => 'Spent'],
-            ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-            ['key' => 'created_by', 'label' => 'Created By'],
-        ];
-
-        $title = 'Marketing Campaigns List';
-        $documentTitle = 'Marketing Campaigns List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing_campaigns_all.pdf');
+        return $this->handlePrintAll($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
     }
 }

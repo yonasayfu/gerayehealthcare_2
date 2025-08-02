@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Insurance;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InsurancePolicy;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Inertia\Inertia;
 
 class InsurancePolicyController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -127,61 +130,21 @@ class InsurancePolicyController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $insurancePolicies = InsurancePolicy::select('service_type', 'coverage_percentage', 'coverage_type', 'is_active')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Service Type,Coverage Percentage,Coverage Type,Is Active\n";
-            foreach ($insurancePolicies as $policy) {
-                $csvData .= "\"{$policy->service_type}\",\"{$policy->coverage_percentage}\",\"{$policy->coverage_type}\",\"{$policy->is_active}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="insurance_policies.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.insurance_policies', ['insurancePolicies' => $insurancePolicies])->setPaper('a4', 'landscape');
-            return $pdf->stream('insurance_policies.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, InsurancePolicy::class, AdditionalExportConfigs::getInsurancePolicyConfig());
     }
 
     public function printSingle(InsurancePolicy $insurancePolicy)
     {
-        $pdf = Pdf::loadView('pdf.insurance_policy_single', ['insurancePolicy' => $insurancePolicy])->setPaper('a4', 'portrait');
-        return $pdf->stream("insurance_policy-{$insurancePolicy->id}.pdf");
+        return $this->handlePrintSingle($insurancePolicy, AdditionalExportConfigs::getInsurancePolicyConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = InsurancePolicy::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('service_type', 'ilike', "%{$search}%")
-                  ->orWhere('coverage_type', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insurancePolicies = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/Policies/PrintCurrent', ['insurancePolicies' => $insurancePolicies->items()]);
+        return $this->handlePrintCurrent($request, InsurancePolicy::class, AdditionalExportConfigs::getInsurancePolicyConfig());
     }
 
     public function printAll(Request $request)
     {
-        $insurancePolicies = InsurancePolicy::orderBy('service_type')->get();
-
-        $pdf = Pdf::loadView('pdf.insurance_policies', ['insurancePolicies' => $insurancePolicies])->setPaper('a4', 'landscape');
-        return $pdf->stream('insurance_policies.pdf');
+        return $this->handlePrintAll($request, InsurancePolicy::class, AdditionalExportConfigs::getInsurancePolicyConfig());
     }
 }

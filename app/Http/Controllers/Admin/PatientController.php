@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 use App\Models\Patient;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Auth; // <-- Import Auth facade for getting logge
 
 class PatientController extends Controller
 {
+    use ExportableTrait;
     public function index(Request $request): \Inertia\Response
     {
         $query = Patient::query();
@@ -138,59 +141,7 @@ class PatientController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        // Include 'email' and 'fayda_id' in select statement for exports if needed
-        $patients = Patient::select('full_name', 'patient_code', 'fayda_id', 'email', 'source', 'phone_number', 'address', 'gender', 'emergency_contact')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Full Name,Patient Code,Fayda ID,Email,Source,Phone,Address,Gender,Emergency Contact\n";
-            foreach ($patients as $p) {
-                // Ensure values are properly quoted for CSV
-                $csvData .= "\"{$p->full_name}\",\"{$p->patient_code}\",\"{$p->fayda_id}\",\"{$p->email}\",\"{$p->source}\",\"{$p->phone_number}\",\"{$p->address}\",\"{$p->gender}\",\"{$p->emergency_contact}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="patients.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $patients->map(function($p) {
-                return [
-                    'full_name' => $p->full_name,
-                    'patient_code' => $p->patient_code ?? '-',
-                    'fayda_id' => $p->fayda_id ?? '-',
-                    'email' => $p->email,
-                    'source' => $p->source ?? '-',
-                    'phone_number' => $p->phone_number,
-                    'address' => $p->address ?? '-',
-                    'gender' => $p->gender,
-                    'emergency_contact' => $p->emergency_contact,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'full_name', 'label' => 'Full Name'],
-                ['key' => 'patient_code', 'label' => 'Patient Code'],
-                ['key' => 'fayda_id', 'label' => 'Fayda ID'],
-                ['key' => 'email', 'label' => 'Email'],
-                ['key' => 'source', 'label' => 'Source'],
-                ['key' => 'phone_number', 'label' => 'Phone'],
-                ['key' => 'address', 'label' => 'Address'],
-                ['key' => 'gender', 'label' => 'Gender'],
-                ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
-            ];
-
-            $title = 'Patient Export - Geraye Home Care Services';
-            $documentTitle = 'Patient Records Export';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('patients.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, Patient::class, ExportConfig::getPatientConfig());
     }
 
     public function printSingle(Patient $patient)
@@ -198,119 +149,21 @@ class PatientController extends Controller
         // For single patient print, eager load relationships if you display who registered them
         $patient->load(['registeredByStaff', 'registeredByCaregiver']);
 
-        $data = [
-            ['label' => 'Full Name', 'value' => $patient->full_name],
-            ['label' => 'Patient Code', 'value' => $patient->patient_code ?? '-'],
-            ['label' => 'Fayda ID', 'value' => $patient->fayda_id ?? '-'],
-            ['label' => 'Gender', 'value' => $patient->gender ?? '-'],
-            ['label' => 'Date of Birth', 'value' => $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('M d, Y') : '-'],
-            ['label' => 'Age', 'value' => $patient->age !== null ? $patient->age : '-'],
-            ['label' => 'Phone Number', 'value' => $patient->phone_number ?? '-'],
-            ['label' => 'Email', 'value' => $patient->email ?? '-'],
-            ['label' => 'Emergency Contact', 'value' => $patient->emergency_contact ?? '-'],
-            ['label' => 'Address', 'value' => $patient->address ?? '-'],
-            ['label' => 'Source', 'value' => $patient->source ?? '-'],
-            ['label' => 'Geolocation', 'value' => $patient->geolocation ?? '-'],
-            ['label' => 'Registered By', 'value' => $patient->registeredByStaff->full_name ?? '-'],
-            ['label' => 'Registered Date', 'value' => $patient->created_at ? \Carbon\Carbon::parse($patient->created_at)->format('M d, Y H:i') : '-'],
-            ['label' => 'Last Updated', 'value' => $patient->updated_at ? \Carbon\Carbon::parse($patient->updated_at)->format('M d, Y H:i') : '-'],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Patient Record - ' . $patient->full_name;
-        $documentTitle = 'Patient Record';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("patient-{$patient->patient_code}.pdf");
+        $config = ExportConfig::getPatientConfig()['single_record'];
+        $config['title'] = 'Patient Record - ' . $patient->full_name;
+        $config['document_title'] = 'Patient Record';
+        $config['filename'] = "patient-{$patient->patient_code}.pdf";
+        
+        return $this->generateSingleRecordPdf($patient, $config);
     }
+
     public function printCurrent(Request $request)
     {
-        $query = Patient::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('full_name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $patients = $query->get();
-
-        $data = $patients->map(function($p, $index) {
-            return [
-                'index' => $index + 1,
-                'full_name' => $p->full_name,
-                'patient_code' => $p->patient_code ?? '-',
-                'fayda_id' => $p->fayda_id ?? '-',
-                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : '-',
-                'gender' => $p->gender ?? '-',
-                'phone_number' => $p->phone_number,
-                'source' => $p->source ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'full_name', 'label' => 'Full Name'],
-            ['key' => 'patient_code', 'label' => 'Patient Code'],
-            ['key' => 'fayda_id', 'label' => 'Fayda ID'],
-            ['key' => 'age', 'label' => 'Age'],
-            ['key' => 'gender', 'label' => 'Gender'],
-            ['key' => 'phone_number', 'label' => 'Phone'],
-            ['key' => 'source', 'label' => 'Source'],
-        ];
-
-        $title = 'Patient List (Current View) - Geraye Home Care Services';
-        $documentTitle = 'Patient List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('patients-current.pdf');
+        return $this->handlePrintCurrent($request, Patient::class, ExportConfig::getPatientConfig());
     }
 
     public function printAll(Request $request)
     {
-        $patients = Patient::orderBy('full_name')->get(); // Fetch all patients, ordered
-
-        $data = $patients->map(function($p, $index) {
-            return [
-                'index' => $index + 1,
-                'full_name' => $p->full_name,
-                'patient_code' => $p->patient_code ?? '-',
-                'fayda_id' => $p->fayda_id ?? '-',
-                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : '-',
-                'gender' => $p->gender ?? '-',
-                'phone_number' => $p->phone_number,
-                'source' => $p->source ?? '-',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'full_name', 'label' => 'Full Name'],
-            ['key' => 'patient_code', 'label' => 'Patient Code'],
-            ['key' => 'fayda_id', 'label' => 'Fayda ID'],
-            ['key' => 'age', 'label' => 'Age'],
-            ['key' => 'gender', 'label' => 'Gender'],
-            ['key' => 'phone_number', 'label' => 'Phone'],
-            ['key' => 'source', 'label' => 'Source'],
-        ];
-
-        $title = 'Patient List - Geraye Home Care Services';
-        $documentTitle = 'Patient Records Export';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('patients.pdf');
+        return $this->handlePrintAll($request, Patient::class, ExportConfig::getPatientConfig());
     }
 }

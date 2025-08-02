@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryItemController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -40,34 +43,9 @@ class InventoryItemController extends Controller
         ]);
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request)
     {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        $inventoryItems = $query->get();
-
-        $csv = Writer::createFromString('');
-        $csv->insertOne(['ID', 'Name', 'Description', 'Category', 'Type', 'Serial Number', 'Purchase Date', 'Warranty Expiry', 'Supplier ID', 'Assigned To Type', 'Assigned To ID', 'Last Maintenance Date', 'Next Maintenance Due', 'Maintenance Schedule', 'Notes', 'Status']);
-
-        foreach ($inventoryItems as $item) {
-            $csv->insertOne($item->toArray());
-        }
-
-        return response()->streamDownload(function () use ($csv) {
-            echo $csv->toString();
-        }, 'inventory_items.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_items.csv"',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ]);
+        return $this->handleExport($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     /**
@@ -115,141 +93,22 @@ class InventoryItemController extends Controller
 
     public function printAll(Request $request)
     {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        if ($request->has('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $inventoryItems = $query->get();
-
-        $data = $inventoryItems->map(function($item, $index) {
-            return [
-                'index' => $index + 1,
-                'name' => $item->name,
-                'item_category' => $item->item_category,
-                'item_type' => $item->item_type,
-                'serial_number' => $item->serial_number,
-                'status' => $item->status,
-                'purchase_date' => $item->purchase_date,
-                'warranty_expiry' => $item->warranty_expiry,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'item_category', 'label' => 'Category'],
-            ['key' => 'item_type', 'label' => 'Type'],
-            ['key' => 'serial_number', 'label' => 'Serial Number'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'purchase_date', 'label' => 'Purchase Date'],
-            ['key' => 'warranty_expiry', 'label' => 'Warranty Expiry'],
-        ];
-
-        $title = 'Inventory Items Report';
-        $documentTitle = 'Inventory Items Report';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory-items.pdf');
+        return $this->handlePrintAll($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     public function printSingle(InventoryItem $inventoryItem)
     {
-        $data = [
-            ['label' => 'Name', 'value' => $inventoryItem->name],
-            ['label' => 'Category', 'value' => $inventoryItem->item_category ?? '-'],
-            ['label' => 'Type', 'value' => $inventoryItem->item_type ?? '-'],
-            ['label' => 'Serial Number', 'value' => $inventoryItem->serial_number ?? '-'],
-            ['label' => 'Status', 'value' => $inventoryItem->status ?? '-'],
-            ['label' => 'Description', 'value' => $inventoryItem->description ?? '-'],
-            ['label' => 'Purchase Date', 'value' => $inventoryItem->purchase_date ? \Carbon\Carbon::parse($inventoryItem->purchase_date)->format('Y-m-d') : '-'],
-            ['label' => 'Warranty Expiry', 'value' => $inventoryItem->warranty_expiry ? \Carbon\Carbon::parse($inventoryItem->warranty_expiry)->format('Y-m-d') : '-'],
-            ['label' => 'Supplier', 'value' => $inventoryItem->supplier->name ?? '-'],
-            ['label' => 'Assigned To Type', 'value' => $inventoryItem->assigned_to_type ?? '-'],
-            ['label' => 'Assigned To ID', 'value' => $inventoryItem->assigned_to_id ?? '-'],
-            ['label' => 'Last Maintenance Date', 'value' => $inventoryItem->last_maintenance_date ? \Carbon\Carbon::parse($inventoryItem->last_maintenance_date)->format('Y-m-d') : '-'],
-            ['label' => 'Next Maintenance Due', 'value' => $inventoryItem->next_maintenance_due ? \Carbon\Carbon::parse($inventoryItem->next_maintenance_due)->format('Y-m-d') : '-'],
-            ['label' => 'Maintenance Schedule', 'value' => $inventoryItem->maintenance_schedule ?? '-'],
-            ['label' => 'Notes', 'value' => $inventoryItem->notes ?? '-'],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Inventory Item Details';
-        $documentTitle = 'Inventory Item Details Report';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("inventory_item_" . $inventoryItem->id . ".pdf");
+        return $this->handlePrintSingle($inventoryItem, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     public function generateSinglePdf(InventoryItem $inventoryItem)
     {
-        $pdf = Pdf::loadView('pdf.inventory_items_single_pdf', ['inventoryItem' => $inventoryItem]);
-        return $pdf->stream('inventory_item_' . $inventoryItem->id . '.pdf');
+        return $this->handlePrintSingle($inventoryItem, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     public function generatePdf(Request $request)
     {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        if ($request->has('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $inventoryItems = $query->get();
-
-        $data = $inventoryItems->map(function($item, $index) {
-            return [
-                'index' => $index + 1,
-                'name' => $item->name,
-                'item_category' => $item->item_category,
-                'item_type' => $item->item_type,
-                'serial_number' => $item->serial_number,
-                'status' => $item->status,
-                'purchase_date' => $item->purchase_date,
-                'warranty_expiry' => $item->warranty_expiry,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'index', 'label' => '#'],
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'item_category', 'label' => 'Category'],
-            ['key' => 'item_type', 'label' => 'Type'],
-            ['key' => 'serial_number', 'label' => 'Serial Number'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'purchase_date', 'label' => 'Purchase Date'],
-            ['key' => 'warranty_expiry', 'label' => 'Warranty Expiry'],
-        ];
-
-        $title = 'Inventory Items Report';
-        $documentTitle = 'Inventory Items Report';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory-items.pdf');
+        return $this->handlePrintCurrent($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     /**

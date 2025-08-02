@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Models\EventParticipant;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
-use App\Http\Controllers\Controller;
 
 class EventParticipantController extends Controller
 {
+    use ExportableTrait;
     public function __construct()
     {
         $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
@@ -125,130 +128,21 @@ class EventParticipantController extends Controller
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $participants = EventParticipant::select('event_id', 'patient_id', 'status')->get();
-
-        if ($type === 'csv') {
-            $csvData = "Event ID,Patient ID,Status\n";
-            foreach ($participants as $participant) {
-                $csvData .= "\"{$participant->event_id}\",\"{$participant->patient_id}\",\"{$participant->status}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=\"event-participants.csv\"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $data = $participants->map(function($participant) {
-                return [
-                    'event_id' => $participant->event_id,
-                    'patient_id' => $participant->patient_id,
-                    'status' => $participant->status,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'event_id', 'label' => 'Event ID'],
-                ['key' => 'patient_id', 'label' => 'Patient ID'],
-                ['key' => 'status', 'label' => 'Status'],
-            ];
-
-            $title = 'Event Participants List';
-            $documentTitle = 'Event Participants List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('event-participants.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
     }
 
     public function printSingle(EventParticipant $eventParticipant)
     {
-        $data = [
-            ['label' => 'Event ID', 'value' => $eventParticipant->event_id],
-            ['label' => 'Patient ID', 'value' => $eventParticipant->patient_id],
-            ['label' => 'Status', 'value' => $eventParticipant->status],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Event Participant Details';
-        $documentTitle = 'Event Participant Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("event-participant-{$eventParticipant->id}.pdf");
+        return $this->handlePrintSingle($eventParticipant, AdditionalExportConfigs::getEventParticipantConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = EventParticipant::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('status', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $participants = $query->get();
-
-        $data = $participants->map(function($participant) {
-            return [
-                'event_id' => $participant->event_id,
-                'patient_id' => $participant->patient_id,
-                'status' => $participant->status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'event_id', 'label' => 'Event ID'],
-            ['key' => 'patient_id', 'label' => 'Patient ID'],
-            ['key' => 'status', 'label' => 'Status'],
-        ];
-
-        $title = 'Event Participants List (Current View)';
-        $documentTitle = 'Event Participants List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('event-participants-current.pdf');
+        return $this->handlePrintCurrent($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
     }
 
     public function printAll(Request $request)
     {
-        $participants = EventParticipant::orderBy('status')->get();
-
-        $data = $participants->map(function($participant) {
-            return [
-                'event_id' => $participant->event_id,
-                'patient_id' => $participant->patient_id,
-                'status' => $participant->status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'event_id', 'label' => 'Event ID'],
-            ['key' => 'patient_id', 'label' => 'Patient ID'],
-            ['key' => 'status', 'label' => 'Status'],
-        ];
-
-        $title = 'Event Participants List';
-        $documentTitle = 'Event Participants List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('event-participants.pdf');
+        return $this->handlePrintAll($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
     }
 }

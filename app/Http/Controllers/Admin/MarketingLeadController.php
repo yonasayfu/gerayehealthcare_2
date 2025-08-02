@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Requests\StoreMarketingLeadRequest;
 use App\Http\Requests\UpdateMarketingLeadRequest;
 use App\Models\MarketingLead;
@@ -20,6 +22,7 @@ use App\Models\Patient;
 
 class MarketingLeadController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -144,156 +147,24 @@ class MarketingLeadController extends Controller
         return back()->with('success', 'Marketing Lead deleted successfully.');
     }
 
-    public function export(Request $request, $type)
+    public function export(Request $request)
     {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->get();
-
-        if ($type === 'csv') {
-            return Excel::download(new MarketingLeadsExport($leads), 'marketing-leads.csv');
-        }
-
-        if ($type === 'pdf') {
-            $data = $leads->map(function($lead) {
-                return [
-                    'lead_code' => $lead->lead_code,
-                    'name' => $lead->first_name . ' ' . $lead->last_name,
-                    'email' => $lead->email,
-                    'phone' => $lead->phone_number,
-                    'status' => $lead->status,
-                    'source_campaign' => $lead->sourceCampaign->name ?? 'N/A',
-                    'landing_page' => $lead->landingPage->name ?? 'N/A',
-                    'assigned_staff' => $lead->assignedStaff->user->name ?? 'N/A',
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'lead_code', 'label' => 'Lead Code'],
-                ['key' => 'name', 'label' => 'Name'],
-                ['key' => 'email', 'label' => 'Email'],
-                ['key' => 'phone', 'label' => 'Phone'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'source_campaign', 'label' => 'Source Campaign'],
-                ['key' => 'landing_page', 'label' => 'Landing Page'],
-                ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-            ];
-
-            $title = 'Marketing Leads List';
-            $documentTitle = 'Marketing Leads List';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream('marketing-leads.pdf');
-        }
-
-        return redirect()->back()->with('error', 'Invalid export type.');
+        return $this->handleExport($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
     }
 
     public function printSingle(MarketingLead $marketingLead)
     {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
-
-        $data = [
-            ['label' => 'Lead Code', 'value' => $marketingLead->lead_code],
-            ['label' => 'Full Name', 'value' => $marketingLead->first_name . ' ' . $marketingLead->last_name],
-            ['label' => 'Email', 'value' => $marketingLead->email],
-            ['label' => 'Phone Number', 'value' => $marketingLead->phone_number],
-            ['label' => 'Status', 'value' => $marketingLead->status],
-            ['label' => 'Source Campaign', 'value' => $marketingLead->sourceCampaign->name ?? 'N/A'],
-            ['label' => 'Landing Page', 'value' => $marketingLead->landingPage->name ?? 'N/A'],
-            ['label' => 'Assigned Staff', 'value' => $marketingLead->assignedStaff->user->name ?? 'N/A'],
-            ['label' => 'Conversion Date', 'value' => $marketingLead->conversion_date ? \Carbon\Carbon::parse($marketingLead->conversion_date)->format('M d, Y') : 'N/A'],
-            ['label' => 'Converted Patient', 'value' => ($marketingLead->convertedPatient->full_name ?? 'N/A') . ' (' . ($marketingLead->convertedPatient->patient_code ?? 'N/A') . ')'],
-            ['label' => 'Notes', 'value' => $marketingLead->notes ?? 'N/A'],
-            ['label' => 'Created At', 'value' => \Carbon\Carbon::parse($marketingLead->created_at)->format('M d, Y H:i')],
-            ['label' => 'Updated At', 'value' => \Carbon\Carbon::parse($marketingLead->updated_at)->format('M d, Y H:i')],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Marketing Lead Details';
-        $documentTitle = 'Marketing Lead Details';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("marketing-lead-{$marketingLead->lead_code}.pdf");
+        return $this->handlePrintSingle($marketingLead, AdditionalExportConfigs::getMarketingLeadConfig());
     }
 
     public function printAll(Request $request)
     {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->get();
-
-        $data = $leads->map(function($lead) {
-            return [
-                'lead_code' => $lead->lead_code,
-                'name' => $lead->first_name . ' ' . $lead->last_name,
-                'email' => $lead->email,
-                'phone' => $lead->phone_number,
-                'status' => $lead->status,
-                'source_campaign' => $lead->sourceCampaign->name ?? 'N/A',
-                'landing_page' => $lead->landingPage->name ?? 'N/A',
-                'assigned_staff' => $lead->assignedStaff->user->name ?? 'N/A',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'lead_code', 'label' => 'Lead Code'],
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'email', 'label' => 'Email'],
-            ['key' => 'phone', 'label' => 'Phone'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'source_campaign', 'label' => 'Source Campaign'],
-            ['key' => 'landing_page', 'label' => 'Landing Page'],
-            ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-        ];
-
-        $title = 'Marketing Leads List';
-        $documentTitle = 'Marketing Leads List';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-leads.pdf');
+        return $this->handlePrintAll($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->get();
-
-        $data = $leads->map(function($lead) {
-            return [
-                'lead_code' => $lead->lead_code,
-                'name' => $lead->first_name . ' ' . $lead->last_name,
-                'email' => $lead->email,
-                'phone' => $lead->phone_number,
-                'status' => $lead->status,
-                'source_campaign' => $lead->sourceCampaign->name ?? 'N/A',
-                'landing_page' => $lead->landingPage->name ?? 'N/A',
-                'assigned_staff' => $lead->assignedStaff->user->name ?? 'N/A',
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'lead_code', 'label' => 'Lead Code'],
-            ['key' => 'name', 'label' => 'Name'],
-            ['key' => 'email', 'label' => 'Email'],
-            ['key' => 'phone', 'label' => 'Phone'],
-            ['key' => 'status', 'label' => 'Status'],
-            ['key' => 'source_campaign', 'label' => 'Source Campaign'],
-            ['key' => 'landing_page', 'label' => 'Landing Page'],
-            ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-        ];
-
-        $title = 'Marketing Leads List (Current View)';
-        $documentTitle = 'Marketing Leads List (Current View)';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-leads-current.pdf');
+        return $this->handlePrintCurrent($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
     }
 
     private function getFilteredQuery(Request $request)

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 use App\Models\CaregiverAssignment;
 use App\Models\Patient;
 use App\Models\Staff;
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\Response as LaravelResponse; // Use an alias for 
 
 class CaregiverAssignmentController extends Controller
 {
+    use ExportableTrait;
     /**
      * Display a listing of the resource.
      */
@@ -128,118 +131,23 @@ class CaregiverAssignmentController extends Controller
 
     public function printAll(Request $request)
     {
-        $query = CaregiverAssignment::with(['patient', 'staff']);
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->whereHas('patient', fn($q) => $q->where('full_name', 'ilike', "%{$search}%'))
-                  ->orWhereHas('staff', fn($q) => $q->where('first_name', 'ilike', "%{$search}%'));
-        }
-
-        if ($request->filled('sort')) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $assignments = $query->get();
-
-        $data = $assignments->map(function($assignment) {
-            return [
-                'patient_name' => $assignment->patient->full_name ?? 'N/A',
-                'staff_member' => ($assignment->staff->first_name ?? '') . ' ' . ($assignment->staff->last_name ?? ''),
-                'shift_start' => $assignment->shift_start ? \Carbon\Carbon::parse($assignment->shift_start)->format('F j, Y, g:i a') : 'N/A',
-                'shift_end' => $assignment->shift_end ? \Carbon\Carbon::parse($assignment->shift_end)->format('F j, Y, g:i a') : 'N/A',
-                'status' => $assignment->status,
-            ];
-        })->toArray();
-
-        $columns = [
-            ['key' => 'patient_name', 'label' => 'Patient Name'],
-            ['key' => 'staff_member', 'label' => 'Staff Member'],
-            ['key' => 'shift_start', 'label' => 'Shift Start'],
-            ['key' => 'shift_end', 'label' => 'Shift End'],
-            ['key' => 'status', 'label' => 'Status'],
-        ];
-
-        $title = 'All Caregiver Assignments - Geraye';
-        $documentTitle = 'Caregiver Assignment Records Export';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'landscape');
-        return $pdf->stream("assignments-all.pdf");
+        return $this->handlePrintAll($request, CaregiverAssignment::class, ExportConfig::getCaregiverAssignmentConfig());
     }
 
     public function printSingle(CaregiverAssignment $assignment)
     {
         $assignment->load(['staff', 'patient']);
 
-        $data = [
-            ['label' => 'Patient', 'value' => $assignment->patient->full_name ?? 'N/A'],
-            ['label' => 'Staff', 'value' => ($assignment->staff->first_name ?? '') . ' ' . ($assignment->staff->last_name ?? '')],
-            ['label' => 'Shift Start', 'value' => $assignment->shift_start ? \Carbon\Carbon::parse($assignment->shift_start)->format('F j, Y, g:i a') : 'N/A'],
-            ['label' => 'Shift End', 'value' => $assignment->shift_end ? \Carbon\Carbon::parse($assignment->shift_end)->format('F j, Y, g:i a') : 'N/A'],
-            ['label' => 'Status', 'value' => $assignment->status ?? 'N/A'],
-        ];
-
-        $columns = [
-            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
-            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
-        ];
-
-        $title = 'Assignment Record - #' . $assignment->id;
-        $documentTitle = 'Caregiver Assignment Record';
-
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                    ->setPaper('a4', 'portrait');
-        return $pdf->stream("assignment-{$assignment->id}.pdf");
+        $config = ExportConfig::getCaregiverAssignmentConfig()['single_record'];
+        $config['title'] = 'Assignment Record - #' . $assignment->id;
+        $config['document_title'] = 'Caregiver Assignment Record';
+        $config['filename'] = "assignment-{$assignment->id}.pdf";
+        
+        return $this->generateSingleRecordPdf($assignment, $config);
     }
 
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $assignments = CaregiverAssignment::with(['staff', 'patient'])->get();
-
-        if ($type === 'csv') {
-            $csvData = "Patient Name,Staff Name,Shift Start,Shift End,Status\n";
-            foreach ($assignments as $a) {
-                $patientName = $a->patient->full_name ?? 'N/A';
-                $staffName = ($a->staff->first_name ?? '') . ' ' . ($a->staff->last_name ?? '');
-                $csvData .= "\"{$patientName}\",\"{$staffName}\",\"{$a->shift_start}\",\"{$a->shift_end}\",\"{$a->status}\"\n";
-            }
-            return LaravelResponse::make($csvData, 200, ['Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="assignments.csv"']);
-        }
-
-        
-
-        if ($type === 'pdf') {
-            $assignments = CaregiverAssignment::with(['patient', 'staff'])->get();
-            $data = $assignments->map(function($assignment) {
-                return [
-                    'patient_name' => $assignment->patient->full_name ?? 'N/A',
-                    'staff_member' => ($assignment->staff->first_name ?? '') . ' ' . ($assignment->staff->last_name ?? ''),
-                    'shift_start' => $assignment->shift_start ? \Carbon\Carbon::parse($assignment->shift_start)->format('F j, Y, g:i a') : 'N/A',
-                    'shift_end' => $assignment->shift_end ? \Carbon\Carbon::parse($assignment->shift_end)->format('F j, Y, g:i a') : 'N/A',
-                    'status' => $assignment->status,
-                ];
-            })->toArray();
-
-            $columns = [
-                ['key' => 'patient_name', 'label' => 'Patient Name'],
-                ['key' => 'staff_member', 'label' => 'Staff Member'],
-                ['key' => 'shift_start', 'label' => 'Shift Start'],
-                ['key' => 'shift_end', 'label' => 'Shift End'],
-                ['key' => 'status', 'label' => 'Status'],
-            ];
-
-            $title = 'All Caregiver Assignments - Geraye';
-            $documentTitle = 'Caregiver Assignment Records Export';
-
-            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
-                        ->setPaper('a4', 'landscape');
-            return $pdf->stream("assignments-all.pdf");
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, CaregiverAssignment::class, ExportConfig::getCaregiverAssignmentConfig());
     }
 }
