@@ -4,6 +4,8 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
+import { useExport } from '@/Composables/useExport';
+import { Download, FileText, Printer } from 'lucide-vue-next';
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -42,15 +44,31 @@ watch([search, perPage], debounce(() => {
   }, { preserveState: true, replace: true })
 }, 300))
 
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-alerts', filters: props.filters });
+
 </script>
 <template>
   <Head title="Inventory Alerts" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div class="space-y-6 p-6 print:p-0 print:space-y-0">
+      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Alerts</h1>
           <p class="text-sm text-muted-foreground">Items that are low in stock and need attention.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            <Download class="h-4 w-4" /> CSV
+          </button>
+          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            <FileText class="h-4 w-4" /> PDF
+          </button>
+          <button @click="printAllRecords" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            <Printer class="h-4 w-4" /> Print All
+          </button>
+          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            <Printer class="h-4 w-4" /> Print Current View
+          </button>
         </div>
       </div>
 

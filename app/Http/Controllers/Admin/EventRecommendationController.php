@@ -167,13 +167,77 @@ class EventRecommendationController extends Controller
 
     public function export(Request $request)
     {
-        // Simplified export method for debugging
-        return response('OK', 200);
+        $type = $request->get('type');
+        $recommendations = EventRecommendation::select('event_id', 'source_channel', 'recommended_by_name', 'patient_name', 'patient_phone', 'notes', 'status')->get();
+
+        if ($type === 'csv') {
+            $csvData = "Event ID,Source Channel,Recommended By,Patient Name,Patient Phone,Notes,Status\n";
+            foreach ($recommendations as $recommendation) {
+                $csvData .= "\"{$recommendation->event_id}\",\"{$recommendation->source_channel}\",\"{$recommendation->recommended_by_name}\",\"{$recommendation->patient_name}\",\"{$recommendation->patient_phone}\",\"{$recommendation->notes}\",\"{$recommendation->status}\"\n";
+            }
+
+            return Response::make($csvData, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename=\"event-recommendations.csv\"',
+            ]);
+        }
+
+        if ($type === 'pdf') {
+            $data = $recommendations->map(function($recommendation) {
+                return [
+                    'event_id' => $recommendation->event_id,
+                    'source_channel' => $recommendation->source_channel,
+                    'recommended_by_name' => $recommendation->recommended_by_name,
+                    'patient_name' => $recommendation->patient_name,
+                    'patient_phone' => $recommendation->patient_phone,
+                    'notes' => $recommendation->notes,
+                    'status' => $recommendation->status,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'event_id', 'label' => 'Event ID'],
+                ['key' => 'source_channel', 'label' => 'Source Channel'],
+                ['key' => 'recommended_by_name', 'label' => 'Recommended By'],
+                ['key' => 'patient_name', 'label' => 'Patient Name'],
+                ['key' => 'patient_phone', 'label' => 'Patient Phone'],
+                ['key' => 'notes', 'label' => 'Notes'],
+                ['key' => 'status', 'label' => 'Status'],
+            ];
+
+            $title = 'Event Recommendations List';
+            $documentTitle = 'Event Recommendations List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
+            return $pdf->download('event-recommendations.pdf');
+        }
+
+        return abort(400, 'Invalid export type');
     }
 
     public function printSingle(EventRecommendation $eventRecommendation)
     {
-        $pdf = Pdf::loadView('pdf.event-recommendation-single', ['eventRecommendation' => $eventRecommendation])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Event ID', 'value' => $eventRecommendation->event_id],
+            ['label' => 'Source', 'value' => $eventRecommendation->source_channel],
+            ['label' => 'Recommended By', 'value' => $eventRecommendation->recommended_by_name],
+            ['label' => 'Patient Name', 'value' => $eventRecommendation->patient_name],
+            ['label' => 'Patient Phone', 'value' => $eventRecommendation->patient_phone],
+            ['label' => 'Notes', 'value' => $eventRecommendation->notes],
+            ['label' => 'Status', 'value' => $eventRecommendation->status],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Event Recommendation Details';
+        $documentTitle = 'Event Recommendation Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("event-recommendation-{$eventRecommendation->id}.pdf");
     }
 
@@ -193,16 +257,53 @@ class EventRecommendationController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $recommendations = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $recommendations = $query->get();
 
-        return Inertia::render('Admin/EventRecommendations/PrintCurrent', ['recommendations' => $recommendations->items()]);
+        $data = $recommendations->map(function($recommendation) {
+            return [
+                'patient_name' => $recommendation->patient_name,
+                'source_channel' => $recommendation->source_channel,
+                'status' => $recommendation->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'patient_name', 'label' => 'Patient Name'],
+            ['key' => 'source_channel', 'label' => 'Source'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Event Recommendations List (Current View)';
+        $documentTitle = 'Event Recommendations List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('event-recommendations-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $recommendations = EventRecommendation::orderBy('patient_name')->get();
 
-        $pdf = Pdf::loadView('pdf.event-recommendations', ['recommendations' => $recommendations])->setPaper('a4', 'landscape');
+        $data = $recommendations->map(function($recommendation) {
+            return [
+                'patient_name' => $recommendation->patient_name,
+                'source_channel' => $recommendation->source_channel,
+                'status' => $recommendation->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'patient_name', 'label' => 'Patient Name'],
+            ['key' => 'source_channel', 'label' => 'Source'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Event Recommendations List';
+        $documentTitle = 'Event Recommendations List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('event-recommendations.pdf');
     }
 }

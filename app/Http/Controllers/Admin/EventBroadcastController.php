@@ -144,7 +144,27 @@ class EventBroadcastController extends Controller
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.event-broadcasts', ['broadcasts' => $broadcasts])->setPaper('a4', 'landscape');
+            $data = $broadcasts->map(function($broadcast) {
+                return [
+                    'event_id' => $broadcast->event_id,
+                    'channel' => $broadcast->channel,
+                    'message' => $broadcast->message,
+                    'sent_by_staff_id' => $broadcast->sent_by_staff_id,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'event_id', 'label' => 'Event ID'],
+                ['key' => 'channel', 'label' => 'Channel'],
+                ['key' => 'message', 'label' => 'Message'],
+                ['key' => 'sent_by_staff_id', 'label' => 'Sent By Staff ID'],
+            ];
+
+            $title = 'Event Broadcasts List';
+            $documentTitle = 'Event Broadcasts List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('event-broadcasts.pdf');
         }
 
@@ -153,7 +173,23 @@ class EventBroadcastController extends Controller
 
     public function printSingle(EventBroadcast $eventBroadcast)
     {
-        $pdf = Pdf::loadView('pdf.event-broadcast-single', ['broadcast' => $eventBroadcast])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Event ID', 'value' => $eventBroadcast->event_id],
+            ['label' => 'Channel', 'value' => $eventBroadcast->channel],
+            ['label' => 'Message', 'value' => $eventBroadcast->message],
+            ['label' => 'Sent By Staff ID', 'value' => $eventBroadcast->sent_by_staff_id],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Event Broadcast Details';
+        $documentTitle = 'Event Broadcast Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("event-broadcast-{$eventBroadcast->id}.pdf");
     }
 
@@ -173,16 +209,57 @@ class EventBroadcastController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $broadcasts = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $broadcasts = $query->get();
 
-        return Inertia::render('Admin/EventBroadcasts/PrintCurrent', ['broadcasts' => $broadcasts->items()]);
+        $data = $broadcasts->map(function($broadcast) {
+            return [
+                'event_id' => $broadcast->event_id,
+                'channel' => $broadcast->channel,
+                'message' => $broadcast->message,
+                'sent_by_staff_id' => $broadcast->sent_by_staff_id,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'channel', 'label' => 'Channel'],
+            ['key' => 'message', 'label' => 'Message'],
+            ['key' => 'sent_by_staff_id', 'label' => 'Sent By Staff ID'],
+        ];
+
+        $title = 'Event Broadcasts List (Current View)';
+        $documentTitle = 'Event Broadcasts List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('event-broadcasts-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $broadcasts = EventBroadcast::orderBy('channel')->get();
 
-        $pdf = Pdf::loadView('pdf.event-broadcasts', ['broadcasts' => $broadcasts])->setPaper('a4', 'landscape');
+        $data = $broadcasts->map(function($broadcast) {
+            return [
+                'event_id' => $broadcast->event_id,
+                'channel' => $broadcast->channel,
+                'message' => $broadcast->message,
+                'sent_by_staff_id' => $broadcast->sent_by_staff_id,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'channel', 'label' => 'Channel'],
+            ['key' => 'message', 'label' => 'Message'],
+            ['key' => 'sent_by_staff_id', 'label' => 'Sent By Staff ID'],
+        ];
+
+        $title = 'Event Broadcasts List';
+        $documentTitle = 'Event Broadcasts List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('event-broadcasts.pdf');
     }
 }

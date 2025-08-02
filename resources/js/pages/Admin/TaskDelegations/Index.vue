@@ -133,7 +133,6 @@ async function printTable() {
           </div>
       </div>
 
-      <!-- Table -->
       <div class="overflow-x-auto bg-white shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -159,7 +158,7 @@ async function printTable() {
             <tr
               v-for="task in taskDelegations.data"
               :key="task.id"
-              class="border-b hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 print-table-row"
+              class="border-b hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row"
             >
               <td class="px-6 py-4">{{ task.title }}</td>
               <td class="px-6 py-4">
@@ -208,140 +207,3 @@ async function printTable() {
     </div>
   </AppLayout>
 </template>
-
-<style>
-/* Print-specific styles for Index.vue (Print Current View) */
-@media print {
-  @page {
-    size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-
-  /* Hide elements */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Specific styles for the print header content (logo and clinic name) */
-  .print-header-content {
-      display: block !important; /* Show header */
-      text-align: center;
-      padding-top: 0.5cm;
-      padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
-  }
-  .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-  }
-  .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
-      font-weight: bold;
-  }
-  .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
-  }
-  hr { border-color: #ccc !important; }
-
-  /* Main content container adjustments */
-  .space-y-6.p-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Table specific print styles */
-  .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background-color: transparent !important; /* No background color */
-    overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
-    transform: scale(0.97); /* Slight scale down to fit wide tables */
-    transform-origin: top left;
-  }
-
-  .print-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
-  }
-
-  .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    text-transform: uppercase !important;
-  }
-
-  .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
-    color: #000 !important;
-    vertical-align: top !important; /* Align content to top of cell */
-    word-break: break-word; /* Allow long words to break */
-  }
-
-  .print-table th {
-    font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
-    white-space: nowrap; /* Keep header text on one line if possible */
-  }
-
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Item */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 15%; } /* Scheduled Date */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Actual Date */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 15%; } /* Performed By */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* Status */
-
-
-  .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  /* Hide actions column for print */
-  .print-table th:last-child,
-  .print-table td:last-child {
-    display: none !important;
-  }
-
-  /* Hide sort arrows on print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Print Footer */
-  .print-footer {
-    display: block !important;
-    text-align: center;
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
-  }
-  .print-footer hr {
-    border-color: #ccc !important;
-  }
-}
-</style>

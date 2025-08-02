@@ -44,32 +44,9 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv') {
-  const form = document.createElement('form');
-  form.method = 'GET';
-  form.action = `/dashboard/assignments/export`;
-  form.target = '_blank';
+import { useExport } from '@/Composables/useExport';
 
-  const input = document.createElement('input');
-  input.type = 'hidden';
-  input.name = 'type';
-  input.value = type;
-  form.appendChild(input);
-
-  document.body.appendChild(form);
-  form.submit();
-  document.body.removeChild(form);
-}
-
-// New function to handle printing all records
-function printAllRecords() {
-    const url = route('admin.assignments.printAll', { ...props.filters });
-    window.open(url, '_blank');
-}
-
-function printCurrentView() {
-  window.print();
-}
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.assignments', filters: props.filters });
 
 
 function toggleSort(field: string) {
@@ -121,12 +98,11 @@ const formatDate = (dateString) => {
           <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <FileText class="h-4 w-4" /> PDF
           </button>
-          <button @click="printTable" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print Current Page">
+          <button @click="printCurrentView()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print Current Page">
             <Printer class="h-4 w-4" /> Print Page
           </button>
-          <button @click="printAllRecords" :disabled="isPrintingAll" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print All Records">
-             <Loader2 v-if="isPrintingAll" class="h-4 w-4 animate-spin" />
-             <Book v-else class="h-4 w-4" />
+          <button @click="printAllRecords()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print All Records">
+             <Book class="h-4 w-4" />
              Print All
           </button>
         </div>
@@ -237,33 +213,3 @@ const formatDate = (dateString) => {
   </AppLayout>
 </template>
 
-<style>
-.print-only {
-    display: none;
-}
-
-@media print {
-  body * {
-    visibility: hidden !important;
-  }
-  .print-only {
-    display: block !important;
-  }
-  #print-header, #print-header * {
-    visibility: visible !important;
-    position: static;
-  }
-  #assignments-table, #assignments-table * {
-    visibility: visible !important;
-  }
-  #assignments-table {
-    position: absolute !important;
-    left: 0;
-    top: 120px; /* Adjust this value to leave space for the header */
-    width: 100%;
-  }
-  .no-print {
-      display: none !important;
-  }
-}
-</style>

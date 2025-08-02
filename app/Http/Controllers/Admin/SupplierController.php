@@ -121,12 +121,34 @@ class SupplierController extends Controller
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%")
                   ->orWhere('contact_person', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%');
         }
 
         $suppliers = $query->get();
 
-        $pdf = Pdf::loadView('pdf.suppliers', ['suppliers' => $suppliers])->setPaper('a4', 'landscape');
+        $data = $suppliers->map(function($supplier) {
+            return [
+                'name' => $supplier->name,
+                'contact_person' => $supplier->contact_person,
+                'email' => $supplier->email,
+                'phone' => $supplier->phone,
+                'address' => $supplier->address,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'contact_person', 'label' => 'Contact Person'],
+            ['key' => 'email', 'label' => 'Email'],
+            ['key' => 'phone', 'label' => 'Phone'],
+            ['key' => 'address', 'label' => 'Address'],
+        ];
+
+        $title = 'Suppliers Report';
+        $documentTitle = 'Suppliers Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('suppliers.pdf');
     }
 
@@ -139,15 +161,48 @@ class SupplierController extends Controller
 
     public function printSingle(Supplier $supplier)
     {
-        return Inertia::render('Admin/Suppliers/PrintSingle', [
-            'supplier' => $supplier,
-        ]);
+        $data = [
+            ['label' => 'Name', 'value' => $supplier->name],
+            ['label' => 'Contact Person', 'value' => $supplier->contact_person ?? '-'],
+            ['label' => 'Email', 'value' => $supplier->email ?? '-'],
+            ['label' => 'Phone', 'value' => $supplier->phone ?? '-'],
+            ['label' => 'Address', 'value' => $supplier->address ?? '-'],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Supplier Details';
+        $documentTitle = 'Supplier Details Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
+        return $pdf->stream("supplier_" . $supplier->id . ".pdf");
     }
 
     public function generateSinglePdf(Supplier $supplier)
     {
-        $pdf = Pdf::loadView('pdf.suppliers_single_pdf', ['supplier' => $supplier]);
-        return $pdf->stream('supplier_' . $supplier->id . '.pdf');
+        $data = [
+            ['label' => 'Name', 'value' => $supplier->name],
+            ['label' => 'Contact Person', 'value' => $supplier->contact_person ?? '-'],
+            ['label' => 'Email', 'value' => $supplier->email ?? '-'],
+            ['label' => 'Phone', 'value' => $supplier->phone ?? '-'],
+            ['label' => 'Address', 'value' => $supplier->address ?? '-'],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Supplier Details';
+        $documentTitle = 'Supplier Details Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
+        return $pdf->stream("supplier_" . $supplier->id . ".pdf");
     }
 
     public function generatePdf(Request $request)
@@ -162,7 +217,29 @@ class SupplierController extends Controller
 
         $suppliers = $query->get();
 
-        $pdf = Pdf::loadView('pdf.suppliers', ['suppliers' => $suppliers])->setPaper('a4', 'landscape');
+        $data = $suppliers->map(function($supplier) {
+            return [
+                'name' => $supplier->name,
+                'contact_person' => $supplier->contact_person,
+                'email' => $supplier->email,
+                'phone' => $supplier->phone,
+                'address' => $supplier->address,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'contact_person', 'label' => 'Contact Person'],
+            ['key' => 'email', 'label' => 'Email'],
+            ['key' => 'phone', 'label' => 'Phone'],
+            ['key' => 'address', 'label' => 'Address'],
+        ];
+
+        $title = 'Suppliers Report';
+        $documentTitle = 'Suppliers Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('suppliers.pdf');
     }
 

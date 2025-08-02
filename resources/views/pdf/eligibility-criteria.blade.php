@@ -1,34 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Eligibility Criteria List</title>
-    <style>
-        body { font-family: 'DejaVu Sans', sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Eligibility Criteria List</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Event ID</th>
-                <th>Criteria Name</th>
-                <th>Operator</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($criteria as $criterion)
-            <tr>
-                <td>{{ $criterion->event_id }}</td>
-                <td>{{ $criterion->criteria_name }}</td>
-                <td>{{ $criterion->operator }}</td>
-                <td>{{ $criterion->value }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</body>
-</html>
+<x-printable-report
+    title="Eligibility Criteria List"
+    :data="$criteria->map(function($criterion) {
+        return [
+            'event_id' => $criterion->event_id,
+            'criteria_name' => $criterion->criteria_name,
+            'operator' => $criterion->operator,
+            'value' => $criterion->value,
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'event_id', 'label' => 'Event ID'],
+        ['key' => 'criteria_name', 'label' => 'Criteria Name'],
+        ['key' => 'operator', 'label' => 'Operator'],
+        ['key' => 'value', 'label' => 'Value'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Eligibility Criteria List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

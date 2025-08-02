@@ -1,32 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Event Staff Assignments List</title>
-    <style>
-        body { font-family: 'DejaVu Sans', sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Event Staff Assignments List</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Event ID</th>
-                <th>Staff ID</th>
-                <th>Role</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($assignments as $assignment)
-            <tr>
-                <td>{{ $assignment->event_id }}</td>
-                <td>{{ $assignment->staff_id }}</td>
-                <td>{{ $assignment->role }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</body>
-</html>
+<x-printable-report
+    title="Event Staff Assignments List"
+    :data="$assignments->map(function($assignment) {
+        return [
+            'event_id' => $assignment->event_id,
+            'staff_id' => $assignment->staff_id,
+            'role' => $assignment->role,
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'event_id', 'label' => 'Event ID'],
+        ['key' => 'staff_id', 'label' => 'Staff ID'],
+        ['key' => 'role', 'label' => 'Role'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Event Staff Assignments List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

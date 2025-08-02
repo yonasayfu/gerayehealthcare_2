@@ -156,8 +156,37 @@ class PatientController extends Controller
         }
 
         if ($type === 'pdf') {
-            // You might need to update your pdf.patients blade view to include new fields
-            $pdf = Pdf::loadView('pdf.patients', ['patients' => $patients])->setPaper('a4', 'landscape');
+            $data = $patients->map(function($p) {
+                return [
+                    'full_name' => $p->full_name,
+                    'patient_code' => $p->patient_code ?? '-',
+                    'fayda_id' => $p->fayda_id ?? '-',
+                    'email' => $p->email,
+                    'source' => $p->source ?? '-',
+                    'phone_number' => $p->phone_number,
+                    'address' => $p->address ?? '-',
+                    'gender' => $p->gender,
+                    'emergency_contact' => $p->emergency_contact,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'full_name', 'label' => 'Full Name'],
+                ['key' => 'patient_code', 'label' => 'Patient Code'],
+                ['key' => 'fayda_id', 'label' => 'Fayda ID'],
+                ['key' => 'email', 'label' => 'Email'],
+                ['key' => 'source', 'label' => 'Source'],
+                ['key' => 'phone_number', 'label' => 'Phone'],
+                ['key' => 'address', 'label' => 'Address'],
+                ['key' => 'gender', 'label' => 'Gender'],
+                ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
+            ];
+
+            $title = 'Patient Export - Geraye Home Care Services';
+            $documentTitle = 'Patient Records Export';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('patients.pdf');
         }
 
@@ -168,7 +197,35 @@ class PatientController extends Controller
     {
         // For single patient print, eager load relationships if you display who registered them
         $patient->load(['registeredByStaff', 'registeredByCaregiver']);
-        $pdf = Pdf::loadView('pdf.patient-single', ['patient' => $patient])->setPaper('a4', 'portrait');
+
+        $data = [
+            ['label' => 'Full Name', 'value' => $patient->full_name],
+            ['label' => 'Patient Code', 'value' => $patient->patient_code ?? '-'],
+            ['label' => 'Fayda ID', 'value' => $patient->fayda_id ?? '-'],
+            ['label' => 'Gender', 'value' => $patient->gender ?? '-'],
+            ['label' => 'Date of Birth', 'value' => $patient->date_of_birth ? \Carbon\Carbon::parse($patient->date_of_birth)->format('M d, Y') : '-'],
+            ['label' => 'Age', 'value' => $patient->age !== null ? $patient->age : '-'],
+            ['label' => 'Phone Number', 'value' => $patient->phone_number ?? '-'],
+            ['label' => 'Email', 'value' => $patient->email ?? '-'],
+            ['label' => 'Emergency Contact', 'value' => $patient->emergency_contact ?? '-'],
+            ['label' => 'Address', 'value' => $patient->address ?? '-'],
+            ['label' => 'Source', 'value' => $patient->source ?? '-'],
+            ['label' => 'Geolocation', 'value' => $patient->geolocation ?? '-'],
+            ['label' => 'Registered By', 'value' => $patient->registeredByStaff->full_name ?? '-'],
+            ['label' => 'Registered Date', 'value' => $patient->created_at ? \Carbon\Carbon::parse($patient->created_at)->format('M d, Y H:i') : '-'],
+            ['label' => 'Last Updated', 'value' => $patient->updated_at ? \Carbon\Carbon::parse($patient->updated_at)->format('M d, Y H:i') : '-'],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Patient Record - ' . $patient->full_name;
+        $documentTitle = 'Patient Record';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("patient-{$patient->patient_code}.pdf");
     }
     public function printCurrent(Request $request)
@@ -187,16 +244,73 @@ class PatientController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $patients = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $patients = $query->get();
 
-        return Inertia::render('Admin/Patients/PrintCurrent', ['patients' => $patients->items()]);
+        $data = $patients->map(function($p, $index) {
+            return [
+                'index' => $index + 1,
+                'full_name' => $p->full_name,
+                'patient_code' => $p->patient_code ?? '-',
+                'fayda_id' => $p->fayda_id ?? '-',
+                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : '-',
+                'gender' => $p->gender ?? '-',
+                'phone_number' => $p->phone_number,
+                'source' => $p->source ?? '-',
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'full_name', 'label' => 'Full Name'],
+            ['key' => 'patient_code', 'label' => 'Patient Code'],
+            ['key' => 'fayda_id', 'label' => 'Fayda ID'],
+            ['key' => 'age', 'label' => 'Age'],
+            ['key' => 'gender', 'label' => 'Gender'],
+            ['key' => 'phone_number', 'label' => 'Phone'],
+            ['key' => 'source', 'label' => 'Source'],
+        ];
+
+        $title = 'Patient List (Current View) - Geraye Home Care Services';
+        $documentTitle = 'Patient List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('patients-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $patients = Patient::orderBy('full_name')->get(); // Fetch all patients, ordered
 
-        $pdf = Pdf::loadView('pdf.patients', ['patients' => $patients])->setPaper('a4', 'landscape');
+        $data = $patients->map(function($p, $index) {
+            return [
+                'index' => $index + 1,
+                'full_name' => $p->full_name,
+                'patient_code' => $p->patient_code ?? '-',
+                'fayda_id' => $p->fayda_id ?? '-',
+                'age' => $p->date_of_birth ? \Carbon\Carbon::parse($p->date_of_birth)->age : '-',
+                'gender' => $p->gender ?? '-',
+                'phone_number' => $p->phone_number,
+                'source' => $p->source ?? '-',
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'full_name', 'label' => 'Full Name'],
+            ['key' => 'patient_code', 'label' => 'Patient Code'],
+            ['key' => 'fayda_id', 'label' => 'Fayda ID'],
+            ['key' => 'age', 'label' => 'Age'],
+            ['key' => 'gender', 'label' => 'Gender'],
+            ['key' => 'phone_number', 'label' => 'Phone'],
+            ['key' => 'source', 'label' => 'Source'],
+        ];
+
+        $title = 'Patient List - Geraye Home Care Services';
+        $documentTitle = 'Patient Records Export';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('patients.pdf');
     }
 }

@@ -132,13 +132,34 @@ class StaffController extends Controller
     }
 
     if ($type === 'pdf') {
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.staff', ['staff' => $staff])
-            ->setPaper('a4', 'landscape');
+        $data = $staff->map(function($s) {
+            return [
+                'full_name' => $s->first_name . ' ' . $s->last_name,
+                'email' => $s->email ?? '-',
+                'phone' => $s->phone ?? '-',
+                'position' => $s->position ?? '-',
+                'department' => $s->department ?? '-',
+                'status' => $s->status,
+                'hire_date' => \Carbon\Carbon::parse($s->hire_date)->format('Y-m-d'),
+            ];
+        })->toArray();
 
-        return $pdf->stream('staff.pdf', [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="staff.pdf"',
-        ]);
+        $columns = [
+            ['key' => 'full_name', 'label' => 'Full Name'],
+            ['key' => 'email', 'label' => 'Email'],
+            ['key' => 'phone', 'label' => 'Phone'],
+            ['key' => 'position', 'label' => 'Position'],
+            ['key' => 'department', 'label' => 'Department'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'hire_date', 'label' => 'Hire Date'],
+        ];
+
+        $title = 'Staff Export - Geraye Home Care Services';
+        $documentTitle = 'All Staff Records';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('staff.pdf');
     }
 
     return abort(400, 'Invalid export type');

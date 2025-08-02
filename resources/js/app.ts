@@ -11,6 +11,7 @@ import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 Alpine.start();
 import AppLayout from '@/layouts/AppLayout.vue'; // This import is correct for a script setup component
+import PrintableReport from '@/components/PrintableReport.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -22,6 +23,7 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .component('AppLayout', AppLayout)
+            .component('PrintableReport', PrintableReport)
             .mount(el);
     },
     progress: {

@@ -24,7 +24,7 @@ interface MarketingLead {
 // Define a type for pagination data
 interface MarketingLeadPagination {
   data: MarketingLead[];
-  links: any[]; // Adjust with a more specific type if available
+  links: any[];
   current_page: number;
   from: number;
   last_page: number;
@@ -86,17 +86,9 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.marketing-leads.export', { type }), '_blank');
-}
+import { useExport } from '@/Composables/useExport';
 
-function printCurrentView() {
-  window.print();
-}
-
-const printAllLeads = () => {
-    window.open(route('admin.marketing-leads.printAll'), '_blank');
-};
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.marketing-leads', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -105,6 +97,15 @@ function toggleSort(field: string) {
     sortField.value = field
     sortDirection.value = 'asc'
   }
+}
+
+function toggleStatus(id: number) {
+  router.put(route('admin.lead-sources.toggle-status', id), {}, {
+    preserveScroll: true,
+    onSuccess: () => {
+      router.reload({ only: ['leadSources'] });
+    },
+  });
 }
 </script>
 
@@ -238,134 +239,3 @@ function toggleSort(field: string) {
   </AppLayout>
 </template>
 
-<style>
-/* Print-specific styles for Index.vue (Print Current View) */
-@media print {
-  @page {
-    size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    padding-bottom: 2cm !important; /* Add padding for fixed footer */
-    overflow: visible !important;
-  }
-
-  /* Hide elements */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Specific styles for the print header content (logo and clinic name) */
-  .print-header-content {
-      display: block !important; /* Show header */
-      text-align: center;
-      padding-top: 0.5cm;
-      padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
-  }
-  .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-  }
-  .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
-      font-weight: bold;
-  }
-  .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
-  }
-  hr { border-color: #ccc !important; }
-
-  /* Main content container adjustments */
-  .space-y-6.p-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  /* Table specific print styles */
-  .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background-color: transparent !important; /* No background color */
-    overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
-    page-break-after: auto !important;
-  }
-
-  .print-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
-  }
-
-  .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    text-transform: uppercase !important;
-  }
-
-  .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
-    color: #000 !important;
-    vertical-align: top !important; /* Align content to top of cell */
-    word-break: break-word; /* Allow long words to break */
-  }
-
-  .print-table th {
-    font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
-    white-space: nowrap; /* Keep header text on one line if possible */
-  }
-
-  .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  /* Hide actions column for print */
-  .print-table th:last-child,
-  .print-table td:last-child {
-    display: none !important;
-  }
-
-  /* Hide sort arrows on print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Print Footer */
-  .print-footer {
-    display: block !important;
-    text-align: center;
-    position: relative; /* Changed from fixed */
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
-  }
-  .print-footer hr {
-    border-color: #ccc !important;
-  }
-}
-</style>

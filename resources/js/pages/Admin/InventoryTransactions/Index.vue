@@ -45,10 +45,9 @@ watch(filters, () => {
   router.get(route('admin.inventory-transactions.index'), { ...filters.value, per_page: perPage.value }, { preserveState: true, replace: true });
 }, { deep: true });
 
-const generatePdf = () => {
-  const url = route('admin.inventory-transactions.generatePdf', { ...filters.value });
-  window.open(url, '_blank');
-};
+import { useExport } from '@/Composables/useExport';
+
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-transactions', filters: props.filters });
 
 </script>
 

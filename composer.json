@@ -16,9 +16,10 @@
         "laravel/nightwatch": "^1.11",
         "laravel/tinker": "^2.10.1",
         "league/csv": "^9.24",
+        "maatwebsite/excel": "^3.1",
+        "spatie/browsershot": "^5.0",
         "spatie/laravel-permission": "^6.20",
-        "tightenco/ziggy": "^2.4",
-        "maatwebsite/excel": "^3.1"
+        "tightenco/ziggy": "^2.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

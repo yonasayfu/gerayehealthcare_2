@@ -144,16 +144,60 @@ class InventoryMaintenanceRecordController extends Controller
 
         $maintenanceRecords = $query->get();
 
-        return Inertia::render('Admin/InventoryMaintenanceRecords/PrintAll', [
-            'maintenanceRecords' => $maintenanceRecords,
-        ]);
+        $data = $maintenanceRecords->map(function($record, $index) {
+            return [
+                'index' => $index + 1,
+                'item_name' => $record->item->name ?? 'N/A',
+                'scheduled_date' => $record->scheduled_date,
+                'actual_date' => $record->actual_date,
+                'performed_by' => $record->performed_by,
+                'cost' => $record->cost,
+                'status' => $record->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'item_name', 'label' => 'Item'],
+            ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+            ['key' => 'actual_date', 'label' => 'Actual Date'],
+            ['key' => 'performed_by', 'label' => 'Performed By'],
+            ['key' => 'cost', 'label' => 'Cost'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Inventory Maintenance Records Report';
+        $documentTitle = 'Inventory Maintenance Records Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('inventory_maintenance_records.pdf');
     }
 
     public function printSingle(InventoryMaintenanceRecord $inventoryMaintenanceRecord)
     {
-        return Inertia::render('Admin/InventoryMaintenanceRecords/PrintSingle', [
-            'maintenanceRecord' => $inventoryMaintenanceRecord->load('item'),
-        ]);
+        $data = [
+            ['label' => 'Item', 'value' => $inventoryMaintenanceRecord->item->name ?? 'N/A'],
+            ['label' => 'Scheduled Date', 'value' => $inventoryMaintenanceRecord->scheduled_date],
+            ['label' => 'Actual Date', 'value' => $inventoryMaintenanceRecord->actual_date],
+            ['label' => 'Performed By', 'value' => $inventoryMaintenanceRecord->performed_by],
+            ['label' => 'Cost', 'value' => $inventoryMaintenanceRecord->cost],
+            ['label' => 'Description', 'value' => $inventoryMaintenanceRecord->description],
+            ['label' => 'Next Due Date', 'value' => $inventoryMaintenanceRecord->next_due_date],
+            ['label' => 'Status', 'value' => $inventoryMaintenanceRecord->status],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Inventory Maintenance Record Details';
+        $documentTitle = 'Inventory Maintenance Record Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
+        return $pdf->stream("inventory_maintenance_record_" . $inventoryMaintenanceRecord->id . ".pdf");
     }
 
     public function generatePdf(Request $request)
@@ -169,7 +213,33 @@ class InventoryMaintenanceRecordController extends Controller
 
         $maintenanceRecords = $query->get();
 
-        $pdf = Pdf::loadView('pdf.inventory-maintenance-records', ['maintenanceRecords' => $maintenanceRecords])->setPaper('a4', 'landscape');
+        $data = $maintenanceRecords->map(function($record, $index) {
+            return [
+                'index' => $index + 1,
+                'item_name' => $record->item->name ?? 'N/A',
+                'scheduled_date' => $record->scheduled_date,
+                'actual_date' => $record->actual_date,
+                'performed_by' => $record->performed_by,
+                'cost' => $record->cost,
+                'status' => $record->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'item_name', 'label' => 'Item'],
+            ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+            ['key' => 'actual_date', 'label' => 'Actual Date'],
+            ['key' => 'performed_by', 'label' => 'Performed By'],
+            ['key' => 'cost', 'label' => 'Cost'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Inventory Maintenance Records Report';
+        $documentTitle = 'Inventory Maintenance Records Report';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('inventory_maintenance_records.pdf');
     }
 }

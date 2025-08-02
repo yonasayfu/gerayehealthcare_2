@@ -92,31 +92,9 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.marketing-budgets.export', { type }), '_blank');
-}
+import { useExport } from '@/Composables/useExport';
 
-function printCurrentView() {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-    campaign_id: campaignId.value,
-    platform_id: platformId.value,
-    status: status.value,
-    period_start: periodStart.value,
-    period_end: periodEnd.value,
-  };
-
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-  window.open(route('admin.marketing-budgets.printCurrent', params), '_blank');
-}
-
-const printAllBudgets = () => {
-    window.open(route('admin.marketing-budgets.printAll'), '_blank');
-};
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -267,4 +245,3 @@ function toggleSort(field: string) {
     </div>
   </AppLayout>
 </template>
-

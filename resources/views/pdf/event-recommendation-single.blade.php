@@ -1,42 +1,24 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Event Recommendation Details</title>
-    <style>
-        body { font-family: 'DejaVu Sans', sans-serif; }
-        .container { width: 80%; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .detail-row { margin-bottom: 10px; }
-        .detail-label { font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Event Recommendation Details</h1>
-        </div>
-
-        <div class="detail-row">
-            <span class="detail-label">Event ID:</span> {{ $eventRecommendation->event_id }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Source:</span> {{ $eventRecommendation->source }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Recommended By:</span> {{ $eventRecommendation->recommended_by }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Patient Name:</span> {{ $eventRecommendation->patient_name }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Patient Phone:</span> {{ $eventRecommendation->patient_phone }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Notes:</span> {{ $eventRecommendation->notes }}
-        </div>
-        <div class="detail-row">
-            <span class="detail-label">Status:</span> {{ $eventRecommendation->status }}
-        </div>
-    </div>
-</body>
-</html>
+<x-printable-report
+    title="Event Recommendation Details"
+    :data="[
+        ['label' => 'Event ID', 'value' => $eventRecommendation->event_id],
+        ['label' => 'Source', 'value' => $eventRecommendation->source],
+        ['label' => 'Recommended By', 'value' => $eventRecommendation->recommended_by],
+        ['label' => 'Patient Name', 'value' => $eventRecommendation->patient_name],
+        ['label' => 'Patient Phone', 'value' => $eventRecommendation->patient_phone],
+        ['label' => 'Notes', 'value' => $eventRecommendation->notes],
+        ['label' => 'Status', 'value' => $eventRecommendation->status],
+    ]"
+    :columns="[
+        ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+        ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Event Recommendation Details',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

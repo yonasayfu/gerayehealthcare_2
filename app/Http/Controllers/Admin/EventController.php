@@ -122,7 +122,29 @@ class EventController extends Controller
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.events', ['events' => $events])->setPaper('a4', 'landscape');
+            $data = $events->map(function($event) {
+                return [
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'event_date' => $event->event_date,
+                    'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
+                    'broadcast_status' => $event->broadcast_status,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'title', 'label' => 'Title'],
+                ['key' => 'description', 'label' => 'Description'],
+                ['key' => 'event_date', 'label' => 'Event Date'],
+                ['key' => 'is_free_service', 'label' => 'Free Service'],
+                ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
+            ];
+
+            $title = 'Events List';
+            $documentTitle = 'Events List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('events.pdf');
         }
 
@@ -131,7 +153,24 @@ class EventController extends Controller
 
     public function printSingle(Event $event)
     {
-        $pdf = Pdf::loadView('pdf.event-single', ['event' => $event])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Title', 'value' => $event->title],
+            ['label' => 'Description', 'value' => $event->description],
+            ['label' => 'Event Date', 'value' => $event->event_date],
+            ['label' => 'Free Service', 'value' => $event->is_free_service ? 'Yes' : 'No'],
+            ['label' => 'Broadcast Status', 'value' => $event->broadcast_status],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Event Details';
+        $documentTitle = 'Event Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("event-{$event->id}.pdf");
     }
 
@@ -151,16 +190,61 @@ class EventController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $events = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $events = $query->get();
 
-        return Inertia::render('Admin/Events/PrintCurrent', ['events' => $events->items()]);
+        $data = $events->map(function($event) {
+            return [
+                'title' => $event->title,
+                'description' => $event->description,
+                'event_date' => $event->event_date,
+                'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
+                'broadcast_status' => $event->broadcast_status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'title', 'label' => 'Title'],
+            ['key' => 'description', 'label' => 'Description'],
+            ['key' => 'event_date', 'label' => 'Event Date'],
+            ['key' => 'is_free_service', 'label' => 'Free Service'],
+            ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
+        ];
+
+        $title = 'Events List (Current View)';
+        $documentTitle = 'Events List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('events-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $events = Event::orderBy('title')->get();
 
-        $pdf = Pdf::loadView('pdf.events', ['events' => $events])->setPaper('a4', 'landscape');
+        $data = $events->map(function($event) {
+            return [
+                'title' => $event->title,
+                'description' => $event->description,
+                'event_date' => $event->event_date,
+                'is_free_service' => $event->is_free_service ? 'Yes' : 'No',
+                'broadcast_status' => $event->broadcast_status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'title', 'label' => 'Title'],
+            ['key' => 'description', 'label' => 'Description'],
+            ['key' => 'event_date', 'label' => 'Event Date'],
+            ['key' => 'is_free_service', 'label' => 'Free Service'],
+            ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
+        ];
+
+        $title = 'Events List';
+        $documentTitle = 'Events List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('events.pdf');
     }
 }

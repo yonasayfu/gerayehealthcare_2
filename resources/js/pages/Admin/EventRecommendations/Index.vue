@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
-import AdminLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { useExport } from '@/Composables/useExport';
 
 const props = defineProps({
     recommendations: Object,
@@ -49,6 +50,8 @@ function destroy(id) {
     }
 }
 
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.event-recommendations', filters: props.filters });
+
 function toggleSort(field) {
     if (sortField.value === field) {
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -73,6 +76,18 @@ function toggleSort(field) {
                     <Link :href="route('admin.event-recommendations.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
                         + Add Recommendation
                     </Link>
+                    <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+                        <Download class="h-4 w-4" /> CSV
+                    </button>
+                    <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+                        <FileText class="h-4 w-4" /> PDF
+                    </button>
+                    <button @click="printAllRecords" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+                        <Printer class="h-4 w-4" /> Print All
+                    </button>
+                    <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+                        <Printer class="h-4 w-4" /> Print Current View
+                    </button>
                 </div>
             </div>
 
@@ -158,129 +173,3 @@ function toggleSort(field) {
         </div>
     </AdminLayout>
 </template>
-
-<style>
-/* Print-specific styles for Index.vue (Print Current View) */
-@media print {
-    @page {
-        size: A4 landscape;
-        margin: 0.5cm;
-    }
-
-    body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color: #000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-header-content {
-        display: block !important;
-        text-align: center;
-        padding-top: 0.5cm;
-        padding-bottom: 0.5cm;
-        margin-bottom: 0.8cm;
-    }
-    .print-logo {
-        max-width: 150px;
-        max-height: 50px;
-        margin-bottom: 0.5rem;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .print-clinic-name {
-        font-size: 1.6rem !important;
-        margin-bottom: 0.2rem !important;
-        line-height: 1.2 !important;
-        font-weight: bold;
-    }
-    .print-document-title {
-        font-size: 0.85rem !important;
-        color: #555 !important;
-    }
-    hr { border-color: #ccc !important; }
-
-    .space-y-6.p-6 {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        background-color: transparent !important;
-        overflow: visible !important;
-        padding: 1cm;
-        transform: scale(0.97);
-        transform-origin: top left;
-    }
-
-    .print-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        font-size: 0.8rem !important;
-        table-layout: fixed;
-    }
-
-    .print-table-header {
-        background-color: #f0f0f0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        text-transform: uppercase !important;
-    }
-
-    .print-table th, .print-table td {
-        border: 1px solid #ddd !important;
-        padding: 0.4rem 0.6rem !important;
-        color: #000 !important;
-        vertical-align: top !important;
-        word-break: break-word;
-    }
-
-    .print-table th {
-        font-weight: bold !important;
-        font-size: 0.7rem !important;
-        white-space: nowrap;
-    }
-
-    .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 30%; }
-    .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 25%; }
-    .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 20%; }
-
-    .print-table tbody tr:nth-child(even) {
-        background-color: #f9f9f9 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    .print-table tbody tr:last-child {
-        border-bottom: 1px solid #ddd !important;
-    }
-
-    .print-table th:last-child,
-    .print-table td:last-child {
-        display: none !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-footer {
-        display: block !important;
-        text-align: center;
-        margin-top: 1cm;
-        font-size: 0.75rem !important;
-        color: #666 !important;
-    }
-    .print-footer hr {
-        border-color: #ccc !important;
-    }
-}
-</style>

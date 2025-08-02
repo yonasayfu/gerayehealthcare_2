@@ -151,7 +151,35 @@ class MarketingBudgetController extends Controller
             return Excel::download(new MarketingBudgetsExport, 'marketing-budgets.csv');
         } elseif ($type === 'pdf') {
             $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
-            $pdf = Pdf::loadView('pdf.marketing-budgets', compact('marketingBudgets'));
+            $data = $marketingBudgets->map(function($budget) {
+                return [
+                    'budget_name' => $budget->budget_name,
+                    'campaign_name' => $budget->campaign->campaign_name ?? '-',
+                    'platform_name' => $budget->platform->name ?? '-',
+                    'allocated_amount' => $budget->allocated_amount,
+                    'spent_amount' => $budget->spent_amount,
+                    'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
+                    'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
+                    'status' => $budget->status,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'budget_name', 'label' => 'Budget Name'],
+                ['key' => 'campaign_name', 'label' => 'Campaign'],
+                ['key' => 'platform_name', 'label' => 'Platform'],
+                ['key' => 'allocated_amount', 'label' => 'Allocated'],
+                ['key' => 'spent_amount', 'label' => 'Spent'],
+                ['key' => 'period_start', 'label' => 'Start Date'],
+                ['key' => 'period_end', 'label' => 'End Date'],
+                ['key' => 'status', 'label' => 'Status'],
+            ];
+
+            $title = 'Marketing Budgets List';
+            $documentTitle = 'Marketing Budgets List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('marketing-budgets.pdf');
         }
         return redirect()->back()->with('error', 'Invalid export type.');
@@ -160,9 +188,36 @@ class MarketingBudgetController extends Controller
     public function printAll(Request $request)
     {
         $marketingBudgets = MarketingBudget::with(['campaign', 'platform'])->get();
-        return Inertia::render('Admin/MarketingBudgets/PrintAll', [
-            'marketingBudgets' => $marketingBudgets,
-        ]);
+        $data = $marketingBudgets->map(function($budget) {
+            return [
+                'budget_name' => $budget->budget_name,
+                'campaign_name' => $budget->campaign->campaign_name ?? '-',
+                'platform_name' => $budget->platform->name ?? '-',
+                'allocated_amount' => $budget->allocated_amount,
+                'spent_amount' => $budget->spent_amount,
+                'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
+                'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
+                'status' => $budget->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'budget_name', 'label' => 'Budget Name'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'platform_name', 'label' => 'Platform'],
+            ['key' => 'allocated_amount', 'label' => 'Allocated'],
+            ['key' => 'spent_amount', 'label' => 'Spent'],
+            ['key' => 'period_start', 'label' => 'Start Date'],
+            ['key' => 'period_end', 'label' => 'End Date'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Marketing Budgets List';
+        $documentTitle = 'Marketing Budgets List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-budgets.pdf');
     }
 
     public function printCurrent(Request $request)
@@ -194,8 +249,35 @@ class MarketingBudgetController extends Controller
 
         $marketingBudgets = $query->with(['campaign', 'platform'])->get();
 
-        return Inertia::render('Admin/MarketingBudgets/PrintCurrent', [
-            'marketingBudgets' => $marketingBudgets,
-        ]);
+        $data = $marketingBudgets->map(function($budget) {
+            return [
+                'budget_name' => $budget->budget_name,
+                'campaign_name' => $budget->campaign->campaign_name ?? '-',
+                'platform_name' => $budget->platform->name ?? '-',
+                'allocated_amount' => $budget->allocated_amount,
+                'spent_amount' => $budget->spent_amount,
+                'period_start' => \Carbon\Carbon::parse($budget->period_start)->format('M d, Y'),
+                'period_end' => $budget->period_end ? \Carbon\Carbon::parse($budget->period_end)->format('M d, Y') : '-',
+                'status' => $budget->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'budget_name', 'label' => 'Budget Name'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'platform_name', 'label' => 'Platform'],
+            ['key' => 'allocated_amount', 'label' => 'Allocated'],
+            ['key' => 'spent_amount', 'label' => 'Spent'],
+            ['key' => 'period_start', 'label' => 'Start Date'],
+            ['key' => 'period_end', 'label' => 'End Date'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Marketing Budgets List (Current View)';
+        $documentTitle = 'Marketing Budgets List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('marketing-budgets-current.pdf');
     }
 }

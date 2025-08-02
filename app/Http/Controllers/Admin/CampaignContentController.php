@@ -166,7 +166,31 @@ class CampaignContentController extends Controller
             return Excel::download(new CampaignContentsExport, 'campaign-contents.csv');
         } elseif ($type === 'pdf') {
             $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
-            $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'));
+            $data = $campaignContents->map(function($content) {
+                return [
+                    'title' => $content->title,
+                    'campaign_name' => $content->campaign->campaign_name ?? '-',
+                    'platform_name' => $content->platform->name ?? '-',
+                    'content_type' => $content->content_type,
+                    'status' => $content->status,
+                    'scheduled_post_date' => $content->scheduled_post_date ? $content->scheduled_post_date->format('Y-m-d H:i') : '-',
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'title', 'label' => 'Title'],
+                ['key' => 'campaign_name', 'label' => 'Campaign'],
+                ['key' => 'platform_name', 'label' => 'Platform'],
+                ['key' => 'content_type', 'label' => 'Type'],
+                ['key' => 'status', 'label' => 'Status'],
+                ['key' => 'scheduled_post_date', 'label' => 'Scheduled Post Date'],
+            ];
+
+            $title = 'Campaign Contents List';
+            $documentTitle = 'Campaign Contents List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->download('campaign-contents.pdf');
         }
         return redirect()->back()->with('error', 'Invalid export type.');
@@ -177,7 +201,31 @@ class CampaignContentController extends Controller
         $this->authorize('viewAny', CampaignContent::class);
 
         $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
-        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
+        $data = $campaignContents->map(function($content) {
+            return [
+                'title' => $content->title,
+                'campaign_name' => $content->campaign->campaign_name ?? '-',
+                'platform_name' => $content->platform->name ?? '-',
+                'content_type' => $content->content_type,
+                'status' => $content->status,
+                'scheduled_post_date' => $content->scheduled_post_date ? $content->scheduled_post_date->format('Y-m-d H:i') : '-',
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'title', 'label' => 'Title'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'platform_name', 'label' => 'Platform'],
+            ['key' => 'content_type', 'label' => 'Type'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'scheduled_post_date', 'label' => 'Scheduled Post Date'],
+        ];
+
+        $title = 'Campaign Contents List';
+        $documentTitle = 'Campaign Contents List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('campaign-contents.pdf');
     }
 
@@ -216,7 +264,31 @@ class CampaignContentController extends Controller
 
         $campaignContents = $query->with(['campaign', 'platform'])->get();
 
-        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
+        $data = $campaignContents->map(function($content) {
+            return [
+                'title' => $content->title,
+                'campaign_name' => $content->campaign->campaign_name ?? '-',
+                'platform_name' => $content->platform->name ?? '-',
+                'content_type' => $content->content_type,
+                'status' => $content->status,
+                'scheduled_post_date' => $content->scheduled_post_date ? $content->scheduled_post_date->format('Y-m-d H:i') : '-',
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'title', 'label' => 'Title'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'platform_name', 'label' => 'Platform'],
+            ['key' => 'content_type', 'label' => 'Type'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'scheduled_post_date', 'label' => 'Scheduled Post Date'],
+        ];
+
+        $title = 'Campaign Contents List (Current View)';
+        $documentTitle = 'Campaign Contents List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('campaign-contents-current.pdf');
     }
 }

@@ -1,54 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Employee Insurance Records List - Geraye Home Care Services</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; color: #333; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 20px; margin: 0; }
-        p { font-size: 14px; margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 8px 10px; border: 1px solid #999; text-align: left; }
-        th { background-color: #f3f3f3; }
-        .footer { text-align: right; margin-top: 30px; font-size: 11px; }
-    </style>
-</head>
-<body>
-    <header>
-        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
-        <h1>Geraye Home Care Services</h1>
-        <p>Employee Insurance Records List</p>
-    </header>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Kebele ID</th>
-                <th>Woreda</th>
-                <th>Region</th>
-                <th>Federal ID</th>
-                <th>Ministry Department</th>
-                <th>Employee ID Number</th>
-                <th>Verified</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($employeeInsuranceRecords as $record)
-            <tr>
-                <td>{{ $record->kebele_id }}</td>
-                <td>{{ $record->woreda }}</td>
-                <td>{{ $record->region }}</td>
-                <td>{{ $record->federal_id }}</td>
-                <td>{{ $record->ministry_department }}</td>
-                <td>{{ $record->employee_id_number }}</td>
-                <td>{{ $record->verified ? 'Yes' : 'No' }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="footer">
-        Generated on {{ now()->format('F j, Y, g:i a') }}
-    </div>
-</body>
-</html>
+<x-printable-report
+    title="Employee Insurance Records List - Geraye Home Care Services"
+    :data="$employeeInsuranceRecords->map(function($record) {
+        return [
+            'kebele_id' => $record->kebele_id,
+            'woreda' => $record->woreda,
+            'region' => $record->region,
+            'federal_id' => $record->federal_id,
+            'ministry_department' => $record->ministry_department,
+            'employee_id_number' => $record->employee_id_number,
+            'verified' => $record->verified ? 'Yes' : 'No',
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'kebele_id', 'label' => 'Kebele ID'],
+        ['key' => 'woreda', 'label' => 'Woreda'],
+        ['key' => 'region', 'label' => 'Region'],
+        ['key' => 'federal_id', 'label' => 'Federal ID'],
+        ['key' => 'ministry_department', 'label' => 'Ministry Department'],
+        ['key' => 'employee_id_number', 'label' => 'Employee ID Number'],
+        ['key' => 'verified', 'label' => 'Verified'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Employee Insurance Records List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

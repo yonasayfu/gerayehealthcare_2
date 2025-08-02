@@ -1,48 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Exchange Rates List - Geraye Home Care Services</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; color: #333; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { font-size: 20px; margin: 0; }
-        p { font-size: 14px; margin: 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 8px 10px; border: 1px solid #999; text-align: left; }
-        th { background-color: #f3f3f3; }
-        .footer { text-align: right; margin-top: 30px; font-size: 11px; }
-    </style>
-</head>
-<body>
-    <header>
-        <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
-        <h1>Geraye Home Care Services</h1>
-        <p>Exchange Rates List</p>
-    </header>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Currency Code</th>
-                <th>Rate to ETB</th>
-                <th>Source</th>
-                <th>Date Effective</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($exchangeRates as $rate)
-            <tr>
-                <td>{{ $rate->currency_code }}</td>
-                <td>{{ $rate->rate_to_etb }}</td>
-                <td>{{ $rate->source }}</td>
-                <td>{{ $rate->date_effective }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="footer">
-        Generated on {{ now()->format('F j, Y, g:i a') }}
-    </div>
-</body>
-</html>
+<x-printable-report
+    title="Exchange Rates List - Geraye Home Care Services"
+    :data="$exchangeRates->map(function($rate) {
+        return [
+            'currency_code' => $rate->currency_code,
+            'rate_to_etb' => $rate->rate_to_etb,
+            'source' => $rate->source,
+            'date_effective' => $rate->date_effective,
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'currency_code', 'label' => 'Currency Code'],
+        ['key' => 'rate_to_etb', 'label' => 'Rate to ETB'],
+        ['key' => 'source', 'label' => 'Source'],
+        ['key' => 'date_effective', 'label' => 'Date Effective'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Exchange Rates List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

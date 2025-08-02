@@ -132,7 +132,36 @@ class LandingPageController extends Controller
             return Excel::download(new LandingPagesExport($pages), 'landing-pages.csv');
         }
 
-        // PDF export logic can be added here if needed
+        } elseif ($type === 'pdf') {
+            $data = $pages->map(function($page, $index) {
+                return [
+                    'index' => $index + 1,
+                    'page_title' => $page->page_title,
+                    'page_url' => $page->page_url,
+                    'page_code' => $page->page_code,
+                    'campaign_name' => $page->campaign->campaign_name ?? '-',
+                    'is_active' => $page->is_active ? 'Yes' : 'No',
+                    'language' => $page->language,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'index', 'label' => '#'],
+                ['key' => 'page_title', 'label' => 'Page Title'],
+                ['key' => 'page_url', 'label' => 'Page URL'],
+                ['key' => 'page_code', 'label' => 'Page Code'],
+                ['key' => 'campaign_name', 'label' => 'Campaign'],
+                ['key' => 'is_active', 'label' => 'Active'],
+                ['key' => 'language', 'label' => 'Language'],
+            ];
+
+            $title = 'Landing Pages Export - Geraye Home Care Services';
+            $documentTitle = 'Landing Pages Export';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
+            return $pdf->download('landing-pages.pdf');
+        }
 
         return redirect()->back()->with('error', 'Invalid export type.');
     }
@@ -142,16 +171,69 @@ class LandingPageController extends Controller
         $query = $this->getFilteredQuery($request);
         $pages = $query->get();
 
-        $pdf = Pdf::loadView('pdf.landing-pages', ['pages' => $pages])->setPaper('a4', 'landscape');
+        $data = $pages->map(function($page, $index) {
+            return [
+                'index' => $index + 1,
+                'page_title' => $page->page_title,
+                'page_url' => $page->page_url,
+                'page_code' => $page->page_code,
+                'campaign_name' => $page->campaign->campaign_name ?? '-',
+                'is_active' => $page->is_active ? 'Yes' : 'No',
+                'language' => $page->language,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'page_title', 'label' => 'Page Title'],
+            ['key' => 'page_url', 'label' => 'Page URL'],
+            ['key' => 'page_code', 'label' => 'Page Code'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'is_active', 'label' => 'Active'],
+            ['key' => 'language', 'label' => 'Language'],
+        ];
+
+        $title = 'Landing Pages List';
+        $documentTitle = 'Landing Pages List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('landing-pages.pdf');
     }
 
     public function printCurrent(Request $request)
     {
         $query = $this->getFilteredQuery($request);
-        $pages = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $pages = $query->get();
 
-        return Inertia::render('Admin/LandingPages/PrintCurrent', ['pages' => $pages->items()]);
+        $data = $pages->map(function($page, $index) {
+            return [
+                'index' => $index + 1,
+                'page_title' => $page->page_title,
+                'page_url' => $page->page_url,
+                'page_code' => $page->page_code,
+                'campaign_name' => $page->campaign->campaign_name ?? '-',
+                'is_active' => $page->is_active ? 'Yes' : 'No',
+                'language' => $page->language,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'page_title', 'label' => 'Page Title'],
+            ['key' => 'page_url', 'label' => 'Page URL'],
+            ['key' => 'page_code', 'label' => 'Page Code'],
+            ['key' => 'campaign_name', 'label' => 'Campaign'],
+            ['key' => 'is_active', 'label' => 'Active'],
+            ['key' => 'language', 'label' => 'Language'],
+        ];
+
+        $title = 'Landing Pages List (Current View)';
+        $documentTitle = 'Landing Pages List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('landing-pages-current.pdf');
     }
 
     private function getFilteredQuery(Request $request)

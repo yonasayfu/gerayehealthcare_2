@@ -139,7 +139,25 @@ class EventStaffAssignmentController extends Controller
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.event-staff-assignments', ['assignments' => $assignments])->setPaper('a4', 'landscape');
+            $data = $assignments->map(function($assignment) {
+                return [
+                    'event_id' => $assignment->event_id,
+                    'staff_id' => $assignment->staff_id,
+                    'role' => $assignment->role,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'event_id', 'label' => 'Event ID'],
+                ['key' => 'staff_id', 'label' => 'Staff ID'],
+                ['key' => 'role', 'label' => 'Role'],
+            ];
+
+            $title = 'Event Staff Assignments List';
+            $documentTitle = 'Event Staff Assignments List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('event-staff-assignments.pdf');
         }
 
@@ -148,7 +166,22 @@ class EventStaffAssignmentController extends Controller
 
     public function printSingle(EventStaffAssignment $eventStaffAssignment)
     {
-        $pdf = Pdf::loadView('pdf.event-staff-assignment-single', ['assignment' => $eventStaffAssignment])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Event ID', 'value' => $eventStaffAssignment->event_id],
+            ['label' => 'Staff ID', 'value' => $eventStaffAssignment->staff_id],
+            ['label' => 'Role', 'value' => $eventStaffAssignment->role],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Event Staff Assignment Details';
+        $documentTitle = 'Event Staff Assignment Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("event-staff-assignment-{$eventStaffAssignment->id}.pdf");
     }
 
@@ -167,16 +200,53 @@ class EventStaffAssignmentController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $assignments = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $assignments = $query->get();
 
-        return Inertia::render('Admin/EventStaffAssignments/PrintCurrent', ['assignments' => $assignments->items()]);
+        $data = $assignments->map(function($assignment) {
+            return [
+                'event_id' => $assignment->event_id,
+                'staff_id' => $assignment->staff_id,
+                'role' => $assignment->role,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'staff_id', 'label' => 'Staff ID'],
+            ['key' => 'role', 'label' => 'Role'],
+        ];
+
+        $title = 'Event Staff Assignments List (Current View)';
+        $documentTitle = 'Event Staff Assignments List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('event-staff-assignments-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $assignments = EventStaffAssignment::orderBy('role')->get();
 
-        $pdf = Pdf::loadView('pdf.event-staff-assignments', ['assignments' => $assignments])->setPaper('a4', 'landscape');
+        $data = $assignments->map(function($assignment) {
+            return [
+                'event_id' => $assignment->event_id,
+                'staff_id' => $assignment->staff_id,
+                'role' => $assignment->role,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'staff_id', 'label' => 'Staff ID'],
+            ['key' => 'role', 'label' => 'Role'],
+        ];
+
+        $title = 'Event Staff Assignments List';
+        $documentTitle = 'Event Staff Assignments List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('event-staff-assignments.pdf');
     }
 }

@@ -128,10 +128,10 @@ class EligibilityCriteriaController extends Controller
     public function export(Request $request)
     {
         $type = $request->get('type');
-        $criteria = EligibilityCriteria::select('event_id', 'criteria_title', 'operator', 'value')->get();
+        $criteria = EligibilityCriteria::select('event_id', 'criteria_name', 'operator', 'value')->get();
 
         if ($type === 'csv') {
-            $csvData = "Event ID,Criteria Title,Operator,Value\n";            foreach ($criteria as $criterion) {                $csvData .= "\"{$criterion->event_id}\",\"{$criterion->criteria_title}\",\"{$criterion->operator}\",\"{$criterion->value}\"\n";
+            $csvData = "Event ID,Criteria Name,Operator,Value\n";            foreach ($criteria as $criterion) {                $csvData .= "{"$criterion->event_id"},{"$criterion->criteria_name"},{"$criterion->operator"},{"$criterion->value"}\n";
             }
 
             return Response::make($csvData, 200, [
@@ -141,8 +141,28 @@ class EligibilityCriteriaController extends Controller
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.eligibility-criteria', ['criteria' => $criteria])->setPaper('a4', 'landscape');
-            return $pdf->stream('eligibility-criteria.pdf');
+            $data = $criteria->map(function($criterion) {
+                return [
+                    'event_id' => $criterion->event_id,
+                    'criteria_name' => $criterion->criteria_name,
+                    'operator' => $criterion->operator,
+                    'value' => $criterion->value,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'event_id', 'label' => 'Event ID'],
+                ['key' => 'criteria_name', 'label' => 'Criteria Name'],
+                ['key' => 'operator', 'label' => 'Operator'],
+                ['key' => 'value', 'label' => 'Value'],
+            ];
+
+            $title = 'Eligibility Criteria List';
+            $documentTitle = 'Eligibility Criteria List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
+            return $pdf->download('eligibility-criteria.pdf');
         }
 
         return abort(400, 'Invalid export type');
@@ -150,7 +170,23 @@ class EligibilityCriteriaController extends Controller
 
     public function printSingle(EligibilityCriteria $eligibilityCriteria)
     {
-        $pdf = Pdf::loadView('pdf.eligibility-criteria-single', ['eligibilityCriteria' => $eligibilityCriteria])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Event ID', 'value' => $eligibilityCriteria->event_id],
+            ['label' => 'Criteria Name', 'value' => $eligibilityCriteria->criteria_name],
+            ['label' => 'Operator', 'value' => $eligibilityCriteria->operator],
+            ['label' => 'Value', 'value' => $eligibilityCriteria->value],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Eligibility Criteria Details';
+        $documentTitle = 'Eligibility Criteria Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("eligibility-criteria-{$eligibilityCriteria->id}.pdf");
     }
 
@@ -169,16 +205,57 @@ class EligibilityCriteriaController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $criteria = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $criteria = $query->get();
 
-        return Inertia::render('Admin/EligibilityCriteria/PrintCurrent', ['criteria' => $criteria->items()]);
+        $data = $criteria->map(function($criterion) {
+            return [
+                'event_id' => $criterion->event_id,
+                'criteria_name' => $criterion->criteria_name,
+                'operator' => $criterion->operator,
+                'value' => $criterion->value,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'criteria_name', 'label' => 'Criteria Name'],
+            ['key' => 'operator', 'label' => 'Operator'],
+            ['key' => 'value', 'label' => 'Value'],
+        ];
+
+        $title = 'Eligibility Criteria List (Current View)';
+        $documentTitle = 'Eligibility Criteria List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('eligibility-criteria-current.pdf');
     }
 
     public function printAll(Request $request)
     {
-        $criteria = EligibilityCriteria::orderBy('criteria_title')->get();
+        $criteria = EligibilityCriteria::orderBy('criteria_name')->get();
 
-        $pdf = Pdf::loadView('pdf.eligibility-criteria', ['criteria' => $criteria])->setPaper('a4', 'landscape');
+        $data = $criteria->map(function($criterion) {
+            return [
+                'event_id' => $criterion->event_id,
+                'criteria_name' => $criterion->criteria_name,
+                'operator' => $criterion->operator,
+                'value' => $criterion->value,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'criteria_name', 'label' => 'Criteria Name'],
+            ['key' => 'operator', 'label' => 'Operator'],
+            ['key' => 'value', 'label' => 'Value'],
+        ];
+
+        $title = 'Eligibility Criteria List';
+        $documentTitle = 'Eligibility Criteria List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('eligibility-criteria.pdf');
     }
 }

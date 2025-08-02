@@ -1,94 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Marketing Campaigns List - Geraye Home Care Services</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            font-size: 10px; /* Smaller font for more columns */
-            color: #333;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        h1 {
-            font-size: 20px;
-            margin: 0;
-        }
-        p {
-            font-size: 14px;
-            margin: 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            padding: 5px 7px; /* Smaller padding */
-            border: 1px solid #999;
-            text-align: left;
-            word-wrap: break-word; /* Allow text to wrap */
-        }
-        th {
-            background-color: #f3f3f3;
-        }
-        .footer {
-            text-align: right;
-            margin-top: 30px;
-            font-size: 11px;
-        }
-    </style>
-</head>
-<body>
-   <header style="text-align: center; margin-bottom: 30px;">
-    <img src="{{ public_path('images/geraye_logo.jpeg') }}" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px;">
-    <h1 style="margin: 0;">Geraye Home Care Services</h1>
-    <p style="margin: 0;">Marketing Campaigns List</p>
-</header>
-
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Campaign Name</th>
-                <th>Code</th>
-                <th>Platform</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Budget Allocated</th>
-                <th>Budget Spent</th>
-                <th>Assigned Staff</th>
-                <th>Created By</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($campaigns as $index => $campaign)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $campaign->campaign_name }}</td>
-                    <td>{{ $campaign->campaign_code ?? '-' }}</td>
-                    <td>{{ $campaign->platform->name ?? '-' }}</td>
-                    <td>{{ $campaign->campaign_type ?? '-' }}</td>
-                    <td>{{ $campaign->status ?? '-' }}</td>
-                    <td>{{ $campaign->start_date ?? '-' }}</td>
-                    <td>{{ $campaign->end_date ?? '-' }}</td>
-                    <td>{{ number_format($campaign->budget_allocated ?? 0, 2) }}</td>
-                    <td>{{ number_format($campaign->budget_spent ?? 0, 2) }}</td>
-                    <td>{{ $campaign->assignedStaff->full_name ?? '-' }}</td>
-                    <td>{{ $campaign->createdByStaff->full_name ?? '-' }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="footer">
-        Generated on {{ now()->format('F j, Y, g:i a') }}
-    </div>
-</body>
-</html>
+<x-printable-report
+    title="Marketing Campaigns List - Geraye Home Care Services"
+    :data="$campaigns->map(function($campaign, $index) {
+        return [
+            'index' => $index + 1,
+            'campaign_name' => $campaign->campaign_name,
+            'campaign_code' => $campaign->campaign_code ?? '-',
+            'platform_name' => $campaign->platform->name ?? '-',
+            'campaign_type' => $campaign->campaign_type ?? '-',
+            'status' => $campaign->status ?? '-',
+            'start_date' => $campaign->start_date ?? '-',
+            'end_date' => $campaign->end_date ?? '-',
+            'budget_allocated' => number_format($campaign->budget_allocated ?? 0, 2),
+            'budget_spent' => number_format($campaign->budget_spent ?? 0, 2),
+            'assigned_staff' => $campaign->assignedStaff->full_name ?? '-',
+            'created_by' => $campaign->createdByStaff->full_name ?? '-',
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'index', 'label' => '#'],
+        ['key' => 'campaign_name', 'label' => 'Campaign Name'],
+        ['key' => 'campaign_code', 'label' => 'Code'],
+        ['key' => 'platform_name', 'label' => 'Platform'],
+        ['key' => 'campaign_type', 'label' => 'Type'],
+        ['key' => 'status', 'label' => 'Status'],
+        ['key' => 'start_date', 'label' => 'Start Date'],
+        ['key' => 'end_date', 'label' => 'End Date'],
+        ['key' => 'budget_allocated', 'label' => 'Budget Allocated'],
+        ['key' => 'budget_spent', 'label' => 'Budget Spent'],
+        ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
+        ['key' => 'created_by', 'label' => 'Created By'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Marketing Campaigns List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>

@@ -141,7 +141,25 @@ class EventParticipantController extends Controller
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.event-participants', ['participants' => $participants])->setPaper('a4', 'landscape');
+            $data = $participants->map(function($participant) {
+                return [
+                    'event_id' => $participant->event_id,
+                    'patient_id' => $participant->patient_id,
+                    'status' => $participant->status,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'event_id', 'label' => 'Event ID'],
+                ['key' => 'patient_id', 'label' => 'Patient ID'],
+                ['key' => 'status', 'label' => 'Status'],
+            ];
+
+            $title = 'Event Participants List';
+            $documentTitle = 'Event Participants List';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('event-participants.pdf');
         }
 
@@ -150,7 +168,22 @@ class EventParticipantController extends Controller
 
     public function printSingle(EventParticipant $eventParticipant)
     {
-        $pdf = Pdf::loadView('pdf.event-participant-single', ['participant' => $eventParticipant])->setPaper('a4', 'portrait');
+        $data = [
+            ['label' => 'Event ID', 'value' => $eventParticipant->event_id],
+            ['label' => 'Patient ID', 'value' => $eventParticipant->patient_id],
+            ['label' => 'Status', 'value' => $eventParticipant->status],
+        ];
+
+        $columns = [
+            ['key' => 'label', 'label' => 'Field', 'printWidth' => '30%'],
+            ['key' => 'value', 'label' => 'Value', 'printWidth' => '70%'],
+        ];
+
+        $title = 'Event Participant Details';
+        $documentTitle = 'Event Participant Details';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'portrait');
         return $pdf->stream("event-participant-{$eventParticipant->id}.pdf");
     }
 
@@ -169,16 +202,53 @@ class EventParticipantController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $participants = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
+        $participants = $query->get();
 
-        return Inertia::render('Admin/EventParticipants/PrintCurrent', ['participants' => $participants->items()]);
+        $data = $participants->map(function($participant) {
+            return [
+                'event_id' => $participant->event_id,
+                'patient_id' => $participant->patient_id,
+                'status' => $participant->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'patient_id', 'label' => 'Patient ID'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Event Participants List (Current View)';
+        $documentTitle = 'Event Participants List (Current View)';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
+        return $pdf->stream('event-participants-current.pdf');
     }
 
     public function printAll(Request $request)
     {
         $participants = EventParticipant::orderBy('status')->get();
 
-        $pdf = Pdf::loadView('pdf.event-participants', ['participants' => $participants])->setPaper('a4', 'landscape');
+        $data = $participants->map(function($participant) {
+            return [
+                'event_id' => $participant->event_id,
+                'patient_id' => $participant->patient_id,
+                'status' => $participant->status,
+            ];
+        })->toArray();
+
+        $columns = [
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'patient_id', 'label' => 'Patient ID'],
+            ['key' => 'status', 'label' => 'Status'],
+        ];
+
+        $title = 'Event Participants List';
+        $documentTitle = 'Event Participants List';
+
+        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                    ->setPaper('a4', 'landscape');
         return $pdf->stream('event-participants.pdf');
     }
 }

@@ -56,16 +56,9 @@ const destroy = (id: number) => {
   }
 };
 
-const downloadCsv = () => {
-  window.open(route('admin.inventory-requests.export'), '_blank');
-};
+import { useExport } from '@/Composables/useExport';
 
-
-
-const printAllRequests = () => {
-  const url = route('admin.inventory-requests.generatePdf', { ...props.filters });
-  window.open(url, '_blank');
-};
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-requests', filters: props.filters });
 
 </script>
 
@@ -192,5 +185,3 @@ const printAllRequests = () => {
       
   </AppLayout>
 </template>
-
-

@@ -142,8 +142,29 @@ public function show(TaskDelegation $task_delegation)
         }
 
         if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.task_delegations', ['tasks' => $tasks])
-                ->setPaper('a4', 'landscape');
+            $data = $tasks->map(function($t) {
+                return [
+                    'title' => $t->title,
+                    'assigned_to' => $t->assignee->first_name . ' ' . $t->assignee->last_name,
+                    'due_date' => \Carbon\Carbon::parse($t->due_date)->format('Y-m-d'),
+                    'status' => $t->status,
+                    'notes' => $t->notes,
+                ];
+            })->toArray();
+
+            $columns = [
+                ['key' => 'title', 'label' => 'Title'],
+                ['key' => 'assigned_to', 'label' => 'Assigned To'],
+                ['key' => 'due_date', 'label' => 'Due Date'],
+                ['key' => 'status', 'label' => 'Status'],
+                ['key' => 'notes', 'label' => 'Notes'],
+            ];
+
+            $title = 'Task Delegations Export – Geraye Home Care Services';
+            $documentTitle = 'Task Delegations Export';
+
+            $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+                        ->setPaper('a4', 'landscape');
             return $pdf->stream('tasks.pdf');
         }
 

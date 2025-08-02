@@ -1,32 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Event Participants List</title>
-    <style>
-        body { font-family: 'DejaVu Sans', sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Event Participants List</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Event ID</th>
-                <th>Patient ID</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($participants as $participant)
-            <tr>
-                <td>{{ $participant->event_id }}</td>
-                <td>{{ $participant->patient_id }}</td>
-                <td>{{ $participant->status }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</body>
-</html>
+<x-printable-report
+    title="Event Participants List"
+    :data="$participants->map(function($participant) {
+        return [
+            'event_id' => $participant->event_id,
+            'patient_id' => $participant->patient_id,
+            'status' => $participant->status,
+        ];
+    })->toArray()"
+    :columns="[
+        ['key' => 'event_id', 'label' => 'Event ID'],
+        ['key' => 'patient_id', 'label' => 'Patient ID'],
+        ['key' => 'status', 'label' => 'Status'],
+    ]"
+    :header-info="[
+        'logoSrc' => public_path('images/geraye_logo.jpeg'),
+        'clinicName' => 'Geraye Home Care Services',
+        'documentTitle' => 'Event Participants List',
+    ]"
+    :footer-info="[
+        'generatedDate' => true,
+    ]"
+/>
