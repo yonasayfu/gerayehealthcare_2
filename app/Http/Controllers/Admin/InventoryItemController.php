@@ -96,6 +96,11 @@ class InventoryItemController extends Controller
         return $this->handlePrintAll($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
+    }
+
     public function printSingle(InventoryItem $inventoryItem)
     {
         return $this->handlePrintSingle($inventoryItem, AdditionalExportConfigs::getInventoryItemConfig());

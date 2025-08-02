@@ -98,6 +98,11 @@ class SupplierController extends Controller
         return $this->handlePrintAll($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
     }
 
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
+    }
+
     public function show(Supplier $supplier)
     {
         return Inertia::render('Admin/Suppliers/Show', [

@@ -46,6 +46,11 @@ class InventoryTransactionController extends Controller
         return $this->handlePrintAll($request, InventoryTransaction::class, AdditionalExportConfigs::getInventoryTransactionConfig());
     }
 
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, InventoryTransaction::class, AdditionalExportConfigs::getInventoryTransactionConfig());
+    }
+
     public function printSingle(InventoryTransaction $inventoryTransaction)
     {
         return $this->handlePrintSingle($inventoryTransaction, AdditionalExportConfigs::getInventoryTransactionConfig());

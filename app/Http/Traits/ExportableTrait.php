@@ -66,7 +66,21 @@ trait ExportableTrait
         $orientation = $pdfConfig['orientation'] ?? 'landscape';
         $filename = $pdfConfig['filename'] ?? 'export.pdf';
 
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+        // Use universal template with config-driven approach
+        $config = [
+            'title' => $title,
+            'columns' => $columns,
+            'header_info' => [
+                'logoSrc' => public_path('images/geraye_logo.jpeg'),
+                'clinicName' => 'Geraye Home Care Services',
+                'documentTitle' => $documentTitle,
+            ],
+            'footer_info' => [
+                'generatedDate' => true,
+            ],
+        ];
+
+        $pdf = Pdf::loadView('pdf.universal-report', compact('config', 'data'))
                     ->setPaper('a4', $orientation);
         
         return $pdf->stream($filename);
@@ -95,7 +109,20 @@ trait ExportableTrait
         $documentTitle = $config['document_title'] ?? $title;
         $filename = $config['filename'] ?? 'record.pdf';
 
-        $pdf = Pdf::loadView('print-layout', compact('title', 'data', 'columns', 'documentTitle'))
+        // Use universal single record template
+        $config = [
+            'title' => $title,
+            'header_info' => [
+                'logoSrc' => public_path('images/geraye_logo.jpeg'),
+                'clinicName' => 'Geraye Home Care Services',
+                'documentTitle' => $documentTitle,
+            ],
+            'footer_info' => [
+                'generatedDate' => true,
+            ],
+        ];
+
+        $pdf = Pdf::loadView('pdf.universal-single-record', compact('config', 'data'))
                     ->setPaper('a4', 'portrait');
         
         return $pdf->stream($filename);

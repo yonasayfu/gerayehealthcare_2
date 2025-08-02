@@ -134,6 +134,11 @@ class CaregiverAssignmentController extends Controller
         return $this->handlePrintAll($request, CaregiverAssignment::class, ExportConfig::getCaregiverAssignmentConfig());
     }
 
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, CaregiverAssignment::class, ExportConfig::getCaregiverAssignmentConfig());
+    }
+
     public function printSingle(CaregiverAssignment $assignment)
     {
         $assignment->load(['staff', 'patient']);

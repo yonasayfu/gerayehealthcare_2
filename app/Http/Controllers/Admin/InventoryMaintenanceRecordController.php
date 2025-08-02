@@ -112,6 +112,11 @@ class InventoryMaintenanceRecordController extends Controller
         return $this->handlePrintAll($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
     }
 
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
+    }
+
     public function printSingle(InventoryMaintenanceRecord $inventoryMaintenanceRecord)
     {
         return $this->handlePrintSingle($inventoryMaintenanceRecord, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
