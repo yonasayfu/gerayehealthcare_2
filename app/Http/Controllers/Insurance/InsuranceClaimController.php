@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\InsuranceClaimEmail;
 use Inertia\Inertia;
+use App\Http\Requests\StoreInsuranceClaimRequest;
+use App\Http\Requests\UpdateInsuranceClaimRequest;
+use App\Http\Requests\SendClaimEmailRequest;
 
 class InsuranceClaimController extends Controller
 {
@@ -55,28 +58,9 @@ class InsuranceClaimController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreInsuranceClaimRequest $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'insurance_company_id' => 'nullable|exists:insurance_companies,id',
-            'policy_id' => 'nullable|exists:insurance_policies,id',
-            'claim_status' => 'required|string|max:255',
-            'coverage_amount' => 'nullable|numeric',
-            'paid_amount' => 'nullable|numeric',
-            'submitted_at' => 'nullable|date',
-            'processed_at' => 'nullable|date',
-            'payment_due_date' => 'nullable|date',
-            'payment_received_at' => 'nullable|date',
-            'payment_method' => 'nullable|string|max:255',
-            'reimbursement_required' => 'required|boolean',
-            'receipt_number' => 'nullable|string|max:255',
-            'is_pre_authorized' => 'required|boolean',
-            'pre_authorization_code' => 'nullable|string|max:255',
-            'denial_reason' => 'nullable|string',
-            'translated_notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         InsuranceClaim::create($validated);
 
@@ -108,30 +92,11 @@ class InsuranceClaimController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateInsuranceClaimRequest $request, string $id)
     {
         $insuranceClaim = InsuranceClaim::findOrFail($id);
 
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'insurance_company_id' => 'nullable|exists:insurance_companies,id',
-            'policy_id' => 'nullable|exists:insurance_policies,id',
-            'claim_status' => 'required|string|max:255',
-            'coverage_amount' => 'nullable|numeric',
-            'paid_amount' => 'nullable|numeric',
-            'submitted_at' => 'nullable|date',
-            'processed_at' => 'nullable|date',
-            'payment_due_date' => 'nullable|date',
-            'payment_received_at' => 'nullable|date',
-            'payment_method' => 'nullable|string|max:255',
-            'reimbursement_required' => 'required|boolean',
-            'receipt_number' => 'nullable|string|max:255',
-            'is_pre_authorized' => 'required|boolean',
-            'pre_authorization_code' => 'nullable|string|max:255',
-            'denial_reason' => 'nullable|string',
-            'translated_notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $insuranceClaim->update($validated);
 
@@ -170,15 +135,11 @@ class InsuranceClaimController extends Controller
         return $this->handlePrintAll($request, InsuranceClaim::class, AdditionalExportConfigs::getInsuranceClaimConfig());
     }
 
-    public function sendClaimEmail(Request $request, string $id)
+    public function sendClaimEmail(SendClaimEmailRequest $request, string $id)
     {
         $insuranceClaim = InsuranceClaim::with(['invoice.patient', 'invoice.visitService'])->findOrFail($id);
 
-        $request->validate([
-            'recipient_email' => 'required|email',
-            'subject' => 'required|string',
-            'message' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         try {
             // Generate PDF

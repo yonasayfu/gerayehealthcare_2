@@ -2,52 +2,48 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Controllers\Base\BaseController;
+use App\Services\SupplierService;
 use App\Models\Supplier;
-use Illuminate\Http\Request;
+use App\Services\Validation\Rules\SupplierRules;
 use Inertia\Inertia;
-use League\Csv\Writer;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Validator;
-use Exception;
 
-class SupplierController extends Controller
+class SupplierController extends BaseController
 {
-    use ExportableTrait;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function __construct(SupplierService $supplierService)
     {
-        $query = Supplier::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('contact_person', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-        }
-
-        if ($request->filled('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $suppliers = $query->paginate($request->input('per_page', 5))->withQueryString();
-
-        return Inertia::render('Admin/Suppliers/Index', [
-            'suppliers' => $suppliers,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
-        ]);
+        parent::__construct(
+            $supplierService,
+            SupplierRules::class,
+            'Admin/Suppliers',
+            'suppliers',
+            Supplier::class
+        );
     }
 
-    public function export(Request $request)
+    public function show(Supplier $supplier)
     {
-        return $this->handleExport($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
+        return parent::show($supplier->id);
+    }
+
+    public function edit(Supplier $supplier)
+    {
+        return parent::edit($supplier->id);
+    }
+
+    public function update(Request $request, Supplier $supplier)
+    {
+        return parent::update($request, $supplier->id);
+    }
+
+    public function destroy(Supplier $supplier)
+    {
+        return parent::destroy($supplier->id);
+    }
+
+    public function printSingle(Supplier $supplier)
+    {
+        return parent::printSingle($supplier->id);
     }
 
     public function createImport()
@@ -57,120 +53,12 @@ class SupplierController extends Controller
 
     public function storeImport(Request $request)
     {
-        $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
-        ]);
-
-        $file = $request->file('csv_file');
-        $path = $file->getRealPath();
-        $records = array_map('str_getcsv', file($path));
-        $header = array_shift($records);
-
-        $rules = [
-            'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-        ];
-
-        $errors = [];
-        foreach ($records as $index => $row) {
-            $data = array_combine($header, $row);
-            $validator = Validator::make($data, $rules);
-
-            if ($validator->fails()) {
-                $errors["Row " . ($index + 2)] = $validator->errors()->all();
-            } else {
-                Supplier::create($data);
-            }
-        }
+        $errors = $this->service->import($request);
 
         if (count($errors) > 0) {
             return redirect()->back()->withErrors($errors);
         }
 
         return redirect()->route('admin.suppliers.index')->with('success', 'Suppliers imported successfully.');
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
-    }
-
-    public function show(Supplier $supplier)
-    {
-        return Inertia::render('Admin/Suppliers/Show', [
-            'supplier' => $supplier,
-        ]);
-    }
-
-    public function printSingle(Supplier $supplier)
-    {
-        return $this->handlePrintSingle($supplier, AdditionalExportConfigs::getSupplierConfig());
-    }
-
-    public function generateSinglePdf(Supplier $supplier)
-    {
-        return $this->handlePrintSingle($supplier, AdditionalExportConfigs::getSupplierConfig());
-    }
-
-    public function generatePdf(Request $request)
-    {
-        return $this->handlePrintCurrent($request, Supplier::class, AdditionalExportConfigs::getSupplierConfig());
-    }
-
-    public function create()
-    {
-        return Inertia::render('Admin/Suppliers/Create');
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-        ]);
-
-        Supplier::create($validated);
-
-        return redirect()->route('admin.suppliers.index')->with('success', 'Supplier created successfully.');
-    }
-
-    public function edit(Supplier $supplier)
-    {
-        return Inertia::render('Admin/Suppliers/Edit', [
-            'supplier' => $supplier,
-        ]);
-    }
-
-    public function update(Request $request, Supplier $supplier)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-        ]);
-
-        $supplier->update($validated);
-
-        return redirect()->route('admin.suppliers.index')->with('success', 'Supplier updated successfully.');
-    }
-
-    public function destroy(Supplier $supplier)
-    {
-        $supplier->delete();
-
-        return redirect()->route('admin.suppliers.index')->with('success', 'Supplier deleted successfully.');
     }
 }

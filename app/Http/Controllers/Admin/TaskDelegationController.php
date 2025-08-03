@@ -2,128 +2,60 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Controllers\Base\BaseController;
+use App\Services\TaskDelegationService;
 use App\Models\TaskDelegation;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Staff;
+use App\Services\Validation\Rules\TaskDelegationRules;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response as LaravelResponse;
 use Inertia\Inertia;
 
-class TaskDelegationController extends Controller
+class TaskDelegationController extends BaseController
 {
-    use ExportableTrait;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function __construct(TaskDelegationService $taskDelegationService)
     {
-        $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'due_date');
-        $sortOrder = $request->input('sort_order', 'asc');
-        $perPage = $request->input('per_page', 15);
-
-        $query = TaskDelegation::with('assignee');
-
-        if ($search) {
-            $query->where('title', 'like', "%{$search}%");
-        }
-
-        if (in_array($sortBy, ['title', 'due_date', 'status'])) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        $tasks = $query->paginate($perPage)
-            ->withQueryString();
-
-        return Inertia::render('Admin/TaskDelegations/Index', [
-            'taskDelegations' => $tasks,
-            'filters' => $request->only(['search', 'sort_by', 'sort_order', 'per_page']),
-        ]);
+        parent::__construct(
+            $taskDelegationService,
+            TaskDelegationRules::class,
+            'Admin/TaskDelegations',
+            'taskDelegations',
+            TaskDelegation::class
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return Inertia::render('Admin/TaskDelegations/Create', [
-            'staffList' => \App\Models\Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
+            'staffList' => Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show(TaskDelegation $task_delegation)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_to' => 'required|exists:staff,id',
-            'due_date' => 'required|date',
-            'status' => 'required|in:Pending,In Progress,Completed',
-            'notes' => 'nullable|string',
-        ]);
-
-        TaskDelegation::create($data);
-
-        return redirect()
-            ->route('admin.task-delegations.index', $request->only(['search', 'sort_by', 'sort_order', 'per_page']))
-            ->with('success', 'Task assigned successfully.');
+        return parent::show($task_delegation->id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(TaskDelegation $task_delegation)
     {
+        $data = $this->service->getById($task_delegation->id);
         return Inertia::render('Admin/TaskDelegations/Edit', [
-            'task' => $task_delegation,
-            'staffList' => \App\Models\Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
+            'task' => $data,
+            'staffList' => Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, TaskDelegation $task_delegation)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_to' => 'required|exists:staff,id',
-            'due_date' => 'required|date',
-            'status' => 'required|in:Pending,In Progress,Completed',
-            'notes' => 'nullable|string',
-        ]);
-
-        $task_delegation->update($data);
-
-        return redirect()
-            ->route('admin.task-delegations.index', $request->only(['search', 'sort_by', 'sort_order', 'per_page']))
-            ->with('success', 'Task updated successfully.');
+        return parent::update($request, $task_delegation->id);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(TaskDelegation $task_delegation)
     {
-        $task_delegation->delete();
-
-        return back()->with('success', 'Task deleted successfully.');
+        return parent::destroy($task_delegation->id);
     }
-public function show(TaskDelegation $task_delegation)
-{
-    return Inertia::render('Admin/TaskDelegations/Show', [
-        'task' => $task_delegation->load('assignee'),
-    ]);
-}
-    /**
-     * Export the listing to CSV or PDF.
-     */
+
     public function export(Request $request)
     {
-        return $this->handleExport($request, TaskDelegation::class, AdditionalExportConfigs::getTaskDelegationConfig());
+        return parent::export($request);
     }
 }

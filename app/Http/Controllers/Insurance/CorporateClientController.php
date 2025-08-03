@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Requests\StoreCorporateClientRequest;
+use App\Http\Requests\UpdateCorporateClientRequest;
 
 class CorporateClientController extends Controller
 {
@@ -53,18 +55,9 @@ class CorporateClientController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCorporateClientRequest $request)
     {
-        $validated = $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'organization_name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'tin_number' => 'nullable|string|max:50',
-            'trade_license_number' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         CorporateClient::create($validated);
 
@@ -96,20 +89,11 @@ class CorporateClientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCorporateClientRequest $request, string $id)
     {
         $corporateClient = CorporateClient::findOrFail($id);
 
-        $validated = $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'organization_name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'tin_number' => 'nullable|string|max:50',
-            'trade_license_number' => 'nullable|string|max:100',
-            'address' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $corporateClient->update($validated);
 

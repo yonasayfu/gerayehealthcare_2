@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Requests\StoreInsurancePolicyRequest;
+use App\Http\Requests\UpdateInsurancePolicyRequest;
 
 class InsurancePolicyController extends Controller
 {
@@ -53,18 +55,9 @@ class InsurancePolicyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreInsurancePolicyRequest $request)
     {
-        $validated = $request->validate([
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'corporate_client_id' => 'required|exists:corporate_clients,id',
-            'service_type' => 'nullable|string|max:255',
-            'service_type_amharic' => 'nullable|string|max:255',
-            'coverage_percentage' => 'required|numeric|min:0|max:100',
-            'coverage_type' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         InsurancePolicy::create($validated);
 
@@ -96,20 +89,11 @@ class InsurancePolicyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateInsurancePolicyRequest $request, string $id)
     {
         $insurancePolicy = InsurancePolicy::findOrFail($id);
 
-        $validated = $request->validate([
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'corporate_client_id' => 'required|exists:corporate_clients,id',
-            'service_type' => 'nullable|string|max:255',
-            'service_type_amharic' => 'nullable|string|max:255',
-            'coverage_percentage' => 'required|numeric|min:0|max:100',
-            'coverage_type' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $insurancePolicy->update($validated);
 

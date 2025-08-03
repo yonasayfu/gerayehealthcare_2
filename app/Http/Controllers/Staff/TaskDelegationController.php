@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TaskDelegation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Requests\StoreStaffTaskDelegationRequest;
+use App\Http\Requests\UpdateStaffTaskDelegationRequest;
 
 class TaskDelegationController extends Controller
 {
@@ -24,13 +26,9 @@ class TaskDelegationController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreStaffTaskDelegationRequest $request)
     {
-        $data = $request->validate([
-            'title'    => 'required|string|max:255',
-            'due_date' => 'required|date',
-            'notes'    => 'nullable|string',
-        ]);
+        $data = $request->validated();
 
         // assign to self
         $data['assigned_to'] = auth()->user()->staff->id;
@@ -43,11 +41,9 @@ class TaskDelegationController extends Controller
     }
 
     
-    public function update(Request $request, TaskDelegation $task_delegation)
+    public function update(UpdateStaffTaskDelegationRequest $request, TaskDelegation $task_delegation)
     {
-        $data = $request->validate([
-            'status' => 'required|in:Pending,In Progress,Completed',
-        ]);
+        $data = $request->validated();
 
         $task_delegation->update($data);
 

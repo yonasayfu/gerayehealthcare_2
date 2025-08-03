@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\InventoryMaintenanceRecord;
+use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
+
+class InventoryMaintenanceRecordService extends BaseService
+{
+    use ExportableTrait;
+
+    public function __construct(InventoryMaintenanceRecord $inventoryMaintenanceRecord)
+    {
+        parent::__construct($inventoryMaintenanceRecord);
+    }
+
+    protected function applySearch($query, $search)
+    {
+        return $query->where('performed_by', 'ilike', "%$search%")
+                  ->orWhere('description', 'ilike', "%$search%")
+                  ->orWhereHas('item', fn($q) => $q->where('name', 'ilike', "%$search%"));
+    }
+
+    public function getAll(Request $request)
+    {
+        $query = $this->model->with(['item']);
+
+        if ($request->has('search')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+
+        if ($request->has('sort')) {
+            $direction = $request->input('direction', 'asc');
+            $query->orderBy($request->input('sort'), $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        return $query->paginate($request->input('per_page', 10));
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
+    }
+
+    public function printSingle($id)
+    {
+        $inventoryMaintenanceRecord = $this->getById($id);
+        return $this->handlePrintSingle($inventoryMaintenanceRecord, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
+    }
+}

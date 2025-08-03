@@ -7,6 +7,7 @@ use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Http\Requests\StoreStaffLeaveRequest;
 
 class LeaveRequestController extends Controller
 {
@@ -27,13 +28,9 @@ class LeaveRequestController extends Controller
     /**
      * Store a newly created leave request in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStaffLeaveRequest $request)
     {
-        $validated = $request->validate([
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'reason' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         Auth::user()->staff->leaveRequests()->create($validated);
 

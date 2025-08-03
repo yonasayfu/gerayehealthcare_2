@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use App\Http\Requests\CheckInVisitRequest;
+use App\Http\Requests\CheckOutVisitRequest;
+use App\Http\Requests\StoreVisitReportRequest;
 
 class MyVisitController extends Controller
 {
@@ -36,16 +39,13 @@ class MyVisitController extends Controller
     /**
      * Handle the check-in process for a visit.
      */
-    public function checkIn(Request $request, VisitService $visit)
+    public function checkIn(CheckInVisitRequest $request, VisitService $visit)
     {
         if ($visit->staff_id !== Auth::user()->staff->id) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
 
         $visit->update([
             'check_in_time' => Carbon::now(),
@@ -60,16 +60,13 @@ class MyVisitController extends Controller
     /**
      * Handle the check-out process for a visit.
      */
-    public function checkOut(Request $request, VisitService $visit)
+    public function checkOut(CheckOutVisitRequest $request, VisitService $visit)
     {
         if ($visit->staff_id !== Auth::user()->staff->id) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
 
         $visit->update([
             'check_out_time' => Carbon::now(),
@@ -100,17 +97,14 @@ class MyVisitController extends Controller
     /**
      * Store the post-visit report.
      */
-    public function storeReport(Request $request, VisitService $visit)
+    public function storeReport(StoreVisitReportRequest $request, VisitService $visit)
     {
         // Security check
         if ($visit->staff_id !== Auth::user()->staff->id) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'visit_notes' => 'nullable|string|max:2000',
-        ]);
+        $validated = $request->validated();
 
         // Find the selected service to get its price
         $service = Service::find($validated['service_id']);

@@ -2,68 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
-use App\Http\Requests\StoreLandingPageRequest;
-use App\Http\Requests\UpdateLandingPageRequest;
+use App\Http\Controllers\Base\BaseController;
+use App\Services\LandingPageService;
 use App\Models\LandingPage;
+use App\Models\MarketingCampaign;
+use App\Services\Validation\Rules\LandingPageRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\LandingPagesExport;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Models\MarketingCampaign;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-class LandingPageController extends Controller
+class LandingPageController extends BaseController
 {
-    use ExportableTrait;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(LandingPageService $landingPageService)
     {
-        $query = LandingPage::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('page_title', 'ilike', "%{$search}%")
-                  ->orWhere('page_url', 'ilike', "%{$search}%")
-                  ->orWhere('page_code', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-        if ($request->filled('language')) {
-            $query->where('language', $request->input('language'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $landingPages = $query->with(['campaign'])
-                               ->paginate($request->input('per_page', 5))
-                               ->withQueryString();
-
-        return Inertia::render('Admin/LandingPages/Index', [
-            'landingPages' => $landingPages,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'is_active', 'language']),
-        ]);
+        parent::__construct(
+            $landingPageService,
+            LandingPageRules::class,
+            'Admin/LandingPages',
+            'landingPages',
+            LandingPage::class
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return Inertia::render('Admin/LandingPages/Create', [
@@ -71,76 +30,33 @@ class LandingPageController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreLandingPageRequest $request)
-    {
-        LandingPage::create($request->validated());
-
-        return redirect()->route('admin.landing-pages.index')->with('success', 'Landing Page created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(LandingPage $landingPage)
     {
-        $landingPage->load(['campaign']);
-
-        return Inertia::render('Admin/LandingPages/Show', [
-            'landingPage' => $landingPage,
-        ]);
+        return parent::show($landingPage->id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(LandingPage $landingPage)
     {
-        $landingPage->load(['campaign']);
-
+        $data = $this->service->getById($landingPage->id);
         return Inertia::render('Admin/LandingPages/Edit', [
-            'landingPage' => $landingPage,
+            'landingPage' => $data,
             'campaigns' => MarketingCampaign::all(['id', 'campaign_name']),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateLandingPageRequest $request, LandingPage $landingPage)
+    public function update(Request $request, LandingPage $landingPage)
     {
-        $landingPage->update($request->validated());
-
-        return redirect()->route('admin.landing-pages.index')->with('success', 'Landing Page updated successfully.');
+        return parent::update($request, $landingPage->id);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(LandingPage $landingPage)
     {
-        $landingPage->delete();
-
-        return back()->with('success', 'Landing Page deleted successfully.');
+        return parent::destroy($landingPage->id);
     }
 
     public function export(Request $request, $type)
     {
         $request->merge(['type' => $type]);
-        return $this->handleExport($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
+        return parent::export($request);
     }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
-    }
-
-
 }

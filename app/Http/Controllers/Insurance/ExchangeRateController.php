@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Requests\StoreExchangeRateRequest;
+use App\Http\Requests\UpdateExchangeRateRequest;
 
 class ExchangeRateController extends Controller
 {
@@ -53,14 +55,9 @@ class ExchangeRateController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreExchangeRateRequest $request)
     {
-        $validated = $request->validate([
-            'currency_code' => 'required|string|max:10',
-            'rate_to_etb' => 'required|numeric',
-            'source' => 'nullable|string|max:255',
-            'date_effective' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         ExchangeRate::create($validated);
 
@@ -92,16 +89,11 @@ class ExchangeRateController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateExchangeRateRequest $request, string $id)
     {
         $exchangeRate = ExchangeRate::findOrFail($id);
 
-        $validated = $request->validate([
-            'currency_code' => 'required|string|max:10',
-            'rate_to_etb' => 'required|numeric',
-            'source' => 'nullable|string|max:255',
-            'date_effective' => 'required|date',
-        ]);
+        $validated = $request->validated();
 
         $exchangeRate->update($validated);
 

@@ -8,6 +8,7 @@ use App\Notifications\NewMessageReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreMessageRequest;
 
 class MessageController extends Controller
 {
@@ -62,13 +63,9 @@ class MessageController extends Controller
     /**
      * Store a new message in the database.
      */
-    public function store(Request $request)
+    public function store(StoreMessageRequest $request)
     {
-        $validated = $request->validate([
-            'receiver_id' => 'required|exists:users,id',
-            'message' => 'nullable|string|max:1000',
-            'attachment' => 'nullable|file|max:10240|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xlsx,txt',
-        ]);
+        $validated = $request->validated();
 
         $messageContent = $validated['message'] ?? null;
         $attachmentPath = null;

@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Requests\StoreEmployeeInsuranceRecordRequest;
+use App\Http\Requests\UpdateEmployeeInsuranceRecordRequest;
 
 class EmployeeInsuranceRecordController extends Controller
 {
@@ -53,20 +55,9 @@ class EmployeeInsuranceRecordController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreEmployeeInsuranceRecordRequest $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'policy_id' => 'required|exists:insurance_policies,id',
-            'kebele_id' => 'nullable|string|max:255',
-            'woreda' => 'nullable|string|max:255',
-            'region' => 'nullable|string|max:255',
-            'federal_id' => 'nullable|string|max:255',
-            'ministry_department' => 'nullable|string|max:255',
-            'employee_id_number' => 'nullable|string|max:255',
-            'verified' => 'required|boolean',
-            'verified_at' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         EmployeeInsuranceRecord::create($validated);
 
@@ -98,22 +89,11 @@ class EmployeeInsuranceRecordController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateEmployeeInsuranceRecordRequest $request, string $id)
     {
         $employeeInsuranceRecord = EmployeeInsuranceRecord::findOrFail($id);
 
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'policy_id' => 'required|exists:insurance_policies,id',
-            'kebele_id' => 'nullable|string|max:255',
-            'woreda' => 'nullable|string|max:255',
-            'region' => 'nullable|string|max:255',
-            'federal_id' => 'nullable|string|max:255',
-            'ministry_department' => 'nullable|string|max:255',
-            'employee_id_number' => 'nullable|string|max:255',
-            'verified' => 'required|boolean',
-            'verified_at' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
         $employeeInsuranceRecord->update($validated);
 

@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
+use App\Http\Requests\StoreEthiopianCalendarDayRequest;
+use App\Http\Requests\UpdateEthiopianCalendarDayRequest;
 
 class EthiopianCalendarDayController extends Controller
 {
@@ -53,15 +55,9 @@ class EthiopianCalendarDayController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreEthiopianCalendarDayRequest $request)
     {
-        $validated = $request->validate([
-            'gregorian_date' => 'required|date',
-            'ethiopian_date' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'is_holiday' => 'required|boolean',
-            'region' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         EthiopianCalendarDay::create($validated);
 
@@ -93,17 +89,11 @@ class EthiopianCalendarDayController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateEthiopianCalendarDayRequest $request, string $id)
     {
         $ethiopianCalendarDay = EthiopianCalendarDay::findOrFail($id);
 
-        $validated = $request->validate([
-            'gregorian_date' => 'required|date',
-            'ethiopian_date' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'is_holiday' => 'required|boolean',
-            'region' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         $ethiopianCalendarDay->update($validated);
 

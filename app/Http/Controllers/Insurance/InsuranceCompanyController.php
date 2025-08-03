@@ -7,11 +7,12 @@ use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Response;
-use Inertia\Inertia;
+use App\Http\Requests\StoreInsuranceCompanyRequest;
+use App\Http\Requests\UpdateInsuranceCompanyRequest;
 
 class InsuranceCompanyController extends Controller
 {
@@ -54,17 +55,9 @@ class InsuranceCompanyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreInsuranceCompanyRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         InsuranceCompany::create($validated);
 
@@ -96,19 +89,11 @@ class InsuranceCompanyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateInsuranceCompanyRequest $request, string $id)
     {
         $insuranceCompany = InsuranceCompany::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $insuranceCompany->update($validated);
 

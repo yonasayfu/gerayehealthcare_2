@@ -8,6 +8,9 @@ use App\Models\VisitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\GetEventsRequest;
+use App\Http\Requests\StoreMyAvailabilityRequest;
+use App\Http\Requests\UpdateMyAvailabilityRequest;
 
 class MyAvailabilityController extends Controller
 {
@@ -21,12 +24,9 @@ class MyAvailabilityController extends Controller
         ]);
     }
 
-    public function getEvents(Request $request)
+    public function getEvents(GetEventsRequest $request)
     {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-        ]);
+        $validated = $request->validated();
 
         $staffId = Auth::user()->staff->id;
 
@@ -78,13 +78,9 @@ class MyAvailabilityController extends Controller
     /**
      * Store a new availability slot.
      */
-    public function store(Request $request)
+    public function store(StoreMyAvailabilityRequest $request)
     {
-        $validated = $request->validate([
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after_or_equal:start_time',
-            'status' => 'required|string|in:Available,Unavailable',
-        ]);
+        $validated = $request->validated();
 
         // Check for overlapping availability for the staff
         $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
@@ -104,17 +100,13 @@ class MyAvailabilityController extends Controller
     /**
      * Update an existing availability slot.
      */
-    public function update(Request $request, StaffAvailability $availability)
+    public function update(UpdateMyAvailabilityRequest $request, StaffAvailability $availability)
     {
         if ($availability->staff_id !== Auth::user()->staff->id) {
             abort(403);
         }
 
-        $validated = $request->validate([
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after_or_equal:start_time',
-            'status' => 'required|string|in:Available,Unavailable',
-        ]);
+        $validated = $request->validated();
 
         // Check for overlapping availability for the staff
         $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)

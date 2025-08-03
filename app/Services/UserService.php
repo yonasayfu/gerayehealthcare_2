@@ -1,0 +1,67 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+
+class UserService extends BaseService
+{
+    public function __construct(User $user)
+    {
+        parent::__construct($user);
+    }
+
+    protected function applySearch($query, $search)
+    {
+        $query->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+    }
+
+    public function create(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            $user = parent::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+            ]);
+
+            $user->staff()->create([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'] ?? null,
+                'position' => $data['position'] ?? null,
+                'department' => $data['department'] ?? null,
+                'hire_date' => $data['hire_date'] ?? null,
+            ]);
+
+            $user->assignRole('Staff');
+
+            return $user;
+        });
+    }
+
+    public function update(int $id, array $data): User
+    {
+        $user = $this->getById($id);
+        $user->syncRoles([$data['role']]);
+        return $user;
+    }
+
+    public function delete(int $id): void
+    {
+        $user = $this->getById($id);
+
+        if ($user->hasRole('Super Admin') && $user->id === auth()->id()) {
+            // In a real application, you might want to throw an exception here
+            // and handle it in the controller to show an error message.
+            return;
+        }
+
+        parent::delete($id);
+    }
+}

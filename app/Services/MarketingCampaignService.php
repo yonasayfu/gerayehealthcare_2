@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\MarketingCampaign;
+use App\Models\Staff;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
+
+class MarketingCampaignService extends BaseService
+{
+    use ExportableTrait;
+
+    public function __construct(MarketingCampaign $marketingCampaign)
+    {
+        parent::__construct($marketingCampaign);
+    }
+
+    protected function applySearch($query, $search)
+    {
+        $query->where('campaign_name', 'ilike', "%{$search}%")
+              ->orWhere('campaign_code', 'ilike', "%{$search}%")
+              ->orWhere('utm_campaign', 'ilike', "%{$search}%");
+    }
+
+    public function getAll(Request $request)
+    {
+        $query = $this->model->with(['platform', 'assignedStaff', 'createdByStaff']);
+
+        if ($request->has('search')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+
+        if ($request->filled('platform_id')) {
+            $query->where('platform_id', $request->input('platform_id'));
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+        if ($request->filled('campaign_type')) {
+            $query->where('campaign_type', $request->input('campaign_type'));
+        }
+        if ($request->filled('start_date')) {
+            $query->where('start_date', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->where('end_date', '<=', $request->input('end_date'));
+        }
+
+        if ($request->has('sort')) {
+            $direction = $request->input('direction', 'asc');
+            $query->orderBy($request->input('sort'), $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        return $query->paginate($request->input('per_page', 10));
+    }
+
+    public function create(array $data): MarketingCampaign
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $staffMember = Staff::where('user_id', $user->id)->first();
+
+            if ($staffMember) {
+                $data['created_by_staff_id'] = $staffMember->id;
+            }
+        }
+
+        return parent::create($data);
+    }
+
+    public function getById(int $id): MarketingCampaign
+    {
+        return $this->model->with(['platform', 'assignedStaff', 'createdByStaff'])->findOrFail($id);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
+    }
+
+    public function printSingle($id)
+    {
+        $marketingCampaign = $this->getById($id);
+        return $this->handlePrintSingle($marketingCampaign, AdditionalExportConfigs::getMarketingCampaignConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
+    }
+}

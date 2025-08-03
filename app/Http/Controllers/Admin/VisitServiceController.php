@@ -2,46 +2,29 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Controllers\Base\BaseController;
+use App\Services\VisitServiceService;
+use App\Models\VisitService;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\VisitService;
-use App\Rules\StaffIsAvailableForVisit;
-use App\Models\CaregiverAssignment;
-use App\Models\EventStaffAssignment;
+use App\Services\Validation\Rules\VisitServiceRules;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Carbon; // Make sure Carbon is imported
 use Inertia\Inertia;
-use Inertia\Response;
 
-class VisitServiceController extends Controller
+class VisitServiceController extends BaseController
 {
-    use ExportableTrait;
-    // ... index, create, show, edit, destroy methods remain the same ...
-    public function index(Request $request): Response
+    public function __construct(VisitServiceService $visitServiceService)
     {
-        $query = VisitService::with(['patient', 'staff']);
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('patient', fn($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
-                    ->orWhereHas('staff', fn($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
-            });
-        }
-
-        $query->orderBy($request->input('sort_by', 'scheduled_at'), $request->input('sort_direction', 'desc'));
-
-        return Inertia::render('Admin/VisitServices/Index', [
-            'visitServices' => $query->paginate($request->input('per_page', 5))->withQueryString(),
-            'filters' => $request->only(['search', 'sort_by', 'sort_direction', 'per_page']),
-        ]);
+        parent::__construct(
+            $visitServiceService,
+            VisitServiceRules::class,
+            'Admin/VisitServices',
+            'visitServices',
+            VisitService::class
+        );
     }
 
-    public function create(): Response
+    public function create()
     {
         return Inertia::render('Admin/VisitServices/Create', [
             'patients' => Patient::orderBy('full_name')->get(['id', 'full_name']),
@@ -49,80 +32,25 @@ class VisitServiceController extends Controller
         ]);
     }
 
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-            'scheduled_at' => 'required|date',
-            'status' => 'required|string|max:255',
-            'visit_notes' => 'nullable|string',
-            'service_description' => 'nullable|string|max:500',
-            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
+        try {
+            return parent::store($request);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-
-        $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
-                                           ->where('staff_id', $validated['staff_id'])
-                                           ->where('status', 'Assigned')
-                                           ->latest('id')
-                                           ->first();
-        
-        $validated['assignment_id'] = $assignment?->id;
-
-        $staff = Staff::find($validated['staff_id']);
-        $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
-
-        if ($request->hasFile('prescription_file')) {
-            $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-        }
-        if ($request->hasFile('vitals_file')) {
-            $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
-        }
-
-        VisitService::create($validated);
-
-        // Log staff contribution to event_staff_assignments if event_id is present
-        if (isset($validated['event_id'])) {
-            EventStaffAssignment::firstOrCreate(
-                [
-                    'event_id' => $validated['event_id'],
-                    'staff_id' => $validated['staff_id'],
-                ],
-                ['role' => 'Attended'] // Default role for staff attending an event
-            );
-        }
-        
-        return redirect()->route('admin.visit-services.index')->with('success', 'Visit scheduled successfully.');
     }
 
-    public function show(VisitService $visitService): Response
+    public function show(VisitService $visitService)
     {
-        return Inertia::render('Admin/VisitServices/Show', [
-            'visitService' => $visitService->load(['patient', 'staff']),
-        ]);
+        return parent::show($visitService->id);
     }
 
-    public function edit(VisitService $visitService): Response
+    public function edit(VisitService $visitService)
     {
+        $data = $this->service->getById($visitService->id);
         return Inertia::render('Admin/VisitServices/Edit', [
-            'visitService' => $visitService->load(['patient', 'staff']),
+            'visitService' => $data,
             'patients' => Patient::orderBy('full_name')->get(['id', 'full_name']),
             'staff' => Staff::where('status', 'Active')->orderBy('first_name')->get(['id', 'first_name', 'last_name']),
         ]);
@@ -130,90 +58,20 @@ class VisitServiceController extends Controller
 
     public function update(Request $request, VisitService $visitService)
     {
-        $request->merge(['visit_id' => $visitService->id]);
-
-        $validated = $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-            'scheduled_at' => 'required|date',
-            'status' => 'required|string|max:255',
-            'visit_notes' => 'nullable|string',
-            'service_description' => 'nullable|string|max:500',
-            'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-        
-        // Check for overlapping visits (additional validation beyond the rule)
-        $scheduledAt = Carbon::parse($validated['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $validated['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled')
-            ->where('id', '!=', $visitService->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: This staff member is already scheduled for another visit at this time.'])->withInput();
+        try {
+            return parent::update($request, $visitService->id);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
-
-        $assignment = CaregiverAssignment::where('patient_id', $validated['patient_id'])
-                                           ->where('staff_id', $validated['staff_id'])
-                                           ->where('status', 'Assigned')
-                                           ->latest('id')
-                                           ->first();
-        $validated['assignment_id'] = $assignment?->id;
-
-        $staff = Staff::find($validated['staff_id']);
-        $validated['cost'] = ($staff->hourly_rate ?? 0) * 1;
-
-        if ($request->hasFile('prescription_file')) {
-            if ($visitService->prescription_file) {
-                Storage::disk('public')->delete($visitService->prescription_file);
-            }
-            $validated['prescription_file'] = $request->file('prescription_file')->store('visits/prescriptions', 'public');
-        } else {
-            unset($validated['prescription_file']);
-        }
-
-        if ($request->hasFile('vitals_file')) {
-            if ($visitService->vitals_file) {
-                Storage::disk('public')->delete($visitService->vitals_file);
-            }
-            $validated['vitals_file'] = $request->file('vitals_file')->store('visits/vitals', 'public');
-        } else {
-            unset($validated['vitals_file']);
-        }
-
-        $visitService->update($validated);
-        return redirect()->route('admin.visit-services.index')->with('success', 'Visit updated successfully.');
     }
 
     public function destroy(VisitService $visitService)
     {
-        if ($visitService->prescription_file) {
-            Storage::disk('public')->delete($visitService->prescription_file);
-        }
-        if ($visitService->vitals_file) {
-            Storage::disk('public')->delete($visitService->vitals_file);
-        }
-        $visitService->delete();
-        return redirect()->back()->with('success', 'Visit cancelled successfully.');
+        return parent::destroy($visitService->id);
     }
 
     public function export(Request $request)
     {
-        return $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+        return parent::export($request);
     }
 }

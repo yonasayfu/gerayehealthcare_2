@@ -2,133 +2,59 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Base\BaseController;
+use App\Services\EventService;
 use App\Models\Event;
-use Illuminate\Http\Request;
+use App\Services\Validation\Rules\EventRules;
+use App\Enums\RoleEnum;
 use Inertia\Inertia;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Response;
-use App\Http\Controllers\Controller;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
+use Illuminate\Http\Request;
 
-class EventController extends Controller
+class EventController extends BaseController
 {
-    use ExportableTrait;
-    public function __construct()
+    public function __construct(EventService $eventService)
     {
-        $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
-    }
-    public function index(Request $request)
-    {
-        $query = Event::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-
-            $sortableFields = ['title', 'event_date', 'broadcast_status', 'created_at'];
-            if (in_array($sortField, $sortableFields)) {
-                $query->orderBy($sortField, $sortDirection);
-            } else {
-                $query->orderBy('created_at', 'desc');
-            }
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $events = $query->paginate($request->input('per_page', 5))->withQueryString();
-
-        return Inertia::render('Admin/Events/Index', [
-            'events' => $events,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
-        ]);
+        parent::__construct(
+            $eventService,
+            EventRules::class,
+            'Admin/Events',
+            'events',
+            Event::class
+        );
+        $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
     public function create()
     {
         // Not implemented for now
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'event_date' => 'required|date',
-            'is_free_service' => 'boolean',
-            'broadcast_status' => 'required|string|in:Draft,Published,Archived',
-        ]);
-
-        Event::create($validated);
-
-        return redirect()->route('admin.events.index')
-            ->with('success', 'Event created successfully.');
+        return Inertia::render('Admin/Events/Create');
     }
 
     public function show(Event $event)
     {
-        return Inertia::render('Admin/Events/Show', [
-            'event' => $event,
-        ]);
+        return parent::show($event->id);
     }
 
     public function edit(Event $event)
     {
         // Not implemented for now
+        return Inertia::render('Admin/Events/Edit', [
+            'event' => $event,
+        ]);
     }
 
     public function update(Request $request, Event $event)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'event_date' => 'required|date',
-            'is_free_service' => 'boolean',
-            'broadcast_status' => 'required|string|in:Draft,Published,Archived',
-        ]);
-
-        $event->update($validated);
-
-        return redirect()->route('admin.events.index')
-            ->with('success', 'Event updated successfully.');
+        return parent::update($request, $event->id);
     }
 
     public function destroy(Event $event)
     {
-        $event->delete();
-
-        return redirect()->route('admin.events.index')
-            ->with('success', 'Event deleted successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, Event::class, ExportConfig::getEventConfig());
+        return parent::destroy($event->id);
     }
 
     public function printSingle(Event $event)
     {
-        $config = ExportConfig::getEventConfig()['single_record'];
-        $config['title'] = 'Event Details - ' . $event->title;
-        $config['document_title'] = 'Event Details';
-        $config['filename'] = "event-{$event->id}.pdf";
-        
-        return $this->generateSingleRecordPdf($event, $config);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, Event::class, ExportConfig::getEventConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, Event::class, ExportConfig::getEventConfig());
+        return parent::printSingle($event->id);
     }
 }
