@@ -10,6 +10,13 @@ use App\Http\Requests\UpdateStaffTaskDelegationRequest;
 
 class TaskDelegationController extends Controller
 {
+    protected $taskDelegationService;
+
+    public function __construct(TaskDelegationService $taskDelegationService)
+    {
+        $this->taskDelegationService = $taskDelegationService;
+    }
+
     public function index(Request $request)
     {
         $staffId = auth()->user()->staff->id;
@@ -28,26 +35,21 @@ class TaskDelegationController extends Controller
 
     public function store(StoreStaffTaskDelegationRequest $request)
     {
-        $data = $request->validated();
+        $validated = $request->validated();
+        $dto = new CreateTaskDelegationDTO(
+            title: $validated['title'],
+            assigned_to: auth()->user()->staff->id,
+            due_date: $validated['due_date'],
+            status: 'Pending',
+            notes: $validated['notes'] ?? null
+        );
 
-        // assign to self
-        $data['assigned_to'] = auth()->user()->staff->id;
-        $data['status']      = 'Pending';
-
-        TaskDelegation::create($data);
+        $this->taskDelegationService->create($dto);
 
         return redirect()->route('staff.task-delegations.index')
                          ->with('success','Task created.');
     }
 
     
-    public function update(UpdateStaffTaskDelegationRequest $request, TaskDelegation $task_delegation)
-    {
-        $data = $request->validated();
-
-        $task_delegation->update($data);
-
-        // Use Inertia::location to force a fresh re-fetch of the index props
-        return Inertia::location(route('staff.task-delegations.index'));
-    }
+   
 }

@@ -1,172 +1,131 @@
-# Standard Module Implementation Template
+# Clean Architecture Module Implementation Guide
 
-This document provides the reusable checklist, file structure, and code templates for creating new CRUD modules.
+This document provides the standard workflow for creating new CRUD modules that align with the project's Clean Architecture principles.
 
-### Instructions:
+### Placeholders:
+- `[ModuleName]` -> `VisitService` (PascalCase, for class names)
+- `[moduleName]` -> `visitService` (camelCase, for variables)
+- `[module_name_plural]` -> `visit_services` (snake_case, for table names)
+- `[module-name-plural]` -> `visit-services` (kebab-case, for routes/URLs)
+- `[ModuleTitle]` -> `Visit Service` (Title Case, for UI text)
 
-1. Choose a name for your new module (e.g., "Visit Service").
-2. Replace the placeholders throughout the templates:
-    - `[ModuleName]` -> `VisitService` (PascalCase, for class names)
-    - `[moduleName]` -> `visitService` (camelCase, for variables)
-    - `[module_name_plural]` -> `visit_services` (snake_case, for table names)
-    - `[module-name-plural]` -> `visit-services` (kebab-case, for routes/URLs)
-    - `[ModuleTitle]` -> `Visit Service` (Title Case, for UI text)
+---
 
-### 1. Development Checklist
+### Development Workflow
 
-| Step | Task | Status | Notes |
-| --- | --- | --- | --- |
-| **1. Database** | Create migration for `[module_name_plural]`. | ☐ | Ensure all necessary columns and relationships are defined. |
-|  | Define `fillable` fields in the `[ModuleName]` model. | ☐ | |
-|  | Create a `[ModuleName]Factory` for seeding test data. | ☐ | |
-|  | Update `DatabaseSeeder` to call the new seeder. | ☐ | |
-| **2. Backend** | Create `[ModuleName]Controller` with full CRUD methods. | ☐ | |
-|  | Implement search, sort, and pagination in the `index` method. | ☐ | |
-|  | Add `export` method for CSV/PDF. | ☐ | |
-|  | Add resource and export routes to `routes/web.php`. | ☐ | Ensure routes are correctly named and protected with appropriate middleware. |
-| **3. Frontend** | Create directory: `resources/js/pages/Admin/[ModuleName]s`. | ☐ | |
-|  | Create a reusable `Form.vue` component. | ☐ | |
-|  | Develop `Index.vue` with table, search, sort, pagination, and actions. | ☐ | |
-|  | Develop `Create.vue` to add new records. | ☐ | When handling dates/times, ensure conversion to UTC ISO strings before sending to backend to avoid timezone issues. |
-|  | Develop `Edit.vue` to modify existing records. | ☐ | When handling dates/times, ensure conversion to UTC ISO strings before sending to backend to avoid timezone issues. |
-|  | Develop `Show.vue` for a read-only detail view. | ☐ | |
-| **4. Navigation** | Add `[ModuleTitle]` to the sidebar in `AppSidebar.vue`. | ☐ | Ensure correct route name and permission are applied. |
-| **5. PDF View** | Create `resources/views/pdf/[module_name_plural].blade.php`. | ☐ | |
-| **6. Final Review** | Ensure all styling and UX are consistent. | ☐ | |
-| **7. Git** | Commit changes to a dedicated feature branch. | ☐ | |
+#### Step 1: Scaffold Core Components
+This single command creates the Model, Migration, Factory, Seeder, and a resource Controller.
 
-### 2. File Structure
-
-```
-/app
-└── /Http
-    └── /Controllers
-        └── /Admin
-            └── [ModuleName]Controller.php
-└── /Models
-    └── [ModuleName].php
-/database
-└── /factories
-    └── [ModuleName]Factory.php
-└── /migrations
-    └── ..._create_[module_name_plural]_table.php
-└── /seeders
-    └── [ModuleName]Seeder.php
-    └── DatabaseSeeder.php (updated)
-/resources
-└── /js
-    └── /pages
-        └── /Admin
-            └── /[ModuleName]s
-                ├── Index.vue
-                ├── Create.vue
-                ├── Edit.vue
-                ├── Show.vue
-                └── Form.vue
-└── /views
-    └── /pdf
-        └── [module_name_plural].blade.php
-/routes
-└── web.php (updated)
-
+```bash
+php artisan make:model [ModuleName] -mfsc
 ```
 
-### 3. Code Templates
+#### Step 2: Scaffold Application & Presentation Layers
+This step requires creating the necessary service and validation rule files. You can use the `/tdd-module [ModuleName]` command to automate this and the Vue file creation.
 
-### **Migration**
+- **Create Service:** `app/Services/[ModuleName]/[ModuleName]Service.php`
+- **Create Validation Rules:** `app/Services/Validation/Rules/[ModuleName]Rules.php`
+- **Create Vue Components:** `resources/js/Pages/Admin/[ModuleName]s/` (Index, Create, Edit, Show, Form)
 
-`..._create_[module_name_plural]_table.php`
+---
 
-```
-Schema::create('[module_name_plural]', function (Blueprint $table) {
-    $table->id();
-    // Add your columns here
-    // Example: $table->string('name');
-    // Example: $table->foreignId('patient_id')->constrained()->onDelete('cascade');
-    $table->timestamps();
-});
+### Implementation Checklist
 
-```
+| Layer | Step | Task | Status |
+| :--- | :--- | :--- | :--- |
+| **1. Infrastructure** | **Migration** | Define the table schema in the generated migration file in `database/migrations/`. | ☐ |
+| | **Factory** | Define the model's default state in `database/factories/[ModuleName]Factory.php`. | ☐ |
+| | **Seeder** | Add logic to `database/seeders/[ModuleName]Seeder.php` and call it from `DatabaseSeeder.php`. | ☐ |
+| **2. Domain** | **Model** | Configure `fillable` properties, casts, and relationships in `app/Models/[ModuleName].php`. | ☐ |
+| **3. Application** | **Validation** | Implement `store()` and `update()` static methods in `app/Services/Validation/Rules/[ModuleName]Rules.php`. | ☐ |
+| | **Service** | Implement business logic in `app/Services/[ModuleName]/[ModuleName]Service.php`. It should extend `BaseService`. | ☐ |
+| **4. Presentation** | **Controller** | Refactor the generated `app/Http/Controllers/[ModuleName]Controller.php` to be a thin controller. It should extend `BaseController` and use the Service and Validation Rules. | ☐ |
+| | **Routes** | Add the resource route to `routes/web.php` inside the authenticated group. | ☐ |
+| | **Frontend** | Develop the Vue components in `resources/js/Pages/Admin/[ModuleName]s/`. | ☐ |
+| | | `Form.vue`: Build the reusable form fields. | ☐ |
+| | | `Index.vue`: Build the data table, filters, and actions. | ☐ |
+| | | `Create.vue`: Implement the create form logic. | ☐ |
+| | | `Edit.vue`: Implement the edit form logic. | ☐ |
+| | | `Show.vue`: Implement the read-only detail view. | ☐ |
+| **5. Finalizing** | **Navigation** | Add a link to the new module in the main sidebar navigation. | ☐ |
+| | **Migration** | Run the migration: `php artisan migrate`. | ☐ |
 
-### **Model**
+---
 
-`app/Models/[ModuleName].php`
+### Code Templates
 
-```
+#### **Validation Rules**
+`app/Services/Validation/Rules/[ModuleName]Rules.php`
+```php
 <?php
-namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+namespace App\Services\Validation\Rules;
 
-class [ModuleName] extends Model
+class [ModuleName]Rules
 {
-    use HasFactory;
-    protected $fillable = [
-        // Add your fillable fields here
-    ];
+    public static function store(): array
+    {
+        return [
+            // 'name' => 'required|string|max:255',
+        ];
+    }
 
-    // Define relationships here
-    // public function patient() { return $this->belongsTo(Patient::class); }
+    public static function update(): array
+    {
+        return [
+            // 'name' => 'sometimes|string|max:255',
+        ];
+    }
 }
-
 ```
 
-### **Controller**
+#### **Service**
+`app/Services/[ModuleName]/[ModuleName]Service.php`
+```php
+<?php
+namespace App\Services\[ModuleName];
 
+use App\Services\BaseService;
+use App\Models\[ModuleName];
+
+class [ModuleName]Service extends BaseService
+{
+    public function __construct([ModuleName] $model)
+    {
+        parent::__construct($model);
+    }
+
+    // Implement module-specific business logic here
+}
+```
+
+#### **Controller**
 `app/Http/Controllers/Admin/[ModuleName]Controller.php`
-
-```
+```php
 <?php
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\[ModuleName];
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-// ... other necessary imports like Pdf, Response
+use App\Http\Controllers\Base\BaseController;
+use App\Services\[ModuleName]\[ModuleName]Service;
+use App\Services\Validation\Rules\[ModuleName]Rules;
 
-class [ModuleName]Controller extends Controller
+class [ModuleName]Controller extends BaseController
 {
-    public function index(Request $request) { /* ... Search, Sort, Paginate ... */ }
-    public function create() { /* ... Return Create view with necessary data ... */ }
-    public function store(Request $request) { /* ... Validate and create record ... */ }
-    public function show([ModuleName] $[moduleName]) { /* ... Load relations and return Show view ... */ }
-    public function edit([ModuleName] $[moduleName]) { /* ... Return Edit view with record and data ... */ }
-    public function update(Request $request, [ModuleName] $[moduleName]) { /* ... Validate and update record ... */ }
-    public function destroy([ModuleName] $[moduleName]) { /* ... Delete record ... */ }
-    public function export(Request $request) { /* ... Handle CSV/PDF export ... */ }
+    public function __construct([ModuleName]Service $service)
+    {
+        parent::__construct($service, [
+            'store' => [
+                'rules' => [ModuleName]Rules::store(),
+            ],
+            'update' => [
+                'rules' => [ModuleName]Rules::update(),
+            ],
+        ]);
+    }
 }
-
 ```
 
-### **Routes**
-
-`routes/web.php` (inside the authenticated dashboard group)
-
+#### **Routes**
+`routes/web.php`
+```php
+Route::resource('/[module-name-plural]', App\Http\Controllers\Admin\[ModuleName]Controller::class);
 ```
-// [ModuleTitle] Module
-Route::get('[module-name-plural]/export', [[ModuleName]Controller::class, 'export'])->name('[module-name-plural].export');
-Route::resource('[module-name-plural]', [ModuleName]Controller::class);
-
-```
-
-### **Vue Component Descriptions**
-
-- **Vue Index Page (`Index.vue`)**: Contains the main table view. Includes props for `[module_name_plural]` and `filters`. Has logic for search, sort, pagination, destroy, export, and print.
-- **Vue Form Component (`Form.vue`)**: The reusable form component. Accepts a `form` object and data for dropdowns as props. Emits a `submit` event.
-- **Vue** Create/Edit/Show **Pages**:
-    - `Create.vue`: Imports `Form.vue`, initializes an empty `useForm` object, and calls `form.post()` on submit.
-    - `Edit.vue`: Imports `Form.vue`, initializes `useForm` with the `[moduleName]` prop data, and calls `form.put()` on submit.
-    - `Show.vue`: Does not use the form. Displays record details in a read-only card layout.
-
-### 4. UI/UX Style Guide
-
-- **Layout**: Main content within a `p-6` space-y-6 div.
-- **Headers**: Use a `rounded-lg bg-muted/40 p-4 shadow-sm` card with an `h1` (text-xl) and a `p` (text-sm text-muted-foreground).
-- **Buttons**:
-    - **Primary Action (Add/Save)**: `bg-green-600 hover:bg-green-700 text-white`.
-    - **Secondary (Export/Print)**: `bg-gray-100 hover:bg-gray-200` with dark mode variants.
-    - **Cancel**: A simple bordered button.
-- **Tables**: Use `w-full text-left`, with a `bg-gray-100` header. Rows should have a `hover:bg-gray-50` effect.
-- **Icons**: Use `lucide-vue-next` consistently with `h-4 w-4` classes for actions.
-- **Forms**: Use a `rounded-lg` border bg-white p-6 shadow-sm card to contain the `<Form>` component. Inputs should have consistent border, background, and focus ring styles.

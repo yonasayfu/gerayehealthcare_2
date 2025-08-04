@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateLeaveRequestDTO;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;

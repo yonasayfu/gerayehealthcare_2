@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateEventStaffAssignmentDTO;
 use App\Models\EventStaffAssignment;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

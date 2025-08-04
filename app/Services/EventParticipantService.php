@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateEventParticipantDTO;
 use App\Models\EventParticipant;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

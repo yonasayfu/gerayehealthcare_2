@@ -16,32 +16,10 @@ class InventoryItemController extends BaseController
             InventoryItemRules::class,
             'Admin/InventoryItems',
             'inventoryItems',
-            InventoryItem::class
+            InventoryItem::class,
+            CreateInventoryItemDTO::class
         );
     }
 
-    public function show(InventoryItem $inventoryItem)
-    {
-        return parent::show($inventoryItem->id);
-    }
-
-    public function edit(InventoryItem $inventoryItem)
-    {
-        return parent::edit($inventoryItem->id);
-    }
-
-    public function update(Request $request, InventoryItem $inventoryItem)
-    {
-        return parent::update($request, $inventoryItem->id);
-    }
-
-    public function destroy(InventoryItem $inventoryItem)
-    {
-        return parent::destroy($inventoryItem->id);
-    }
-
-    public function printSingle(InventoryItem $inventoryItem)
-    {
-        return parent::printSingle($inventoryItem->id);
-    }
+    
 }

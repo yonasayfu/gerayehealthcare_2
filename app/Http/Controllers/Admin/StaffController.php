@@ -16,27 +16,10 @@ class StaffController extends BaseController
             StaffRules::class,
             'Admin/Staff',
             'staff',
-            Staff::class
+            Staff::class,
+            CreateStaffDTO::class
         );
     }
 
-    public function show(Staff $staff)
-    {
-        return parent::show($staff->id);
-    }
-
-    public function edit(Staff $staff)
-    {
-        return parent::edit($staff->id);
-    }
-
-    public function update(Request $request, Staff $staff)
-    {
-        return parent::update($request, $staff->id);
-    }
-
-    public function destroy(Staff $staff)
-    {
-        return parent::destroy($staff->id);
-    }
+   
 }

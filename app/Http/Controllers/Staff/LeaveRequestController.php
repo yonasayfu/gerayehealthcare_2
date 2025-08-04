@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Staff;
 
+use App\DTOs\CreateLeaveRequestDTO;
+use App\Services\LeaveRequestService;
 use App\Http\Controllers\Controller;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
@@ -11,6 +13,13 @@ use App\Http\Requests\StoreStaffLeaveRequest;
 
 class LeaveRequestController extends Controller
 {
+    protected $leaveRequestService;
+
+    public function __construct(LeaveRequestService $leaveRequestService)
+    {
+        $this->leaveRequestService = $leaveRequestService;
+    }
+
     /**
      * Display a listing of the authenticated staff's leave requests.
      */
@@ -31,8 +40,16 @@ class LeaveRequestController extends Controller
     public function store(StoreStaffLeaveRequest $request)
     {
         $validated = $request->validated();
+        $dto = new CreateLeaveRequestDTO(
+            staff_id: Auth::user()->staff->id,
+            start_date: $validated['start_date'],
+            end_date: $validated['end_date'],
+            reason: $validated['reason'],
+            status: 'Pending',
+            admin_notes: null
+        );
 
-        Auth::user()->staff->leaveRequests()->create($validated);
+        $this->leaveRequestService->create($dto);
 
         return redirect()->back()->with('success', 'Leave request submitted successfully.');
     }

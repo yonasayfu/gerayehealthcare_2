@@ -24,72 +24,12 @@ class MarketingTaskController extends BaseController
             MarketingTaskRules::class,
             'Admin/MarketingTasks',
             'marketingTasks',
-            MarketingTask::class
+            MarketingTask::class,
+            CreateMarketingTaskDTO::class
         );
     }
 
-    public function create()
-    {
-        $this->authorize('create', MarketingTask::class);
-        return Inertia::render('Admin/MarketingTasks/Create', [
-            'campaigns' => MarketingCampaign::all(),
-            'staffs' => Staff::with('user')->get(),
-            'campaignContents' => CampaignContent::all(),
-            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
-            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
-        ]);
-    }
+    
 
-    public function store(Request $request)
-    {
-        $this->authorize('create', MarketingTask::class);
-        return parent::store($request);
-    }
-
-    public function show(MarketingTask $marketingTask)
-    {
-        $this->authorize('view', $marketingTask);
-        return parent::show($marketingTask->id);
-    }
-
-    public function edit(MarketingTask $marketingTask)
-    {
-        $this->authorize('update', $marketingTask);
-        $data = $this->service->getById($marketingTask->id);
-        return Inertia::render('Admin/MarketingTasks/Edit', [
-            'marketingTask' => $data,
-            'campaigns' => MarketingCampaign::all(),
-            'staffs' => Staff::with('user')->get(),
-            'campaignContents' => CampaignContent::all(),
-            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
-            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
-        ]);
-    }
-
-    public function update(Request $request, MarketingTask $marketingTask)
-    {
-        $this->authorize('update', $marketingTask);
-        return parent::update($request, $marketingTask->id);
-    }
-
-    public function destroy(MarketingTask $marketingTask)
-    {
-        $this->authorize('delete', $marketingTask);
-        return parent::destroy($marketingTask->id);
-    }
-
-    public function export(Request $request)
-    {
-        return parent::export($request);
-    }
-
-    public function printAll(Request $request)
-    {
-        return parent::printAll($request);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return parent::printCurrent($request);
-    }
+    
 }

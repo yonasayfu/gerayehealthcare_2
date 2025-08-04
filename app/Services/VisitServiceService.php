@@ -9,12 +9,10 @@ use App\Models\EventStaffAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
 
 class VisitServiceService extends BaseService
 {
-    use ExportableTrait;
 
     public function __construct(VisitService $visitService)
     {
@@ -49,7 +47,6 @@ class VisitServiceService extends BaseService
 
     public function create(array $data): VisitService
     {
-        $this->checkOverlap($data);
 
         $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
                                            ->where('staff_id', $data['staff_id'])
@@ -72,13 +69,7 @@ class VisitServiceService extends BaseService
         $visitService = parent::create($data);
 
         if (isset($data['event_id'])) {
-            EventStaffAssignment::firstOrCreate(
-                [
-                    'event_id' => $data['event_id'],
-                    'staff_id' => $data['staff_id'],
-                ],
-                ['role' => 'Attended']
-            );
+            event(new StaffAssignedToEvent($data['event_id'], $data['staff_id']));
         }
         return $visitService;
     }
@@ -148,20 +139,5 @@ class VisitServiceService extends BaseService
         if ($overlap->exists()) {
             throw new \Exception('Conflict: This staff member is already scheduled for another visit at this time.');
         }
-    }
-
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
     }
 }

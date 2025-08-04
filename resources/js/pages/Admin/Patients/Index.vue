@@ -11,7 +11,7 @@ import type { PatientPagination } from '@/types'; // Import PatientPagination ty
 
 const props = defineProps<{
   patients: PatientPagination;
-  filters: {
+  filters?: {
     search?: string;
     sort?: string;
     direction?: 'asc' | 'desc';
@@ -24,10 +24,10 @@ const breadcrumbs = [
   { title: 'Patients', href: route('admin.patients.index') },
 ]
 
-const search = ref(props.filters.search || '')
-const sortField = ref(props.filters.sort || '')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 5)
+const search = ref(props.filters?.search || '')
+const sortField = ref(props.filters?.sort || '')
+const sortDirection = ref(props.filters?.direction || 'asc')
+const perPage = ref(props.filters?.per_page || 5)
 
 // Create a computed property for the formatted date string
 const formattedGeneratedDate = computed(() => {
@@ -62,8 +62,12 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.patients.export', { type }), '_blank');
+function exportData(type: 'csv' | 'pdf', preview: boolean = false) {
+  const params: Record<string, string | boolean> = { type };
+  if (preview) {
+    params.preview = true;
+  }
+  window.open(route('admin.patients.export', params), '_blank');
 }
 
 function printCurrentView() {
@@ -79,8 +83,8 @@ function printCurrentView() {
 }
 
 const printAllPatients = () => {
-    // This will call your PatientController@export method with type=pdf
-    window.open(route('admin.patients.export', { type: 'pdf' }), '_blank');
+    // This will call your PatientController@export method with type=pdf and preview=true
+    window.open(route('admin.patients.export', { type: 'pdf', preview: true }), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -112,7 +116,7 @@ function toggleSort(field: string) {
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('pdf', true)" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <FileText class="h-4 w-4" /> PDF
           </button>
           <button @click="printAllPatients" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">

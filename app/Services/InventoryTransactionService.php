@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateInventoryTransactionDTO;
 use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

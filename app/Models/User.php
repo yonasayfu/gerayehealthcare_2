@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +11,7 @@ use Spatie\Permission\Traits\HasRoles; // <-- Ensure this import is present
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasRoles; // <-- Ensure HasRoles is used here
+    use HasApiTokens, HasFactory, Notifiable, HasRoles; // <-- Ensure HasRoles is used here
 
     /**
      * The attributes that are mass assignable.

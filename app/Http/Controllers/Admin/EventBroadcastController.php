@@ -18,33 +18,11 @@ class EventBroadcastController extends BaseController
             EventBroadcastRules::class,
             'Admin/EventBroadcasts',
             'broadcasts',
-            EventBroadcast::class
+            EventBroadcast::class,
+            CreateEventBroadcastDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-    public function show(EventBroadcast $eventBroadcast)
-    {
-        return parent::show($eventBroadcast->id);
-    }
-
-    public function edit(EventBroadcast $eventBroadcast)
-    {
-        return parent::edit($eventBroadcast->id);
-    }
-
-    public function update(Request $request, EventBroadcast $eventBroadcast)
-    {
-        return parent::update($request, $eventBroadcast->id);
-    }
-
-    public function destroy(EventBroadcast $eventBroadcast)
-    {
-        return parent::destroy($eventBroadcast->id);
-    }
-
-    public function printSingle(EventBroadcast $eventBroadcast)
-    {
-        return parent::printSingle($eventBroadcast->id);
-    }
+   
 }

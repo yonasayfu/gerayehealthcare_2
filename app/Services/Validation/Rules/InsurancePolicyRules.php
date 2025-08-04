@@ -2,33 +2,33 @@
 
 namespace App\Services\Validation\Rules;
 
-class InsurancePolicyRules extends BaseResourceRules
+class InsurancePolicyRules
 {
     public static function store(): array
     {
         return [
-            'patient_id' => 'required|exists:patients,id',
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'policy_number' => 'required|string|max:255|unique:insurance_policies,policy_number',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'coverage_amount' => 'required|numeric|min:0',
-            'premium_amount' => 'required|numeric|min:0',
-            'status' => 'required|string|in:Active,Expired,Cancelled',
+            'insurance_company_id' => 'nullable|integer|exists:insurance_companies,id',
+            'corporate_client_id' => 'nullable|integer|exists:corporate_clients,id',
+            'service_type' => 'required|string|max:255',
+            'service_type_amharic' => 'nullable|string|max:255',
+            'coverage_percentage' => 'nullable|numeric|min:0|max:100',
+            'coverage_type' => 'nullable|string|in:Full,Partial,Copay',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
         ];
     }
-    
-    public static function update($policy): array
+
+    public static function update(): array
     {
         return [
-            'patient_id' => 'required|exists:patients,id',
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'policy_number' => 'required|string|max:255|unique:insurance_policies,policy_number,' . $policy->id,
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'coverage_amount' => 'required|numeric|min:0',
-            'premium_amount' => 'required|numeric|min:0',
-            'status' => 'required|string|in:Active,Expired,Cancelled',
+            'insurance_company_id' => 'nullable|integer|exists:insurance_companies,id',
+            'corporate_client_id' => 'nullable|integer|exists:corporate_clients,id',
+            'service_type' => 'sometimes|required|string|max:255',
+            'service_type_amharic' => 'nullable|string|max:255',
+            'coverage_percentage' => 'nullable|numeric|min:0|max:100',
+            'coverage_type' => 'nullable|string|in:Full,Partial,Copay',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
         ];
     }
 }

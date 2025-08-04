@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateInventoryItemDTO;
 use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

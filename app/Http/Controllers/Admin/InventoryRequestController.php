@@ -20,50 +20,12 @@ class InventoryRequestController extends BaseController
             InventoryRequestRules::class,
             'Admin/InventoryRequests',
             'inventoryRequests',
-            InventoryRequest::class
+            InventoryRequest::class,
+            CreateInventoryRequestDTO::class
         );
     }
 
-    public function create()
-    {
-        $staffList = Staff::all();
-        $inventoryItems = InventoryItem::all();
+    
 
-        return Inertia::render('Admin/InventoryRequests/Create', [
-            'staffList' => $staffList,
-            'inventoryItems' => $inventoryItems,
-        ]);
-    }
-
-    public function show(InventoryRequest $inventoryRequest)
-    {
-        return parent::show($inventoryRequest->id);
-    }
-
-    public function edit(InventoryRequest $inventoryRequest)
-    {
-        $staffList = Staff::all();
-        $inventoryItems = InventoryItem::all();
-
-        return Inertia::render('Admin/InventoryRequests/Edit', [
-            'inventoryRequest' => $inventoryRequest->load(['requester', 'approver', 'item']),
-            'staffList' => $staffList,
-            'inventoryItems' => $inventoryItems,
-        ]);
-    }
-
-    public function update(Request $request, InventoryRequest $inventoryRequest)
-    {
-        return parent::update($request, $inventoryRequest->id);
-    }
-
-    public function destroy(InventoryRequest $inventoryRequest)
-    {
-        return parent::destroy($inventoryRequest->id);
-    }
-
-    public function printSingle(InventoryRequest $inventoryRequest)
-    {
-        return parent::printSingle($inventoryRequest->id);
-    }
+   
 }

@@ -41,14 +41,11 @@ class CaregiverAssignmentService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function create(array $data): CaregiverAssignment
+    public function create(CreateCaregiverAssignmentDTO $dto): CaregiverAssignment
     {
-        $assignment = parent::create($data);
+        $assignment = parent::create((array) $dto);
 
-        $staff = Staff::find($data['staff_id']);
-        if ($staff) {
-            Notification::send($staff, new NewCaregiverAssignment($assignment));
-        }
+        event(new CaregiverAssigned($assignment));
 
         return $assignment;
     }
@@ -57,10 +54,8 @@ class CaregiverAssignmentService extends BaseService
     {
         $assignment = parent::update($id, $data);
 
-        $staff = Staff::find($data['staff_id']);
-        if ($staff) {
-            Notification::send($staff, new NewCaregiverAssignment($assignment));
-        }
+        // Optionally, you can create a different event for updates, e.g., CaregiverAssignmentUpdated
+        event(new CaregiverAssigned($assignment));
 
         return $assignment;
     }

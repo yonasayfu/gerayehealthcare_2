@@ -17,37 +17,10 @@ class InventoryAlertController extends BaseController
             InventoryAlertRules::class,
             'Admin/InventoryAlerts',
             'inventoryAlerts',
-            InventoryAlert::class
+            InventoryAlert::class,
+            CreateInventoryAlertDTO::class
         );
     }
 
-    public function show(InventoryAlert $inventoryAlert)
-    {
-        return parent::show($inventoryAlert->id);
-    }
-
-    public function edit(InventoryAlert $inventoryAlert)
-    {
-        return parent::edit($inventoryAlert->id);
-    }
-
-    public function update(Request $request, InventoryAlert $inventoryAlert)
-    {
-        return parent::update($request, $inventoryAlert->id);
-    }
-
-    public function destroy(InventoryAlert $inventoryAlert)
-    {
-        return parent::destroy($inventoryAlert->id);
-    }
-
-    public function printSingle(InventoryAlert $inventoryAlert)
-    {
-        return parent::printSingle($inventoryAlert->id);
-    }
-
-    public function count()
-    {
-        return $this->service->count();
-    }
+    
 }

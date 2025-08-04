@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateMarketingTaskDTO;
 use App\Models\MarketingTask;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

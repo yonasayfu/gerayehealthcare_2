@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateLandingPageDTO;
 use App\Models\LandingPage;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateMarketingBudgetDTO;
 use App\Models\MarketingBudget;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

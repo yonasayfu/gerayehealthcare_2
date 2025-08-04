@@ -23,7 +23,8 @@ class CampaignContentController extends BaseController
             CampaignContentRules::class,
             'Admin/CampaignContents',
             'campaignContents',
-            CampaignContent::class
+            CampaignContent::class,
+            CreateCampaignContentDTO::class
         );
     }
 
@@ -39,69 +40,11 @@ class CampaignContentController extends BaseController
         ]);
     }
 
-    public function create()
-    {
-        $this->authorize('create', CampaignContent::class);
-        return Inertia::render('Admin/CampaignContents/Create', [
-            'campaigns' => MarketingCampaign::all(),
-            'platforms' => MarketingPlatform::all(),
-            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
-            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
-        ]);
-    }
+    
 
-    public function store(Request $request)
-    {
-        $this->authorize('create', CampaignContent::class);
-        return parent::store($request);
-    }
+    
 
-    public function show(CampaignContent $campaignContent)
-    {
-        $this->authorize('view', $campaignContent);
-        return parent::show($campaignContent->id);
-    }
+    
 
-    public function edit(CampaignContent $campaignContent)
-    {
-        $this->authorize('update', $campaignContent);
-        $data = $this->service->getById($campaignContent->id);
-        return Inertia::render('Admin/CampaignContents/Edit', [
-            'campaignContent' => $data,
-            'campaigns' => MarketingCampaign::all(),
-            'platforms' => MarketingPlatform::all(),
-            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
-            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
-        ]);
-    }
-
-    public function update(Request $request, CampaignContent $campaignContent)
-    {
-        $this->authorize('update', $campaignContent);
-        return parent::update($request, $campaignContent->id);
-    }
-
-    public function destroy(CampaignContent $campaignContent)
-    {
-        $this->authorize('delete', $campaignContent);
-        return parent::destroy($campaignContent->id);
-    }
-
-    public function export(Request $request)
-    {
-        $this->authorize('viewAny', CampaignContent::class);
-        return parent::export($request);
-    }
-
-    public function printAll(Request $request)
-    {
-        $this->authorize('viewAny', CampaignContent::class);
-        return parent::printAll($request);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        $this->authorize('viewAny', CampaignContent::class);
-        return parent::printCurrent($request);
-    }
+    
 }

@@ -47,34 +47,8 @@ class EventRecommendationService extends BaseService
         $eventRecommendation = parent::update($id, $data);
 
         if ($data['status'] === 'approved') {
-            // Find or create patient
-            $patient = Patient::firstOrCreate(
-                ['phone_number' => $data['patient_phone']],
-                [
-                    'full_name' => $data['patient_name'],
-                    'email' => null,
-                    'date_of_birth' => null,
-                    'gender' => null,
-                    'address' => null,
-                    'emergency_contact' => null,
-                    'source' => 'Event Recommendation',
-                    'geolocation' => null,
-                    'patient_code' => 'PAT-' . str_pad(Patient::count() + 1, 5, '0', STR_PAD_LEFT),
-                ]
-            );
-
-            // Link the recommendation to the patient
-            $eventRecommendation->linked_patient_id = $patient->id;
-            $eventRecommendation->save();
-
-            // Create event participant record
-            EventParticipant::firstOrCreate(
-                [
-                    'event_id' => $data['event_id'],
-                    'patient_id' => $patient->id,
-                ],
-                ['status' => 'registered']
-            );
+            event(new PatientCreatedFromRecommendation($data['patient_name'], $data['patient_phone'], $eventRecommendation));
+            event(new EventParticipantRegistered($data['event_id'], $eventRecommendation->linked_patient_id));
         }
 
         return $eventRecommendation;

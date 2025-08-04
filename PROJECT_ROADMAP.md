@@ -4,172 +4,123 @@ This document outlines the vision, architecture, features, and technology stack 
 
 ## 1. System Architecture (High-Level)
 
-### 🗂️ Backend: Laravel 12
+- **🗂️ Backend: Laravel 12 (RESTful API + Background Jobs)**
+  - **Authentication**: Sanctum
+  - **Queue System**: Laravel Queues with Redis
+  - **Storage**: Local + S3
+  - **Notifications**: Email, SMS, Push (via Firebase for mobile)
+  - **Scheduler**: Laravel Task Scheduler
+  - **API**: RESTful endpoints for Flutter mobile apps
 
-- **Authentication**: Sanctum
-- **Queue System**: Laravel Queues with Redis
-- **Storage**: Local + S3
-- **Notifications**: Email, SMS, Push (via Firebase)
-- **Scheduler**: Laravel Task Scheduler
-- **API**: RESTful endpoints for the Flutter mobile app
+- **🎨 Frontend: Vue 3 (with Inertia.js for SPA behavior)**
+  - Admin panel
+  - Doctor dashboard
+  - Patient portal
 
-### 🎨 Frontend: Vue 3 with Inertia.js
+- **📱 Mobile App: Flutter (Future Phase)**
+  - Patient app for booking, monitoring
+  - Staff app for on-field service delivery
+  - Connects to Laravel API
+  - Push notifications via Firebase
 
-- Admin panel
-- Doctor dashboard
-- Patient portal
+- **🛢️ Database: PostgreSQL**
+  - Modular schemas: patients, services, referrals, inventory, etc.
 
-### 📱 Mobile App: Flutter (Future Phase)
-
-- Patient app (booking, monitoring)
-- Staff app (on-field service delivery)
-- Connects to Laravel API via RESTful endpoints
-- Push notifications via Firebase
-
-### 🛢️ Database: PostgreSQL
-
-- Modular schemas for patients, services, referrals, inventory, etc.
-
-### 🔌 3rd-Party Integrations
-
-- **Marketing**: TikTok Ads API
-- **Insurance**: Insurance Provider APIs
-- **Partners**: Hospital APIs
-- **Mapping**: Google Maps
-- **Communication**: Email/SMS providers
+- **🔌 3rd-Party Integrations**
+  - TikTok Ads API (Marketing ROI tracking)
+  - Insurance APIs (claims sync, coverage status)
+  - Hospital APIs (referral handling)
+  - Google Maps (location & routing)
+  - Email/SMS providers
 
 ## 2. Core Feature Modules
 
-### 1. 🩺 Patient Management - ✅ Done
+### ✅ Implemented
 
-- Patient registration and medical profile
-- Medical history tracking
-- Appointment scheduling
-- Emergency contact info
-- Geolocation/address tracking for home visits
+1.  **Patient Management**
+    - Patient registration and medical profile
+    - Medical history tracking
+    - Appointment scheduling
+    - Emergency contact info
+    - Geolocation/address tracking for home visits
 
-### 2. 👨‍⚕️ Caregiver/Nurse Management - ✅ Done
+2.  **Caregiver/Nurse Management**
+    - Register caregivers (nurses, physical therapists, etc.)
+    - Assign caregivers to patients
+    - Shift scheduling and availability
+    - Performance and feedback system
+    - Certification and training records
 
-- Register caregivers (nurses, physical therapists, etc.)
-- Assign caregivers to patients
-- Shift scheduling and availability
-- Performance and feedback system
-- Certification and training records
+3.  **Admin & HR Tools**
+    - Dashboard for organization overview
+    - Staff management and leave requests
+    - Task delegation
 
-### 3. 🏥 Visit & Service Management - 🚧 In Progress
+4.  **Digital Marketing Tracker**
+    - Campaign tracker (TikTok, Meta, etc.)
+    - Custom landing page generator
+    - Conversion tracking
+    - Monthly ROI report
 
-- Daily visit schedule for caregivers
-- Check-in/check-out via GPS (proof of visit)
-- Digital notes and reports from each visit
-- Upload prescriptions, vitals, and images
+5.  **Inventory Management**
+    - Track rented/loaned equipment
+    - Inventory status and location
+    - Alerts for expiry, maintenance, or recall
 
-### 4. 💬 Communication - 📝 To Do
+6.  **Events Management**
+    - Winter/monthly free service scheduler
+    - Broadcast to partners & public
+    - Volunteer doctor assignment
 
-- Secure in-app chat between staff and patients
-- Notification system (reminders, updates)
-- Video consultation option
+7.  **Insurance Coordination**
+    - Check coverage on patient registration
+    - Sync claims for services
+    - Track shared payments
+    - Notifications for payment delays/denials
 
-### 5. 💰 Billing & Payments - 📝 To Do
+### 🚧 In Progress
 
-- Invoice generation
-- Service pricing packages
-- Payment gateway integration
-- Receipt history
+1.  **Visit & Service Management**
+    - Daily visit schedule for caregivers
+    - Check-in/check-out via GPS (proof of visit)
+    - Digital notes and reports from each visit
+    - Upload prescriptions, vitals, and images
 
-### 6. 🧑‍💼 Admin & HR Tools - 🚧 In Progress
+### 📝 To Do
 
-- Dashboard for organization overview
-- Staff management and leave requests (Implemented)
-- Task delegation (Implemented)
-- Analytics and KPIs
+1.  **Communication**
+    - Secure in-app chat between staff and patients
+    - Notification system (reminders, updates)
+    - Video consultation option
 
-### 7. 📄 Medical Records & Documentation - 📝 To Do
+2.  **Billing & Payments**
+    - Invoice generation
+    - Service pricing packages
+    - Payment gateway integration
+    - Receipt history
 
-- Digital prescriptions
-- Lab result uploads
-- Progress notes and treatment plans
+3.  **Medical Records & Documentation**
+    - Digital prescriptions
+    - Lab result uploads
+    - Progress notes and treatment plans
 
-### 8. 📊 Reporting & Analytics - 📝 To Do
+4.  **Reporting & Analytics**
+    - Monthly service volume reports
+    - Digital marketing ROI reports
+    - Revenue summaries
 
-- Monthly service volume reports
-- Digital marketing ROI reports
-- Revenue summaries
+5.  **Partner Integrations**
+    - Hospital & pharmacy referral tracker
+    - Commission and invoice sharing
+    - Referral document upload & status sync
 
-### 9. 🤝 Partner Integrations - 📝 To Do
+6.  **Business & NGO Networking**
+    - Track engagement with orgs, banks, schools
+    - Priority service levels
+    - Revenue sharing from referrals
 
-- Hospital & pharmacy referral tracker
-- Commission and invoice sharing
-- Referral document upload & status sync
-### 9.1 🏦 Business & NGO Networking - 📝 To Do
-
-- Track engagement with orgs, banks, schools
-- Priority service levels
-- Revenue sharing from referrals
-
-### 10. 🧾 Insurance Coordination - 📝 To Do
-
-- Check coverage on patient registration
-- Sync claims for services
-- Track shared payments
-- Notifications for payment delays/denials
-
-### 11. 🌐 Digital Marketing Tracker - ✅ Done
-
-- Campaign tracker (TikTok, Meta, etc.)
-- Custom landing page generator
-- Conversion tracking
-- Monthly ROI report
-- **Implemented Modules**: Lead Sources, Marketing Platforms, Marketing Campaigns, Campaign Contents, Landing Pages, Marketing Leads, Marketing Budgets, Marketing Tasks, and Marketing Analytics Dashboard.
-- **Functionality**: Full CRUD operations, data management, and analytics reporting for marketing entities.
-
-### 12. 📦 Inventory & Equipment Tracker - 📝 To Do
-
-- Track rented/loaned equipment
-- Inventory status and location
-- Alerts for expiry, maintenance, or recall
-
-### 13. 🌍 International Referrals - 📝 To Do
-
-- Global partner hospital directory
-- Referral request system
-- Visa & travel documentation tracking
-- Cross-border commission reporting
-
-### 14. 📅 Events & Free Service Campaigns - 📝 To Do
-
-- Winter/monthly free service scheduler
-- Broadcast to partners & public
-- Volunteer doctor assignment
-
-
-
-## 3. User Roles
-
-- Admin (Owner/Manager)
-- Doctor/Nurse/Caregiver
-- Patient/Family Member
-- Dispatcher/Coordinator (optional)
-- Accountant (optional)
-
-## 4. Development Progress Summary
-
-### Day 1-5 Accomplishments:
-
-- **Patient Management Module**: Full CRUD functionality implemented with server-side search, sortable columns, pagination, and export (CSV/PDF).
-- **Staff Module**: Full CRUD functionality implemented, including staff profile photo upload.
-- **Caregiver Assignments Module**: Full CRUD functionality implemented, connecting Staff to Patients.
-- **Role-Based Access Control (RBAC) System**: `spatie/laravel-permission` integrated with Super Admin, Admin, and Staff roles.
-- **Route Naming and Protection**: All admin and staff routes grouped and protected with appropriate middleware. Frontend components updated to use correct route names.
-- **Staff Availability & Conflict Detection**: `staff_availabilities` table created. Staff-facing calendar UI for managing availability. Admin-facing list view. Custom validation rule (`StaffIsAvailableForShift`) implemented to prevent assignment conflicts. Timezone bug resolved. Staff calendar updated to show both personal availability and work assignments.
-
-### Day 6 Plan:
-
-- **Visit & Service Management Module**:
-    1.  **Database**: Create the `visit_services` table migration and model.
-    2.  **Backend**: Implement the `VisitServiceController` with full CRUD functionality.
-    3.  **Frontend**: Develop the Vue components for managing visit services (`Index`, `Create`, `Edit`, `Show`, `Form`).
-    4.  **Routes & Navigation**: Add the necessary routes and update the sidebar.
-
-### Recent Accomplishments:
-
-- **Digital Marketing Tracker Module**: Full CRUD functionality implemented for Lead Sources, Marketing Platforms, Marketing Campaigns, Campaign Contents, Landing Pages, Marketing Leads, Marketing Budgets, and Marketing Tasks. A Marketing Analytics Dashboard has also been developed. This module includes comprehensive data management and reporting capabilities for various marketing activities.
+7.  **International Referrals**
+    - Global partner hospital directory
+    - Referral request system
+    - Visa & travel documentation tracking
+    - Cross-border commission reporting

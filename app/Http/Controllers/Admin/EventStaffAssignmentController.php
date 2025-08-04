@@ -18,33 +18,11 @@ class EventStaffAssignmentController extends BaseController
             EventStaffAssignmentRules::class,
             'Admin/EventStaffAssignments',
             'assignments',
-            EventStaffAssignment::class
+            EventStaffAssignment::class,
+            CreateEventStaffAssignmentDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-    public function show(EventStaffAssignment $eventStaffAssignment)
-    {
-        return parent::show($eventStaffAssignment->id);
-    }
-
-    public function edit(EventStaffAssignment $eventStaffAssignment)
-    {
-        return parent::edit($eventStaffAssignment->id);
-    }
-
-    public function update(Request $request, EventStaffAssignment $eventStaffAssignment)
-    {
-        return parent::update($request, $eventStaffAssignment->id);
-    }
-
-    public function destroy(EventStaffAssignment $eventStaffAssignment)
-    {
-        return parent::destroy($eventStaffAssignment->id);
-    }
-
-    public function printSingle(EventStaffAssignment $eventStaffAssignment)
-    {
-        return parent::printSingle($eventStaffAssignment->id);
-    }
+   
 }

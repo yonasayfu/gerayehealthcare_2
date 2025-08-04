@@ -23,8 +23,10 @@ class PatientService extends BaseService
               ->orWhere('email', 'ilike', "%{$search}%");
     }
 
-    public function create(array $data): Patient
+    public function create(array|object $data): Patient
     {
+        $data = is_object($data) ? (array) $data : $data; // Ensure $data is an array
+
         if (Auth::check()) {
             $user = Auth::user();
             $staffMember = \App\Models\Staff::where('user_id', $user->id)->first();
@@ -47,17 +49,14 @@ class PatientService extends BaseService
         return $this->handleExport($request, Patient::class, ExportConfig::getPatientConfig());
     }
 
-    public function printSingle($id)
+    public function printSingle($id, Request $request)
     {
         $patient = $this->getById($id);
         $patient->load(['registeredByStaff', 'registeredByCaregiver']);
 
-        $config = ExportConfig::getPatientConfig()['single_record'];
-        $config['title'] = 'Patient Record - ' . $patient->full_name;
-        $config['document_title'] = 'Patient Record';
-        $config['filename'] = "patient-{$patient->patient_code}.pdf";
+        $config = ExportConfig::getPatientConfig();
         
-        return $this->generateSingleRecordPdf($patient, $config);
+        return $this->handlePrintSingle($request, $patient, $config);
     }
 
     public function printCurrent(Request $request)

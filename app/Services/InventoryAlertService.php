@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateInventoryAlertDTO;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

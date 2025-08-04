@@ -22,30 +22,7 @@ class RoleController extends BaseController
         );
     }
 
-    public function create()
-    {
-        return Inertia::render('Admin/Roles/Create', [
-            'permissions' => Permission::all()->pluck('name'),
-        ]);
-    }
+    
 
-    public function edit(Role $role)
-    {
-        $role->load('permissions');
-
-        return Inertia::render('Admin/Roles/Edit', [
-            'role' => $role,
-            'allPermissions' => Permission::all()->pluck('name'),
-        ]);
-    }
-
-    public function update(Request $request, Role $role)
-    {
-        return parent::update($request, $role->id);
-    }
-
-    public function destroy(Role $role)
-    {
-        return parent::destroy($role->id);
-    }
+   
 }

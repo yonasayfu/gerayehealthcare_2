@@ -16,19 +16,8 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: props.patient.full_name, href: route('admin.patients.show', props.patient.id) },
 ]
 
-function printPage() {
-  // Add a small delay to ensure the DOM is ready for printing.
-  // This can sometimes resolve issues where the print dialog doesn't appear
-  // or content is not rendered correctly.
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      // Optionally, provide user feedback if print fails
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100); // 100ms delay
+function printSinglePatient() {
+  window.open(route('admin.patients.printSingle', { id: props.patient.id, preview: true }), '_blank');
 }
 
 function destroy(id: number) {
@@ -160,7 +149,7 @@ function destroy(id: number) {
 
         <div class="p-6 border-t border-gray-200 rounded-b">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
+              <button @click="printSinglePatient" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <Link

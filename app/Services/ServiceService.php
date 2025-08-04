@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateServiceDTO;
 use App\Models\Service;
 
 class ServiceService extends BaseService

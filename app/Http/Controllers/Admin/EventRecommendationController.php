@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateEventRecommendationDTO;
+use App\DTOs\UpdateEventRecommendationDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\EventRecommendationService;
 use App\Models\EventRecommendation;
@@ -19,33 +21,11 @@ class EventRecommendationController extends BaseController
             EventRecommendationRules::class,
             'Admin/EventRecommendations',
             'recommendations',
-            EventRecommendation::class
+            EventRecommendation::class,
+            CreateEventRecommendationDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-    public function show(EventRecommendation $eventRecommendation)
-    {
-        return parent::show($eventRecommendation->id);
-    }
-
-    public function edit(EventRecommendation $eventRecommendation)
-    {
-        return parent::edit($eventRecommendation->id);
-    }
-
-    public function update(Request $request, EventRecommendation $eventRecommendation)
-    {
-        return parent::update($request, $eventRecommendation->id);
-    }
-
-    public function destroy(EventRecommendation $eventRecommendation)
-    {
-        return parent::destroy($eventRecommendation->id);
-    }
-
-    public function printSingle(EventRecommendation $eventRecommendation)
-    {
-        return parent::printSingle($eventRecommendation->id);
-    }
+    
 }

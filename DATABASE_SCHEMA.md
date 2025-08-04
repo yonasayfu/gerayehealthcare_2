@@ -1,55 +1,65 @@
 # Master Database Schema (PostgreSQL)
 
-This document defines the official database schema for the Home-to-Home Care Automation Platform. All new migrations and models must conform to these table structures and relationships.
+This document defines the official database schema for the Home-to-Home Care Automation Platform. It is organized by functional modules.
 
-*Note: The `staff` table reflects the corrected migration we implemented, not the initial schema document.*
+---
 
-## 1. Table Definitions
+## 1. Implemented Modules
 
-```
--- 1. patients
+### Core & Patient Management
+```sql
+-- Patients
 CREATE TABLE patients (
     id SERIAL PRIMARY KEY,
-    patient_code VARCHAR(255) NOT NULL UNIQUE,
     full_name VARCHAR(255) NOT NULL,
-    fayda_id VARCHAR(255) UNIQUE,
     date_of_birth DATE,
     gender VARCHAR(10),
     address TEXT,
     phone_number VARCHAR(255) UNIQUE,
     email VARCHAR(255) UNIQUE,
     emergency_contact TEXT,
-    source VARCHAR(255),
-    geolocation GEOGRAPHY(POINT, 4326),
-    registered_by_staff_id BIGINT UNSIGNED NULL REFERENCES staff(id) ON DELETE SET NULL,
-    registered_by_caregiver_id BIGINT UNSIGNED NULL REFERENCES caregiver_assignments(id) ON DELETE SET NULL,
+    geolocation TEXT,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
 
--- 2. staff (Reflects the actual migration used)
+-- Services
+CREATE TABLE services (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price NUMERIC(10, 2) NOT NULL,
+    duration INT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Staff & Administrative Tools
+```sql
+-- Staff
 CREATE TABLE staff (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    phone VARCHAR(255) NULL,
-    position VARCHAR(255) NULL,
-    department VARCHAR(255) NULL,
-    role VARCHAR(255) NOT NULL DEFAULT 'Caregiver',
-    status VARCHAR(50) NOT NULL DEFAULT 'Active',
-    hire_date DATE NULL,
-    photo VARCHAR(255) NULL,
-    user_id BIGINT UNSIGNED NULL,
+    phone VARCHAR(255),
+    position VARCHAR(255),
+    department VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'Active',
+    hire_date DATE,
+    photo VARCHAR(255),
+    user_id BIGINT UNSIGNED,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
 
--- 3. caregiver_assignments
+-- Caregiver Assignments
 CREATE TABLE caregiver_assignments (
     id SERIAL PRIMARY KEY,
-    staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    staff_id BIGINT UNSIGNED NOT NULL,
+    patient_id BIGINT UNSIGNED NOT NULL,
     shift_start TIMESTAMP,
     shift_end TIMESTAMP,
     status VARCHAR(255) DEFAULT 'Assigned',
@@ -57,412 +67,257 @@ CREATE TABLE caregiver_assignments (
     updated_at TIMESTAMP
 );
 
--- 4. visit_services
-CREATE TABLE visit_services (
+-- Staff Availabilities
+CREATE TABLE staff_availabilities (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE SET NULL,
-    scheduled_at TIMESTAMP,
-    check_in_time TIMESTAMP,
-    check_out_time TIMESTAMP,
-    visit_notes TEXT,
-    prescription_file TEXT,
-    vitals_file TEXT,
-    status VARCHAR DEFAULT 'Pending',
+    staff_id BIGINT UNSIGNED NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    status VARCHAR(255) NOT NULL,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
 
--- 5. messages
-CREATE TABLE messages (
+-- Leave Requests
+CREATE TABLE leave_requests (
     id SERIAL PRIMARY KEY,
-    sender_id INTEGER REFERENCES staff(id) ON DELETE CASCADE,
-    receiver_id INTEGER REFERENCES patients(id) ON DELETE CASCADE,
-    message TEXT,
-    attachment_path VARCHAR(255),
-    attachment_filename VARCHAR(255),
-    attachment_mime_type VARCHAR(255),
-    type VARCHAR(10) DEFAULT 'text',
-    read_at TIMESTAMP,
-    created_at TIMESTAMP
+    staff_id BIGINT UNSIGNED NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason TEXT,
+    status VARCHAR(255) DEFAULT 'Pending',
+    admin_notes TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
 );
 
--- 6. invoices
+-- Task Delegations
+CREATE TABLE task_delegations (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    assigned_to BIGINT UNSIGNED NOT NULL,
+    due_date DATE NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    notes TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Inventory Management
+```sql
+-- Suppliers
+CREATE TABLE suppliers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    contact_person VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    address TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Inventory Items
+CREATE TABLE inventory_items (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    item_category VARCHAR(255),
+    item_type VARCHAR(255),
+    serial_number VARCHAR(255) UNIQUE,
+    purchase_date DATE,
+    warranty_expiry DATE,
+    supplier_id BIGINT UNSIGNED,
+    assigned_to_type VARCHAR(255),
+    assigned_to_id BIGINT UNSIGNED,
+    last_maintenance_date DATE,
+    next_maintenance_due DATE,
+    maintenance_schedule VARCHAR(255),
+    notes TEXT,
+    status VARCHAR(255) DEFAULT 'Available',
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Inventory Requests
+CREATE TABLE inventory_requests (
+    id SERIAL PRIMARY KEY,
+    requester_id BIGINT UNSIGNED NOT NULL,
+    approver_id BIGINT UNSIGNED,
+    item_id BIGINT UNSIGNED NOT NULL,
+    quantity_requested INT DEFAULT 1,
+    quantity_approved INT,
+    reason TEXT,
+    status VARCHAR(255) DEFAULT 'Pending',
+    priority VARCHAR(255) DEFAULT 'Normal',
+    needed_by_date DATE,
+    approved_at TIMESTAMP,
+    fulfilled_at TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Inventory Transactions
+CREATE TABLE inventory_transactions (
+    id SERIAL PRIMARY KEY,
+    item_id BIGINT UNSIGNED NOT NULL,
+    request_id BIGINT UNSIGNED,
+    from_location VARCHAR(255),
+    to_location VARCHAR(255),
+    from_assigned_to_type VARCHAR(255),
+    from_assigned_to_id BIGINT UNSIGNED,
+    to_assigned_to_type VARCHAR(255),
+    to_assigned_to_id BIGINT UNSIGNED,
+    quantity INT NOT NULL,
+    transaction_type VARCHAR(255) NOT NULL,
+    performed_by_id BIGINT UNSIGNED NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Inventory Maintenance Records
+CREATE TABLE inventory_maintenance_records (
+    id SERIAL PRIMARY KEY,
+    item_id BIGINT UNSIGNED NOT NULL,
+    scheduled_date DATE,
+    actual_date DATE,
+    performed_by VARCHAR(255),
+    cost NUMERIC(10, 2),
+    description TEXT,
+    next_due_date DATE,
+    status VARCHAR(255) DEFAULT 'Scheduled',
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Inventory Alerts
+CREATE TABLE inventory_alerts (
+    id SERIAL PRIMARY KEY,
+    item_id BIGINT UNSIGNED,
+    alert_type VARCHAR(255) NOT NULL,
+    threshold_value VARCHAR(255),
+    message TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    triggered_at TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Marketing Management
+```sql
+-- Marketing Campaigns
+CREATE TABLE marketing_campaigns (
+    id SERIAL PRIMARY KEY,
+    platform VARCHAR(255),
+    campaign_name VARCHAR(255),
+    landing_page_url TEXT,
+    start_date DATE,
+    end_date DATE,
+    roi_report_url TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+-- Marketing Leads
+CREATE TABLE marketing_leads (
+    id SERIAL PRIMARY KEY,
+    lead_code VARCHAR(255) UNIQUE NOT NULL,
+    source_campaign_id BIGINT UNSIGNED,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    country VARCHAR(255),
+    utm_source VARCHAR(255),
+    utm_campaign VARCHAR(255),
+    utm_medium VARCHAR(255),
+    landing_page_id BIGINT UNSIGNED,
+    lead_score INT DEFAULT 0,
+    status VARCHAR(255) DEFAULT 'New',
+    assigned_staff_id BIGINT UNSIGNED,
+    converted_patient_id BIGINT UNSIGNED,
+    conversion_date TIMESTAMP,
+    notes TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Events Management
+```sql
+-- Events
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    is_free_service BOOLEAN DEFAULT FALSE,
+    broadcast_status VARCHAR(255) DEFAULT 'Draft',
+    is_pagume_campaign BOOLEAN DEFAULT FALSE,
+    location VARCHAR(255),
+    region VARCHAR(255),
+    woreda VARCHAR(255),
+    created_by_staff_id BIGINT UNSIGNED,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+---
+
+## 2. In Progress & Future Modules
+
+### Visit & Service Management
+```sql
+-- Visit Services
+CREATE TABLE visit_services (
+    id SERIAL PRIMARY KEY,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    staff_id BIGINT UNSIGNED,
+    scheduled_at TIMESTAMP,
+    check_in_time TIMESTAMP,
+    check_out_time TIMESTAMP,
+    visit_notes TEXT,
+    prescription_file VARCHAR(255),
+    vitals_file VARCHAR(255),
+    status VARCHAR(255) DEFAULT 'Pending',
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+```
+
+### Billing & Payments
+```sql
+-- Invoices
 CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    service_id INTEGER NOT NULL REFERENCES visit_services(id) ON DELETE CASCADE,
-    amount NUMERIC NOT NULL,
+    patient_id BIGINT UNSIGNED NOT NULL,
+    service_id BIGINT UNSIGNED NOT NULL,
+    invoice_number VARCHAR(255) UNIQUE NOT NULL,
+    invoice_date DATE NOT NULL,
+    due_date DATE NOT NULL,
+    subtotal NUMERIC(10, 2) NOT NULL,
+    tax_amount NUMERIC(10, 2) DEFAULT 0.00,
+    grand_total NUMERIC(10, 2) NOT NULL,
+    amount NUMERIC(10, 2) NOT NULL,
     status VARCHAR(255) DEFAULT 'Pending',
     paid_at TIMESTAMP,
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
 
--- 7. insurance_claims
-CREATE TABLE insurance_claims (
+-- Staff Payouts
+CREATE TABLE staff_payouts (
     id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    insurance_company VARCHAR(255),
-    claim_status VARCHAR(255) DEFAULT 'Submitted',
-    coverage_amount NUMERIC,
-    submitted_at TIMESTAMP,
-    processed_at TIMESTAMP,
-    created_at TIMESTAMP
-);
-
--- 8. inventory_items
-CREATE TABLE inventory_items (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    status VARCHAR(255) DEFAULT 'Available',
-    location TEXT,
-    expiry_date DATE,
-    photo TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 9. admin_task_tracking
-CREATE TABLE admin_task_tracking (
-    id SERIAL PRIMARY KEY,
-    staff_id INTEGER NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
-    visit_service_id INTEGER REFERENCES visit_services(id) ON DELETE SET NULL,
-    task_status VARCHAR(255) DEFAULT 'Assigned',
-    remarks TEXT,
-    assigned_date TIMESTAMP,
-    completed_date TIMESTAMP,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 10. partner_hospitals
-CREATE TABLE partner_hospitals (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    address TEXT,
-    contact_email VARCHAR(255),
-    contact_phone VARCHAR(255),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 11. referrals
-CREATE TABLE referrals (
-    id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    partner_hospital_id INTEGER NOT NULL REFERENCES partner_hospitals(id) ON DELETE CASCADE,
-    reason TEXT,
-    documents TEXT,
-    status VARCHAR(255) DEFAULT 'Requested',
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 12. marketing_campaigns
-CREATE TABLE marketing_campaigns (
-    id SERIAL PRIMARY KEY,
-    platform_id BIGINT UNSIGNED NULL REFERENCES marketing_platforms(id) ON DELETE SET NULL,
-    lead_source_id BIGINT UNSIGNED NULL REFERENCES lead_sources(id) ON DELETE SET NULL,
-    campaign_name VARCHAR(255) NOT NULL,
-    start_date DATE,
-    end_date DATE,
-    budget NUMERIC(15, 2),
-    target_audience TEXT,
-    status VARCHAR(50) DEFAULT 'Planned',
+    staff_id BIGINT UNSIGNED NOT NULL,
+    total_amount NUMERIC(10, 2) NOT NULL,
+    payout_date DATE NOT NULL,
+    status VARCHAR(255) DEFAULT 'Completed',
     notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 13. lead_sources
-CREATE TABLE lead_sources (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 14. marketing_platforms
-CREATE TABLE marketing_platforms (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
-    description TEXT,
-    api_key VARCHAR(255),
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 15. campaign_metrics
-CREATE TABLE campaign_metrics (
-    id SERIAL PRIMARY KEY,
-    campaign_id BIGINT UNSIGNED NOT NULL REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
-    metric_name VARCHAR(255) NOT NULL,
-    metric_value NUMERIC(15, 2) NOT NULL,
-    recorded_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 16. landing_pages
-CREATE TABLE landing_pages (
-    id SERIAL PRIMARY KEY,
-    campaign_id BIGINT UNSIGNED NULL REFERENCES marketing_campaigns(id) ON DELETE SET NULL,
-    name VARCHAR(255) NOT NULL,
-    url TEXT NOT NULL UNIQUE,
-    conversion_rate NUMERIC(5, 2),
-    notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 17. marketing_leads
-CREATE TABLE marketing_leads (
-    id SERIAL PRIMARY KEY,
-    lead_source_id BIGINT UNSIGNED NULL REFERENCES lead_sources(id) ON DELETE SET NULL,
-    campaign_id BIGINT UNSIGNED NULL REFERENCES marketing_campaigns(id) ON DELETE SET NULL,
-    landing_page_id BIGINT UNSIGNED NULL REFERENCES landing_pages(id) ON DELETE SET NULL,
-    full_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE,
-    phone_number VARCHAR(255),
-    status VARCHAR(50) DEFAULT 'New',
-    notes TEXT,
-    converted_to_patient_at TIMESTAMP,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 18. marketing_budgets
-CREATE TABLE marketing_budgets (
-    id SERIAL PRIMARY KEY,
-    campaign_id BIGINT UNSIGNED NULL REFERENCES marketing_campaigns(id) ON DELETE SET NULL,
-    allocated_amount NUMERIC(15, 2) NOT NULL,
-    spent_amount NUMERIC(15, 2) DEFAULT 0,
-    start_date DATE,
-    end_date DATE,
-    notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 19. marketing_tasks
-CREATE TABLE marketing_tasks (
-    id SERIAL PRIMARY KEY,
-    campaign_id BIGINT UNSIGNED NULL REFERENCES marketing_campaigns(id) ON DELETE SET NULL,
-    assigned_to_staff_id BIGINT UNSIGNED NULL REFERENCES staff(id) ON DELETE SET NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    due_date DATE,
-    status VARCHAR(50) DEFAULT 'Pending',
-    priority VARCHAR(50) DEFAULT 'Medium',
-    completed_at TIMESTAMP,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 20. campaign_contents
-CREATE TABLE campaign_contents (
-    id SERIAL PRIMARY KEY,
-    campaign_id BIGINT UNSIGNED NOT NULL REFERENCES marketing_campaigns(id) ON DELETE CASCADE,
-    content_type VARCHAR(255) NOT NULL,
-    content_url TEXT,
-    description TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- Update patients table with marketing fields
-ALTER TABLE patients
-ADD COLUMN IF NOT EXISTS marketing_lead_id BIGINT UNSIGNED NULL REFERENCES marketing_leads(id) ON DELETE SET NULL,
-ADD COLUMN IF NOT EXISTS acquisition_channel VARCHAR(255),
-ADD COLUMN IF NOT EXISTS initial_campaign_id BIGINT UNSIGNED NULL REFERENCES marketing_campaigns(id) ON DELETE SET NULL;
-
--- 21. international_referrals
-CREATE TABLE international_referrals (
-    id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    partner_country VARCHAR(255),
-    hospital_name VARCHAR(255),
-    visa_status VARCHAR(255),
-    documents_uploaded TEXT,
-    revenue_share_ratio NUMERIC,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 13. international_referrals
-CREATE TABLE international_referrals (
-    id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    partner_country VARCHAR(255),
-    hospital_name VARCHAR(255),
-    visa_status VARCHAR(255),
-    documents_uploaded TEXT,
-    revenue_share_ratio NUMERIC,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 14. events
-CREATE TABLE events (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    event_date DATE,
-    is_free_service BOOLEAN DEFAULT FALSE,
-    broadcast_status VARCHAR(255) DEFAULT 'Draft',
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
--- 15. ngo_networks
-CREATE TABLE ngo_networks (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    org_type VARCHAR(255),
-    engagement_level VARCHAR(255),
-    referral_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-🔐 1. insurance_companies
-CREATE TABLE insurance_companies (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    name_amharic VARCHAR(255),
-    contact_person VARCHAR(255),
-    contact_email VARCHAR(255),
-    contact_phone VARCHAR(255),
-    address TEXT,
-    address_amharic TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-🏢 2. corporate_clients
-CREATE TABLE corporate_clients (
-    id SERIAL PRIMARY KEY,
-    organization_name VARCHAR(255) NOT NULL,
-    organization_name_amharic VARCHAR(255),
-    contact_person VARCHAR(255),
-    contact_email VARCHAR(255),
-    contact_phone VARCHAR(255),
-    tin_number VARCHAR(50),
-    trade_license_number VARCHAR(100),
-    address TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-📜 3. insurance_policies
-CREATE TABLE insurance_policies (
-    id SERIAL PRIMARY KEY,
-    insurance_company_id INTEGER REFERENCES insurance_companies(id) ON DELETE SET NULL,
-    corporate_client_id INTEGER REFERENCES corporate_clients(id) ON DELETE SET NULL,
-    service_type VARCHAR(255), -- e.g., "Physiotherapy"
-    service_type_amharic VARCHAR(255),
-    coverage_percentage NUMERIC(5, 2) DEFAULT 100.00,
-    coverage_type VARCHAR(50) DEFAULT 'Full', -- Full / Partial / Copay
-    is_active BOOLEAN DEFAULT TRUE,
-    notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-👤 4. employee_insurance_records
-CREATE TABLE employee_insurance_records (
-    id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    policy_id INTEGER NOT NULL REFERENCES insurance_policies(id) ON DELETE CASCADE,
-    kebele_id VARCHAR(50),
-    woreda VARCHAR(100),
-    region VARCHAR(100),
-    federal_id VARCHAR(50),
-    ministry_department VARCHAR(255),
-    employee_id_number VARCHAR(100),
-    verified BOOLEAN DEFAULT FALSE,
-    verified_at TIMESTAMP,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-🧾 5. insurance_claims
-CREATE TABLE insurance_claims (
-    id SERIAL PRIMARY KEY,
-    patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
-    invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,
-    insurance_company_id INTEGER REFERENCES insurance_companies(id) ON DELETE SET NULL,
-    policy_id INTEGER REFERENCES insurance_policies(id) ON DELETE SET NULL,
-    claim_status VARCHAR(255) DEFAULT 'Submitted', -- Submitted, Approved, Rejected, Paid
-    coverage_amount NUMERIC,
-    paid_amount NUMERIC DEFAULT 0,
-    submitted_at TIMESTAMP,
-    processed_at TIMESTAMP,
-    payment_due_date DATE,
-    payment_received_at TIMESTAMP,
-    payment_method VARCHAR(50), -- Telebirr, Wire, Cash, etc.
-    reimbursement_required BOOLEAN DEFAULT FALSE,
-    receipt_number VARCHAR(100),
-    is_pre_authorized BOOLEAN DEFAULT FALSE,
-    pre_authorization_code VARCHAR(100),
-    denial_reason TEXT,
-    translated_notes TEXT,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-🌐 6. exchange_rates
-CREATE TABLE exchange_rates (
-    id SERIAL PRIMARY KEY,
-    currency_code VARCHAR(10) NOT NULL, -- e.g., USD
-    rate_to_etb NUMERIC(10, 4) NOT NULL,
-    source VARCHAR(255), -- e.g., "NBE"
-    date_effective DATE NOT NULL,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
-);
-
-📅 7. ethiopian_calendar_days
-CREATE TABLE ethiopian_calendar_days (
-    id SERIAL PRIMARY KEY,
-    gregorian_date DATE NOT NULL,
-    ethiopian_date VARCHAR(20),
-    description TEXT,
-    is_holiday BOOLEAN DEFAULT FALSE,
-    region VARCHAR(100),
     created_at TIMESTAMP,
     updated_at TIMESTAMP
 );
 ```
-
-## 2. Entity Relationship Summary
-
-- **staff ↔ patients**:
-    - Via `caregiver_assignments` (`staff_id` ↔ `patient_id`)
-    - Via `visit_services` (`staff_id` ↔ `patient_id`)
-    - Via `messages` (`sender_id` ↔ `receiver_id`)
-- **patients ↔ services**:
-    - Via `visit_services`
-    - Via `invoices`
-- **patients ↔ insurance_claims** (One-to-Many)
-- **staff ↔ admin_task_tracking** (One-to-Many)
-- **visit_services ↔ admin_task_tracking** (Optional One-to-One/Many)
-- **partner_hospitals ↔ referrals** (One-to-Many)
-- **patients** ↔ **referrals** (One-to-Many)
-- **patients ↔ international_referrals** (One-to-Many)
-- **marketing_campaigns ↔ patients** (Optional, via a pivot table, and direct link via `initial_campaign_id` in `patients`)
-- **marketing_campaigns ↔ lead_sources** (Many-to-One)
-- **marketing_campaigns ↔ marketing_platforms** (Many-to-One)
-- **marketing_campaigns ↔ campaign_metrics** (One-to-Many)
-- **marketing_campaigns ↔ landing_pages** (One-to-Many)
-- **marketing_campaigns ↔ marketing_leads** (One-to-Many)
-- **marketing_campaigns ↔ marketing_budgets** (One-to-Many)
-- **marketing_campaigns ↔ marketing_tasks** (One-to-Many)
-- **marketing_campaigns ↔ campaign_contents** (One-to-Many)
-- **lead_sources ↔ marketing_leads** (One-to-Many)
-- **landing_pages ↔ marketing_leads** (One-to-Many)
-- **patients ↔ marketing_leads** (One-to-One, via `marketing_lead_id` in `patients`)
-- **staff ↔ marketing_tasks** (One-to-Many, via `assigned_to_staff_id`)
-- **events ↔ broadcast** (Optional, via an extension table)

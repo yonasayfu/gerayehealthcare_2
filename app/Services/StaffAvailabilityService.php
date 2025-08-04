@@ -69,6 +69,12 @@ class StaffAvailabilityService extends BaseService
 
     public function create(array $data): StaffAvailability
     {
+        $dto = new CreateStaffAvailabilityDTO(
+            staff_id: $data['staff_id'],
+            start_time: $data['start_time'],
+            end_time: $data['end_time'],
+            status: $data['status']
+        );
         $this->checkOverlap($data);
         return parent::create($data);
     }

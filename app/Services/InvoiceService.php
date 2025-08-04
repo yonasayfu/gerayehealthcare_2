@@ -55,6 +55,7 @@ class InvoiceService extends BaseService
             // 2. Create the main invoice record
             $invoice = parent::create([
                 'patient_id' => $data['patient_id'],
+                'invoice_number' => 'INV-' . uniqid(), // Generate unique invoice number
                 'invoice_date' => $data['invoice_date'],
                 'due_date' => $data['due_date'],
                 'subtotal' => $subtotal,

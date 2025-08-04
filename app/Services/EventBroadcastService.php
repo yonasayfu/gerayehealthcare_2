@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateEventBroadcastDTO;
 use App\Models\EventBroadcast;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

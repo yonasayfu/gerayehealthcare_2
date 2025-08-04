@@ -2,31 +2,31 @@
 
 namespace App\Services\Validation\Rules;
 
-class InsuranceCompanyRules extends BaseResourceRules
+class InsuranceCompanyRules
 {
     public static function store(): array
     {
         return [
             'name' => 'required|string|max:255',
+            'name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:insurance_companies,email',
-            'phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-            'website' => 'nullable|url',
-            'is_active' => 'boolean',
+            'address_amharic' => 'nullable|string',
         ];
     }
-    
-    public static function update($company): array
+
+    public static function update(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
+            'name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:insurance_companies,email,' . $company->id,
-            'phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-            'website' => 'nullable|url',
-            'is_active' => 'boolean',
+            'address_amharic' => 'nullable|string',
         ];
     }
 }

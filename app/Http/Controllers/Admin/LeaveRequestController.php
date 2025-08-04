@@ -18,18 +18,10 @@ class LeaveRequestController extends BaseController
             LeaveRequestRules::class,
             'Admin/LeaveRequests',
             'leaveRequests',
-            LeaveRequest::class
+            LeaveRequest::class,
+            CreateLeaveRequestDTO::class
         );
     }
 
-    public function update(Request $request, LeaveRequest $leaveRequest)
-    {
-        try {
-            $this->service->update($leaveRequest->id, $request->all());
-            session()->flash('success', 'Leave request status updated.');
-        } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
-        }
-        return Inertia::location(route('admin.admin-leave-requests.index', request()->query()));
-    }
+    
 }

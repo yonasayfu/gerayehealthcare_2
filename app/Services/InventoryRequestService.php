@@ -58,7 +58,7 @@ class InventoryRequestService extends BaseService
     public function create(array $data): InventoryRequest
     {
         $inventoryRequest = parent::create($data);
-        $this->checkInventoryAlert($inventoryRequest);
+        event(new InventoryRequestSaved($inventoryRequest));
         return $inventoryRequest;
     }
 
@@ -69,18 +69,7 @@ class InventoryRequestService extends BaseService
         return $inventoryRequest;
     }
 
-    protected function checkInventoryAlert(InventoryRequest $inventoryRequest): void
-    {
-        $inventoryItem = InventoryItem::find($inventoryRequest->item_id);
-        if ($inventoryItem && $inventoryRequest->quantity_requested > $inventoryItem->quantity) {
-            InventoryAlert::create([
-                'item_id' => $inventoryItem->id,
-                'alert_type' => 'Low Stock',
-                'message' => "Inventory request {$inventoryRequest->id} requests {$inventoryRequest->quantity_requested} of {$inventoryItem->name}, but only {$inventoryItem->quantity} are available.",
-                'is_active' => true,
-            ]);
-        }
-    }
+    
 
     public function export(Request $request)
     {

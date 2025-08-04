@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateMarketingLeadDTO;
 use App\Models\MarketingLead;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

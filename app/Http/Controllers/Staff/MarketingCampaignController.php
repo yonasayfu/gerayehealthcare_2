@@ -70,34 +70,5 @@ class MarketingCampaignController extends Controller
         ]);
     }
 
-    public function show(MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-
-        return Inertia::render('Staff/MarketingCampaigns/Show', [
-            'marketingCampaign' => $marketingCampaign,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-
-        return Inertia::render('Staff/MarketingCampaigns/Edit', [
-            'marketingCampaign' => $marketingCampaign,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingCampaignRequest $request, MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->update($request->validated());
-
-        return redirect()->route('staff.marketing-campaigns.index')->with('success', 'Marketing Campaign updated successfully.');
-    }
+    
 }

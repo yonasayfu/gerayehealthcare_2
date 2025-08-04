@@ -80,7 +80,31 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
     ],
   },
-  communicationNavGroup,
+  {
+    group: 'Administrative Tools',
+    icon: UserCog,
+    items: [
+      { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
+      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
+      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
+      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
+      { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
+      { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
+    ],
+  },
+  {
+    group: 'Inventory Management',
+    icon: Warehouse,
+    items: [
+      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
+      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
+      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
+      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+    ],
+  },
   {
     group: 'Marketing Management',
     icon: Megaphone,
@@ -94,19 +118,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
       { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'manage marketing' },
       { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
-    ],
-  },
-  {
-    group: 'Administrative Tools',
-    icon: UserCog,
-    items: [
-      { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
-      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
-      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
-      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
-      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-      { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
-      { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
     ],
   },
   {
@@ -133,18 +144,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Ethiopian Calendar Days', routeName: 'admin.ethiopian-calendar-days.index', icon: CalendarDays, permission: 'view ethiopian calendar days' },
     ],
   },
-  {
-    group: 'Inventory Management',
-    icon: Warehouse,
-    items: [
-      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
-      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
-      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
-      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
-      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
-      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
-    ],
-  },
+  communicationNavGroup,
   {
     group: 'Integrations',
     icon: Globe2,

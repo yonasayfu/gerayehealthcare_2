@@ -19,42 +19,13 @@ class EventController extends BaseController
             EventRules::class,
             'Admin/Events',
             'events',
-            Event::class
+            Event::class,
+            CreateEventDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-    public function create()
-    {
-        // Not implemented for now
-        return Inertia::render('Admin/Events/Create');
-    }
+    
 
-    public function show(Event $event)
-    {
-        return parent::show($event->id);
-    }
-
-    public function edit(Event $event)
-    {
-        // Not implemented for now
-        return Inertia::render('Admin/Events/Edit', [
-            'event' => $event,
-        ]);
-    }
-
-    public function update(Request $request, Event $event)
-    {
-        return parent::update($request, $event->id);
-    }
-
-    public function destroy(Event $event)
-    {
-        return parent::destroy($event->id);
-    }
-
-    public function printSingle(Event $event)
-    {
-        return parent::printSingle($event->id);
-    }
+  
 }

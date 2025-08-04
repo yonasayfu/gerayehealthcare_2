@@ -65,34 +65,5 @@ class MarketingLeadController extends Controller
         ]);
     }
 
-    public function show(MarketingLead $marketingLead)
-    {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
-
-        return Inertia::render('Staff/MarketingLeads/Show', [
-            'marketingLead' => $marketingLead,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MarketingLead $marketingLead)
-    {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
-
-        return Inertia::render('Staff/MarketingLeads/Edit', [
-            'marketingLead' => $marketingLead,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingLeadRequest $request, MarketingLead $marketingLead)
-    {
-        $marketingLead->update($request->validated());
-
-        return redirect()->route('staff.marketing-leads.index')->with('success', 'Marketing Lead updated successfully.');
-    }
+   
 }

@@ -13,6 +13,7 @@ class ExportConfig
             'searchable_fields' => ['full_name', 'email'],
             'sortable_fields' => ['full_name', 'patient_code', 'created_at', 'date_of_birth'],
             'default_sort' => 'created_at',
+            'filename_prefix' => 'patients', // Added for CSV export
             'select_fields' => [
                 'full_name', 'patient_code', 'fayda_id', 'email', 'source', 
                 'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth'
@@ -27,13 +28,14 @@ class ExportConfig
                     'full_name', 'patient_code', 'fayda_id', 'email', 'source',
                     'phone_number', 'address', 'gender', 'emergency_contact'
                 ],
-                'filename' => 'patients.csv'
+                'filename_prefix' => 'patients' // Changed from 'filename' to 'filename_prefix'
             ],
             
             'pdf' => [
+                'view' => 'print-layout', // Changed to print-layout
                 'title' => 'Patient Export - Geraye Home Care Services',
                 'document_title' => 'Patient Records Export',
-                'filename' => 'patients.pdf',
+                'filename_prefix' => 'patients',
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'fields' => [
@@ -60,10 +62,11 @@ class ExportConfig
                 ]
             ],
             
-            'print_current' => [
+            'current_page' => [
+                'view' => 'print-layout', // Changed to print-layout
                 'title' => 'Patient List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Patient List (Current View)',
-                'filename' => 'patients-current.pdf',
+                'filename_prefix' => 'patients-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'fields' => [
@@ -92,10 +95,11 @@ class ExportConfig
                 ]
             ],
             
-            'print_all' => [
+            'all_records' => [
+                'view' => 'print-layout', // Changed to print-layout
                 'title' => 'Patient List - Geraye Home Care Services',
                 'document_title' => 'Patient Records Export',
-                'filename' => 'patients.pdf',
+                'filename_prefix' => 'patients',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'default_sort' => 'full_name',
@@ -126,6 +130,10 @@ class ExportConfig
             ],
             
             'single_record' => [
+                'view' => 'print-layout',
+                'title' => 'Patient Record - Geraye Home Care Services',
+                'document_title' => 'Patient Record',
+                'filename_prefix' => 'patient-record',
                 'fields' => [
                     'Full Name' => 'full_name',
                     'Patient Code' => ['field' => 'patient_code', 'default' => '-'],
@@ -141,8 +149,27 @@ class ExportConfig
                     'Phone Number' => 'phone_number',
                     'Email' => 'email',
                     'Address' => ['field' => 'address', 'default' => '-'],
-                    'Emergency Contact' => 'emergency_contact',
+                    'Emergency Contact' => ['field' => 'emergency_contact', 'default' => '-'],
                     'Source' => ['field' => 'source', 'default' => '-'],
+                    'Registered By Staff' => ['field' => 'registeredByStaff.full_name', 'default' => '-'],
+                    'Registered Date' => ['field' => 'created_at', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                    'Last Updated' => ['field' => 'updated_at', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'full_name', 'label' => 'Full Name'],
+                    ['key' => 'patient_code', 'label' => 'Patient Code'],
+                    ['key' => 'fayda_id', 'label' => 'Fayda ID'],
+                    ['key' => 'date_of_birth', 'label' => 'Date of Birth'],
+                    ['key' => 'age', 'label' => 'Age', 'transform' => function($value, $model) { return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age . ' years' : '-'; }],
+                    ['key' => 'gender', 'label' => 'Gender'],
+                    ['key' => 'phone_number', 'label' => 'Phone Number'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'address', 'label' => 'Address'],
+                    ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
+                    ['key' => 'source', 'label' => 'Source'],
+                    ['key' => 'registeredByStaff.full_name', 'label' => 'Registered By Staff'],
+                    ['key' => 'created_at', 'label' => 'Registered Date', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                    ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
                 ]
             ]
         ];
@@ -489,7 +516,7 @@ class ExportConfig
             'print_current' => [
                 'title' => 'Caregiver Assignments (Current View) - Geraye',
                 'document_title' => 'Caregiver Assignments (Current View)',
-                'filename' => 'assignments-current.pdf',
+                'filename_prefix' => 'assignments-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'fields' => [
@@ -527,7 +554,7 @@ class ExportConfig
             'print_all' => [
                 'title' => 'All Caregiver Assignments - Geraye',
                 'document_title' => 'Caregiver Assignment Records Export',
-                'filename' => 'assignments-all.pdf',
+                'filename_prefix' => 'assignments-all',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'default_sort' => 'shift_start',

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateTaskDelegationDTO;
 use App\Models\TaskDelegation;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

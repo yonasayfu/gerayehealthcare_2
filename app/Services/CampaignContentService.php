@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateCampaignContentDTO;
 use App\Models\CampaignContent;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;

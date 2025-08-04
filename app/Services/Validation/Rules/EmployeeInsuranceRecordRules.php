@@ -2,33 +2,37 @@
 
 namespace App\Services\Validation\Rules;
 
-class EmployeeInsuranceRecordRules extends BaseResourceRules
+class EmployeeInsuranceRecordRules
 {
     public static function store(): array
     {
         return [
-            'staff_id' => 'required|exists:staff,id',
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'policy_number' => 'required|string|max:255|unique:employee_insurance_records,policy_number',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'coverage_amount' => 'required|numeric|min:0',
-            'premium_amount' => 'required|numeric|min:0',
-            'status' => 'required|string|in:Active,Expired,Cancelled',
+            'patient_id' => 'required|integer|exists:patients,id',
+            'policy_id' => 'required|integer|exists:insurance_policies,id',
+            'kebele_id' => 'nullable|string|max:50',
+            'woreda' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'federal_id' => 'nullable|string|max:50',
+            'ministry_department' => 'nullable|string|max:255',
+            'employee_id_number' => 'nullable|string|max:100',
+            'verified' => 'boolean',
+            'verified_at' => 'nullable|date',
         ];
     }
-    
-    public static function update($record): array
+
+    public static function update(): array
     {
         return [
-            'staff_id' => 'required|exists:staff,id',
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'policy_number' => 'required|string|max:255|unique:employee_insurance_records,policy_number,' . $record->id,
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'coverage_amount' => 'required|numeric|min:0',
-            'premium_amount' => 'required|numeric|min:0',
-            'status' => 'required|string|in:Active,Expired,Cancelled',
+            'patient_id' => 'sometimes|required|integer|exists:patients,id',
+            'policy_id' => 'sometimes|required|integer|exists:insurance_policies,id',
+            'kebele_id' => 'nullable|string|max:50',
+            'woreda' => 'nullable|string|max:100',
+            'region' => 'nullable|string|max:100',
+            'federal_id' => 'nullable|string|max:50',
+            'ministry_department' => 'nullable|string|max:255',
+            'employee_id_number' => 'nullable|string|max:100',
+            'verified' => 'boolean',
+            'verified_at' => 'nullable|date',
         ];
     }
 }

@@ -1,0 +1,167 @@
+<?php
+
+namespace App\Http\Traits;
+
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Response;
+
+trait ExportableTrait
+{
+    protected function handleExport(Request $request, $modelClass, array $config)
+    {
+        $type = $request->input('type', 'csv'); // Default to CSV
+
+        $query = $modelClass::query();
+
+        // Apply filters, search, and sorting based on request
+        if (method_exists($this, 'applyFilters')) {
+            $this->applyFilters($query, $request);
+        }
+        if (method_exists($this, 'applySearch')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+        if (method_exists($this, 'applySorting')) {
+            $this->applySorting($query, $request);
+        }
+
+        $data = $query->get();
+
+        if ($type === 'csv') {
+            $csvConfig = $config['csv'];
+            $csvFileName = $csvConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $csvFileName . '"',
+            ];
+
+            $callback = function() use ($data, $csvConfig) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $csvConfig['headers']);
+
+                foreach ($data as $row) {
+                    $csvRow = [];
+                    foreach ($csvConfig['fields'] as $field) {
+                        // Handle fields that are arrays with 'field' and 'transform'
+                        if (is_array($field) && isset($field['field'])) {
+                            $value = data_get($row, $field['field']);
+                            if (isset($field['transform']) && is_callable($field['transform'])) {
+                                $csvRow[] = $field['transform']($value, $row);
+                            } else {
+                                $csvRow[] = $value;
+                            }
+                        } else {
+                            $csvRow[] = data_get($row, $field);
+                        }
+                    }
+                    fputcsv($file, $csvRow);
+                }
+                fclose($file);
+            };
+
+            return Response::stream($callback, 200, $headers);
+        } elseif ($type === 'pdf') {
+            $pdfConfig = $config['pdf'];
+            $pdf = Pdf::loadView($pdfConfig['view'], [
+                'items' => $data, // Assuming 'items' is the variable name in the PDF view
+                'document_title' => $pdfConfig['document_title'],
+                'columns' => $pdfConfig['columns'] ?? [], // Pass columns for dynamic table rendering
+            ])->setPaper('a4', $pdfConfig['orientation'] ?? 'portrait');
+
+            if ($request->input('preview')) {
+                return $pdf->stream($pdfConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            } else {
+                return $pdf->download($pdfConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            }
+        }
+
+        // If type is not recognized, return a 404 or an error response
+        abort(404, 'Export type not supported.');
+    }
+
+    protected function handlePrintAll(Request $request, $modelClass, array $config)
+    {
+        $query = $modelClass::query();
+
+        // Apply filters, search, and sorting based on request
+        if (method_exists($this, 'applyFilters')) {
+            $this->applyFilters($query, $request);
+        }
+        if (method_exists($this, 'applySearch')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+        if (method_exists($this, 'applySorting')) {
+            $this->applySorting($query, $request);
+        }
+
+        $data = $query->get();
+
+        $pdf = Pdf::loadView($config['all_records']['view'], [
+            $config['data_variable_name'] => $data,
+            'document_title' => $config['all_records']['document_title'],
+        ])->setPaper('a4', 'landscape');
+
+        if ($request->input('preview')) {
+            return $pdf->stream($config['all_records']['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+        } else {
+            return $pdf->download($config['all_records']['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+        }
+    }
+
+    protected function handlePrintCurrent(Request $request, $modelClass, array $config)
+    {
+        $query = $modelClass::query();
+
+        // Apply filters, search, and sorting based on request
+        if (method_exists($this, 'applyFilters')) {
+            $this->applyFilters($query, $request);
+        }
+        if (method_exists($this, 'applySearch')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+        if (method_exists($this, 'applySorting')) {
+            $this->applySorting($query, $request);
+        }
+
+        $data = $query->paginate($request->input('per_page', 10));
+
+        $pdf = Pdf::loadView($config['current_page']['view'], [
+            $config['data_variable_name'] => $data,
+            'document_title' => $config['current_page']['document_title'],
+        ])->setPaper('a4', 'landscape');
+
+        if ($request->input('preview')) {
+            return $pdf->stream($config['current_page']['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+        } else {
+            return $pdf->download($config['current_page']['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+        }
+    }
+
+    protected function handlePrintSingle(Request $request, $modelInstance, array $config)
+    {
+        $pdf = Pdf::loadView($config['single_record']['view'], [
+            'item' => $modelInstance,
+            'document_title' => $config['single_record']['document_title'],
+        ])->setPaper('a4', 'portrait');
+
+        if ($request->input('preview')) {
+            return $pdf->stream($config['single_record']['filename_prefix'] . '_' . $modelInstance->id . '.pdf');
+        } else {
+            return $pdf->download($config['single_record']['filename_prefix'] . '_' . $modelInstance->id . '.pdf');
+        }
+    }
+
+    protected function generateSingleRecordPdf($modelInstance, array $config)
+    {
+        $pdf = Pdf::loadView($config['view'], [
+            'item' => $modelInstance,
+            'document_title' => $config['document_title'],
+        ])->setPaper('a4', 'portrait');
+
+        if ($request->input('preview')) {
+            return $pdf->stream($config['filename']);
+        } else {
+            return $pdf->download($config['filename']);
+        }
+    }
+}

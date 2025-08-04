@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -29,5 +30,21 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if ($e instanceof ResourceNotFoundException) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Resource not found.'], 404);
+                }
+                return back()->with('error', 'Resource not found.');
+            }
+
+            if ($e instanceof ValidationException) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $e->getMessage(), 'errors' => []], 422);
+                }
+                return back()->with('error', $e->getMessage());
+            }
+
+            return null; // Let the default handler take over
+        });
     })->create();

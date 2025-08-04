@@ -2,27 +2,27 @@
 
 namespace App\Services\Validation\Rules;
 
-class EligibilityCriteriaRules extends BaseResourceRules
+class EligibilityCriteriaRules
 {
     public static function store(): array
     {
         return [
-            'service_id' => 'required|exists:services,id',
-            'criteria_type' => 'required|string|in:Age,Income,Condition,Other',
-            'operator' => 'required|string|in:>,>=,<,<=,=,!=,contains',
-            'value' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'criteria_type' => 'nullable|string|max:255',
+            'value' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
         ];
     }
-    
-    public static function update($criteria): array
+
+    public static function update(): array
     {
         return [
-            'service_id' => 'required|exists:services,id',
-            'criteria_type' => 'required|string|in:Age,Income,Condition,Other',
-            'operator' => 'required|string|in:>,>=,<,<=,=,!=,contains',
-            'value' => 'required|string|max:255',
+            'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
+            'criteria_type' => 'nullable|string|max:255',
+            'value' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
         ];
     }
 }

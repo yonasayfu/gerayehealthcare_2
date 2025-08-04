@@ -2,29 +2,33 @@
 
 namespace App\Services\Validation\Rules;
 
-class CorporateClientRules extends BaseResourceRules
+class CorporateClientRules
 {
     public static function store(): array
     {
         return [
-            'company_name' => 'required|string|max:255',
+            'organization_name' => 'required|string|max:255',
+            'organization_name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:corporate_clients,email',
-            'phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:255',
+            'tin_number' => 'nullable|string|max:50',
+            'trade_license_number' => 'nullable|string|max:100',
             'address' => 'nullable|string',
-            'is_active' => 'boolean',
         ];
     }
-    
-    public static function update($client): array
+
+    public static function update(): array
     {
         return [
-            'company_name' => 'required|string|max:255',
+            'organization_name' => 'sometimes|required|string|max:255',
+            'organization_name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:corporate_clients,email,' . $client->id,
-            'phone' => 'nullable|string|max:20',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:255',
+            'tin_number' => 'nullable|string|max:50',
+            'trade_license_number' => 'nullable|string|max:100',
             'address' => 'nullable|string',
-            'is_active' => 'boolean',
         ];
     }
 }

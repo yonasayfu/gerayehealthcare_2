@@ -22,23 +22,5 @@ class UserController extends BaseController
         );
     }
 
-    public function edit(User $user)
-    {
-        $user->load('roles');
-        
-        return Inertia::render('Admin/Users/Edit', [
-            'user' => $user,
-            'roles' => Role::all()->pluck('name'),
-        ]);
-    }
-
-    public function update(Request $request, User $user)
-    {
-        return parent::update($request, $user->id);
-    }
-
-    public function destroy(User $user)
-    {
-        return parent::destroy($user->id);
-    }
+    
 }

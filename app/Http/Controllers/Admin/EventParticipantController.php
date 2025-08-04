@@ -18,33 +18,11 @@ class EventParticipantController extends BaseController
             EventParticipantRules::class,
             'Admin/EventParticipants',
             'participants',
-            EventParticipant::class
+            EventParticipant::class,
+            CreateEventParticipantDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-    public function show(EventParticipant $eventParticipant)
-    {
-        return parent::show($eventParticipant->id);
-    }
-
-    public function edit(EventParticipant $eventParticipant)
-    {
-        return parent::edit($eventParticipant->id);
-    }
-
-    public function update(Request $request, EventParticipant $eventParticipant)
-    {
-        return parent::update($request, $eventParticipant->id);
-    }
-
-    public function destroy(EventParticipant $eventParticipant)
-    {
-        return parent::destroy($eventParticipant->id);
-    }
-
-    public function printSingle(EventParticipant $eventParticipant)
-    {
-        return parent::printSingle($eventParticipant->id);
-    }
+   
 }

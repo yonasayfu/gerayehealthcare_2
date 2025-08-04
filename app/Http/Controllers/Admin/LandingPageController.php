@@ -19,44 +19,10 @@ class LandingPageController extends BaseController
             LandingPageRules::class,
             'Admin/LandingPages',
             'landingPages',
-            LandingPage::class
+            LandingPage::class,
+            CreateLandingPageDTO::class
         );
     }
 
-    public function create()
-    {
-        return Inertia::render('Admin/LandingPages/Create', [
-            'campaigns' => MarketingCampaign::all(['id', 'campaign_name']),
-        ]);
-    }
-
-    public function show(LandingPage $landingPage)
-    {
-        return parent::show($landingPage->id);
-    }
-
-    public function edit(LandingPage $landingPage)
-    {
-        $data = $this->service->getById($landingPage->id);
-        return Inertia::render('Admin/LandingPages/Edit', [
-            'landingPage' => $data,
-            'campaigns' => MarketingCampaign::all(['id', 'campaign_name']),
-        ]);
-    }
-
-    public function update(Request $request, LandingPage $landingPage)
-    {
-        return parent::update($request, $landingPage->id);
-    }
-
-    public function destroy(LandingPage $landingPage)
-    {
-        return parent::destroy($landingPage->id);
-    }
-
-    public function export(Request $request, $type)
-    {
-        $request->merge(['type' => $type]);
-        return parent::export($request);
-    }
+    
 }

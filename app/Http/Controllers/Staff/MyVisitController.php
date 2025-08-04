@@ -15,6 +15,13 @@ use App\Http\Requests\StoreVisitReportRequest;
 
 class MyVisitController extends Controller
 {
+    protected $visitServiceService;
+
+    public function __construct(VisitServiceService $visitServiceService)
+    {
+        $this->visitServiceService = $visitServiceService;
+    }
+
     /**
      * Display a listing of the visits assigned to the authenticated staff member.
      */
@@ -106,15 +113,28 @@ class MyVisitController extends Controller
 
         $validated = $request->validated();
 
-        // Find the selected service to get its price
-        $service = Service::find($validated['service_id']);
-
-        $visit->update([
-            'service_id' => $validated['service_id'],
-            'visit_notes' => $validated['visit_notes'],
-            'cost' => $service->price, // Update the visit cost based on the selected service's price
-        ]);
-
-        return redirect()->route('staff.my-visits.index')->with('success', 'Visit report filed successfully.');
+        try {
+            $dto = new UpdateVisitServiceDTO(
+                patient_id: $visit->patient_id,
+                staff_id: $visit->staff_id,
+                scheduled_at: $visit->scheduled_at->toDateTimeString(),
+                check_in_time: $visit->check_in_time?->toDateTimeString(),
+                check_out_time: $visit->check_out_time?->toDateTimeString(),
+                visit_notes: $validated['visit_notes'],
+                prescription_file: $request->file('prescription_file'),
+                vitals_file: $request->file('vitals_file'),
+                status: $visit->status,
+                cost: $validated['cost'],
+                is_paid_to_staff: $visit->is_paid_to_staff,
+                is_invoiced: $visit->is_invoiced,
+                service_id: $validated['service_id'],
+                assignment_id: $visit->assignment_id,
+                event_id: $visit->event_id
+            );
+            $this->visitServiceService->update($visit->id, $dto);
+            return redirect()->route('staff.my-visits.index')->with('success', 'Visit report filed successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
     }
 }

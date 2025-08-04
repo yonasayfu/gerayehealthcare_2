@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
+use App\DTOs\CreateStaffPayoutDTO;
 use App\Models\Staff;
 use App\Models\StaffPayout;
 use App\Models\VisitService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Services\BaseService;
 
-class StaffPayoutService
+class StaffPayoutService extends BaseService
 {
     public function getStaffEarningsData(): array
     {
@@ -34,9 +36,14 @@ class StaffPayoutService
         ];
     }
 
-    public function processPayout(int $staffId): void
+    public function __construct(StaffPayout $staffPayout)
     {
-        $unpaidVisits = VisitService::where('staff_id', $staffId)
+        parent::__construct($staffPayout);
+    }
+
+    public function processPayout(CreateStaffPayoutDTO $dto): void
+    {
+        $unpaidVisits = VisitService::where('staff_id', $dto->staff_id)
             ->where('is_paid_to_staff', false)
             ->where('status', 'Completed')
             ->get();
@@ -47,12 +54,12 @@ class StaffPayoutService
 
         $totalAmount = $unpaidVisits->sum('cost');
 
-        DB::transaction(function () use ($staffId, $unpaidVisits, $totalAmount) {
-            $payout = StaffPayout::create([
-                'staff_id' => $staffId,
+        DB::transaction(function () use ($dto, $unpaidVisits, $totalAmount) {
+            $payout = parent::create([
+                'staff_id' => $dto->staff_id,
                 'total_amount' => $totalAmount,
                 'payout_date' => Carbon::today(),
-                'notes' => 'Monthly Payout',
+                'notes' => $dto->notes ?? 'Monthly Payout',
             ]);
 
             $payout->visitServices()->attach($unpaidVisits->pluck('id'));

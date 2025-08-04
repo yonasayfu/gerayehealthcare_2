@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Staff;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
 use Illuminate\Http\Request;
@@ -12,18 +12,33 @@ use App\Http\Requests\GetEventsRequest;
 use App\Http\Requests\StoreMyAvailabilityRequest;
 use App\Http\Requests\UpdateMyAvailabilityRequest;
 
-class MyAvailabilityController extends Controller
+class MyAvailabilityController extends BaseController
 {
+    protected $staffAvailabilityService;
+
+    public function __construct(StaffAvailabilityService $staffAvailabilityService)
+    {
+        parent::__construct(
+            $staffAvailabilityService,
+            null,
+            'Staff/MyAvailability',
+            'myAvailabilities',
+            StaffAvailability::class,
+            CreateStaffAvailabilityDTO::class
+        );
+    }
+
     /**
      * Display the calendar view for the authenticated staff member.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return \Inertia\Inertia::render('Staff/MyAvailability/Index', [
-            'staff' => Auth::user()->staff,
-        ]);
+        return parent::index($request);
     }
 
+    /**
+     * Handle the request for calendar events.
+     */
     public function getEvents(GetEventsRequest $request)
     {
         $validated = $request->validated();
@@ -73,68 +88,5 @@ class MyAvailabilityController extends Controller
         });
 
         return response()->json($availabilityEvents->concat($visitEvents));
-    }
-
-    /**
-     * Store a new availability slot.
-     */
-    public function store(StoreMyAvailabilityRequest $request)
-    {
-        $validated = $request->validated();
-
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
-        Auth::user()->staff->availabilities()->create($validated);
-
-        return back()->with('success', 'Availability created.');
-    }
-
-    /**
-     * Update an existing availability slot.
-     */
-    public function update(UpdateMyAvailabilityRequest $request, StaffAvailability $availability)
-    {
-        if ($availability->staff_id !== Auth::user()->staff->id) {
-            abort(403);
-        }
-
-        $validated = $request->validated();
-
-        // Check for overlapping availability for the staff
-        $overlap = StaffAvailability::where('staff_id', Auth::user()->staff->id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->where('id', '<>', $availability->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
-        $availability->update($validated);
-
-        return back()->with('success', 'Availability updated.');
-    }
-
-    /**
-     * Remove an availability slot.
-     */
-    public function destroy(StaffAvailability $availability)
-    {
-        if ($availability->staff_id !== Auth::user()->staff->id) {
-            abort(403);
-        }
-
-        $availability->delete();
-
-        return back()->with('success', 'Availability deleted.');
     }
 }

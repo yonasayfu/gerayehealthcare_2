@@ -20,29 +20,10 @@ class InvoiceController extends BaseController
             InvoiceRules::class,
             'Admin/Invoices',
             'invoices',
-            Invoice::class
+            Invoice::class,
+            CreateInvoiceDTO::class
         );
     }
 
-    public function create(Request $request)
-    {
-        $billableVisits = [];
-        if ($request->has('patient_id')) {
-            $billableVisits = VisitService::where('patient_id', $request->patient_id)
-                ->where('status', 'Completed')
-                ->where('is_invoiced', false)
-                ->get();
-        }
-
-        return Inertia::render('Admin/Invoices/Create', [
-            'patients' => Patient::orderBy('full_name')->get(['id', 'full_name']),
-            'selectedPatientId' => $request->input('patient_id'),
-            'billableVisits' => $billableVisits,
-        ]);
-    }
-
-    public function show(Invoice $invoice)
-    {
-        return parent::show($invoice->id);
-    }
+    
 }

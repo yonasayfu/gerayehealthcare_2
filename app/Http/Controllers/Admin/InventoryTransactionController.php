@@ -17,17 +17,10 @@ class InventoryTransactionController extends BaseController
             InventoryTransactionRules::class,
             'Admin/InventoryTransactions',
             'inventoryTransactions',
-            InventoryTransaction::class
+            InventoryTransaction::class,
+            CreateInventoryTransactionDTO::class
         );
     }
 
-    public function show(InventoryTransaction $inventoryTransaction)
-    {
-        return parent::show($inventoryTransaction->id);
-    }
-
-    public function printSingle(InventoryTransaction $inventoryTransaction)
-    {
-        return parent::printSingle($inventoryTransaction->id);
-    }
+    
 }

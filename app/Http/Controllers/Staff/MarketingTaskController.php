@@ -73,34 +73,5 @@ class MarketingTaskController extends Controller
         ]);
     }
 
-    public function show(MarketingTask $marketingTask)
-    {
-        $marketingTask->load(['campaign', 'assignedToStaff', 'relatedContent', 'doctor']);
-
-        return Inertia::render('Staff/MarketingTasks/Show', [
-            'marketingTask' => $marketingTask,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MarketingTask $marketingTask)
-    {
-        $marketingTask->load(['campaign', 'assignedToStaff', 'relatedContent', 'doctor']);
-
-        return Inertia::render('Staff/MarketingTasks/Edit', [
-            'marketingTask' => $marketingTask,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingTaskRequest $request, MarketingTask $marketingTask)
-    {
-        $marketingTask->update($request->validated());
-
-        return redirect()->route('staff.marketing-tasks.index')->with('success', 'Marketing Task updated successfully.');
-    }
+    
 }
