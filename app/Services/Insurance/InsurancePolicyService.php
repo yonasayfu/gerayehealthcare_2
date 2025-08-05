@@ -13,8 +13,9 @@ class InsurancePolicyService extends BaseService
         parent::__construct($insurancePolicy);
     }
 
-    public function create(array $data): InsurancePolicy
+    public function create(array|object $data): InsurancePolicy
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 }

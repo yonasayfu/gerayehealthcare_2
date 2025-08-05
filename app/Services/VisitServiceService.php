@@ -6,6 +6,7 @@ use App\Models\VisitService;
 use App\Models\Staff;
 use App\Models\CaregiverAssignment;
 use App\Models\EventStaffAssignment;
+use App\Events\StaffAssignedToEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -45,8 +46,9 @@ class VisitServiceService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function create(array $data): VisitService
+    public function create(array|object $data): VisitService
     {
+        $data = is_object($data) ? (array) $data : $data;
 
         $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
                                            ->where('staff_id', $data['staff_id'])
@@ -68,7 +70,8 @@ class VisitServiceService extends BaseService
 
         $visitService = parent::create($data);
 
-        if (isset($data['event_id'])) {
+        // Trigger event for staff assignment
+        if (isset($data['event_id']) && isset($data['staff_id'])) {
             event(new StaffAssignedToEvent($data['event_id'], $data['staff_id']));
         }
         return $visitService;
@@ -139,5 +142,30 @@ class VisitServiceService extends BaseService
         if ($overlap->exists()) {
             throw new \Exception('Conflict: This staff member is already scheduled for another visit at this time.');
         }
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+    }
+
+    public function printSingle($id, Request $request)
+    {
+        $visitService = $this->getById($id);
+        $visitService->load(['registeredByStaff', 'registeredByCaregiver']);
+        
+        $config = AdditionalExportConfigs::getVisitServiceConfig();
+        
+        return $this->handlePrintSingle($request, $visitService, $config);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
     }
 }

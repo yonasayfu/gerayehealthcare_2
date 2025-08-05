@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateMarketingTaskDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\MarketingTaskService;
 use App\Models\MarketingTask;
@@ -28,8 +29,4 @@ class MarketingTaskController extends BaseController
             CreateMarketingTaskDTO::class
         );
     }
-
-    
-
-    
 }

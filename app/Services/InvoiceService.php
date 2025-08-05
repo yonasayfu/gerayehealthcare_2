@@ -41,42 +41,10 @@ class InvoiceService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function create(array $data): Invoice
+    public function create(array|object $data): Invoice
     {
-        $visitsToInvoice = VisitService::whereIn('id', $data['visit_ids'])->get();
-
-        return DB::transaction(function () use ($data, $visitsToInvoice) {
-            // 1. Calculate totals
-            $subtotal = $visitsToInvoice->sum('cost');
-            $taxRate = 0.15; // 15% Tax
-            $taxAmount = $subtotal * $taxRate;
-            $grandTotal = $subtotal + $taxAmount;
-
-            // 2. Create the main invoice record
-            $invoice = parent::create([
-                'patient_id' => $data['patient_id'],
-                'invoice_number' => 'INV-' . uniqid(), // Generate unique invoice number
-                'invoice_date' => $data['invoice_date'],
-                'due_date' => $data['due_date'],
-                'subtotal' => $subtotal,
-                'tax_amount' => $taxAmount,
-                'grand_total' => $grandTotal,
-                'status' => 'Pending',
-            ]);
-
-            // 3. Create invoice line items
-            foreach ($visitsToInvoice as $visit) {
-                $invoice->items()->create([
-                    'visit_service_id' => $visit->id,
-                    'description' => $visit->service_description ?: 'Standard Visit',
-                    'cost' => $visit->cost ?? 0.00,
-                ]);
-
-                // 4. Mark the visit as having been invoiced
-                $visit->update(['is_invoiced' => true]);
-            }
-            return $invoice;
-        });
+        $data = is_object($data) ? (array) $data : $data;
+        return parent::create($data);
     }
 
     public function getById(int $id): Invoice

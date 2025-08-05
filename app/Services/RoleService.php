@@ -12,15 +12,10 @@ class RoleService extends BaseService
         parent::__construct($role);
     }
 
-    public function create(array $data): Role
+    public function create(array|object $data): Role
     {
-        $role = parent::create(['name' => $data['name']]);
-
-        if (isset($data['permissions'])) {
-            $role->syncPermissions($data['permissions']);
-        }
-
-        return $role;
+        $data = is_object($data) ? (array) $data : $data;
+        return parent::create($data);
     }
 
     public function update(int $id, array $data): Role

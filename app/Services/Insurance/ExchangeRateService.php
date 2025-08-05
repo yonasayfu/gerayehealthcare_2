@@ -13,8 +13,9 @@ class ExchangeRateService extends BaseService
         parent::__construct($exchangeRate);
     }
 
-    public function create(array $data): ExchangeRate
+    public function create(array|object $data): ExchangeRate
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 }

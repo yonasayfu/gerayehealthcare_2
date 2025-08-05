@@ -32,7 +32,7 @@ class ExportConfig
             ],
             
             'pdf' => [
-                'view' => 'print-layout', // Changed to print-layout
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient Export - Geraye Home Care Services',
                 'document_title' => 'Patient Records Export',
                 'filename_prefix' => 'patients',
@@ -63,12 +63,13 @@ class ExportConfig
             ],
             
             'current_page' => [
-                'view' => 'print-layout', // Changed to print-layout
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Patient List (Current View)',
                 'filename_prefix' => 'patients-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
+                'with_relations' => ['registeredByStaff'],
                 'fields' => [
                     'full_name' => 'full_name',
                     'patient_code' => ['field' => 'patient_code', 'default' => '-'],
@@ -96,13 +97,14 @@ class ExportConfig
             ],
             
             'all_records' => [
-                'view' => 'print-layout', // Changed to print-layout
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient List - Geraye Home Care Services',
                 'document_title' => 'Patient Records Export',
                 'filename_prefix' => 'patients',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'default_sort' => 'full_name',
+                'with_relations' => ['registeredByStaff'],
                 'fields' => [
                     'full_name' => 'full_name',
                     'patient_code' => ['field' => 'patient_code', 'default' => '-'],
@@ -130,10 +132,11 @@ class ExportConfig
             ],
             
             'single_record' => [
-                'view' => 'print-layout',
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient Record - Geraye Home Care Services',
                 'document_title' => 'Patient Record',
                 'filename_prefix' => 'patient-record',
+                'with_relations' => ['registeredByStaff'],
                 'fields' => [
                     'Full Name' => 'full_name',
                     'Patient Code' => ['field' => 'patient_code', 'default' => '-'],
@@ -325,6 +328,7 @@ class ExportConfig
             ],
             
             'pdf' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff Export - Geraye Home Care Services',
                 'document_title' => 'All Staff Records',
                 'filename' => 'staff.pdf',
@@ -360,7 +364,8 @@ class ExportConfig
                 ]
             ],
             
-            'print_current' => [
+            'current_page' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Staff List (Current View)',
                 'filename' => 'staff-current.pdf',
@@ -390,7 +395,8 @@ class ExportConfig
                 ]
             ],
             
-            'print_all' => [
+            'all_records' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List - Geraye Home Care Services',
                 'document_title' => 'All Staff Records',
                 'filename' => 'staff.pdf',
@@ -457,7 +463,6 @@ class ExportConfig
             'select_fields' => [
                 'patient_id', 'staff_id', 'shift_start', 'shift_end', 'status'
             ],
-            'with_relations' => ['staff', 'patient'],
             
             'csv' => [
                 'headers' => [
@@ -477,11 +482,13 @@ class ExportConfig
             ],
             
             'pdf' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'All Caregiver Assignments - Geraye',
                 'document_title' => 'Caregiver Assignment Records Export',
-                'filename' => 'assignments-all.pdf',
+                'filename_prefix' => 'assignments-all',
                 'orientation' => 'landscape',
                 'include_index' => false,
+                'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
@@ -505,8 +512,8 @@ class ExportConfig
                     'status' => 'status',
                 ],
                 'columns' => [
-                    ['key' => 'patient_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff_member', 'label' => 'Staff Member'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
@@ -514,11 +521,13 @@ class ExportConfig
             ],
             
             'print_current' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Caregiver Assignments (Current View) - Geraye',
                 'document_title' => 'Caregiver Assignments (Current View)',
                 'filename_prefix' => 'assignments-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
+                'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
@@ -543,21 +552,22 @@ class ExportConfig
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
-                    ['key' => 'patient_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff_member', 'label' => 'Staff Member'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
                 ]
             ],
             
-            'print_all' => [
+            'all_records' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'All Caregiver Assignments - Geraye',
                 'document_title' => 'Caregiver Assignment Records Export',
                 'filename_prefix' => 'assignments-all',
                 'orientation' => 'landscape',
-                'include_index' => true,
-                'default_sort' => 'shift_start',
+                'include_index' => false,
+                'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
@@ -569,21 +579,20 @@ class ExportConfig
                     'shift_start' => [
                         'field' => 'shift_start',
                         'transform' => function($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
                         }
                     ],
                     'shift_end' => [
                         'field' => 'shift_end',
                         'transform' => function($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
                         }
                     ],
                     'status' => 'status',
                 ],
                 'columns' => [
-                    ['key' => 'index', 'label' => '#'],
-                    ['key' => 'patient_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff_member', 'label' => 'Staff Member'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
@@ -591,27 +600,223 @@ class ExportConfig
             ],
             
             'single_record' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'title' => 'Caregiver Assignment Record - Geraye',
+                'document_title' => 'Caregiver Assignment Record',
+                'filename_prefix' => 'assignment-record',
+                'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'Staff Member' => [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'Shift Start' => [
-                        'field' => 'shift_start',
-                        'transform' => function($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'Shift End' => [
-                        'field' => 'shift_end',
-                        'transform' => function($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
+                    'Staff Member' => ['field' => 'staff.first_name','transform' => function($value, $model) { return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? ''); }],
+                    'Shift Start' => ['field' => 'shift_start','transform' => function($value, $model) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A'; }],
+                    'Shift End' => ['field' => 'shift_end','transform' => function($value, $model) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A'; }],
                     'Status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'shift_start', 'label' => 'Shift Start'],
+                    ['key' => 'shift_end', 'label' => 'Shift End'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Get export configuration for Service model
+     */
+    public static function getServiceConfig(): array
+    {
+        return [
+            'searchable_fields' => ['name', 'description'],
+            'sortable_fields' => ['name', 'category', 'price', 'duration', 'is_active', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'services',
+            'select_fields' => [
+                'name', 'description', 'category', 'price', 'duration', 'is_active'
+            ],
+            
+            'csv' => [
+                'headers' => [
+                    'Name', 'Description', 'Category', 'Price', 'Duration', 'Active'
+                ],
+                'fields' => [
+                    'name', 'description', 'category', 'price', 'duration', 'is_active'
+                ],
+                'filename_prefix' => 'services'
+            ],
+            
+            'pdf' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'title' => 'Services Export - Geraye Home Care Services',
+                'document_title' => 'Services Records Export',
+                'filename_prefix' => 'services',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'name' => 'name',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'category' => 'category',
+                    'price' => [
+                        'field' => 'price',
+                        'transform' => function($value) {
+                            return '$' . number_format($value, 2);
+                        }
+                    ],
+                    'duration' => [
+                        'field' => 'duration',
+                        'transform' => function($value) {
+                            return $value . ' minutes';
+                        }
+                    ],
+                    'is_active' => [
+                        'field' => 'is_active',
+                        'transform' => function($value) {
+                            return $value ? 'Active' : 'Inactive';
+                        }
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Service Name'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'category', 'label' => 'Category'],
+                    ['key' => 'price', 'label' => 'Price'],
+                    ['key' => 'duration', 'label' => 'Duration'],
+                    ['key' => 'is_active', 'label' => 'Status'],
+                ]
+            ],
+            
+            'current_page' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'title' => 'Services List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Services List (Current View)',
+                'filename_prefix' => 'services-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'fields' => [
+                    'name' => 'name',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'category' => 'category',
+                    'price' => [
+                        'field' => 'price',
+                        'transform' => function($value) {
+                            return '$' . number_format($value, 2);
+                        }
+                    ],
+                    'duration' => [
+                        'field' => 'duration',
+                        'transform' => function($value) {
+                            return $value . ' min';
+                        }
+                    ],
+                    'is_active' => [
+                        'field' => 'is_active',
+                        'transform' => function($value) {
+                            return $value ? 'Active' : 'Inactive';
+                        }
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'name', 'label' => 'Service Name'],
+                    ['key' => 'category', 'label' => 'Category'],
+                    ['key' => 'price', 'label' => 'Price'],
+                    ['key' => 'duration', 'label' => 'Duration'],
+                    ['key' => 'is_active', 'label' => 'Status'],
+                ]
+            ],
+            
+            'all_records' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'title' => 'All Services - Geraye Home Care Services',
+                'document_title' => 'All Services Records',
+                'filename_prefix' => 'services-all',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'name',
+                'fields' => [
+                    'name' => 'name',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'category' => 'category',
+                    'price' => [
+                        'field' => 'price',
+                        'transform' => function($value) {
+                            return '$' . number_format($value, 2);
+                        }
+                    ],
+                    'duration' => [
+                        'field' => 'duration',
+                        'transform' => function($value) {
+                            return $value . ' min';
+                        }
+                    ],
+                    'is_active' => [
+                        'field' => 'is_active',
+                        'transform' => function($value) {
+                            return $value ? 'Active' : 'Inactive';
+                        }
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'name', 'label' => 'Service Name'],
+                    ['key' => 'category', 'label' => 'Category'],
+                    ['key' => 'price', 'label' => 'Price'],
+                    ['key' => 'duration', 'label' => 'Duration'],
+                    ['key' => 'is_active', 'label' => 'Status'],
+                ]
+            ],
+            
+            'single_record' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'title' => 'Service Record - Geraye Home Care Services',
+                'document_title' => 'Service Record',
+                'filename_prefix' => 'service-record',
+                'fields' => [
+                    'Service Name' => 'name',
+                    'Description' => ['field' => 'description', 'default' => '-'],
+                    'Category' => 'category',
+                    'Price' => [
+                        'field' => 'price',
+                        'transform' => function($value) {
+                            return '$' . number_format($value, 2);
+                        }
+                    ],
+                    'Duration' => [
+                        'field' => 'duration',
+                        'transform' => function($value) {
+                            return $value . ' minutes';
+                        }
+                    ],
+                    'Status' => [
+                        'field' => 'is_active',
+                        'transform' => function($value) {
+                            return $value ? 'Active' : 'Inactive';
+                        }
+                    ],
+                    'Created Date' => [
+                        'field' => 'created_at',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                        }
+                    ],
+                    'Last Updated' => [
+                        'field' => 'updated_at',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                        }
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Service Name'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'category', 'label' => 'Category'],
+                    ['key' => 'price', 'label' => 'Price'],
+                    ['key' => 'duration', 'label' => 'Duration'],
+                    ['key' => 'is_active', 'label' => 'Status'],
+                    ['key' => 'created_at', 'label' => 'Created Date'],
+                    ['key' => 'updated_at', 'label' => 'Last Updated'],
                 ]
             ]
         ];

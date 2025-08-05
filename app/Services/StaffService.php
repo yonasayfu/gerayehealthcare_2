@@ -24,8 +24,10 @@ class StaffService extends BaseService
               ->orWhere('email', 'ilike', "%{$search}%");
     }
 
-    public function create(array $data): Staff
+    public function create(array|object $data): Staff
     {
+        $data = is_object($data) ? (array) $data : $data;
+
         if (isset($data['photo'])) {
             $data['photo'] = $data['photo']->store('images/staff', 'public');
         }
@@ -33,8 +35,10 @@ class StaffService extends BaseService
         return parent::create($data);
     }
 
-    public function update(int $id, array $data): Staff
+    public function update(int $id, array|object $data): Staff
     {
+        $data = is_object($data) ? (array) $data : $data;
+        
         $staff = $this->getById($id);
 
         if (isset($data['photo'])) {

@@ -12,8 +12,9 @@ class EligibilityCriteriaService extends BaseService
         parent::__construct($eligibilityCriteria);
     }
 
-    public function create(array $data): EligibilityCriteria
+    public function create(array|object $data): EligibilityCriteria
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 

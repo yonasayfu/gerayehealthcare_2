@@ -1497,91 +1497,165 @@ class AdditionalExportConfigs
         ];
     }
 
+    /**
+     * Get export configuration for VisitService model
+     */
     public static function getVisitServiceConfig(): array
     {
         return [
-            'searchable_fields' => ['service_description', 'visit_notes', 'status'],
-            'sortable_fields' => ['scheduled_at', 'status', 'cost', 'created_at'],
-            'select_fields' => ['id', 'patient_id', 'staff_id', 'assignment_id', 'scheduled_at', 'status', 'visit_notes', 'service_description', 'cost', 'prescription_file', 'vitals_file', 'created_at', 'updated_at'],
-            'relationships' => ['patient', 'staff', 'assignment'],
-            'csv_headers' => ['Patient Name', 'Staff Name', 'Scheduled At', 'Status', 'Service Description', 'Cost', 'Visit Notes', 'Created Date'],
-            'csv_fields' => [
-                'Patient Name' => [
-                    'field' => 'patient.full_name',
-                    'default' => 'N/A'
+            'searchable_fields' => ['patient.full_name', 'staff.first_name', 'staff.last_name'],
+            'sortable_fields' => ['scheduled_at', 'check_in_time', 'check_out_time', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'visit-services',
+            'select_fields' => [
+                'patient_id', 'staff_id', 'scheduled_at', 'check_in_time', 'check_out_time', 'status', 'visit_notes'
+            ],
+            
+            'csv' => [
+                'headers' => [
+                    'Patient Name', 'Staff Name', 'Scheduled At', 'Check In', 'Check Out', 'Status', 'Notes'
                 ],
-                'Staff Name' => [
-                    'field' => 'staff.first_name',
-                    'transform' => function($value, $model) {
-                        return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                    }
+                'fields' => [
+                    ['field' => 'patient.full_name', 'default' => 'N/A'],
+                    [
+                        'field' => 'staff.first_name',
+                        'transform' => function($value, $model) {
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                        }
+                    ],
+                    'scheduled_at', 'check_in_time', 'check_out_time', 'status', 'visit_notes'
                 ],
-                'Scheduled At' => [
-                    'field' => 'scheduled_at',
-                    'transform' => function($value) {
-                        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
-                    }
+                'filename_prefix' => 'visit-services'
+            ],
+            
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Services Export - Geraye Home Care Services',
+                'document_title' => 'Visit Services Records Export',
+                'filename_prefix' => 'visit-services',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['patient', 'staff'],
+                'fields' => [
+                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
+                    'staff_member' => [
+                        'field' => 'staff.first_name',
+                        'transform' => function($value, $model) {
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                        }
+                    ],
+                    'scheduled_at' => [
+                        'field' => 'scheduled_at',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                        }
+                    ],
+                    'check_in_time' => [
+                        'field' => 'check_in_time',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                        }
+                    ],
+                    'check_out_time' => [
+                        'field' => 'check_out_time',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                        }
+                    ],
+                    'status' => 'status',
+                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
                 ],
-                'Status' => 'status',
-                'Service Description' => ['field' => 'service_description', 'default' => '-'],
-                'Cost' => [
-                    'field' => 'cost',
-                    'transform' => function($value) {
-                        return $value ? '$' . number_format($value, 2) : '$0.00';
-                    }
-                ],
-                'Visit Notes' => ['field' => 'visit_notes', 'default' => '-'],
-                'Created Date' => [
-                    'field' => 'created_at',
-                    'transform' => function($value) {
-                        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+                    ['key' => 'check_in_time', 'label' => 'Check In'],
+                    ['key' => 'check_out_time', 'label' => 'Check Out'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'visit_notes', 'label' => 'Notes'],
                 ]
             ],
-            'pdf_columns' => [
-                ['key' => 'patient_name', 'label' => 'Patient'],
-                ['key' => 'staff_name', 'label' => 'Staff'],
-                ['key' => 'scheduled_at', 'label' => 'Scheduled'],
-                ['key' => 'status', 'label' => 'Status'],
-                ['key' => 'service_description', 'label' => 'Service'],
-                ['key' => 'cost', 'label' => 'Cost']
-            ],
-            'pdf_fields' => [
-                'patient_name' => [
-                    'field' => 'patient.full_name',
-                    'default' => 'N/A'
-                ],
-                'staff_name' => [
-                    'field' => 'staff.first_name',
-                    'transform' => function($value, $model) {
-                        return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                    }
-                ],
-                'scheduled_at' => [
-                    'field' => 'scheduled_at',
-                    'transform' => function($value) {
-                        return $value ? \Carbon\Carbon::parse($value)->format('M d, Y H:i') : '-';
-                    }
-                ],
-                'status' => 'status',
-                'service_description' => ['field' => 'service_description', 'default' => '-'],
-                'cost' => [
-                    'field' => 'cost',
-                    'transform' => function($value) {
-                        return $value ? '$' . number_format($value, 2) : '$0.00';
-                'orientation' => 'landscape'
-            ],
-            'print_single_config' => [
-                'title' => 'Visit Service Details',
-                'filename_prefix' => 'visit-service-',
-                'paper' => 'a4',
-                'orientation' => 'portrait',
+            
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Services (Current View) - Geraye Home Care Services',
+                'document_title' => 'Visit Services (Current View)',
+                'filename_prefix' => 'visit-services-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['patient', 'staff'],
                 'fields' => [
-                    'Patient' => [
-                        'field' => 'patient.full_name',
-                        'default' => 'N/A'
+                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
+                    'staff_member' => [
+                        'field' => 'staff.first_name',
+                        'transform' => function($value, $model) {
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                        }
                     ],
-                    'Staff' => [
+                    'scheduled_at' => [
+                        'field' => 'scheduled_at',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
+                        }
+                    ],
+                    'status' => 'status',
+                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'visit_notes', 'label' => 'Notes'],
+                ]
+            ],
+            
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Visit Services - Geraye Home Care Services',
+                'document_title' => 'All Visit Services Records',
+                'filename_prefix' => 'visit-services-all',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['patient', 'staff'],
+                'default_sort' => 'scheduled_at',
+                'fields' => [
+                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
+                    'staff_member' => [
+                        'field' => 'staff.first_name',
+                        'transform' => function($value, $model) {
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                        }
+                    ],
+                    'scheduled_at' => [
+                        'field' => 'scheduled_at',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
+                        }
+                    ],
+                    'status' => 'status',
+                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'visit_notes', 'label' => 'Notes'],
+                ]
+            ],
+            
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Service Record - Geraye Home Care Services',
+                'document_title' => 'Visit Service Record',
+                'filename_prefix' => 'visit-service-record',
+                'with_relations' => ['patient', 'staff'],
+                'fields' => [
+                    'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
+                    'Staff Member' => [
                         'field' => 'staff.first_name',
                         'transform' => function($value, $model) {
                             return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
@@ -1590,26 +1664,39 @@ class AdditionalExportConfigs
                     'Scheduled At' => [
                         'field' => 'scheduled_at',
                         'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M d, Y H:i') : '-';
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                        }
+                    ],
+                    'Check In Time' => [
+                        'field' => 'check_in_time',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                        }
+                    ],
+                    'Check Out Time' => [
+                        'field' => 'check_out_time',
+                        'transform' => function($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
                         }
                     ],
                     'Status' => 'status',
-                    'Service Description' => ['field' => 'service_description', 'default' => '-'],
+                    'Visit Notes' => ['field' => 'visit_notes', 'default' => '-'],
                     'Cost' => [
                         'field' => 'cost',
                         'transform' => function($value) {
-                            return $value ? '$' . number_format($value, 2) : '$0.00';
+                            return $value ? '$' . number_format($value, 2) : '-';
                         }
                     ],
-                    'Visit Notes' => ['field' => 'visit_notes', 'default' => '-'],
-                    'Prescription File' => ['field' => 'prescription_file', 'default' => '-'],
-                    'Vitals File' => ['field' => 'vitals_file', 'default' => '-'],
-                    'Created Date' => [
-                        'field' => 'created_at',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M d, Y H:i') : '-';
-                        }
-                    ]
+                ],
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+                    ['key' => 'check_in_time', 'label' => 'Check In Time'],
+                    ['key' => 'check_out_time', 'label' => 'Check Out Time'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'visit_notes', 'label' => 'Visit Notes'],
+                    ['key' => 'cost', 'label' => 'Cost'],
                 ]
             ]
         ];
@@ -1849,7 +1936,7 @@ class AdditionalExportConfigs
                     ['key' => 'contact_email', 'label' => 'Contact Email', 'printWidth' => '20%'],
                     ['key' => 'contact_phone', 'label' => 'Contact Phone', 'printWidth' => '15%'],
                     ['key' => 'tin_number', 'label' => 'TIN Number', 'printWidth' => '15%'],
-                    ['key' => 'trade_license_number', 'label' => 'Trade License', 'printWidth' => '15%'],
+                    ['key' => 'trade_license_number', 'label' => 'Trade License Number', 'printWidth' => '15%'],
                 ],
                 'field_transformations' => [
                     'contact_person' => fn($value) => $value ?: '-',

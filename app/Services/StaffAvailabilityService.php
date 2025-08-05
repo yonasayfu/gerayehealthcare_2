@@ -67,15 +67,9 @@ class StaffAvailabilityService extends BaseService
         return $query->paginate($request->get('per_page', 15));
     }
 
-    public function create(array $data): StaffAvailability
+    public function create(array|object $data): StaffAvailability
     {
-        $dto = new CreateStaffAvailabilityDTO(
-            staff_id: $data['staff_id'],
-            start_time: $data['start_time'],
-            end_time: $data['end_time'],
-            status: $data['status']
-        );
-        $this->checkOverlap($data);
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 

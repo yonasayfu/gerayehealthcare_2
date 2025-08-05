@@ -20,8 +20,10 @@ class UserService extends BaseService
               ->orWhere('email', 'like', "%{$search}%");
     }
 
-    public function create(array $data): User
+    public function create(array|object $data): User
     {
+        $data = is_object($data) ? (array) $data : $data;
+        
         return DB::transaction(function () use ($data) {
             $user = parent::create([
                 'name' => $data['name'],
@@ -45,8 +47,10 @@ class UserService extends BaseService
         });
     }
 
-    public function update(int $id, array $data): User
+    public function update(int $id, array|object $data): User
     {
+        $data = is_object($data) ? (array) $data : $data;
+        
         $user = $this->getById($id);
         $user->syncRoles([$data['role']]);
         return $user;

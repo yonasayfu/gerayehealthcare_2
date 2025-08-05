@@ -24,6 +24,7 @@ const breadcrumbs = [
   { title: 'Patients', href: route('admin.patients.index') },
 ]
 
+// Fix: Use optional chaining and provide defaults
 const search = ref(props.filters?.search || '')
 const sortField = ref(props.filters?.sort || '')
 const sortDirection = ref(props.filters?.direction || 'asc')

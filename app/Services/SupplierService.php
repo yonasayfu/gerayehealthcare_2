@@ -47,16 +47,17 @@ class SupplierService extends BaseService
             if ($validator->fails()) {
                 $errors["Row " . ($index + 2)] = $validator->errors()->all();
             } else {
-                $this->create(new CreateSupplierDTO(...$data));
+                $this->create($data);
             }
         }
 
         return $errors;
     }
 
-    public function create(CreateSupplierDTO $dto): Supplier
+    public function create(array|object $data): Supplier
     {
-        return parent::create((array) $dto);
+        $data = is_object($data) ? (array) $data : $data;
+        return parent::create($data);
     }
 
     public function export(Request $request)

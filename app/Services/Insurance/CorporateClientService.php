@@ -13,8 +13,9 @@ class CorporateClientService extends BaseService
         parent::__construct($corporateClient);
     }
 
-    public function create(array $data): CorporateClient
+    public function create(array|object $data): CorporateClient
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 }

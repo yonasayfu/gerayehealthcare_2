@@ -59,17 +59,9 @@ class MarketingCampaignService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function create(array $data): MarketingCampaign
+    public function create(array|object $data): MarketingCampaign
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            $staffMember = Staff::where('user_id', $user->id)->first();
-
-            if ($staffMember) {
-                $data['created_by_staff_id'] = $staffMember->id;
-            }
-        }
-
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 

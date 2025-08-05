@@ -55,11 +55,10 @@ class InventoryRequestService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function create(array $data): InventoryRequest
+    public function create(array|object $data): InventoryRequest
     {
-        $inventoryRequest = parent::create($data);
-        event(new InventoryRequestSaved($inventoryRequest));
-        return $inventoryRequest;
+        $data = is_object($data) ? (array) $data : $data;
+        return parent::create($data);
     }
 
     public function update(int $id, array $data): InventoryRequest

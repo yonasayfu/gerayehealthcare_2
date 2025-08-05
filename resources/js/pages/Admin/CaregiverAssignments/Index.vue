@@ -4,35 +4,49 @@ import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Book, Loader2 } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue' // Use the component
-
+import Pagination from '@/components/Pagination.vue'
+import { format } from 'date-fns'
+import { useExport } from '@/Composables/useExport';
 
 const props = defineProps<{
   assignments: any;
-  filters: any;
+  filters?: {
+    search?: string;
+    sort?: string;
+    direction?: 'asc' | 'desc';
+    per_page?: number;
+  };
 }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Assignments', href: '/dashboard/assignments' },
+  { title: 'Assignments', href: 'admin.assignments.index' },
 ]
 
-const search = ref(props.filters.search || '')
-const sortField = ref(props.filters.sort || '')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 5)
+// Fix: Provide default values and use optional chaining
+const search = ref(props.filters?.search || '')
+const sortField = ref(props.filters?.sort || '')
+const sortDirection = ref(props.filters?.direction || 'asc')
+const perPage = ref(props.filters?.per_page || 5)
 const isPrintingAll = ref(false)
 
 // Trigger search, sort, pagination
 watch([search, sortField, sortDirection, perPage], debounce(() => {
   // Don't refetch data if we are in the middle of printing all records
   if (isPrintingAll.value) return;
-  router.get('/dashboard/assignments', {
+
+  const params: Record<string, string | number> = {
     search: search.value,
-    sort: sortField.value,
     direction: sortDirection.value,
     per_page: perPage.value,
-  }, {
+  };
+
+  // Only add sort parameter if sortField.value is not an empty string
+  if (sortField.value) {
+    params.sort = sortField.value;
+  }
+
+  router.get(route('admin.assignments.index'), params, {
     preserveState: true,
     replace: true,
   })
@@ -44,10 +58,11 @@ function destroy(id: number) {
   }
 }
 
-import { useExport } from '@/Composables/useExport';
-
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.assignments', filters: props.filters });
-
+// Fix: Pass filters with default empty object
+const { exportData, printCurrentView, printAllRecords } = useExport({ 
+  routeName: 'admin.assignments', 
+  filters: props.filters || {} 
+});
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -65,14 +80,13 @@ const getStaffFullName = (staff) => {
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString();
+    return format(new Date(dateString), 'PPP p');
 }
 </script>
 
 <template>
   <Head title="Caregiver Assignments" />
 
-  <!-- Custom Print Header -->
   <div id="print-header" class="hidden print-only">
     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
     <h1 style="text-align: center; margin: 0; font-size: 20px;">Geraye Home Care Services</h1>
@@ -82,7 +96,6 @@ const formatDate = (dateString) => {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div id="main-content" class="space-y-6 p-6">
 
-      <!-- Header + Actions -->
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Caregiver Assignments</h1>
@@ -108,9 +121,7 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <!-- Filters -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 no-print">
-        <!-- Search -->
         <div class="relative w-full md:w-1/3">
           <input
             type="text"
@@ -124,7 +135,6 @@ const formatDate = (dateString) => {
           </svg>
         </div>
 
-        <!-- Pagination Dropdown -->
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
@@ -137,7 +147,6 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <!-- Table -->
       <div id="assignments-table" class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
@@ -204,12 +213,8 @@ const formatDate = (dateString) => {
         </table>
       </div>
 
-      <!-- Pagination Links -->
-     
-      <!-- THE FIX IS HERE: Replaced the manual links with the reusable Pagination component -->
       <Pagination v-if="assignments.data.length > 0" :links="assignments.links" class="mt-6 flex justify-center" />
 
     </div>
   </AppLayout>
 </template>
-

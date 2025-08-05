@@ -13,6 +13,7 @@ class Service extends Model
     protected $fillable = [
         'name',
         'description',
+        'category', // Add missing field
         'price',
         'duration',
         'is_active',

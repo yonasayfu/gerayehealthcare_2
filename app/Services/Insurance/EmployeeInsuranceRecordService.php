@@ -13,8 +13,9 @@ class EmployeeInsuranceRecordService extends BaseService
         parent::__construct($employeeInsuranceRecord);
     }
 
-    public function create(array $data): EmployeeInsuranceRecord
+    public function create(array|object $data): EmployeeInsuranceRecord
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 }

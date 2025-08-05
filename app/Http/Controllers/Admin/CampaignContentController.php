@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateCampaignContentDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\CampaignContentService;
 use App\Models\CampaignContent;
@@ -39,12 +40,4 @@ class CampaignContentController extends BaseController
             'platforms' => MarketingPlatform::all(),
         ]);
     }
-
-    
-
-    
-
-    
-
-    
 }

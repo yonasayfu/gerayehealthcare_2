@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateMarketingLeadDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\MarketingLeadService;
 use App\Models\MarketingLead;
@@ -26,8 +27,4 @@ class MarketingLeadController extends BaseController
             CreateMarketingLeadDTO::class
         );
     }
-
-    
-
-   
 }

@@ -8,14 +8,16 @@ class PatientRules extends BaseResourceRules
     {
         return [
             'full_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:patients,email',
-            'phone_number' => 'nullable|string|max:20',
+            'fayda_id' => 'nullable|string|max:255|unique:patients,fayda_id',
             'date_of_birth' => 'required|date',
-            'gender' => 'required|string|in:Male,Female,Other',
+            'gender' => 'nullable|string|max:10',
             'address' => 'nullable|string',
-            'emergency_contact' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|regex:/^[0-9+\-\s\(\)]+$/|max:255',
+            'email' => 'nullable|email:rfc,dns|max:255|unique:patients,email',
+            'emergency_contact' => 'nullable|string',
+            'source' => 'nullable|string|max:255|in:TikTok,Website,Referral,Walk-in',
             'geolocation' => 'nullable|string',
-            'registered_by_staff_id' => 'nullable|integer',
+            'registered_by_staff_id' => 'nullable|integer|exists:staff,id',
         ];
     }
     
@@ -23,14 +25,16 @@ class PatientRules extends BaseResourceRules
     {
         return [
             'full_name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:patients,email,' . $patient->id,
-            'phone_number' => 'nullable|string|max:20',
+            'fayda_id' => ['nullable', 'string', 'max:255', \Illuminate\Validation\Rule::unique('patients')->ignore($patient->id)],
             'date_of_birth' => 'required|date',
-            'gender' => 'required|string|in:Male,Female,Other',
+            'gender' => 'nullable|string|max:10',
             'address' => 'nullable|string',
-            'emergency_contact' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|regex:/^[0-9+\-\s\(\)]+$/|max:255',
+            'email' => ['nullable', 'email:rfc,dns', 'max:255', \Illuminate\Validation\Rule::unique('patients')->ignore($patient->id)],
+            'emergency_contact' => 'nullable|string',
+            'source' => 'nullable|string|max:255|in:TikTok,Website,Referral,Walk-in',
             'geolocation' => 'nullable|string',
-            'registered_by_staff_id' => 'nullable|integer',
+            'registered_by_staff_id' => 'nullable|integer|exists:staff,id',
         ];
     }
 }

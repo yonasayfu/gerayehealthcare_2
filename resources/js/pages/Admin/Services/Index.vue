@@ -20,15 +20,14 @@ const props = defineProps<{
       total: number;
     };
   };
-  filters: {
-    type: Object,
-    default: () => ({
-      search: '',
-      sort_by: '',
-      sort_order: 'asc',
-      per_page: 5,
-    }),
-  },
+  filters?: {
+    search?: string;
+    sort?: string;
+    direction?: 'asc' | 'desc';
+    per_page?: number;
+    sort_by?: string;
+    sort_order?: string;
+  };
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -36,8 +35,9 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Services', href: route('admin.services.index') },
 ];
 
-const search = ref(props.filters.search || '');
-const perPage = ref(props.services?.meta?.per_page || 5);
+// Fix: Use optional chaining and provide defaults
+const search = ref(props.filters?.search || '');
+const perPage = ref(props.filters?.per_page || props.services?.meta?.per_page || 5);
 
 watch([search, perPage], debounce(([searchValue, perPageValue]) => {
     router.get(route('admin.services.index'), { search: searchValue, per_page: perPageValue }, {

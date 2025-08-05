@@ -13,8 +13,9 @@ class EthiopianCalendarDayService extends BaseService
         parent::__construct($ethiopianCalendarDay);
     }
 
-    public function create(array $data): EthiopianCalendarDay
+    public function create(array|object $data): EthiopianCalendarDay
     {
+        $data = is_object($data) ? (array) $data : $data;
         return parent::create($data);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateMarketingCampaignDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\MarketingCampaignService;
 use App\Models\MarketingCampaign;
@@ -24,8 +25,4 @@ class MarketingCampaignController extends BaseController
             CreateMarketingCampaignDTO::class
         );
     }
-
-    
-
-   
 }

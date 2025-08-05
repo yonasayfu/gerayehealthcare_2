@@ -22,11 +22,8 @@ class VisitServiceController extends BaseController
             VisitServiceRules::class,
             'Admin/VisitServices',
             'visitServices',
-            VisitService::class
+            VisitService::class,
+            CreateVisitServiceDTO::class
         );
     }
-
-    
-
-   
 }

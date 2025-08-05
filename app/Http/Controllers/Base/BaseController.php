@@ -30,7 +30,10 @@ class BaseController extends Controller
     public function index(Request $request)
     {
         $data = $this->service->getAll($request);
-        return Inertia::render($this->viewName . '/Index', [$this->dataVariableName => $data]);
+        return Inertia::render($this->viewName . '/Index', [
+            $this->dataVariableName => $data,
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
+        ]);
     }
 
     public function create()
@@ -141,9 +144,8 @@ class BaseController extends Controller
             } elseif ($parameter->allowsNull()) {
                 $dtoData[$name] = null;
             } else {
-                // This case should ideally not be reached if validation is correct for required fields
-                // Or if the DTO is correctly defined with nullable/default values
-                $dtoData[$name] = null; // Fallback, though it might lead to errors if the DTO expects non-nullable
+                // Log error or throw exception for missing required parameters
+                throw new \InvalidArgumentException("Missing required parameter: {$name} for DTO {$this->dtoClass}");
             }
         }
 
