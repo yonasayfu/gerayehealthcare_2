@@ -36,7 +36,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { defineProps } 'vue';
+import { defineProps } from 'vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({

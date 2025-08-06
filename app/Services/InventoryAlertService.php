@@ -7,6 +7,7 @@ use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use Illuminate\Support\Facades\Log;
 
 class InventoryAlertService extends BaseService
 {
@@ -24,9 +25,9 @@ class InventoryAlertService extends BaseService
                   ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['item']);
+        $query = $this->model->with(array_merge(['item'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
@@ -65,6 +66,11 @@ class InventoryAlertService extends BaseService
 
     public function count()
     {
-        return InventoryAlert::where('is_active', true)->count();
+        try {
+            return InventoryAlert::where('is_active', true)->count();
+        } catch (\Exception $e) {
+            Log::error("Error fetching inventory alert count: " . $e->getMessage());
+            return 0; // Return 0 or handle the error as appropriate
+        }
     }
 }

@@ -103,5 +103,5 @@ const breadcrumbs = [
                 </form>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>

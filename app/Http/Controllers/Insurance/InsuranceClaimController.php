@@ -14,6 +14,7 @@ use Inertia\Inertia;
 use App\Http\Requests\StoreInsuranceClaimRequest;
 use App\Http\Requests\UpdateInsuranceClaimRequest;
 use App\Http\Requests\SendClaimEmailRequest;
+use App\Services\Insurance\InsuranceClaimService;
 
 class InsuranceClaimController extends BaseController
 {

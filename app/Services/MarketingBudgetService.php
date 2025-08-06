@@ -22,9 +22,9 @@ class MarketingBudgetService extends BaseService
         return $query->where('budget_name', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['campaign', 'platform']);
+        $query = $this->model->with(array_merge(['campaign', 'platform'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

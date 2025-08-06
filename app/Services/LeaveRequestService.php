@@ -26,9 +26,9 @@ class LeaveRequestService extends BaseService
         });
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['staff']);
+        $query = $this->model->with(array_merge(['staff'], $with));
 
         if ($request->filled('search')) {
             $this->applySearch($query, $request->input('search'));

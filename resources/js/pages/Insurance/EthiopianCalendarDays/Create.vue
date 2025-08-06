@@ -18,7 +18,11 @@
 
                         <div class="mb-4">
                             <label for="ethiopian_date" class="block text-sm font-medium text-gray-700">Ethiopian Date</label>
-                            <input type="text" id="ethiopian_date" v-model="form.ethiopian_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <EthiopianDatePicker
+                                id="ethiopian_date"
+                                v-model="form.gregorian_date"
+                                @update:ethiopianDate="form.ethiopian_date = $event"
+                            />
                             <div v-if="form.errors.ethiopian_date" class="text-red-500 text-sm mt-1">{{ form.errors.ethiopian_date }}</div>
                         </div>
 
@@ -38,7 +42,21 @@
 
                         <div class="mb-4">
                             <label for="region" class="block text-sm font-medium text-gray-700">Region</label>
-                            <input type="text" id="region" v-model="form.region" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select id="region" v-model="form.region" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option value="">Select Region</option>
+                                <option value="Addis Ababa">Addis Ababa</option>
+                                <option value="Oromia">Oromia</option>
+                                <option value="Amhara">Amhara</option>
+                                <option value="Tigray">Tigray</option>
+                                <option value="SNNPR">SNNPR</option>
+                                <option value="Sidama">Sidama</option>
+                                <option value="Somali">Somali</option>
+                                <option value="Benishangul-Gumuz">Benishangul-Gumuz</option>
+                                <option value="Gambela">Gambela</option>
+                                <option value="Harari">Harari</option>
+                                <option value="Afar">Afar</option>
+                                <option value="Dire Dawa">Dire Dawa</option>
+                            </select>
                             <div v-if="form.errors.region" class="text-red-500 text-sm mt-1">{{ form.errors.region }}</div>
                         </div>
 
@@ -53,8 +71,9 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { useForm } from '@inertiajs/vue3';
+import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue';
 
 const form = useForm({
     gregorian_date: '',

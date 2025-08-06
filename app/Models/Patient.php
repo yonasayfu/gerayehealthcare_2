@@ -19,6 +19,7 @@ class Patient extends Model
         'full_name',
         'fayda_id',
         'date_of_birth',
+        'ethiopian_date_of_birth',
         'gender',
         'address',
         'phone_number',

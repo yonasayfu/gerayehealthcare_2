@@ -22,5 +22,8 @@ class InventoryAlertController extends BaseController
         );
     }
 
-    
+    public function count()
+    {
+        return response()->json(['count' => $this->service->count()]);
+    }
 }

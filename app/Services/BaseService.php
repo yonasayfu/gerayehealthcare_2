@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use App\Exceptions\ResourceNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class BaseService
 {
@@ -33,6 +34,9 @@ class BaseService
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
+        
+        Log::info('Data being passed to model create:', ['data' => $data]);
+
         return $this->model->create($data);
     }
 

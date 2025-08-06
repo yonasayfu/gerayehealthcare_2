@@ -24,9 +24,9 @@ class InventoryRequestService extends BaseService
                   ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%"));
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['requester', 'approver', 'item']);
+        $query = $this->model->with(array_merge(['requester', 'approver', 'item'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

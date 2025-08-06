@@ -25,9 +25,9 @@ class MarketingCampaignService extends BaseService
               ->orWhere('utm_campaign', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['platform', 'assignedStaff', 'createdByStaff']);
+        $query = $this->model->with(array_merge(['platform', 'assignedStaff', 'createdByStaff'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

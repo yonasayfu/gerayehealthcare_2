@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Http\Requests\CheckInVisitRequest;
 use App\Http\Requests\CheckOutVisitRequest;
 use App\Http\Requests\StoreVisitReportRequest;
+use App\Services\VisitServiceService;
 
 class MyVisitController extends Controller
 {

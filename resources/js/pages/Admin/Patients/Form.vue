@@ -17,6 +17,7 @@ const emit = defineEmits(['submit'])
 // Define options for dropdowns here
 const genders = ['Male', 'Female', 'Other', 'Prefer not to say']
 const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
+
 </script>
 
 <template>
@@ -119,16 +120,32 @@ const sources = ['TikTok', 'Website', 'Referral', 'Walk-in']
         </div>
 
         <div class="sm:col-span-3">
-          <label class="block text-sm font-medium text-gray-900 dark:text-white">Date of Birth <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-gray-900 dark:text-white">Date of Birth (Gregorian) <span class="text-red-500">*</span></label>
           <div class="mt-2">
             <input
               type="date"
-              v-model="form.date_of_birth"
+              v-model="dateOfBirth"
               required
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
             <div v-if="form.errors.date_of_birth" class="text-red-500 text-sm mt-1">
               {{ form.errors.date_of_birth }}
+            </div>
+          </div>
+        </div>
+
+        <div class="sm:col-span-3">
+          <label class="block text-sm font-medium text-gray-900 dark:text-white">Date of Birth (Ethiopian) <span class="text-red-500">*</span></label>
+          <div class="mt-2">
+            <input
+              type="text"
+              v-model="ethiopianDateOfBirth"
+              placeholder="YYYY-MM-DD"
+              required
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+            />
+            <div v-if="form.errors.ethiopian_date_of_birth" class="text-red-500 text-sm mt-1">
+              {{ form.errors.ethiopian_date_of_birth }}
             </div>
           </div>
         </div>

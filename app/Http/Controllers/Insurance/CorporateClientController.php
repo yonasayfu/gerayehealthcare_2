@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Requests\StoreCorporateClientRequest;
 use App\Http\Requests\UpdateCorporateClientRequest;
+use App\Services\Insurance\CorporateClientService;
 
 class CorporateClientController extends BaseController
 {

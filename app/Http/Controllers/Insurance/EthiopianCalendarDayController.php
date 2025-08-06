@@ -28,5 +28,4 @@ class EthiopianCalendarDayController extends BaseController
             CreateEthiopianCalendarDayDTO::class
         );
     }
-
- }
+}

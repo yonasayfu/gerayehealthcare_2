@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Response;
 use App\Http\Requests\StoreEligibilityCriteriaRequest;
 use App\Http\Requests\UpdateEligibilityCriteriaRequest;
+use App\Services\EligibilityCriteriaService;
 
 class EligibilityCriteriaController extends BaseController
 {

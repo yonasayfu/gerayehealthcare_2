@@ -23,9 +23,9 @@ class LeadSourceService extends BaseService
               ->orWhere('category', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->query();
+        $query = $this->model->with($with);
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

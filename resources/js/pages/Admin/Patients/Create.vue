@@ -15,6 +15,7 @@ const form = useForm<any>({
   full_name: null,
   fayda_id: null,
   date_of_birth: null,
+  ethiopian_date_of_birth: null,
   gender: null,
   address: null,
   phone_number: null,

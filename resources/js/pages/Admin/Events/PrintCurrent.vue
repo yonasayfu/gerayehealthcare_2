@@ -51,5 +51,5 @@ const printPage = () => {
                 </div>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>

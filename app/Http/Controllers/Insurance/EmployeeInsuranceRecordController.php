@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Requests\StoreEmployeeInsuranceRecordRequest;
 use App\Http\Requests\UpdateEmployeeInsuranceRecordRequest;
+use App\Services\Insurance\EmployeeInsuranceRecordService;
 
 class EmployeeInsuranceRecordController extends BaseController
 {

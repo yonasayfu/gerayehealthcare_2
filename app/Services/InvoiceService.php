@@ -23,9 +23,9 @@ class InvoiceService extends BaseService
               });
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['patient:id,full_name']);
+        $query = $this->model->with(array_merge(['patient:id,full_name'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

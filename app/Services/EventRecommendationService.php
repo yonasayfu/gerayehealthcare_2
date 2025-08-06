@@ -24,9 +24,9 @@ class EventRecommendationService extends BaseService
               ->orWhere('source_channel', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->query();
+        $query = $this->model->with($with);
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
@@ -42,7 +42,7 @@ class EventRecommendationService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function update(int $id, array $data): EventRecommendation
+    public function update(int $id, array|object $data): EventRecommendation
     {
         $eventRecommendation = parent::update($id, $data);
 

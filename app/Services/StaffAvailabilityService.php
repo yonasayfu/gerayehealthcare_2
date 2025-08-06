@@ -41,9 +41,9 @@ class StaffAvailabilityService extends BaseService
         })->toArray();
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with('staff');
+        $query = $this->model->with(array_merge(['staff'], $with));
 
         if ($request->filled('staff_id')) {
             $query->where('staff_id', $request->staff_id);

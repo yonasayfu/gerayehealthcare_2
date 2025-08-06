@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Requests\StoreInsurancePolicyRequest;
 use App\Http\Requests\UpdateInsurancePolicyRequest;
+use App\Services\Insurance\InsurancePolicyService;
 
 class InsurancePolicyController extends BaseController
 {

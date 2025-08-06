@@ -34,6 +34,11 @@ const perPage = ref(props.filters?.per_page || 5)
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p'); // Use the imported format function here
 });
+
+const currentDate = computed(() => {
+  return format(new Date(), 'PPP');
+});
+
 // Add a computed property to calculate the index numbers
 const currentIndex = computed(() => {
   return (props.patients.current_page - 1) * props.patients.per_page;
@@ -109,6 +114,7 @@ function toggleSort(field: string) {
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Patients</h1>
           <p class="text-sm text-muted-foreground">Manage all patient records here.</p>
+          <p class="text-sm text-muted-foreground">Today's Date: {{ currentDate }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <Link :href="route('admin.patients.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">

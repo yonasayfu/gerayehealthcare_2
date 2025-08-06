@@ -26,9 +26,9 @@ class CaregiverAssignmentService extends BaseService
               ->orWhereHas('staff', fn($q) => $q->where('first_name', 'ilike', "%{$search}%"));
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['patient', 'staff']);
+        $query = $this->model->with(array_merge(['patient', 'staff'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

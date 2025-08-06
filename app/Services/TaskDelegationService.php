@@ -22,9 +22,9 @@ class TaskDelegationService extends BaseService
         return $query->where('title', 'like', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['assignee']);
+        $query = $this->model->with(array_merge(['assignee'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

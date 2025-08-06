@@ -8,6 +8,7 @@ class CreatePatientDTO
         public string $full_name,
         public ?string $fayda_id,
         public string $date_of_birth,
+        public ?string $ethiopian_date_of_birth,
         public ?string $gender,
         public ?string $address,
         public ?string $phone_number,

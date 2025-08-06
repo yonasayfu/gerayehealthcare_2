@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Requests\StoreExchangeRateRequest;
 use App\Http\Requests\UpdateExchangeRateRequest;
+use App\Services\Insurance\ExchangeRateService;
 
 class ExchangeRateController extends BaseController
 {

@@ -24,9 +24,9 @@ class InventoryMaintenanceRecordService extends BaseService
                   ->orWhereHas('item', fn($q) => $q->where('name', 'ilike', "%$search%"));
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['item']);
+        $query = $this->model->with(array_merge(['item'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

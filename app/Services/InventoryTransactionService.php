@@ -23,9 +23,9 @@ class InventoryTransactionService extends BaseService
                   ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['item', 'performedBy']);
+        $query = $this->model->with(array_merge(['item', 'performedBy'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

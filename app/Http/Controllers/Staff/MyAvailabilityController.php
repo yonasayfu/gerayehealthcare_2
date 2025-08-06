@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\GetEventsRequest;
 use App\Http\Requests\StoreMyAvailabilityRequest;
 use App\Http\Requests\UpdateMyAvailabilityRequest;
+use App\Services\StaffAvailabilityService;
 
 class MyAvailabilityController extends BaseController
 {

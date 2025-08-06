@@ -66,7 +66,7 @@ function toggleSort(field) {
 <template>
     <Head title="Event Broadcasts" />
 
-    <AdminLayout :breadcrumbs="breadcrumbs">
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6 print:p-0 print:space-y-0">
             <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
                 <div>
@@ -179,6 +179,6 @@ function toggleSort(field) {
                 <p>Document Generated: {{ formattedGeneratedDate }}</p>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>
 

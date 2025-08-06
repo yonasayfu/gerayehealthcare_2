@@ -24,9 +24,9 @@ class MarketingTaskService extends BaseService
               ->orWhere('task_code', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user']);
+        $query = $this->model->with(array_merge(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

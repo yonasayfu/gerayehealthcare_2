@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppSidebarLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Head } from '@inertiajs/vue3'
 import { type BreadcrumbItem } from '@/types'
-import Sidebar from '@/components/Sidebar.vue';
+import Sidebar from '@/components/ui/sidebar/Sidebar.vue';
 
 // Icons (you can change to better match your UI later)
 import { FileText, ClipboardList, CalendarDays } from 'lucide-vue-next'

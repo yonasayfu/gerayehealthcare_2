@@ -25,9 +25,9 @@ class MarketingLeadService extends BaseService
                   ->orWhere('lead_code', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
+        $query = $this->model->with(array_merge(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

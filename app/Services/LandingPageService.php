@@ -24,9 +24,9 @@ class LandingPageService extends BaseService
               ->orWhere('page_code', 'ilike', "%{$search}%");
     }
 
-    public function getAll(Request $request)
+    public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(['campaign']);
+        $query = $this->model->with(array_merge(['campaign'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

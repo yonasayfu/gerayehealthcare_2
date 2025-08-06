@@ -35,7 +35,7 @@ function destroy(id: number) {
 <template>
   <Head :title="`Event Recommendation: ${eventRecommendation.patient_name}`" />
 
-  <AdminLayout :breadcrumbs="breadcrumbs">
+  <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
@@ -118,7 +118,7 @@ function destroy(id: number) {
 
     </div>
 
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 <style>
