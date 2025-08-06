@@ -64,7 +64,7 @@ function destroy(id: number) {
                   <span v-for="permission in role.permissions" :key="permission.id" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full dark:bg-blue-900 dark:text-blue-200">
                     {{ permission.name }}
                   </span>
-                   <span v-if="!role.permissions || role.permissions.length === 0" class="text-gray-400 italic">No permissions assigned</span>
+                   <span v-if="role.permissions.length === 0" class="text-gray-400 italic">No permissions assigned</span>
                 </div>
               </td>
               <td class="px-6 py-4 text-right">

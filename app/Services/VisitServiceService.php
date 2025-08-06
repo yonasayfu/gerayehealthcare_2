@@ -77,7 +77,7 @@ class VisitServiceService extends BaseService
         return $visitService;
     }
 
-    public function update(int $id, array $data): VisitService
+    public function update(int $id, array|object $data): VisitService
     {
         $visitService = $this->getById($id);
         $this->checkOverlap($data, $visitService->id);

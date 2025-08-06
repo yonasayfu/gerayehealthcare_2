@@ -80,6 +80,7 @@ function destroy(id: number) {
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 text-sm">
             <option value="5">5</option>
             <option value="10">10</option>
+            
             <option value="25">25</option>
             <option value="50">50</option>
           </select>

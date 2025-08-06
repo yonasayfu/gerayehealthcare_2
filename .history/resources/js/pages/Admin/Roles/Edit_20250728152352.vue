@@ -15,7 +15,7 @@ const props = defineProps<{
 const form = useForm({
   name: props.role.name,
   // We extract just the names from the permissions array for the form
-  permissions: (props.role.permissions || []).map(p => p.name),
+  permissions: props.role.permissions.map(p => p.name),
 });
 
 const submit = () => {
@@ -49,3 +49,4 @@ const submit = () => {
     </div>
   </AppLayout>
 </template>
+

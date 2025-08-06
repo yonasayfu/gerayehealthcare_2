@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use Illuminate\Http\Request;
 
 class UserService extends BaseService
 {
@@ -18,27 +17,7 @@ class UserService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhereHas('staff', function ($q) use ($search) {
-                  $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-              });
-    }
-
-    public function getAll(Request $request, array $with = [])
-    {
-        $query = $this->model->with('roles');
-        
-        if ($request->has('search')) {
-            $this->applySearch($query, $request->input('search'));
-        }
-
-        if ($request->has('sort')) {
-            $direction = $request->input('direction', 'asc');
-            $query->orderBy($request->input('sort'), $direction);
-        }
-
-        return $query->paginate($request->input('per_page', 5));
+              ->orWhere('email', 'like', "%{$search}%");
     }
 
     public function create(array|object $data): User

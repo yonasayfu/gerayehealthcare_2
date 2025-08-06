@@ -61,7 +61,7 @@ class InventoryRequestService extends BaseService
         return parent::create($data);
     }
 
-    public function update(int $id, array $data): InventoryRequest
+    public function update(int $id, array|object $data): InventoryRequest
     {
         $inventoryRequest = parent::update($id, $data);
         $this->checkInventoryAlert($inventoryRequest);

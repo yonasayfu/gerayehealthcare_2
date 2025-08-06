@@ -34,7 +34,7 @@ class MrXInsuranceScenarioSeeder extends Seeder
 
         $physiotherapyService = Service::firstOrCreate(
             ['name' => 'Physiotherapy'],
-            ['description' => 'Physical therapy services', 'price' => 1000.00, 'duration' => 60, 'is_active' => true]
+            ['description' => 'Physical therapy services', 'category' => 'Physiotherapy', 'price' => 1000.00, 'duration' => 60, 'is_active' => true]
         );
 
         $nyalaAslmPolicy = InsurancePolicy::firstOrCreate(

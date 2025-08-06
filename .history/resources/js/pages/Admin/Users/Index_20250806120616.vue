@@ -80,6 +80,7 @@ function destroy(id: number) {
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 text-sm">
             <option value="5">5</option>
             <option value="10">10</option>
+            <option value="5">5</option>
             <option value="25">25</option>
             <option value="50">50</option>
           </select>
@@ -116,9 +117,6 @@ function destroy(id: number) {
                   <Link :href="route('admin.users.edit', user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700" title="Edit Role">
                     <Edit3 class="w-4 h-4 text-blue-600" />
                   </Link>
-                  <button @click="destroy(user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-gray-700" title="Delete User">
-                    <Trash2 class="w-4 h-4 text-red-600" />
-                  </button>
                 </div>
               </td>
             </tr>

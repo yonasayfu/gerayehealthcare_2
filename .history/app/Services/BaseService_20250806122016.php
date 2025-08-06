@@ -14,9 +14,9 @@ class BaseService
         $this->model = $model;
     }
 
-    public function getAll(Request $request, array $with = [])
+    public function getAll(Request $request)
     {
-        $query = $this->model->query()->with($with);
+        $query = $this->model->query();
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));

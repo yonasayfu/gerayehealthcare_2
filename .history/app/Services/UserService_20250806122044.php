@@ -18,14 +18,10 @@ class UserService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhereHas('staff', function ($q) use ($search) {
-                  $q->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-              });
+              ->orWhere('email', 'like', "%{$search}%");
     }
 
-    public function getAll(Request $request, array $with = [])
+    public function getAll(Request $request)
     {
         $query = $this->model->with('roles');
         

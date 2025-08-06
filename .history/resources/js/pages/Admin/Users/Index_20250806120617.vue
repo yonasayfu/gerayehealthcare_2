@@ -80,6 +80,7 @@ function destroy(id: number) {
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 text-sm">
             <option value="5">5</option>
             <option value="10">10</option>
+            <option value="5">5</option>
             <option value="25">25</option>
             <option value="50">50</option>
           </select>
@@ -120,9 +121,6 @@ function destroy(id: number) {
                     <Trash2 class="w-4 h-4 text-red-600" />
                   </button>
                 </div>
-              </td>
-            </tr>
-             <tr v-if="users.data.length === 0">
               <td colspan="4" class="text-center px-6 py-4 text-gray-400">No users found.</td>
             </tr>
           </tbody>

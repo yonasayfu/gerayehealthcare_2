@@ -25,7 +25,8 @@ class StaffAvailabilityController extends BaseController
         );
     }
 
-    
-
-    
+    public function getCalendarEvents(Request $request)
+    {
+        return $this->service->getCalendarEvents($request);
+    }
 }

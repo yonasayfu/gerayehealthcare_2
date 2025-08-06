@@ -48,7 +48,7 @@ class LeaveRequestService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function update(int $id, array $data): LeaveRequest
+    public function update(int $id, array|object $data): LeaveRequest
     {
         $leaveRequest = $this->getById($id);
 

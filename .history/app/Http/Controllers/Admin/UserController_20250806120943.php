@@ -25,11 +25,18 @@ class UserController extends BaseController
 
     public function index(Request $request)
     {
-        $data = $this->service->getAll($request, ['roles']);
-        
-        return Inertia::render($this->viewName . '/Index', [
-            $this->dataVariableName => $data,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
+        $query = User::with('roles');
+
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%')
+                  ->orWhere('email', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $users = $query->paginate($request->input('per_page', 10));
+
+        return Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'filters' => $request->only(['search', 'per_page']),
         ]);
     }
 

@@ -18,9 +18,8 @@ class RoleService extends BaseService
         return parent::create($data);
     }
 
-    public function update(int $id, array|object $data): Role
+    public function update(int $id, array $data): Role
     {
-        $data = is_object($data) ? (array) $data : $data;
         $role = $this->getById($id);
         $role->update(['name' => $data['name']]);
         $role->syncPermissions($data['permissions'] ?? []);

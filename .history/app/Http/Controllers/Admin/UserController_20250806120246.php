@@ -10,7 +10,6 @@ use Spatie\Permission\Models\Role;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
-class UserController extends BaseController
 {
     public function __construct(UserService $userService)
     {
@@ -21,16 +20,6 @@ class UserController extends BaseController
             'users',
             User::class
         );
-    }
-
-    public function index(Request $request)
-    {
-        $data = $this->service->getAll($request, ['roles']);
-        
-        return Inertia::render($this->viewName . '/Index', [
-            $this->dataVariableName => $data,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
-        ]);
     }
 
     public function edit($id)
@@ -53,13 +42,5 @@ class UserController extends BaseController
         $user->syncRoles($validatedData['role']);
 
         return redirect()->route('admin.users.index')->with('success', 'User role updated successfully.');
-    }
-
-    public function show($id)
-    {
-        $user = User::with('roles')->findOrFail($id);
-        return Inertia::render('Admin/Users/Show', [
-            'user' => $user,
-        ]);
     }
 }

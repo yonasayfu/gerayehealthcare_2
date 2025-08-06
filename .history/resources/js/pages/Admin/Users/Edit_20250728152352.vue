@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const form = useForm({
   // Get the first role name, or default to ''
-  role: (props.user.roles && props.user.roles[0]?.name) || '',
+  role: props.user.roles[0]?.name || '',
 });
 
 const submit = () => {

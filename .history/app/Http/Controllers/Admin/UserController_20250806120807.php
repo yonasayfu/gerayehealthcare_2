@@ -25,21 +25,19 @@ class UserController extends BaseController
 
     public function index(Request $request)
     {
-        $data = $this->service->getAll($request, ['roles']);
-        
-        return Inertia::render($this->viewName . '/Index', [
-            $this->dataVariableName => $data,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
-        ]);
-    }
+        $query = User::with('roles');
 
-    public function edit($id)
-    {
-        $user = $this->service->getById($id);
-        $roles = Role::all()->pluck('name');
-        return Inertia::render('Admin/Users/Edit', [
-            'user' => $user,
-            'roles' => $roles,
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->input('search') . '%')
+                  ->orWhere('email', 'like', '%' . $request->input('search') . '%');
+        }
+
+        $users = $query->paginate($request->input('per_page', 10));
+
+        return Inertia::render('Admin/Users/Index', [
+            'users' => $users,
+            'filters' => $request->only(['search', 'per_page']),
+        ]);
         ]);
     }
 
@@ -53,13 +51,5 @@ class UserController extends BaseController
         $user->syncRoles($validatedData['role']);
 
         return redirect()->route('admin.users.index')->with('success', 'User role updated successfully.');
-    }
-
-    public function show($id)
-    {
-        $user = User::with('roles')->findOrFail($id);
-        return Inertia::render('Admin/Users/Show', [
-            'user' => $user,
-        ]);
     }
 }

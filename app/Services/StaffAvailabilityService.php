@@ -73,7 +73,7 @@ class StaffAvailabilityService extends BaseService
         return parent::create($data);
     }
 
-    public function update(int $id, array $data): StaffAvailability
+    public function update(int $id, array|object $data): StaffAvailability
     {
         $this->checkOverlap($data, $id);
         return parent::update($id, $data);

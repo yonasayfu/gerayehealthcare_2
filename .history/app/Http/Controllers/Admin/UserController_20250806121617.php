@@ -29,6 +29,9 @@ class UserController extends BaseController
         
         return Inertia::render($this->viewName . '/Index', [
             $this->dataVariableName => $data,
+        
+        return Inertia::render($this->viewName . '/Index', [
+            $this->dataVariableName => $data,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
         ]);
     }
