@@ -23,4 +23,3 @@ Route::prefix('v1')->group(function () {
     Route::post('/convert-to-ethiopian', [DateConversionController::class, 'convertToEthiopian']);
     Route::post('/convert-gregorian-to-ethiopian', [DateConversionController::class, 'convertGregorianToEthiopian']);
     Route::post('/convert-ethiopian-to-gregorian', [DateConversionController::class, 'convertEthiopianToGregorian']);
-});
