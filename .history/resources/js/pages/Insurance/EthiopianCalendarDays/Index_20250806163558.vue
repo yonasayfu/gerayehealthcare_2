@@ -175,7 +175,7 @@ async function convertDate(type: 'gregorian' | 'ethiopian') {
                 v-model="ethiopianPickerGregorianModel"
                 @update:ethiopianDate="ethiopianInput = $event"
             />
-            <button @click="convertDate('ethiopian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:outline-none focus:border-gray-400 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+            <button @click="convertDate('ethiopian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-600 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
               Convert to Gregorian
             </button>
             <p v-if="convertedGregorianDate" class="mt-2 text-sm text-green-600 dark:text-green-400">Converted Gregorian: {{ convertedGregorianDate }}</p>

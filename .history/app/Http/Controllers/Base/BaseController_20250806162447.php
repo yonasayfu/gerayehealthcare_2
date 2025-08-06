@@ -48,6 +48,7 @@ class BaseController extends Controller
 
         $data = $this->dtoClass ? new ($this->dtoClass)(...$this->prepareDataForDTO($validatedData)) : $validatedData;
 
+
         $this->service->create($data);
 
         return redirect()->route('admin.' . $this->getRouteName() . '.index')->with('success', ucfirst($this->dataVariableName) . ' created successfully.');
@@ -56,6 +57,7 @@ class BaseController extends Controller
     public function show($id)
     {
         $data = $this->service->getById($id);
+        Log::info('Data retrieved in BaseController@show:', ['data' => $data]);
 
         // Conditionally add ethiopian_date for EthiopianCalendarDay model
         if ($this->modelClass === \App\Models\EthiopianCalendarDay::class && $data->gregorian_date) {
@@ -123,6 +125,7 @@ class BaseController extends Controller
     private function getRouteName()
     {
         $routeName = Str::kebab(Str::plural(class_basename($this->modelClass)));
+        Log::info('Generated route name:', ['name' => $routeName, 'model' => class_basename($this->modelClass)]);
         return $routeName;
     }
 
@@ -140,6 +143,7 @@ class BaseController extends Controller
      */
     protected function prepareDataForDTO(array $validatedData): array
     {
+        Log::info('Validated data before DTO preparation:', ['validatedData' => $validatedData]);
         if (!$this->dtoClass) {
             return $validatedData;
         }
