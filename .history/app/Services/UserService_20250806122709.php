@@ -17,11 +17,11 @@ class UserService extends BaseService
 
     protected function applySearch($query, $search)
     {
-        $query->where('name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%")
+        $query->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
               ->orWhereHas('staff', function ($q) use ($search) {
                   $q->where('first_name', 'ilike', "%{$search}%")
-                    ->orWhere('last_name', 'ilike', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%");
               });
     }
 

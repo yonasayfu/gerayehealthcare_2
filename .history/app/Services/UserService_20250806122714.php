@@ -21,7 +21,7 @@ class UserService extends BaseService
               ->orWhere('email', 'ilike', "%{$search}%")
               ->orWhereHas('staff', function ($q) use ($search) {
                   $q->where('first_name', 'ilike', "%{$search}%")
-                    ->orWhere('last_name', 'ilike', "%{$search}%");
+                    ->orWhere('last_name', 'like', "%{$search}%");
               });
     }
 
