@@ -9,22 +9,13 @@ import { format } from 'date-fns'
 import CalendarView from '@/components/CalendarView.vue'
 import { toEthiopian, toGregorian } from 'ethiopian-date'; // Import toGregorian
 import axios from 'axios'; // Import axios
-import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
 
 import type { EthiopianCalendarDayPagination } from '@/types';
 
 const gregorianInput = ref('');
-const ethiopianInput = ref(''); // This will store the Ethiopian date string from the picker
-const ethiopianPickerGregorianModel = ref(''); // This will be the v-model for EthiopianDatePicker
+const ethiopianInput = ref('');
 const convertedGregorianDate = ref('');
 const convertedEthiopianDate = ref('');
-const conversionError = ref('');
-
-const props = defineProps<{
-  ethiopianCalendarDays: EthiopianCalendarDayPagination;
-  filters: {
-    search?: string;
-    sort?: string;
     direction?: 'asc' | 'desc';
     per_page?: number;
   };
@@ -87,43 +78,6 @@ function toggleSort(field: string) {
     sortDirection.value = 'asc'
   }
 }
-
-async function convertDate(type: 'gregorian' | 'ethiopian') {
-  conversionError.value = '';
-  convertedGregorianDate.value = '';
-  convertedEthiopianDate.value = '';
-
-  try {
-    if (type === 'gregorian' && gregorianInput.value) {
-      const response = await axios.post('/api/v1/convert-to-ethiopian', { date: gregorianInput.value });
-      convertedEthiopianDate.value = response.data.ethiopian_date;
-    } else if (type === 'ethiopian' && ethiopianInput.value) {
-      try {
-        const dateParts = ethiopianInput.value.split('-').map(Number);
-        if (dateParts.length !== 3 || isNaN(dateParts[0]) || isNaN(dateParts[1]) || isNaN(dateParts[2])) {
-          throw new Error('Invalid Ethiopian date format. Please use YYYY-MM-DD.');
-        }
-        const gregorian = toGregorian(dateParts[0], dateParts[1], dateParts[2]);
-        convertedGregorianDate.value = `${gregorian[0]}-${String(gregorian[1]).padStart(2, '0')}-${String(gregorian[2]).padStart(2, '0')}`;
-      } catch (e: any) {
-        conversionError.value = e.message || 'Invalid Ethiopian date for conversion.';
-        console.error('Frontend conversion error:', e);
-      }
-    } else {
-      conversionError.value = 'Please enter a date to convert.';
-    }
-  } catch (error: any) {
-    if (error.response && error.response.data && error.response.data.message) {
-      conversionError.value = error.response.data.message;
-    } else if (error.response && error.response.data && error.response.data.error) {
-      conversionError.value = error.response.data.error;
-    }
-    else {
-      conversionError.value = 'An unexpected error occurred during conversion.';
-    }
-    console.error('Conversion error:', error);
-  }
-}
 </script>
 
 <template>
@@ -149,34 +103,6 @@ async function convertDate(type: 'gregorian' | 'ethiopian') {
 
       <div v-if="showEthiopianDate" class="rounded-lg bg-blue-50 p-4 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden mt-4">
         <p class="text-base font-semibold text-blue-800 dark:text-blue-200">Today's Date: {{ new Date().toLocaleDateString() }} (Gregorian) / {{ currentEthiopianDate }} (Ethiopian)</p>
-      </div>
-
-      <!-- Date Conversion Section -->
-      <div class="rounded-lg bg-gray-50 p-4 shadow-md print:hidden mt-4">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Date Conversion</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="gregorianConvertInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gregorian Date to Convert</label>
-            <input type="date" id="gregorianConvertInput" v-model="gregorianInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-            <button @click="convertDate('gregorian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-600 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
-              Convert to Ethiopian
-            </button>
-            <p v-if="convertedEthiopianDate" class="mt-2 text-sm text-green-600 dark:text-green-400">Converted Ethiopian: {{ convertedEthiopianDate }}</p>
-          </div>
-          <div>
-            <label for="ethiopianConvertInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ethiopian Date to Convert</label>
-            <EthiopianDatePicker
-                id="ethiopianConvertInput"
-                v-model="ethiopianPickerGregorianModel"
-                @update:ethiopianDate="ethiopianInput = $event"
-            />
-            <button @click="convertDate('ethiopian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-600 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
-              Convert to Gregorian
-            </button>
-            <p v-if="convertedGregorianDate" class="mt-2 text-sm text-green-600 dark:text-green-400">Converted Gregorian: {{ convertedGregorianDate }}</p>
-          </div>
-        </div>
-        <p v-if="conversionError" class="mt-4 text-sm text-red-600 dark:text-red-400">{{ conversionError }}</p>
       </div>
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">

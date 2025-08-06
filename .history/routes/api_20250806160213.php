@@ -19,7 +19,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('patients', PatientController::class)->only(['index', 'show']);
     });
     
-    // Date conversion routes
+    // Temporarily move date conversion routes outside auth:sanctum for testing
     Route::post('/convert-to-ethiopian', [DateConversionController::class, 'convertToEthiopian']);
-    // Removed convert-to-gregorian as it will be handled on frontend
+    Route::post('/convert-to-gregorian', [DateConversionController::class, 'convertToGregorian']);
 });

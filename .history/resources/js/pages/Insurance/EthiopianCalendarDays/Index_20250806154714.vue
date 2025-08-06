@@ -9,7 +9,6 @@ import { format } from 'date-fns'
 import CalendarView from '@/components/CalendarView.vue'
 import { toEthiopian, toGregorian } from 'ethiopian-date'; // Import toGregorian
 import axios from 'axios'; // Import axios
-import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
 
 import type { EthiopianCalendarDayPagination } from '@/types';
 
@@ -98,17 +97,8 @@ async function convertDate(type: 'gregorian' | 'ethiopian') {
       const response = await axios.post('/api/v1/convert-to-ethiopian', { date: gregorianInput.value });
       convertedEthiopianDate.value = response.data.ethiopian_date;
     } else if (type === 'ethiopian' && ethiopianInput.value) {
-      try {
-        const dateParts = ethiopianInput.value.split('-').map(Number);
-        if (dateParts.length !== 3 || isNaN(dateParts[0]) || isNaN(dateParts[1]) || isNaN(dateParts[2])) {
-          throw new Error('Invalid Ethiopian date format. Please use YYYY-MM-DD.');
-        }
-        const gregorian = toGregorian(dateParts[0], dateParts[1], dateParts[2]);
-        convertedGregorianDate.value = `${gregorian[0]}-${String(gregorian[1]).padStart(2, '0')}-${String(gregorian[2]).padStart(2, '0')}`;
-      } catch (e: any) {
-        conversionError.value = e.message || 'Invalid Ethiopian date for conversion.';
-        console.error('Frontend conversion error:', e);
-      }
+      const response = await axios.post('/api/v1/convert-to-gregorian', { date: ethiopianInput.value });
+      convertedGregorianDate.value = response.data.gregorian_date;
     } else {
       conversionError.value = 'Please enter a date to convert.';
     }

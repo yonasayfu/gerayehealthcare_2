@@ -9,13 +9,11 @@ import { format } from 'date-fns'
 import CalendarView from '@/components/CalendarView.vue'
 import { toEthiopian, toGregorian } from 'ethiopian-date'; // Import toGregorian
 import axios from 'axios'; // Import axios
-import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
 
 import type { EthiopianCalendarDayPagination } from '@/types';
 
 const gregorianInput = ref('');
-const ethiopianInput = ref(''); // This will store the Ethiopian date string from the picker
-const ethiopianPickerGregorianModel = ref(''); // This will be the v-model for EthiopianDatePicker
+const ethiopianInput = ref('');
 const convertedGregorianDate = ref('');
 const convertedEthiopianDate = ref('');
 const conversionError = ref('');
@@ -87,43 +85,6 @@ function toggleSort(field: string) {
     sortDirection.value = 'asc'
   }
 }
-
-async function convertDate(type: 'gregorian' | 'ethiopian') {
-  conversionError.value = '';
-  convertedGregorianDate.value = '';
-  convertedEthiopianDate.value = '';
-
-  try {
-    if (type === 'gregorian' && gregorianInput.value) {
-      const response = await axios.post('/api/v1/convert-to-ethiopian', { date: gregorianInput.value });
-      convertedEthiopianDate.value = response.data.ethiopian_date;
-    } else if (type === 'ethiopian' && ethiopianInput.value) {
-      try {
-        const dateParts = ethiopianInput.value.split('-').map(Number);
-        if (dateParts.length !== 3 || isNaN(dateParts[0]) || isNaN(dateParts[1]) || isNaN(dateParts[2])) {
-          throw new Error('Invalid Ethiopian date format. Please use YYYY-MM-DD.');
-        }
-        const gregorian = toGregorian(dateParts[0], dateParts[1], dateParts[2]);
-        convertedGregorianDate.value = `${gregorian[0]}-${String(gregorian[1]).padStart(2, '0')}-${String(gregorian[2]).padStart(2, '0')}`;
-      } catch (e: any) {
-        conversionError.value = e.message || 'Invalid Ethiopian date for conversion.';
-        console.error('Frontend conversion error:', e);
-      }
-    } else {
-      conversionError.value = 'Please enter a date to convert.';
-    }
-  } catch (error: any) {
-    if (error.response && error.response.data && error.response.data.message) {
-      conversionError.value = error.response.data.message;
-    } else if (error.response && error.response.data && error.response.data.error) {
-      conversionError.value = error.response.data.error;
-    }
-    else {
-      conversionError.value = 'An unexpected error occurred during conversion.';
-    }
-    console.error('Conversion error:', error);
-  }
-}
 </script>
 
 <template>
@@ -165,11 +126,7 @@ async function convertDate(type: 'gregorian' | 'ethiopian') {
           </div>
           <div>
             <label for="ethiopianConvertInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ethiopian Date to Convert</label>
-            <EthiopianDatePicker
-                id="ethiopianConvertInput"
-                v-model="ethiopianPickerGregorianModel"
-                @update:ethiopianDate="ethiopianInput = $event"
-            />
+            <input type="text" id="ethiopianConvertInput" v-model="ethiopianInput" placeholder="YYYY-MM-DD" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
             <button @click="convertDate('ethiopian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-600 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
               Convert to Gregorian
             </button>
@@ -188,37 +145,6 @@ async function convertDate(type: 'gregorian' | 'ethiopian') {
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
           />
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-        </div>
-
-        <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
-        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
-            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
-            <p class="text-gray-600 dark:text-gray-400 print-document-title">Ethiopian Calendar Days List (Current View)</p>
-            <hr class="my-3 border-gray-300 print:my-2">
-        </div>
-        
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
-          <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
-            <tr>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gregorian_date')">
-                Gregorian Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('ethiopian_date')">
-                Ethiopian Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('description')">
                 Description <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
