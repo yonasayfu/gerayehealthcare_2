@@ -24,11 +24,10 @@ defineProps<{
           v-else
           :key="`link-${key}`"
           class="mr-1 mb-1 px-4 py-3 text-sm leading-4 border rounded hover:bg-white focus:border-primary-500 focus:text-primary-500"
-          :class="{ 'bg-blue-500 text-white': link.active }"
+          :class="{ 'bg-white': link.active }"
           :href="link.url"
           v-html="link.label"
         />
       </template>
     </div>
   </div>
-</template>

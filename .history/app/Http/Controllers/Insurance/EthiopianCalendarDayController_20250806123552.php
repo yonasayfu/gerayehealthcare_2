@@ -15,9 +15,6 @@ use App\Services\Insurance\EthiopianCalendarDayService;
 use App\Services\Validation\Rules\EthiopianCalendarDayRules;
 use App\DTOs\CreateEthiopianCalendarDayDTO;
 
-class EthiopianCalendarDayController extends BaseController
-{
-    public function __construct(EthiopianCalendarDayService $ethiopianCalendarDayService)
     {
         parent::__construct(
             $ethiopianCalendarDayService,

@@ -129,7 +129,22 @@ function destroy(id: number) {
           </tbody>
         </table>
       </div>
-      <Pagination :links="users.links" />
+      <div class="flex justify-end" v-if="users.links.length > 3">
+        <div class="flex items-center space-x-1">
+          <Link
+            v-for="(link, i) in users.links"
+            :key="i"
+            :href="link.url || '#'"
+            v-html="link.label"
+            :class="[
+              'px-3 py-1 rounded-md text-sm',
+              link.active ? 'bg-primary-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700',
+              !link.url && 'cursor-not-allowed text-gray-400'
+            ]"
+            :disabled="!link.url"
+          />
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>

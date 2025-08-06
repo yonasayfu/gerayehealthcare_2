@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 use App\Http\Requests\StoreEthiopianCalendarDayRequest;
 use App\Http\Requests\UpdateEthiopianCalendarDayRequest;
-use App\Services\Insurance\EthiopianCalendarDayService;
-use App\Services\Validation\Rules\EthiopianCalendarDayRules;
-use App\DTOs\CreateEthiopianCalendarDayDTO;
 
 class EthiopianCalendarDayController extends BaseController
 {
