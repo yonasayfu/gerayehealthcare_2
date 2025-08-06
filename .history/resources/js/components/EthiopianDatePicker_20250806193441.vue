@@ -20,14 +20,12 @@
     </button>
     <div v-if="showCalendar" class="absolute z-10 bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4">
       <div class="flex justify-between items-center mb-2">
-        <button @click="prevMonth" class="px-2 py-1 rounded hover:bg-gray-200"><</button>
         <select v-model="currentEthiopianMonth" class="mx-2 p-1 border rounded">
           <option v-for="(month, index) in ethiopianMonths" :key="index" :value="index + 1">{{ month }}</option>
         </select>
         <select v-model="currentEthiopianYear" class="mx-2 p-1 border rounded">
           <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
         </select>
-        <button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-200">></button>
       </div>
       <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500 mb-1">
         <span v-for="day in weekDays" :key="day">{{ day }}</span>

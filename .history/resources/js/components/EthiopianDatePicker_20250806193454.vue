@@ -28,8 +28,6 @@
           <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
         </select>
         <button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-200">></button>
-      </div>
-      <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500 mb-1">
         <span v-for="day in weekDays" :key="day">{{ day }}</span>
       </div>
       <div class="grid grid-cols-7 gap-1 text-sm">

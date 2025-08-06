@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import AppLayout from '@/layouts/AppLayout.vue'
+import AdminLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 

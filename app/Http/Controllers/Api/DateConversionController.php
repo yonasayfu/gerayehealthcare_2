@@ -93,13 +93,12 @@ class DateConversionController extends Controller
             // Let's try to use the `toDateTime()` method as it is the intended way.
             // If it fails again, I will consider using `DateTimeFactory::toGregorian` if it exists, or manually constructing.
             // For now, I will assume the previous error was a temporary glitch or related to the protected property issue.
-            // Due to limitations with the current 'andegna/calender' library for direct Ethiopian to Gregorian conversion,
-            // this method will return a hardcoded value for demonstration purposes.
-            // A more robust solution would require a different library or custom implementation.
+            $gregorianDate = new \DateTime($ethiopicDate->format('Y-m-d H:i:s'));
+
             return response()->json([
-                'year' => 2024,
-                'month' => 9,
-                'day' => 11,
+                'year' => (int)$gregorianDate->format('Y'),
+                'month' => (int)$gregorianDate->format('m'),
+                'day' => (int)$gregorianDate->format('d'),
             ]);
         } catch (\Exception $e) {
             Log::error("Error converting Ethiopian to Gregorian date: " . $e->getMessage(), ['request_data' => $request->all()]);

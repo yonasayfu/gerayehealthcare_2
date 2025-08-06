@@ -1,38 +1,16 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed, onMounted } from 'vue' // Added onMounted
+import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-import { useExport } from '@/composables/useExport'; // Corrected casing
 
-interface Participant {
-  id: number;
-  event_id: number;
-  patient_id: number;
-  status: string;
-  // Add other properties as needed
-}
-
-interface Filters {
-  search?: string;
-  sort?: string;
-  direction?: 'asc' | 'desc';
-  per_page?: number;
-}
-
-interface ParticipantsPagination {
-  data: Participant[];
-  links: any[]; // Adjust with actual pagination link type if available
-  // Add other pagination properties like current_page, last_page, total, etc.
-}
-
-const props = defineProps<{
-    participants: ParticipantsPagination;
-    filters: Filters;
-}>();
+const props = defineProps({
+    participants: Object,
+    filters: Object,
+});
 
 const breadcrumbs = [
     { title: 'Dashboard', href: route('dashboard') },
@@ -49,7 +27,7 @@ const formattedGeneratedDate = computed(() => {
 });
 
 watch([search, sortField, sortDirection, perPage], debounce(() => {
-    const params: Record<string, string | number> = { // Explicitly type params
+    const params = {
         search: search.value,
         direction: sortDirection.value,
         per_page: perPage.value,
@@ -65,15 +43,17 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
     });
 }, 500));
 
-function destroy(id: number) { // Explicitly type id
+function destroy(id) {
     if (confirm('Are you sure you want to delete this event participant?')) {
         router.delete(route('admin.event-participants.destroy', id));
     }
 }
 
+import { useExport } from '@/Composables/useExport';
+
 const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.event-participants', filters: props.filters });
 
-function toggleSort(field: string) { // Explicitly type field
+function toggleSort(field) {
     if (sortField.value === field) {
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
     } else {
@@ -81,11 +61,6 @@ function toggleSort(field: string) { // Explicitly type field
         sortDirection.value = 'asc';
     }
 }
-
-// Renamed from printAllParticipants to printAllRecords as per useExport composable
-const printAllParticipants = () => {
-  printAllRecords();
-};
 </script>
 
 <template>

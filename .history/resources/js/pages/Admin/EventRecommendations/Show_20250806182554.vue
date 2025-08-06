@@ -5,13 +5,13 @@ import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 
 const props = defineProps<{
-  assignment: any;
+  eventRecommendation: any;
 }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Event Staff Assignments', href: route('admin.event-staff-assignments.index') },
-  { title: props.assignment.role, href: route('admin.event-staff-assignments.show', props.assignment.id) },
+  { title: 'Event Recommendations', href: route('admin.event-recommendations.index') },
+  { title: props.eventRecommendation.patient_name, href: route('admin.event-recommendations.show', props.eventRecommendation.id) },
 ]
 
 function printPage() {
@@ -26,23 +26,23 @@ function printPage() {
 }
 
 function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event staff assignment?')) {
-    router.delete(route('admin.event-staff-assignments.destroy', id))
+  if (confirm('Are you sure you want to delete this event recommendation?')) {
+    router.delete(route('admin.event-recommendations.destroy', id))
   }
 }
 </script>
 
 <template>
-  <Head :title="`Event Staff Assignment: ${assignment.role}`" />
+  <Head :title="`Event Recommendation: ${eventRecommendation.patient_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Event Staff Assignment Details: {{ assignment.role }}
+                Event Recommendation Details: {{ eventRecommendation.patient_name }}
             </h3>
-            <Link :href="route('admin.event-staff-assignments.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+            <Link :href="route('admin.event-recommendations.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </Link>
         </div>
@@ -53,24 +53,40 @@ function destroy(id: number) {
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                     <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
-                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Event Staff Assignment Document</p>
+                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Event Recommendation Document</p>
                     <hr class="my-3 border-gray-300 print:my-2">
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Assignment Information</h2>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Recommendation Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Event ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.event_id }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.event_id }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Staff ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.staff_id }}</p>
+                      <p class="text-sm text-muted-foreground">Source:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.source }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Role:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.role }}</p>
+                      <p class="text-sm text-muted-foreground">Recommended By:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.recommended_by ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Patient Name:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.patient_name }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Patient Phone:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.patient_phone ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Status:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.status }}</p>
+                    </div>
+                    <div class="lg:col-span-3">
+                      <p class="text-sm text-muted-foreground">Notes:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.notes ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -89,13 +105,13 @@ function destroy(id: number) {
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <Link
-                :href="route('admin.event-staff-assignments.edit', assignment.id)"
+                :href="route('admin.event-recommendations.edit', eventRecommendation.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
-                Edit Assignment
+                Edit Recommendation
               </Link>
-              <button @click="destroy(assignment.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Assignment
+              <button @click="destroy(eventRecommendation.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
+                <Trash2 class="w-4 h-4" /> Delete Recommendation
               </button>
             </div>
         </div>

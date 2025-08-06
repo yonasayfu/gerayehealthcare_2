@@ -20,14 +20,14 @@
     </button>
     <div v-if="showCalendar" class="absolute z-10 bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4">
       <div class="flex justify-between items-center mb-2">
-        <button @click="prevMonth" class="px-2 py-1 rounded hover:bg-gray-200"><</button>
+        <button @click="prevMonth" class="px-2 py-1 rounded hover:bg-gray-200">&lt;</button>
         <select v-model="currentEthiopianMonth" class="mx-2 p-1 border rounded">
           <option v-for="(month, index) in ethiopianMonths" :key="index" :value="index + 1">{{ month }}</option>
         </select>
         <select v-model="currentEthiopianYear" class="mx-2 p-1 border rounded">
           <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
         </select>
-        <button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-200">></button>
+        <button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-200">&gt;</button>
       </div>
       <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500 mb-1">
         <span v-for="day in weekDays" :key="day">{{ day }}</span>
@@ -98,17 +98,21 @@ const availableYears = computed(() => {
 const calendarDays = ref([]);
 
 const updateCalendarDays = async () => {
+  console.log('updateCalendarDays called for:', currentEthiopianYear.value, currentEthiopianMonth.value);
   try {
     if (currentEthiopianYear.value === null || currentEthiopianMonth.value === null) {
       calendarDays.value = [];
+      console.log('updateCalendarDays: Year or month is null, clearing calendarDays.');
       return;
     }
 
     const days = [];
     // Get the first day of the current Ethiopian month
     const firstDayOfEthMonthGregorian = await convertEthiopianToGregorian({ year: currentEthiopianYear.value, month: currentEthiopianMonth.value, day: 1 });
+    console.log('firstDayOfEthMonthGregorian:', firstDayOfEthMonthGregorian);
     if (!firstDayOfEthMonthGregorian) {
       calendarDays.value = [];
+      console.error('updateCalendarDays: Failed to get first day of Ethiopian month.');
       return;
     }
     const firstDayDate = new Date(firstDayOfEthMonthGregorian.year, firstDayOfEthMonthGregorian.month - 1, firstDayOfEthMonthGregorian.day);
@@ -128,15 +132,19 @@ const updateCalendarDays = async () => {
     if (currentEthiopianMonth.value === 13) { // Pagume
       // Check for leap year in Ethiopian calendar
       const nextYearFirstMonthFirstDayGregorian = await convertEthiopianToGregorian({ year: currentEthiopianYear.value + 1, month: 1, day: 1 });
+      console.log('nextYearFirstMonthFirstDayGregorian:', nextYearFirstMonthFirstDayGregorian);
       if (!nextYearFirstMonthFirstDayGregorian) {
         calendarDays.value = [];
+        console.error("updateCalendarDays: Failed to get next year's first month first day.");
         return;
       }
       const nextYearFirstMonthFirstDayDate = new Date(nextYearFirstMonthFirstDayGregorian.year, nextYearFirstMonthFirstDayGregorian.month - 1, nextYearFirstMonthFirstDayGregorian.day);
       const currentYearLastDayGregorian = new Date(nextYearFirstMonthFirstDayDate.setDate(nextYearFirstMonthFirstDayDate.getDate() - 1));
       const currentYearLastDayEthiopian = await convertGregorianToEthiopian({ year: currentYearLastDayGregorian.getFullYear(), month: currentYearLastDayGregorian.getMonth() + 1, day: currentYearLastDayGregorian.getDate() });
+      console.log('currentYearLastDayEthiopian:', currentYearLastDayEthiopian);
       if (!currentYearLastDayEthiopian) {
         calendarDays.value = [];
+        console.error("updateCalendarDays: Failed to get current year's last day Ethiopian.");
         return;
       }
       daysInEthMonth = currentYearLastDayEthiopian.day; // The day of Pagume
@@ -161,7 +169,27 @@ const updateCalendarDays = async () => {
 
 watch([currentEthiopianYear, currentEthiopianMonth], updateCalendarDays, { immediate: true });
 
+function prevMonth() {
+  console.log('prevMonth clicked');
+  if (currentEthiopianMonth.value === 1) {
+    currentEthiopianMonth.value = 13;
+    currentEthiopianYear.value--;
+  } else {
+    currentEthiopianMonth.value--;
+  }
+  console.log('New Ethiopian Month/Year after prevMonth:', currentEthiopianMonth.value, currentEthiopianYear.value);
+}
 
+function nextMonth() {
+  console.log('nextMonth clicked');
+  if (currentEthiopianMonth.value === 13) {
+    currentEthiopianMonth.value = 1;
+    currentEthiopianYear.value++;
+  } else {
+    currentEthiopianMonth.value++;
+  }
+  console.log('New Ethiopian Month/Year after nextMonth:', currentEthiopianMonth.value, currentEthiopianYear.value);
+}
 
 async function selectDay(day) {
   if (day.date) {
@@ -237,51 +265,35 @@ const handleClickOutside = (event) => {
 };
 
 // Initialize calendar with current date or modelValue
-  onMounted(async () => {
-    // Set initial year and month to a reasonable default (e.g., current Gregorian year - 7, month 1)
-    const todayGregorian = new Date();
-    let initialEthiopianYear = todayGregorian.getFullYear() - 7; // Approximate Ethiopian year
-    let initialEthiopianMonth = 1; // Meskerem
+onMounted(async () => {
+  const todayGregorian = new Date();
+  const todayEthiopian = await convertGregorianToEthiopian({ year: todayGregorian.getFullYear(), month: todayGregorian.getMonth() + 1, day: todayGregorian.getDate() });
+  if (todayEthiopian) {
+    currentEthiopianYear.value = todayEthiopian.year;
+    currentEthiopianMonth.value = todayEthiopian.month;
+  } else {
+    // Fallback to a reasonable default if conversion fails (e.g., current Gregorian year converted to Ethiopian)
+    const fallbackDate = new Date();
+    currentEthiopianYear.value = fallbackDate.getFullYear() - 7; // Approximate Ethiopian year
+    currentEthiopianMonth.value = 1; // Meskerem
+    console.warn('Failed to get today's Ethiopian date, falling back to default.');
+  }
 
-    // Try to get today's Ethiopian date for initial display if no modelValue
-    const todayEthiopian = await convertGregorianToEthiopian({
-      year: todayGregorian.getFullYear(),
-      month: todayGregorian.getMonth() + 1,
-      day: todayGregorian.getDate()
-    });
-
-    if (todayEthiopian) {
-      initialEthiopianYear = todayEthiopian.year;
-      initialEthiopianMonth = todayEthiopian.month;
+  if (props.modelValue) {
+    const [y, m, d] = props.modelValue.split('-').map(Number);
+    const eth = await convertGregorianToEthiopian({ year: y, month: m, day: d });
+    if (eth) {
+      ethiopianDateInternal.value = `${eth.year}-${eth.month}-${eth.day}`;
     } else {
-      console.warn('Failed to get today\'s Ethiopian date, using approximate default.');
+      ethiopianDateInternal.value = '';
     }
+  } else if (todayEthiopian) {
+    // If no modelValue, initialize with today's Ethiopian date
+    ethiopianDateInternal.value = `${todayEthiopian.year}-${todayEthiopian.month}-${todayEthiopian.day}`;
+  }
 
-    currentEthiopianYear.value = initialEthiopianYear;
-    currentEthiopianMonth.value = initialEthiopianMonth;
-
-    // If modelValue is provided, convert it and set the internal date
-    if (props.modelValue) {
-      const [gregYear, gregMonth, gregDay] = props.modelValue.split('-').map(Number);
-      const ethFromModel = await convertGregorianToEthiopian({ year: gregYear, month: gregMonth, day: gregDay });
-      if (ethFromModel) {
-        ethiopianDateInternal.value = `${ethFromModel.year}-${ethFromModel.month}-${ethFromModel.day}`;
-        currentEthiopianYear.value = ethFromModel.year;
-        currentEthiopianMonth.value = ethFromModel.month;
-      } else {
-        ethiopianDateInternal.value = '';
-        console.error('Failed to convert modelValue Gregorian date to Ethiopian.');
-      }
-    } else if (todayEthiopian) {
-      // If no modelValue, and today's Ethiopian date was successfully obtained, use it
-      ethiopianDateInternal.value = `${todayEthiopian.year}-${todayEthiopian.month}-${todayEthiopian.day}`;
-    } else {
-      // Fallback if neither modelValue nor today's Ethiopian date could be set
-      ethiopianDateInternal.value = `${initialEthiopianYear}-${initialEthiopianMonth}-1`; // Default to 1st day of default month
-    }
-
-    document.addEventListener('click', handleClickOutside);
-  });
+  document.addEventListener('click', handleClickOutside);
+});
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside);

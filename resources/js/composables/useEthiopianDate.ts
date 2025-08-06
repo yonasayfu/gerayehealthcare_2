@@ -30,10 +30,10 @@ export function useEthiopianDate() {
 
     const convertGregorianToEthiopian = async (gregorianDate: GregorianDate): Promise<EthiopianDate | null> => {
         try {
-            const response = await axios.post('/api/convert-gregorian-to-ethiopian', gregorianDate);
+            const response = await axios.post('/api/v1/convert-gregorian-to-ethiopian', gregorianDate);
             return response.data;
         } catch (err: any) {
-            console.error('Error converting Gregorian to Ethiopian:', err);
+            console.error('Error converting Gregorian to Ethiopian:', err.message, err.response);
             return null;
         }
     };
@@ -43,17 +43,17 @@ export function useEthiopianDate() {
             const response = await axios.post('/api/v1/convert-to-ethiopian', { date: gregorianDateString });
             return response.data.ethiopian_date;
         } catch (err: any) {
-            console.error('Error converting Gregorian to Ethiopian via API:', err);
+            console.error('Error converting Gregorian to Ethiopian via API:', err.message, err.response);
             return null;
         }
     };
 
     const convertEthiopianToGregorian = async (ethiopianDate: EthiopianDate): Promise<GregorianDate | null> => {
         try {
-            const response = await axios.post('/api/convert-ethiopian-to-gregorian', ethiopianDate);
+            const response = await axios.post('/api/v1/convert-ethiopian-to-gregorian', ethiopianDate);
             return response.data;
         } catch (err: any) {
-            console.error('Error converting Ethiopian to Gregorian:', err);
+            console.error('Error converting Ethiopian to Gregorian:', err.message, err.response);
             return null;
         }
     };
