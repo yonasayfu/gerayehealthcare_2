@@ -57,25 +57,6 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.insurance-claims.export', { type }), '_blank');
-}
-
-function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
-}
-
-const printAllClaims = () => {
-    window.open(route('admin.insurance-claims.printAll', { type: 'pdf' }), '_blank');
-};
-
 function toggleSort(field: string) {
   if (sortField.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'

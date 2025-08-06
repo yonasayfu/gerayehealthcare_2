@@ -56,6 +56,7 @@ class BaseController extends Controller
     public function show($id)
     {
         $data = $this->service->getById($id);
+        Log::info('Data retrieved in BaseController@show:', ['data' => $data]);
 
         // Conditionally add ethiopian_date for EthiopianCalendarDay model
         if ($this->modelClass === \App\Models\EthiopianCalendarDay::class && $data->gregorian_date) {
@@ -77,6 +78,7 @@ class BaseController extends Controller
     public function edit($id)
     {
         $data = $this->service->getById($id);
+        Log::info('Data retrieved in BaseController@edit:', ['data' => $data]);
         // Ensure the prop name matches the frontend's camelCase expectation
         $propName = lcfirst(class_basename($this->modelClass));
         return Inertia::render($this->viewName . '/Edit', [$propName => $data]);

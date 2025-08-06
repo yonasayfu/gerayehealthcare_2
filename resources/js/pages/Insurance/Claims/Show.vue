@@ -8,17 +8,17 @@
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                <div v-if="insuranceClaim" class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Claim Details</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p><strong>Claim ID:</strong> {{ insuranceClaim.id }}</p>
                             <p><strong>Claim Status:</strong> {{ insuranceClaim.claim_status }}</p>
                             <p><strong>Coverage Amount:</strong> {{ insuranceClaim.coverage_amount }}</p>
-                            <p><strong>Submitted At:</strong> {{ new Date(insuranceClaim.submitted_at).toLocaleDateString() }}</p>
-                            <p><strong>Processed At:</strong> {{ insuranceClaim.processed_at ? new Date(insuranceClaim.processed_at).toLocaleDateString() : 'N/A' }}</p>
+                                                        <p><strong>Submitted At:</strong> {{ insuranceClaim.submitted_at ? format(new Date(insuranceClaim.submitted_at), 'PPP') : 'N/A' }}</p>
+                            <p><strong>Processed At:</strong> {{ insuranceClaim.processed_at ? format(new Date(insuranceClaim.processed_at), 'PPP') : 'N/A' }}</p>
                             <p><strong>Email Status:</strong> {{ insuranceClaim.email_status ?? 'N/A' }}</p>
-                            <p v-if="insuranceClaim.email_sent_at"><strong>Email Sent At:</strong> {{ new Date(insuranceClaim.email_sent_at).toLocaleString() }}</p>
+                            <p v-if="insuranceClaim.email_sent_at"><strong>Email Sent At:</strong> {{ format(new Date(insuranceClaim.email_sent_at), 'PPP p') }}</p>
                         </div>
                         <div>
                             <p><strong>Invoice Number:</strong> {{ insuranceClaim.invoice?.invoice_number ?? 'N/A' }}</p>
@@ -60,35 +60,10 @@
                         </div>
                     </div>
                 </div>
+                <div v-else class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                    <p>Loading Insurance Claim details...</p>
+                </div>
             </div>
         </div>
     </AppLayout>
 </template>
-
-<script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
-import { useForm } from '@inertiajs/vue3';
-import { defineProps } from 'vue';
-
-const props = defineProps({
-    insuranceClaim: Object,
-});
-
-const form = useForm({
-    recipient_email: props.insuranceClaim.invoice?.insurance_company?.contact_email || '',
-    subject: `Insurance Claim for Invoice ${props.insuranceClaim.invoice?.invoice_number || ''}`,
-    message: '',
-});
-
-const submitEmail = () => {
-    form.post(route('admin.insurance-claims.send-email', props.insuranceClaim.id), {
-        onSuccess: () => {
-            // Optionally reset form or show success message
-            form.reset();
-        },
-        onError: (errors) => {
-            console.error('Email sending failed:', errors);
-        },
-    });
-};
-</script>
