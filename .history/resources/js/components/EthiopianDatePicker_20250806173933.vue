@@ -18,16 +18,6 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
-    <div v-if="showCalendar" class="absolute z-10 bg-white border border-gray-300 rounded-lg shadow-lg mt-1 p-4">
-      <div class="flex justify-between items-center mb-2">
-        <button @click="prevMonth" class="px-2 py-1 rounded hover:bg-gray-200">&lt;</button>
-        <span>{{ currentMonthName }} {{ currentEthiopianYear }}</span>
-        <button @click="nextMonth" class="px-2 py-1 rounded hover:bg-gray-200">&gt;</button>
-      </div>
-      <div class="grid grid-cols-7 text-center text-xs font-medium text-gray-500 mb-1">
-        <span v-for="day in weekDays" :key="day">{{ day }}</span>
-      </div>
-      <div class="grid grid-cols-7 gap-1 text-sm">
         <span
           v-for="(day, index) in calendarDays"
           :key="index"
@@ -274,21 +264,11 @@ watch(() => props.modelValue, async (newVal) => {
     ethiopianDateInternal.value = '';
   }
 });
-
-function clearDate() {
-  ethiopianDateInternal.value = '';
-  emit('update:modelValue', null);
-  emit('update:ethiopianDate', null);
-}
 </script>
 
 <style scoped>
 .relative {
   position: relative;
-}
-
-.pr-10 {
-  padding-right: 2.5rem; /* Space for the clear button */
 }
 
 .absolute {

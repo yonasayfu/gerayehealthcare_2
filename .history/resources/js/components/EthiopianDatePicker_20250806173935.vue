@@ -285,26 +285,6 @@ function clearDate() {
 <style scoped>
 .relative {
   position: relative;
-}
-
-.pr-10 {
-  padding-right: 2.5rem; /* Space for the clear button */
-}
-
-.absolute {
-  position: absolute;
-}
-
-.z-10 {
-  z-index: 10;
-}
-
-.bg-white {
-  background-color: #fff;
-}
-
-.border {
-  border-width: 1px;
   border-style: solid;
   border-color: #e2e8f0; /* gray-300 */
 }
