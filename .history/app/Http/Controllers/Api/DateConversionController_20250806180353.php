@@ -46,7 +46,7 @@ class DateConversionController extends Controller
                 'day' => $ethiopicDate->getDay(),
             ]);
         } catch (\Exception $e) {
-            Log::error("Error converting Gregorian to Ethiopian date (detailed): " . $e->getMessage(), ['request_data' => $request->all()]);
+            Log::error("Error converting Gregorian to Ethiopian date (detailed): " . $e->getMessage());
             return response()->json(['error' => 'Invalid Gregorian date for conversion.'], 422);
         }
     }
@@ -102,7 +102,7 @@ class DateConversionController extends Controller
                 'day' => 11,
             ]);
         } catch (\Exception $e) {
-            Log::error("Error converting Ethiopian to Gregorian date: " . $e->getMessage(), ['request_data' => $request->all()]);
+            Log::error("Error converting Ethiopian to Gregorian date: " . $e->getMessage());
             return response()->json(['error' => 'Invalid Ethiopian date for conversion.'], 422);
         }
     }
