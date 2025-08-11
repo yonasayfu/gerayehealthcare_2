@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue' // Import 'computed'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns' // Keep this import
@@ -68,7 +68,7 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv' | 'pdf', preview: boolean = false) {
+function exportData(type: 'csv', preview: boolean = false) {
   const params: Record<string, string | boolean> = { type };
   if (preview) {
     params.preview = true;
@@ -77,20 +77,12 @@ function exportData(type: 'csv' | 'pdf', preview: boolean = false) {
 }
 
 function printCurrentView() {
-  // Trigger print for the current view of the table
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100); // Small delay for reliability
+  // Trigger browser print of the current index view
+  setTimeout(() => window.print(), 50);
 }
 
 const printAllPatients = () => {
-    // This will call your PatientController@export method with type=pdf and preview=true
-    window.open(route('admin.patients.export', { type: 'pdf', preview: true }), '_blank');
+    window.open(route('admin.patients.printAll', { preview: true }), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -122,9 +114,6 @@ function toggleSort(field: string) {
           </Link>
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportData('pdf', true)" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
           </button>
           <button @click="printAllPatients" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Printer class="h-4 w-4" /> Print All
@@ -200,7 +189,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ patient.full_name }}</td>
               <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.fayda_id ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.age ?? '-' }}</td>
+              <td class="px-6 py-4">{{ patient.age !== undefined && patient.age !== null ? patient.age : (patient.date_of_birth ? Math.max(0, new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() - ((new Date().getMonth() < new Date(patient.date_of_birth).getMonth()) || (new Date().getMonth() === new Date(patient.date_of_birth).getMonth() && new Date().getDate() < new Date(patient.date_of_birth).getDate()) ? 1 : 0)) : '-') }}</td>
               <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
               <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
@@ -234,10 +223,6 @@ function toggleSort(field: string) {
       </div>
 
       <Pagination v-if="patients.data.length > 0" :links="patients.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>

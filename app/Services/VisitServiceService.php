@@ -7,17 +7,22 @@ use App\Models\Staff;
 use App\Models\CaregiverAssignment;
 use App\Models\EventStaffAssignment;
 use App\Events\StaffAssignedToEvent;
+use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Http\Config\AdditionalExportConfigs;
 
 class VisitServiceService extends BaseService
 {
 
-    public function __construct(VisitService $visitService)
+    protected $invoiceService;
+
+    public function __construct(VisitService $visitService, InvoiceService $invoiceService)
     {
         parent::__construct($visitService);
+        $this->invoiceService = $invoiceService;
     }
 
     protected function applySearch($query, $search)
@@ -80,17 +85,25 @@ class VisitServiceService extends BaseService
     public function update(int $id, array|object $data): VisitService
     {
         $visitService = $this->getById($id);
-        $this->checkOverlap($data, $visitService->id);
+        $data = is_object($data) ? (array) $data : $data;
 
-        $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
-                                           ->where('staff_id', $data['staff_id'])
-                                           ->where('status', 'Assigned')
-                                           ->latest('id')
-                                           ->first();
-        $data['assignment_id'] = $assignment?->id;
+        // Only check for overlap if scheduling info is being updated
+        if (isset($data['scheduled_at']) && isset($data['staff_id'])) {
+            $this->checkOverlap($data, $visitService->id);
+        }
 
-        $staff = Staff::find($data['staff_id']);
-        $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
+        // Only update assignment and cost if patient or staff are changed
+        if (isset($data['patient_id']) && isset($data['staff_id'])) {
+            $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
+                ->where('staff_id', $data['staff_id'])
+                ->where('status', 'Assigned')
+                ->latest('id')
+                ->first();
+            $data['assignment_id'] = $assignment?->id;
+
+            $staff = Staff::find($data['staff_id']);
+            $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
+        }
 
         if (isset($data['prescription_file'])) {
             if ($visitService->prescription_file) {
@@ -110,7 +123,32 @@ class VisitServiceService extends BaseService
             unset($data['vitals_file']);
         }
 
-        return parent::update($id, $data);
+        $updatedVisitService = parent::update($id, $data);
+
+        // Auto-generate invoice when visit is completed
+        $this->handleVisitCompletion($updatedVisitService, $visitService);
+
+        return $updatedVisitService;
+    }
+
+    /**
+     * Handle visit completion workflow - generate invoice and insurance claim
+     */
+    protected function handleVisitCompletion(VisitService $updatedVisit, VisitService $originalVisit): void
+    {
+        // Check if status changed to 'Completed'
+        if ($updatedVisit->status === 'Completed' && $originalVisit->status !== 'Completed') {
+            try {
+                // Create invoice automatically
+                $invoice = $this->invoiceService->createFromVisitService($updatedVisit);
+                
+                Log::info("Invoice {$invoice->invoice_number} created for completed visit {$updatedVisit->id}");
+                
+            } catch (\Exception $e) {
+                Log::error("Failed to create invoice for visit {$updatedVisit->id}: " . $e->getMessage());
+                // Don't throw exception to avoid breaking visit update
+            }
+        }
     }
 
     public function delete(int $id): void

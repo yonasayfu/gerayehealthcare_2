@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('task_code')->unique(); // Auto-generated like TASK-00001
             $table->foreignId('campaign_id')->nullable()->constrained('marketing_campaigns')->onDelete('set null');
-            $table->foreignId('assigned_to_staff_id')->nullable()->constrained('staff')->onDelete('set null');
+            $table->foreignId('assigned_to_staff_id')->nullable()->constrained('staff')->onDelete('cascade');
             $table->foreignId('related_content_id')->nullable()->constrained('campaign_contents')->onDelete('set null');
-            $table->foreignId('doctor_id')->nullable()->constrained('staff')->onDelete('set null'); // Assuming doctors are also staff
+            $table->foreignId('doctor_id')->nullable()->constrained('staff')->onDelete('cascade'); // Assuming doctors are also staff
             $table->string('task_type'); // e.g., Content Creation, Posting, Doctor Filming, Lead Follow-up
             $table->string('title');
             $table->text('description')->nullable();

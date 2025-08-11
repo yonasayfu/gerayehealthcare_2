@@ -17,7 +17,8 @@ const props = defineProps<{
     hire_date: string | null
     photo: string | null
     hourly_rate: string | number | null // Corrected type definition
-  }
+  },
+  departments: string[]
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -66,7 +67,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" :existingPhoto="staff.photo" />
+            <Form :form="form" :existingPhoto="staff.photo" :departments="departments" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

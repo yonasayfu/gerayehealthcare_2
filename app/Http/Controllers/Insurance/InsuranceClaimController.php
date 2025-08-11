@@ -65,4 +65,36 @@ class InsuranceClaimController extends BaseController
             'insurancePolicies' => $insurancePolicies,
         ]);
     }
+
+    public function processPayment(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'paid_amount' => 'required|numeric|min:0',
+            'payment_received_at' => 'nullable|date',
+            'payment_method' => 'nullable|string',
+            'receipt_number' => 'nullable|string',
+        ]);
+
+        try {
+            $claim = $this->service->processPayment($id, $validatedData);
+            return Redirect::back()->with('success', 'Payment processed successfully.');
+        } catch (\Exception $e) {
+            return Redirect::back()->with('error', 'Failed to process payment: ' . $e->getMessage());
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'status' => 'required|string|in:Submitted,Processing,Approved,Denied,Paid',
+            'denial_reason' => 'nullable|string|required_if:status,Denied',
+        ]);
+
+        try {
+            $claim = $this->service->updateClaimStatus($id, $validatedData['status'], $validatedData['denial_reason'] ?? null);
+            return Redirect::back()->with('success', 'Claim status updated successfully.');
+        } catch (\Exception $e) {
+            return Redirect::back()->with('error', 'Failed to update claim status: ' . $e->getMessage());
+        }
+    }
 }

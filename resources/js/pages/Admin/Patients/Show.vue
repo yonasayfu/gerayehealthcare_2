@@ -17,7 +17,8 @@ const breadcrumbs: BreadcrumbItemType[] = [
 ]
 
 function printSinglePatient() {
-  window.open(route('admin.patients.printSingle', { id: props.patient.id, preview: true }), '_blank');
+  // Print the current page using the built-in browser print dialog
+  window.print();
 }
 
 function destroy(id: number) {
@@ -33,7 +34,7 @@ function destroy(id: number) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Patient Details: {{ patient.full_name }}
             </h3>
@@ -139,18 +140,15 @@ function destroy(id: number) {
                   </div>
                 </div>
 
-                <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
-                    <hr class="my-2 border-gray-300">
-                    <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
-                    </div>
+                
 
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <button @click="printSinglePatient" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
+                <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link
                 :href="route('admin.patients.edit', patient.id)"
@@ -162,6 +160,11 @@ function destroy(id: number) {
                 <Trash2 class="w-4 h-4" /> Delete Patient
               </button>
             </div>
+        </div>
+
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300">
+          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
         </div>
 
     </div>

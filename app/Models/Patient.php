@@ -9,6 +9,10 @@ use Carbon\Carbon;
 use App\Models\LeadSource;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingLead;
+use App\Models\EmployeeInsuranceRecord;
+use App\Models\InsuranceClaim;
+use App\Models\VisitService;
+use App\Models\Invoice;
 use Illuminate\Support\Facades\DB; // Import DB facade for transactions
 
 class Patient extends Model
@@ -128,6 +132,46 @@ class Patient extends Model
     public function lead()
     {
         return $this->belongsTo(MarketingLead::class, 'lead_id');
+    }
+
+    /**
+     * Get the employee insurance records for this patient.
+     */
+    public function employeeInsuranceRecords()
+    {
+        return $this->hasMany(EmployeeInsuranceRecord::class);
+    }
+
+    /**
+     * Get the active employee insurance record for this patient.
+     */
+    public function activeInsuranceRecord()
+    {
+        return $this->hasOne(EmployeeInsuranceRecord::class)->where('verified', true)->latest();
+    }
+
+    /**
+     * Get insurance claims for this patient.
+     */
+    public function insuranceClaims()
+    {
+        return $this->hasMany(InsuranceClaim::class);
+    }
+
+    /**
+     * Get visit services for this patient.
+     */
+    public function visitServices()
+    {
+        return $this->hasMany(VisitService::class);
+    }
+
+    /**
+     * Get invoices for this patient.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
     }
 
 }

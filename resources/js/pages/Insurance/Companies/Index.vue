@@ -10,7 +10,16 @@ import { format } from 'date-fns'
 import type { InsuranceCompanyPagination } from '@/types';
 
 const props = defineProps<{
-  insuranceCompanies: InsuranceCompanyPagination;
+  insuranceCompanies: { // Define a more robust type for insuranceCompanies
+    data: Array<any>;
+    links: Array<any>;
+    current_page: number;
+    from: number;
+    last_page: number;
+    per_page: number;
+    to: number;
+    total: number;
+  };
   filters: {
     search?: string;
     sort?: string;
@@ -18,6 +27,9 @@ const props = defineProps<{
     per_page?: number;
   };
 }>()
+
+// Provide a default value for insuranceCompanies to prevent errors if it's not passed
+props.insuranceCompanies = props.insuranceCompanies || { data: [], links: [], current_page: 1, from: 0, last_page: 1, per_page: 10, to: 0, total: 0 };
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -169,7 +181,7 @@ function toggleSort(field: string) {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="company in insuranceCompanies.data" :key="company.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+            <tr v-for="company in insuranceCompanies.data || []" :key="company.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
               <td class="px-6 py-4">{{ company.name }}</td>
               <td class="px-6 py-4">{{ company.contact_person ?? '-' }}</td>
               <td class="px-6 py-4">{{ company.contact_email ?? '-' }}</td>
@@ -197,14 +209,14 @@ function toggleSort(field: string) {
                 </div>
               </td>
             </tr>
-            <tr v-if="insuranceCompanies.data.length === 0">
+            <tr v-if="(insuranceCompanies.data || []).length === 0">
               <td colspan="6" class="text-center px-6 py-4 text-gray-400">No insurance companies found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <Pagination v-if="insuranceCompanies.data.length > 0" :links="insuranceCompanies.links" class="mt-6 flex justify-center print:hidden" />
+      <Pagination v-if="(insuranceCompanies.data || []).length > 0" :links="insuranceCompanies.links" class="mt-6 flex justify-center print:hidden" />
       
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">

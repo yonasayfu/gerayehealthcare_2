@@ -319,12 +319,10 @@ class ExportConfig
                     'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date'
                 ],
                 'fields' => [
-                    ['field' => 'first_name', 'transform' => function($value, $model) {
-                        return $model->first_name . ' ' . $model->last_name;
-                    }],
+                    'full_name',
                     'email', 'phone', 'position', 'department', 'status', 'hire_date'
                 ],
-                'filename' => 'staff.csv'
+                'filename_prefix' => 'staff.csv'
             ],
             
             'pdf' => [
@@ -385,7 +383,6 @@ class ExportConfig
                     'status' => 'status',
                 ],
                 'columns' => [
-                    ['key' => 'index', 'label' => '#'],
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'email', 'label' => 'Email'],
                     ['key' => 'phone', 'label' => 'Phone'],
@@ -417,7 +414,6 @@ class ExportConfig
                     'status' => 'status',
                 ],
                 'columns' => [
-                    ['key' => 'index', 'label' => '#'],
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'email', 'label' => 'Email'],
                     ['key' => 'phone', 'label' => 'Phone'],

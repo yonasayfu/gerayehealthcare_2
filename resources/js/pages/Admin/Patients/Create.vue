@@ -4,6 +4,11 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue' // Adjust path if Form.vue is in a different directory
 import type { BreadcrumbItemType, PatientForm } from '@/types' // Import PatientForm type
 
+const props = defineProps<{
+  corporateClients: Array<any>;
+  insurancePolicies: Array<any>;
+}>();
+
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Patients', href: route('admin.patients.index') },
@@ -23,6 +28,8 @@ const form = useForm<any>({
   source: null,
   emergency_contact: null,
   geolocation: null,
+  corporate_client_id: null,
+  policy_id: null,
 })
 
 function submit() {
@@ -46,7 +53,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" />
+            <Form :form="form" :corporateClients="props.corporateClients" :insurancePolicies="props.insurancePolicies" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

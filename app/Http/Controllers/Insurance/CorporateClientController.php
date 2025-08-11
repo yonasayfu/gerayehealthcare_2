@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Insurance;
 
+use App\Services\Validation\Rules\CorporateClientRules;
+use App\DTOs\CreateCorporateClientDTO;
+
 use App\Http\Controllers\Base\BaseController;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;

@@ -190,13 +190,13 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('employee-insurance-records/print-current', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printCurrent'])->name('employee-insurance-records.printCurrent');
         Route::get('employee-insurance-records/{employee_insurance_record}/print', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printSingle'])->name('employee-insurance-records.print');
         Route::resource('employee-insurance-records', App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class);
-        Route::get('insurance-claims/export', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'export'])->name('insurance-claims.export');
+        Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
+        Route::post('insurance-claims/{insurance_claim}/process-payment', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'processPayment'])->name('insurance-claims.process-payment');
+        Route::post('insurance-claims/{insurance_claim}/update-status', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'updateStatus'])->name('insurance-claims.update-status');
+        Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
         Route::get('insurance-claims/print-all', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printAll'])->name('insurance-claims.printAll');
         Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
-        Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
         Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
-        Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
-        Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
         Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
         Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
         Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
@@ -270,6 +270,12 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
+        });
+
+        // Accountant/Payment Reconciliation
+        Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
+            Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
         });
     });
 

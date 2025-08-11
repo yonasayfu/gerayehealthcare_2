@@ -6,6 +6,8 @@ import type { BreadcrumbItemType, Patient, PatientForm } from '@/types' // Impor
 
 const props = defineProps<{
   patient: Patient; // Use the Patient interface
+  corporateClients: Array<any>;
+  insurancePolicies: Array<any>;
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -14,17 +16,30 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Edit', href: route('admin.patients.edit', props.patient.id) },
 ]
 
+const normalizeDate = (value: string | null | undefined) => {
+  if (!value) return null as any
+  // Accept ISO strings like 2025-08-01T00:00:00.000000Z
+  const s = String(value)
+  return s.length >= 10 ? s.substring(0, 10) : s
+}
+
 const form = useForm<any>({ // Use any for the form data to satisfy FormDataType constraint
   full_name: props.patient.full_name,
   fayda_id: props.patient.fayda_id,
-  date_of_birth: props.patient.date_of_birth,
+  date_of_birth: normalizeDate(props.patient.date_of_birth as any),
+  ethiopian_date_of_birth: props.patient.ethiopian_date_of_birth,
   gender: props.patient.gender,
   address: props.patient.address,
-  phone_number: props.patient.phone_number,
+  phone_number: String(props.patient.phone_number ?? ''),
   email: props.patient.email, // Add the missing email field
   source: props.patient.source,
   emergency_contact: props.patient.emergency_contact,
   geolocation: props.patient.geolocation,
+  // Pre-populate employer and policy from active insurance record if available
+  corporate_client_id: (props.patient.employee_insurance_records?.[0]?.policy?.corporate_client_id)
+    ?? props.patient.employee_insurance_records?.[0]?.corporate_client_id
+    ?? null,
+  policy_id: props.patient.employee_insurance_records?.[0]?.policy_id || null,
 })
 
 function submit() {
@@ -48,7 +63,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" />
+            <Form :form="form" :corporateClients="props.corporateClients" :insurancePolicies="props.insurancePolicies" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

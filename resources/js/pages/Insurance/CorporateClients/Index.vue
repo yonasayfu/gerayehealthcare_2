@@ -10,7 +10,16 @@ import { format } from 'date-fns'
 import type { CorporateClientPagination } from '@/types';
 
 const props = defineProps<{
-  corporateClients: CorporateClientPagination;
+  corporateClients: { // Define a more robust type for corporateClients
+    data: Array<any>;
+    links: Array<any>;
+    current_page: number;
+    from: number;
+    last_page: number;
+    per_page: number;
+    to: number;
+    total: number;
+  };
   filters: {
     search?: string;
     sort?: string;
@@ -18,6 +27,9 @@ const props = defineProps<{
     per_page?: number;
   };
 }>()
+
+// Provide a default value for corporateClients to prevent errors if it's not passed
+props.corporateClients = props.corporateClients || { data: [], links: [], current_page: 1, from: 0, last_page: 1, per_page: 10, to: 0, total: 0 };
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Patient;
+use App\Models\InsurancePolicy;
 
 class EmployeeInsuranceRecord extends Model
 {
@@ -21,4 +23,20 @@ class EmployeeInsuranceRecord extends Model
         'verified',
         'verified_at',
     ];
+
+    /**
+     * Get the patient that owns this insurance record.
+     */
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * Get the insurance policy for this record.
+     */
+    public function policy()
+    {
+        return $this->belongsTo(InsurancePolicy::class, 'policy_id');
+    }
 }

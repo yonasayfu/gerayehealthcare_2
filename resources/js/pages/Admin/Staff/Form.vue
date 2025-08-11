@@ -89,12 +89,9 @@ defineProps<{
     <!-- Department -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Department</label>
-      <input
-        v-model="form.department"
-        type="text"
-        placeholder="Department"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-      />
+      <select v-model="form.department" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+        <option v-for="department in departments" :key="department" :value="department">{{ department }}</option>
+      </select>
       <span class="text-red-500 text-xs" v-if="form.errors.department">{{ form.errors.department }}</span>
     </div>
 

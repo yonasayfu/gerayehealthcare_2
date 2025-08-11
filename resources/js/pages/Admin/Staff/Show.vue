@@ -130,9 +130,7 @@ function printPage() {
 
         <div class="p-6 border-t border-gray-200 rounded-b">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
+              
               <Link :href="route('admin.staff.edit', props.staff.id)"
                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
                 <Edit3 class="w-4 h-4" /> Edit Staff
@@ -221,9 +219,6 @@ function printPage() {
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
-
-    transform: scale(0.98); /* Less aggressive scaling. Adjust if it goes to 2 pages */
-    transform-origin: top left;
   }
 
   /* Reduce overall top-level padding/margin if the wrapper div adds too much */
