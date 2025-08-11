@@ -11,7 +11,7 @@ class VisitServiceRules extends BaseResourceRules
         return [
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit],
-            'scheduled_at' => 'required|date',
+            'scheduled_at' => 'required|date|after:now',
             'status' => 'required|string|max:255',
             'visit_notes' => 'nullable|string',
             'service_description' => 'nullable|string|max:500',
@@ -25,12 +25,13 @@ class VisitServiceRules extends BaseResourceRules
         return [
             'patient_id' => 'required|exists:patients,id',
             'staff_id' => ['required', 'exists:staff,id', new StaffIsAvailableForVisit($item->id)],
-            'scheduled_at' => 'required|date',
+            'scheduled_at' => 'required|date|after:now',
             'status' => 'required|string|max:255',
             'visit_notes' => 'nullable|string',
             'service_description' => 'nullable|string|max:500',
             'prescription_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'vitals_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'visit_id' => $item->id, // Pass the visit ID for conflict checking
         ];
     }
 }

@@ -1,34 +1,23 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2, FileText } from 'lucide-vue-next' // Import icons
-import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
-import { format } from 'date-fns' // For date formatting
-
+import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
+import type { BreadcrumbItemType } from '@/types'
+import { format } from 'date-fns'
 
 const props = defineProps<{
-  visitService: any; // Ideally, define a more specific type for patient data
+  visitService: any;
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Visit Services', href: route('admin.visit-services.index') },
-  { title: props.visitService.id, href: route('admin.visit-services.show', props.visitService.id) },
+  { title: `Visit #${props.visitService.id}`, href: route('admin.visit-services.show', props.visitService.id) },
 ]
 
-function printPage() {
-  // Add a small delay to ensure the DOM is ready for printing.
-  // This can sometimes resolve issues where the print dialog doesn't appear
-  // or content is not rendered correctly.
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      // Optionally, provide user feedback if print fails
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100); // 100ms delay
+function printSingleVisit() {
+  // Print the current page using the built-in browser print dialog
+  window.print();
 }
 
 function destroy(id: number) {
@@ -134,12 +123,12 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
+            <div class="flex flex-wrap gap-2 print:hidden">
+              <button @click="printSingleVisit" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <a :href="route('admin.visit-services.print', visitService.id)" target="_blank" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:ring-4 focus:ring-blue-300">
-                <FileText class="h-4 w-4" /> Print PDF
+                <Printer class="h-4 w-4" /> Print PDF
               </a>
               <Link
                 :href="route('admin.visit-services.edit', visitService.id)"

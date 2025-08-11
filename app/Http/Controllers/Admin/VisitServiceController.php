@@ -27,6 +27,21 @@ class VisitServiceController extends BaseController
         );
     }
 
+    public function printAll(Request $request)
+    {
+        // Use the export/print pipeline to generate a PDF preview in browser
+        return $this->service->printAll($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        // Keep existing behavior (if any) but index page will trigger in-page print without new tab
+        return Inertia::render($this->viewName . '/Index', [
+            $this->dataVariableName => $this->service->getAll($request),
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'])
+        ]);
+    }
+
     public function create()
     {
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
@@ -45,19 +60,9 @@ class VisitServiceController extends BaseController
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
         
         return Inertia::render($this->viewName . '/Edit', [
-            'visitService' => $visitService,
+            lcfirst(class_basename($this->modelClass)) => $visitService,
             'patients' => $patients,
             'staff' => $staff
-        ]);
-    }
-
-    public function show($id)
-    {
-        $visitService = $this->service->getById($id);
-        $visitService->load(['patient', 'staff']);
-        
-        return Inertia::render($this->viewName . '/Show', [
-            'visitService' => $visitService
         ]);
     }
 }

@@ -1576,7 +1576,7 @@ class AdditionalExportConfigs
                 ]
             ],
             
-            'current_page' => [
+            'print_current' => [
                 'view' => 'pdf.universal-report',
                 'title' => 'Visit Services (Current View) - Geraye Home Care Services',
                 'document_title' => 'Visit Services (Current View)',
@@ -1611,7 +1611,7 @@ class AdditionalExportConfigs
                 ]
             ],
             
-            'all_records' => [
+            'print_all' => [
                 'view' => 'pdf.universal-report',
                 'title' => 'All Visit Services - Geraye Home Care Services',
                 'document_title' => 'All Visit Services Records',

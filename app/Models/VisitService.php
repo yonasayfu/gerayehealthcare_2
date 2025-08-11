@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use App\Models\CaregiverAssignment;
 
 class VisitService extends Model
 {
@@ -54,6 +55,17 @@ class VisitService extends Model
     public function staff(): BelongsTo
     {
         return $this->belongsTo(Staff::class);
+    }
+
+    public function assignment(): BelongsTo
+    {
+        return $this->belongsTo(CaregiverAssignment::class, 'assignment_id');
+    }
+
+    // Add relationship to get the assigned staff through the assignment
+    public function assignedStaff(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class, 'staff_id');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\VisitService;
 use App\Models\Staff;
+use App\Models\StaffAvailability;
 use App\Models\CaregiverAssignment;
 use App\Models\EventStaffAssignment;
 use App\Events\StaffAssignedToEvent;
@@ -50,20 +51,36 @@ class VisitServiceService extends BaseService
             $query->orderBy('created_at', 'desc');
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 5));
     }
 
     public function create(array|object $data): VisitService
     {
         $data = is_object($data) ? (array) $data : $data;
 
+        // Validate staff availability before creating
+        if (isset($data['scheduled_at']) && isset($data['staff_id'])) {
+            $this->validateStaffAvailability($data['staff_id'], $data['scheduled_at']);
+        }
+
+        // Find or create caregiver assignment
         $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
                                            ->where('staff_id', $data['staff_id'])
                                            ->where('status', 'Assigned')
                                            ->latest('id')
                                            ->first();
         
-        $data['assignment_id'] = $assignment?->id;
+        // If no assignment exists, create one
+        if (!$assignment) {
+            $assignment = CaregiverAssignment::create([
+                'patient_id' => $data['patient_id'],
+                'staff_id' => $data['staff_id'],
+                'status' => 'Assigned',
+                'assignment_date' => now(),
+            ]);
+        }
+        
+        $data['assignment_id'] = $assignment->id;
 
         $staff = Staff::find($data['staff_id']);
         $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
@@ -89,9 +106,9 @@ class VisitServiceService extends BaseService
         $visitService = $this->getById($id);
         $data = is_object($data) ? (array) $data : $data;
 
-        // Only check for overlap if scheduling info is being updated
+        // Validate staff availability before updating (excluding current visit)
         if (isset($data['scheduled_at']) && isset($data['staff_id'])) {
-            $this->checkOverlap($data, $visitService->id);
+            $this->validateStaffAvailability($data['staff_id'], $data['scheduled_at'], $id);
         }
 
         // Only update assignment and cost if patient or staff are changed
@@ -101,7 +118,18 @@ class VisitServiceService extends BaseService
                 ->where('status', 'Assigned')
                 ->latest('id')
                 ->first();
-            $data['assignment_id'] = $assignment?->id;
+            
+            // If no assignment exists, create one
+            if (!$assignment) {
+                $assignment = CaregiverAssignment::create([
+                    'patient_id' => $data['patient_id'],
+                    'staff_id' => $data['staff_id'],
+                    'status' => 'Assigned',
+                    'assignment_date' => now(),
+                ]);
+            }
+            
+            $data['assignment_id'] = $assignment->id;
 
             $staff = Staff::find($data['staff_id']);
             $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
@@ -165,35 +193,95 @@ class VisitServiceService extends BaseService
         parent::delete($id);
     }
 
-    protected function checkOverlap(array $data, ?int $id = null): void
+    /**
+     * Validate staff availability for the scheduled time
+     */
+    protected function validateStaffAvailability(int $staffId, string $scheduledAt, ?int $excludeVisitId = null): void
     {
-        $scheduledAt = Carbon::parse($data['scheduled_at']);
-        $visitEndTime = $scheduledAt->copy()->addHour();
-        
-        $overlap = VisitService::where('staff_id', $data['staff_id'])
-            ->where('scheduled_at', '<', $visitEndTime)
-            ->where('scheduled_at', '>', $scheduledAt->copy()->subHour())
-            ->where('status', '!=', 'Cancelled');
+        $scheduledDateTime = Carbon::parse($scheduledAt);
+        $visitEndTime = $scheduledDateTime->copy()->addHour(); // Assume 1-hour duration
 
-        if ($id) {
-            $overlap->where('id', '!=', $id);
+        // Check 1: Staff availability slots (if they marked themselves unavailable)
+        $isUnavailable = StaffAvailability::where('staff_id', $staffId)
+            ->where('status', 'Unavailable')
+            ->where(function ($query) use ($scheduledDateTime, $visitEndTime) {
+                $query->where('start_time', '<', $visitEndTime)
+                      ->where('end_time', '>', $scheduledDateTime);
+            })
+            ->exists();
+
+        if ($isUnavailable) {
+            throw new \Exception('Staff member is marked as unavailable during this time period.');
         }
 
-        if ($overlap->exists()) {
-            throw new \Exception('Conflict: This staff member is already scheduled for another visit at this time.');
+        // Check 2: Conflicting visit services
+        $conflictingVisit = VisitService::where('staff_id', $staffId)
+            ->where('status', '!=', 'Cancelled')
+            ->where(function ($query) use ($scheduledDateTime, $visitEndTime) {
+                $query->where('scheduled_at', '<', $visitEndTime)
+                      ->where('scheduled_at', '>', $scheduledDateTime->copy()->subHour());
+            })
+            ->when($excludeVisitId, function ($query) use ($excludeVisitId) {
+                return $query->where('id', '!=', $excludeVisitId);
+            })
+            ->first();
+
+        if ($conflictingVisit) {
+            $conflictTime = Carbon::parse($conflictingVisit->scheduled_at)->format('M d, Y g:i A');
+            throw new \Exception("Staff member is already scheduled for another visit at {$conflictTime}. Please choose a different time or staff member.");
         }
+
+        // Check 3: Reasonable scheduling (not too close to other visits)
+        $nearbyVisits = VisitService::where('staff_id', $staffId)
+            ->where('status', '!=', 'Cancelled')
+            ->where(function ($query) use ($scheduledDateTime) {
+                $query->whereBetween('scheduled_at', [
+                    $scheduledDateTime->copy()->subHours(2),
+                    $scheduledDateTime->copy()->addHours(2)
+                ]);
+            })
+            ->when($excludeVisitId, function ($query) use ($excludeVisitId) {
+                return $query->where('id', '!=', $excludeVisitId);
+            })
+            ->count();
+
+        if ($nearbyVisits >= 2) {
+            throw new \Exception('Staff member has multiple visits scheduled near this time. Consider scheduling with more time between visits for travel and preparation.');
+        }
+    }
+
+    public function getById(int $id): VisitService
+    {
+        return $this->model->with([
+            'patient',
+            'staff',
+        ])->findOrFail($id);
     }
 
     public function export(Request $request)
     {
-        return $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+        // Add debug logging
+        \Log::info('VisitServiceService export called', [
+            'request_type' => $request->input('type'),
+            'request_params' => $request->all()
+        ]);
+        
+        $result = $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+        
+        // Add debug logging for result
+        \Log::info('VisitServiceService export result', [
+            'result_type' => gettype($result),
+            'result_class' => get_class($result)
+        ]);
+        
+        return $result;
     }
 
     public function printSingle($id, Request $request)
     {
         $visitService = $this->getById($id);
-        $visitService->load(['registeredByStaff', 'registeredByCaregiver']);
-        
+        $visitService->load(['patient', 'staff']);
+
         $config = AdditionalExportConfigs::getVisitServiceConfig();
         
         return $this->handlePrintSingle($request, $visitService, $config);
