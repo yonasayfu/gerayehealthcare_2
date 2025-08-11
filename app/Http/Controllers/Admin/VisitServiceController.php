@@ -26,4 +26,38 @@ class VisitServiceController extends BaseController
             CreateVisitServiceDTO::class
         );
     }
+
+    public function create()
+    {
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        
+        return Inertia::render($this->viewName . '/Create', [
+            'patients' => $patients,
+            'staff' => $staff
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $visitService = $this->service->getById($id);
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        
+        return Inertia::render($this->viewName . '/Edit', [
+            'visitService' => $visitService,
+            'patients' => $patients,
+            'staff' => $staff
+        ]);
+    }
+
+    public function show($id)
+    {
+        $visitService = $this->service->getById($id);
+        $visitService->load(['patient', 'staff']);
+        
+        return Inertia::render($this->viewName . '/Show', [
+            'visitService' => $visitService
+        ]);
+    }
 }

@@ -11,6 +11,7 @@ class UpdateVisitServiceDTO
         public ?string $check_in_time,
         public ?string $check_out_time,
         public ?string $visit_notes,
+        public ?string $service_description,
         public ?string $prescription_file,
         public ?string $vitals_file,
         public ?string $status,

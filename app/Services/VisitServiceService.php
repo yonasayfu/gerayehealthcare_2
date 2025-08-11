@@ -8,6 +8,7 @@ use App\Models\CaregiverAssignment;
 use App\Models\EventStaffAssignment;
 use App\Events\StaffAssignedToEvent;
 use App\Services\InvoiceService;
+use App\Http\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +17,7 @@ use App\Http\Config\AdditionalExportConfigs;
 
 class VisitServiceService extends BaseService
 {
+    use ExportableTrait;
 
     protected $invoiceService;
 

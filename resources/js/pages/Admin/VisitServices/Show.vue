@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
+import { Printer, Edit3, Trash2, FileText } from 'lucide-vue-next' // Import icons
 import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
 import { format } from 'date-fns' // For date formatting
 
@@ -79,12 +79,12 @@ function destroy(id: number) {
                       <p class="font-medium text-gray-900 dark:text-white">{{ visitService.scheduled_at ? format(new Date(visitService.scheduled_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Check-in At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_in_at ? format(new Date(visitService.check_in_at), 'PPP p') : '-' }}</p>
+                      <p class="text-sm text-muted-foreground">Check-in Time:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_in_time ? format(new Date(visitService.check_in_time), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Check-out At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_out_at ? format(new Date(visitService.check_out_at), 'PPP p') : '-' }}</p>
+                      <p class="text-sm text-muted-foreground">Check-out Time:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_out_time ? format(new Date(visitService.check_out_time), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
@@ -98,15 +98,15 @@ function destroy(id: number) {
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Check-in Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_in_location ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_in_latitude && visitService.check_in_longitude ? `${visitService.check_in_latitude}, ${visitService.check_in_longitude}` : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Check-out Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_out_location ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.check_out_latitude && visitService.check_out_longitude ? `${visitService.check_out_latitude}, ${visitService.check_out_longitude}` : '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Notes:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.notes ?? '-' }}</p>
+                      <p class="text-sm text-muted-foreground">Visit Notes:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ visitService.visit_notes ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -138,6 +138,9 @@ function destroy(id: number) {
               <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
+              <a :href="route('admin.visit-services.print', visitService.id)" target="_blank" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:ring-4 focus:ring-blue-300">
+                <FileText class="h-4 w-4" /> Print PDF
+              </a>
               <Link
                 :href="route('admin.visit-services.edit', visitService.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"

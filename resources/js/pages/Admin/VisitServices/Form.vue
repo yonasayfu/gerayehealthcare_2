@@ -16,6 +16,7 @@ const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled']
     <div>
       <label for="patient_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Patient</label>
       <select id="patient_id" v-model="form.patient_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required>
+        <option value="">Select a patient...</option>
         <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.full_name }}</option>
       </select>
       <div v-if="form.errors.patient_id" class="text-sm text-red-600 mt-1">{{ form.errors.patient_id }}</div>
@@ -24,6 +25,7 @@ const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled']
     <div>
       <label for="staff_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Assign Staff</label>
       <select id="staff_id" v-model="form.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required>
+        <option value="">Select a staff member...</option>
         <option v-for="member in staff" :key="member.id" :value="member.id">{{ member.first_name }} {{ member.last_name }}</option>
       </select>
       <div v-if="form.errors.staff_id" class="text-sm text-red-600 mt-1">{{ form.errors.staff_id }}</div>

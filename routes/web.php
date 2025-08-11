@@ -102,6 +102,10 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::resource('assignments', CaregiverAssignmentController::class);
 
         // Visit Services
+        Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
+        Route::get('visit-services/print-all', [VisitServiceController::class, 'printAll'])->name('visit-services.printAll');
+        Route::get('visit-services/print-current', [VisitServiceController::class, 'printCurrent'])->name('visit-services.printCurrent');
+        Route::get('visit-services/{visit_service}/print', [VisitServiceController::class, 'printSingle'])->name('visit-services.print');
         Route::resource('visit-services', VisitServiceController::class);
 
         // Inventory Management

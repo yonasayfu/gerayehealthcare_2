@@ -1529,7 +1529,7 @@ class AdditionalExportConfigs
             ],
             
             'pdf' => [
-                'view' => 'pdf-layout',
+                'view' => 'pdf.universal-report',
                 'title' => 'Visit Services Export - Geraye Home Care Services',
                 'document_title' => 'Visit Services Records Export',
                 'filename_prefix' => 'visit-services',
@@ -1577,7 +1577,7 @@ class AdditionalExportConfigs
             ],
             
             'current_page' => [
-                'view' => 'pdf-layout',
+                'view' => 'pdf.universal-report',
                 'title' => 'Visit Services (Current View) - Geraye Home Care Services',
                 'document_title' => 'Visit Services (Current View)',
                 'filename_prefix' => 'visit-services-current',
@@ -1612,7 +1612,7 @@ class AdditionalExportConfigs
             ],
             
             'all_records' => [
-                'view' => 'pdf-layout',
+                'view' => 'pdf.universal-report',
                 'title' => 'All Visit Services - Geraye Home Care Services',
                 'document_title' => 'All Visit Services Records',
                 'filename_prefix' => 'visit-services-all',
@@ -1648,7 +1648,7 @@ class AdditionalExportConfigs
             ],
             
             'single_record' => [
-                'view' => 'pdf-layout',
+                'view' => 'pdf.universal-single-record',
                 'title' => 'Visit Service Record - Geraye Home Care Services',
                 'document_title' => 'Visit Service Record',
                 'filename_prefix' => 'visit-service-record',

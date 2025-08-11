@@ -78,6 +78,12 @@ const formatDate = (dateString: string | null) => {
           <Link :href="route('admin.visit-services.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Plus class="h-4 w-4" /> Schedule Visit
           </Link>
+          <a :href="route('admin.visit-services.export', { type: 'csv' })" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
+            <FileText class="h-4 w-4" /> Export CSV
+          </a>
+          <a :href="route('admin.visit-services.printCurrent')" target="_blank" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
+            <FileText class="h-4 w-4" /> Print Current
+          </a>
         </div>
       </div>
 
@@ -140,17 +146,8 @@ const formatDate = (dateString: string | null) => {
         </table>
       </div>
 
-      <div class="flex justify-between items-center mt-6">
-        <div class="flex items-center gap-2">
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
+      <!-- Pagination -->
+      <div class="flex justify-end mt-6">
         <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" />
       </div>
       
