@@ -128,7 +128,7 @@ class BaseController extends Controller
         return $routeName;
     }
 
-    private function validateRequest(Request $request, $method, $model = null)
+    protected function validateRequest(Request $request, $method, $model = null)
     {
         $rules = $this->rulesClass::$method($model);
         return $request->validate($rules);

@@ -6,7 +6,7 @@ import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Book, Loa
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
 const props = defineProps<{
   assignments: any;
@@ -19,8 +19,8 @@ const props = defineProps<{
 }>()
 
 const breadcrumbs = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Assignments', href: 'admin.assignments.index' },
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Assignments', href: route('admin.assignments.index') },
 ]
 
 // Fix: Provide default values and use optional chaining
@@ -61,7 +61,7 @@ function destroy(id: number) {
 // Fix: Pass filters with default empty object
 const { exportData, printCurrentView, printAllRecords } = useExport({ 
   routeName: 'admin.assignments', 
-  filters: props.filters || {} 
+  filters: { ...(props.filters || {}), preview: true } 
 });
 
 function toggleSort(field: string) {
@@ -87,16 +87,12 @@ const formatDate = (dateString) => {
 <template>
   <Head title="Caregiver Assignments" />
 
-  <div id="print-header" class="hidden print-only">
-    <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" style="max-height: 60px; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto;">
-    <h1 style="text-align: center; margin: 0; font-size: 20px;">Geraye Home Care Services</h1>
-    <p style="text-align: center; margin: 0; font-size: 14px;">Caregiver Assignment Records</p>
-  </div>
+
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div id="main-content" class="space-y-6 p-6">
+    <div id="main-content" class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Caregiver Assignments</h1>
           <p class="text-sm text-muted-foreground">Manage all staff and patient assignments here.</p>
@@ -108,11 +104,9 @@ const formatDate = (dateString) => {
           <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
+          
           <button @click="printCurrentView()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print Current Page">
-            <Printer class="h-4 w-4" /> Print Page
+            <Printer class="h-4 w-4" /> Print Current
           </button>
           <button @click="printAllRecords()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print All Records">
              <Book class="h-4 w-4" />
@@ -121,7 +115,7 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
         <div class="relative w-full md:w-1/3">
           <input
             type="text"
@@ -147,29 +141,37 @@ const formatDate = (dateString) => {
         </div>
       </div>
 
-      <div id="assignments-table" class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+      <div id="assignments-table" class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+            <p class="text-gray-600 dark:text-gray-400 print-document-title">Caregiver Assignments (Current View)</p>
+            <hr class="my-3 border-gray-300 print:my-2">
+        </div>
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
+              <th class="px-6 py-3">#</th>
               <th class="px-6 py-3">Patient</th>
               <th class="px-6 py-3">Staff Member</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('shift_start')">
-                Shift Start <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
+                Shift Start <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('shift_end')">
-                Shift End <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
+                Shift End <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
-                Status <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
+                Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('created_at')">
-                Date Created <span class="no-print"><ArrowUpDown class="inline w-4 h-4 ml-1" /></span>
+                Date Created <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 text-right no-print">Actions</th>
+              <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="assignment in assignments.data" :key="assignment.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <tr v-for="(assignment, index) in assignments.data" :key="assignment.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+              <td class="px-6 py-4">{{ ((assignments.current_page - 1) * assignments.per_page) + index + 1 }}</td>
               <td class="px-6 py-4">{{ assignment.patient?.full_name ?? 'N/A' }}</td>
               <td class="px-6 py-4">{{ getStaffFullName(assignment.staff) }}</td>
               <td class="px-6 py-4">{{ formatDate(assignment.shift_start) }}</td>
@@ -184,7 +186,7 @@ const formatDate = (dateString) => {
                 ]">{{ assignment.status }}</span>
               </td>
               <td class="px-6 py-4">{{ formatDate(assignment.created_at) }}</td>
-              <td class="px-6 py-4 text-right no-print">
+              <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.assignments.show', assignment.id)"
@@ -213,8 +215,85 @@ const formatDate = (dateString) => {
         </table>
       </div>
 
-      <Pagination v-if="assignments.data.length > 0" :links="assignments.links" class="mt-6 flex justify-center" />
+      <Pagination v-if="assignments.data.length > 0" :links="assignments.links" class="mt-6 flex justify-center print:hidden" />
+
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300">
+        <p>Printed on: {{ formatDate(new Date().toISOString()) }}</p>
+      </div>
 
     </div>
   </AppLayout>
 </template>
+
+<style>
+/* Print styles for Caregiver Assignments */
+@media print {
+  @page {
+    size: A4;
+    margin: 0.5cm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .hidden.print\:block {
+    display: block !important;
+  }
+
+  /* Print header styling */
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .print-clinic-name {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .print-document-title {
+    font-size: 0.9rem !important;
+    color: #555 !important;
+  }
+
+  /* Table styling for print */
+  .print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #ccc !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    text-align: left !important;
+  }
+
+  .print-table thead {
+    background-color: #f3f4f6 !important;
+  }
+}
+</style>

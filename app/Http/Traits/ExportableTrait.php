@@ -27,6 +27,12 @@ trait ExportableTrait
 
         $data = $query->get();
 
+        // Eager load relations for CSV export if configured
+        $relations = $config['with_relations'] ?? ($config['csv']['with_relations'] ?? null);
+        if ($relations && is_array($relations) && method_exists($data, 'load')) {
+            $data->load($relations);
+        }
+
         if ($type === 'csv') {
             $csvConfig = $config['csv'];
 if (!isset($csvConfig['headers']) || !isset($csvConfig['fields'])) {
@@ -45,10 +51,17 @@ $callback = function () use ($csvConfig, $data) {
     // Add UTF-8 BOM for Excel compatibility
     fwrite($output, "\xEF\xBB\xBF");
     fputcsv($output, $csvConfig['headers']);
-    foreach ($data as $row) {
+    foreach ($data as $index => $row) {
         $line = [];
         foreach ($csvConfig['fields'] as $field) {
-            $line[] = data_get($row, $field, '');
+            if ($field === 'index') {
+                $line[] = $index + 1;
+            } elseif ($field === 'staff_full_name') {
+                $staff = $row->staff ?? null;
+                $line[] = $staff ? trim(($staff->first_name ?? '') . ' ' . ($staff->last_name ?? '')) : 'N/A';
+            } else {
+                $line[] = data_get($row, $field, '');
+            }
         }
         fputcsv($output, $line);
     }

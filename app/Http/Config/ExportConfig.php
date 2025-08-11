@@ -15,22 +15,22 @@ class ExportConfig
             'default_sort' => 'created_at',
             'filename_prefix' => 'patients', // Added for CSV export
             'select_fields' => [
-                'full_name', 'patient_code', 'fayda_id', 'email', 'source', 
-                'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth'
+                'full_name', 'patient_code', 'fayda_id', 'email', 'source',
+                'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth',
             ],
-            
+
             'csv' => [
                 'headers' => [
-                    'Full Name', 'Patient Code', 'Fayda ID', 'Email', 'Source', 
-                    'Phone', 'Address', 'Gender', 'Emergency Contact'
+                    'Full Name', 'Patient Code', 'Fayda ID', 'Email', 'Source',
+                    'Phone', 'Address', 'Gender', 'Emergency Contact',
                 ],
                 'fields' => [
                     'full_name', 'patient_code', 'fayda_id', 'email', 'source',
-                    'phone_number', 'address', 'gender', 'emergency_contact'
+                    'phone_number', 'address', 'gender', 'emergency_contact',
                 ],
-                'filename_prefix' => 'patients' // Changed from 'filename' to 'filename_prefix'
+                'filename_prefix' => 'patients', // Changed from 'filename' to 'filename_prefix'
             ],
-            
+
             'pdf' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient Export - Geraye Home Care Services',
@@ -59,9 +59,9 @@ class ExportConfig
                     ['key' => 'address', 'label' => 'Address'],
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
-                ]
+                ],
             ],
-            
+
             'current_page' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient List (Current View) - Geraye Home Care Services',
@@ -76,9 +76,9 @@ class ExportConfig
                     'fayda_id' => ['field' => 'fayda_id', 'default' => '-'],
                     'age' => [
                         'field' => 'date_of_birth',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->age : '-';
-                        }
+                        },
                     ],
                     'gender' => ['field' => 'gender', 'default' => '-'],
                     'phone_number' => 'phone_number',
@@ -93,9 +93,9 @@ class ExportConfig
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'phone_number', 'label' => 'Phone'],
                     ['key' => 'source', 'label' => 'Source'],
-                ]
+                ],
             ],
-            
+
             'all_records' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient List - Geraye Home Care Services',
@@ -111,9 +111,9 @@ class ExportConfig
                     'fayda_id' => ['field' => 'fayda_id', 'default' => '-'],
                     'age' => [
                         'field' => 'date_of_birth',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->age : '-';
-                        }
+                        },
                     ],
                     'gender' => ['field' => 'gender', 'default' => '-'],
                     'phone_number' => 'phone_number',
@@ -128,9 +128,9 @@ class ExportConfig
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'phone_number', 'label' => 'Phone'],
                     ['key' => 'source', 'label' => 'Source'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Patient Record - Geraye Home Care Services',
@@ -144,9 +144,9 @@ class ExportConfig
                     'Date of Birth' => 'date_of_birth',
                     'Age' => [
                         'field' => 'date_of_birth',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->age . ' years' : '-';
-                        }
+                        },
                     ],
                     'Gender' => ['field' => 'gender', 'default' => '-'],
                     'Phone Number' => 'phone_number',
@@ -155,15 +155,15 @@ class ExportConfig
                     'Emergency Contact' => ['field' => 'emergency_contact', 'default' => '-'],
                     'Source' => ['field' => 'source', 'default' => '-'],
                     'Registered By Staff' => ['field' => 'registeredByStaff.full_name', 'default' => '-'],
-                    'Registered Date' => ['field' => 'created_at', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
-                    'Last Updated' => ['field' => 'updated_at', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                    'Registered Date' => ['field' => 'created_at', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
+                    'Last Updated' => ['field' => 'updated_at', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
                 ],
                 'columns' => [
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'patient_code', 'label' => 'Patient Code'],
                     ['key' => 'fayda_id', 'label' => 'Fayda ID'],
                     ['key' => 'date_of_birth', 'label' => 'Date of Birth'],
-                    ['key' => 'age', 'label' => 'Age', 'transform' => function($value, $model) { return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age . ' years' : '-'; }],
+                    ['key' => 'age', 'label' => 'Age', 'transform' => function ($value, $model) {return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age . ' years' : '-';}],
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'phone_number', 'label' => 'Phone Number'],
                     ['key' => 'email', 'label' => 'Email'],
@@ -171,10 +171,10 @@ class ExportConfig
                     ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
                     ['key' => 'source', 'label' => 'Source'],
                     ['key' => 'registeredByStaff.full_name', 'label' => 'Registered By Staff'],
-                    ['key' => 'created_at', 'label' => 'Registered Date', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
-                    ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
-                ]
-            ]
+                    ['key' => 'created_at', 'label' => 'Registered Date', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
+                    ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
+                ],
+            ],
         ];
     }
 
@@ -188,19 +188,19 @@ class ExportConfig
             'sortable_fields' => ['title', 'event_date', 'broadcast_status', 'created_at'],
             'default_sort' => 'created_at',
             'select_fields' => [
-                'title', 'description', 'event_date', 'is_free_service', 'broadcast_status'
+                'title', 'description', 'event_date', 'is_free_service', 'broadcast_status',
             ],
-            
+
             'csv' => [
                 'headers' => [
-                    'Title', 'Description', 'Event Date', 'Is Free Service', 'Broadcast Status'
+                    'Title', 'Description', 'Event Date', 'Is Free Service', 'Broadcast Status',
                 ],
                 'fields' => [
-                    'title', 'description', 'event_date', 'is_free_service', 'broadcast_status'
+                    'title', 'description', 'event_date', 'is_free_service', 'broadcast_status',
                 ],
-                'filename' => 'events.csv'
+                'filename' => 'events.csv',
             ],
-            
+
             'pdf' => [
                 'title' => 'Events List',
                 'document_title' => 'Events List',
@@ -213,9 +213,9 @@ class ExportConfig
                     'event_date' => 'event_date',
                     'is_free_service' => [
                         'field' => 'is_free_service',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'broadcast_status' => 'broadcast_status',
                 ],
@@ -225,9 +225,9 @@ class ExportConfig
                     ['key' => 'event_date', 'label' => 'Event Date'],
                     ['key' => 'is_free_service', 'label' => 'Free Service'],
                     ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ]
+                ],
             ],
-            
+
             'print_current' => [
                 'title' => 'Events List (Current View)',
                 'document_title' => 'Events List (Current View)',
@@ -240,9 +240,9 @@ class ExportConfig
                     'event_date' => 'event_date',
                     'is_free_service' => [
                         'field' => 'is_free_service',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'broadcast_status' => 'broadcast_status',
                 ],
@@ -252,9 +252,9 @@ class ExportConfig
                     ['key' => 'event_date', 'label' => 'Event Date'],
                     ['key' => 'is_free_service', 'label' => 'Free Service'],
                     ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ]
+                ],
             ],
-            
+
             'print_all' => [
                 'title' => 'Events List',
                 'document_title' => 'Events List',
@@ -268,9 +268,9 @@ class ExportConfig
                     'event_date' => 'event_date',
                     'is_free_service' => [
                         'field' => 'is_free_service',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'broadcast_status' => 'broadcast_status',
                 ],
@@ -280,9 +280,9 @@ class ExportConfig
                     ['key' => 'event_date', 'label' => 'Event Date'],
                     ['key' => 'is_free_service', 'label' => 'Free Service'],
                     ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'fields' => [
                     'Title' => 'title',
@@ -290,13 +290,13 @@ class ExportConfig
                     'Event Date' => 'event_date',
                     'Free Service' => [
                         'field' => 'is_free_service',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'Broadcast Status' => 'broadcast_status',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -310,21 +310,21 @@ class ExportConfig
             'sortable_fields' => ['first_name', 'last_name', 'email', 'position', 'department', 'status', 'hire_date', 'created_at'],
             'default_sort' => 'created_at',
             'select_fields' => [
-                'first_name', 'last_name', 'email', 'phone', 'position', 
-                'department', 'status', 'hire_date'
+                'first_name', 'last_name', 'email', 'phone', 'position',
+                'department', 'status', 'hire_date',
             ],
-            
+
             'csv' => [
                 'headers' => [
-                    'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date'
+                    'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date',
                 ],
                 'fields' => [
                     'full_name',
-                    'email', 'phone', 'position', 'department', 'status', 'hire_date'
+                    'email', 'phone', 'position', 'department', 'status', 'hire_date',
                 ],
-                'filename_prefix' => 'staff.csv'
+                'filename_prefix' => 'staff.csv',
             ],
-            
+
             'pdf' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff Export - Geraye Home Care Services',
@@ -335,9 +335,9 @@ class ExportConfig
                 'fields' => [
                     'full_name' => [
                         'field' => 'first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $model->first_name . ' ' . $model->last_name;
-                        }
+                        },
                     ],
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
@@ -346,9 +346,9 @@ class ExportConfig
                     'status' => 'status',
                     'hire_date' => [
                         'field' => 'hire_date',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -359,9 +359,9 @@ class ExportConfig
                     ['key' => 'department', 'label' => 'Department'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'hire_date', 'label' => 'Hire Date'],
-                ]
+                ],
             ],
-            
+
             'current_page' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List (Current View) - Geraye Home Care Services',
@@ -372,9 +372,9 @@ class ExportConfig
                 'fields' => [
                     'full_name' => [
                         'field' => 'first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $model->first_name . ' ' . $model->last_name;
-                        }
+                        },
                     ],
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
@@ -389,9 +389,9 @@ class ExportConfig
                     ['key' => 'position', 'label' => 'Position'],
                     ['key' => 'department', 'label' => 'Department'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'all_records' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List - Geraye Home Care Services',
@@ -403,9 +403,9 @@ class ExportConfig
                 'fields' => [
                     'full_name' => [
                         'field' => 'first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $model->first_name . ' ' . $model->last_name;
-                        }
+                        },
                     ],
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
@@ -420,16 +420,16 @@ class ExportConfig
                     ['key' => 'position', 'label' => 'Position'],
                     ['key' => 'department', 'label' => 'Department'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'fields' => [
                     'Full Name' => [
                         'field' => 'first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $model->first_name . ' ' . $model->last_name;
-                        }
+                        },
                     ],
                     'Email' => ['field' => 'email', 'default' => '-'],
                     'Phone' => ['field' => 'phone', 'default' => '-'],
@@ -438,12 +438,12 @@ class ExportConfig
                     'Status' => 'status',
                     'Hire Date' => [
                         'field' => 'hire_date',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -457,67 +457,66 @@ class ExportConfig
             'sortable_fields' => ['shift_start', 'shift_end', 'status', 'created_at'],
             'default_sort' => 'created_at',
             'select_fields' => [
-                'patient_id', 'staff_id', 'shift_start', 'shift_end', 'status'
+                'patient_id', 'staff_id', 'shift_start', 'shift_end', 'status',
             ],
-            
+
             'csv' => [
                 'headers' => [
-                    'Patient Name', 'Staff Name', 'Shift Start', 'Shift End', 'Status'
+                    '#', 'Patient Name', 'Staff Name', 'Shift Start', 'Shift End', 'Status',
                 ],
                 'fields' => [
-                    ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'shift_start', 'shift_end', 'status'
+                    'index',
+                    'patient.full_name',
+                    'staff_full_name',
+                    'shift_start',
+                    'shift_end',
+                    'status',
                 ],
-                'filename' => 'assignments.csv'
+                'with_relations' => ['staff', 'patient'],
+                'filename_prefix' => 'assignments',
             ],
-            
+
             'pdf' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'All Caregiver Assignments - Geraye',
                 'document_title' => 'Caregiver Assignment Records Export',
                 'filename_prefix' => 'assignments-all',
                 'orientation' => 'landscape',
-                'include_index' => false,
+                'include_index' => true,
                 'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
                         'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
+                        },
                     ],
                     'shift_start' => [
                         'field' => 'shift_start',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'shift_end' => [
                         'field' => 'shift_end',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'status' => 'status',
                 ],
                 'columns' => [
                     ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'print_current' => [
-                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Caregiver Assignments (Current View) - Geraye',
                 'document_title' => 'Caregiver Assignments (Current View)',
                 'filename_prefix' => 'assignments-current',
@@ -528,94 +527,95 @@ class ExportConfig
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
                         'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
+                        },
                     ],
                     'shift_start' => [
                         'field' => 'shift_start',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'shift_end' => [
                         'field' => 'shift_end',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'status' => 'status',
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
                     ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'all_records' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'All Caregiver Assignments - Geraye',
                 'document_title' => 'Caregiver Assignment Records Export',
                 'filename_prefix' => 'assignments-all',
                 'orientation' => 'landscape',
-                'include_index' => false,
+                'include_index' => true,
                 'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'staff_member' => [
                         'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
+                        },
                     ],
                     'shift_start' => [
                         'field' => 'shift_start',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'shift_end' => [
                         'field' => 'shift_end',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
+                        },
                     ],
                     'status' => 'status',
                 ],
                 'columns' => [
+                    ['key' => 'index', 'label' => '#'],
                     ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
-                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Caregiver Assignment Record - Geraye',
                 'document_title' => 'Caregiver Assignment Record',
                 'filename_prefix' => 'assignment-record',
                 'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'Staff Member' => ['field' => 'staff.first_name','transform' => function($value, $model) { return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? ''); }],
-                    'Shift Start' => ['field' => 'shift_start','transform' => function($value, $model) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A'; }],
-                    'Shift End' => ['field' => 'shift_end','transform' => function($value, $model) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A'; }],
+                    'Staff Member' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');}],
+                    'Shift Start' => ['field' => 'shift_start', 'transform' => function ($value, $model) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';}],
+                    'Shift End' => ['field' => 'shift_end', 'transform' => function ($value, $model) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';}],
                     'Status' => 'status',
                 ],
                 'columns' => [
                     ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff Member'],
                     ['key' => 'shift_start', 'label' => 'Shift Start'],
                     ['key' => 'shift_end', 'label' => 'Shift End'],
                     ['key' => 'status', 'label' => 'Status'],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -630,19 +630,19 @@ class ExportConfig
             'default_sort' => 'created_at',
             'filename_prefix' => 'services',
             'select_fields' => [
-                'name', 'description', 'category', 'price', 'duration', 'is_active'
+                'name', 'description', 'category', 'price', 'duration', 'is_active',
             ],
-            
+
             'csv' => [
                 'headers' => [
-                    'Name', 'Description', 'Category', 'Price', 'Duration', 'Active'
+                    'Name', 'Description', 'Category', 'Price', 'Duration', 'Active',
                 ],
                 'fields' => [
-                    'name', 'description', 'category', 'price', 'duration', 'is_active'
+                    'name', 'description', 'category', 'price', 'duration', 'is_active',
                 ],
-                'filename_prefix' => 'services'
+                'filename_prefix' => 'services',
             ],
-            
+
             'pdf' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Services Export - Geraye Home Care Services',
@@ -656,21 +656,21 @@ class ExportConfig
                     'category' => 'category',
                     'price' => [
                         'field' => 'price',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return '$' . number_format($value, 2);
-                        }
+                        },
                     ],
                     'duration' => [
                         'field' => 'duration',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value . ' minutes';
-                        }
+                        },
                     ],
                     'is_active' => [
                         'field' => 'is_active',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Active' : 'Inactive';
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -680,11 +680,11 @@ class ExportConfig
                     ['key' => 'price', 'label' => 'Price'],
                     ['key' => 'duration', 'label' => 'Duration'],
                     ['key' => 'is_active', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'current_page' => [
-                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Services List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Services List (Current View)',
                 'filename_prefix' => 'services-current',
@@ -696,21 +696,21 @@ class ExportConfig
                     'category' => 'category',
                     'price' => [
                         'field' => 'price',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return '$' . number_format($value, 2);
-                        }
+                        },
                     ],
                     'duration' => [
                         'field' => 'duration',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value . ' min';
-                        }
+                        },
                     ],
                     'is_active' => [
                         'field' => 'is_active',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Active' : 'Inactive';
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -720,9 +720,9 @@ class ExportConfig
                     ['key' => 'price', 'label' => 'Price'],
                     ['key' => 'duration', 'label' => 'Duration'],
                     ['key' => 'is_active', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'all_records' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'All Services - Geraye Home Care Services',
@@ -737,21 +737,21 @@ class ExportConfig
                     'category' => 'category',
                     'price' => [
                         'field' => 'price',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return '$' . number_format($value, 2);
-                        }
+                        },
                     ],
                     'duration' => [
                         'field' => 'duration',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value . ' min';
-                        }
+                        },
                     ],
                     'is_active' => [
                         'field' => 'is_active',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Active' : 'Inactive';
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -761,9 +761,9 @@ class ExportConfig
                     ['key' => 'price', 'label' => 'Price'],
                     ['key' => 'duration', 'label' => 'Duration'],
                     ['key' => 'is_active', 'label' => 'Status'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Service Record - Geraye Home Care Services',
@@ -775,33 +775,33 @@ class ExportConfig
                     'Category' => 'category',
                     'Price' => [
                         'field' => 'price',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return '$' . number_format($value, 2);
-                        }
+                        },
                     ],
                     'Duration' => [
                         'field' => 'duration',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value . ' minutes';
-                        }
+                        },
                     ],
                     'Status' => [
                         'field' => 'is_active',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Active' : 'Inactive';
-                        }
+                        },
                     ],
                     'Created Date' => [
                         'field' => 'created_at',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
-                        }
+                        },
                     ],
                     'Last Updated' => [
                         'field' => 'updated_at',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -813,8 +813,8 @@ class ExportConfig
                     ['key' => 'is_active', 'label' => 'Status'],
                     ['key' => 'created_at', 'label' => 'Created Date'],
                     ['key' => 'updated_at', 'label' => 'Last Updated'],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

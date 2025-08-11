@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? ($headerInfo['document_title'] ?? 'Document') }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; color: #111; }
+        body { font-family: DejaVu Sans, sans-serif; color: #111; margin-bottom: 80px; padding-bottom: 20px; }
         .header { text-align: center; margin-bottom: 16px; }
         .logo { max-width: 140px; max-height: 50px; display: block; margin: 0 auto 8px auto; }
         .clinic-name { font-weight: bold; font-size: 18px; margin: 0 0 4px 0; }
@@ -15,7 +15,21 @@
         thead { background: #f3f4f6; }
         .kv { margin-bottom: 6px; }
         .kv .label { font-weight: 600; margin-right: 6px; }
-        .footer { position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 11px; color: #666; }
+        .footer { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            text-align: center; 
+            font-size: 11px; 
+            color: #666; 
+            padding: 10px; 
+            border-top: 1px solid #ccc; 
+            background: white; 
+            z-index: 1000;
+            height: 40px;
+            line-height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -50,6 +64,8 @@
                             @php $key = $col['key'] ?? ''; @endphp
                             @if($key === 'index')
                                 <td>{{ $indexBase + $loop->parent->iteration }}</td>
+                            @elseif($key === 'staff_full_name')
+                                <td>{{ ($row->staff->first_name ?? '') . ' ' . ($row->staff->last_name ?? '') ?: 'N/A' }}</td>
                             @else
                                 <td>{{ data_get($row, $key, '-') }}</td>
                             @endif
@@ -74,7 +90,8 @@
     @endif
 
     <div class="footer">
-        Printed on: {{ $footerInfo['generated_date'] ?? now()->format('F j, Y, g:i a') }}
+        <div>Generated on: {{ $footerInfo['generated_date'] ?? now()->format('F j, Y, g:i a') }}</div>
+        <div style="font-size: 10px; color: #888; margin-top: 2px;">Geraye Home Care Services - Confidential Document</div>
     </div>
 </body>
 </html>

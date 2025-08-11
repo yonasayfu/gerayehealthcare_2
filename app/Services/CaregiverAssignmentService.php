@@ -86,6 +86,8 @@ class CaregiverAssignmentService extends BaseService
         $config['document_title'] = 'Caregiver Assignment Record';
         $config['filename'] = "assignment-{$assignment->id}.pdf";
         
-        return $this->generateSingleRecordPdf($assignment, $config);
+        return $this->handlePrintSingle($assignment, $config);
     }
+
+   
 }

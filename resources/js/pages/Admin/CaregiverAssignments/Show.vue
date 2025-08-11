@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import type { BreadcrumbItemType } from '@/types'
 import { Calendar, Clock, User, Stethoscope, BadgeCheck } from 'lucide-vue-next'
@@ -16,9 +16,9 @@ const props = defineProps<{
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
-  { title: 'Dashboard', href: '/dashboard' },
-  { title: 'Assignments', href: '/dashboard/assignments' },
-  { title: 'Details', href: `/dashboard/assignments/${props.assignment.id}` },
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Assignments', href: route('admin.assignments.index') },
+  { title: 'Details', href: route('admin.assignments.show', props.assignment.id) },
 ]
 
 // Helper to combine staff first and last names
@@ -41,6 +41,11 @@ const formatTime = (dateString) => {
         hour: '2-digit', minute: '2-digit'
     });
 }
+
+function printSingleAssignment() {
+  // Print the current page using the built-in browser print dialog
+  window.print();
+}
 </script>
 
 <template>
@@ -48,7 +53,7 @@ const formatTime = (dateString) => {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Assignment #{{ assignment.id }}
             </h3>
@@ -58,11 +63,18 @@ const formatTime = (dateString) => {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+
+                <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+                    <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Assignment Record Document</p>
+                    <hr class="my-3 border-gray-300 print:my-2">
+                </div>
                 <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Patient Info -->
-                    <div class="space-y-4">
-                        <h3 class="font-semibold text-lg text-gray-800 dark:text-white">Patient Information</h3>
+                    <div class="space-y-4 border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                        <h3 class="font-semibold text-lg text-gray-800 dark:text-white print:mb-2">Patient Information</h3>
                         <div class="flex items-center gap-3">
                             <User class="w-5 h-5 text-muted-foreground" />
                             <span>{{ assignment.patient?.full_name ?? 'N/A' }}</span>
@@ -70,8 +82,8 @@ const formatTime = (dateString) => {
                     </div>
 
                     <!-- Staff Info -->
-                    <div class="space-y-4">
-                        <h3 class="font-semibold text-lg text-gray-800 dark:text-white">Assigned Staff</h3>
+                    <div class="space-y-4 border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                        <h3 class="font-semibold text-lg text-gray-800 dark:text-white print:mb-2">Assigned Staff</h3>
                          <div class="flex items-center gap-3">
                             <Stethoscope class="w-5 h-5 text-muted-foreground" />
                             <span>{{ getStaffFullName(assignment.staff) }}</span>
@@ -80,7 +92,7 @@ const formatTime = (dateString) => {
 
                     <!-- Shift Details -->
                     <div class="space-y-4 md:col-span-2 border-t dark:border-gray-700 pt-6">
-                         <h3 class="font-semibold text-lg text-gray-800 dark:text-white">Shift Details</h3>
+                         <h3 class="font-semibold text-lg text-gray-800 dark:text-white print:mb-2">Shift Details</h3>
                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                 <Calendar class="w-5 h-5 text-muted-foreground" />
@@ -109,7 +121,7 @@ const formatTime = (dateString) => {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex items-center gap-2">
                 <Link :href="route('admin.assignments.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
                     Back to List
@@ -117,12 +129,79 @@ const formatTime = (dateString) => {
                 <Link :href="route('admin.assignments.edit', assignment.id)" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                     Edit Assignment
                 </Link>
-                <a :href="route('admin.assignments.print', assignment.id)" target="_blank" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
-                    Print
-                </a>
+                <button @click="printSingleAssignment" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
+                    Print Current
+                </button>
+                <button @click="() => router.delete(route('admin.assignments.destroy', assignment.id))" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium">
+                    Delete
+                </button>
             </div>
+        </div>
+
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300">
+          <p>Printed on: {{ formatDate(new Date().toISOString()) }}</p>
         </div>
 
     </div>
   </AppLayout>
 </template>
+
+<style>
+/* Print styles for Single Assignment */
+@media print {
+  @page {
+    size: A4;
+    margin: 0.5cm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .hidden.print\:block {
+    display: block !important;
+  }
+
+  /* Print header styling */
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .print-clinic-name {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .print-document-title {
+    font-size: 0.9rem !important;
+    color: #555 !important;
+  }
+
+  /* Content adjustments */
+  .space-y-8 > div:not(:first-child) {
+    margin-top: 0.8rem !important;
+    margin-bottom: 0.8rem !important;
+  }
+}
+</style>

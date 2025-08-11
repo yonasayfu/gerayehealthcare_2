@@ -30,7 +30,7 @@ export function useExport(options: UseExportOptions) {
 
   const printAllRecords = () => {
     isProcessing.value = true;
-    const url = route(`${options.routeName}.printAll`, { ...options.filters });
+    const url = route(`${options.routeName}.printAll`, { preview: true, ...options.filters });
     window.open(url, '_blank');
     isProcessing.value = false;
   };
