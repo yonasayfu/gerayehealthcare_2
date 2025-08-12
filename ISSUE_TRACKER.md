@@ -53,12 +53,12 @@ Use this section when working with browser-based AI agents that lack full repo a
 - [ ] Remove PDF download/generation features from both the frontend and backend, as requested.
 
 ### Module 3: Caregiver Assignments
-- [ ] Correct the empty "PATIENT NAME STAFF MEMBER" column in the exported CSV.
-- [ ] Fix the PDF download functionality to preview the PDF in the browser instead of directly downloading it.
-- [ ] Fix the print page button to use the correct template and not include unwanted headers and data.
-- [ ] Ensure print all opens a preview in the browser before downloading.
-- [ ] Resolve the TypeError: Cannot read properties of undefined (reading 'id') errors in Show.vue and Edit.vue.
-- [ ] Remove the PDF download/generation features from the frontend and backend.
+- [x] Correct the empty "PATIENT NAME STAFF MEMBER" column in the exported CSV.
+- [x] Fix the PDF download functionality to preview the PDF in the browser instead of directly downloading it.
+- [x] Fix the print page button to use the correct template and not include unwanted headers and data.
+- [x] Ensure print all opens a preview in the browser before downloading.
+- [x] Resolve the TypeError: Cannot read properties of undefined (reading 'id') errors in Show.vue and Edit.vue.
+- [x] N/A — centralized ExportableTrait with preview streaming replaces removal of PDF generation features.
 
 ### Module 4: Visit Services
 - [ ] Fix the data fetching and display on Show.vue to correctly reflect the index view.
