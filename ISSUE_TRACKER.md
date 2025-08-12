@@ -77,7 +77,7 @@ Use this section when working with browser-based AI agents that lack full repo a
 
 ### Module 6: Staff Payouts & Performance
 - [x] Add a special seeder to populate test data for this module.
-- [ ] Review the relationships with other modules to ensure data integrity.
+- [x] Review the relationships with other modules to ensure data integrity.
 
 ### Module 7: Task Delegations
 - [ ] Remove the CSV, PDF, and print features.
