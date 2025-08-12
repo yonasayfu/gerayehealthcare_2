@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Models\Staff;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
+use Illuminate\Http\Request;
 
 class StaffService extends BaseService
 {
@@ -54,5 +54,20 @@ class StaffService extends BaseService
     public function export(Request $request)
     {
         return $this->handleExport($request, Staff::class, ExportConfig::getStaffConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, Staff::class, ExportConfig::getStaffConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, Staff::class, ExportConfig::getStaffConfig());
+    }
+
+    public function printSingle(Staff $staff, Request $request)
+    {
+        return $this->handlePrintSingle($request, $staff, ExportConfig::getStaffConfig());
     }
 }

@@ -3,7 +3,8 @@ import { Trash2 } from 'lucide-vue-next';
 
 defineProps<{
   form: any,
-  existingPhoto?: string | null
+  existingPhoto?: string | null,
+  departments?: string[]
 }>()
 </script>
 

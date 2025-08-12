@@ -25,6 +25,13 @@ class StaffController extends BaseController
         );
     }
 
+    public function create()
+    {
+        return Inertia::render('Admin/Staff/Create', [
+            'departments' => config('hr.departments'),
+        ]);
+    }
+
     public function edit($id)
     {
         $staff = $this->service->getById($id);
@@ -34,4 +41,18 @@ class StaffController extends BaseController
         ]);
     }
    
+    public function printAll()
+    {
+        return app(StaffService::class)->printAll(request());
+    }
+
+    public function printCurrent()
+    {
+        return app(StaffService::class)->printCurrent(request());
+    }
+
+    public function printSingle(Staff $staff)
+    {
+        return app(StaffService::class)->printSingle($staff, request());
+    }
 }

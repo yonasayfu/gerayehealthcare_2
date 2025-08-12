@@ -4,6 +4,8 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
 
+const props = defineProps<{ departments: string[] }>()
+
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: '/dashboard' },
   { title: 'Staff', href: '/dashboard/staff' },
@@ -47,7 +49,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" :errors="form.errors" />
+            <Form :form="form" :errors="form.errors" :departments="props.departments" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

@@ -130,7 +130,9 @@ function printPage() {
 
         <div class="p-6 border-t border-gray-200 rounded-b">
             <div class="flex flex-wrap gap-2">
-              
+              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300 print:hidden">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link :href="route('admin.staff.edit', props.staff.id)"
                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
                 <Edit3 class="w-4 h-4" /> Edit Staff

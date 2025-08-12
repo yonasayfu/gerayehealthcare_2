@@ -154,6 +154,9 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         // Staff
         Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export');
+        Route::get('staff/print-all', [StaffController::class, 'printAll'])->name('staff.printAll');
+        Route::get('staff/print-current', [StaffController::class, 'printCurrent'])->name('staff.printCurrent');
+        Route::get('staff/{staff}/print', [StaffController::class, 'printSingle'])->name('staff.print');
         Route::resource('staff', StaffController::class);
 
         // Staff Availabilities
