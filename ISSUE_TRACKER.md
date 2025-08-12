@@ -73,7 +73,7 @@ Use this section when working with browser-based AI agents that lack full repo a
 ### Module 5: Staff Availabilities
 - [x] Fix the staff member dropdown to show available staff so that new availability slots can be created.
 - [x] Create a special seeder to test this module.
-- [ ] Review the relationships with other modules to ensure data integrity.
+- [x] Review the relationships with other modules to ensure data integrity.
 
 ### Module 6: Staff Payouts & Performance
 - [ ] Add a special seeder to populate test data for this module.
