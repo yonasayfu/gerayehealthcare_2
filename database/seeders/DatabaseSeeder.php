@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             LeaveRequestSeeder::class,
             InventorySeeder::class,
             StaffAvailabilityDemoSeeder::class,
+            StaffPayoutDemoSeeder::class,
             MarketingModuleMainSeeder::class,
             MarketingRelatedSeeder::class,
             CampaignContentSeeder::class,
