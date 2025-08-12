@@ -9,6 +9,7 @@ use App\Services\Validation\Rules\StaffRules;
 use App\DTOs\CreateStaffDTO;
 use App\DTOs\UpdateStaffDTO;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 class StaffController extends BaseController
 {
@@ -30,6 +31,11 @@ class StaffController extends BaseController
         return Inertia::render('Admin/Staff/Create', [
             'departments' => config('hr.departments'),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        return app(StaffService::class)->export($request);
     }
 
     public function edit($id)

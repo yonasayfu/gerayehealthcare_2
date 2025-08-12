@@ -330,6 +330,7 @@ class ExportConfig
                 'title' => 'Staff Export - Geraye Home Care Services',
                 'document_title' => 'All Staff Records',
                 'filename' => 'staff.pdf',
+                'filename_prefix' => 'staff',
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'fields' => [
@@ -367,6 +368,7 @@ class ExportConfig
                 'title' => 'Staff List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Staff List (Current View)',
                 'filename' => 'staff-current.pdf',
+                'filename_prefix' => 'staff-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'fields' => [
