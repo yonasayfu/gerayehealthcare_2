@@ -1,5 +1,38 @@
 # Project Issues Tracker
 
+## Agent Workflow, Labels, and Templates
+
+Use this section when working with browser-based AI agents that lack full repo access.
+
+- **Labels (apply to each issue):**
+  - Priority: Blocker | High | Medium | Low
+  - Type: Bug | Feature | Refactor | Data | UX
+  - Status: Todo | In-Progress | Blocked | Done
+
+- **Attachments to include per issue:**
+  1) PROJECT_ROADMAP.md
+  2) DATABASE_SCHEMA.md
+  3) ISSUE_TRACKER.md (only the specific issue excerpt)
+  4) Minimal related code: controller(s), model(s), service(s), Vue pages/components, routes, config
+
+- **Issue Brief Template (copy-paste to the agent):**
+  - Title: <concise single-scope change>
+  - Module: <e.g., Patients>
+  - Priority/Type/Status: <High | Bug | Todo>
+  - Current Behavior: <what happens>
+  - Expected Behavior: <what should happen>
+  - Steps to Reproduce: <short list>
+  - Files Provided: <paths>
+  - Routes/UI Entry Points: <route names + Vue paths>
+  - Constraints/Guidelines: <coding standards, do/don'ts>
+  - Acceptance Criteria: <bullet list of checks>
+
+- **Execution checklist per issue:**
+  1) Share the three docs + minimal files
+  2) Ask the agent to propose a minimal diff/PR
+  3) If more files are requested, share only those
+  4) Run locally, verify acceptance criteria, then mark Done
+
 ## Phase 1: Foundational Core Modules (Staff, Patient, and Visit Services)
 
 ### Module 1: Staff

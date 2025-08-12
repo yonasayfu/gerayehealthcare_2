@@ -84,6 +84,7 @@ return Response::stream($callback, 200, $headers);
                 'data' => $data,
                 'title' => $pdfConfig['document_title'],
                 'columns' => $pdfConfig['columns'] ?? [], // Pass columns instead of fields
+                'hide_footer' => $pdfConfig['hide_footer'] ?? false,
                 'headerInfo' => [
                     'logo' => public_path('images/geraye_logo.jpeg'),
                     'clinic_name' => 'Geraye Home Care Services',
@@ -139,6 +140,7 @@ return Response::stream($callback, 200, $headers);
             'data' => $data,
             'title' => $allRecordsConfig['document_title'] ?? 'All Records',
             'columns' => $allRecordsConfig['columns'] ?? [], // Pass columns instead of fields
+            'hide_footer' => $allRecordsConfig['hide_footer'] ?? false,
             'headerInfo' => [
                 'logo' => public_path('images/geraye_logo.jpeg'),
                 'clinic_name' => 'Geraye Home Care Services',
@@ -190,6 +192,7 @@ return Response::stream($callback, 200, $headers);
             'data' => $data,
             'title' => $currentPageConfig['document_title'] ?? 'Current View',
             'columns' => $currentPageConfig['columns'] ?? [], // Pass columns instead of fields
+            'hide_footer' => $currentPageConfig['hide_footer'] ?? false,
             'headerInfo' => [
                 'logo' => public_path('images/geraye_logo.jpeg'),
                 'clinic_name' => 'Geraye Home Care Services',
@@ -225,6 +228,7 @@ return Response::stream($callback, 200, $headers);
             'data' => $modelInstance, 
             'title' => $singleRecordConfig['document_title'] ?? 'Record Details', 
             'columns' => $singleRecordConfig['columns'] ?? [], // Pass columns instead of fields
+            'hide_footer' => $singleRecordConfig['hide_footer'] ?? false,
             'headerInfo' => [
                 'logo' => public_path('images/geraye_logo.jpeg'),
                 'clinic_name' => 'Geraye Home Care Services',

@@ -119,99 +119,7 @@ class AdditionalExportConfigs
         ];
     }
 
-    /**
-     * Get export configuration for InsuranceCompany model
-     */
-    public static function getInsuranceCompanyConfig(): array
-    {
-        return [
-            'searchable_fields' => ['name', 'contact_person'],
-            'sortable_fields' => ['name', 'contact_person', 'created_at'],
-            'default_sort' => 'name',
-            'select_fields' => ['name', 'contact_person', 'contact_email', 'contact_phone', 'address'],
-            
-            'csv' => [
-                'headers' => ['Name', 'Contact Person', 'Contact Email', 'Contact Phone', 'Address'],
-                'fields' => ['name', 'contact_person', 'contact_email', 'contact_phone', 'address'],
-                'filename' => 'insurance_companies.csv'
-            ],
-            
-            'pdf' => [
-                'title' => 'Insurance Companies List',
-                'document_title' => 'Insurance Companies List',
-                'filename' => 'insurance_companies.pdf',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'fields' => [
-                    'name' => 'name',
-                    'contact_person' => 'contact_person',
-                    'contact_email' => 'contact_email',
-                    'contact_phone' => 'contact_phone',
-                    'address' => 'address',
-                ],
-                'columns' => [
-                    ['key' => 'name', 'label' => 'Name'],
-                    ['key' => 'contact_person', 'label' => 'Contact Person'],
-                    ['key' => 'contact_email', 'label' => 'Contact Email'],
-                    ['key' => 'contact_phone', 'label' => 'Contact Phone'],
-                    ['key' => 'address', 'label' => 'Address'],
-                ]
-            ],
-            
-            'print_current' => [
-                'title' => 'Insurance Companies (Current View)',
-                'document_title' => 'Insurance Companies (Current View)',
-                'filename' => 'insurance_companies_current.pdf',
-                'orientation' => 'landscape',
-                'include_index' => true,
-                'fields' => [
-                    'name' => 'name',
-                    'contact_person' => 'contact_person',
-                    'contact_email' => 'contact_email',
-                    'contact_phone' => 'contact_phone',
-                ],
-                'columns' => [
-                    ['key' => 'index', 'label' => '#'],
-                    ['key' => 'name', 'label' => 'Name'],
-                    ['key' => 'contact_person', 'label' => 'Contact Person'],
-                    ['key' => 'contact_email', 'label' => 'Email'],
-                    ['key' => 'contact_phone', 'label' => 'Phone'],
-                ]
-            ],
-            
-            'print_all' => [
-                'title' => 'All Insurance Companies',
-                'document_title' => 'All Insurance Companies',
-                'filename' => 'insurance_companies_all.pdf',
-                'orientation' => 'landscape',
-                'include_index' => true,
-                'default_sort' => 'name',
-                'fields' => [
-                    'name' => 'name',
-                    'contact_person' => 'contact_person',
-                    'contact_email' => 'contact_email',
-                    'contact_phone' => 'contact_phone',
-                ],
-                'columns' => [
-                    ['key' => 'index', 'label' => '#'],
-                    ['key' => 'name', 'label' => 'Name'],
-                    ['key' => 'contact_person', 'label' => 'Contact Person'],
-                    ['key' => 'contact_email', 'label' => 'Email'],
-                    ['key' => 'contact_phone', 'label' => 'Phone'],
-                ]
-            ],
-            
-            'single_record' => [
-                'fields' => [
-                    'Name' => 'name',
-                    'Contact Person' => 'contact_person',
-                    'Contact Email' => 'contact_email',
-                    'Contact Phone' => 'contact_phone',
-                    'Address' => 'address',
-                ]
-            ]
-        ];
-    }
+    
 
     /**
      * Get export configuration for EventStaffAssignment model
@@ -1497,210 +1405,7 @@ class AdditionalExportConfigs
         ];
     }
 
-    /**
-     * Get export configuration for VisitService model
-     */
-    public static function getVisitServiceConfig(): array
-    {
-        return [
-            'searchable_fields' => ['patient.full_name', 'staff.first_name', 'staff.last_name'],
-            'sortable_fields' => ['scheduled_at', 'check_in_time', 'check_out_time', 'status', 'created_at'],
-            'default_sort' => 'created_at',
-            'filename_prefix' => 'visit-services',
-            'select_fields' => [
-                'patient_id', 'staff_id', 'scheduled_at', 'check_in_time', 'check_out_time', 'status', 'visit_notes'
-            ],
-            
-            'csv' => [
-                'headers' => [
-                    'Patient Name', 'Staff Name', 'Scheduled At', 'Check In', 'Check Out', 'Status', 'Notes'
-                ],
-                'fields' => [
-                    ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'scheduled_at', 'check_in_time', 'check_out_time', 'status', 'visit_notes'
-                ],
-                'filename_prefix' => 'visit-services'
-            ],
-            
-            'pdf' => [
-                'view' => 'pdf.universal-report',
-                'title' => 'Visit Services Export - Geraye Home Care Services',
-                'document_title' => 'Visit Services Records Export',
-                'filename_prefix' => 'visit-services',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'with_relations' => ['patient', 'staff'],
-                'fields' => [
-                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'staff_member' => [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'scheduled_at' => [
-                        'field' => 'scheduled_at',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'check_in_time' => [
-                        'field' => 'check_in_time',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'check_out_time' => [
-                        'field' => 'check_out_time',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'status' => 'status',
-                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
-                ],
-                'columns' => [
-                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
-                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-                    ['key' => 'check_in_time', 'label' => 'Check In'],
-                    ['key' => 'check_out_time', 'label' => 'Check Out'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'visit_notes', 'label' => 'Notes'],
-                ]
-            ],
-            
-            'print_current' => [
-                'view' => 'pdf.universal-report',
-                'title' => 'Visit Services (Current View) - Geraye Home Care Services',
-                'document_title' => 'Visit Services (Current View)',
-                'filename_prefix' => 'visit-services-current',
-                'orientation' => 'landscape',
-                'include_index' => true,
-                'with_relations' => ['patient', 'staff'],
-                'fields' => [
-                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'staff_member' => [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'scheduled_at' => [
-                        'field' => 'scheduled_at',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
-                        }
-                    ],
-                    'status' => 'status',
-                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
-                ],
-                'columns' => [
-                    ['key' => 'index', 'label' => '#'],
-                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
-                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'visit_notes', 'label' => 'Notes'],
-                ]
-            ],
-            
-            'print_all' => [
-                'view' => 'pdf.universal-report',
-                'title' => 'All Visit Services - Geraye Home Care Services',
-                'document_title' => 'All Visit Services Records',
-                'filename_prefix' => 'visit-services-all',
-                'orientation' => 'landscape',
-                'include_index' => true,
-                'with_relations' => ['patient', 'staff'],
-                'default_sort' => 'scheduled_at',
-                'fields' => [
-                    'patient_name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'staff_member' => [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'scheduled_at' => [
-                        'field' => 'scheduled_at',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('M j, Y g:i a') : 'N/A';
-                        }
-                    ],
-                    'status' => 'status',
-                    'visit_notes' => ['field' => 'visit_notes', 'default' => '-'],
-                ],
-                'columns' => [
-                    ['key' => 'index', 'label' => '#'],
-                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
-                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'visit_notes', 'label' => 'Notes'],
-                ]
-            ],
-            
-            'single_record' => [
-                'view' => 'pdf.universal-single-record',
-                'title' => 'Visit Service Record - Geraye Home Care Services',
-                'document_title' => 'Visit Service Record',
-                'filename_prefix' => 'visit-service-record',
-                'with_relations' => ['patient', 'staff'],
-                'fields' => [
-                    'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'Staff Member' => [
-                        'field' => 'staff.first_name',
-                        'transform' => function($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
-                        }
-                    ],
-                    'Scheduled At' => [
-                        'field' => 'scheduled_at',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'Check In Time' => [
-                        'field' => 'check_in_time',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'Check Out Time' => [
-                        'field' => 'check_out_time',
-                        'transform' => function($value) {
-                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
-                        }
-                    ],
-                    'Status' => 'status',
-                    'Visit Notes' => ['field' => 'visit_notes', 'default' => '-'],
-                    'Cost' => [
-                        'field' => 'cost',
-                        'transform' => function($value) {
-                            return $value ? '$' . number_format($value, 2) : '-';
-                        }
-                    ],
-                ],
-                'columns' => [
-                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
-                    ['key' => 'staff.first_name', 'label' => 'Staff Member'],
-                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
-                    ['key' => 'check_in_time', 'label' => 'Check In Time'],
-                    ['key' => 'check_out_time', 'label' => 'Check Out Time'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'visit_notes', 'label' => 'Visit Notes'],
-                    ['key' => 'cost', 'label' => 'Cost'],
-                ]
-            ]
-        ];
-    }
+
 
     private static $exchangeRateConfig = null;
 
@@ -1986,7 +1691,7 @@ class AdditionalExportConfigs
     {
         if (self::$inventoryAlertConfig === null) {
             self::$inventoryAlertConfig = [
-                'searchable_fields' => ['alert_type', 'message'],
+                'searchable_fields' => ['item.name', 'alert_type', 'message'],
                 'sortable_fields' => ['alert_type', 'threshold_value', 'message', 'is_active', 'triggered_at', 'created_at'],
                 'csv_headers' => ['ID', 'Item', 'Alert Type', 'Threshold Value', 'Message', 'Is Active', 'Triggered At'],
                 'csv_fields' => ['id', 'item_name', 'alert_type', 'threshold_value', 'message', 'is_active_text', 'triggered_at'],
@@ -2040,85 +1745,9 @@ class AdditionalExportConfigs
         return self::$inventoryAlertConfig;
     }
 
-    private static $marketingCampaignConfig = null;
+    
 
-    public static function getMarketingCampaignConfig(): array
-    {
-        if (self::$marketingCampaignConfig === null) {
-            self::$marketingCampaignConfig = [
-                'searchable_fields' => ['campaign_name', 'campaign_code', 'utm_campaign'],
-                'sortable_fields' => ['campaign_name', 'campaign_code', 'campaign_type', 'status', 'start_date', 'end_date', 'budget_allocated', 'budget_spent', 'created_at'],
-                'csv_headers' => ['Campaign Name', 'Campaign Code', 'Platform', 'Campaign Type', 'Status', 'Start Date', 'End Date', 'Budget Allocated', 'Budget Spent', 'Assigned Staff', 'Created By'],
-                'csv_fields' => ['campaign_name', 'campaign_code', 'platform_name', 'campaign_type', 'status', 'start_date', 'end_date', 'budget_allocated_formatted', 'budget_spent_formatted', 'assigned_staff_name', 'created_by_name'],
-                'pdf_columns' => [
-                    ['key' => 'campaign_name', 'label' => 'Campaign Name', 'printWidth' => '15%'],
-                    ['key' => 'campaign_code', 'label' => 'Code', 'printWidth' => '10%'],
-                    ['key' => 'platform_name', 'label' => 'Platform', 'printWidth' => '10%'],
-                    ['key' => 'campaign_type', 'label' => 'Type', 'printWidth' => '10%'],
-                    ['key' => 'status', 'label' => 'Status', 'printWidth' => '8%'],
-                    ['key' => 'start_date', 'label' => 'Start Date', 'printWidth' => '10%'],
-                    ['key' => 'end_date', 'label' => 'End Date', 'printWidth' => '10%'],
-                    ['key' => 'budget_allocated_formatted', 'label' => 'Budget Allocated', 'printWidth' => '12%'],
-                    ['key' => 'budget_spent_formatted', 'label' => 'Budget Spent', 'printWidth' => '10%'],
-                    ['key' => 'assigned_staff_name', 'label' => 'Assigned Staff', 'printWidth' => '15%'],
-                ],
-                'field_transformations' => [
-                    'platform_name' => fn($value, $model) => $model->platform?->name ?? '-',
-                    'assigned_staff_name' => fn($value, $model) => $model->assignedStaff?->full_name ?? '-',
-                    'created_by_name' => fn($value, $model) => $model->createdByStaff?->full_name ?? '-',
-                    'campaign_code' => fn($value) => $value ?: '-',
-                    'campaign_type' => fn($value) => $value ?: '-',
-                    'status' => fn($value) => $value ?: '-',
-                    'start_date' => fn($value) => $value ?: '-',
-                    'end_date' => fn($value) => $value ?: '-',
-                    'budget_allocated_formatted' => fn($value, $model) => number_format($model->budget_allocated ?? 0, 2),
-                    'budget_spent_formatted' => fn($value, $model) => number_format($model->budget_spent ?? 0, 2),
-                ],
-                'print_layout' => [
-                    'title' => 'Marketing Campaigns List',
-                    'document_title' => 'Marketing Campaigns List',
-                    'paper_size' => 'a4',
-                    'orientation' => 'landscape',
-                    'filename_prefix' => 'marketing_campaigns',
-                ],
-                'single_print_layout' => [
-                    'title' => 'Marketing Campaign Details',
-                    'document_title' => 'Marketing Campaign Details',
-                    'paper_size' => 'a4',
-                    'orientation' => 'portrait',
-                    'filename_prefix' => 'marketing_campaign',
-                    'fields' => [
-                        ['label' => 'Campaign Name', 'key' => 'campaign_name'],
-                        ['label' => 'Campaign Code', 'key' => 'campaign_code'],
-                        ['label' => 'Platform', 'key' => 'platform_name', 'transform' => fn($value, $model) => $model->platform?->name ?? '-'],
-                        ['label' => 'Campaign Type', 'key' => 'campaign_type'],
-                        ['label' => 'Status', 'key' => 'status'],
-                        ['label' => 'Start Date', 'key' => 'start_date'],
-                        ['label' => 'End Date', 'key' => 'end_date'],
-                        ['label' => 'Budget Allocated', 'key' => 'budget_allocated', 'transform' => fn($value) => number_format($value ?? 0, 2)],
-                        ['label' => 'Budget Spent', 'key' => 'budget_spent', 'transform' => fn($value) => number_format($value ?? 0, 2)],
-                        ['label' => 'Assigned Staff', 'key' => 'assigned_staff_name', 'transform' => fn($value, $model) => $model->assignedStaff?->full_name ?? '-'],
-                        ['label' => 'Created By', 'key' => 'created_by_name', 'transform' => fn($value, $model) => $model->createdByStaff?->full_name ?? '-'],
-                        ['label' => 'Description', 'key' => 'description'],
-                        ['label' => 'UTM Campaign', 'key' => 'utm_campaign'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
-                    ],
-                ],
-                'relationships' => ['platform', 'assignedStaff', 'createdByStaff'],
-                'default_sort' => ['created_at', 'desc'],
-                'per_page' => 5,
-                'additional_filters' => [
-                    'platform_id' => fn($query, $value) => $query->where('platform_id', $value),
-                    'status' => fn($query, $value) => $query->where('status', $value),
-                    'campaign_type' => fn($query, $value) => $query->where('campaign_type', $value),
-                    'start_date' => fn($query, $value) => $query->where('start_date', '>=', $value),
-                    'end_date' => fn($query, $value) => $query->where('end_date', '<=', $value),
-                ],
-            ];
-        }
 
-        return self::$marketingCampaignConfig;
-    }
 
     private static $eligibilityCriteriaConfig = null;
 
@@ -2224,6 +1853,119 @@ class AdditionalExportConfigs
         }
 
         return self::$eventBroadcastConfig;
+    }
+
+    /**
+     * Get export configuration for VisitService model
+     */
+    public static function getVisitServiceConfig(): array
+    {
+        return [
+            'searchable_fields' => ['patient.full_name', 'staff.first_name', 'staff.last_name', 'status', 'visit_notes'],
+            'sortable_fields' => ['scheduled_at', 'status', 'cost', 'created_at'],
+            'default_sort' => 'scheduled_at',
+            'with_relations' => ['patient', 'staff', 'assignment'],
+            
+            'csv' => [
+                'headers' => ['Patient', 'Staff', 'Scheduled', 'Status', 'Cost', 'Notes', 'Service Description'],
+                'fields' => [
+                    ['field' => 'patient_name', 'default' => 'N/A'],
+                    ['field' => 'staff_name', 'default' => 'N/A'],
+                    ['field' => 'scheduled_at_formatted', 'default' => 'N/A'],
+                    'status',
+                    ['field' => 'cost_formatted', 'default' => '$0.00'],
+                    ['field' => 'visit_notes', 'default' => 'N/A'],
+                    ['field' => 'service_description', 'default' => 'N/A'],
+                ]
+            ],
+            
+            'pdf' => [
+                'title' => 'Visit Services Report',
+                'document_title' => 'Visit Services Report',
+                'filename_prefix' => 'visit_services',
+                'orientation' => 'landscape',
+                'view' => 'pdf-layout',
+                'with_relations' => ['patient', 'staff', 'assignment'],
+                'columns' => [
+                    ['key' => 'id', 'label' => '#', 'printWidth' => '5%'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient', 'printWidth' => '20%'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff', 'printWidth' => '15%'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled', 'printWidth' => '15%'],
+                    ['key' => 'status', 'label' => 'Status', 'printWidth' => '10%'],
+                    ['key' => 'cost_formatted', 'label' => 'Cost', 'printWidth' => '10%'],
+                    ['key' => 'visit_notes', 'label' => 'Notes', 'printWidth' => '25%'],
+                ]
+            ],
+            
+            'current_page' => [
+                'title' => 'Visit Services - Current Page',
+                'document_title' => 'Visit Services - Current Page',
+                'filename_prefix' => 'visit_services_current',
+                'orientation' => 'portrait',
+                'view' => 'pdf-layout',
+                'with_relations' => ['patient', 'staff', 'assignment'],
+                'columns' => [
+                    ['key' => 'id', 'label' => '#', 'printWidth' => '5%'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient', 'printWidth' => '20%'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff', 'printWidth' => '15%'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled', 'printWidth' => '15%'],
+                    ['key' => 'status', 'label' => 'Status', 'printWidth' => '10%'],
+                    ['key' => 'cost_formatted', 'label' => 'Cost', 'printWidth' => '10%'],
+                    ['key' => 'visit_notes', 'label' => 'Notes', 'printWidth' => '25%'],
+                ]
+            ],
+            
+            'all_records' => [
+                'title' => 'All Visit Services',
+                'document_title' => 'All Visit Services',
+                'filename_prefix' => 'visit_services_all',
+                'orientation' => 'landscape',
+                'view' => 'pdf-layout',
+                'with_relations' => ['patient', 'staff', 'assignment'],
+                'columns' => [
+                    ['key' => 'id', 'label' => '#', 'printWidth' => '5%'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient', 'printWidth' => '20%'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff', 'printWidth' => '15%'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled', 'printWidth' => '15%'],
+                    ['key' => 'status', 'label' => 'Status', 'printWidth' => '10%'],
+                    ['key' => 'cost_formatted', 'label' => 'Cost', 'printWidth' => '10%'],
+                    ['key' => 'visit_notes', 'label' => 'Notes', 'printWidth' => '25%'],
+                ]
+            ],
+            
+            'single_record' => [
+                'title' => 'Visit Service Details',
+                'document_title' => 'Visit Service Details',
+                'filename_prefix' => 'visit_service',
+                'view' => 'pdf-layout',
+                'with_relations' => ['patient', 'staff', 'assignment'],
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient Name'],
+                    ['key' => 'staff_full_name', 'label' => 'Assigned Staff'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled Time'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'cost_formatted', 'label' => 'Cost'],
+                    ['key' => 'visit_notes', 'label' => 'Visit Notes'],
+                    ['key' => 'service_description', 'label' => 'Service Description'],
+                    ['key' => 'check_in_time', 'label' => 'Check In Time'],
+                    ['key' => 'check_out_time', 'label' => 'Check Out Time'],
+                    ['key' => 'created_at', 'label' => 'Created'],
+                ]
+            ],
+            
+            'field_transformations' => [
+                'patient_name' => fn($value, $model) => $model->patient?->full_name ?? 'N/A',
+                'staff_name' => fn($value, $model) => $model->staff ? $model->staff->first_name . ' ' . $model->staff->last_name : 'N/A',
+                'scheduled_at_formatted' => fn($value, $model) => $model->scheduled_at ? $model->scheduled_at->format('Y-m-d H:i') : 'N/A',
+                'cost_formatted' => fn($value, $model) => '$' . number_format($model->cost ?? 0, 2),
+                'visit_notes' => fn($value) => $value ?: 'N/A',
+                'service_description' => fn($value) => $value ?: 'N/A',
+                'check_in_time' => fn($value, $model) => $model->check_in_time ? $model->check_in_time->format('Y-m-d H:i') : 'N/A',
+                'check_out_time' => fn($value, $model) => $model->check_out_time ? $model->check_out_time->format('Y-m-d H:i') : 'N/A',
+                'created_at' => fn($value, $model) => $model->created_at ? $model->created_at->format('Y-m-d H:i') : 'N/A',
+                'scheduled_at' => fn($value, $model) => $model->scheduled_at ? $model->scheduled_at->format('Y-m-d H:i') : 'N/A',
+            ]
+        ];
     }
 
     private static $eventRecommendationConfig = null;

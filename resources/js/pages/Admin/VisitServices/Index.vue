@@ -75,21 +75,13 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv', preview: boolean = false) {
-  const params: Record<string, string | boolean> = { type };
-  if (preview) {
-    params.preview = true;
-  }
-  window.open(route('admin.visit-services.export', params), '_blank');
-}
-
 function printCurrentView() {
   // Trigger browser print of the current index view
   setTimeout(() => window.print(), 50);
 }
 
-const printAllVisits = () => {
-    window.open(route('admin.visit-services.printAll', { preview: true }), '_blank');
+const printAllVisitServices = () => {
+  window.open(route('admin.visit-services.printAll', { preview: true }), '_blank');
 };
 
 function toggleSort(field: string) {
@@ -111,8 +103,16 @@ const formatDate = (dateString: string | null) => {
   <Head title="Visit Services" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
+      <!-- Print Header (Hidden by default, shown only when printing) -->
+      <div class="hidden print:block text-center mb-8">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="mx-auto mb-4 max-w-24">
+        <h1 class="text-2xl font-bold">Geraye Home Care Services</h1>
+        <h2 class="text-lg mt-2">Visit Services List</h2>
+        <p class="text-sm text-gray-600 mt-2">Generated on {{ formattedGeneratedDate }}</p>
+        <hr class="my-4 border-gray-400">
+      </div>
       <!-- Header -->
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Visit Services</h1>
           <p class="text-sm text-muted-foreground">Manage all scheduled patient visits.</p>
@@ -121,27 +121,24 @@ const formatDate = (dateString: string | null) => {
           <Link :href="route('admin.visit-services.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Plus class="h-4 w-4" /> Schedule Visit
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md transition">
-            <Download class="h-4 w-4" /> Export CSV
+          <button @click="printAllVisitServices" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-md transition dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+            <Printer class="h-4 w-4" /> Print All
           </button>
           <button @click="printCurrentView" class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Printer class="h-4 w-4" /> Print Current
-          </button>
-          <button @click="printAllVisits" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
-            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
           <div class="relative w-full md:w-1/3">
               <input type="text" v-model="search" placeholder="Search by Patient or Staff..." class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
           </div>
           <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white"><option value="5">5</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white"><option :value="5">5</option><option :value="10">10</option><option :value="25">25</option><option :value="50">50</option><option :value="100">100</option></select>
           </div>
       </div>
 
@@ -198,46 +195,41 @@ const formatDate = (dateString: string | null) => {
         <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" />
       </div>
 
-      <!-- Print Header (Hidden by default, shown only when printing) -->
-      <div class="hidden print:block text-center mb-8">
-        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="mx-auto mb-4 max-w-24">
-        <h1 class="text-2xl font-bold">Geraye Home Care Services</h1>
-        <h2 class="text-lg mt-2">Visit Services List</h2>
-        <p class="text-sm text-gray-600 mt-2">Generated on {{ formattedGeneratedDate }}</p>
-        <hr class="my-4 border-gray-400">
-      </div>
       
+      
+      <!-- Print-only footer with generated date -->
+      <div class="hidden print:block vs-print-footer">
+        <div class="vs-print-footer-inner">
+          <div>Generated on: {{ formattedGeneratedDate }}</div>
+          <div class="vs-print-footer-note">Geraye Home Care Services - Confidential Document</div>
+        </div>
+      </div>
     </div>
   </AppLayout>
 </template>
 
 <style>
 @media print {
-  @page {
-    size: A4 landscape;
-    margin: 0.5in;
-  }
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .print\:hidden {
-    display: none !important;
-  }
-  .print\:block {
-    display: block !important;
-  }
-  table {
+  .vs-print-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     width: 100% !important;
-    font-size: 12px !important;
+    z-index: 1000 !important;
   }
-  th, td {
-    padding: 8px 4px !important;
-    border: 1px solid #ddd !important;
+  .vs-print-footer-inner {
+    text-align: center !important;
+    font-size: 0.8rem !important;
+    color: #444 !important;
+    border-top: 1px solid #ccc !important;
+    padding: 8px 0 !important;
+    background: #fff !important;
   }
-  .bg-yellow-100 { background-color: #fef3c7 !important; color: #92400e !important; }
-  .bg-green-100 { background-color: #dcfce7 !important; color: #166534 !important; }
-  .bg-red-100 { background-color: #fecaca !important; color: #991b1b !important; }
-  .bg-blue-100 { background-color: #dbeafe !important; color: #1e40af !important; }
+  .vs-print-footer-note {
+    font-size: 0.7rem !important;
+    color: #777 !important;
+    margin-top: 2px !important;
+  }
 }
 </style>

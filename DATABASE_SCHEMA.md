@@ -4,6 +4,125 @@ This document defines the official database schema for the Home-to-Home Care Aut
 
 ---
 
+## Conventions, Constraints, and Indexes (Apply Across Modules)
+
+- **Table/Column naming:** snake_case; singular table names for core domain (e.g., `patient`, `staff`) are acceptable but we use plural consistently here. Primary key `id`.
+- **Timestamps:** `created_at`, `updated_at` (TIMESTAMP with timezone recommended in production).
+- **Foreign keys:** Always declare FKs with explicit ON DELETE behavior:
+  - `ON DELETE CASCADE` for dependent/join rows (assignments, availability, transactions)
+  - `ON DELETE SET NULL` for optional relationships (e.g., `approved_by`, `performed_by` when history must remain)
+- **Indexes:**
+  - btree on frequent lookups and FK columns: e.g., `(patient_id)`, `(staff_id)`, `(item_id)`
+  - compound indexes for common filters: e.g., `(status, created_at DESC)`
+  - text search: use `GIN (to_tsvector('simple', column))` for free-text; or `ILIKE` with indexes via `citext`/trigrams if needed
+- **Search fields:** prefer `citext` for case-insensitive email/phone/name; otherwise normalize and index
+- **Uniqueness:** explicit `UNIQUE` where business-unique (e.g., `invoice_number`, `serial_number`, `lead_code`)
+- **Soft deletes:** add `deleted_at TIMESTAMP NULL` if you need recovery; pair with partial unique indexes to ignore soft-deleted rows
+
+Below are suggested migration-style ALTERs to add FKs and helpful indexes to the existing DDL blocks. Apply per your ORM migrations.
+
+```sql
+-- Foreign keys and indexes (samples)
+
+-- caregiver_assignments
+ALTER TABLE caregiver_assignments
+  ADD CONSTRAINT fk_caregiver_assignments_staff
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_caregiver_assignments_patient
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE;
+CREATE INDEX idx_caregiver_assignments_staff ON caregiver_assignments(staff_id);
+CREATE INDEX idx_caregiver_assignments_patient ON caregiver_assignments(patient_id);
+CREATE INDEX idx_caregiver_assignments_status ON caregiver_assignments(status);
+
+-- staff_availabilities
+ALTER TABLE staff_availabilities
+  ADD CONSTRAINT fk_staff_availabilities_staff
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE;
+CREATE INDEX idx_staff_availabilities_staff ON staff_availabilities(staff_id);
+CREATE INDEX idx_staff_availabilities_range ON staff_availabilities(start_time, end_time);
+
+-- leave_requests
+ALTER TABLE leave_requests
+  ADD CONSTRAINT fk_leave_requests_staff
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE;
+CREATE INDEX idx_leave_requests_staff ON leave_requests(staff_id);
+CREATE INDEX idx_leave_requests_status ON leave_requests(status);
+
+-- task_delegations.assigned_to -> staff
+ALTER TABLE task_delegations
+  ADD CONSTRAINT fk_task_delegations_assigned_to
+    FOREIGN KEY (assigned_to) REFERENCES staff(id) ON DELETE SET NULL;
+CREATE INDEX idx_task_delegations_assigned_to ON task_delegations(assigned_to);
+CREATE INDEX idx_task_delegations_status ON task_delegations(status);
+
+-- inventory tables
+ALTER TABLE inventory_items
+  ADD CONSTRAINT fk_inventory_items_supplier
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL;
+CREATE INDEX idx_inventory_items_category ON inventory_items(item_category);
+CREATE INDEX idx_inventory_items_status ON inventory_items(status);
+
+ALTER TABLE inventory_requests
+  ADD CONSTRAINT fk_inventory_requests_requester
+    FOREIGN KEY (requester_id) REFERENCES staff(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_inventory_requests_approver
+    FOREIGN KEY (approver_id) REFERENCES staff(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_inventory_requests_item
+    FOREIGN KEY (item_id) REFERENCES inventory_items(id) ON DELETE RESTRICT;
+CREATE INDEX idx_inventory_requests_status ON inventory_requests(status);
+
+ALTER TABLE inventory_transactions
+  ADD CONSTRAINT fk_inventory_transactions_item
+    FOREIGN KEY (item_id) REFERENCES inventory_items(id) ON DELETE RESTRICT,
+  ADD CONSTRAINT fk_inventory_transactions_request
+    FOREIGN KEY (request_id) REFERENCES inventory_requests(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_inventory_transactions_performed_by
+    FOREIGN KEY (performed_by_id) REFERENCES staff(id) ON DELETE SET NULL;
+CREATE INDEX idx_inventory_transactions_item ON inventory_transactions(item_id);
+CREATE INDEX idx_inventory_transactions_type ON inventory_transactions(transaction_type);
+
+ALTER TABLE inventory_maintenance_records
+  ADD CONSTRAINT fk_inventory_maintenance_item
+    FOREIGN KEY (item_id) REFERENCES inventory_items(id) ON DELETE CASCADE;
+CREATE INDEX idx_inventory_maintenance_item ON inventory_maintenance_records(item_id);
+CREATE INDEX idx_inventory_maintenance_status ON inventory_maintenance_records(status);
+
+ALTER TABLE inventory_alerts
+  ADD CONSTRAINT fk_inventory_alerts_item
+    FOREIGN KEY (item_id) REFERENCES inventory_items(id) ON DELETE SET NULL;
+CREATE INDEX idx_inventory_alerts_active ON inventory_alerts(is_active);
+
+-- marketing
+ALTER TABLE marketing_leads
+  ADD CONSTRAINT fk_marketing_leads_campaign
+    FOREIGN KEY (source_campaign_id) REFERENCES marketing_campaigns(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_marketing_leads_landing_page
+    FOREIGN KEY (landing_page_id) REFERENCES landing_pages(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_marketing_leads_assigned_staff
+    FOREIGN KEY (assigned_staff_id) REFERENCES staff(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_marketing_leads_converted_patient
+    FOREIGN KEY (converted_patient_id) REFERENCES patients(id) ON DELETE SET NULL;
+CREATE INDEX idx_marketing_leads_status ON marketing_leads(status);
+CREATE INDEX idx_marketing_leads_score ON marketing_leads(lead_score);
+
+-- events
+ALTER TABLE events
+  ADD CONSTRAINT fk_events_created_by_staff
+    FOREIGN KEY (created_by_staff_id) REFERENCES staff(id) ON DELETE SET NULL;
+CREATE INDEX idx_events_date ON events(event_date);
+CREATE INDEX idx_events_region_woreda ON events(region, woreda);
+
+-- visit_services
+ALTER TABLE visit_services
+  ADD CONSTRAINT fk_visit_services_patient
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_visit_services_staff
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE SET NULL;
+CREATE INDEX idx_visit_services_patient ON visit_services(patient_id);
+CREATE INDEX idx_visit_services_staff ON visit_services(staff_id);
+CREATE INDEX idx_visit_services_status ON visit_services(status);
+```
+
 ## 1. Implemented Modules
 
 ### Core & Patient Management

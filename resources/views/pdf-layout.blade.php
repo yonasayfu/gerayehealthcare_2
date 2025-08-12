@@ -89,9 +89,11 @@
         @endif
     @endif
 
+    @unless(!empty($hide_footer))
     <div class="footer">
         <div>Generated on: {{ $footerInfo['generated_date'] ?? now()->format('F j, Y, g:i a') }}</div>
         <div style="font-size: 10px; color: #888; margin-top: 2px;">Geraye Home Care Services - Confidential Document</div>
     </div>
+    @endunless
 </body>
 </html>

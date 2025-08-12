@@ -10,11 +10,11 @@ use App\Models\EventStaffAssignment;
 use App\Events\StaffAssignedToEvent;
 use App\Services\InvoiceService;
 use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use App\Http\Config\AdditionalExportConfigs;
 
 class VisitServiceService extends BaseService
 {
@@ -85,11 +85,16 @@ class VisitServiceService extends BaseService
         $staff = Staff::find($data['staff_id']);
         $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
 
-        if (isset($data['prescription_file'])) {
+        if (isset($data['prescription_file']) && $data['prescription_file'] && is_object($data['prescription_file']) && method_exists($data['prescription_file'], 'store')) {
             $data['prescription_file'] = $data['prescription_file']->store('visits/prescriptions', 'public');
+        } else {
+            unset($data['prescription_file']);
         }
-        if (isset($data['vitals_file'])) {
+        
+        if (isset($data['vitals_file']) && $data['vitals_file'] && is_object($data['vitals_file']) && method_exists($data['vitals_file'], 'store')) {
             $data['vitals_file'] = $data['vitals_file']->store('visits/vitals', 'public');
+        } else {
+            unset($data['vitals_file']);
         }
 
         $visitService = parent::create($data);
@@ -135,7 +140,7 @@ class VisitServiceService extends BaseService
             $data['cost'] = ($staff->hourly_rate ?? 0) * 1;
         }
 
-        if (isset($data['prescription_file'])) {
+        if (isset($data['prescription_file']) && $data['prescription_file'] && is_object($data['prescription_file']) && method_exists($data['prescription_file'], 'store')) {
             if ($visitService->prescription_file) {
                 Storage::disk('public')->delete($visitService->prescription_file);
             }
@@ -144,7 +149,7 @@ class VisitServiceService extends BaseService
             unset($data['prescription_file']);
         }
 
-        if (isset($data['vitals_file'])) {
+        if (isset($data['vitals_file']) && $data['vitals_file'] && is_object($data['vitals_file']) && method_exists($data['vitals_file'], 'store')) {
             if ($visitService->vitals_file) {
                 Storage::disk('public')->delete($visitService->vitals_file);
             }
@@ -191,6 +196,27 @@ class VisitServiceService extends BaseService
             Storage::disk('public')->delete($visitService->vitals_file);
         }
         parent::delete($id);
+    }
+
+    /**
+     * Printing/Exporting using centralized pipeline
+     */
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
+    }
+
+    public function printSingle($id, Request $request)
+    {
+        $visit = $this->getById($id);
+        $visit->load(['patient', 'staff', 'assignment']);
+        $config = AdditionalExportConfigs::getVisitServiceConfig();
+        return $this->handlePrintSingle($request, $visit, $config);
     }
 
     /**
@@ -258,42 +284,7 @@ class VisitServiceService extends BaseService
         ])->findOrFail($id);
     }
 
-    public function export(Request $request)
-    {
-        // Add debug logging
-        \Log::info('VisitServiceService export called', [
-            'request_type' => $request->input('type'),
-            'request_params' => $request->all()
-        ]);
-        
-        $result = $this->handleExport($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-        
-        // Add debug logging for result
-        \Log::info('VisitServiceService export result', [
-            'result_type' => gettype($result),
-            'result_class' => get_class($result)
-        ]);
-        
-        return $result;
-    }
+    
 
-    public function printSingle($id, Request $request)
-    {
-        $visitService = $this->getById($id);
-        $visitService->load(['patient', 'staff']);
 
-        $config = AdditionalExportConfigs::getVisitServiceConfig();
-        
-        return $this->handlePrintSingle($request, $visitService, $config);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
 }

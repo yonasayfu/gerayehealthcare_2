@@ -102,25 +102,7 @@ class BaseController extends Controller
         return back()->with('success', ucfirst($this->dataVariableName) . ' deleted successfully.');
     }
 
-    public function export(Request $request)
-    {
-        return $this->service->export($request);
-    }
-
-    public function printSingle($id)
-    {
-        return $this->service->printSingle($id);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->service->printCurrent($request);
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->service->printAll($request);
-    }
+    
 
     private function getRouteName()
     {
@@ -155,6 +137,10 @@ class BaseController extends Controller
 
         $parameters = $constructor->getParameters();
         $dtoData = [];
+
+        if (!is_array($parameters) && !($parameters instanceof \Traversable)) {
+            return $validatedData;
+        }
 
         foreach ($parameters as $parameter) {
             $name = $parameter->getName();

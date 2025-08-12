@@ -9,6 +9,9 @@ const props = defineProps<{
   visitService: any;
 }>()
 
+// Printed date to show in browser print footer
+const generatedAt: string = format(new Date(), 'PPP p')
+
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Visit Services', href: route('admin.visit-services.index') },
@@ -35,7 +38,7 @@ function destroy(id: number) {
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Visit Details: {{ visitService.id }}'''
+                Visit Details: {{ visitService.id }}
             </h3>
             <Link :href="route('admin.visit-services.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -114,22 +117,16 @@ function destroy(id: number) {
                   </div>
                 </div>
 
-                <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
-                    <hr class="my-2 border-gray-300">
-                    <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
-                    </div>
+                
 
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2 print:hidden">
               <button @click="printSingleVisit" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
-              <a :href="route('admin.visit-services.print', visitService.id)" target="_blank" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:ring-4 focus:ring-blue-300">
-                <Printer class="h-4 w-4" /> Print PDF
-              </a>
               <Link
                 :href="route('admin.visit-services.edit', visitService.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
@@ -140,6 +137,14 @@ function destroy(id: number) {
                 <Trash2 class="w-4 h-4" /> Delete Visit
               </button>
             </div>
+        </div>
+
+        <!-- Print-only footer with generated date -->
+        <div class="hidden print:block print-footer">
+          <div class="print-footer-inner">
+            <div>Generated on: {{ generatedAt }}</div>
+            <div class="print-footer-note">Geraye Home Care Services - Confidential Document</div>
+          </div>
         </div>
 
     </div>
@@ -212,6 +217,29 @@ function destroy(id: number) {
   .print-document-title {
       font-size: 0.9rem !important;
       color: #555 !important;
+  }
+
+  /* Print footer */
+  .print-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    z-index: 1000 !important;
+  }
+  .print-footer-inner {
+    text-align: center !important;
+    font-size: 0.8rem !important;
+    color: #444 !important;
+    border-top: 1px solid #ccc !important;
+    padding: 8px 0 !important;
+    background: #fff !important;
+  }
+  .print-footer-note {
+    font-size: 0.7rem !important;
+    color: #777 !important;
+    margin-top: 2px !important;
   }
 
   /* Target the main patient document container for scaling and layout */

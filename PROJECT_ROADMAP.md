@@ -2,6 +2,51 @@
 
 This document outlines the vision, architecture, features, and technology stack for the Home-to-Home Care Platform.
 
+## 0. Execution Plan with Web-Chat AI Agents
+
+To execute issues via browser-based AI agents with limited project access, use a consistent “context pack” for every task:
+
+- **Context Pack (always share):**
+  - PROJECT_ROADMAP.md (this file)
+  - DATABASE_SCHEMA.md
+  - ISSUE_TRACKER.md (filtered to the target issue)
+  - Only the directly related code for the issue: controller(s), model(s), service(s), Vue pages/components, routes, and any config used
+
+- **Issue Brief Template (paste into chat):**
+  - Title: <clear, single-scope change>
+  - Module: <Patients | Staff | Inventory | ...>
+  - Current behavior: <what happens now>
+  - Expected behavior: <what you want>
+  - Files provided: <list>
+  - Routes/UI entry points: <route names + Vue paths>
+  - Constraints: <tech constraints, coding standards>
+  - Done criteria: <acceptance checks>
+
+- **Sharing strategy:**
+  - Start with the 3 docs + the minimal set of files needed.
+  - If the agent asks for more, share only the requested file(s).
+  - Keep issues small; avoid multi-module changes in a single chat.
+
+## Sprint Plan (90-day outline)
+
+- **Sprint 1 (Weeks 1–3): Phase 1, Modules 1–4**
+  - Stabilize Staff, Patients, Caregiver Assignments, Visit Services.
+  - Target: close all “blocking” and “data integrity” issues first.
+
+- **Sprint 2 (Weeks 4–6): Phase 2, Modules 5–12**
+  - Admin & Inventory reliability. Seeders for reproducible testing.
+
+- **Sprint 3 (Weeks 7–9): Phase 2 cont. + Phase 3 (start)**
+  - Transactions/Alerts polish; begin Marketing Campaigns/Leads.
+
+- **Sprint 4 (Weeks 10–12): Phase 3 wrap-up**
+  - Complete Marketing modules and Events.
+
+- **Sprint 5 (Weeks 13–15): Phase 4**
+  - Insurance + User/Role management, UX consistency pass.
+
+Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
+
 ## 1. System Architecture (High-Level)
 
 - **🗂️ Backend: Laravel 12 (RESTful API + Background Jobs)**
