@@ -159,6 +159,8 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Staff Availabilities
         Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])
             ->name('staff-availabilities.events');
+        Route::get('staff-availabilities/available-staff', [StaffAvailabilityController::class, 'availableStaff'])
+            ->name('staff-availabilities.availableStaff');
         Route::resource('staff-availabilities', StaffAvailabilityController::class)
             ->only(['index', 'store', 'update', 'destroy']);
 

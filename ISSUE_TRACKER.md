@@ -71,8 +71,8 @@ Use this section when working with browser-based AI agents that lack full repo a
 ## Phase 2: Administrative and Inventory Modules
 
 ### Module 5: Staff Availabilities
-- [ ] Fix the staff member dropdown to show available staff so that new availability slots can be created.
-- [ ] Create a special seeder to test this module.
+- [x] Fix the staff member dropdown to show available staff so that new availability slots can be created.
+- [x] Create a special seeder to test this module.
 - [ ] Review the relationships with other modules to ensure data integrity.
 
 ### Module 6: Staff Payouts & Performance

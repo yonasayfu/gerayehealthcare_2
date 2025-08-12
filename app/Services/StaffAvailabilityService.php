@@ -70,6 +70,8 @@ class StaffAvailabilityService extends BaseService
     public function create(array|object $data): StaffAvailability
     {
         $data = is_object($data) ? (array) $data : $data;
+        // Prevent overlapping slot on create as well
+        $this->checkOverlap($data, null);
         return parent::create($data);
     }
 
@@ -92,5 +94,25 @@ class StaffAvailabilityService extends BaseService
         if ($overlap->exists()) {
             throw new \Exception('Conflict: Overlapping availability slot exists.');
         }
+    }
+
+    /**
+     * Return staff records that do NOT have any availability overlapping the given range.
+     */
+    public function getAvailableStaff(string $start, string $end)
+    {
+        // Staff who do not have any availability overlapping [start, end)
+        $conflictingStaffIds = StaffAvailability::where('end_time', '>', $start)
+            ->where('start_time', '<', $end)
+            ->pluck('staff_id')
+            ->unique()
+            ->all();
+
+        return Staff::select('id', 'first_name', 'last_name')
+            ->when(!empty($conflictingStaffIds), function ($q) use ($conflictingStaffIds) {
+                $q->whereNotIn('id', $conflictingStaffIds);
+            })
+            ->orderBy('first_name')
+            ->get();
     }
 }

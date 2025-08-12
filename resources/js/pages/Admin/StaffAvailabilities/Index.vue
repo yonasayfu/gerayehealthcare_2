@@ -48,6 +48,8 @@ watch(filters, debounce(() => {
 
 const showModal = ref(false);
 const isEditMode = ref(false);
+const availableStaff = ref<Array<{ id: number; first_name: string; last_name: string }>>(props.staffList || []);
+const loadingStaff = ref(false);
 
 const form = useForm({
     id: null,
@@ -60,6 +62,7 @@ const form = useForm({
 const openCreateModal = () => {
     isEditMode.value = false;
     form.reset();
+    availableStaff.value = props.staffList || [];
     showModal.value = true;
 };
 
@@ -70,8 +73,38 @@ const openEditModal = (availability) => {
     form.status = availability.status;
     form.start_time = availability.start_time.slice(0, 16);
     form.end_time = availability.end_time.slice(0, 16);
+    availableStaff.value = props.staffList || [];
     showModal.value = true;
 };
+
+async function loadAvailableStaff() {
+    const start = form.start_time;
+    const end = form.end_time;
+    if (!start || !end) {
+        availableStaff.value = props.staffList || [];
+        return;
+    }
+    loadingStaff.value = true;
+    try {
+        const params = new URLSearchParams({ start_time: start, end_time: end });
+        const url = route('admin.staff-availabilities.availableStaff') + `?${params.toString()}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('Failed to load available staff');
+        const data = await res.json();
+        availableStaff.value = Array.isArray(data) ? data : [];
+        // Keep selected staff if still available; otherwise clear
+        if (form.staff_id && !availableStaff.value.find(s => String(s.id) === String(form.staff_id))) {
+            form.staff_id = '';
+        }
+    } catch (e) {
+        availableStaff.value = props.staffList || [];
+    } finally {
+        loadingStaff.value = false;
+    }
+}
+
+watch(() => form.start_time, () => { loadAvailableStaff(); });
+watch(() => form.end_time, () => { loadAvailableStaff(); });
 
 const submit = () => {
     const onSuccess = () => {
@@ -221,8 +254,9 @@ const formatDate = (dateString) => {
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staff Member</label>
                     <select v-model="form.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                         <option disabled value="">Please select a staff member</option>
-                        <option v-for="staff in staffList" :key="staff.id" :value="staff.id">{{ getStaffFullName(staff) }}</option>
+                        <option v-for="staff in availableStaff" :key="staff.id" :value="staff.id">{{ getStaffFullName(staff) }}</option>
                     </select>
+                    <div v-if="loadingStaff" class="text-xs text-muted-foreground mt-1">Loading available staff…</div>
                     <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">{{ form.errors.staff_id }}</div>
                 </div>
                  <div>
