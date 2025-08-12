@@ -28,9 +28,14 @@ class StaffService extends BaseService
     {
         $data = is_object($data) ? (array) $data : $data;
 
-        if (isset($data['photo'])) {
+        if (isset($data['photo']) && $data['photo']) {
             $data['photo'] = $data['photo']->store('images/staff', 'public');
+        } else {
+            unset($data['photo']);
         }
+
+        // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
+        $data = array_filter($data, fn($v) => !is_null($v));
 
         return parent::create($data);
     }

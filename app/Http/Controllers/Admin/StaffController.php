@@ -7,7 +7,6 @@ use App\Services\StaffService;
 use App\Models\Staff;
 use App\Services\Validation\Rules\StaffRules;
 use App\DTOs\CreateStaffDTO;
-use App\DTOs\UpdateStaffDTO;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -21,8 +20,7 @@ class StaffController extends BaseController
             'Admin/Staff',
             'staff',
             Staff::class,
-            CreateStaffDTO::class,
-            UpdateStaffDTO::class
+            CreateStaffDTO::class
         );
     }
 

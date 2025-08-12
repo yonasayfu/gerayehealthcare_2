@@ -19,6 +19,23 @@ class ExportConfig
                 'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth',
             ],
 
+            // Explicit all records config for Print All
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'All Staff Records',
+                'filename_prefix' => 'staff',
+                'orientation' => 'landscape',
+                'columns' => [
+                    ['key' => 'full_name', 'label' => 'Full Name'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'position', 'label' => 'Position'],
+                    ['key' => 'department', 'label' => 'Department'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'hire_date', 'label' => 'Hire Date'],
+                ],
+            ],
+
             'csv' => [
                 'headers' => [
                     'Full Name', 'Patient Code', 'Fayda ID', 'Email', 'Source',
@@ -322,7 +339,7 @@ class ExportConfig
                     'full_name',
                     'email', 'phone', 'position', 'department', 'status', 'hire_date',
                 ],
-                'filename_prefix' => 'staff.csv',
+                'filename_prefix' => 'staff',
             ],
 
             'pdf' => [
@@ -398,7 +415,7 @@ class ExportConfig
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List - Geraye Home Care Services',
                 'document_title' => 'All Staff Records',
-                'filename' => 'staff.pdf',
+                'filename_prefix' => 'staff',
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'default_sort' => 'first_name',

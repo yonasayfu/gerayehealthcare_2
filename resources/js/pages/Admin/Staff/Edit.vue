@@ -44,6 +44,8 @@ const form = useForm({
 function submit() {
   // Use form.post for multipart/form-data with method spoofing
   form.post(route('admin.staff.update', { staff: props.staff.id }), {
+    forceFormData: true,
+    preserveScroll: true,
     onSuccess: () => {
       form.reset('photo'); // Only reset the photo field on success
     },

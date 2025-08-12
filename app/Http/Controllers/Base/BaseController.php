@@ -46,9 +46,15 @@ class BaseController extends Controller
     {
         $validatedData = $this->validateRequest($request, 'store');
 
-        $data = $this->dtoClass ? new ($this->dtoClass)(...$this->prepareDataForDTO($validatedData)) : $validatedData;
+        if ($this->dtoClass) {
+            // Spatie DTOs accept an associative array in the constructor
+            $dto = new ($this->dtoClass)($validatedData);
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $validatedData;
+        } else {
+            $payload = $validatedData;
+        }
 
-        $this->service->create($data);
+        $this->service->create($payload);
 
         return redirect()->route('admin.' . $this->getRouteName() . '.index')->with('success', ucfirst($this->dataVariableName) . ' created successfully.');
     }
@@ -89,9 +95,15 @@ class BaseController extends Controller
         $model = $this->service->getById($id);
         $validatedData = $this->validateRequest($request, 'update', $model);
 
-        $data = $this->dtoClass ? new ($this->dtoClass)(...$this->prepareDataForDTO($validatedData)) : $validatedData;
+        if ($this->dtoClass) {
+            $dtoData = $this->prepareDataForDTO($validatedData);
+            $dto = new ($this->dtoClass)($dtoData);
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $dtoData;
+        } else {
+            $payload = $validatedData;
+        }
 
-        $this->service->update($id, $data);
+        $this->service->update($id, $payload);
 
         return redirect()->route('admin.' . $this->getRouteName() . '.index')->with('success', ucfirst($this->dataVariableName) . ' updated successfully.');
     }
