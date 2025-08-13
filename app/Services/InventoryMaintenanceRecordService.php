@@ -42,24 +42,5 @@ class InventoryMaintenanceRecordService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, InventoryMaintenanceRecord::class, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $inventoryMaintenanceRecord = $this->getById($id);
-        return $this->handlePrintSingle($inventoryMaintenanceRecord, AdditionalExportConfigs::getInventoryMaintenanceRecordConfig());
-    }
+    
 }

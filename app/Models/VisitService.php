@@ -68,6 +68,11 @@ class VisitService extends Model
         return $this->belongsTo(Staff::class, 'staff_id');
     }
 
+    public function staffPayouts(): BelongsToMany
+    {
+        return $this->belongsToMany(StaffPayout::class, 'payout_visit_service');
+    }
+
     /**
      * Get the URL for the prescription file.
      *

@@ -23,24 +23,5 @@ class EventBroadcastService extends BaseService
               ->orWhere('channel', 'ilike', "%{$search}%");
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, EventBroadcast::class, AdditionalExportConfigs::getEventBroadcastConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $eventBroadcast = $this->getById($id);
-        return $this->handlePrintSingle($eventBroadcast, AdditionalExportConfigs::getEventBroadcastConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, EventBroadcast::class, AdditionalExportConfigs::getEventBroadcastConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, EventBroadcast::class, AdditionalExportConfigs::getEventBroadcastConfig());
-    }
+    
 }

@@ -51,18 +51,5 @@ class MarketingPlatformService extends BaseService
         return $marketingPlatform;
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, MarketingPlatform::class, AdditionalExportConfigs::getMarketingPlatformConfig());
-    }
+    
 }

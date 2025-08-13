@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Services\EventBroadcastService;
-use App\Models\EventBroadcast;
+use App\Models\Event;
+use App\Models\Staff;
 use App\Services\Validation\Rules\EventBroadcastRules;
 use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class EventBroadcastController extends BaseController
 {
@@ -24,5 +24,27 @@ class EventBroadcastController extends BaseController
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
-   
+    public function create()
+    {
+        $events = Event::select('id', 'title')->orderBy('title')->get();
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render($this->viewName . '/Create', [
+            'events' => $events,
+            'staff' => $staff,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $eventBroadcast = $this->service->getById($id);
+        $events = Event::select('id', 'title')->orderBy('title')->get();
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $eventBroadcast,
+            'events' => $events,
+            'staff' => $staff,
+        ]);
+    }
 }

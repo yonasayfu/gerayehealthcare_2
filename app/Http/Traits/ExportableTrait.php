@@ -136,6 +136,14 @@ return Response::stream($callback, 200, $headers);
             $data->load($allRecordsConfig['with_relations']);
         }
 
+        // Add index to data if include_index is true
+        if (($allRecordsConfig['include_index'] ?? false) === true) {
+            $data = $data->map(function ($item, $key) {
+                $item->index = $key + 1;
+                return $item;
+            });
+        }
+
         $pdf = Pdf::loadView($allRecordsConfig['view'], [
             'data' => $data,
             'title' => $allRecordsConfig['document_title'] ?? 'All Records',

@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Models\EmployeeInsuranceRecord;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Patient;
+use App\Models\InsurancePolicy;
+use App\Services\Validation\Rules\EmployeeInsuranceRecordRules;
+use App\DTOs\CreateEmployeeInsuranceRecordDTO;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
-use App\Http\Requests\StoreEmployeeInsuranceRecordRequest;
-use App\Http\Requests\UpdateEmployeeInsuranceRecordRequest;
-use App\Services\Insurance\EmployeeInsuranceRecordService;
 
 class EmployeeInsuranceRecordController extends BaseController
 {
@@ -27,4 +23,27 @@ class EmployeeInsuranceRecordController extends BaseController
         );
     }
 
+    public function create()
+    {
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+        $insurancePolicies = InsurancePolicy::select('id', 'service_type')->orderBy('service_type')->get();
+
+        return Inertia::render($this->viewName . '/Create', [
+            'patients' => $patients,
+            'insurancePolicies' => $insurancePolicies,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $employeeInsuranceRecord = $this->service->getById($id);
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+        $insurancePolicies = InsurancePolicy::select('id', 'service_type')->orderBy('service_type')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $employeeInsuranceRecord,
+            'patients' => $patients,
+            'insurancePolicies' => $insurancePolicies,
+        ]);
+    }
 }

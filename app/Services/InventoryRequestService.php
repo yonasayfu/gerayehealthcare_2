@@ -21,7 +21,8 @@ class InventoryRequestService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->whereHas('item', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%"));
+                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%"))
+                  ->orWhere('reason', 'like', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -70,24 +71,5 @@ class InventoryRequestService extends BaseService
 
     
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, InventoryRequest::class, AdditionalExportConfigs::getInventoryRequestConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $inventoryRequest = $this->getById($id);
-        return $this->handlePrintSingle($inventoryRequest, AdditionalExportConfigs::getInventoryRequestConfig());
-    }
+    
 }

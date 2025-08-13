@@ -4,7 +4,7 @@ namespace App\DTOs;
 
 use Spatie\LaravelData\Data;
 
-class CreateMarketingPlatformDTO extends Data
+class UpdateMarketingPlatformDTO extends Data
 {
     public function __construct(
         public string $name,

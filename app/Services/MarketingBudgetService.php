@@ -56,18 +56,5 @@ class MarketingBudgetService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, MarketingBudget::class, AdditionalExportConfigs::getMarketingBudgetConfig());
-    }
+    
 }

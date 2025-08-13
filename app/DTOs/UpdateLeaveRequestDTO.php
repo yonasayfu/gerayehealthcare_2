@@ -4,7 +4,7 @@ namespace App\DTOs;
 
 use Spatie\LaravelData\Data;
 
-class CreateLeaveRequestDTO extends Data
+class UpdateLeaveRequestDTO extends Data
 {
     public function __construct(
         public int $staff_id,

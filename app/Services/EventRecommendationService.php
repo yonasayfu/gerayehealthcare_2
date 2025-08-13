@@ -54,24 +54,5 @@ class EventRecommendationService extends BaseService
         return $eventRecommendation;
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, EventRecommendation::class, AdditionalExportConfigs::getEventRecommendationConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $eventRecommendation = $this->getById($id);
-        return $this->handlePrintSingle($eventRecommendation, AdditionalExportConfigs::getEventRecommendationConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, EventRecommendation::class, AdditionalExportConfigs::getEventRecommendationConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, EventRecommendation::class, AdditionalExportConfigs::getEventRecommendationConfig());
-    }
+    
 }

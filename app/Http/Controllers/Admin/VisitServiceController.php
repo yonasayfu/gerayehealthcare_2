@@ -40,20 +40,7 @@ class VisitServiceController extends BaseController
         ]);
     }
 
-    public function printAll(Request $request)
-    {
-        return $this->service->printAll($request);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->service->printCurrent($request);
-    }
-
-    public function printSingle($id, Request $request)
-    {
-        return $this->service->printSingle($id, $request);
-    }
+    
 
     public function edit($id)
     {

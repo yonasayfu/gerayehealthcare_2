@@ -83,45 +83,69 @@ Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
 ### ✅ Implemented
 
 1.  **Patient Management**
-    - Patient registration and medical profile
-    - Medical history tracking
-    - Appointment scheduling
+    - Patient registration and medical profile (CRUD, search, export, print)
+    - Medical history tracking (via visit services)
+    - Appointment scheduling (via visit services)
     - Emergency contact info
     - Geolocation/address tracking for home visits
+    - Patient code generation
+    - Fayda ID integration
+    - Marketing acquisition tracking (source, campaign, lead)
 
 2.  **Caregiver/Nurse Management**
-    - Register caregivers (nurses, physical therapists, etc.)
-    - Assign caregivers to patients
-    - Shift scheduling and availability
-    - Performance and feedback system
-    - Certification and training records
+    - Staff registration and management (CRUD, search, export, print)
+    - Role assignment (via Spatie permissions)
+    - Hourly rate tracking
+    - Caregiver assignments to patients (CRUD, search, export, print)
+    - Shift scheduling and availability (CRUD, search, calendar view)
+    - Leave requests (CRUD, search, export, print)
+    - Staff payouts (CRUD, search, export, print)
 
 3.  **Admin & HR Tools**
     - Dashboard for organization overview
-    - Staff management and leave requests
-    - Task delegation
+    - User management (CRUD, roles/permissions, search, export, print)
+    - Service management (CRUD, search, export, print)
+    - Task delegation (CRUD, search, export, print)
+    - Invoices (CRUD, search, export, print)
+    - Messages (CRUD)
+    - Notifications (CRUD)
 
 4.  **Digital Marketing Tracker**
-    - Campaign tracker (TikTok, Meta, etc.)
-    - Custom landing page generator
-    - Conversion tracking
-    - Monthly ROI report
+    - Lead sources (CRUD, search, export, print)
+    - Marketing platforms (CRUD, search, export, print)
+    - Marketing campaigns (CRUD, search, export, print, enhanced with budget, goals, UTMs)
+    - Campaign metrics (CRUD, search, export, print)
+    - Landing pages (CRUD, search, export, print)
+    - Marketing leads (CRUD, search, export, print, with conversion to patient)
+    - Campaign content (CRUD, search, export, print)
+    - Marketing budgets (CRUD, search, export, print)
+    - Marketing tasks (CRUD, search, export, print)
+    - Marketing analytics dashboard (data retrieval)
 
 5.  **Inventory Management**
-    - Track rented/loaned equipment
-    - Inventory status and location
-    - Alerts for expiry, maintenance, or recall
+    - Suppliers (CRUD, search, export, print)
+    - Inventory items (CRUD, search, export, print, with quantity, reorder level)
+    - Inventory requests (CRUD, search, export, print)
+    - Inventory transactions (CRUD, search, export, print)
+    - Inventory maintenance records (CRUD, search, export, print)
+    - Inventory alerts (CRUD, search, export, print)
 
 6.  **Events Management**
-    - Winter/monthly free service scheduler
-    - Broadcast to partners & public
-    - Volunteer doctor assignment
+    - Events (CRUD, search, export, print)
+    - Event recommendations (CRUD, search, export, print, with patient linking)
+    - Eligibility criteria (CRUD, search, export, print)
+    - Event staff assignments (CRUD, search, export, print)
+    - Event broadcasts (CRUD, search, export, print)
+    - Event participants (CRUD, search, export, print)
 
 7.  **Insurance Coordination**
-    - Check coverage on patient registration
-    - Sync claims for services
-    - Track shared payments
-    - Notifications for payment delays/denials
+    - Insurance companies (CRUD, search, export, print)
+    - Corporate clients (CRUD, search, export, print)
+    - Insurance policies (CRUD, search, export, print)
+    - Employee insurance records (CRUD, search, export, print)
+    - Insurance claims (CRUD, search, export, print, with email tracking)
+    - Exchange rates (CRUD, search, export, print)
+    - Ethiopian calendar days (CRUD, search, export, print)
 
 ### 🚧 In Progress
 
@@ -130,6 +154,7 @@ Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
     - Check-in/check-out via GPS (proof of visit)
     - Digital notes and reports from each visit
     - Upload prescriptions, vitals, and images
+    - Cost tracking, invoicing, service and assignment linking
 
 ### 📝 To Do
 
@@ -169,3 +194,38 @@ Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
     - Referral request system
     - Visa & travel documentation tracking
     - Cross-border commission reporting
+
+
+## 3. Technology Stack
+
+- **Backend**: Laravel (PHP)
+- **Frontend**: Vue.js (TypeScript) with Inertia.js
+- **Build Tool**: Vite
+- **Database**: PostgreSQL
+- **Testing Framework**: Pest (PHPUnit for Laravel)
+- **Deployment**: Docker, Render.com
+
+## 4. Development Progress Summary
+
+### Day 1-n Accomplishments:
+
+- Initial project setup with Laravel, Vue, Inertia, Vite.
+- Implemented core authentication and authorization (Spatie/Laravel-Permission).
+- Developed a DRY validation architecture.
+- Implemented comprehensive CRUD, search, export, and print functionalities for:
+    - Patient Management
+    - Staff & Administrative Tools (including Staff, Caregiver Assignments, Staff Availabilities, Leave Requests, Task Delegations, Staff Payouts, Messages, Notifications)
+    - Digital Marketing Tracker (including Lead Sources, Marketing Platforms, Marketing Campaigns, Campaign Metrics, Landing Pages, Marketing Leads, Campaign Content, Marketing Budgets, Marketing Tasks, Marketing Analytics Dashboard)
+    - Inventory Management (including Suppliers, Inventory Items, Inventory Requests, Inventory Transactions, Inventory Maintenance Records, Inventory Alerts)
+    - Events Management (including Events, Event Recommendations, Eligibility Criteria, Event Staff Assignments, Event Broadcasts, Event Participants)
+    - Insurance Coordination (including Insurance Companies, Corporate Clients, Insurance Policies, Employee Insurance Records, Insurance Claims, Exchange Rates, Ethiopian Calendar Days)
+    - Visit & Service Management (partially, with core CRUD, GPS check-in/out, cost, invoicing, service/assignment linking, Invoice Items, Invoices, Payout Visit Service)
+- Integrated dynamic sidebar navigation based on user roles.
+- Established a standard module implementation workflow.
+- Implemented backend export/print methods for many controllers.
+
+### Plan for Day n:
+
+- Complete the remaining functionalities for "Visit & Service Management" module, focusing on full integration and reporting.
+- Begin implementing "Communication" module (in-app chat, notifications).
+- Continue refining existing modules based on feedback and identified issues.

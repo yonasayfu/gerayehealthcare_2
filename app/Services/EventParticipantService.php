@@ -22,24 +22,5 @@ class EventParticipantService extends BaseService
         $query->where('status', 'ilike', "%{$search}%");
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $eventParticipant = $this->getById($id);
-        return $this->handlePrintSingle($eventParticipant, AdditionalExportConfigs::getEventParticipantConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, EventParticipant::class, AdditionalExportConfigs::getEventParticipantConfig());
-    }
+    
 }

@@ -2,10 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\DTOs\CreateCampaignContentDTO;
-use App\Http\Controllers\Base\BaseController;
-use App\Services\CampaignContentService;
-use App\Models\CampaignContent;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
 use App\Services\Validation\Rules\CampaignContentRules;
@@ -27,6 +23,30 @@ class CampaignContentController extends BaseController
             CampaignContent::class,
             CreateCampaignContentDTO::class
         );
+    }
+
+    public function create()
+    {
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+
+        return Inertia::render($this->viewName . '/Create', [
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $campaignContent = $this->service->getById($id);
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $campaignContent,
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+        ]);
     }
 
     public function index(Request $request)

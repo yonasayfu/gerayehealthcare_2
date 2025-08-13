@@ -28,10 +28,10 @@ class InventoryItemService extends BaseService
         return $this->handleExport($request, InventoryItem::class, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
-    public function printSingle($id)
+    public function printSingle($id, Request $request)
     {
         $inventoryItem = $this->getById($id);
-        return $this->generateSingleRecordPdf($inventoryItem, AdditionalExportConfigs::getInventoryItemConfig()['single_record']);
+        return $this->handlePrintSingle($request, $inventoryItem, AdditionalExportConfigs::getInventoryItemConfig());
     }
 
     public function printCurrent(Request $request)

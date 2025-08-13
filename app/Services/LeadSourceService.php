@@ -52,24 +52,5 @@ class LeadSourceService extends BaseService
         return $leadSource;
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $leadSource = $this->getById($id);
-        return $this->handlePrintSingle($leadSource, AdditionalExportConfigs::getLeadSourceConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, LeadSource::class, AdditionalExportConfigs::getLeadSourceConfig());
-    }
+    
 }

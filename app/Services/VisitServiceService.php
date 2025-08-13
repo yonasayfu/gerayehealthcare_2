@@ -198,26 +198,7 @@ class VisitServiceService extends BaseService
         parent::delete($id);
     }
 
-    /**
-     * Printing/Exporting using centralized pipeline
-     */
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, VisitService::class, AdditionalExportConfigs::getVisitServiceConfig());
-    }
-
-    public function printSingle($id, Request $request)
-    {
-        $visit = $this->getById($id);
-        $visit->load(['patient', 'staff', 'assignment']);
-        $config = AdditionalExportConfigs::getVisitServiceConfig();
-        return $this->handlePrintSingle($request, $visit, $config);
-    }
+    
 
     /**
      * Validate staff availability for the scheduled time

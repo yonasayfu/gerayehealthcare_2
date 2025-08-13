@@ -19,22 +19,7 @@ class ExportConfig
                 'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth',
             ],
 
-            // Explicit all records config for Print All
-            'all_records' => [
-                'view' => 'pdf-layout',
-                'document_title' => 'All Staff Records',
-                'filename_prefix' => 'staff',
-                'orientation' => 'landscape',
-                'columns' => [
-                    ['key' => 'full_name', 'label' => 'Full Name'],
-                    ['key' => 'email', 'label' => 'Email'],
-                    ['key' => 'phone', 'label' => 'Phone'],
-                    ['key' => 'position', 'label' => 'Position'],
-                    ['key' => 'department', 'label' => 'Department'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'hire_date', 'label' => 'Hire Date'],
-                ],
-            ],
+            
 
             'csv' => [
                 'headers' => [
@@ -336,7 +321,12 @@ class ExportConfig
                     'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date',
                 ],
                 'fields' => [
-                    'full_name',
+                    'full_name' => [
+                        'field' => 'first_name',
+                        'transform' => function ($value, $model) {
+                            return $model->first_name . ' ' . $model->last_name;
+                        },
+                    ],
                     'email', 'phone', 'position', 'department', 'status', 'hire_date',
                 ],
                 'filename_prefix' => 'staff',

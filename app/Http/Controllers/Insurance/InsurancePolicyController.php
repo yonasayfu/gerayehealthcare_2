@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Models\InsurancePolicy;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\InsuranceCompany;
+use App\Models\CorporateClient;
+use App\Services\Validation\Rules\InsurancePolicyRules;
+use App\DTOs\CreateInsurancePolicyDTO;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
-use App\Http\Requests\StoreInsurancePolicyRequest;
-use App\Http\Requests\UpdateInsurancePolicyRequest;
-use App\Services\Insurance\InsurancePolicyService;
 
 class InsurancePolicyController extends BaseController
 {
@@ -27,4 +23,27 @@ class InsurancePolicyController extends BaseController
         );
     }
 
- }
+    public function create()
+    {
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
+
+        return Inertia::render($this->viewName . '/Create', [
+            'insuranceCompanies' => $insuranceCompanies,
+            'corporateClients' => $corporateClients,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $insurancePolicy = $this->service->getById($id);
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $insurancePolicy,
+            'insuranceCompanies' => $insuranceCompanies,
+            'corporateClients' => $corporateClients,
+        ]);
+    }
+}

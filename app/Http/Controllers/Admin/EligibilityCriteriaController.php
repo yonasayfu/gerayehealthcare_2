@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
+use App\Models\Event;
 use App\Models\EligibilityCriteria;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -27,4 +27,23 @@ class EligibilityCriteriaController extends BaseController
         $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
     }
 
+    public function create()
+    {
+        $events = Event::select('id', 'title')->orderBy('title')->get();
+
+        return Inertia::render($this->viewName . '/Create', [
+            'events' => $events,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $eligibilityCriteria = $this->service->getById($id);
+        $events = Event::select('id', 'title')->orderBy('title')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $eligibilityCriteria,
+            'events' => $events,
+        ]);
+    }
 }

@@ -37,7 +37,7 @@ const form = useForm({
   department: props.staff.department,
   status: props.staff.status,
   hire_date: props.staff.hire_date,
-  hourly_rate: props.staff.hourly_rate || '', // Added hourly_rate to the form
+  hourly_rate: props.staff.hourly_rate ?? null, // Ensure hourly_rate is null if not set
   photo: null as File | null,
 });
 

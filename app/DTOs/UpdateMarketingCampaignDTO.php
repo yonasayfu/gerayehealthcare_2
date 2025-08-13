@@ -2,7 +2,9 @@
 
 namespace App\DTOs;
 
-class CreateMarketingCampaignDTO
+use Spatie\LaravelData\Data;
+
+class UpdateMarketingCampaignDTO extends Data
 {
     public function __construct(
         public string $campaign_name,
@@ -17,6 +19,6 @@ class CreateMarketingCampaignDTO
         public ?int $assigned_staff_id,
         public ?int $created_by_staff_id,
         public ?string $urgency,
-        public ?int $responsible_staff_id
+        public ?int $responsible_staff_id,
     ) {}
 }

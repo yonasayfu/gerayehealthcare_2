@@ -25,5 +25,13 @@ class InvoiceController extends BaseController
         );
     }
 
-    
-}
+    public function create()
+    {
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+        $services = VisitService::select('id', 'service_description')->orderBy('service_description')->get(); // Assuming service_description is the display field
+
+        return Inertia::render($this->viewName . '/Create', [
+            'patients' => $patients,
+            'services' => $services,
+        ]);
+    }

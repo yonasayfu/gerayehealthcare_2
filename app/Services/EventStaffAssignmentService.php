@@ -40,24 +40,5 @@ class EventStaffAssignmentService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $eventStaffAssignment = $this->getById($id);
-        return $this->handlePrintSingle($eventStaffAssignment, AdditionalExportConfigs::getEventStaffAssignmentConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, EventStaffAssignment::class, AdditionalExportConfigs::getEventStaffAssignmentConfig());
-    }
+    
 }

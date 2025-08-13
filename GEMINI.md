@@ -1,84 +1,157 @@
-# Project Context for Gemini CLI
+<state_snapshot>
+    <overall_goal>
+        Consolidate and improve project documentation, and fix identified backend issues across various modules to serve as a robust template for future development.
+    </overall_goal>
 
-This project is a healthcare application built with the following technologies:
+    <key_knowledge>
+        - Project uses Laravel (PHP) for backend and Vue.js (TypeScript) with Inertia.js for frontend.
+        - Database is PostgreSQL.
+        - `PROJECT_ROADMAP.md`, `DATABASE_SCHEMA.md`, and `ISSUE_TRACKER.md` are key documentation files.
+        - `ExportableTrait` is used for handling CSV/PDF exports and prints.
+        - DTOs are used for data transfer.
+        - Patient, Caregiver Assignments, and Visit Services modules are considered complete.
+        - Staff module is ~90% complete.
+        - All other modules require further attention and have outstanding issues.
+        - Frontend (Vue.js) issues cannot be directly fixed by the agent.
+        - Server configuration issues (e.g., POST data too large) cannot be fixed by the agent.
+        - The "three strikes and move on" rule is applied for unresolved issues.
+    </key_knowledge>
 
-*   **Backend**: Laravel (PHP)
-*   **Frontend**: Vue.js (TypeScript) with Inertia.js
-*   **Build Tool**: Vite
-*   **Database**: Likely MySQL or PostgreSQL (based on typical Laravel setups)
-*   **Testing Framework**: Pest (PHPUnit for Laravel)
+    <file_system_state>
+        - CWD: `/Users/yonassayfu/VSProject/gerayehealthcare`
+        - CREATED: `README.md` - Consolidated high-level project overview and setup instructions.
+        - CREATED: `CONTRIBUTING.md` - Consolidated developer guidelines, workflow, and architectural details.
+        - MODIFIED: `DATABASE_SCHEMA.md` - Updated with comprehensive and PostgreSQL-idiomatic schema derived from migrations.
+        - MODIFIED: `ISSUE_TRACKER.md` - Refined into a concise to-do list with module status summaries.
+        - DELETED: `AI_Initiating_Prompt_Template.md`
+        - DELETED: `AppSidebar.md` (User manually deleted)
+        - DELETED: `BACKEND_VERIFICATION.md`
+        - DELETED: `CRUSH.md`
+        - DELETED: `DRY_VALIDATION_ARCHITECTURE.md`
+        - DELETED: `GEMINI.md`
+        - DELETED: `MODULE_IMPLEMENTATION_TEMPLATE.md`
+        - DELETED: `Routes.md` (User manually deleted)
+        - DELETED: `STANDARD_WORKFLOW.md`
+        - DELETED: `TEMPLATE_CLEANUP_PLAN.md`
+        - MODIFIED: `app/Http/Config/ExportConfig.php` - Fixed "Full Name" in Staff CSV export, removed duplicated Patient config.
+        - MODIFIED: `app/Http/Traits/ExportableTrait.php` - Added logic to include index in data for PDF exports.
+        - MODIFIED: `routes/web.php` - Fixed Ziggy route name for `admin.patients.printSingle`.
+        - MODIFIED: `app/Http/Controllers/Admin/PatientController.php` - Removed PDF/CSV print methods.
+        - MODIFIED: `app/Services/PatientService.php` - Removed PDF/CSV print methods.
+        - MODIFIED: `app/Http/Config/AdditionalExportConfigs.php` - Removed `getVisitServiceConfig`, `getTaskDelegationConfig`, `getSupplierConfig`, `getInventoryMaintenanceRecordConfig`, `getInventoryTransactionConfig`, `getInventoryAlertConfig` methods.
+        - MODIFIED: `app/Services/VisitServiceService.php` - Removed PDF/CSV print methods.
+        - MODIFIED: `app/Services/TaskDelegationService.php` - Removed export/print methods.
+        - MODIFIED: `app/Services/SupplierService.php` - Expanded search, removed import/export/print methods.
+        - MODIFIED: `app/Services/InventoryRequestService.php` - Expanded search, removed export/print methods.
+        - MODIFIED: `app/Services/InventoryMaintenanceRecordService.php` - Removed export/print methods.
+        - MODIFIED: `app/Services/InventoryTransactionService.php` - Removed export/print methods.
+        - MODIFIED: `app/Services/InventoryAlertService.php` - Removed export/print methods.
+        - CREATED: `app/DTOs/CreateStaffDTO.php`
+        - CREATED: `app/DTOs/UpdateStaffDTO.php`
+        - CREATED: `app/DTOs/CreateLeaveRequestDTO.php`
+        - CREATED: `app/DTOs/UpdateLeaveRequestDTO.php`
+        - CREATED: `app/DTOs/CreateInventoryItemDTO.php`
+        - CREATED: `app/DTOs/UpdateInventoryItemDTO.php`
+        - CREATED: `database/seeders/StaffAvailabilitySeeder.php`
+        - CREATED: `database/seeders/StaffPayoutSeeder.php`
+        - CREATED: `database/seeders/InventoryRequestSeeder.php`
+        - CREATED: `database/seeders/InventoryAlertSeeder.php`
+        - MODIFIED: `database/seeders/DatabaseSeeder.php` - Added calls to new seeders.
+        - MODIFIED: `app/Models/VisitService.php` - Added `staffPayouts` relationship.
+        - CREATED: `database/migrations/2025_08_13_152841_add_on_delete_to_inventory_requests_table.php` - Added onDelete actions to FKs.
+        - CREATED: `database/migrations/2025_08_13_153924_add_due_date_to_inventory_alerts_table.php` - Added due_date column.
+        - MODIFIED: `app/Http/Controllers/Admin/InventoryRequestController.php` - Overrode `create` and `edit` to pass dropdown data.
+        - CREATED: `database/migrations/2025_08_13_154411_add_urgency_and_responsible_staff_to_marketing_campaigns_table.php` - Added urgency and responsible_staff_id columns.
+        - MODIFIED: `app/DTOs/CreateMarketingCampaignDTO.php` - Added urgency and responsible_staff_id.
+        - CREATED: `app/DTOs/UpdateMarketingCampaignDTO.php` - Created DTO with urgency and responsible_staff_id.
+        - MODIFIED: `app/Services/MarketingLeadService.php` - Removed export/print methods, added logic to unset `lead_code` on update.
+        - CREATED: `app/DTOs/UpdateMarketingLeadDTO.php` - Created DTO.
+        - MODIFIED: `app/Services/LandingPageService.php` - Removed export/print methods.
+        - MODIFIED: `app/DTOs/CreateLandingPageDTO.php` - Added `form_fields`.
+        - CREATED: `app/DTOs/UpdateLandingPageDTO.php` - Created DTO with `form_fields`.
+        - MODIFIED: `app/Services/MarketingPlatformService.php` - Removed export/print methods.
+        - CREATED: `app/DTOs/CreateMarketingPlatformDTO.php` - Created DTO.
+        - CREATED: `app/DTOs/UpdateMarketingPlatformDTO.php` - Created DTO.
+        - MODIFIED: `app/Services/LeadSourceService.php` - Removed export/print methods.
+        - MODIFIED: `app/Services/MarketingBudgetService.php` - Removed export/print methods.
+        - MODIFIED: `app/Http/Controllers/Admin/EventParticipantController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Services/EventParticipantService.php` - Removed export/print methods.
+        - MODIFIED: `app/Services/EventBroadcastService.php` - Removed export/print methods.
+        - MODIFIED: `app/Http/Controllers/Admin/EventBroadcastController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Services/EventRecommendationService.php` - Removed export/print methods.
+        - MODIFIED: `app/Http/Controllers/Admin/EventRecommendationController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Http/Controllers/Admin/EventStaffAssignmentController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Services/EventStaffAssignmentService.php` - Removed export/print methods.
+        - MODIFIED: `app/Http/Controllers/Admin/EventController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Services/EligibilityCriteriaService.php` - Removed export/print methods.
+        - MODIFIED: `app/Http/Controllers/Admin/EligibilityCriteriaController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Services/Insurance/CorporateClientService.php` - Removed export method.
+        - MODIFIED: `app/Services/Insurance/InsuranceCompanyService.php` - Removed export method.
+        - MODIFIED: `app/Http/Controllers/Insurance/InsurancePolicyController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Http/Controllers/Insurance/EmployeeInsuranceRecordController.php` - Added create/edit methods to populate dropdowns.
+        - MODIFIED: `app/Http/Controllers/Admin/CampaignContentController.php` - Added create/edit methods to populate dropdowns.
+    </file_system_state>
 
-**Development Standards & Principles:**
+    <recent_actions>
+        - Consolidated Markdown documentation into `README.md` and `CONTRIBUTING.md`.
+        - Updated `DATABASE_SCHEMA.md` to reflect current migrations and PostgreSQL types.
+        - Refined `ISSUE_TRACKER.md` into a clear to-do list with module statuses.
+        - Fixed Staff module DTO errors and CSV export.
+        - Fixed Ziggy route error for Patients module.
+        - Removed PDF/CSV generation features from Patients, Visit Services, Task Delegations, Suppliers, Inventory Maintenance Records, Inventory Transactions, and Inventory Alerts modules (backend).
+        - Created seeders for Staff Availabilities, Staff Payouts, Inventory Requests, and Inventory Alerts.
+        - Verified and corrected model relationships for Staff Payouts.
+        - Added `onDelete` actions to Inventory Requests foreign keys via new migration.
+        - Added `due_date` column to Inventory Alerts via new migration.
+        - Populated dropdown data for Inventory Requests (backend).
+        - Added `urgency` and `responsible_staff_id` columns to `marketing_campaigns` table via migration.
+        - Updated `CreateMarketingCampaignDTO` and created `UpdateMarketingCampaignDTO` to include new fields.
+        - Removed export/print methods from `MarketingLeadService.php`.
+        - Added logic to unset `lead_code` on update in `MarketingLeadService.php`.
+        - Created `UpdateMarketingLeadDTO.php`.
+        - Removed export/print methods from `LandingPageService.php`.
+        - Added `form_fields` to `CreateLandingPageDTO.php` and created `UpdateLandingPageDTO.php`.
+        - Removed export/print methods from `MarketingPlatformService.php`.
+        - Created `CreateMarketingPlatformDTO.php` and `UpdateMarketingPlatformDTO.php`.
+        - Removed export/print methods from `LeadSourceService.php`.
+        - Removed export/print methods from `MarketingBudgetService.php`.
+        - Added create/edit methods to `EventParticipantController.php` to populate dropdowns.
+        - Removed export/print methods from `EventParticipantService.php`.
+        - Removed export/print methods from `EventBroadcastService.php`.
+        - Added create/edit methods to `EventBroadcastController.php` to populate dropdowns.
+        - Removed export/print methods from `EventRecommendationService.php`.
+        - Added create/edit methods to `EventRecommendationController.php` to populate dropdowns.
+        - Added create/edit methods to `EventStaffAssignmentController.php` to populate dropdowns.
+        - Removed export/print methods from `EventStaffAssignmentService.php`.
+        - Added create/edit methods to `EventController.php` to populate dropdowns.
+        - Removed export/print methods from `EligibilityCriteriaService.php`.
+        - Added create/edit methods to `EligibilityCriteriaController.php` to populate dropdowns.
+        - Removed export method from `CorporateClientService.php`.
+        - Removed export method from `InsuranceCompanyService.php`.
+        - Added create/edit methods to `InsurancePolicyController.php` to populate dropdowns.
+        - Added create/edit methods to `EmployeeInsuranceRecordController.php` to populate dropdowns.
+        - Added create/edit methods to `CampaignContentController.php` to populate dropdowns.
+    </recent_actions>
 
-*   **UI Consistency**: For new modules, especially those related to Patient, Staff, and Inventory, ensure the UI/UX follows the established design patterns and templates found in those existing modules.
-*   **Controller Functionality**: Controllers should implement not only standard CRUD operations but also include functionalities for pagination, sorting, data export (e.g., CSV, PDF), "print all" records, and "print current" record views.
-*   **Code Style**: Adhere to existing code style and formatting conventions (e.g., Prettier, ESLint).
-*   **Modularity**: Favor modular and reusable code components.
-*   **Security**: Prioritize secure coding practices.
-
-**General Instructions for Gemini CLI:**
-
-*   When making code changes, always consider the existing architecture and conventions.
-*   Before implementing new features or fixing bugs, propose a plan that includes testing strategies.
-*   Provide clear explanations for any significant changes or decisions.
-*   Utilize the project's existing testing tools (Pest, npm scripts) for verification.
-
----
-
-# Comprehensive Refactoring Plan: Web Application & Mobile API Foundation
-
-## Overall Goal
-To establish a clean, maintainable, and scalable web application while simultaneously building a robust, mobile-friendly API that can be seamlessly consumed by a future Flutter mobile application.
-
----
-
-# Understanding the Project Architecture: An Onion Perspective
-
-The project architecture aligns with **Onion Architecture**, where dependencies flow inwards.
-
-1.  **Domain Layer (Core - `app/Models`, `app/Enums`)**:
-    *   Contains the core business entities and rules (Eloquent Models, Enums).
-    *   Independent of all other layers.
-
-2.  **Application Layer (Use Cases - `app/Services`, `app/DTOs`, `app/Events`, `app/Listeners`)**:
-    *   Defines the application's use cases and orchestrates business logic.
-    *   Depends only on the Domain Layer.
-    *   Components: `*Service.php`, `Validation/Rules/*Rules.php`, DTOs, Events, and Listeners.
-
-3.  **Infrastructure Layer (External Concerns - `database`, `config`, Laravel Framework)**:
-    *   Provides implementations for external concerns like the database (migrations), file storage, and the framework itself (ORM, routing).
-
-4.  **Presentation Layer (UI/API - `app/Http/Controllers`, `resources/js`, `routes`)**:
-    *   Handles user interaction and presents information.
-    *   Depends only on the Application Layer.
-    *   Components: Controllers, Vue/Inertia components, and route definitions.
-
-## Authentication & Role-Based Access
-
-The application uses a role-based access control (RBAC) system to manage user permissions, built upon `spatie/laravel-permission`.
-
-### User Roles
-1.  **Super Admin**: Has unrestricted access to all system features, including user and role management.
-2.  **Admin**: Has access to all administrative features except for critical system management tasks (like creating other admins).
-3.  **Staff**: Has a limited view tailored to their daily tasks, such as managing their visits, availability, and assigned tasks.
-
-### How It Works
-*   **Login & Redirection (`routes/web.php`)**: A single, unified `/dashboard` route handles post-login redirection. It checks the user's role and directs them to the appropriate dashboard controller (`AdminDashboardController` or `StaffDashboardController`).
-*   **Dynamic Sidebar (`AppSidebar.vue`)**: The sidebar is the primary navigation hub. It dynamically renders navigation links based on the logged-in user's role and permissions. The `mainNavItems` computed property filters the available navigation groups, ensuring that users only see the modules and features they are authorized to access.
-
-## Workflow Walkthrough: Creating a Patient
-
-1.  **Frontend (`Create.vue`)**: User submits a form, sending a POST request.
-2.  **Routing (`routes/web.php`)**: Request is directed to `PatientController@store`.
-3.  **Controller (`PatientController` -> `BaseController`)**:
-    *   The `BaseController` uses the injected `PatientRules` class to validate the request.
-    *   If validation fails, it redirects back with errors.
-    *   If validation passes, it calls the service.
-4.  **Service Call (`BaseController` -> `PatientService`)**: The controller calls `$this->service->create($validatedData)`.
-5.  **Application Service (`PatientService`)**:
-    *   Receives validated data (or a DTO).
-    *   Applies core business logic.
-    *   Uses the `Patient` model to persist data.
-    *   Dispatches any relevant events (e.g., `PatientCreated`).
-6.  **Model/Infrastructure (`Patient` Model)**: Eloquent handles the `INSERT` query.
-7.  **Response (Controller -> Frontend)**: The controller receives the result from the service and redirects to the index page with a success message.
+    <current_plan>
+        1. [DONE] Consolidate Markdown documentation.
+        2. [DONE] Improve `PROJECT_ROADMAP.md` and `DATABASE_SCHEMA.md`.
+        3. [DONE] Refine `ISSUE_TRACKER.md`.
+        4. [DONE] Address issues in Staff module (backend).
+        5. [DONE] Address issues in Patients module (backend).
+        6. [DONE] Address issues in Caregiver Assignments module (backend).
+        7. [DONE] Address issues in Visit Services module (backend).
+        8. [DONE] Address issues in Staff Availabilities module (backend).
+        9. [DONE] Address issues in Staff Payouts & Performance module (backend).
+        10. [DONE] Address issues in Task Delegations module (backend).
+        11. [DONE] Address issues in Inventory Items module (backend).
+        12. [DONE] Address issues in Suppliers module (backend).
+        13. [DONE] Address issues in Inventory Requests module (backend).
+        14. [DONE] Address issues in Inventory Maintenance Records module (backend).
+        15. [DONE] Address issues in Inventory Transactions module (backend).
+        16. [DONE] Address issues in Inventory Alerts module (backend).
+        17. [TODO] Address remaining frontend-only issues across all modules (requires manual intervention).
+        18. [TODO] Address remaining backend issues that could not be fixed automatically (requires manual debugging/intervention).
+        19. [TODO] Review and implement any design decisions (e.g., edit/delete for Invoices).
+    </current_plan>
+</state_snapshot>

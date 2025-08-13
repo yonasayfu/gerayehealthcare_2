@@ -59,4 +59,14 @@ class StaffController extends BaseController
     {
         return app(StaffService::class)->printSingle($staff, request());
     }
+
+    public function update(Request $request, $id)
+    {
+        $staff = $this->service->getById($id);
+        $validatedData = $this->validateRequest($request, 'update', $staff);
+
+        $this->service->update($id, $validatedData);
+
+        return redirect()->route('admin.staff.index')->with('success', 'Staff updated successfully.');
+    }
 }

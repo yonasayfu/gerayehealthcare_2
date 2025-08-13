@@ -43,26 +43,7 @@ class InventoryAlertService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, InventoryAlert::class, AdditionalExportConfigs::getInventoryAlertConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $inventoryAlert = $this->getById($id);
-        return $this->handlePrintSingle($inventoryAlert, AdditionalExportConfigs::getInventoryAlertConfig());
-    }
+    
 
     public function count()
     {

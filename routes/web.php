@@ -89,7 +89,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('patients/print-current', [PatientController::class, 'printCurrent'])->name('patients.printCurrent');
 
         // printSingle route (already correctly defined relative to the group)
-        Route::get('patients/{patient}/print', [PatientController::class, 'printSingle'])->name('patients.print');
+        Route::get('patients/{patient}/print', [PatientController::class, 'printSingle'])->name('patients.printSingle');
 
         // Resource route (already correctly defined relative to the group)
         Route::resource('patients', PatientController::class);

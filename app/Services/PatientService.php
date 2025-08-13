@@ -106,42 +106,5 @@ class PatientService extends BaseService
         ])->findOrFail($id);
     }
 
-    public function export(Request $request)
-    {
-        // Add debug logging
-        \Log::info('PatientService export called', [
-            'request_type' => $request->input('type'),
-            'request_params' => $request->all()
-        ]);
-        
-        $result = $this->handleExport($request, Patient::class, ExportConfig::getPatientConfig());
-        
-        // Add debug logging for result
-        \Log::info('PatientService export result', [
-            'result_type' => gettype($result),
-            'result_class' => get_class($result)
-        ]);
-        
-        return $result;
-    }
-
-    public function printSingle($id, Request $request)
-    {
-        $patient = $this->getById($id);
-        $patient->load(['registeredByStaff', 'registeredByCaregiver']);
-
-        $config = ExportConfig::getPatientConfig();
-        
-        return $this->handlePrintSingle($request, $patient, $config);
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, Patient::class, ExportConfig::getPatientConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, Patient::class, ExportConfig::getPatientConfig());
-    }
+    
 }

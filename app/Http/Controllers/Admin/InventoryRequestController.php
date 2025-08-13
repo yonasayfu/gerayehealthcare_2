@@ -25,7 +25,26 @@ class InventoryRequestController extends BaseController
         );
     }
 
-    
+    public function create()
+    {
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
 
-   
-}
+        return Inertia::render($this->viewName . '/Create', [
+            'staff' => $staff,
+            'inventoryItems' => $inventoryItems,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $inventoryRequest = $this->service->getById($id);
+        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $inventoryRequest,
+            'staff' => $staff,
+            'inventoryItems' => $inventoryItems,
+        ]);
+    }

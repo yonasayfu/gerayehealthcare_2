@@ -17,6 +17,11 @@ class InventoryTransactionService extends BaseService
         parent::__construct($inventoryTransaction);
     }
 
+    public function getById(int $id): InventoryTransaction
+    {
+        return $this->model->with(['item', 'performedBy'])->findOrFail($id);
+    }
+
     protected function applySearch($query, $search)
     {
         return $query->where('transaction_type', 'like', "%$search%")
@@ -41,24 +46,5 @@ class InventoryTransactionService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InventoryTransaction::class, AdditionalExportConfigs::getInventoryTransactionConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, InventoryTransaction::class, AdditionalExportConfigs::getInventoryTransactionConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, InventoryTransaction::class, AdditionalExportConfigs::getInventoryTransactionConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $inventoryTransaction = $this->getById($id);
-        return $this->handlePrintSingle($inventoryTransaction, AdditionalExportConfigs::getInventoryTransactionConfig());
-    }
+    
 }

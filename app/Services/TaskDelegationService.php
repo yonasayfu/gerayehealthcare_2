@@ -40,8 +40,5 @@ class TaskDelegationService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, TaskDelegation::class, AdditionalExportConfigs::getTaskDelegationConfig());
-    }
+    
 }

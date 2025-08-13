@@ -51,19 +51,3 @@ class LandingPageService extends BaseService
 
         return $query->paginate($request->input('per_page', 10));
     }
-
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, LandingPage::class, AdditionalExportConfigs::getLandingPageConfig());
-    }
-}

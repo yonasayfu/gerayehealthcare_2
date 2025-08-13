@@ -58,18 +58,5 @@ class CampaignContentService extends BaseService
         return $query->with(['campaign', 'platform'])->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, CampaignContent::class, AdditionalExportConfigs::getCampaignContentConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, CampaignContent::class, AdditionalExportConfigs::getCampaignContentConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, CampaignContent::class, AdditionalExportConfigs::getCampaignContentConfig());
-    }
+    
 }

@@ -51,6 +51,8 @@ class StaffService extends BaseService
                 Storage::disk('public')->delete($staff->photo);
             }
             $data['photo'] = $data['photo']->store('images/staff', 'public');
+        } else {
+            unset($data['photo']);
         }
 
         return parent::update($id, $data);

@@ -70,24 +70,5 @@ class MarketingCampaignService extends BaseService
         return $this->model->with(['platform', 'assignedStaff', 'createdByStaff'])->findOrFail($id);
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
-    }
-
-    public function printSingle($id)
-    {
-        $marketingCampaign = $this->getById($id);
-        return $this->handlePrintSingle($marketingCampaign, AdditionalExportConfigs::getMarketingCampaignConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, MarketingCampaign::class, AdditionalExportConfigs::getMarketingCampaignConfig());
-    }
+    
 }

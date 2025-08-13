@@ -56,24 +56,17 @@ class MarketingLeadService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function export(Request $request)
+    public function update(int $id, array|object $data): MarketingLead
     {
-        return $this->handleExport($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
+        $data = is_object($data) ? (array) $data : $data;
+
+        // Prevent lead_code from being updated
+        if (isset($data['lead_code'])) {
+            unset($data['lead_code']);
+        }
+
+        return parent::update($id, $data);
     }
 
-    public function printSingle($id)
-    {
-        $marketingLead = $this->getById($id);
-        return $this->handlePrintSingle($marketingLead, AdditionalExportConfigs::getMarketingLeadConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, MarketingLead::class, AdditionalExportConfigs::getMarketingLeadConfig());
-    }
+    
 }

@@ -24,8 +24,5 @@ class InsuranceCompanyService extends BaseService
         return parent::create($data);
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InsuranceCompany::class, AdditionalExportConfigs::getInsuranceCompanyConfig());
-    }
+    
 }

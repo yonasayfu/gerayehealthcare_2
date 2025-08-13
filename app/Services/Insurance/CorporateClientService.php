@@ -24,8 +24,5 @@ class CorporateClientService extends BaseService
         return parent::create($data);
     }
 
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, CorporateClient::class, AdditionalExportConfigs::getCorporateClientConfig());
-    }
+    
 }
