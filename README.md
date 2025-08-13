@@ -1,5 +1,7 @@
 # Geraye Healthcare Platform
 
+> Start here: Read AI onboarding at [AI_AGENT_ONBOARDING.md](./AI_AGENT_ONBOARDING.md) for architecture, status, and step-by-step guidance.
+
 ## Project Context for Gemini CLI
 
 This project is a healthcare application built with the following technologies:

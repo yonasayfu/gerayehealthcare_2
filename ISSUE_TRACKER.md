@@ -1,5 +1,7 @@
 # Project To-Do List & Issue Tracker
 
+> New to this codebase? Read [AI_AGENT_ONBOARDING.md](./AI_AGENT_ONBOARDING.md) first for architecture, status, and how to work issues effectively.
+
 This document outlines the current development tasks and known issues for the Home-to-Home Care Platform.
 
 ## Module Status Summary
