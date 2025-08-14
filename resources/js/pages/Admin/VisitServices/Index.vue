@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Plus, Paperclip, MapPin } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Plus, Paperclip, MapPin, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -75,6 +75,10 @@ function destroy(id: number) {
   }
 }
 
+function exportCsv() {
+  window.open(route('admin.visit-services.export', { type: 'csv' }), '_blank');
+}
+
 function printCurrentView() {
   // Trigger browser print of the current index view
   setTimeout(() => window.print(), 50);
@@ -121,11 +125,14 @@ const formatDate = (dateString: string | null) => {
           <Link :href="route('admin.visit-services.create')" class="btn btn-primary">
             <Plus class="h-4 w-4" /> Schedule Visit
           </Link>
-          <button @click="printAllVisitServices" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
+          <button @click="exportCsv" class="btn btn-success">
+            <Download class="h-4 w-4" /> CSV
           </button>
           <button @click="printCurrentView" class="btn btn-dark">
             <Printer class="h-4 w-4" /> Print Current
+          </button>
+          <button @click="printAllVisitServices" class="btn btn-info">
+            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
@@ -134,7 +141,7 @@ const formatDate = (dateString: string | null) => {
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
           <div class="relative w-full md:w-1/3">
               <input type="text" v-model="search" placeholder="Search by Patient or Staff..." class="form-input w-full rounded-md border border-gray-300 pl-3 pr-10 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
-              <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
+              <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
           </div>
           <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
@@ -191,8 +198,13 @@ const formatDate = (dateString: string | null) => {
       </div>
 
       <!-- Pagination -->
-      <div class="flex justify-end mt-6 print:hidden">
-        <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" />
+      <div class="mt-6 space-y-2 print:hidden">
+        <div class="flex justify-center">
+          <Pagination v-if="visitServices.data.length > 0" :links="visitServices.links" />
+        </div>
+        <p v-if="visitServices.total" class="text-center text-sm text-gray-600 dark:text-gray-300">
+          Showing {{ visitServices.from || 0 }}–{{ visitServices.to || 0 }} of {{ visitServices.total }}
+        </p>
       </div>
 
       

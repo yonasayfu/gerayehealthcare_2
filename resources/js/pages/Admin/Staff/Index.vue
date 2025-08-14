@@ -116,7 +116,7 @@ function toggleSort(field: string) {
         </div>
 
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -188,6 +188,9 @@ function toggleSort(field: string) {
       
       <!-- THE FIX IS HERE: Replaced the manual links with the reusable Pagination component -->
       <Pagination v-if="staff.data.length > 0" :links="staff.links" class="mt-6 flex justify-center print:hidden" />
+      <p v-if="staff.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300 print:hidden">
+        Showing {{ staff.from || 0 }}–{{ staff.to || 0 }} of {{ staff.total }}
+      </p>
 
       <!-- spacer to prevent content under footer when printing -->
       <div class="hidden print:block h-24"></div>

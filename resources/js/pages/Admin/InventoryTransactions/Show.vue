@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
+import { Printer, Edit3 } from 'lucide-vue-next' // Import icons
 import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
 import { format } from 'date-fns' // For date formatting
 
@@ -31,11 +31,7 @@ function printPage() {
   }, 100); // 100ms delay
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this transaction?')) {
-    router.delete(route('admin.inventory-transactions.destroy', id))
-  }
-}
+// Delete action removed per UI policy (no Delete on Show pages)
 </script>
 
 <template>
@@ -44,7 +40,7 @@ function destroy(id: number) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Inventory Transaction Details: {{ inventoryTransaction.id }}
             </h3>
@@ -119,20 +115,13 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <!-- Edit route for inventory transactions is not defined in web.php, so I'm commenting this out -->
-              <!-- <Link
-                :href="route('admin.inventory-transactions.edit', inventoryTransaction.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Transaction
-              </Link> -->
-              <button @click="destroy(inventoryTransaction.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Transaction
+              <Link :href="route('admin.inventory-transactions.index')" class="btn btn-outline">Back to List</Link>
+              <!-- Keep Edit only if route exists -->
+              <!-- <Link :href="route('admin.inventory-transactions.edit', inventoryTransaction.id)" class="btn btn-primary">Edit</Link> -->
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
             </div>
         </div>

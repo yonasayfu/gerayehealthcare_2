@@ -11,20 +11,20 @@ defineProps<{
 </script>
 
 <template>
-  <div v-if="links.length > 3">
-    <div class="flex flex-wrap -mb-1">
+  <div v-if="links.length > 1">
+    <div class="flex flex-wrap items-center gap-2">
       <template v-for="(link, key) in links">
-        <div
+        <span
           v-if="link.url === null"
-          :key="key"
-          class="mr-1 mb-1 px-4 py-3 text-sm leading-4 text-gray-400 border rounded"
+          :key="`span-${key}`"
+          class="btn btn-outline opacity-50 cursor-not-allowed select-none"
           v-html="link.label"
         />
         <Link
           v-else
           :key="`link-${key}`"
-          class="mr-1 mb-1 px-4 py-3 text-sm leading-4 border rounded hover:bg-white focus:border-primary-500 focus:text-primary-500"
-          :class="{ 'bg-blue-500 text-white': link.active }"
+          class="btn"
+          :class="link.active ? 'btn-info' : 'btn-outline'"
           :href="link.url"
           v-html="link.label"
         />

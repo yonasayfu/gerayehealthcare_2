@@ -76,6 +76,8 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
+      <!-- Spacer to prevent footer overlap -->
+      <div class="print-footer-spacer"></div>
       <div class="print-footer">
         <hr class="my-2 border-gray-300">
         <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
@@ -95,8 +97,24 @@ body { font-family: sans-serif; margin: 0; padding: 0; }
 .print-table th, .print-table td { border: 1px solid #ccc; padding: 8pt; text-align: left; font-size: 9pt; }
 .print-table th { background-color: #f0f0f0; }
 
+/* Footer styles */
+.print-footer { text-align: center; font-size: 10pt; color: #555; }
+.print-footer-spacer { height: 18mm; }
+
 @media print {
   body { margin: 0; padding: 0; }
   .print-document { width: auto; min-height: auto; margin: 0; padding: 0; }
+  @page { size: A4; margin: 12mm; }
+
+  /* Fix footer to bottom on print */
+  .print-footer {
+    position: fixed;
+    left: 12mm;
+    right: 12mm;
+    bottom: 8mm;
+    background: #fff;
+    padding-top: 4mm;
+    z-index: 10;
+  }
 }
 </style>

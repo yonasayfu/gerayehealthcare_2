@@ -20,17 +20,30 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $user = $request->user();
+        $roles = [];
+        $permissions = [];
+        if ($user) {
+            // Guard against missing Spatie methods in environments/users without HasRoles
+            if (method_exists($user, 'getRoleNames')) {
+                $roles = $user->getRoleNames()->toArray();
+            }
+            if (method_exists($user, 'getAllPermissions')) {
+                $permissions = $user->getAllPermissions()->pluck('name')->toArray();
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'roles' => $request->user()->getRoleNames(),
-                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'roles' => $roles,
+                    'permissions' => $permissions,
                 ] : null,
             ],
             'ziggy' => [

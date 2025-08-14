@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Book, Loader2 } from 'lucide-vue-next'
+import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Loader2, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -109,7 +109,7 @@ const formatDate = (dateString) => {
             <Printer class="h-4 w-4" /> Print Current
           </button>
           <button @click="printAllRecords()" class="btn btn-info" title="Print All Records">
-             <Book class="h-4 w-4" />
+             <Printer class="h-4 w-4" />
              Print All
           </button>
         </div>
@@ -123,14 +123,11 @@ const formatDate = (dateString) => {
             placeholder="Search assignments..."
             class="form-input w-full rounded-md border border-gray-300 pl-3 pr-10 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
           />
-          <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" />
-          </svg>
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
 
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -215,7 +212,14 @@ const formatDate = (dateString) => {
         </table>
       </div>
 
-      <Pagination v-if="assignments.data.length > 0" :links="assignments.links" class="mt-6 flex justify-center print:hidden" />
+      <div class="mt-6 space-y-2 print:hidden">
+        <div class="flex justify-center">
+          <Pagination v-if="assignments.data.length > 0" :links="assignments.links" />
+        </div>
+        <p v-if="assignments.total" class="text-center text-sm text-gray-600 dark:text-gray-300">
+          Showing {{ assignments.from || 0 }}–{{ assignments.to || 0 }} of {{ assignments.total }}
+        </p>
+      </div>
 
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
         <hr class="my-2 border-gray-300">

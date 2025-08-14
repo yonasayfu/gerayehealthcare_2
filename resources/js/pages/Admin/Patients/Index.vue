@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue' // Import 'computed'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns' // Keep this import
@@ -115,11 +115,11 @@ function toggleSort(field: string) {
           <button @click="exportData('csv')" class="btn btn-success">
             <Download class="h-4 w-4" /> CSV
           </button>
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
+          </button>
           <button @click="printAllPatients" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
       </div>
@@ -136,7 +136,7 @@ function toggleSort(field: string) {
         </div>
 
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
             <option value="5">5</option>
             <option value="10">10</option>
@@ -223,6 +223,9 @@ function toggleSort(field: string) {
       </div>
 
       <Pagination v-if="patients.data.length > 0" :links="patients.links" class="mt-6 flex justify-center print:hidden" />
+      <p v-if="patients.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300 print:hidden">
+        Showing {{ patients.from || 0 }}–{{ patients.to || 0 }} of {{ patients.total }}
+      </p>
 
     </div>
   </AppLayout>

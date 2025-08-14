@@ -181,6 +181,198 @@ class ExportConfig
     }
 
     /**
+     * Get export configuration for InventoryTransaction model
+     */
+    public static function getInventoryTransactionConfig(): array
+    {
+        return [
+            'searchable_fields' => ['transaction_type', 'from_location', 'to_location', 'item.name', 'performedBy.first_name', 'performedBy.last_name'],
+            'sortable_fields' => ['transaction_type', 'quantity', 'from_location', 'to_location', 'performed_by_id', 'item_id', 'created_at'],
+            'default_sort' => 'created_at',
+            'select_fields' => [
+                'item_id', 'transaction_type', 'quantity', 'from_location', 'to_location', 'performed_by_id', 'created_at',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Item', 'Type', 'Quantity', 'From', 'To', 'Performed By', 'Date',
+                ],
+                'fields' => [
+                    'index',
+                    'item.name',
+                    'transaction_type',
+                    'quantity',
+                    'from_location',
+                    'to_location',
+                    [
+                        'field' => 'performedBy.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedBy->first_name ?? '';
+                            $ln = $model->performedBy->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    [
+                        'field' => 'created_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'with_relations' => ['item', 'performedBy'],
+                'filename_prefix' => 'inventory-transactions',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Transactions - Geraye',
+                'document_title' => 'Inventory Transactions',
+                'filename_prefix' => 'inventory-transactions',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['item', 'performedBy'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'from_location' => ['field' => 'from_location', 'default' => '-'],
+                    'to_location' => ['field' => 'to_location', 'default' => '-'],
+                    'performed_by' => [
+                        'field' => 'performedBy.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedBy->first_name ?? '';
+                            $ln = $model->performedBy->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'created_at' => [
+                        'field' => 'created_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Type'],
+                    ['key' => 'quantity', 'label' => 'Qty'],
+                    ['key' => 'from_location', 'label' => 'From'],
+                    ['key' => 'to_location', 'label' => 'To'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Transactions (Current View) - Geraye',
+                'document_title' => 'Inventory Transactions (Current View)',
+                'filename_prefix' => 'inventory-transactions-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item', 'performedBy'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'from_location' => ['field' => 'from_location', 'default' => '-'],
+                    'to_location' => ['field' => 'to_location', 'default' => '-'],
+                    'performed_by' => [
+                        'field' => 'performedBy.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedBy->first_name ?? '';
+                            $ln = $model->performedBy->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'created_at' => [
+                        'field' => 'created_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Type'],
+                    ['key' => 'quantity', 'label' => 'Qty'],
+                    ['key' => 'from_location', 'label' => 'From'],
+                    ['key' => 'to_location', 'label' => 'To'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Inventory Transactions - Geraye',
+                'document_title' => 'All Inventory Transactions',
+                'filename_prefix' => 'inventory-transactions',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item', 'performedBy'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'from_location' => ['field' => 'from_location', 'default' => '-'],
+                    'to_location' => ['field' => 'to_location', 'default' => '-'],
+                    'performed_by' => [
+                        'field' => 'performedBy.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedBy->first_name ?? '';
+                            $ln = $model->performedBy->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'created_at' => [
+                        'field' => 'created_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Type'],
+                    ['key' => 'quantity', 'label' => 'Qty'],
+                    ['key' => 'from_location', 'label' => 'From'],
+                    ['key' => 'to_location', 'label' => 'To'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Transaction Record - Geraye',
+                'document_title' => 'Inventory Transaction',
+                'filename_prefix' => 'inventory-transaction',
+                'with_relations' => ['item', 'performedBy'],
+                'fields' => [
+                    'Item' => ['field' => 'item.name', 'default' => '-'],
+                    'Type' => 'transaction_type',
+                    'Quantity' => 'quantity',
+                    'From' => ['field' => 'from_location', 'default' => '-'],
+                    'To' => ['field' => 'to_location', 'default' => '-'],
+                    'Performed By' => [
+                        'field' => 'performedBy.first_name',
+                        'transform' => function ($value, $model) { $fn = $model->performedBy->first_name ?? ''; $ln = $model->performedBy->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : 'N/A'; },
+                    ],
+                    'Date' => ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Type'],
+                    ['key' => 'quantity', 'label' => 'Quantity'],
+                    ['key' => 'from_location', 'label' => 'From'],
+                    ['key' => 'to_location', 'label' => 'To'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export configuration for Event model
      */
     public static function getEventConfig(): array
