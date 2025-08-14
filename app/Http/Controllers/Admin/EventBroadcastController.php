@@ -8,6 +8,7 @@ use App\Services\Validation\Rules\EventBroadcastRules;
 use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Controllers\Base\BaseController;
 
 class EventBroadcastController extends BaseController
 {

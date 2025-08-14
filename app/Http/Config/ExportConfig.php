@@ -200,13 +200,14 @@ class ExportConfig
                 'fields' => [
                     'title', 'description', 'event_date', 'is_free_service', 'broadcast_status',
                 ],
-                'filename' => 'events.csv',
+                'filename_prefix' => 'events',
             ],
 
             'pdf' => [
+                'view' => 'pdf-layout',
                 'title' => 'Events List',
                 'document_title' => 'Events List',
-                'filename' => 'events.pdf',
+                'filename_prefix' => 'events',
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'fields' => [
@@ -230,10 +231,11 @@ class ExportConfig
                 ],
             ],
 
-            'print_current' => [
+            'current_page' => [
+                'view' => 'pdf-layout',
                 'title' => 'Events List (Current View)',
                 'document_title' => 'Events List (Current View)',
-                'filename' => 'events-current.pdf',
+                'filename_prefix' => 'events-current',
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'fields' => [
@@ -257,10 +259,11 @@ class ExportConfig
                 ],
             ],
 
-            'print_all' => [
+            'all_records' => [
+                'view' => 'pdf-layout',
                 'title' => 'Events List',
                 'document_title' => 'Events List',
-                'filename' => 'events.pdf',
+                'filename_prefix' => 'events',
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'default_sort' => 'title',
@@ -286,6 +289,8 @@ class ExportConfig
             ],
 
             'single_record' => [
+                'view' => 'pdf-layout',
+                'filename_prefix' => 'event-record',
                 'fields' => [
                     'Title' => 'title',
                     'Description' => 'description',
@@ -318,9 +323,10 @@ class ExportConfig
 
             'csv' => [
                 'headers' => [
-                    'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date',
+                    '#', 'Full Name', 'Email', 'Phone', 'Position', 'Department', 'Status', 'Hire Date',
                 ],
                 'fields' => [
+                    'index',
                     'full_name' => [
                         'field' => 'first_name',
                         'transform' => function ($value, $model) {
@@ -336,7 +342,6 @@ class ExportConfig
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff Export - Geraye Home Care Services',
                 'document_title' => 'All Staff Records',
-                'filename' => 'staff.pdf',
                 'filename_prefix' => 'staff',
                 'orientation' => 'landscape',
                 'include_index' => false,
@@ -374,7 +379,6 @@ class ExportConfig
                 'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Staff List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Staff List (Current View)',
-                'filename' => 'staff-current.pdf',
                 'filename_prefix' => 'staff-current',
                 'orientation' => 'landscape',
                 'include_index' => true,
@@ -392,6 +396,7 @@ class ExportConfig
                     'status' => 'status',
                 ],
                 'columns' => [
+                    ['key' => 'index', 'label' => '#'],
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'email', 'label' => 'Email'],
                     ['key' => 'phone', 'label' => 'Phone'],
@@ -423,6 +428,7 @@ class ExportConfig
                     'status' => 'status',
                 ],
                 'columns' => [
+                    ['key' => 'index', 'label' => '#'],
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'email', 'label' => 'Email'],
                     ['key' => 'phone', 'label' => 'Phone'],
@@ -524,8 +530,8 @@ class ExportConfig
                 ],
             ],
 
-            'print_current' => [
-                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
+            'current_page' => [
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Caregiver Assignments (Current View) - Geraye',
                 'document_title' => 'Caregiver Assignments (Current View)',
                 'filename_prefix' => 'assignments-current',
@@ -605,7 +611,7 @@ class ExportConfig
             ],
 
             'single_record' => [
-                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Caregiver Assignment Record - Geraye',
                 'document_title' => 'Caregiver Assignment Record',
                 'filename_prefix' => 'assignment-record',
@@ -693,7 +699,7 @@ class ExportConfig
             ],
 
             'current_page' => [
-                'view' => 'print-layout', // Changed from 'print-layout' to 'pdf-layout'
+                'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
                 'title' => 'Services List (Current View) - Geraye Home Care Services',
                 'document_title' => 'Services List (Current View)',
                 'filename_prefix' => 'services-current',

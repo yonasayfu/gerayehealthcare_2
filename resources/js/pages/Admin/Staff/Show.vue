@@ -33,13 +33,21 @@ function printPage() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-center justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
                 Staff Details: {{ staff.first_name }} {{ staff.last_name }}
             </h3>
-            <Link :href="route('admin.staff.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
+            <div class="flex items-center gap-3">
+              <img
+                :src="staff.photo_url ?? '/images/staff/placeholder.jpg'"
+                alt="Staff Photo"
+                class="w-28 h-28 rounded-full object-cover border print:w-32 print:h-32"
+                @error="(e: Event) => { (e.target as HTMLImageElement).src = '/images/staff/placeholder.jpg' }"
+              />
+              <Link :href="route('admin.staff.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center print:hidden" title="Close">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+              </Link>
+            </div>
         </div>
 
         <div class="p-6 space-y-6">
@@ -63,10 +71,6 @@ function printPage() {
                       <p class="text-sm text-muted-foreground">Last Name:</p>
                       <p class="font-medium text-gray-900 dark:text-white">{{ staff.last_name }}</p>
                     </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.email ?? '-' }}</p>
-                    </div>
                   </div>
                 </div>
 
@@ -76,6 +80,10 @@ function printPage() {
                     <div>
                       <p class="text-sm text-muted-foreground">Phone:</p>
                       <p class="font-medium text-gray-900 dark:text-white">{{ staff.phone ?? '-' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm text-muted-foreground">Email:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.email ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -101,10 +109,16 @@ function printPage() {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Hourly Rate:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ typeof staff.hourly_rate === 'number' ? `${staff.hourly_rate.toFixed(2)}` : '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">
+                        {{ staff.hourly_rate !== null && staff.hourly_rate !== undefined && !isNaN(Number(staff.hourly_rate))
+                          ? Number(staff.hourly_rate).toFixed(2)
+                          : '-' }}
+                      </p>
                     </div>
                   </div>
                 </div>
+
+                
 
                 <div>
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">System Information</h2>
@@ -120,7 +134,9 @@ function printPage() {
                   </div>
                 </div>
 
-                <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
+                <!-- spacer to keep content above fixed print footer -->
+                <div class="hidden print:block h-24"></div>
+                <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs print-footer">
                     <hr class="my-2 border-gray-300">
                     <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
                 </div>
@@ -130,11 +146,14 @@ function printPage() {
 
         <div class="p-6 border-t border-gray-200 rounded-b">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300 print:hidden">
+              <Link :href="route('admin.staff.index')" class="btn btn-outline print:hidden">
+                Back to List
+              </Link>
+              <button @click="printPage" class="btn btn-dark print:hidden">
                 <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link :href="route('admin.staff.edit', props.staff.id)"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md transition">
+                class="btn btn-primary print:hidden">
                 <Edit3 class="w-4 h-4" /> Edit Staff
               </Link>
             </div>
@@ -251,6 +270,17 @@ function printPage() {
     border-bottom: 1px solid #ddd !important;
     padding-bottom: 0.7rem !important;
     margin-bottom: 0.7rem !important;
+  }
+
+  /* Fixed footer for print */
+  .print-footer {
+    position: fixed !important;
+    bottom: 0.3cm !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    padding-top: 0.2rem !important;
   }
 
   /* GRID LAYOUT FOR DATA FIELDS (Two-column "Label: Value" format) */

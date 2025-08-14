@@ -1,7 +1,7 @@
 // In resources/js/Pages/Admin/VisitServices/Edit.vue
 
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import VisitServiceForm from './Form.vue'
 import { format } from 'date-fns'
@@ -72,9 +72,18 @@ function submit() {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
-              {{ form.processing ? 'Saving...' : 'Update Visit' }}
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <Link :href="route('admin.visit-services.index')" class="btn btn-outline">Cancel</Link>
+              <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
+                {{ form.processing ? 'Saving...' : 'Update Visit' }}
+              </button>
+              <button
+                class="btn btn-danger ml-auto"
+                @click="() => { if (confirm('Delete this visit service?')) { router.delete(route('admin.visit-services.destroy', props.visitService.id)) } }"
+              >
+                Delete
+              </button>
+            </div>
         </div>
 
     </div>

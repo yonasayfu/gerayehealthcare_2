@@ -28,6 +28,15 @@ class StaffService extends BaseService
     {
         $data = is_object($data) ? (array) $data : $data;
 
+        // Normalize hourly_rate if provided
+        if (array_key_exists('hourly_rate', $data)) {
+            if ($data['hourly_rate'] === '' || $data['hourly_rate'] === null) {
+                $data['hourly_rate'] = null;
+            } elseif (is_string($data['hourly_rate']) || is_numeric($data['hourly_rate'])) {
+                $data['hourly_rate'] = (float) $data['hourly_rate'];
+            }
+        }
+
         if (isset($data['photo']) && $data['photo']) {
             $data['photo'] = $data['photo']->store('images/staff', 'public');
         } else {
@@ -46,6 +55,16 @@ class StaffService extends BaseService
         
         $staff = $this->getById($id);
 
+        // Normalize hourly_rate if present in payload
+        if (array_key_exists('hourly_rate', $data)) {
+            if ($data['hourly_rate'] === '' || $data['hourly_rate'] === null) {
+                // To avoid overwriting with null unintentionally, remove the key when empty
+                unset($data['hourly_rate']);
+            } elseif (is_string($data['hourly_rate']) || is_numeric($data['hourly_rate'])) {
+                $data['hourly_rate'] = (float) $data['hourly_rate'];
+            }
+        }
+
         if (isset($data['photo'])) {
             if ($staff->photo && Storage::disk('public')->exists($staff->photo)) {
                 Storage::disk('public')->delete($staff->photo);
@@ -54,6 +73,9 @@ class StaffService extends BaseService
         } else {
             unset($data['photo']);
         }
+
+        // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
+        $data = array_filter($data, fn($v) => $v !== null);
 
         return parent::update($id, $data);
     }

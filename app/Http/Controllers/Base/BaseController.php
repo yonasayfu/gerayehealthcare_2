@@ -96,9 +96,9 @@ class BaseController extends Controller
         $validatedData = $this->validateRequest($request, 'update', $model);
 
         if ($this->dtoClass) {
-            $dtoData = $this->prepareDataForDTO($validatedData);
-            $dto = new ($this->dtoClass)($dtoData);
-            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $dtoData;
+            // Mirror store(): pass validated data directly to DTO constructor
+            $dto = new ($this->dtoClass)($validatedData);
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $validatedData;
         } else {
             $payload = $validatedData;
         }

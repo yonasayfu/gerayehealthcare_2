@@ -98,17 +98,17 @@ const formatDate = (dateString) => {
           <p class="text-sm text-muted-foreground">Manage all staff and patient assignments here.</p>
         </div>
         <div class="flex flex-wrap gap-2 no-print">
-          <Link :href="route('admin.assignments.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.assignments.create')" class="btn btn-primary">
             + Add Assignment
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('csv')" class="btn btn-success">
             <Download class="h-4 w-4" /> CSV
           </button>
           
-          <button @click="printCurrentView()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print Current Page">
+          <button @click="printCurrentView()" class="btn btn-dark" title="Print Current Page">
             <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="printAllRecords()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200" title="Print All Records">
+          <button @click="printAllRecords()" class="btn btn-info" title="Print All Records">
              <Book class="h-4 w-4" />
              Print All
           </button>
@@ -121,9 +121,9 @@ const formatDate = (dateString) => {
             type="text"
             v-model="search"
             placeholder="Search assignments..."
-            class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
+            class="form-input w-full rounded-md border border-gray-300 pl-3 pr-10 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
           />
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" />
           </svg>
@@ -190,19 +190,19 @@ const formatDate = (dateString) => {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.assignments.show', assignment.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="btn-icon text-gray-500"
                     title="View"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.assignments.edit', assignment.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="btn-icon text-blue-600"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(assignment.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button @click="destroy(assignment.id)" class="btn-icon text-red-600" title="Delete">
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>

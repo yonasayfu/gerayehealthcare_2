@@ -7,4 +7,14 @@ return [
         'Administrative',
         'Support',
     ],
+    'positions' => [
+        'Caregiver',
+        'Nurse',
+        'Physiotherapist',
+        'Supervisor',
+        'Coordinator',
+        'Administrator',
+        'Driver',
+        'Support Staff',
+    ],
 ];

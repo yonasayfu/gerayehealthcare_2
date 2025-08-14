@@ -8,6 +8,7 @@ use App\Services\Validation\Rules\CampaignContentRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Controllers\Base\BaseController;
 
 class CampaignContentController extends BaseController
 {

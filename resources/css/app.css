@@ -128,10 +128,35 @@
     --radius: 0.5rem;
 }
 
+@layer components {
+    .btn {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+    }
 
+    /* Filled variants */
+    .btn-primary { /* Teal/Cyan: primary actions (Create/Save/Schedule) */
+        @apply text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-300;
+    }
+    .btn-success { /* Green: success/export */
+        @apply text-white bg-green-600 hover:bg-green-700 focus:ring-green-300;
+    }
+    .btn-info { /* Blue: info/print-all */
+        @apply text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300;
+    }
+    .btn-dark { /* Slate: neutral emphasis (print current) */
+        @apply text-white bg-slate-700 hover:bg-slate-800 focus:ring-slate-300;
+    }
+    .btn-danger { /* Destructive */
+        @apply text-white bg-red-600 hover:bg-red-700 focus:ring-red-300;
+    }
 
-@layer base {
-    body {
-        @apply bg-background text-foreground;
+    /* Outline/neutral */
+    .btn-outline {
+        @apply border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800;
+    }
+
+    /* Icon-only small button */
+    .btn-icon {
+        @apply inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900;
     }
 }

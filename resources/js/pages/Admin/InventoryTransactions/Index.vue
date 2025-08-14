@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
-import { ArrowUpDown, Printer, Download, Eye } from 'lucide-vue-next';
+import { ArrowUpDown, Printer, Download, Eye, Edit2, Trash2 } from 'lucide-vue-next';
 import Pagination from '@/components/Pagination.vue';
 
 const breadcrumbs = [
@@ -49,6 +49,12 @@ import { useExport } from '@/Composables/useExport';
 
 const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-transactions', filters: props.filters });
 
+function destroyTx(id: number) {
+  if (confirm('Delete this transaction?')) {
+    router.delete(route('admin.inventory-transactions.destroy', id));
+  }
+}
+
 </script>
 
 <template>
@@ -61,12 +67,14 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Transactions are typically created via other actions, not directly here -->
-          <a :href="route('admin.inventory-transactions.export')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            <Download class="h-4 w-4" /> Export
-          </a>
-          <button @click="generatePdf" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> PDF
+          <button @click="() => exportData('csv')" class="btn btn-primary">
+            <Download class="h-4 w-4" /> Export CSV
+          </button>
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
+          </button>
+          <button @click="printAllRecords" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
@@ -75,7 +83,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         <!-- Search and Filter Section -->
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
           <div class="relative w-full md:w-1/3">
-            <input type="text" v-model="search" placeholder="Search transactions..." class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
+            <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
           </div>
           <div>
             <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
@@ -111,11 +119,13 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
                 <td class="p-2">{{ transaction.quantity }}</td>
                 <td class="p-2">{{ transaction.from_location }}</td>
                 <td class="p-2">{{ transaction.to_location }}</td>
-                <td class="p-2">{{ transaction.performed_by.first_name }} {{ transaction.performed_by.last_name }}</td>
+                <td class="p-2">{{ transaction.performed_by ? (transaction.performed_by.first_name + ' ' + transaction.performed_by.last_name) : '-' }}</td>
                 <td class="p-2">{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
                 <td class="p-2 text-right">
-                  <div class="inline-flex items-center justify-end space-x-2">
-                    <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600" title="View Details"><Eye class="w-4 h-4" /></Link>
+                  <div class="inline-flex items-center justify-end space-x-1">
+                    <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="btn btn-icon" title="View"><Eye class="w-4 h-4" /></Link>
+                    <Link :href="route('admin.inventory-transactions.edit', transaction.id)" class="btn btn-icon" title="Edit"><Edit2 class="w-4 h-4" /></Link>
+                    <button @click="() => destroyTx(transaction.id)" class="btn btn-icon text-red-600" title="Delete"><Trash2 class="w-4 h-4" /></button>
                   </div>
                 </td>
               </tr>

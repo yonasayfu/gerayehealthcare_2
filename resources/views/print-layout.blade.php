@@ -6,6 +6,11 @@
     <title>{{ $title ?? 'Report' }}</title>
     <!-- Remove @vite directive and add inline styles for PDF generation -->
     <style>
+        /* Page size and margins for PDF/Print */
+        @page {
+            size: A4 landscape; /* Make print-all and print-current landscape */
+            margin: 10mm;
+        }
         /* Reset and base styles */
         * {
             margin: 0;
@@ -19,6 +24,8 @@
             line-height: 1.4;
             color: #333;
             background: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         
         /* Header styles */
@@ -55,6 +62,8 @@
             border-collapse: collapse;
             margin: 15px 0;
             font-size: 11px;
+            table-layout: fixed; /* helps long content wrap nicely in landscape */
+            word-wrap: break-word;
         }
         
         th, td {
@@ -62,6 +71,7 @@
             padding: 6px 8px;
             text-align: left;
             vertical-align: top;
+            overflow-wrap: anywhere;
         }
         
         th {
@@ -89,20 +99,24 @@
         @media print {
             body {
                 margin: 0;
-                padding: 10px;
+                padding: 6mm;
             }
-            
+
             .header {
-                margin-bottom: 15px;
+                margin-bottom: 12px;
             }
-            
+
             table {
                 page-break-inside: avoid;
             }
-            
+
             th, td {
                 padding: 4px 6px;
             }
+
+            /* Avoid orphan headers/rows */
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
         }
         
         /* Utility classes */

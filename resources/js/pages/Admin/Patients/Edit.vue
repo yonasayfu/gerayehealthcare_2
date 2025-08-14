@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm, Link } from '@inertiajs/vue3'
+import { Head, useForm, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType, Patient, PatientForm } from '@/types' // Import Patient and PatientForm
@@ -67,9 +67,18 @@ function submit() {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
-              {{ form.processing ? 'Saving...' : 'Save Changes' }}
-            </button>
+            <div class="flex flex-wrap items-center gap-2">
+              <Link :href="route('admin.patients.index')" class="btn btn-outline">Cancel</Link>
+              <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
+                {{ form.processing ? 'Saving...' : 'Save Changes' }}
+              </button>
+              <button
+                class="btn btn-danger ml-auto"
+                @click="() => { if (confirm('Are you sure you want to delete this patient? This action cannot be undone.')) { router.delete(route('admin.patients.destroy', props.patient.id)) } }"
+              >
+                Delete
+              </button>
+            </div>
         </div>
 
     </div>

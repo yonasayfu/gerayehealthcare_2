@@ -28,6 +28,7 @@ class StaffController extends BaseController
     {
         return Inertia::render('Admin/Staff/Create', [
             'departments' => config('hr.departments'),
+            'positions' => config('hr.positions'),
         ]);
     }
 
@@ -42,6 +43,7 @@ class StaffController extends BaseController
         return Inertia::render('Admin/Staff/Edit', [
             'staff' => $staff,
             'departments' => config('hr.departments'),
+            'positions' => config('hr.positions'),
         ]);
     }
    

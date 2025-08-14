@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
 
-const props = defineProps<{ departments: string[] }>()
+const props = defineProps<{ departments: string[]; positions: string[] }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: '/dashboard' },
@@ -49,13 +49,16 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" :errors="form.errors" :departments="props.departments" />
+            <Form :form="form" :errors="form.errors" :departments="props.departments" :positions="props.positions" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
-              {{ form.processing ? 'Saving...' : 'Save' }}
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <Link :href="route('admin.staff.index')" class="btn btn-outline">Cancel</Link>
+              <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
+                {{ form.processing ? 'Saving...' : 'Save' }}
+              </button>
+            </div>
         </div>
 
     </div>

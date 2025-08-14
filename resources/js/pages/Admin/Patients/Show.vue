@@ -147,17 +147,17 @@ function destroy(id: number) {
 
         <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printSinglePatient" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
+              <Link :href="route('admin.patients.index')" class="btn btn-outline">
+                Back to List
+              </Link>
               <Link
                 :href="route('admin.patients.edit', patient.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                class="btn btn-primary"
               >
                 Edit Patient
               </Link>
-              <button @click="destroy(patient.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Patient
+              <button @click="printSinglePatient" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
             </div>
         </div>

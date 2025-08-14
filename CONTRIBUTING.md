@@ -51,6 +51,59 @@ This document outlines the mandatory process for all development tasks.
 - Frontend: Vue.js/TypeScript in `/resources/js`
 - Tests: Pest PHP tests in `/tests`
 
+## Controller Surface Policy
+
+Keep controllers ultra-thin and consistent across modules. Controllers should:
+
+- Only orchestrate. No business logic, data mapping, or CSV/PDF building.
+- Delegate all CRUD, search/sort/paginate to the corresponding Service (extends `BaseService`).
+- Use centralized export/print handlers (via `ExportableTrait`/service), never custom CSV/PDF logic in controllers.
+- Override only `create()` and `edit()` when preload data is needed for forms (e.g., dropdown options from config). Preloading is not business logic.
+- Never define validation rule arrays directly; use unified Form Requests with Rules classes per the DRY validation architecture.
+
+Minimal controller pattern:
+
+```php
+class XController extends BaseController
+{
+    public function __construct(XService $service)
+    {
+        parent::__construct($service, [
+            'store' => ['rules' => XRules::store()],
+            'update' => ['rules' => XRules::update()],
+        ]);
+    }
+
+    // Override only to provide preload data for forms
+    public function create()
+    {
+        return Inertia::render('Admin/X/Create', [
+            'preload' => [
+                // e.g., 'positions' => config('hr.positions'),
+                // e.g., 'departments' => config('hr.departments'),
+            ],
+        ]);
+    }
+
+    public function edit(X $x)
+    {
+        return Inertia::render('Admin/X/Edit', [
+            'data' => $x,
+            'preload' => [
+                // same as create()
+            ],
+        ]);
+    }
+}
+```
+
+Controller checklist:
+
+- [ ] Constructor delegates to `BaseController` with Rules class.
+- [ ] No validation arrays, no CSV/PDF building in controller.
+- [ ] `create()`/`edit()` only preload dropdown data (if needed).
+- [ ] Export/Print routes call centralized handlers (CSV/PDF/print current/all/single).
+
 ## DRY Validation Architecture Implementation
 
 ### Overview

@@ -118,13 +118,13 @@ const formatDate = (dateString: string | null) => {
           <p class="text-sm text-muted-foreground">Manage all scheduled patient visits.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.visit-services.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.visit-services.create')" class="btn btn-primary">
             <Plus class="h-4 w-4" /> Schedule Visit
           </Link>
-          <button @click="printAllVisitServices" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-md transition dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printAllVisitServices" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
           </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <button @click="printCurrentView" class="btn btn-dark">
             <Printer class="h-4 w-4" /> Print Current
           </button>
         </div>
@@ -133,8 +133,8 @@ const formatDate = (dateString: string | null) => {
       <!-- Filters -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
           <div class="relative w-full md:w-1/3">
-              <input type="text" v-model="search" placeholder="Search by Patient or Staff..." class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
+              <input type="text" v-model="search" placeholder="Search by Patient or Staff..." class="form-input w-full rounded-md border border-gray-300 pl-3 pr-10 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
+              <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
           </div>
           <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
@@ -177,9 +177,9 @@ const formatDate = (dateString: string | null) => {
               </td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
-                  <Link :href="route('admin.visit-services.show', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500" title="View Details"><Eye class="w-4 h-4" /></Link>
-                  <Link :href="route('admin.visit-services.edit', visit.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
-                  <button @click="destroy(visit.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Cancel Visit"><Trash2 class="w-4 h-4" /></button>
+                  <Link :href="route('admin.visit-services.show', visit.id)" class="btn-icon text-gray-500" title="View Details"><Eye class="w-4 h-4" /></Link>
+                  <Link :href="route('admin.visit-services.edit', visit.id)" class="btn-icon text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
+                  <button @click="destroy(visit.id)" class="btn-icon text-red-600" title="Cancel Visit"><Trash2 class="w-4 h-4" /></button>
                 </div>
               </td>
             </tr>

@@ -164,6 +164,15 @@
         background-color: #f5f5f5;
         font-weight: bold;
     }
+
+    /* Zebra striping for readability */
+    .print-table tbody tr:nth-child(odd) {
+        background-color: #fafafa;
+    }
+
+    .print-table tbody tr:hover {
+        background-color: #f0f0f0;
+    }
     
     .single-record-details {
         margin: 20px 0;
@@ -207,5 +216,44 @@
     .print-generated-date {
         font-size: 12px;
         color: #666;
+    }
+
+    /* Print-optimized rules */
+    @media print {
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        html, body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .printable-report-container {
+            padding: 0;
+        }
+
+        .print-header-hr,
+        .print-footer-hr {
+            border-top-color: #bbb !important;
+        }
+
+        .print-header { margin-bottom: 16px; }
+        .print-document-title { margin-bottom: 6px; }
+
+        /* Avoid row breaks */
+        .print-table tr { page-break-inside: avoid; }
+        .single-record-details, .detail-item { page-break-inside: avoid; }
+
+        /* Fixed footer at bottom of page */
+        .print-footer {
+            position: fixed;
+            bottom: 0.5cm;
+            left: 0;
+            right: 0;
+            background: #fff;
+            padding-top: 6px;
+        }
     }
 </style>

@@ -122,18 +122,15 @@ function printSingleAssignment() {
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-            <div class="flex items-center gap-2">
-                <Link :href="route('admin.assignments.index')" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
+            <div class="flex flex-wrap gap-2">
+                <Link :href="route('admin.assignments.index')" class="btn btn-outline">
                     Back to List
                 </Link>
-                <Link :href="route('admin.assignments.edit', assignment.id)" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                <Link :href="route('admin.assignments.edit', assignment.id)" class="btn btn-primary">
                     Edit Assignment
                 </Link>
-                <button @click="printSingleAssignment" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium">
+                <button @click="printSingleAssignment" class="btn btn-dark">
                     Print Current
-                </button>
-                <button @click="() => router.delete(route('admin.assignments.destroy', assignment.id))" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium">
-                    Delete
                 </button>
             </div>
         </div>

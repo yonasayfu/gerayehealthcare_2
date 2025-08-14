@@ -35,40 +35,61 @@ trait ExportableTrait
 
         if ($type === 'csv') {
             $csvConfig = $config['csv'];
-if (!isset($csvConfig['headers']) || !isset($csvConfig['fields'])) {
-    abort(500, "CSV export configuration must include 'headers' and 'fields'.");
-}
-
-$filename = ($csvConfig['filename_prefix'] ?? ($config['filename_prefix'] ?? 'export')) . '_' . now()->format('Ymd_His') . '.csv';
-
-$headers = [
-    'Content-Type' => 'text/csv; charset=UTF-8',
-    'Content-Disposition' => "attachment; filename=\"$filename\"",
-];
-
-$callback = function () use ($csvConfig, $data) {
-    $output = fopen('php://output', 'w');
-    // Add UTF-8 BOM for Excel compatibility
-    fwrite($output, "\xEF\xBB\xBF");
-    fputcsv($output, $csvConfig['headers']);
-    foreach ($data as $index => $row) {
-        $line = [];
-        foreach ($csvConfig['fields'] as $field) {
-            if ($field === 'index') {
-                $line[] = $index + 1;
-            } elseif ($field === 'staff_full_name') {
-                $staff = $row->staff ?? null;
-                $line[] = $staff ? trim(($staff->first_name ?? '') . ' ' . ($staff->last_name ?? '')) : 'N/A';
-            } else {
-                $line[] = data_get($row, $field, '');
+            if (!isset($csvConfig['headers']) || !isset($csvConfig['fields'])) {
+                abort(500, "CSV export configuration must include 'headers' and 'fields'.");
             }
-        }
-        fputcsv($output, $line);
-    }
-    fclose($output);
-};
 
-return Response::stream($callback, 200, $headers);
+            $filename = ($csvConfig['filename_prefix'] ?? ($config['filename_prefix'] ?? 'export')) . '_' . now()->format('Ymd_His') . '.csv';
+
+            $headers = [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+
+            $callback = function () use ($csvConfig, $data) {
+                $output = fopen('php://output', 'w');
+                // Add UTF-8 BOM for Excel compatibility
+                fwrite($output, "\xEF\xBB\xBF");
+                fputcsv($output, $csvConfig['headers']);
+                foreach ($data as $index => $row) {
+                    $line = [];
+                    foreach ($csvConfig['fields'] as $field) {
+                        // 1) Literal index column support
+                        if ($field === 'index') {
+                            $line[] = $index + 1;
+                            continue;
+                        }
+
+                        // 2) Legacy special-case support
+                        if ($field === 'staff_full_name') {
+                            $staff = $row->staff ?? null;
+                            $line[] = $staff ? trim(($staff->first_name ?? '') . ' ' . ($staff->last_name ?? '')) : 'N/A';
+                            continue;
+                        }
+
+                        // 3) Array field spec with transform/default
+                        if (is_array($field)) {
+                            $source = $field['field'] ?? null;
+                            $value = $source ? data_get($row, $source, null) : null;
+                            if (isset($field['transform']) && is_callable($field['transform'])) {
+                                $value = call_user_func($field['transform'], $value, $row);
+                            }
+                            if (($value === null || $value === '') && array_key_exists('default', $field)) {
+                                $value = $field['default'];
+                            }
+                            $line[] = $value ?? '';
+                            continue;
+                        }
+
+                        // 4) Simple string path (dot-notation supported)
+                        $line[] = data_get($row, $field, '');
+                    }
+                    fputcsv($output, $line);
+                }
+                fclose($output);
+            };
+
+            return Response::stream($callback, 200, $headers);
         } elseif ($type === 'pdf') {
             $pdfConfig = $config['pdf'];
             if (!isset($pdfConfig['view'])) {
