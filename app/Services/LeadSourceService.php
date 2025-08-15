@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateLeadSourceDTO;
 use App\Models\LeadSource;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class LeadSourceService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(LeadSource $leadSource)
     {
         parent::__construct($leadSource);

@@ -34,8 +34,9 @@ class LeaveRequestService extends BaseService
             $this->applySearch($query, $request->input('search'));
         }
 
-        $sortBy = $request->input('sort', 'created_at');
-        $sortOrder = $request->input('direction', 'desc');
+        // Accept both new and legacy sort keys from the UI
+        $sortBy = $request->input('sort', $request->input('sort_by', 'created_at'));
+        $sortOrder = $request->input('direction', $request->input('sort_order', 'desc'));
 
         if ($sortBy === 'staff_first_name') {
             $query->join('staff', 'leave_requests.staff_id', '=', 'staff.id')
@@ -45,7 +46,15 @@ class LeaveRequestService extends BaseService
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        $perPage = (int) $request->input('per_page', 10);
+
+        // Ensure pagination links preserve current filters
+        $paginator = $query->paginate($perPage);
+        $paginator->appends($request->only([
+            'search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'
+        ]));
+
+        return $paginator;
     }
 
     public function update(int $id, array|object $data): LeaveRequest

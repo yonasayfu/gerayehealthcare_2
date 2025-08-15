@@ -20,11 +20,24 @@ class TaskDelegationController extends BaseController
             'Admin/TaskDelegations',
             'taskDelegations',
             TaskDelegation::class,
-            CreateTaskDelegationDTO::class
+            'App\\DTOs\\CreateTaskDelegationDTO',
+            'App\\DTOs\\UpdateTaskDelegationDTO'
         );
     }
 
-    
+    public function create()
+    {
+        return Inertia::render('Admin/TaskDelegations/Create', [
+            'staff' => Staff::all(['id', 'first_name', 'last_name']),
+        ]);
+    }
 
-   
+    public function edit($id)
+    {
+        $taskDelegation = $this->service->getById($id);
+        return Inertia::render('Admin/TaskDelegations/Edit', [
+            'taskDelegation' => $taskDelegation,
+            'staff' => Staff::all(['id', 'first_name', 'last_name']),
+        ]);
+    }
 }

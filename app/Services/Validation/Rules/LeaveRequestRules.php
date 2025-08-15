@@ -14,7 +14,7 @@ class LeaveRequestRules extends BaseResourceRules
     public static function update($item): array
     {
         return [
-            'status' => 'required|in:Approved,Denied',
+            'status' => 'required|in:Pending,Approved,Denied',
             'admin_notes' => 'nullable|string|max:1000',
         ];
     }

@@ -5,13 +5,10 @@ namespace App\Services;
 use App\DTOs\CreateMarketingPlatformDTO;
 use App\Models\MarketingPlatform;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use Illuminate\Support\Facades\Log;
 
 class MarketingPlatformService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(MarketingPlatform $marketingPlatform)
     {
         parent::__construct($marketingPlatform);

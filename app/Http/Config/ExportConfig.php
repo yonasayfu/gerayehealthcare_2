@@ -1024,4 +1024,174 @@ class ExportConfig
             ],
         ];
     }
+
+    /**
+     * Get export configuration for Invoice model
+     */
+    public static function getInvoiceConfig(): array
+    {
+        return [
+            'searchable_fields' => ['invoice_number', 'patient.full_name', 'status'],
+            'sortable_fields' => ['invoice_number', 'invoice_date', 'due_date', 'grand_total', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'select_fields' => [
+                'invoice_number', 'patient_id', 'invoice_date', 'due_date', 'subtotal', 'tax_amount', 'grand_total', 'status', 'paid_at'
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Invoice #', 'Patient', 'Invoice Date', 'Due Date', 'Subtotal', 'Tax', 'Grand Total', 'Status', 'Paid At',
+                ],
+                'fields' => [
+                    'index',
+                    'invoice_number',
+                    'patient.full_name',
+                    [
+                        'field' => 'invoice_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'due_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'subtotal',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    [
+                        'field' => 'tax_amount',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    [
+                        'field' => 'grand_total',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    'status',
+                    [
+                        'field' => 'paid_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'with_relations' => ['patient'],
+                'filename_prefix' => 'invoices',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Invoices - Geraye Home Care Services',
+                'document_title' => 'Invoices',
+                'filename_prefix' => 'invoices',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['patient'],
+                'fields' => [
+                    'invoice_number' => 'invoice_number',
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'subtotal' => [ 'field' => 'subtotal', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'tax_amount' => [ 'field' => 'tax_amount', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'status' => 'status',
+                    'paid_at' => [ 'field' => 'paid_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'invoice_date', 'label' => 'Invoice Date'],
+                    ['key' => 'due_date', 'label' => 'Due Date'],
+                    ['key' => 'subtotal', 'label' => 'Subtotal'],
+                    ['key' => 'tax_amount', 'label' => 'Tax'],
+                    ['key' => 'grand_total', 'label' => 'Grand Total'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'paid_at', 'label' => 'Paid At'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Invoices (Current View) - Geraye Home Care Services',
+                'document_title' => 'Invoices (Current View)',
+                'filename_prefix' => 'invoices-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['patient'],
+                'fields' => [
+                    'invoice_number' => 'invoice_number',
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'invoice_date', 'label' => 'Invoice Date'],
+                    ['key' => 'due_date', 'label' => 'Due Date'],
+                    ['key' => 'grand_total', 'label' => 'Grand Total'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Invoices - Geraye Home Care Services',
+                'document_title' => 'Invoices',
+                'filename_prefix' => 'invoices',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['patient'],
+                'fields' => [
+                    'invoice_number' => 'invoice_number',
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'invoice_date', 'label' => 'Invoice Date'],
+                    ['key' => 'due_date', 'label' => 'Due Date'],
+                    ['key' => 'grand_total', 'label' => 'Grand Total'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf.invoice',
+                'title' => 'Invoice Detail - Geraye Home Care Services',
+                'document_title' => 'Invoice Detail',
+                'filename_prefix' => 'invoice',
+                'with_relations' => ['patient', 'items.visitService'],
+                'fields' => [
+                    'Invoice #' => 'invoice_number',
+                    'Patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'Invoice Date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Due Date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Subtotal' => [ 'field' => 'subtotal', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Tax' => [ 'field' => 'tax_amount', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Grand Total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Status' => 'status',
+                    'Paid At' => [ 'field' => 'paid_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'invoice_date', 'label' => 'Invoice Date'],
+                    ['key' => 'due_date', 'label' => 'Due Date'],
+                    ['key' => 'subtotal', 'label' => 'Subtotal'],
+                    ['key' => 'tax_amount', 'label' => 'Tax'],
+                    ['key' => 'grand_total', 'label' => 'Grand Total'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'paid_at', 'label' => 'Paid At'],
+                ],
+            ],
+        ];
+    }
+
 }

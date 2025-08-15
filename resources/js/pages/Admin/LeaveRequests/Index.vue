@@ -32,14 +32,14 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Leave Requests', href: route('admin.admin-leave-requests.index') },
+  { title: 'Leave Requests', href: route('admin.leave-requests.index') },
 ];
 
 // Reactive variables for search and sort
 const searchInput = ref(props.filters.search || '');
 const currentSortBy = ref(props.filters.sort_by);
 const currentSortOrder = ref(props.filters.sort_order);
-const perPage = ref(props.filters.per_page || 5);
+const perPage = ref<number>(Number(props.filters.per_page) || 5);
 
 // Watch for changes in searchInput and trigger search after a delay
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -52,10 +52,17 @@ watch(searchInput, (newValue) => {
   }, 300); // 300ms debounce
 });
 
+// Watch perPage and re-fetch with the new per_page value
+watch(perPage, (newVal) => {
+  const n = Number(newVal) || 5;
+  if (n !== perPage.value) perPage.value = n;
+  applyFilters({ preserveScroll: true });
+});
+
 // Function to apply filters (search and sort)
 const applyFilters = (options?: { preserveState?: boolean; preserveScroll?: boolean }) => {
   router.get(
-    route('admin.admin-leave-requests.index'),
+    route('admin.leave-requests.index'),
     {
       search: searchInput.value,
       sort_by: currentSortBy.value,
@@ -103,10 +110,10 @@ const form = useForm({
   admin_notes: '',
 });
 
-// Function to open the dialog and set the selected request
-const openUpdateDialog = (request: LeaveRequest, status: 'Approved' | 'Denied') => {
+// Function to open the dialog and set the selected request (presetting status if provided)
+const openUpdateDialog = (request: LeaveRequest, status?: 'Approved' | 'Denied' | 'Pending') => {
   selectedRequest.value = request;
-  form.status = status; // This should set 'Approved' or 'Denied'
+  form.status = status ?? (request.status as 'Approved' | 'Denied' | 'Pending');
   form.admin_notes = request.admin_notes || ''; // Ensure notes are pre-filled if existing
   isDialogOpen.value = true; // THIS IS KEY: Set to true to open the dialog
 };
@@ -119,7 +126,7 @@ const updateRequestStatus = () => {
     return;
   }
 
-  form.put(route('admin.admin-leave-requests.update', selectedRequest.value.id), {
+  form.put(route('admin.leave-requests.update', selectedRequest.value.id), {
     preserveScroll: true,
     
     // When the backend responds with Inertia::location, it automatically performs a new GET request
@@ -244,11 +251,13 @@ const statusColor = (status: string) => {
                   </span>
                 </td>
                 <td class="p-2 text-right">
-                  <div v-if="request.status === 'Pending'" class="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" @click="openUpdateDialog(request, 'Approved')">Approve</Button>
-                    <Button variant="destructive" size="sm" @click="openUpdateDialog(request, 'Denied')">Deny</Button>
+                  <div class="flex justify-end gap-2">
+                    <template v-if="request.status === 'Pending'">
+                      <Button variant="outline" size="sm" @click="openUpdateDialog(request, 'Approved')">Approve</Button>
+                      <Button variant="destructive" size="sm" @click="openUpdateDialog(request, 'Denied')">Deny</Button>
+                    </template>
+                    <Button variant="secondary" size="sm" @click="openUpdateDialog(request)">Edit</Button>
                   </div>
-                  <span v-else class="text-xs text-muted-foreground">Reviewed</span>
                 </td>
               </tr>
             </tbody>
@@ -279,6 +288,22 @@ const statusColor = (status: string) => {
           </DialogDescription>
         </DialogHeader>
         <div class="py-4">
+          <div class="mb-4">
+            <Label for="status">Status</Label>
+            <select
+              id="status"
+              v-model="form.status"
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Denied">Denied</option>
+            </select>
+            <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">
+              {{ form.errors.status }}
+            </div>
+          </div>
+
           <Label for="admin_notes">Notes (Optional)</Label>
           <textarea
             id="admin_notes"

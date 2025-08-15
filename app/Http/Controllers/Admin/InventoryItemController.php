@@ -6,7 +6,6 @@ use App\Http\Controllers\Base\BaseController;
 use App\Services\InventoryItemService;
 use App\Models\InventoryItem;
 use App\Services\Validation\Rules\InventoryItemRules;
-use App\DTOs\CreateInventoryItemDTO;
 
 class InventoryItemController extends BaseController
 {
@@ -17,8 +16,7 @@ class InventoryItemController extends BaseController
             InventoryItemRules::class,
             'Admin/InventoryItems',
             'inventoryItems',
-            InventoryItem::class,
-            CreateInventoryItemDTO::class
+            InventoryItem::class
         );
     }
 

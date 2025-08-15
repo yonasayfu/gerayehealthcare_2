@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateMarketingBudgetDTO;
 use App\Models\MarketingBudget;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class MarketingBudgetService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(MarketingBudget $marketingBudget)
     {
         parent::__construct($marketingBudget);

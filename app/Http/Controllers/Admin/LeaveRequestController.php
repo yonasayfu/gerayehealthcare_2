@@ -19,7 +19,7 @@ class LeaveRequestController extends BaseController
             'Admin/LeaveRequests',
             'leaveRequests',
             LeaveRequest::class,
-            CreateLeaveRequestDTO::class
+            'App\\DTOs\\UpdateLeaveRequestDTO'
         );
     }
 

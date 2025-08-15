@@ -4,14 +4,10 @@ namespace App\Services;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 use Illuminate\Support\Facades\Validator;
 
 class SupplierService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(Supplier $supplier)
     {
         parent::__construct($supplier);

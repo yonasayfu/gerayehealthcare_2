@@ -47,9 +47,11 @@ class BaseController extends Controller
         $validatedData = $this->validateRequest($request, 'store');
 
         if ($this->dtoClass) {
-            // Spatie DTOs accept an associative array in the constructor
-            $dto = new ($this->dtoClass)($validatedData);
-            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $validatedData;
+            // Prepare data for DTO instantiation
+            $dtoData = $this->prepareDataForDTO($validatedData);
+            // Instantiate DTO with constructor parameters, not as a single array
+            $dto = new ($this->dtoClass)(...array_values($dtoData));
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $dtoData;
         } else {
             $payload = $validatedData;
         }
@@ -96,9 +98,11 @@ class BaseController extends Controller
         $validatedData = $this->validateRequest($request, 'update', $model);
 
         if ($this->dtoClass) {
-            // Mirror store(): pass validated data directly to DTO constructor
-            $dto = new ($this->dtoClass)($validatedData);
-            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $validatedData;
+            // Prepare data for DTO instantiation
+            $dtoData = $this->prepareDataForDTO($validatedData);
+            // Instantiate DTO with constructor parameters, not as a single array
+            $dto = new ($this->dtoClass)(...array_values($dtoData));
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : $dtoData;
         } else {
             $payload = $validatedData;
         }
@@ -157,7 +161,27 @@ class BaseController extends Controller
         foreach ($parameters as $parameter) {
             $name = $parameter->getName();
             if (array_key_exists($name, $validatedData)) {
-                $dtoData[$name] = $validatedData[$name];
+                $value = $validatedData[$name];
+                // Ensure staff_id is always an int
+                if ($name === 'staff_id') {
+                    \Log::debug('prepareDataForDTO: staff_id value', ['value' => $value]);
+                    if (is_array($value)) {
+                        // Try to extract a numeric value from the array
+                        if (isset($value['id']) && is_numeric($value['id'])) {
+                            $value = $value['id'];
+                        } else {
+                            // Try to get the first numeric value in the array
+                            $numeric = array_filter($value, 'is_numeric');
+                            if (!empty($numeric)) {
+                                $value = array_shift($numeric);
+                            } else {
+                                throw new \InvalidArgumentException('staff_id must be an integer or contain an id key. Got: ' . json_encode($value));
+                            }
+                        }
+                    }
+                    $value = (int) $value;
+                }
+                $dtoData[$name] = $value;
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $dtoData[$name] = $parameter->getDefaultValue();
             } elseif ($parameter->allowsNull()) {

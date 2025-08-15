@@ -8,6 +8,8 @@ use App\Models\LeadSource;
 use App\Services\Validation\Rules\LeadSourceRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\DTOs\CreateLeadSourceDTO;
+use App\DTOs\UpdateLeadSourceDTO;
 
 class LeadSourceController extends BaseController
 {
@@ -19,7 +21,8 @@ class LeadSourceController extends BaseController
             'Admin/LeadSources',
             'leadSources',
             LeadSource::class,
-            CreateLeadSourceDTO::class
+            CreateLeadSourceDTO::class,
+            UpdateLeadSourceDTO::class
         );
     }
 

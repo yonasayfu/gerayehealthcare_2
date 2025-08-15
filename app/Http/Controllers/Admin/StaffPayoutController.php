@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
+use App\DTOs\CreateStaffPayoutDTO;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Carbon;
+use App\Models\StaffPayout;
 
 class StaffPayoutController extends Controller
 {
@@ -18,9 +20,9 @@ class StaffPayoutController extends Controller
         $this->staffPayoutService = $staffPayoutService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $data = $this->staffPayoutService->getStaffEarningsData();
+        $data = $this->staffPayoutService->getStaffEarningsData($request);
         return Inertia::render('Admin/StaffPayouts/Index', $data);
     }
 
@@ -41,5 +43,16 @@ class StaffPayoutController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function printAll()
+    {
+        $payouts = StaffPayout::with('staff')
+            ->orderByDesc('payout_date')
+            ->limit(500)
+            ->get();
+        return Inertia::render('Admin/StaffPayouts/PrintAll', [
+            'payouts' => $payouts,
+        ]);
     }
 }

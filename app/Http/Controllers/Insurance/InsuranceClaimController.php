@@ -19,6 +19,7 @@ use App\Models\Patient;
 use App\Models\Invoice;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
+use App\Services\Validation\Rules\InsuranceClaimRules;
 
 class InsuranceClaimController extends BaseController
 {

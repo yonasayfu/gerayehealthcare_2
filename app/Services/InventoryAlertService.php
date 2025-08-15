@@ -5,14 +5,10 @@ namespace App\Services;
 use App\DTOs\CreateInventoryAlertDTO;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 use Illuminate\Support\Facades\Log;
 
 class InventoryAlertService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(InventoryAlert $inventoryAlert)
     {
         parent::__construct($inventoryAlert);

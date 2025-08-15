@@ -54,18 +54,13 @@ function exportData(type) {
 }
 
 function printCurrentView() {
-    setTimeout(() => {
-        try {
-            window.print();
-        } catch (error) {
-            console.error('Print failed:', error);
-            alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-        }
-    }, 100);
+    // Use centralized backend handler for current page printing
+    window.open(route('admin.events.printCurrent'), '_blank');
 }
 
 const printAllEvents = () => {
-    window.open(route('admin.events.export', { type: 'pdf' }), '_blank');
+    // Use centralized backend handler for printing all records
+    window.open(route('admin.events.printAll'), '_blank');
 };
 
 function toggleSort(field) {
@@ -144,8 +139,14 @@ function toggleSort(field) {
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('title')">
                                 Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
+                            <th class="px-6 py-3">
+                                Description
+                            </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('event_date')">
                                 Event Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                            </th>
+                            <th class="px-6 py-3">
+                                Free Service
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('broadcast_status')">
                                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
@@ -156,7 +157,9 @@ function toggleSort(field) {
                     <tbody>
                         <tr v-for="event in events.data" :key="event.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
                             <td class="px-6 py-4">{{ event.title }}</td>
+                            <td class="px-6 py-4">{{ event.description }}</td>
                             <td class="px-6 py-4">{{ event.event_date }}</td>
+                            <td class="px-6 py-4">{{ event.is_free_service ? 'Yes' : 'No' }}</td>
                             <td class="px-6 py-4">{{ event.broadcast_status }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
@@ -181,7 +184,7 @@ function toggleSort(field) {
                             </td>
                         </tr>
                         <tr v-if="events.data.length === 0">
-                            <td colspan="4" class="text-center px-6 py-4 text-gray-400">No events found.</td>
+                            <td colspan="6" class="text-center px-6 py-4 text-gray-400">No events found.</td>
                         </tr>
                     </tbody>
                 </table>

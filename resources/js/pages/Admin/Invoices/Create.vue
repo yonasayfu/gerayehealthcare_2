@@ -16,16 +16,14 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Create', href: route('admin.invoices.create') },
 ];
 
-const selectedPatient = ref(props.selectedPatientId);
-
 const form = useForm({
-  patient_id: props.selectedPatientId,
+  patient_id: props.selectedPatientId || '',
   visit_ids: [],
   invoice_date: new Date().toISOString().split('T')[0],
   due_date: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // Default due date 30 days from now
 });
 
-watch(selectedPatient, (newPatientId) => {
+watch(() => form.patient_id, (newPatientId) => {
   router.get(route('admin.invoices.create'), { patient_id: newPatientId }, {
     preserveState: true,
     replace: true,
@@ -68,13 +66,13 @@ function submit() {
         <div class="p-6 space-y-6">
             <div class="p-4 bg-white rounded-lg shadow">
                 <label for="patient" class="block text-sm font-medium text-gray-700">Step 1: Select a Patient</label>
-                <select id="patient" v-model="selectedPatient" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+                <select id="patient" v-model="form.patient_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                   <option disabled value="">-- Select a Patient --</option>
                   <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.full_name }}</option>
                 </select>
             </div>
 
-            <form v-if="selectedPatient" @submit.prevent="submit">
+            <form v-if="form.patient_id" @submit.prevent="submit">
                 <div class="rounded-lg bg-white dark:bg-background p-6 shadow-sm space-y-6">
                   <h2 class="text-lg font-semibold">Step 2: Select Billable Visits</h2>
                   

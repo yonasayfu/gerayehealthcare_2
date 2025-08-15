@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, router } from '@inertiajs/vue3';
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { DollarSign } from 'lucide-vue-next';
@@ -46,26 +46,54 @@ const breadcrumbs: BreadcrumbItemType[] = [
 ];
 
 const perPage = ref(5);
+const searchQuery = ref('');
 
 const form = useForm({
-  staff_id: null,
+  staff_id: null as number | null,
   per_page: perPage.value,
 });
 
+const processingStaffId = ref<number | null>(null)
+const alertMessage = ref<string | null>(null)
+const alertType = ref<'success' | 'error' | null>(null)
+
+// Debounced search
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(searchQuery, (val) => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: val }, { preserveState: true, replace: true });
+  }, 300);
+});
+
+// Per-page change triggers reload preserving search
 watch(perPage, (value) => {
-  form.per_page = value;
-  form.get(route('admin.staff-payouts.index'), { preserveState: true });
+  router.get(route('admin.staff-payouts.index'), { per_page: value, search: searchQuery.value }, { preserveState: true, replace: true });
 });
 
 const processPayout = (staffId: number, staffName: string, amount: string) => {
-  if (confirm(`Are you sure you want to process a payout of ${formatCurrency(amount)} for ${staffName}?`)) {
-    form.transform(() => ({
-      staff_id: staffId,
-    })).post(route('admin.staff-payouts.store'), {
+  if (!confirm(`Process payout of ${formatCurrency(amount)} for ${staffName}?`)) return
+  alertMessage.value = null
+  alertType.value = null
+  processingStaffId.value = staffId
+  form.transform(() => ({ staff_id: staffId }))
+    .post(route('admin.staff-payouts.store'), {
       preserveScroll: true,
-    });
-  }
-};
+      onSuccess: () => {
+        alertMessage.value = `Payout processed successfully for ${staffName}.`
+        alertType.value = 'success'
+        // reload current page to refresh unpaid counts while preserving filters
+        router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: searchQuery.value }, { preserveState: true, replace: true })
+      },
+      onError: (errors) => {
+        alertMessage.value = Object.values(errors)[0] as string ?? 'Failed to process payout.'
+        alertType.value = 'error'
+      },
+      onFinish: () => {
+        processingStaffId.value = null
+      }
+    })
+}
 
 const formatCurrency = (value: string | null) => {
   const amount = parseFloat(value || '0');
@@ -112,9 +140,17 @@ const chartOptions = {
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
         <div class="relative w-full md:w-1/3">
-          <!-- Search input can go here if needed in the future -->
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search staff by name..."
+            class="form-input w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
+          />
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
+          <a :href="route('admin.staff-payouts.printAll')" target="_blank" class="btn btn-info">
+            Print All
+          </a>
           <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
           <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
             <option value="5">5</option>
@@ -124,6 +160,10 @@ const chartOptions = {
             <option value="100">100</option>
           </select>
         </div>
+      </div>
+
+      <div v-if="alertMessage" :class="['rounded-md p-3 text-sm', alertType==='success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200']">
+        {{ alertMessage }}
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
@@ -149,11 +189,15 @@ const chartOptions = {
                 <button
                   v-if="staff.unpaid_visits_count > 0"
                   @click="processPayout(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost)"
-                  :disabled="form.processing && form.staff_id === staff.id"
+                  :disabled="processingStaffId === staff.id"
                   class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-md transition disabled:opacity-50"
                 >
-                  <DollarSign class="h-4 w-4" />
-                  {{ (form.processing && form.staff_id === staff.id) ? 'Processing...' : 'Process Payout' }}
+                  <svg v-if="processingStaffId === staff.id" class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <DollarSign v-else class="h-4 w-4" />
+                  {{ processingStaffId === staff.id ? 'Processing...' : 'Process Payout' }}
                 </button>
                 <span v-else class="text-xs text-gray-400">No pending payments</span>
               </td>

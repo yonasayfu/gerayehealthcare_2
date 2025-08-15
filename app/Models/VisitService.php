@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use App\Models\CaregiverAssignment;
@@ -29,12 +30,16 @@ class VisitService extends Model
         'check_in_longitude',
         'check_out_latitude',
         'check_out_longitude',
+        'cost',
+        'is_paid_to_staff',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'check_in_time' => 'datetime',
         'check_out_time' => 'datetime',
+        'is_paid_to_staff' => 'boolean',
+        'cost' => 'decimal:2',
     ];
 
     /**

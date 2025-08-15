@@ -2,7 +2,9 @@
 
 namespace App\DTOs;
 
-class CreateInventoryAlertDTO
+use Spatie\LaravelData\Data;
+
+class CreateInventoryAlertDTO extends Data
 {
     public function __construct(
         public ?int $item_id,
@@ -10,6 +12,7 @@ class CreateInventoryAlertDTO
         public ?string $threshold_value,
         public string $message,
         public ?bool $is_active,
-        public ?string $triggered_at
+        public ?string $triggered_at,
+        public ?string $due_date
     ) {}
 }

@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateInventoryMaintenanceRecordDTO;
 use App\Models\InventoryMaintenanceRecord;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class InventoryMaintenanceRecordService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(InventoryMaintenanceRecord $inventoryMaintenanceRecord)
     {
         parent::__construct($inventoryMaintenanceRecord);

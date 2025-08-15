@@ -17,7 +17,7 @@ class EmployeeInsuranceRecord extends Model
         'kebele_id',
         'woreda',
         'region',
-        'federal_id',
+        'fayda_id',
         'ministry_department',
         'employee_id_number',
         'verified',

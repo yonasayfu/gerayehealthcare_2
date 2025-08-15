@@ -7,6 +7,8 @@ use App\Services\MarketingPlatformService;
 use App\Models\MarketingPlatform;
 use App\Services\Validation\Rules\MarketingPlatformRules;
 use Illuminate\Http\Request;
+use App\DTOs\CreateMarketingPlatformDTO;
+use App\DTOs\UpdateMarketingPlatformDTO;
 
 class MarketingPlatformController extends BaseController
 {
@@ -18,7 +20,8 @@ class MarketingPlatformController extends BaseController
             'Admin/MarketingPlatforms',
             'marketingPlatforms',
             MarketingPlatform::class,
-            CreateMarketingPlatformDTO::class
+            CreateMarketingPlatformDTO::class,
+            UpdateMarketingPlatformDTO::class
         );
     }
 

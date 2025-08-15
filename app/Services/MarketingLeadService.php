@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateMarketingLeadDTO;
 use App\Models\MarketingLead;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class MarketingLeadService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(MarketingLead $marketingLead)
     {
         parent::__construct($marketingLead);

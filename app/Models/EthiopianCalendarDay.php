@@ -14,6 +14,5 @@ class EthiopianCalendarDay extends Model
         'ethiopian_date',
         'description',
         'is_holiday',
-        'region',
     ];
 }

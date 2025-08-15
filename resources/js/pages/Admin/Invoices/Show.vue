@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
+import { Printer, Share2, Download } from 'lucide-vue-next';
 
 const props = defineProps<{
   invoice: any;
@@ -22,6 +24,52 @@ const formatCurrency = (value: number | string) => {
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), 'MMM dd, yyyy');
 };
+
+const copyShareLink = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard');
+  } catch (e) {
+    alert('Failed to copy link. You can copy the URL from the address bar.');
+  }
+};
+
+// Fetch a public signed PDF URL from the backend
+const getPublicShareLink = async (invoiceId: number | string): Promise<string> => {
+  const url = route('admin.invoices.shareLink', invoiceId as any) as string;
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  if (!res.ok) throw new Error('Failed to generate share link');
+  const data = await res.json();
+  return data.url as string;
+};
+
+const shareViaTelegram = async () => {
+  try {
+    const publicUrl = await getPublicShareLink(props.invoice.id);
+    const text = encodeURIComponent(`Invoice ${props.invoice.invoice_number}`);
+    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(publicUrl)}&text=${text}`;
+    window.open(tgUrl, '_blank');
+  } catch (e) {
+    alert('Could not open Telegram share.');
+  }
+};
+
+const copyPublicLink = async () => {
+  try {
+    const publicUrl = await getPublicShareLink(props.invoice.id);
+    await navigator.clipboard.writeText(publicUrl);
+    alert('Public link copied to clipboard');
+  } catch (e) {
+    alert('Failed to generate public link');
+  }
+};
+
+const downloadUrl = computed(() => `${route('admin.invoices.print', props.invoice.id)}?download=1`);
+
+// Share dropdown state
+const showShare = ref(false);
+const toggleShare = () => (showShare.value = !showShare.value);
+const closeShare = () => (showShare.value = false);
 </script>
 
 <template>
@@ -33,9 +81,29 @@ const formatDate = (dateString: string) => {
             <h3 class="text-xl font-semibold">
                 Invoice {{ invoice.invoice_number }}
             </h3>
-            <Link :href="route('admin.invoices.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
+            <div class="ml-auto inline-flex items-center gap-2 relative">
+              <a :href="route('admin.invoices.print', invoice.id)" target="_blank" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-md transition">
+                <Printer class="h-4 w-4" /> Print
+              </a>
+              <a :href="downloadUrl" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-2 rounded-md transition">
+                <Download class="h-4 w-4" /> Download PDF
+              </a>
+              <!-- Share dropdown -->
+              <div class="relative" @keydown.escape.prevent.stop="closeShare">
+                <button @click="toggleShare" type="button" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs px-3 py-2 rounded-md transition">
+                  <Share2 class="h-4 w-4" /> Share
+                </button>
+                <div v-if="showShare" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black/5 z-20">
+                  <div class="py-1 text-sm">
+                    <button @click="shareViaTelegram(); closeShare()" class="w-full text-left px-3 py-2 hover:bg-gray-50">Share via Telegram</button>
+                    <button @click="copyPublicLink(); closeShare()" class="w-full text-left px-3 py-2 hover:bg-gray-50">Copy Public Link</button>
+                  </div>
+                </div>
+              </div>
+              <Link :href="route('admin.invoices.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+              </Link>
+            </div>
         </div>
 
         <div class="p-6 space-y-6">

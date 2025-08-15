@@ -7,62 +7,78 @@ use App\Models\Staff;
 use App\Models\Patient;
 use App\Models\VisitService;
 use App\Models\StaffPayout;
+use App\Services\StaffPayoutService;
+use App\DTOs\CreateStaffPayoutDTO;
 use Carbon\Carbon;
+use Faker\Factory as Faker;
 
 class StaffPayoutSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run(StaffPayoutService $payoutService): void
     {
-        // Ensure there are staff and patients
+        // Deterministic faker
+        $faker = Faker::create();
+        $faker->seed(20250815);
+
+        // Ensure there are staff and patients, limiting to a small number for focused seeding
         if (Staff::count() === 0) {
-            Staff::factory()->count(5)->create();
+            Staff::factory()->count(3)->create();
         }
         if (Patient::count() === 0) {
-            Patient::factory()->count(10)->create();
+            Patient::factory()->count(5)->create();
         }
 
-        $staffIds = Staff::pluck('id');
+        $staff = Staff::all();
         $patientIds = Patient::pluck('id');
 
-        foreach ($staffIds as $staffId) {
-            // Create some unpaid completed visit services for each staff
-            for ($i = 0; $i < rand(3, 7); $i++) {
-                $visitService = VisitService::create([
+        foreach ($staff as $sIdx => $member) {
+            // Create 2 completed visits per staff with predictable paid/unpaid pattern
+            for ($i = 0; $i < 2; $i++) {
+                $completedAt = Carbon::now()->copy()->subDays(7 + $i);
+                $checkIn = $completedAt->copy()->setTime(9, 0);
+                $checkOut = $completedAt->copy()->setTime(11 + ($i % 2), 0);
+
+                // Pattern: first is unpaid, second is paid -> guarantees unpaid > 0 per staff
+                $isPaid = $i === 1;
+
+                VisitService::create([
                     'patient_id' => $patientIds->random(),
-                    'staff_id' => $staffId,
-                    'scheduled_at' => Carbon::now()->subDays(rand(1, 30)),
-                    'check_in_time' => Carbon::now()->subDays(rand(1, 30))->addHours(1),
-                    'check_out_time' => Carbon::now()->subDays(rand(1, 30))->addHours(3),
-                    'visit_notes' => 'Test visit notes for payout.',
+                    'staff_id' => $member->id,
+                    'scheduled_at' => $completedAt->copy()->subHours(2),
+                    'check_in_time' => $checkIn,
+                    'check_out_time' => $checkOut,
+                    'visit_notes' => $faker->sentence,
                     'status' => 'Completed',
-                    'cost' => rand(50, 200) * 100 / 100, // Random cost between 50 and 200
-                    'is_paid_to_staff' => false,
+                    'cost' => $faker->randomFloat(2, 80, 200),
+                    'is_paid_to_staff' => $isPaid,
                 ]);
             }
+        }
 
-            // Process a payout for this staff member
-            $unpaidVisits = VisitService::where('staff_id', $staffId)
-                ->where('is_paid_to_staff', false)
-                ->where('status', 'Completed')
-                ->get();
+        // Process payouts for ~half the staff to create realistic mix of paid vs waiting-for-payment
+        $count = $staff->count();
+        $half = (int) floor($count / 2);
+        $toPayout = $staff->shuffle()->take(max(1, $half));
+        foreach ($toPayout as $member) {
+            try {
+                $payoutService->processPayout(new CreateStaffPayoutDTO(
+                    staff_id: $member->id,
+                    notes: 'Automated seeder payout.'
+                ));
 
-            if ($unpaidVisits->isNotEmpty()) {
-                $totalAmount = $unpaidVisits->sum('cost');
-
-                $payout = StaffPayout::create([
-                    'staff_id' => $staffId,
-                    'total_amount' => $totalAmount,
-                    'payout_date' => Carbon::now(),
+                // Add an older payout for history/charts
+                StaffPayout::create([
+                    'staff_id' => $member->id,
+                    'total_amount' => $faker->randomFloat(2, 150, 600),
+                    'payout_date' => Carbon::now()->subDays(30),
                     'status' => 'Completed',
-                    'notes' => 'Automated test payout.',
+                    'notes' => 'Previous month seeded payout',
                 ]);
-
-                // Attach visit services to payout and mark as paid
-                $payout->visitServices()->attach($unpaidVisits->pluck('id'));
-                VisitService::whereIn('id', $unpaidVisits->pluck('id'))->update(['is_paid_to_staff' => true]);
+            } catch (\Exception $e) {
+                // ignore
             }
         }
     }

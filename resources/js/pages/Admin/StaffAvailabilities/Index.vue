@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Trash2, ArrowUpDown, Filter, Edit3, PlusCircle } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
@@ -46,6 +46,41 @@ watch(filters, debounce(() => {
   })
 }, 300), { deep: true })
 
+// Navigate pagination links returned from backend
+function goToPage(url?: string | null) {
+  if (!url) return
+  router.get(url, {}, { preserveState: true, replace: true })
+}
+
+// Build index URL with current filters and target page (fallback pagination)
+function goToPageNumber(page: number) {
+  const base = route('admin.staff-availabilities.index')
+  const params = new URLSearchParams({
+    staff_id: String(filters.value.staff_id || ''),
+    status: String(filters.value.status || ''),
+    start_date: String(filters.value.start_date || ''),
+    end_date: String(filters.value.end_date || ''),
+    sort: String(filters.value.sort || ''),
+    direction: String(filters.value.direction || ''),
+    per_page: String(filters.value.per_page || 10),
+    page: String(page),
+  })
+  router.get(`${base}?${params.toString()}`, {}, { preserveState: true, replace: true })
+}
+
+// Reset all filters to defaults
+function resetFilters() {
+  filters.value = {
+    staff_id: '',
+    status: '',
+    start_date: '',
+    end_date: '',
+    sort: 'start_time',
+    direction: 'desc',
+    per_page: 10,
+  }
+}
+
 const showModal = ref(false);
 const isEditMode = ref(false);
 const availableStaff = ref<Array<{ id: number; first_name: string; last_name: string }>>(props.staffList || []);
@@ -59,6 +94,17 @@ const form = useForm({
     end_time: '',
 });
 
+// Basic client-side validation to improve UX
+const canSave = computed(() => {
+  const hasStaff = String(form.staff_id || '').length > 0
+  const hasTimes = !!form.start_time && !!form.end_time
+  const statusOk = !!form.status
+  const start = form.start_time ? new Date(form.start_time).getTime() : 0
+  const end = form.end_time ? new Date(form.end_time).getTime() : 0
+  const timesOk = hasTimes && end >= start
+  return hasStaff && timesOk && statusOk && !form.processing && !loadingStaff.value
+})
+
 const openCreateModal = () => {
     isEditMode.value = false;
     form.reset();
@@ -69,7 +115,7 @@ const openCreateModal = () => {
 const openEditModal = (availability) => {
     isEditMode.value = true;
     form.id = availability.id;
-    form.staff_id = availability.staff_id;
+    form.staff_id = String(availability.staff_id);
     form.status = availability.status;
     form.start_time = availability.start_time.slice(0, 16);
     form.end_time = availability.end_time.slice(0, 16);
@@ -92,9 +138,18 @@ async function loadAvailableStaff() {
         if (!res.ok) throw new Error('Failed to load available staff');
         const data = await res.json();
         availableStaff.value = Array.isArray(data) ? data : [];
-        // Keep selected staff if still available; otherwise clear
-        if (form.staff_id && !availableStaff.value.find(s => String(s.id) === String(form.staff_id))) {
-            form.staff_id = '';
+        // In edit mode, keep the currently selected staff and ensure it appears in the dropdown
+        if (isEditMode.value && form.staff_id) {
+            const exists = availableStaff.value.find(s => String(s.id) === String(form.staff_id))
+            if (!exists) {
+                const current = (props.staffList || []).find(s => String(s.id) === String(form.staff_id))
+                if (current) availableStaff.value = [current, ...availableStaff.value]
+            }
+        } else {
+            // In create mode, if the selected staff is no longer available, clear selection
+            if (form.staff_id && !availableStaff.value.find(s => String(s.id) === String(form.staff_id))) {
+                form.staff_id = '';
+            }
         }
     } catch (e) {
         availableStaff.value = props.staffList || [];
@@ -164,16 +219,28 @@ const formatDate = (dateString) => {
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
-        <div class="flex items-center gap-2 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
             <Filter class="h-5 w-5 text-muted-foreground" />
             <h3 class="text-lg font-semibold">Filters</h3>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-sm text-muted-foreground">Per page</label>
+            <select v-model.number="filters.per_page" class="border rounded px-2 py-1 text-sm">
+              <option :value="5">5</option>
+              <option :value="10">10</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+            </select>
+            <button @click="resetFilters" type="button" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-100">Reset Filters</button>
+          </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staff Member</label>
                 <select v-model="filters.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                     <option value="">All Staff</option>
-                    <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
+                    <option v-for="staff in staffList" :key="staff.id" :value="String(staff.id)">
                         {{ getStaffFullName(staff) }}
                     </option>
                 </select>
@@ -241,6 +308,40 @@ const formatDate = (dateString) => {
           </tbody>
         </table>
       </div>
+      <!-- Pagination -->
+      <div v-if="availabilities && availabilities.meta" class="flex items-center justify-between mt-4">
+        <div class="text-sm text-muted-foreground">
+          Showing {{ (availabilities.meta && availabilities.meta.from) ? availabilities.meta.from : 0 }}
+          to {{ (availabilities.meta && availabilities.meta.to) ? availabilities.meta.to : 0 }}
+          of {{ (availabilities.meta && availabilities.meta.total) ? availabilities.meta.total : 0 }} results
+        </div>
+        <div class="flex items-center gap-1">
+          <template v-if="availabilities.links && availabilities.links.length">
+            <button
+              v-for="link in availabilities.links"
+              :key="(link.label || '') + String(!!link.active)"
+              :disabled="!link.url"
+              v-html="link.label"
+              @click="goToPage(link.url)"
+              class="px-3 py-1 border rounded text-sm"
+              :class="[link.active ? 'bg-cyan-600 text-white border-cyan-600' : 'hover:bg-gray-100', !link.url ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']"
+            />
+          </template>
+          <template v-else>
+            <button
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-100"
+              :disabled="availabilities.meta.current_page <= 1"
+              @click="goToPageNumber(availabilities.meta.current_page - 1)"
+            >Previous</button>
+            <span class="px-2 text-sm">Page {{ availabilities.meta.current_page }} of {{ availabilities.meta.last_page }}</span>
+            <button
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-100"
+              :disabled="availabilities.meta.current_page >= availabilities.meta.last_page"
+              @click="goToPageNumber(availabilities.meta.current_page + 1)"
+            >Next</button>
+          </template>
+        </div>
+      </div>
     </div>
 
     <!-- Create/Edit Modal -->
@@ -254,7 +355,7 @@ const formatDate = (dateString) => {
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Staff Member</label>
                     <select v-model="form.staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
                         <option disabled value="">Please select a staff member</option>
-                        <option v-for="staff in availableStaff" :key="staff.id" :value="staff.id">{{ getStaffFullName(staff) }}</option>
+                        <option v-for="staff in availableStaff" :key="staff.id" :value="String(staff.id)">{{ getStaffFullName(staff) }}</option>
                     </select>
                     <div v-if="loadingStaff" class="text-xs text-muted-foreground mt-1">Loading available staff…</div>
                     <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">{{ form.errors.staff_id }}</div>
@@ -268,12 +369,12 @@ const formatDate = (dateString) => {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Time</label>
-                    <input type="datetime-local" v-model="form.start_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
+                    <input type="datetime-local" step="1" v-model="form.start_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                     <div v-if="form.errors.start_time" class="text-red-500 text-sm mt-1">{{ form.errors.start_time }}</div>
                 </div>
                  <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">End Time</label>
-                    <input type="datetime-local" v-model="form.end_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
+                    <input type="datetime-local" step="1" v-model="form.end_time" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" />
                     <div v-if="form.errors.end_time" class="text-red-500 text-sm mt-1">{{ form.errors.end_time }}</div>
                 </div>
                 
@@ -284,7 +385,7 @@ const formatDate = (dateString) => {
                 
                 <div class="flex justify-end space-x-3 pt-4">
                     <button @click="showModal = false" type="button" class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-100">Cancel</button>
-                    <button type="submit" :disabled="form.processing" class="px-4 py-2 bg-cyan-600 text-white rounded-md disabled:opacity-50 hover:bg-cyan-700">
+                    <button type="submit" :disabled="!canSave" class="px-4 py-2 bg-cyan-600 text-white rounded-md disabled:opacity-50 hover:bg-cyan-700">
                         {{ form.processing ? 'Saving...' : 'Save Slot' }}
                     </button>
                 </div>

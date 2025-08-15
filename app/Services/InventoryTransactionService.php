@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateInventoryTransactionDTO;
 use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class InventoryTransactionService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(InventoryTransaction $inventoryTransaction)
     {
         parent::__construct($inventoryTransaction);
@@ -56,25 +52,5 @@ class InventoryTransactionService extends BaseService
         } else {
             $query->orderBy('created_at', 'desc');
         }
-    }
-
-    public function export(Request $request)
-    {
-        return $this->handleExport($request, InventoryTransaction::class, ExportConfig::getInventoryTransactionConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, InventoryTransaction::class, ExportConfig::getInventoryTransactionConfig());
-    }
-
-    public function printCurrent(Request $request)
-    {
-        return $this->handlePrintCurrent($request, InventoryTransaction::class, ExportConfig::getInventoryTransactionConfig());
-    }
-
-    public function printSingle(InventoryTransaction $transaction, Request $request)
-    {
-        return $this->handlePrintSingle($request, $transaction, ExportConfig::getInventoryTransactionConfig());
     }
 }

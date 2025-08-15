@@ -2,17 +2,17 @@
 
 namespace App\DTOs;
 
-class CreateInventoryRequestDTO
+use Spatie\LaravelData\Data;
+
+class CreateInventoryRequestDTO extends Data
 {
     public function __construct(
         public int $requester_id,
-        public ?int $approver_id,
         public int $item_id,
         public int $quantity_requested,
-        public ?int $quantity_approved,
         public ?string $reason,
-        public ?string $status,
-        public ?string $priority,
-        public ?string $needed_by_date
+        public string $status,
+        public string $priority,
+        public string $needed_by_date
     ) {}
 }

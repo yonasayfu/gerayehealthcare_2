@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateTaskDelegationDTO;
 use App\Models\TaskDelegation;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class TaskDelegationService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(TaskDelegation $taskDelegation)
     {
         parent::__construct($taskDelegation);

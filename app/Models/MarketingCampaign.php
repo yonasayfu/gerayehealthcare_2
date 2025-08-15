@@ -44,10 +44,12 @@ class MarketingCampaign extends Model
         'start_date',
         'end_date',
         'status',
+        'urgency',
         'utm_campaign',
         'utm_source',
         'utm_medium',
         'assigned_staff_id',
+        'responsible_staff_id',
         'created_by_staff_id',
         'goals',
     ];
@@ -67,6 +69,11 @@ class MarketingCampaign extends Model
     public function assignedStaff()
     {
         return $this->belongsTo(Staff::class, 'assigned_staff_id');
+    }
+
+    public function responsibleStaff()
+    {
+        return $this->belongsTo(Staff::class, 'responsible_staff_id');
     }
 
     public function createdByStaff()

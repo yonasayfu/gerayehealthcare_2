@@ -13,6 +13,7 @@ use App\Models\Staff;
 use App\Models\VisitService;
 use App\Models\Invoice;
 use App\Models\InsuranceClaim;
+use App\Models\InvoiceItem;
 
 class MrXInsuranceScenarioSeeder extends Seeder
 {
@@ -123,7 +124,6 @@ class MrXInsuranceScenarioSeeder extends Seeder
         $invoice = Invoice::firstOrCreate(
             [
                 'patient_id' => $mrX->id,
-                'service_id' => $visitService->id, // Link to visit service
                 'invoice_date' => now()->toDateString(),
             ],
             [
@@ -136,6 +136,15 @@ class MrXInsuranceScenarioSeeder extends Seeder
                 'insurance_company_id' => $nyalaInsurance->id,
             ]
         );
+
+        // Ensure an invoice item exists for the visit service
+        if (!$invoice->items()->where('visit_service_id', $visitService->id)->exists()) {
+            $invoice->items()->create([
+                'visit_service_id' => $visitService->id,
+                'description' => $visitService->service_description ?? 'Service',
+                'cost' => $totalAmount,
+            ]);
+        }
 
         // Step 5: Insurance Claim Creation
         $insuranceClaim = InsuranceClaim::firstOrCreate(

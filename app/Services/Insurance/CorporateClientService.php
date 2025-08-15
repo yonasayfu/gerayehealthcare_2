@@ -5,14 +5,10 @@ namespace App\Services\Insurance;
 use App\Models\CorporateClient;
 use App\DTOs\CreateCorporateClientDTO;
 use App\Services\BaseService;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 use Illuminate\Http\Request;
 
 class CorporateClientService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(CorporateClient $corporateClient)
     {
         parent::__construct($corporateClient);

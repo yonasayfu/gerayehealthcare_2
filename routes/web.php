@@ -48,6 +48,11 @@ use Inertia\Inertia;
 // Public & General
 Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
+// Public signed invoice PDF (no auth, signed URL required)
+Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPdf'])
+    ->middleware('signed')
+    ->name('invoices.public_pdf');
+
 // Shared Dashboard
 Route::get('dashboard', function () {
     $user = Auth::user();
@@ -170,8 +175,14 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Staff Payouts
         Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
         Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
+        Route::get('staff-payouts/print-all', [StaffPayoutController::class, 'printAll'])->name('staff-payouts.printAll');
 
         // Invoices
+        Route::get('invoices/export', [InvoiceController::class, 'export'])->name('invoices.export');
+        Route::get('invoices/print-all', [InvoiceController::class, 'printAll'])->name('invoices.printAll');
+        Route::get('invoices/print-current', [InvoiceController::class, 'printCurrent'])->name('invoices.printCurrent');
+        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'printSingle'])->name('invoices.print');
+        Route::get('invoices/{invoice}/share-link', [InvoiceController::class, 'shareLink'])->name('invoices.shareLink');
         Route::resource('invoices', InvoiceController::class)
             ->except(['edit', 'update', 'destroy']);
 
@@ -264,6 +275,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Admin Leave Requests
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
+            ->names('leave-requests') // Name routes as admin.leave-requests.* while keeping the URI
             ->only(['index', 'update']);
 
         // Global Search

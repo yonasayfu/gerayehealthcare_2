@@ -14,12 +14,10 @@ class InsuranceCompany extends Model
 
     protected $fillable = [
         'name',
-        'name_amharic',
         'contact_person',
         'contact_email',
         'contact_phone',
         'address',
-        'address_amharic',
     ];
 
     /**

@@ -119,6 +119,108 @@ class AdditionalExportConfigs
         ];
     }
 
+    /**
+     * Get export configuration for InsuranceCompany model
+     */
+    public static function getInsuranceCompanyConfig(): array
+    {
+        return [
+            'searchable_fields' => ['name', 'contact_person', 'contact_email', 'contact_phone', 'address'],
+            'sortable_fields' => ['name', 'contact_person', 'contact_email', 'contact_phone', 'created_at'],
+            'default_sort' => 'created_at',
+            'select_fields' => ['id', 'name', 'contact_person', 'contact_email', 'contact_phone', 'address', 'tin_number', 'trade_license_number', 'created_at'],
+
+            'csv' => [
+                'headers' => ['Name', 'Contact Person', 'Contact Email', 'Contact Phone', 'Address', 'TIN Number', 'Trade License Number'],
+                'fields' => ['name', 'contact_person', 'contact_email', 'contact_phone', 'address', 'tin_number', 'trade_license_number'],
+                'filename_prefix' => 'insurance_companies',
+            ],
+
+            'pdf' => [
+                'title' => 'Insurance Companies List',
+                'document_title' => 'Insurance Companies List',
+                'filename_prefix' => 'insurance_companies',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'name' => 'name',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'contact_email' => ['field' => 'contact_email', 'default' => '-'],
+                    'contact_phone' => ['field' => 'contact_phone', 'default' => '-'],
+                    'address' => ['field' => 'address', 'default' => '-'],
+                    'tin_number' => ['field' => 'tin_number', 'default' => '-'],
+                    'trade_license_number' => ['field' => 'trade_license_number', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'contact_email', 'label' => 'Contact Email'],
+                    ['key' => 'contact_phone', 'label' => 'Contact Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                    ['key' => 'tin_number', 'label' => 'TIN Number'],
+                    ['key' => 'trade_license_number', 'label' => 'Trade License Number'],
+                ],
+            ],
+
+            'current_page' => [
+                'title' => 'Insurance Companies (Current View)',
+                'document_title' => 'Insurance Companies (Current View)',
+                'filename_prefix' => 'insurance_companies_current',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'name' => 'name',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'contact_email' => ['field' => 'contact_email', 'default' => '-'],
+                    'contact_phone' => ['field' => 'contact_phone', 'default' => '-'],
+                    'address' => ['field' => 'address', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'contact_email', 'label' => 'Contact Email'],
+                    ['key' => 'contact_phone', 'label' => 'Contact Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                ],
+            ],
+
+            'all_records' => [
+                'title' => 'Insurance Companies List',
+                'document_title' => 'Insurance Companies List',
+                'filename_prefix' => 'insurance_companies',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'default_sort' => 'name',
+                'fields' => [
+                    'name' => 'name',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'contact_email' => ['field' => 'contact_email', 'default' => '-'],
+                    'contact_phone' => ['field' => 'contact_phone', 'default' => '-'],
+                    'address' => ['field' => 'address', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'contact_email', 'label' => 'Contact Email'],
+                    ['key' => 'contact_phone', 'label' => 'Contact Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                ],
+            ],
+
+            'single_record' => [
+                'filename_prefix' => 'insurance_company',
+                'fields' => [
+                    'Name' => 'name',
+                    'Contact Person' => ['field' => 'contact_person', 'default' => '-'],
+                    'Contact Email' => ['field' => 'contact_email', 'default' => '-'],
+                    'Contact Phone' => ['field' => 'contact_phone', 'default' => '-'],
+                    'Address' => ['field' => 'address', 'default' => '-'],
+                    'TIN Number' => ['field' => 'tin_number', 'default' => '-'],
+                    'Trade License Number' => ['field' => 'trade_license_number', 'default' => '-'],
+                ],
+            ],
+        ];
+    }
     
 
     

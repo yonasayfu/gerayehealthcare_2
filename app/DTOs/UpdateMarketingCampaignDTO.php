@@ -19,6 +19,6 @@ class UpdateMarketingCampaignDTO extends Data
         public ?int $assigned_staff_id,
         public ?int $created_by_staff_id,
         public ?string $urgency,
-        public ?int $responsible_staff_id,
+        public ?int $responsible_staff_id
     ) {}
 }

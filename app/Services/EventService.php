@@ -12,4 +12,10 @@ class EventService extends BaseService
     {
         parent::__construct($event);
     }
+
+    protected function applySearch($query, $search)
+    {
+        $query->where('title', 'ilike', "%{$search}%")
+              ->orWhere('description', 'ilike', "%{$search}%");
+    }
 }

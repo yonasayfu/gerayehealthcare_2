@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\StaffAvailability;
 use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class StaffAvailabilityService extends BaseService
 {
@@ -15,9 +16,12 @@ class StaffAvailabilityService extends BaseService
 
     public function getCalendarEvents(Request $request): array
     {
+        // Include any availability that overlaps the requested window: [start, end)
+        $rangeStart = $request->start;
+        $rangeEnd = $request->end;
         $query = $this->model->with('staff')
-            ->where('start_time', '>=', $request->start)
-            ->where('end_time', '<=', $request->end);
+            ->where('end_time', '>', $rangeStart)
+            ->where('start_time', '<', $rangeEnd);
 
         if ($request->filled('staff_id')) {
             $query->where('staff_id', $request->staff_id);
@@ -77,22 +81,30 @@ class StaffAvailabilityService extends BaseService
 
     public function update(int $id, array|object $data): StaffAvailability
     {
+        $data = is_object($data) ? (array) $data : $data;
         $this->checkOverlap($data, $id);
         return parent::update($id, $data);
     }
 
-    protected function checkOverlap(array $data, ?int $id = null): void
+    protected function checkOverlap(array|object $data, ?int $id = null): void
     {
-        $overlap = StaffAvailability::where('staff_id', $data['staff_id'])
-            ->where('end_time', '>', $data['start_time'])
-            ->where('start_time', '<', $data['end_time']);
+        $data = is_object($data) ? (array) $data : $data;
+        $staffId = (int) ($data['staff_id'] ?? 0);
+        $start = $data['start_time'] ?? null;
+        $end = $data['end_time'] ?? null;
+
+        $overlap = StaffAvailability::where('staff_id', $staffId)
+            ->where('end_time', '>', $start)
+            ->where('start_time', '<', $end);
 
         if ($id) {
             $overlap->where('id', '<>', $id);
         }
 
         if ($overlap->exists()) {
-            throw new \Exception('Conflict: Overlapping availability slot exists.');
+            throw ValidationException::withMessages([
+                'error' => 'Conflict: Overlapping availability slot exists for this staff within the selected time range.'
+            ]);
         }
     }
 

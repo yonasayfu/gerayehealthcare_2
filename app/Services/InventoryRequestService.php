@@ -6,13 +6,9 @@ use App\Models\InventoryRequest;
 use App\Models\InventoryItem;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class InventoryRequestService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(InventoryRequest $inventoryRequest)
     {
         parent::__construct($inventoryRequest);

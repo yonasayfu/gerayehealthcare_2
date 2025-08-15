@@ -6,13 +6,9 @@ use App\Models\MarketingCampaign;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class MarketingCampaignService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(MarketingCampaign $marketingCampaign)
     {
         parent::__construct($marketingCampaign);

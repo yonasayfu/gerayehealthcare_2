@@ -8,9 +8,10 @@ class StaffPayoutRules extends BaseResourceRules
     {
         return [
             'staff_id' => 'required|exists:staff,id',
-            'total_amount' => 'required|numeric|min:0',
-            'payout_date' => 'required|date',
-            'status' => 'required|string|in:Planned,Processing,Paid,Completed',
+            // Computed by service from unpaid visits
+            'total_amount' => 'nullable',
+            'payout_date' => 'nullable',
+            'status' => 'nullable',
             'notes' => 'nullable|string',
         ];
     }

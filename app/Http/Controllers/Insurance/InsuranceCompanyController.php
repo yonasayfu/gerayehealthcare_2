@@ -7,6 +7,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\InsuranceCompany;
 use App\Services\Insurance\InsuranceCompanyService; // Corrected namespace
 use App\DTOs\CreateInsuranceCompanyDTO;
+use App\DTOs\UpdateInsuranceCompanyDTO;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Response;
@@ -25,8 +26,8 @@ class InsuranceCompanyController extends BaseController
             'Insurance/Companies',
             'insuranceCompanies',
             InsuranceCompany::class,
-            CreateInsuranceCompanyDTO::class
+            CreateInsuranceCompanyDTO::class,
+            UpdateInsuranceCompanyDTO::class
         );
     }
-
- }
+}

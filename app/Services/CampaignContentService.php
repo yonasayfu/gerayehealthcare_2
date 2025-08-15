@@ -5,13 +5,9 @@ namespace App\Services;
 use App\DTOs\CreateCampaignContentDTO;
 use App\Models\CampaignContent;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class CampaignContentService extends BaseService
 {
-    use ExportableTrait;
-
     public function __construct(CampaignContent $campaignContent)
     {
         parent::__construct($campaignContent);

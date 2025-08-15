@@ -11,9 +11,12 @@ use App\Services\Insurance\InsuranceClaimService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 
 class InvoiceService extends BaseService
 {
+    use ExportableTrait;
     protected $insuranceClaimService;
 
     public function __construct(Invoice $invoice, InsuranceClaimService $insuranceClaimService)
@@ -51,14 +54,51 @@ class InvoiceService extends BaseService
     public function create(array|object $data): Invoice
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         return DB::transaction(function () use ($data) {
-            $invoice = parent::create($data);
-            
+            $visitIds = $data['visit_ids'] ?? [];
+
+            // Load visit services for items
+            $visits = VisitService::whereIn('id', $visitIds)->get();
+
+            // Compute totals
+            $subtotal = $visits->sum(function ($v) {
+                return (float) $v->cost;
+            });
+            $taxAmount = isset($data['tax_amount']) ? (float) $data['tax_amount'] : 0.0;
+            $grandTotal = $subtotal + $taxAmount;
+
+            // Prepare invoice payload
+            $invoicePayload = [
+                'patient_id'   => $data['patient_id'],
+                'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
+                'due_date'     => $data['due_date'] ?? now()->addDays(30)->toDateString(),
+                'subtotal'     => $subtotal,
+                'tax_amount'   => $taxAmount,
+                'grand_total'  => $grandTotal,
+                'amount'       => $grandTotal, // amount due at creation
+                'status'       => $data['status'] ?? 'Pending',
+            ];
+
+            // Create invoice
+            $invoice = parent::create($invoicePayload);
+
+            // Create invoice items
+            if ($visits->isNotEmpty()) {
+                $items = $visits->map(function ($visit) {
+                    return [
+                        'visit_service_id' => $visit->id,
+                        'description'      => $visit->service_description,
+                        'cost'             => $visit->cost,
+                    ];
+                })->all();
+                $invoice->items()->createMany($items);
+            }
+
             // Auto-create insurance claim if patient has active insurance
             $this->createInsuranceClaimIfEligible($invoice);
-            
-            return $invoice;
+
+            return $invoice->load(['items.visitService']);
         });
     }
 
@@ -134,16 +174,34 @@ class InvoiceService extends BaseService
     public function createFromVisitService(VisitService $visitService): Invoice
     {
         $invoiceData = [
-            'patient_id' => $visitService->patient_id,
-            'service_id' => $visitService->id,
-            'invoice_date' => now(),
-            'due_date' => now()->addDays(30),
-            'subtotal' => $visitService->cost,
-            'tax_amount' => 0, // Adjust based on your tax calculation logic
-            'grand_total' => $visitService->cost,
-            'status' => 'Pending',
+            'patient_id'   => $visitService->patient_id,
+            'invoice_date' => now()->toDateString(),
+            'due_date'     => now()->addDays(30)->toDateString(),
+            'tax_amount'   => 0,
+            'status'       => 'Pending',
+            'visit_ids'    => [$visitService->id],
         ];
 
         return $this->create($invoiceData);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, Invoice::class, ExportConfig::getInvoiceConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, Invoice::class, ExportConfig::getInvoiceConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, Invoice::class, ExportConfig::getInvoiceConfig());
+    }
+
+    public function printSingle(Invoice $invoice, Request $request)
+    {
+        return $this->handlePrintSingle($request, $invoice, ExportConfig::getInvoiceConfig());
     }
 }

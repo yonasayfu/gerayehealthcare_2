@@ -20,7 +20,6 @@ class InvoiceFactory extends Factory
     {
         return [
             'patient_id' => Patient::factory(),
-            'service_id' => VisitService::factory(),
             'amount' => $this->faker->randomFloat(2, 100, 1000),
             'status' => $this->faker->randomElement(['Pending', 'Paid']),
             'paid_at' => $this->faker->dateTime,

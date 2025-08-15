@@ -74,18 +74,13 @@ function exportData(type: 'csv' | 'pdf') {
 }
 
 function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  // Use centralized backend handler for current page printing
+  window.open(route('admin.insurance-companies.printCurrent'), '_blank');
 }
 
 const printAllCompanies = () => {
-    window.open(route('admin.insurance-companies.printAll', { type: 'pdf' }), '_blank');
+    // Use centralized backend handler for printing all records
+    window.open(route('admin.insurance-companies.printAll'), '_blank');
 };
 
 function toggleSort(field: string) {

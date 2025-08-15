@@ -7,24 +7,59 @@ use App\Models\Staff;
 use App\Models\StaffPayout;
 use App\Models\VisitService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Services\BaseService;
 
 class StaffPayoutService extends BaseService
 {
-    public function getStaffEarningsData(): array
+    public function getStaffEarningsData(Request $request): array
     {
-        $staffWithUnpaidEarnings = Staff::withCount([
-            'visitServices as unpaid_visits_count' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed'),
-            'visitServices as unique_patients_count' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed')->select(DB::raw('count(distinct(patient_id))')),
-        ])
-        ->withSum(['visitServices as total_unpaid_cost' => fn($q) => $q->where('is_paid_to_staff', false)->where('status', 'Completed')], 'cost')
-        ->orderBy('first_name')
-        ->get()
-        ->map(function ($staff) {
-            $staff->total_hours_logged = $staff->unpaid_visits_count;
-            return $staff;
-        });
+        $perPage = (int) $request->input('per_page', 10);
+
+        $staffWithUnpaidEarningsQuery = Staff::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->input('search');
+                $q->where(function ($w) use ($search) {
+                    $w->where('first_name', 'like', "%$search%")
+                      ->orWhere('last_name', 'like', "%$search%");
+                });
+            })
+            ->withCount([
+                'visitServices as unpaid_visits_count' => function ($q) {
+                    $q->where('status', 'Completed')
+                      ->where(function ($r) {
+                          $r->where('is_paid_to_staff', false)
+                            ->orWhereNull('is_paid_to_staff');
+                      });
+                },
+                'visitServices as unique_patients_count' => function ($q) {
+                    $q->where('status', 'Completed')
+                      ->where(function ($r) {
+                          $r->where('is_paid_to_staff', false)
+                            ->orWhereNull('is_paid_to_staff');
+                      })
+                      ->select(DB::raw('count(distinct(patient_id))'));
+                },
+            ])
+            ->withSum(['visitServices as total_unpaid_cost' => function ($q) {
+                $q->where('status', 'Completed')
+                  ->where(function ($r) {
+                      $r->where('is_paid_to_staff', false)
+                        ->orWhereNull('is_paid_to_staff');
+                  });
+            }], 'cost')
+            ->orderBy('first_name');
+
+        $staffWithUnpaidEarnings = $staffWithUnpaidEarningsQuery
+            ->paginate($perPage)
+            ->through(function ($staff) {
+                $staff->total_hours_logged = $staff->unpaid_visits_count;
+                return $staff;
+            });
+
+        // Preserve filters in pagination links
+        $staffWithUnpaidEarnings->appends($request->only(['per_page', 'search']));
 
         $staffWithTotalPayouts = Staff::has('payouts')
             ->withSum('payouts', 'total_amount')

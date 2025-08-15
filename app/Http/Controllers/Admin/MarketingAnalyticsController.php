@@ -39,19 +39,4 @@ class MarketingAnalyticsController extends Controller
         $funnelData = $this->marketingAnalyticsService->getConversionFunnel();
         return response()->json($funnelData);
     }
-
-    public function generateReport(Request $request)
-    {
-        return $this->marketingAnalyticsService->generateReport($request);
-    }
-
-    public function printAllCampaignPerformance(Request $request)
-    {
-        return $this->marketingAnalyticsService->printAllCampaignPerformance($request);
-    }
-
-    public function printCurrentCampaignPerformance(Request $request)
-    {
-        return $this->marketingAnalyticsService->printCurrentCampaignPerformance($request);
-    }
 }

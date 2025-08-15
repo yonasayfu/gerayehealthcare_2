@@ -18,7 +18,8 @@ class SupplierController extends BaseController
             'Admin/Suppliers',
             'suppliers',
             Supplier::class,
-            CreateSupplierDTO::class
+            'App\\DTOs\\CreateSupplierDTO',
+            'App\\DTOs\\UpdateSupplierDTO'
         );
     }
 

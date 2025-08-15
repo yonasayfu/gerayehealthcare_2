@@ -3,7 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus } from 'lucide-vue-next';
+import { Plus, Printer, Download } from 'lucide-vue-next';
 
 defineProps<{
   invoices: any;
@@ -33,9 +33,17 @@ const formatDate = (dateString: string) => {
           <h1 class="text-xl font-semibold">Invoices</h1>
           <p class="text-sm text-muted-foreground">Review and manage all patient invoices.</p>
         </div>
-        <Link :href="route('admin.invoices.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-          <Plus class="h-4 w-4" /> Create Invoice
-        </Link>
+        <div class="flex items-center gap-2">
+          <a :href="route('admin.invoices.export')" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-2 rounded-md transition">
+            <Download class="h-4 w-4" /> Export CSV
+          </a>
+          <a :href="route('admin.invoices.printAll')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-2 rounded-md transition" target="_blank">
+            <Printer class="h-4 w-4" /> Print All
+          </a>
+          <Link :href="route('admin.invoices.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+            <Plus class="h-4 w-4" /> Create Invoice
+          </Link>
+        </div>
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
@@ -69,8 +77,9 @@ const formatDate = (dateString: string) => {
                   {{ invoice.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-right">
+              <td class="px-6 py-4 text-right space-x-3">
                 <Link :href="route('admin.invoices.show', invoice.id)" class="text-sm text-indigo-600">View</Link>
+                <a :href="route('admin.invoices.print', invoice.id)" class="text-sm text-gray-600" target="_blank">Print</a>
               </td>
             </tr>
           </tbody>
