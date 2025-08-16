@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -86,9 +86,53 @@ function destroy(id: number) {
   }
 }
 
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.marketing-leads', filters: props.filters });
+const { printCurrentView, isProcessing } = useExport({ routeName: 'admin.marketing-leads', filters: props.filters });
+
+// Client-side Print All: load a large page with current filters, print, then restore pagination
+async function printAllCurrentFilters() {
+  if (isProcessing.value) return;
+  try {
+    isProcessing.value = true;
+    const originalPerPage = perPage.value;
+
+    // Build params with current filters and a high per_page
+    const params: Record<string, string | number> = {
+      search: search.value,
+      direction: sortDirection.value,
+      per_page: 1000, // load many rows to print all
+      status: status.value,
+      source_campaign_id: sourceCampaignId.value,
+    };
+    if (sortField.value) params.sort = sortField.value;
+
+    await router.get(route('admin.marketing-leads.index'), params, {
+      preserveState: true,
+      replace: true,
+      onSuccess: () => {
+        // Give Vue time to render table, then print
+        setTimeout(() => {
+          window.print();
+          // restore original per_page
+          const restoreParams = { ...params, per_page: originalPerPage } as Record<string, string | number>;
+          router.get(route('admin.marketing-leads.index'), restoreParams, {
+            preserveState: true,
+            replace: true,
+            onFinish: () => {
+              perPage.value = originalPerPage;
+              isProcessing.value = false;
+            },
+          });
+        }, 300);
+      },
+      onError: () => { isProcessing.value = false; },
+    });
+  } catch (e) {
+    console.error('Print all (client) failed', e);
+    isProcessing.value = false;
+  }
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -121,20 +165,14 @@ function toggleStatus(id: number) {
           <p class="text-sm text-muted-foreground">Manage all marketing leads here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.marketing-leads.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.marketing-leads.create')" class="btn btn-primary">
             + Add Lead
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllLeads" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printAllCurrentFilters" :disabled="isProcessing" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
           </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
+          <button @click="printCurrentView" :disabled="isProcessing" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
         </div>
       </div>
@@ -198,8 +236,8 @@ function toggleStatus(id: number) {
               <td class="px-6 py-4">{{ lead.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.phone ?? '-' }}</td>
               <td class="px-6 py-4">{{ lead.status ?? '-' }}</td>
-              <td class="px-6 py-4">{{ lead.sourceCampaign?.campaign_name ?? '-' }}</td>
-              <td class="px-6 py-4">{{ lead.assignedStaff?.full_name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ lead.source_campaign?.campaign_name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ lead.assigned_staff?.full_name ?? '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link

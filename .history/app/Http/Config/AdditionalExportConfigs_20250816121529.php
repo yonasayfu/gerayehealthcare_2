@@ -1062,7 +1062,6 @@ class AdditionalExportConfigs
             ],
             
             'print_all' => [
-                'view' => 'pdf-layout',
                 'title' => 'All Inventory Transactions',
                 'document_title' => 'All Inventory Transactions',
                 'filename' => 'inventory_transactions_all.pdf',

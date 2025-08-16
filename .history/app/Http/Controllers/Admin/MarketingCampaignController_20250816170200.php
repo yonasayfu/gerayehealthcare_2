@@ -28,16 +28,6 @@ class MarketingCampaignController extends BaseController
         return app(MarketingCampaignService::class)->printAll(request());
     }
 
-    public function printCurrent(Request $request)
-    {
-        return app(MarketingCampaignService::class)->printCurrent($request);
-    }
-
-    public function printSingle(Request $request, MarketingCampaign $marketing_campaign)
-    {
-        return app(MarketingCampaignService::class)->printSingle($request, $marketing_campaign);
-    }
-
     // CSV export for marketing campaigns
     public function export(Request $request)
     {

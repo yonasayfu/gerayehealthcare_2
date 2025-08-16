@@ -1068,7 +1068,6 @@ class AdditionalExportConfigs
                 'filename' => 'inventory_transactions_all.pdf',
                 'orientation' => 'landscape',
                 'include_index' => true,
-                'default_sort' => 'created_at',
                 'fields' => [
                     'item_name' => ['field' => 'item.name', 'default' => '-'],
                     'transaction_type' => 'transaction_type',

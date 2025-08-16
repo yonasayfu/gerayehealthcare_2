@@ -23,7 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Head title="Print All Inventory Items" />
+  <Head title="Print All Inventory Requests" />
 
   <div class="print-document">
     <div v-if="isLoading" class="loading-indicator">
@@ -37,7 +37,7 @@ onMounted(() => {
     <div v-else>
       <div class="print-header">
         <img src="/images/geraye_logo.jpeg" alt="Geraye Home Care Services Logo" style="max-width: 150px; margin-bottom: 10px;">
-        <h1>All Inventory Items</h1>
+        <h1>All Inventory Requests</h1>
         <p>Generated on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 

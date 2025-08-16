@@ -121,9 +121,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('inventory-items/{inventory_item}/print', [App\Http\Controllers\Admin\InventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
         Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class);
 
-        Route::get('inventory-requests/export', [App\Http\Controllers\Admin\InventoryRequestController::class, 'export'])->name('inventory-requests.export');
-        Route::get('inventory-requests/print-all', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printAll'])->name('inventory-requests.printAll');
-        Route::get('inventory-requests/pdf', [App\Http\Controllers\Admin\InventoryRequestController::class, 'generatePdf'])->name('inventory-requests.generatePdf');
         Route::get('inventory-requests/{inventory_request}/print', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printSingle'])->name('inventory-requests.printSingle');
         Route::resource('inventory-requests', App\Http\Controllers\Admin\InventoryRequestController::class);
 

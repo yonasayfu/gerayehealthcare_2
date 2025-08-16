@@ -93,7 +93,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
   <Head title="Inventory Transactions" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
@@ -107,12 +107,24 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
             <Printer class="h-4 w-4" />
             <span class="ml-2">Print Current</span>
           </button>
+          <button @click="printAllRecords" class="btn btn-info" title="Print all records" aria-label="Print all records">
+            <Printer class="h-4 w-4" />
+            <span class="ml-2">Print All</span>
+          </button>
         </div>
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
+        <!-- Print-only header -->
+        <div class="hidden print:block text-center mb-4">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="mx-auto" style="max-width:150px; max-height:50px; margin-bottom:6px;" />
+          <h2 class="font-bold text-gray-900" style="margin:0;">Geraye Home Care Services</h2>
+          <p class="text-gray-600" style="margin:2px 0 6px;">Inventory Transactions - Current View</p>
+          <hr class="border-gray-300" />
+        </div>
+
         <!-- Search and Filter Section -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 print:hidden">
           <div class="relative w-full md:w-1/3">
             <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
             <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
@@ -146,8 +158,8 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
               </tr>
             </thead>
             <tbody>
-              <tr v-if="inventoryTransactions?.data?.length > 0" v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
-                <td class="p-2">{{ (inventoryTransactions?.from ?? 1) + i }}</td>
+              <tr v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
+                <td class="p-2">{{ (inventoryTransactions.from ?? 1) + i }}</td>
                 <td class="p-2">{{ transaction.item ? transaction.item.name : '-' }}</td>
                 <td class="p-2">{{ transaction.transaction_type }}</td>
                 <td class="p-2">{{ transaction.quantity }}</td>
@@ -158,6 +170,8 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
                 <td class="p-2 text-right">
                   <div class="inline-flex items-center justify-end space-x-2">
                     <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="btn-icon text-indigo-600" title="View"><Eye class="w-4 h-4" /></Link>
+                    <Link :href="route('admin.inventory-transactions.edit', transaction.id)" class="btn-icon text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
+                    <button @click="destroy(transaction.id)" class="btn-icon text-red-600" title="Delete"><Trash2 class="w-4 h-4" /></button>
                   </div>
                 </td>
               </tr>
@@ -169,10 +183,16 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4">
+        <div class="mt-4 print:hidden">
           <div class="flex justify-center">
             <Pagination :links="inventoryTransactions.links" />
           </div>
+        </div>
+
+        <!-- Print-only footer -->
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300" />
+          <p>Document Generated: {{ new Date().toLocaleString() }}</p>
         </div>
       </div>
     </div>
@@ -183,7 +203,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 @media print {
   @page { size: A4; margin: 12mm; }
   /* Hide AppLayout chrome while printing */
-  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"], .print\:hidden { display: none !important; }
   /* Ensure print-only blocks are visible */
   .hidden.print\:block { display: block !important; }
 }

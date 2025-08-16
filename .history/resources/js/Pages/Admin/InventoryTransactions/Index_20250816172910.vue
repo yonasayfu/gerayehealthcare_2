@@ -139,6 +139,35 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
                 <th class="p-2 cursor-pointer" @click="toggleSort('transaction_type')">Type <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
                 <th class="p-2 cursor-pointer" @click="toggleSort('quantity')">Quantity <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
                 <th class="p-2 cursor-pointer" @click="toggleSort('from_location')">From <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+
+        <!-- Search and Filter Section -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 print:hidden">
+          <div class="relative w-full md:w-1/3">
+            <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
+            <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          </div>
+          <div>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Inventory Maintenance Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead>
+              <tr>
+                <th class="p-2">#</th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('item_id')">Item <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('transaction_type')">Type <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('quantity')">Quantity <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+                <th class="p-2 cursor-pointer" @click="toggleSort('from_location')">From <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
                 <th class="p-2 cursor-pointer" @click="toggleSort('to_location')">To <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
                 <th class="p-2 cursor-pointer" @click="toggleSort('performed_by_id')">Performed By <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
                 <th class="p-2 cursor-pointer" @click="toggleSort('created_at')">Date <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
@@ -169,10 +198,16 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4">
+        <div class="mt-4 print:hidden">
           <div class="flex justify-center">
             <Pagination :links="inventoryTransactions.links" />
           </div>
+        </div>
+
+        <!-- Print-only footer -->
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300" />
+          <p>Document Generated: {{ new Date().toLocaleString() }}</p>
         </div>
       </div>
     </div>
@@ -180,11 +215,22 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 </template>
 
 <style>
+.print-container {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
 @media print {
   @page { size: A4; margin: 12mm; }
-  /* Hide AppLayout chrome while printing */
-  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
-  /* Ensure print-only blocks are visible */
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"], .print\:hidden { display: none !important; }
   .hidden.print\:block { display: block !important; }
 }
 </style>

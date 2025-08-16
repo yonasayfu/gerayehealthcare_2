@@ -93,7 +93,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
   <Head title="Inventory Transactions" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
@@ -111,8 +111,37 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
+        <!-- Print-only header -->
+        <div class="hidden print:block print-container">
+          <h1>Current Inventory Transactions List</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Performed By</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="transaction in inventoryTransactions.data" :key="transaction.id">
+                <td>{{ transaction.item ? transaction.item.name : '-' }}</td>
+                <td>{{ transaction.transaction_type }}</td>
+                <td>{{ transaction.quantity }}</td>
+                <td>{{ transaction.from_location }}</td>
+                <td>{{ transaction.to_location }}</td>
+                <td>{{ transaction.performed_by ? (transaction.performed_by.first_name + ' ' + transaction.performed_by.last_name) : '-' }}</td>
+                <td>{{ new Date(transaction.created_at).toLocaleDateString() }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <!-- Search and Filter Section -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 print:hidden">
           <div class="relative w-full md:w-1/3">
             <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
             <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
@@ -146,8 +175,8 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
               </tr>
             </thead>
             <tbody>
-              <tr v-if="inventoryTransactions?.data?.length > 0" v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
-                <td class="p-2">{{ (inventoryTransactions?.from ?? 1) + i }}</td>
+              <tr v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
+                <td class="p-2">{{ (inventoryTransactions.from ?? 1) + i }}</td>
                 <td class="p-2">{{ transaction.item ? transaction.item.name : '-' }}</td>
                 <td class="p-2">{{ transaction.transaction_type }}</td>
                 <td class="p-2">{{ transaction.quantity }}</td>
@@ -169,10 +198,16 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4">
+        <div class="mt-4 print:hidden">
           <div class="flex justify-center">
             <Pagination :links="inventoryTransactions.links" />
           </div>
+        </div>
+
+        <!-- Print-only footer -->
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300" />
+          <p>Document Generated: {{ new Date().toLocaleString() }}</p>
         </div>
       </div>
     </div>
@@ -180,12 +215,25 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 </template>
 
 <style>
+.print-container {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
 @media print {
   @page { size: A4; margin: 12mm; }
-  /* Hide AppLayout chrome while printing */
-  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
-  /* Ensure print-only blocks are visible */
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"], .print\:hidden { display: none !important; }
   .hidden.print\:block { display: block !important; }
 }
+</style>
+]]>
 </style>
 ]]>

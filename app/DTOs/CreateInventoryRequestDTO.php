@@ -11,8 +11,8 @@ class CreateInventoryRequestDTO extends Data
         public int $item_id,
         public int $quantity_requested,
         public ?string $reason,
-        public string $status,
+        public string $status = 'Pending',
         public string $priority,
-        public string $needed_by_date
+        public ?string $needed_by_date = null
     ) {}
 }

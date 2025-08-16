@@ -189,3 +189,49 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 }
 </style>
 ]]>
+              </tr>
+              <tr v-if="inventoryTransactions.data.length === 0">
+                <td colspan="9" class="text-center p-4 text-muted-foreground">No inventory transactions found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 print:hidden">
+          <div class="flex justify-center">
+            <Pagination :links="inventoryTransactions.links" />
+          </div>
+        </div>
+
+        <!-- Print-only footer -->
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300" />
+          <p>Document Generated: {{ new Date().toLocaleString() }}</p>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
+<style>
+.print-container {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"], .print\:hidden { display: none !important; }
+  .hidden.print\:block { display: block !important; }
+}
+</style>
+]]>

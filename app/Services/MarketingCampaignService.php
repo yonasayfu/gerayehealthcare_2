@@ -75,4 +75,14 @@ class MarketingCampaignService extends BaseService
     {
         return $this->handlePrintAll($request, MarketingCampaign::class, ExportConfig::getMarketingCampaignConfig());
     }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, MarketingCampaign::class, ExportConfig::getMarketingCampaignConfig());
+    }
+
+    public function printSingle(Request $request, MarketingCampaign $marketingCampaign)
+    {
+        return $this->handlePrintSingle($request, $marketingCampaign, ExportConfig::getMarketingCampaignConfig());
+    }
 }

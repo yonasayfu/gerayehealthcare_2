@@ -51,6 +51,16 @@ function printPage() {
   }, 100);
 }
 
+function printPdf() {
+  try {
+    const url = route('admin.marketing-campaigns.printSingle', { marketing_campaign: props.marketingCampaign.id, preview: true });
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error('Failed to open PDF:', error);
+    alert('Failed to open PDF. Please try again.');
+  }
+}
+
 function destroy(id: number) {
   if (confirm('Are you sure you want to delete this marketing campaign?')) {
     router.delete(route('admin.marketing-campaigns.destroy', id))
@@ -197,6 +207,9 @@ function destroy(id: number) {
             <div class="flex flex-wrap gap-2">
               <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
+              </button>
+              <button @click="printPdf" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
+                <Printer class="h-4 w-4" /> Print PDF (Server)
               </button>
               <Link
                 :href="route('admin.marketing-campaigns.edit', marketingCampaign.id)"

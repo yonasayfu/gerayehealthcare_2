@@ -23,8 +23,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('marketing-campaigns/print-current', [AdminMarketingCampaignController::class, 'printCurrent'])->name('marketing-campaigns.printCurrent');
         Route::get('marketing-campaigns/{marketing_campaign}/print', [AdminMarketingCampaignController::class, 'printSingle'])->name('marketing-campaigns.printSingle');
         Route::resource('marketing-campaigns', AdminMarketingCampaignController::class);
-        Route::get('marketing-leads/export', [AdminMarketingLeadController::class, 'export'])->name('marketing-leads.export');
-        Route::get('marketing-leads/print-all', [AdminMarketingLeadController::class, 'printAll'])->name('marketing-leads.printAll');
         Route::resource('marketing-leads', AdminMarketingLeadController::class);
         Route::get('landing-pages/export/{type}', [AdminLandingPageController::class, 'export'])->name('landing-pages.export');
         Route::get('landing-pages/print-all', [AdminLandingPageController::class, 'printAll'])->name('landing-pages.printAll');

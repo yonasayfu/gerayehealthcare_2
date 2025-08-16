@@ -23,7 +23,7 @@ class InventoryRequestRules extends BaseResourceRules
             'approver_id' => 'nullable|exists:staff,id',
             'item_id' => 'required|exists:inventory_items,id',
             'quantity_requested' => 'required|integer|min:1',
-            'quantity_approved' => 'nullable|integer|min:0|max:quantity_requested',
+            'quantity_approved' => 'nullable|integer|min:0|lte:quantity_requested',
             'reason' => 'nullable|string',
             'status' => 'required|string|in:Pending,Approved,Rejected,Fulfilled,Partially Fulfilled',
             'priority' => 'required|string|in:Low,Normal,High,Urgent',

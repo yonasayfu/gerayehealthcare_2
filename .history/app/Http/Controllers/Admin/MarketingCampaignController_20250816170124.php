@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateMarketingCampaignDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Models\MarketingCampaign;
 use App\Services\MarketingCampaignService;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
+use App\Models\Staff;
 use App\Services\Validation\Rules\MarketingCampaignRules;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class MarketingCampaignController extends BaseController
 {
@@ -28,16 +31,6 @@ class MarketingCampaignController extends BaseController
         return app(MarketingCampaignService::class)->printAll(request());
     }
 
-    public function printCurrent(Request $request)
-    {
-        return app(MarketingCampaignService::class)->printCurrent($request);
-    }
-
-    public function printSingle(Request $request, MarketingCampaign $marketing_campaign)
-    {
-        return app(MarketingCampaignService::class)->printSingle($request, $marketing_campaign);
-    }
-
     // CSV export for marketing campaigns
     public function export(Request $request)
     {
@@ -52,7 +45,7 @@ class MarketingCampaignController extends BaseController
         ];
 
         $columns = [
-            'id', 'campaign_name', 'platform', 'start_date', 'end_date', 'status', 'urgentness', 'mandatoryness', 'responsible_staff', 'created_at',
+            'id', 'campaign_name', 'platform', 'start_date', 'end_date', 'status', 'urgentness', 'mandatoryness', 'responsible_staff', 'created_at'
         ];
 
         $callback = function () use ($campaigns, $columns) {

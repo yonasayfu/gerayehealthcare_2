@@ -177,6 +177,65 @@ class ExportConfig
                     ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
                 ],
             ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Marketing Campaign Detail - Geraye',
+                'document_title' => 'Marketing Campaign Detail',
+                'filename_prefix' => 'marketing-campaign',
+                'with_relations' => ['platform', 'assignedStaff', 'createdByStaff'],
+                'fields' => [
+                    'Campaign Name' => 'campaign_name',
+                    'Campaign Code' => ['field' => 'campaign_code', 'default' => '-'],
+                    'Platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'Type' => ['field' => 'campaign_type', 'default' => '-'],
+                    'Status' => ['field' => 'status', 'default' => '-'],
+                    'Urgentness' => ['field' => 'urgentness', 'default' => '-'],
+                    'Mandatoryness' => ['field' => 'mandatoryness', 'default' => '-'],
+                    'Responsible Staff' => [
+                        'field' => 'assignedStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->assignedStaff->first_name ?? '';
+                            $ln = $model->assignedStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'Start Date' => [
+                        'field' => 'start_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-'; },
+                    ],
+                    'End Date' => [
+                        'field' => 'end_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-'; },
+                    ],
+                    'Created By' => [
+                        'field' => 'createdByStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->createdByStaff->first_name ?? '';
+                            $ln = $model->createdByStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'campaign_name', 'label' => 'Campaign Name'],
+                    ['key' => 'campaign_code', 'label' => 'Campaign Code'],
+                    ['key' => 'platform', 'label' => 'Platform'],
+                    ['key' => 'campaign_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'urgentness', 'label' => 'Urgentness'],
+                    ['key' => 'mandatoryness', 'label' => 'Mandatoryness'],
+                    ['key' => 'responsible_staff', 'label' => 'Responsible Staff'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'createdByStaff', 'label' => 'Created By'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
         ];
     }
 
@@ -1324,6 +1383,54 @@ class ExportConfig
             'sortable_fields' => ['campaign_name', 'start_date', 'end_date', 'status', 'created_at'],
             'default_sort' => 'created_at',
             'filename_prefix' => 'marketing-campaigns',
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Marketing Campaigns (Current View) - Geraye',
+                'document_title' => 'Marketing Campaigns (Current View)',
+                'filename_prefix' => 'marketing-campaigns-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['platform', 'assignedStaff', 'createdByStaff'],
+                'fields' => [
+                    'campaign_name' => 'campaign_name',
+                    'campaign_code' => ['field' => 'campaign_code', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'campaign_type' => ['field' => 'campaign_type', 'default' => '-'],
+                    'status' => ['field' => 'status', 'default' => '-'],
+                    'urgentness' => ['field' => 'urgentness', 'default' => '-'],
+                    'mandatoryness' => ['field' => 'mandatoryness', 'default' => '-'],
+                    'responsible_staff' => [
+                        'field' => 'assignedStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->assignedStaff->first_name ?? '';
+                            $ln = $model->assignedStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'start_date' => [
+                        'field' => 'start_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'end_date' => [
+                        'field' => 'end_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'campaign_name', 'label' => 'Campaign Name'],
+                    ['key' => 'campaign_code', 'label' => 'Campaign Code'],
+                    ['key' => 'platform', 'label' => 'Platform'],
+                    ['key' => 'campaign_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'urgentness', 'label' => 'Urgentness'],
+                    ['key' => 'mandatoryness', 'label' => 'Mandatoryness'],
+                    ['key' => 'responsible_staff', 'label' => 'Responsible Staff'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                ],
+            ],
             'all_records' => [
                 'view' => 'pdf-layout',
                 'title' => 'All Marketing Campaigns - Geraye',
@@ -1334,16 +1441,42 @@ class ExportConfig
                 'with_relations' => ['platform', 'assignedStaff', 'createdByStaff'],
                 'fields' => [
                     'campaign_name' => 'campaign_name',
-                    'start_date' => 'start_date',
-                    'end_date' => 'end_date',
-                    'status' => 'status',
+                    'campaign_code' => ['field' => 'campaign_code', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'campaign_type' => ['field' => 'campaign_type', 'default' => '-'],
+                    'status' => ['field' => 'status', 'default' => '-'],
+                    'urgentness' => ['field' => 'urgentness', 'default' => '-'],
+                    'mandatoryness' => ['field' => 'mandatoryness', 'default' => '-'],
+                    'responsible_staff' => [
+                        'field' => 'assignedStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->assignedStaff->first_name ?? '';
+                            $ln = $model->assignedStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'start_date' => [
+                        'field' => 'start_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'end_date' => [
+                        'field' => 'end_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
                     ['key' => 'campaign_name', 'label' => 'Campaign Name'],
+                    ['key' => 'campaign_code', 'label' => 'Campaign Code'],
+                    ['key' => 'platform', 'label' => 'Platform'],
+                    ['key' => 'campaign_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'urgentness', 'label' => 'Urgentness'],
+                    ['key' => 'mandatoryness', 'label' => 'Mandatoryness'],
+                    ['key' => 'responsible_staff', 'label' => 'Responsible Staff'],
                     ['key' => 'start_date', 'label' => 'Start Date'],
                     ['key' => 'end_date', 'label' => 'End Date'],
-                    ['key' => 'status', 'label' => 'Status'],
                 ],
             ],
         ];

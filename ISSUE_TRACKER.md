@@ -93,7 +93,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [x] Fix the Method ...::generateSinglePdf does not exist error for the "download pdf" button on show.vue and rename it for consistency.
 - [x] Resolve the Class "App\\Http\\Controllers\\Admin\\CreateSupplierDTO" not found error on submission from edit.vue.
 
-#### Module: Inventory Requests ()
+#### Module: Inventory Requests (COMPLATE 100%)
 - [x] Add "requester" to the search functionality.
 - [x] Remove the export CSV and PDF features.
 - [x] Fix the "Print All" functionality, as nothing happens when clicked.
@@ -122,7 +122,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [x] Create a special seeder and test the module to ensure it works correctly.
 - [x] Review the logic for disabling alerts and add a "due date" column for viewing.
 
-#### Module: Invoices (Complete)
+#### Module: Invoices (Complete 100%)
 - [ ] Change the view action button to an icon for consistency.
 - [ ] Check the module's relationships and usage to determine if "edit" and "delete" are needed.
 - [x] Populate the dropdowns for patient and service on the "Create New Invoice" page.

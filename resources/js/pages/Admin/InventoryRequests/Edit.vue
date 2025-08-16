@@ -11,7 +11,7 @@ const props = defineProps({
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Inventory Items', href: route('admin.inventory-requests.index') },
+  { title: 'Inventory Requests', href: route('admin.inventory-requests.index') },
   { title: 'Edit', href: route('admin.inventory-requests.edit', props.inventoryRequest.id) },
 ];
 
@@ -47,7 +47,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" @submit="submit" />
+            <Form :form="form" :staffList="staffList" :inventoryItems="inventoryItems" @submit="submit" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

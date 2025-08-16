@@ -1,58 +1,30 @@
-<![CDATA[<script setup lang="ts">
+<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
-import { ArrowUpDown, Printer, Download, Eye, Search, Trash2, Edit3 } from 'lucide-vue-next';
+import { ArrowUpDown, Printer, Download, Eye, Search } from 'lucide-vue-next';
 import Pagination from '@/components/Pagination.vue';
-
-// Define the type for inventory transaction data
-interface InventoryTransaction {
-  id: number;
-  item: { name: string } | null;
-  transaction_type: string;
-  quantity: number;
-  from_location: string | null;
-  to_location: string | null;
-  performed_by: { first_name: string; last_name: string } | null;
-  created_at: string;
-  updated_at: string | null;
-  notes: string | null;
-}
-
-// Define the type for the paginated data
-interface InventoryTransactionPagination {
-  data: InventoryTransaction[];
-  links: Array<{
-    url: string | null;
-    label: string;
-    active: boolean;
-  }>;
-  from: number | null;
-}
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Inventory Transactions', href: route('admin.inventory-transactions.index') },
 ];
 
-const props = defineProps<{
-  inventoryTransactions: InventoryTransactionPagination; // Use the defined pagination type
-  filters: {
-    search?: string;
-    sort?: string;
-    direction?: 'asc' | 'desc';
-    per_page?: number;
-    page?: number; // Add page to filters for printCurrentView
-  };
-}>();
+const props = defineProps({
+  inventoryTransactions: Object, // Paginated list of inventory transactions
+  filters: { // Add filters prop with a default empty object
+    type: Object,
+    default: () => ({}),
+  },
+});
 
 const search = ref(props.filters.search || '');
 const perPage = ref(props.filters.per_page || 5);
 const filters = ref({
   search: props.filters.search || '',
-  sort: props.filters.sort || 'created_at',
-  direction: props.filters.direction || 'desc',
+  sort: (props.filters as any).sort || 'created_at',
+  direction: (props.filters as any).direction || 'desc',
 });
 
 const toggleSort = (column: string) => {
@@ -63,12 +35,6 @@ const toggleSort = (column: string) => {
     filters.value.direction = 'asc';
   }
 };
-
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this inventory transaction?')) {
-    router.delete(route('admin.inventory-transactions.destroy', id));
-  }
-}
 
 watch([search, perPage], debounce(() => {
   filters.value.search = search.value;
@@ -93,32 +59,41 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
   <Head title="Inventory Transactions" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button @click="exportData('csv')" class="btn btn-success" title="Export CSV" aria-label="Export CSV">
-            <Download class="h-4 w-4" />
-            <span class="ml-2">CSV</span>
+          <button @click="() => exportData('csv')" class="btn btn-success">
+            <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="printCurrentView" class="btn btn-dark" title="Print current page" aria-label="Print current page">
-            <Printer class="h-4 w-4" />
-            <span class="ml-2">Print Current</span>
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
+          </button>
+          <button @click="printAllRecords" class="btn btn-info">
+            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
+        <!-- Print-only header -->
+        <div class="hidden print:block text-center mb-4">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="mx-auto" style="max-width:150px; max-height:50px; margin-bottom:6px;" />
+          <h2 class="font-bold text-gray-900" style="margin:0;">Geraye Home Care Services</h2>
+          <p class="text-gray-600" style="margin:2px 0 6px;">Inventory Transactions - Current View</p>
+          <hr class="border-gray-300" />
+        </div>
+
         <!-- Search and Filter Section -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 print:hidden">
           <div class="relative w-full md:w-1/3">
             <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
             <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
           </div>
           <div>
-            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
             <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
               <option value="5">5</option>
               <option value="10">10</option>
@@ -146,8 +121,8 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
               </tr>
             </thead>
             <tbody>
-              <tr v-if="inventoryTransactions?.data?.length > 0" v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
-                <td class="p-2">{{ (inventoryTransactions?.from ?? 1) + i }}</td>
+              <tr v-for="(transaction, i) in inventoryTransactions.data" :key="transaction.id" class="border-t">
+                <td class="p-2">{{ (inventoryTransactions.from ?? 1) + i }}</td>
                 <td class="p-2">{{ transaction.item ? transaction.item.name : '-' }}</td>
                 <td class="p-2">{{ transaction.transaction_type }}</td>
                 <td class="p-2">{{ transaction.quantity }}</td>
@@ -169,10 +144,16 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
 
         <!-- Pagination -->
-        <div class="mt-4">
+        <div class="mt-4 print:hidden">
           <div class="flex justify-center">
             <Pagination :links="inventoryTransactions.links" />
           </div>
+        </div>
+
+        <!-- Print-only footer -->
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300" />
+          <p>Document Generated: {{ new Date().toLocaleString() }}</p>
         </div>
       </div>
     </div>
@@ -183,9 +164,8 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 @media print {
   @page { size: A4; margin: 12mm; }
   /* Hide AppLayout chrome while printing */
-  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"], .print\:hidden { display: none !important; }
   /* Ensure print-only blocks are visible */
   .hidden.print\:block { display: block !important; }
 }
 </style>
-]]>
