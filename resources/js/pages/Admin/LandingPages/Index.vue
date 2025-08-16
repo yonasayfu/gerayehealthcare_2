@@ -15,7 +15,8 @@ interface LandingPage {
   page_url: string;
   language: string;
   is_active: boolean;
-  campaign: { campaign_name: string }; // Assuming campaign is eager loaded
+  campaign_name?: string; // flat alias from join
+  campaign?: { campaign_name: string }; // eager-loaded relation
   // Add other fields as needed
 }
 
@@ -87,9 +88,9 @@ function destroy(id: number) {
   }
 }
 
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.landing-pages', filters: props.filters });
+const { printCurrentView, printAllRecords } = useExport({ routeName: 'admin.landing-pages', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -113,20 +114,14 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all landing pages here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.landing-pages.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.landing-pages.create')" class="btn btn-primary">
             + Add Page
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllPages" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printAllRecords" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
       </div>
@@ -191,7 +186,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ page.page_url ?? '-' }}</td>
               <td class="px-6 py-4">{{ page.language ?? '-' }}</td>
               <td class="px-6 py-4">{{ page.is_active ? 'Yes' : 'No' }}</td>
-              <td class="px-6 py-4">{{ page.campaign?.campaign_name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ page.campaign?.campaign_name || page.campaign_name || '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link

@@ -45,6 +45,7 @@ class LandingPage extends Model
         'submissions',
         'conversion_rate',
         'is_active',
+        'notes',
     ];
 
     protected $casts = [

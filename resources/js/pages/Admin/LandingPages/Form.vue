@@ -3,6 +3,7 @@ import InputLabel from '@/components/ui/label/Label.vue'
 import TextInput from '@/components/ui/input/Input.vue'
 import InputError from '@/components/InputError.vue'
 import { useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 
 const props = defineProps<{
   form: ReturnType<typeof useForm>;
@@ -10,6 +11,32 @@ const props = defineProps<{
 }>();
 
 const languages = ['en', 'es', 'fr', 'de', 'zh'];
+
+// Keep a string version of JSON for the textarea, with safe parse on set
+const formFieldsJson = computed<string>({
+  get() {
+    try {
+      if (typeof props.form.form_fields === 'string') {
+        // If already a string, pretty print if possible
+        const parsed = JSON.parse(props.form.form_fields)
+        return JSON.stringify(parsed, null, 2)
+      }
+      return JSON.stringify(props.form.form_fields ?? {}, null, 2)
+    } catch (e) {
+      // Fallback to raw string if can't parse
+      return String(props.form.form_fields ?? '')
+    }
+  },
+  set(val: string) {
+    try {
+      const parsed = val ? JSON.parse(val) : {}
+      props.form.form_fields = parsed
+    } catch (e) {
+      // If invalid JSON, keep the string; backend validation can catch if needed
+      props.form.form_fields = val as any
+    }
+  }
+})
 </script>
 
 <template>
@@ -147,7 +174,7 @@ const languages = ['en', 'es', 'fr', 'de', 'zh'];
       <textarea
         id="form_fields"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50"
-        v-model="form.form_fields"
+        v-model="formFieldsJson"
       ></textarea>
       <InputError class="mt-2" :message="form.errors.form_fields" />
     </div>

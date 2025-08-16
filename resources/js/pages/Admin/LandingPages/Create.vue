@@ -53,8 +53,9 @@ function submit() {
             <Form :form="form" :campaigns="props.campaigns" />
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+        <div class="p-6 border-t border-gray-200 rounded-b flex gap-2">
+            <Link :href="route('admin.landing-pages.index')" class="btn btn-outline">Cancel</Link>
+            <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
               {{ form.processing ? 'Creating...' : 'Create Landing Page' }}
             </button>
         </div>

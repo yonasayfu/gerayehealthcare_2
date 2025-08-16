@@ -33,7 +33,11 @@ class BaseController extends Controller
         $data = $this->service->getAll($request);
         return Inertia::render($this->viewName . '/Index', [
             $this->dataVariableName => $data,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order', 'active_only'])
+            'filters' => $request->only([
+                'search', 'sort', 'direction', 'per_page',
+                'sort_by', 'sort_order', 'active_only',
+                'campaign_id', 'is_active', 'language'
+            ])
         ]);
     }
 

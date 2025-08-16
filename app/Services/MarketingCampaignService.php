@@ -27,7 +27,7 @@ class MarketingCampaignService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(array_merge(['platform', 'assignedStaff', 'createdByStaff'], $with));
+        $query = $this->model->with(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
@@ -67,7 +67,7 @@ class MarketingCampaignService extends BaseService
 
     public function getById(int $id, array $with = []): MarketingCampaign
     {
-        $with = array_unique(array_merge(['platform', 'assignedStaff', 'createdByStaff'], $with));
+        $with = array_unique(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
         return $this->model->with($with)->findOrFail($id);
     }
 

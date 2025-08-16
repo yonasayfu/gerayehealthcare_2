@@ -83,6 +83,9 @@
     color: #000 !important;
     vertical-align: top !important; /* Align content to top of cell */
     word-break: break-word; /* Allow long words to break */
+    overflow-wrap: anywhere; /* Force wrapping of very long strings */
+    white-space: normal !important; /* Ensure text wraps to multiple lines */
+    line-height: 1.2 !important;
   }
 
   .print-table th {
@@ -101,6 +104,12 @@
   }
   .print-table tbody tr:last-child {
     border-bottom: 1px solid #ddd !important;
+  }
+
+  /* Avoid breaking a row across pages */
+  .print-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   /* Hide actions column for print */

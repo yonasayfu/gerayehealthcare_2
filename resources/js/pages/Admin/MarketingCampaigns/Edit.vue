@@ -28,6 +28,10 @@ interface MarketingCampaign {
 
 const props = defineProps<{
   marketingCampaign: MarketingCampaign;
+  platforms: { id: number; name: string }[];
+  staffMembers: { id: number; full_name: string }[];
+  campaignTypes: string[];
+  statuses: string[];
 }>()
 
 const breadcrumbs = [
@@ -37,52 +41,30 @@ const breadcrumbs = [
   { title: 'Edit', href: route('admin.marketing-campaigns.edit', props.marketingCampaign.id) },
 ]
 
+const toDateInput = (val?: string) => (val ? val.substring(0, 10) : '');
+
 const form = useForm({
   campaign_name: props.marketingCampaign.campaign_name,
   platform_id: props.marketingCampaign.platform_id,
   campaign_type: props.marketingCampaign.campaign_type,
-  target_audience: JSON.stringify(props.marketingCampaign.target_audience, null, 2),
+  target_audience: JSON.stringify(props.marketingCampaign.target_audience ?? {}, null, 2),
   budget_allocated: props.marketingCampaign.budget_allocated,
   budget_spent: props.marketingCampaign.budget_spent,
-  start_date: props.marketingCampaign.start_date,
-  end_date: props.marketingCampaign.end_date,
+  start_date: toDateInput(props.marketingCampaign.start_date),
+  end_date: toDateInput(props.marketingCampaign.end_date),
   status: props.marketingCampaign.status,
   utm_campaign: props.marketingCampaign.utm_campaign,
   utm_source: props.marketingCampaign.utm_source,
   utm_medium: props.marketingCampaign.utm_medium,
   assigned_staff_id: props.marketingCampaign.assigned_staff_id,
-  goals: JSON.stringify(props.marketingCampaign.goals, null, 2),
+  goals: JSON.stringify(props.marketingCampaign.goals ?? {}, null, 2),
 });
 
 const submit = () => {
   form.put(route('admin.marketing-campaigns.update', props.marketingCampaign.id));
 };
 
-// Dummy data for select options (replace with actual data from props if available)
-const platforms = [
-  { id: 1, name: 'TikTok' },
-  { id: 2, name: 'Meta' },
-  { id: 3, name: 'Google' },
-  { id: 4, name: 'LinkedIn' },
-];
-
-const campaignTypes = [
-  'Awareness',
-  'Lead Gen',
-  'Conversion',
-];
-
-const statuses = [
-  'Draft',
-  'Active',
-  'Paused',
-  'Completed',
-];
-
-const staffMembers = [
-  { id: 1, full_name: 'John Doe' },
-  { id: 2, full_name: 'Jane Smith' },
-];
+// Options now come from props: props.platforms, props.staffMembers, props.campaignTypes, props.statuses
 </script>
 
 <template>
@@ -124,7 +106,7 @@ const staffMembers = [
                         required
                     >
                         <option value="">Select a Platform</option>
-                        <option v-for="platform in platforms" :key="platform.id" :value="platform.id">{{ platform.name }}</option>
+                        <option v-for="platform in props.platforms" :key="platform.id" :value="platform.id">{{ platform.name }}</option>
                     </select>
                     <InputError class="mt-2" :message="form.errors.platform_id" />
                 </div>
@@ -137,7 +119,7 @@ const staffMembers = [
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
                     >
                         <option value="">Select a Type</option>
-                        <option v-for="type in campaignTypes" :key="type" :value="type">{{ type }}</option>
+                        <option v-for="type in props.campaignTypes" :key="type" :value="type">{{ type }}</option>
                     </select>
                     <InputError class="mt-2" :message="form.errors.campaign_type" />
                 </div>
@@ -209,7 +191,7 @@ const staffMembers = [
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
                         required
                     >
-                        <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+                        <option v-for="s in props.statuses" :key="s" :value="s">{{ s }}</option>
                     </select>
                     <InputError class="mt-2" :message="form.errors.status" />
                 </div>
@@ -255,7 +237,7 @@ const staffMembers = [
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
                     >
                         <option value="">Select Staff</option>
-                        <option v-for="staff in staffMembers" :key="staff.id" :value="staff.id">{{ staff.full_name }}</option>
+                        <option v-for="staff in props.staffMembers" :key="staff.id" :value="staff.id">{{ staff.full_name }}</option>
                     </select>
                     <InputError class="mt-2" :message="form.errors.assigned_staff_id" />
                 </div>

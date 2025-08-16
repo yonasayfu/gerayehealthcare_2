@@ -8,7 +8,7 @@ class LandingPageRules extends BaseResourceRules
     {
         return [
             'page_title' => ['required', 'string', 'max:255'],
-            'page_url' => ['required', 'url', 'max:255'],
+            'page_url' => ['required', 'url', 'max:255', 'unique:landing_pages,page_url'],
             'template_used' => ['nullable', 'string', 'max:255'],
             'language' => ['string', 'max:10'],
             'form_fields' => ['nullable', 'array'],
@@ -24,6 +24,9 @@ class LandingPageRules extends BaseResourceRules
 
     public static function update($item): array
     {
-        return self::store();
+        $rules = self::store();
+        // Adjust unique rule to ignore current record on update
+        $rules['page_url'] = ['required', 'url', 'max:255', 'unique:landing_pages,page_url,' . ($item?->id ?? 'NULL')];
+        return $rules;
     }
 }

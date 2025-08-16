@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\DTOs\CreateLandingPageDTO;
 use App\DTOs\UpdateLandingPageDTO;
+use Illuminate\Support\Facades\App;
 
 class LandingPageController extends BaseController
 {
@@ -34,6 +35,16 @@ class LandingPageController extends BaseController
         return Inertia::render($this->viewName . '/Create', [
             'campaigns' => $campaigns,
         ]);
+    }
+
+    public function printAll(Request $request)
+    {
+        return app(LandingPageService::class)->printAll($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return app(LandingPageService::class)->printCurrent($request);
     }
 
     public function edit($id)

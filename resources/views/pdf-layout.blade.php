@@ -30,6 +30,9 @@
             height: 40px;
             line-height: 20px;
         }
+        .page-number:after {
+            content: counter(page) " of " counter(pages);
+        }
     </style>
 </head>
 <body>
@@ -92,6 +95,7 @@
     @unless(!empty($hide_footer))
     <div class="footer">
         <div>Generated on: {{ $footerInfo['generated_date'] ?? now()->format('F j, Y, g:i a') }}</div>
+        <div>Page <span class="page-number"></span></div>
         <div style="font-size: 10px; color: #888; margin-top: 2px;">Geraye Home Care Services - Confidential Document</div>
     </div>
     @endunless

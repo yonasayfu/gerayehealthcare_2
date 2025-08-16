@@ -34,10 +34,12 @@ class MarketingCampaignFactory extends Factory
             'start_date' => $startDate,
             'end_date' => $endDate,
             'status' => $this->faker->randomElement(['Draft', 'Active', 'Paused', 'Completed']),
+            'urgency' => $this->faker->randomElement(['Low', 'Medium', 'High', 'Critical']),
             'utm_campaign' => $this->faker->slug(),
             'utm_source' => $this->faker->word(),
             'utm_medium' => $this->faker->word(),
             'assigned_staff_id' => Staff::all()->random()->id,
+            'responsible_staff_id' => Staff::all()->random()->id,
             'created_by_staff_id' => Staff::all()->random()->id,
             'goals' => json_encode(['leads' => $this->faker->numberBetween(100, 1000), 'conversions' => $this->faker->numberBetween(10, 200)]),
         ];
