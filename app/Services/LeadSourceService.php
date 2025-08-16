@@ -41,8 +41,9 @@ class LeadSourceService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    public function toggleStatus(LeadSource $leadSource): LeadSource
+    public function toggleStatus(int $id): LeadSource
     {
+        $leadSource = $this->getById($id);
         $leadSource->is_active = !$leadSource->is_active;
         $leadSource->save();
         return $leadSource;

@@ -5,7 +5,21 @@ import Form from './Form.vue';
 
 const props = defineProps({
   inventoryItem: Object, // The inventory item to edit
+  suppliers: {
+    type: Array,
+    default: () => [],
+  },
 });
+
+function toDateInput(value: string | null): string | null {
+  if (!value) return null;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -19,13 +33,13 @@ const form = useForm({
   item_category: props.inventoryItem.item_category,
   item_type: props.inventoryItem.item_type,
   serial_number: props.inventoryItem.serial_number,
-  purchase_date: props.inventoryItem.purchase_date,
-  warranty_expiry: props.inventoryItem.warranty_expiry,
+  purchase_date: toDateInput(props.inventoryItem.purchase_date),
+  warranty_expiry: toDateInput(props.inventoryItem.warranty_expiry),
   supplier_id: props.inventoryItem.supplier_id,
   assigned_to_type: props.inventoryItem.assigned_to_type,
   assigned_to_id: props.inventoryItem.assigned_to_id,
-  last_maintenance_date: props.inventoryItem.last_maintenance_date,
-  next_maintenance_due: props.inventoryItem.next_maintenance_due,
+  last_maintenance_date: toDateInput(props.inventoryItem.last_maintenance_date),
+  next_maintenance_due: toDateInput(props.inventoryItem.next_maintenance_due),
   maintenance_schedule: props.inventoryItem.maintenance_schedule,
   notes: props.inventoryItem.notes,
   status: props.inventoryItem.status,
@@ -51,13 +65,17 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" @submit="submit" />
+            <div v-if="Object.keys(form.errors).length" class="rounded-md bg-red-50 p-4 border border-red-200 text-red-800 text-sm">
+              Please correct the highlighted errors and try again.
+            </div>
+            <Form :form="form" :suppliers="props.suppliers" @submit="submit" />
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+        <div class="p-6 border-t border-gray-200 rounded-b flex gap-2">
+            <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="button">
               {{ form.processing ? 'Saving...' : 'Save Changes' }}
             </button>
+            <Link :href="route('admin.inventory-items.index')" class="btn btn-outline">Cancel</Link>
         </div>
 
     </div>

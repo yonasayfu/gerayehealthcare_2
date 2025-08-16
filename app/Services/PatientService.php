@@ -98,12 +98,13 @@ class PatientService extends BaseService
         return $patient;
     }
 
-    public function getById(int $id): Patient
+    public function getById(int $id, array $with = []): Patient
     {
-        return $this->model->with([
+        $with = array_unique(array_merge([
             'registeredByStaff',
             'employeeInsuranceRecords.policy.corporateClient',
-        ])->findOrFail($id);
+        ], $with));
+        return $this->model->with($with)->findOrFail($id);
     }
 
     

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 
 // Only one defineProps call
 const props = defineProps<{
-  task: {
+  taskDelegation: {
     id: number
     title: string
     assigned_to: number
@@ -15,38 +15,38 @@ const props = defineProps<{
     status: 'Pending' | 'In Progress' | 'Completed'
     notes: string | null
   }
-  staffList: { id: number; first_name: string; last_name: string }[]
+  staff: { id: number; first_name: string; last_name: string }[]
 }>()
 
 // Initialize the form with the existing values
 const form = useForm({
-  title:       props.task.title,
-  assigned_to: props.task.assigned_to,
-  due_date:    props.task.due_date,
-  status:      props.task.status,
-  notes:       props.task.notes || '',
+  title:       props.taskDelegation.title,
+  assigned_to: props.taskDelegation.assigned_to,
+  due_date:    props.taskDelegation.due_date,
+  status:      props.taskDelegation.status,
+  notes:       props.taskDelegation.notes || '',
 })
 
 function submit() {
   form.put(
-    route('admin.task-delegations.update', { task_delegation: props.task.id })
+    route('admin.task-delegations.update', { task_delegation: props.taskDelegation.id })
   )
 }
 </script>
 
 <template>
-  <Head :title="`Edit Task: ${props.task.title}`" />
+  <Head :title="`Edit Task: ${props.taskDelegation.title}`" />
 
   <AppLayout :breadcrumbs="[
     { title: 'Dashboard', href: route('dashboard') },
     { title: 'Task Delegations', href: route('admin.task-delegations.index') },
-    { title: `Edit: ${props.task.title}`, href: '' }
+    { title: `Edit: ${props.taskDelegation.title}`, href: '' }
   ]">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Edit Task: {{ props.task.title }}
+                Edit Task: {{ props.taskDelegation.title }}
             </h3>
             <Link :href="route('admin.task-delegations.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -67,7 +67,7 @@ function submit() {
                   <Label for="assigned_to">Assign To</Label>
                   <select id="assigned_to" v-model="form.assigned_to" class="form-select w-full rounded-md border-gray-300">
                     <option disabled value="">Select staff…</option>
-                    <option v-for="s in props.staffList" :key="s.id" :value="s.id">
+                    <option v-for="s in props.staff" :key="s.id" :value="s.id">
                       {{ s.first_name }} {{ s.last_name }}
                     </option>
                   </select>

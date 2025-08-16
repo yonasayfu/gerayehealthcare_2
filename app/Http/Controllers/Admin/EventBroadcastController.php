@@ -9,6 +9,9 @@ use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Base\BaseController;
+use App\Services\EventBroadcastService;
+use App\Models\EventBroadcast;
+use App\DTOs\CreateEventBroadcastDTO;
 
 class EventBroadcastController extends BaseController
 {

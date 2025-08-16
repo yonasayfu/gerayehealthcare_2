@@ -23,8 +23,32 @@ class InventoryAlertController extends BaseController
         );
     }
 
+    public function show($id)
+    {
+        $alert = $this->service->getById($id, ['item', 'delegatedTask.assignee']);
+        return \Inertia\Inertia::render('Admin/InventoryAlerts/Show', [
+            'inventoryAlert' => $alert,
+            'returnTo' => request()->input('return_to'),
+        ]);
+    }
+
     public function count()
     {
         return response()->json(['count' => $this->service->count()]);
+    }
+
+    public function printAll()
+    {
+        return app(InventoryAlertService::class)->printAll(request());
+    }
+
+    public function printCurrent()
+    {
+        return app(InventoryAlertService::class)->printCurrent(request());
+    }
+
+    public function printSingle(InventoryAlert $inventory_alert)
+    {
+        return app(InventoryAlertService::class)->printSingle($inventory_alert, request());
     }
 }

@@ -2,7 +2,7 @@
 import { ref, watch, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next';
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, Plus } from 'lucide-vue-next';
 import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
 import { format } from 'date-fns';
@@ -87,20 +87,17 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all medical equipment and supplies.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.inventory-items.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add New Item
+          <Link :href="route('admin.inventory-items.create')" class="btn btn-primary inline-flex items-center gap-2">
+            <Plus class="h-4 w-4" /> Add Item
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
+          <button @click="exportData('csv')" class="btn btn-success inline-flex items-center gap-2">
+            <Download class="h-4 w-4" /> Export CSV
           </button>
-          <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
+          <button @click="printCurrentView" class="btn btn-dark inline-flex items-center gap-2">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="printAllInventoryItems" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md">
+          <button @click="printAllRecords" class="btn btn-info inline-flex items-center gap-2">
             <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md">
-            <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
       </div>

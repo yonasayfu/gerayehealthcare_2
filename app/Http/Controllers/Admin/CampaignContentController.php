@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Controllers\Base\BaseController;
+use App\Services\CampaignContentService;
+use App\Models\CampaignContent;
+use App\DTOs\CreateCampaignContentDTO;
 
 class CampaignContentController extends BaseController
 {

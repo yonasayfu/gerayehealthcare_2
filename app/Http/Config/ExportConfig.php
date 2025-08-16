@@ -181,6 +181,126 @@ class ExportConfig
     }
 
     /**
+     * Get export/print configuration for InventoryAlert model
+     */
+    public static function getInventoryAlertConfig(): array
+    {
+        return [
+            'searchable_fields' => ['alert_type', 'message', 'item.name'],
+            'sortable_fields' => ['is_active', 'alert_type', 'triggered_at', 'created_at'],
+            'default_sort' => 'created_at',
+            'select_fields' => [
+                'item_id', 'alert_type', 'message', 'is_active', 'triggered_at', 'created_at',
+            ],
+
+            // CSV intentionally not used for Inventory Alerts per latest requirement
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Alerts - Geraye Home Care Services',
+                'document_title' => 'Inventory Alerts',
+                'filename_prefix' => 'inventory-alerts',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['item'],
+                'fields' => [
+                    'status' => [
+                        'field' => 'is_active',
+                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                    ],
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
+                    'reorder_level' => ['field' => 'item.reorder_level', 'default' => '-'],
+                    'alert_type' => ['field' => 'alert_type', 'default' => '-'],
+                    'triggered_at' => [
+                        'field' => 'triggered_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                    'message' => ['field' => 'message', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'item.quantity_on_hand', 'label' => 'Qty on Hand'],
+                    ['key' => 'item.reorder_level', 'label' => 'Reorder Level'],
+                    ['key' => 'alert_type', 'label' => 'Alert Type'],
+                    ['key' => 'triggered_at', 'label' => 'Triggered'],
+                    ['key' => 'message', 'label' => 'Message'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Alerts (Current View) - Geraye Home Care Services',
+                'document_title' => 'Inventory Alerts (Current View)',
+                'filename_prefix' => 'inventory-alerts-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item'],
+                'fields' => [
+                    'status' => [
+                        'field' => 'is_active',
+                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                    ],
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
+                    'reorder_level' => ['field' => 'item.reorder_level', 'default' => '-'],
+                    'alert_type' => ['field' => 'alert_type', 'default' => '-'],
+                    'triggered_at' => [
+                        'field' => 'triggered_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                    'message' => ['field' => 'message', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'item.quantity_on_hand', 'label' => 'Qty on Hand'],
+                    ['key' => 'item.reorder_level', 'label' => 'Reorder Level'],
+                    ['key' => 'alert_type', 'label' => 'Alert Type'],
+                    ['key' => 'triggered_at', 'label' => 'Triggered'],
+                    ['key' => 'message', 'label' => 'Message'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Alerts - Geraye Home Care Services',
+                'document_title' => 'Inventory Alerts',
+                'filename_prefix' => 'inventory-alerts',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item'],
+                'fields' => [
+                    'status' => [
+                        'field' => 'is_active',
+                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                    ],
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
+                    'reorder_level' => ['field' => 'item.reorder_level', 'default' => '-'],
+                    'alert_type' => ['field' => 'alert_type', 'default' => '-'],
+                    'triggered_at' => [
+                        'field' => 'triggered_at',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                    'message' => ['field' => 'message', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'item.quantity_on_hand', 'label' => 'Qty on Hand'],
+                    ['key' => 'item.reorder_level', 'label' => 'Reorder Level'],
+                    ['key' => 'alert_type', 'label' => 'Alert Type'],
+                    ['key' => 'triggered_at', 'label' => 'Triggered'],
+                    ['key' => 'message', 'label' => 'Message'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export configuration for InventoryTransaction model
      */
     public static function getInventoryTransactionConfig(): array
@@ -1194,4 +1314,235 @@ class ExportConfig
         ];
     }
 
+    /**
+     * Get export configuration for MarketingCampaign model
+     */
+    public static function getMarketingCampaignConfig(): array
+    {
+        return [
+            'searchable_fields' => ['campaign_name', 'campaign_code', 'utm_campaign'],
+            'sortable_fields' => ['campaign_name', 'start_date', 'end_date', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'marketing-campaigns',
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Marketing Campaigns - Geraye',
+                'document_title' => 'All Marketing Campaigns',
+                'filename_prefix' => 'marketing-campaigns',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['platform', 'assignedStaff', 'createdByStaff'],
+                'fields' => [
+                    'campaign_name' => 'campaign_name',
+                    'start_date' => 'start_date',
+                    'end_date' => 'end_date',
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'campaign_name', 'label' => 'Campaign Name'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get export configuration for InventoryMaintenanceRecord model
+     */
+    public static function getInventoryMaintenanceRecordConfig(): array
+    {
+        return [
+            'searchable_fields' => ['description', 'item.name', 'performedByStaff.first_name', 'performedByStaff.last_name'],
+            'sortable_fields' => ['item_id', 'scheduled_date', 'actual_date', 'performed_by_staff_id', 'cost', 'next_due_date', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'select_fields' => [
+                'item_id', 'scheduled_date', 'actual_date', 'performed_by_staff_id', 'cost', 'description', 'next_due_date', 'status',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Item', 'Scheduled Date', 'Actual Date', 'Performed By', 'Cost', 'Description', 'Next Due Date', 'Status',
+                ],
+                'fields' => [
+                    'index',
+                    'item.name',
+                    [
+                        'field' => 'scheduled_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'actual_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'performedByStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedByStaff->first_name ?? '';
+                            $ln = $model->performedByStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    [
+                        'field' => 'cost',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    'description',
+                    [
+                        'field' => 'next_due_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status',
+                ],
+                'with_relations' => ['item', 'performedByStaff'],
+                'filename_prefix' => 'inventory-maintenance-records',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Maintenance Records - Geraye',
+                'document_title' => 'Inventory Maintenance Records',
+                'filename_prefix' => 'inventory-maintenance-records',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['item', 'performedByStaff'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'performed_by' => [
+                        'field' => 'performedByStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedByStaff->first_name ?? '';
+                            $ln = $model->performedByStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'description' => 'description',
+                    'next_due_date' => [ 'field' => 'next_due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_date', 'label' => 'Actual Date'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'cost', 'label' => 'Cost'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'next_due_date', 'label' => 'Next Due Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Maintenance Records (Current View) - Geraye',
+                'document_title' => 'Inventory Maintenance Records (Current View)',
+                'filename_prefix' => 'inventory-maintenance-records-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item', 'performedByStaff'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'performed_by' => [
+                        'field' => 'performedByStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedByStaff->first_name ?? '';
+                            $ln = $model->performedByStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_date', 'label' => 'Actual Date'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'cost', 'label' => 'Cost'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Inventory Maintenance Records - Geraye',
+                'document_title' => 'All Inventory Maintenance Records',
+                'filename_prefix' => 'inventory-maintenance-records',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['item', 'performedByStaff'],
+                'fields' => [
+                    'item' => ['field' => 'item.name', 'default' => '-'],
+                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'performed_by' => [
+                        'field' => 'performedByStaff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedByStaff->first_name ?? '';
+                            $ln = $model->performedByStaff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : 'N/A';
+                        },
+                    ],
+                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_date', 'label' => 'Actual Date'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'cost', 'label' => 'Cost'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Inventory Maintenance Record Detail - Geraye',
+                'document_title' => 'Inventory Maintenance Record',
+                'filename_prefix' => 'inventory-maintenance-record',
+                'with_relations' => ['item', 'performedByStaff'],
+                'fields' => [
+                    'Item' => ['field' => 'item.name', 'default' => '-'],
+                    'Scheduled Date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Actual Date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Performed By' => [
+                        'field' => 'performedByStaff.first_name',
+                        'transform' => function ($value, $model) { $fn = $model->performedByStaff->first_name ?? ''; $ln = $model->performedByStaff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : 'N/A'; },
+                    ],
+                    'Cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Description' => 'description',
+                    'Next Due Date' => [ 'field' => 'next_due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Status' => 'status',
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'item.name', 'label' => 'Item'],
+                    ['key' => 'scheduled_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_date', 'label' => 'Actual Date'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'cost', 'label' => 'Cost'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'next_due_date', 'label' => 'Next Due Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
 }

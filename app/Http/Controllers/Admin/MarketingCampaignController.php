@@ -25,4 +25,9 @@ class MarketingCampaignController extends BaseController
             CreateMarketingCampaignDTO::class
         );
     }
+
+    public function printAll()
+    {
+        return app(MarketingCampaignService::class)->printAll(request());
+    }
 }

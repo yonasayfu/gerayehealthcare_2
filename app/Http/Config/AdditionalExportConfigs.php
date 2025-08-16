@@ -996,7 +996,106 @@ class AdditionalExportConfigs
         return self::$employeeInsuranceRecordConfig;
     }
 
-    
+    public static function getInventoryTransactionConfig(): array
+    {
+        return [
+            'searchable_fields' => ['transaction_type', 'item.name'],
+            'sortable_fields' => ['transaction_type', 'quantity', 'created_at'],
+            'default_sort' => 'created_at',
+            'with_relations' => ['item', 'performedBy'],
+            
+            'csv' => [
+                'headers' => ['Item', 'Transaction Type', 'Quantity', 'Performed By', 'Date'],
+                'fields' => [
+                    ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type',
+                    'quantity',
+                    ['field' => 'performedBy.first_name', 'default' => '-'],
+                    'created_at',
+                ],
+                'filename' => 'inventory_transactions.csv'
+            ],
+            
+            'pdf' => [
+                'title' => 'Inventory Transactions List',
+                'document_title' => 'Inventory Transactions List',
+                'filename' => 'inventory_transactions.pdf',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'item_name' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'performed_by' => ['field' => 'performedBy.first_name', 'default' => '-'],
+                    'created_at' => 'created_at',
+                ],
+                'columns' => [
+                    ['key' => 'item_name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Transaction Type'],
+                    ['key' => 'quantity', 'label' => 'Quantity'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ]
+            ],
+            
+            'print_current' => [
+                'title' => 'Inventory Transactions (Current View)',
+                'document_title' => 'Inventory Transactions (Current View)',
+                'filename' => 'inventory_transactions_current.pdf',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'fields' => [
+                    'item_name' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'performed_by' => ['field' => 'performedBy.first_name', 'default' => '-'],
+                    'created_at' => 'created_at',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item_name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Transaction Type'],
+                    ['key' => 'quantity', 'label' => 'Quantity'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ]
+            ],
+            
+            'print_all' => [
+                'title' => 'All Inventory Transactions',
+                'document_title' => 'All Inventory Transactions',
+                'filename' => 'inventory_transactions_all.pdf',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'created_at',
+                'fields' => [
+                    'item_name' => ['field' => 'item.name', 'default' => '-'],
+                    'transaction_type' => 'transaction_type',
+                    'quantity' => 'quantity',
+                    'performed_by' => ['field' => 'performedBy.first_name', 'default' => '-'],
+                    'created_at' => 'created_at',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'item_name', 'label' => 'Item'],
+                    ['key' => 'transaction_type', 'label' => 'Transaction Type'],
+                    ['key' => 'quantity', 'label' => 'Quantity'],
+                    ['key' => 'performed_by', 'label' => 'Performed By'],
+                    ['key' => 'created_at', 'label' => 'Date'],
+                ]
+            ],
+            
+            'single_record' => [
+                'fields' => [
+                    'Item' => ['field' => 'item.name', 'default' => '-'],
+                    'Transaction Type' => 'transaction_type',
+                    'Quantity' => 'quantity',
+                    'Performed By' => ['field' => 'performedBy.first_name', 'default' => '-'],
+                    'Date' => 'created_at',
+                ]
+            ]
+        ];
+    }
 
     
 }

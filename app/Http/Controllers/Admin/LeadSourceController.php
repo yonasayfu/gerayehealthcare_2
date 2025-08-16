@@ -26,5 +26,9 @@ class LeadSourceController extends BaseController
         );
     }
 
-    
+    public function toggleStatus(Request $request, $id)
+    {
+        $this->service->toggleStatus($id);
+        return back()->with('success', 'Status updated successfully.');
+    }
 }

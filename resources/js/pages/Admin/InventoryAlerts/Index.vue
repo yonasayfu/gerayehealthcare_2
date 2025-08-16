@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
-import { useExport } from '@/Composables/useExport';
-import { Download, FileText, Printer } from 'lucide-vue-next';
+import { Printer, Edit3, ClipboardList, Eye } from 'lucide-vue-next';
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -25,26 +24,67 @@ const props = defineProps<{
       total: number;
     };
   };
-  filters: {
-    type: Object,
-    default: () => ({
-      search: '',
-      per_page: 5,
-    }),
-  },
+  filters?: {
+    search?: string;
+    per_page?: number;
+    active_only?: boolean | number | string;
+    sort?: string;
+    direction?: string;
+  };
 }>();
 
-const search = ref(props.filters.search || '');
-const perPage = ref(props.inventoryAlerts?.meta?.per_page || 5);
+const search = ref(props.filters?.search || '');
+const perPage = ref(props.filters?.per_page || 5);
+const activeOnly = ref(
+  typeof props.filters?.active_only === 'undefined'
+    ? true
+    : props.filters?.active_only === true || props.filters?.active_only === 1 || props.filters?.active_only === '1'
+);
 
-watch([search, perPage], debounce(() => {
+// Sorting state
+const sort = ref<string | undefined>(props.filters?.sort || undefined);
+const direction = ref<'asc' | 'desc'>(
+  (props.filters?.direction === 'asc' || props.filters?.direction === 'desc') ? (props.filters?.direction as 'asc' | 'desc') : 'asc'
+);
+
+// Keep local controls in sync when navigating via pagination links (props update)
+watch(() => props.filters, (f) => {
+  if (!f) return;
+  search.value = f.search ?? '';
+  perPage.value = (f.per_page as any) ?? 5;
+  activeOnly.value = f.active_only === true || f.active_only === 1 || f.active_only === '1';
+  sort.value = (f.sort as any) ?? undefined;
+  direction.value = (f.direction === 'asc' || f.direction === 'desc') ? (f.direction as any) : direction.value;
+}, { deep: true });
+
+watch([search, perPage, activeOnly, sort, direction], debounce(() => {
   router.get(route('admin.inventory-alerts.index'), {
     search: search.value,
     per_page: perPage.value,
+    active_only: activeOnly.value ? 1 : 0,
+    sort: sort.value,
+    direction: direction.value,
   }, { preserveState: true, replace: true })
 }, 300))
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-alerts', filters: props.filters });
+// Build reactive filters object so prints use the latest UI state
+const currentFilters = computed(() => ({
+  search: search.value,
+  per_page: perPage.value,
+  active_only: activeOnly.value ? 1 : 0,
+  sort: sort.value,
+  direction: direction.value,
+}));
+
+// Server-side print handlers (PDF, landscape)
+const onPrintAll = () => {
+  const url = route('admin.inventory-alerts.printAll', { preview: true, ...(currentFilters.value as any) });
+  window.open(url, '_blank');
+};
+const onPrintCurrent = () => {
+  const url = route('admin.inventory-alerts.printCurrent', { preview: true, ...(currentFilters.value as any) });
+  window.open(url, '_blank');
+};
 
 </script>
 <template>
@@ -56,30 +96,46 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Alerts</h1>
           <p class="text-sm text-muted-foreground">Items that are low in stock and need attention.</p>
         </div>
+
+      <!-- Legend explaining status colors -->
+      <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-300 print:hidden">
+        <span class="inline-flex items-center gap-2">
+          <span class="inline-block h-3 w-3 rounded-full bg-red-400"></span>
+          Active alert (needs attention)
+        </span>
+        <span class="inline-flex items-center gap-2">
+          <span class="inline-block h-3 w-3 rounded-full bg-green-400"></span>
+          Resolved
+        </span>
+      </div>
         <div class="flex flex-wrap gap-2">
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
+          <button @click="onPrintCurrent" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllRecords" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="onPrintAll" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
           <div class="relative w-full md:w-1/3">
               <input type="text" v-model="search" placeholder="Search by item name..." class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
           </div>
-          <div>
+          <div class="flex items-center gap-4">
+              <label class="inline-flex items-center text-sm text-gray-700 dark:text-gray-300">
+                <input type="checkbox" v-model="activeOnly" class="mr-2" />
+                Show only active
+              </label>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white"><option value="5">5</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
           </div>
       </div>
 
@@ -87,16 +143,84 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
+              <th class="px-6 py-3">
+                <button
+                  class="inline-flex items-center gap-1 hover:underline"
+                  @click="
+                    if (sort === 'is_active') {
+                      direction = (direction === 'asc' ? 'desc' : 'asc') as any;
+                    } else {
+                      sort = 'is_active';
+                      direction = 'desc';
+                    }
+                  "
+                >
+                  Status
+                  <svg v-if="sort === 'is_active'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path v-if="direction === 'asc'" fill-rule="evenodd" d="M3.293 12.95a1 1 0 011.414 0L10 18.243l5.293-5.293a1 1 0 111.414 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path v-else fill-rule="evenodd" d="M16.707 7.05a1 1 0 01-1.414 0L10 1.757 4.707 7.05A1 1 0 013.293 5.636l6-6a1 1 0 011.414 0l6 6a1 1 0 010 1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </th>
               <th class="px-6 py-3">Item Name</th>
-              <th class="px-6 py-3">Quantity on Hand</th>
+              <th class="px-6 py-3">Qty on Hand</th>
               <th class="px-6 py-3">Reorder Level</th>
+              <th class="px-6 py-3">Alert Type</th>
+              <th class="px-6 py-3">Triggered</th>
+              <th class="px-6 py-3">Message</th>
+              <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="alert in inventoryAlerts.data" :key="alert.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <td class="px-6 py-4">{{ alert.item.name }}</td>
-              <td class="px-6 py-4">{{ alert.item.quantity_on_hand }}</td>
-              <td class="px-6 py-4">{{ alert.item.reorder_level }}</td>
+            <tr
+              v-for="alert in inventoryAlerts.data"
+              :key="alert.id"
+              class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+              :class="{ 'bg-red-50 dark:bg-red-900/10': alert.is_active }"
+            >
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                  :class="alert.is_active ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-200' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-200'"
+                >
+                  {{ alert.is_active ? 'Active' : 'Resolved' }}
+                </span>
+              </td>
+              <td class="px-6 py-4">{{ alert.item?.name ?? '-' }}</td>
+              <td class="px-6 py-4">{{ alert.item?.quantity_on_hand ?? '-' }}</td>
+              <td class="px-6 py-4">{{ alert.item?.reorder_level ?? '-' }}</td>
+              <td class="px-6 py-4">{{ alert.alert_type || '-' }}</td>
+              <td class="px-6 py-4">{{ alert.triggered_at ? new Date(alert.triggered_at).toLocaleString() : '-' }}</td>
+              <td class="px-6 py-4 truncate max-w-[280px]" :title="alert.message">{{ alert.message || '-' }}</td>
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-end gap-1">
+                  <Link
+                    :href="route('admin.inventory-alerts.show', { inventory_alert: alert.id, return_to: route('admin.inventory-alerts.index', currentFilters.value as any) })"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </Link>
+                  <Link
+                    :href="route('admin.inventory-alerts.edit', alert.id)"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600"
+                    title="Edit Alert"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <Link
+                    :href="route('admin.task-delegations.create', {
+                      title: `Restock ${alert.item?.name ?? 'Item'} - ${alert.alert_type ?? 'Alert'}`,
+                      notes: alert.message ?? '',
+                      return_to: route('admin.inventory-alerts.index', currentFilters.value as any)
+                    })"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-cyan-50 dark:hover:bg-cyan-900/20 text-cyan-600"
+                    title="Delegate Task"
+                  >
+                    <ClipboardList class="w-4 h-4" />
+                  </Link>
+                </div>
+              </td>
             </tr>
             <tr v-if="inventoryAlerts.data.length === 0">
               <td colspan="3" class="text-center px-6 py-4 text-gray-400">No inventory alerts.</td>
@@ -105,8 +229,11 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </table>
       </div>
 
-      <div class="flex justify-between items-center mt-6">
+      <div class="mt-6 print:hidden">
         <Pagination v-if="inventoryAlerts.data.length > 0" :links="inventoryAlerts.links" />
+        <p v-if="inventoryAlerts?.meta?.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
+          Showing {{ inventoryAlerts.meta.from || 0 }}–{{ inventoryAlerts.meta.to || 0 }} of {{ inventoryAlerts.meta.total }}
+        </p>
       </div>
       
     </div>

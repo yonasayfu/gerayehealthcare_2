@@ -17,8 +17,10 @@ const breadcrumbs: BreadcrumbItemType[] = [
 const form = useForm({
   name: props.service.name,
   description: props.service.description,
+  category: props.service.category,
+  duration: props.service.duration,
   price: props.service.price,
-  is_active: props.service.is_active,
+  is_active: Boolean(props.service.is_active),
 });
 
 const submit = () => {
@@ -41,13 +43,7 @@ const submit = () => {
         </div>
 
         <div class="p-6 space-y-6">
-            <ServiceForm :form="form" />
-        </div>
-
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
-              {{ form.processing ? 'Saving...' : 'Update Service' }}
-            </button>
+            <ServiceForm :form="form" @submit="submit" />
         </div>
 
     </div>

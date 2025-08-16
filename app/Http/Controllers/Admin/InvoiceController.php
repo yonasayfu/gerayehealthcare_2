@@ -13,6 +13,7 @@ use App\DTOs\CreateInvoiceDTO;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
 
 class InvoiceController extends BaseController
 {
@@ -84,5 +85,73 @@ class InvoiceController extends BaseController
             'url' => $signedUrl,
             'expires_at' => $expiresAt->toIso8601String(),
         ]);
+    }
+
+    /**
+     * Incoming Invoices queue: billable visit services completed by staff but not invoiced yet
+     */
+    public function incoming()
+    {
+        $raw = VisitService::with(['patient:id,full_name'])
+            ->where('status', 'Completed')
+            ->whereDoesntHave('invoiceItems')
+            ->select('id', 'patient_id', 'service_description', 'scheduled_at', 'cost')
+            ->orderByDesc('scheduled_at')
+            ->get();
+
+        // Group by patient for batching
+        $groups = $raw->groupBy('patient_id')->map(function ($items, $patientId) {
+            $total = $items->sum('cost');
+            $dates = $items->pluck('scheduled_at')->filter();
+            return [
+                'patient_id' => $patientId,
+                'patient_name' => optional($items->first()->patient)->full_name,
+                'count' => $items->count(),
+                'first_date' => optional($dates->min())->format('Y-m-d H:i:s'),
+                'last_date' => optional($dates->max())->format('Y-m-d H:i:s'),
+                'estimated_total' => (float) $total,
+                'visit_ids' => $items->pluck('id')->values()->all(),
+            ];
+        })->values();
+
+        return Inertia::render($this->viewName . '/Incoming', [
+            'groups' => $groups,
+        ]);
+    }
+
+    /**
+     * Generate an invoice from selected visit services (multi-visit design)
+     */
+    public function generate(Request $request)
+    {
+        $data = $request->all();
+        $validator = Validator::make($data, [
+            'patient_id' => ['required', 'integer', 'exists:patients,id'],
+            'visit_ids' => ['required', 'array', 'min:1'],
+            'visit_ids.*' => ['integer', 'exists:visit_services,id'],
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // Create invoice via service
+        $invoice = app(InvoiceService::class)->create([
+            'patient_id' => (int) $data['patient_id'],
+            'visit_ids' => $data['visit_ids'],
+            'status' => 'Issued',
+        ]);
+
+        return redirect()->route('admin.invoices.show', $invoice->id)
+            ->with('success', 'Invoice generated successfully');
+    }
+
+    /**
+     * Approve an invoice (admin action)
+     */
+    public function approve(Invoice $invoice)
+    {
+        $invoice->update(['status' => 'Approved']);
+        return redirect()->back()->with('success', 'Invoice approved');
     }
 }

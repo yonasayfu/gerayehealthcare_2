@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed, nextTick } from 'vue' // Added nextTick
+import { ref, watch } from 'vue'
 import debounce from 'lodash/debounce'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Pagination from '@/components/Pagination.vue'
-import { Download, FileText, Printer, ArrowUpDown, Edit3, Trash2, Eye } from 'lucide-vue-next'
-import { format } from 'date-fns'
-import { Button } from '@/components/ui/button'
-import TaskDelegationsPrint from '@/components/print/TaskDelegationsPrint.vue' // Import the print component
+import { ArrowUpDown, Edit3, Trash2, Eye } from 'lucide-vue-next'
 
 // ————————————————
 // 1. Destructure props: use `assignee` here
@@ -46,11 +43,7 @@ const sortBy    = ref(filters.sort_by)
 const sortOrder = ref(filters.sort_order)
 const perPage   = ref(filters.per_page || 5)
 
-const formattedGeneratedDate = computed(() => {
-  return format(new Date(), 'PPP p');
-});
-
-const showPrintView = ref(false); // Reactive variable to control print view
+// Export/Print features removed per requirements
 
 watch([search, sortBy, sortOrder, perPage], debounce(([searchValue, sort_byValue, sort_orderValue, perPageValue]) => {
   router.get(
@@ -75,21 +68,13 @@ function destroy(id: number) {
   }
 }
 
-function exportCSV() { window.open(route('admin.task-delegations.export', { type: 'csv' }), '_blank') }
-function exportPDF() { window.open(route('admin.task-delegations.export', { type: 'pdf' }), '_blank') }
+// Removed CSV/PDF/Print handlers
 
-async function printTable() {
-  showPrintView.value = true; // Show the print-only component
-  await nextTick(); // Wait for the DOM to update
-  try {
-    window.print();
-  } catch (error) {
-    console.error('Print failed:', error);
-    alert('Failed to open print dialog. Please check your browser settings or try again.');
-  } finally {
-    showPrintView.value = false; // Hide the print-only component after printing
-  }
-}
+// Breadcrumbs for layout
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Task Delegations', href: route('admin.task-delegations.index') },
+]
 </script>
 
 <template>
@@ -109,15 +94,6 @@ async function printTable() {
             :href="route('admin.task-delegations.create')"
             class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded"
           >+ Assign Task</Link>
-          <button @click="exportCSV" class="inline-flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportPDF" class="inline-flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printTable" class="inline-flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm">
-            <Printer class="h-4 w-4" /> Print
-          </button>
         </div>
       </div>
 
@@ -133,13 +109,7 @@ async function printTable() {
           </div>
       </div>
 
-      <div class="overflow-x-auto bg-white shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
-        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
-            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
-            <p class="text-gray-600 dark:text-gray-400 print-document-title">Task Delegations Report</p>
-            <hr class="my-3 border-gray-300 print:my-2">
-        </div>
+      <div class="overflow-x-auto bg-white shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
             <tr>
@@ -166,7 +136,18 @@ async function printTable() {
                 {{ task.assignee.first_name }} {{ task.assignee.last_name }}
               </td>
               <td class="px-6 py-4">{{ new Date(task.due_date).toLocaleDateString() }}</td>
-              <td class="px-6 py-4">{{ task.status }}</td>
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                  :class="{
+                    'bg-yellow-100 text-yellow-800': task.status === 'Pending',
+                    'bg-blue-100 text-blue-800': task.status === 'In Progress',
+                    'bg-green-100 text-green-800': task.status === 'Completed',
+                  }"
+                >
+                  {{ task.status }}
+                </span>
+              </td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
@@ -197,9 +178,7 @@ async function printTable() {
           </tbody>
         </table>
       </div>
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
+      
 
       <div class="flex justify-between items-center mt-6 print:hidden">
         <Pagination v-if="taskDelegations.data.length" :links="taskDelegations.links" />

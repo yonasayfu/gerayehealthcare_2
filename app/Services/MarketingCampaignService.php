@@ -6,9 +6,13 @@ use App\Models\MarketingCampaign;
 use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 
 class MarketingCampaignService extends BaseService
 {
+    use ExportableTrait;
+
     public function __construct(MarketingCampaign $marketingCampaign)
     {
         parent::__construct($marketingCampaign);
@@ -61,10 +65,14 @@ class MarketingCampaignService extends BaseService
         return parent::create($data);
     }
 
-    public function getById(int $id): MarketingCampaign
+    public function getById(int $id, array $with = []): MarketingCampaign
     {
-        return $this->model->with(['platform', 'assignedStaff', 'createdByStaff'])->findOrFail($id);
+        $with = array_unique(array_merge(['platform', 'assignedStaff', 'createdByStaff'], $with));
+        return $this->model->with($with)->findOrFail($id);
     }
 
-    
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, MarketingCampaign::class, ExportConfig::getMarketingCampaignConfig());
+    }
 }

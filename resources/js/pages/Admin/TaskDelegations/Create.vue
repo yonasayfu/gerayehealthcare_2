@@ -7,18 +7,39 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Pagination from '@/components/Pagination.vue'
 
-defineProps<{ staffList: { id: number; first_name: string; last_name: string }[] }>()
+const props = defineProps<{
+  staff: { id: number; first_name: string; last_name: string }[],
+  prefill?: {
+    title?: string | null,
+    assigned_to?: number | null,
+    due_date?: string | null,
+    status?: string | null,
+    notes?: string | null,
+  },
+  returnTo?: string | null,
+  inventoryAlertId?: number | null,
+}>()
 
 const form = useForm({
-  title: '',
-  assigned_to: null,
-  due_date: '',
-  status: 'Pending',
-  notes: ''
+  title: props.prefill?.title ?? '',
+  assigned_to: props.prefill?.assigned_to ?? null,
+  due_date: props.prefill?.due_date ?? '',
+  status: props.prefill?.status ?? 'Pending',
+  notes: props.prefill?.notes ?? '',
+  // Extra meta to support linking back to an InventoryAlert
+  inventory_alert_id: props.inventoryAlertId ?? null,
+  return_to: props.returnTo ?? null,
 })
 
 function submit() {
-  form.post(route('admin.task-delegations.store'))
+  form.post(route('admin.task-delegations.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      if (props.returnTo) {
+        window.location.href = props.returnTo as string
+      }
+    }
+  })
 }
 </script>
 
@@ -31,7 +52,7 @@ function submit() {
             <h3 class="text-xl font-semibold">
                 Assign New Task
             </h3>
-            <Link :href="route('admin.task-delegations.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+            <Link :href="props.returnTo || route('admin.task-delegations.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" :title="props.returnTo ? 'Back to Alerts' : 'Close'">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </Link>
         </div>
@@ -47,8 +68,8 @@ function submit() {
                 <div>
                   <Label for="assigned_to">Assign To</Label>
                   <select v-model="form.assigned_to" id="assigned_to" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-                    <option disabled value="">Select staff…</option>
-                    <option v-for="s in staffList" :key="s.id" :value="s.id">
+                    <option disabled :value="null">Select staff…</option>
+                    <option v-for="s in staff" :key="s.id" :value="s.id">
                       {{ s.first_name }} {{ s.last_name }}
                     </option>
                   </select>

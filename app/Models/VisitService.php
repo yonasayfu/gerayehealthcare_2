@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
 use App\Models\CaregiverAssignment;
+use App\Models\InvoiceItem;
 
 class VisitService extends Model
 {
@@ -76,6 +78,14 @@ class VisitService extends Model
     public function staffPayouts(): BelongsToMany
     {
         return $this->belongsToMany(StaffPayout::class, 'payout_visit_service');
+    }
+
+    /**
+     * Related invoice items created from this visit service.
+     */
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class, 'visit_service_id');
     }
 
     /**

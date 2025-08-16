@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
   form: Object, // Inertia form object
+  suppliers: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(['submit']);
 
 const itemCategories = ['Medical Equipment', 'Office Supplies', 'Diagnostic Tools', 'Furniture', 'Other'];
-const itemTypes = {
+const itemTypes: Record<string, string[]> = {
   'Medical Equipment': ['Stethoscope', 'Blood Pressure Monitor', 'Wheelchair', 'Crutches', 'Hospital Bed'],
   'Office Supplies': ['Laptop', 'Printer', 'Desk', 'Chair', 'Stationery'],
   'Diagnostic Tools': ['X-ray Machine', 'Ultrasound Machine', 'MRI Scanner'],
@@ -17,11 +22,37 @@ const itemTypes = {
 };
 const itemStatuses = ['Available', 'In Use', 'Under Maintenance', 'Lost', 'Damaged', 'Retired'];
 
-// You would fetch suppliers from your backend and pass them as a prop
-const suppliers = [
-  { id: 1, name: 'MedSupply Co.' },
-  { id: 2, name: 'Office Depot' },
-];
+// Suppliers are provided from the parent via props.suppliers
+
+// Derived option lists that include existing values when editing
+const categories = computed<string[]>(() => {
+  const base = [...itemCategories];
+  const current = (props as any).form?.item_category as string | null;
+  if (current && !base.includes(current)) base.unshift(current);
+  return base;
+});
+
+const typesForSelected = computed<string[]>(() => {
+  const form = (props as any).form;
+  const selectedCat: string | null = form?.item_category ?? null;
+  const list = (selectedCat && itemTypes[selectedCat]) ? itemTypes[selectedCat] : [];
+  if (list.length > 0) return list;
+  // Fallback: show existing type so it remains visible even if category is custom
+  const currentType: string | null = form?.item_type ?? null;
+  return currentType ? [currentType] : [];
+});
+
+// When category changes, reset type if it's not valid for the new category
+watch(
+  () => (props as any).form?.item_category,
+  (newCat) => {
+    const form = (props as any).form;
+    const allowed: string[] = (newCat && itemTypes[newCat]) ? itemTypes[newCat] : [];
+    if (form && form.item_type && !allowed.includes(form.item_type)) {
+      form.item_type = null;
+    }
+  }
+);
 
 // You would fetch staff, patients, departments, events for assigned_to
 const assignedToOptions = [
@@ -58,7 +89,7 @@ const assignedToOptions = [
             <label for="item_category" class="block text-sm font-medium text-gray-900 dark:text-white">Category</label>
             <select id="item_category" v-model="form.item_category" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
               <option :value="null">Select a category</option>
-              <option v-for="category in itemCategories" :key="category" :value="category">{{ category }}</option>
+              <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
             </select>
             <div v-if="form.errors.item_category" class="text-red-500 text-sm mt-1">{{ form.errors.item_category }}</div>
           </div>
@@ -67,7 +98,7 @@ const assignedToOptions = [
             <label for="item_type" class="block text-sm font-medium text-gray-900 dark:text-white">Type</label>
             <select id="item_type" v-model="form.item_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" :disabled="!form.item_category">
               <option :value="null">Select a type</option>
-              <option v-for="type in itemTypes[form.item_category] || []" :key="type" :value="type">{{ type }}</option>
+              <option v-for="type in typesForSelected" :key="type" :value="type">{{ type }}</option>
             </select>
             <div v-if="form.errors.item_type" class="text-red-500 text-sm mt-1">{{ form.errors.item_type }}</div>
           </div>
@@ -100,9 +131,9 @@ const assignedToOptions = [
 
           <div class="sm:col-span-3">
             <label for="supplier_id" class="block text-sm font-medium text-gray-900 dark:text-white">Supplier</label>
-            <select id="supplier_id" v-model="form.supplier_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+            <select id="supplier_id" v-model.number="form.supplier_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
               <option :value="null">Select a supplier</option>
-              <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.name }}</option>
+              <option v-for="supplier in props.suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.name }}</option>
             </select>
             <div v-if="form.errors.supplier_id" class="text-red-500 text-sm mt-1">{{ form.errors.supplier_id }}</div>
           </div>

@@ -2,7 +2,7 @@
 import { ref, watch, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, Upload } from 'lucide-vue-next';
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next';
 import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
 import { format } from 'date-fns';
@@ -53,22 +53,12 @@ function destroy(id: number) {
   }
 }
 
-function exportData(type: 'csv') {
-  const url = route('admin.suppliers.export', { type, ...props.filters });
-  window.open(url, '_blank');
-}
-
-function downloadPdf() {
-  const url = route('admin.suppliers.generatePdf', { ...props.filters });
-  window.open(url, '_blank');
-}
-
 function printCurrentView() {
   window.print();
 }
 
 const printAllSuppliers = () => {
-    const url = route('admin.suppliers.printAll', { ...props.filters });
+    const url = route('admin.suppliers.printAll', { ...props.filters, preview: 1 });
     window.open(url, '_blank');
 };
 
@@ -94,23 +84,12 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all inventory suppliers.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.suppliers.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add New Supplier
-          </Link>
-          <Link :href="route('admin.suppliers.import.create')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Upload class="h-4 w-4" /> Import CSV
-          </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllSuppliers" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <Link :href="route('admin.suppliers.create')" class="btn btn-primary">+ Add New Supplier</Link>
+          <button @click="printCurrentView" class="btn btn-dark inline-flex items-center gap-1 text-sm">
             <Printer class="h-4 w-4" /> Print Current View
+          </button>
+          <button @click="printAllSuppliers" class="btn btn-info inline-flex items-center gap-1 text-sm">
+            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
@@ -138,7 +117,7 @@ function toggleSort(field: string) {
         </div>
       </div>
 
-      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent print:w-[95%] print:mx-auto print:overflow-visible">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -209,3 +188,31 @@ function toggleSort(field: string) {
     </div>
   </AppLayout>
 </template>
+
+<style>
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Prevent cutting rows across pages and repeat headers */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
+  /* Maintain readable sizes and spacing */
+  .print-table { font-size: 12px !important; line-height: 1.35; }
+  .print-table th, .print-table td { padding: 8px 10px !important; vertical-align: top; }
+  .print-table-header { background: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
+
+  /* Word wrapping to prevent overflow */
+  .print-table td, .print-table th { word-break: break-word; }
+
+  /* Center main print container */
+  .print\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
+  .print\:w-\[95\%\] { width: 95% !important; }
+}
+</style>

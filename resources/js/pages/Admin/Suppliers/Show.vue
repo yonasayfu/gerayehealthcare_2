@@ -18,9 +18,7 @@ function printPage() {
   window.print();
 }
 
-function downloadPdf() {
-  window.open(route('admin.suppliers.generateSinglePdf', props.supplier.id), '_blank');
-}
+// Single supplier print uses in-browser preview for consistency
 
 </script>
 
@@ -28,7 +26,7 @@ function downloadPdf() {
   <Head :title="`Supplier: ${props.supplier.name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:m-0 print:w-[95%] print:mx-auto print:border-0 print:shadow-none">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
@@ -74,10 +72,7 @@ function downloadPdf() {
                   </div>
                 </div>
 
-                <div class="col-span-full">
-                  <p class="text-sm text-muted-foreground">Notes:</p>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ supplier.notes ?? '-' }}</p>
-                </div>
+                
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
                   <hr class="my-2 border-gray-300">
                   <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
@@ -85,13 +80,13 @@ function downloadPdf() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                <Printer class="h-4 w-4" /> Download PDF
+              <button @click="printPage()" class="btn btn-dark inline-flex items-center gap-1 text-sm">
+                <Printer class="h-4 w-4" /> Print
               </button>
               <Link :href="route('admin.suppliers.edit', props.supplier.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                class="btn btn-primary text-sm">
                 Edit Supplier
               </Link>
             </div>
@@ -102,5 +97,25 @@ function downloadPdf() {
 </template>
 
 <style>
-/* Add print styles here if needed */
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure headers repeat and rows don't split */
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
+  /* Keep readable sizing */
+  .print-header-content h1 { font-size: 18px !important; }
+  .print-document-title { font-size: 12px !important; }
+
+  /* Center main card in print */
+  .print\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
+  .print\:w-\[95\%\] { width: 95% !important; }
+}
 </style>

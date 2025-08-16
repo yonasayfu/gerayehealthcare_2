@@ -61,15 +61,13 @@
     background-color: transparent !important; /* No background color */
     overflow: visible !important; /* Essential to prevent clipping */
     padding: 1cm; /* Inner padding for the table */
-    transform: scale(0.97); /* Slight scale down to fit wide tables */
-    transform-origin: top left;
   }
 
   .print-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
+    font-size: 0.85rem !important; /* Slightly larger for readability */
+    table-layout: auto !important; /* Let browser distribute widths naturally */
   }
 
   .print-table-header {
@@ -93,11 +91,7 @@
     white-space: nowrap; /* Keep header text on one line if possible */
   }
 
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Service Type */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Coverage Percentage */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Coverage Type */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Is Active */
+  /* Removed hard-coded nth-child column widths to keep layouts responsive across modules */
 
 
   .print-table tbody tr:nth-child(even) {

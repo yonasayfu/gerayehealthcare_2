@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\InventoryRequest;
-use App\Models\InventoryItem;
-use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 
 class InventoryRequestService extends BaseService
@@ -14,11 +12,24 @@ class InventoryRequestService extends BaseService
         parent::__construct($inventoryRequest);
     }
 
+    public function getById(int $id, array $with = [])
+    {
+        $with = array_unique(array_merge(['requester', 'item', 'approver'], $with));
+        return $this->model->with($with)->findOrFail($id);
+    }
+
     protected function applySearch($query, $search)
     {
-        return $query->whereHas('item', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('requester', fn($q) => $q->where('first_name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%"))
-                  ->orWhere('reason', 'like', "%{$search}%");
+        return $query->where(function ($q) use ($search) {
+            $q->whereHas('item', function ($q) use ($search) {
+                $q->where('name', 'ilike', "%{$search}%");
+            })
+            ->orWhereHas('requester', function ($q) use ($search) {
+                $q->where('first_name', 'ilike', "%{$search}%")
+                  ->orWhere('last_name', 'ilike', "%{$search}%");
+            })
+            ->orWhere('reason', 'ilike', "%{$search}%");
+        });
     }
 
     public function getAll(Request $request, array $with = [])
@@ -33,7 +44,6 @@ class InventoryRequestService extends BaseService
             $sortField = $request->input('sort');
             $sortDirection = $request->input('direction', 'asc');
 
-            // Handle sorting for relationships
             if ($sortField === 'requester_id') {
                 $query->join('staff', 'inventory_requests.requester_id', '=', 'staff.id')
                       ->orderBy('staff.first_name', $sortDirection)
@@ -51,21 +61,4 @@ class InventoryRequestService extends BaseService
 
         return $query->paginate($request->input('per_page', 10));
     }
-
-    public function create(array|object $data): InventoryRequest
-    {
-        $data = is_object($data) ? (array) $data : $data;
-        return parent::create($data);
-    }
-
-    public function update(int $id, array|object $data): InventoryRequest
-    {
-        $inventoryRequest = parent::update($id, $data);
-        $this->checkInventoryAlert($inventoryRequest);
-        return $inventoryRequest;
-    }
-
-    
-
-    
 }

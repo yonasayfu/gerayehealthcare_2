@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { InertiaForm } from '@/types'
+import { ref, onMounted, watchEffect } from 'vue'
 
 interface LocalErrors {
   // Add any local validation errors if needed
@@ -13,7 +14,30 @@ const props = defineProps<{
 const emit = defineEmits(['submit'])
 
 // Define options for dropdowns here
-const categories = ['Nursing Care', 'Physical Therapy', 'Occupational Therapy', 'Medical Consultation', 'Home Health Aide', 'Other']
+const categories = ref<string[]>([
+  'Nursing Care',
+  'Physical Therapy',
+  'Occupational Therapy',
+  'Medical Consultation',
+  'Home Health Aide',
+  'Other',
+])
+
+// Ensure current category is available in dropdown during edit
+onMounted(() => {
+  const current = (props.form as any)?.category
+  if (current && !categories.value.includes(current)) {
+    categories.value.unshift(current)
+  }
+})
+
+// Also react if form.category changes later (e.g., async load)
+watchEffect(() => {
+  const current = (props.form as any)?.category
+  if (current && !categories.value.includes(current)) {
+    categories.value.unshift(current)
+  }
+})
 </script>
 
 <template>

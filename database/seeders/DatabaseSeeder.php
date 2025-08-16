@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
             LeadSourceSeeder::class,
             MrXInsuranceScenarioSeeder::class,
             PagumeCampaignSeeder::class,
+            IncomingInvoicesDemoSeeder::class,
         ]);
 
         // Create sample data using factories

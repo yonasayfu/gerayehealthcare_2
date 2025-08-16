@@ -18,8 +18,8 @@ function printPage() {
   window.print();
 }
 
-function downloadPdf() {
-  window.open(route('admin.inventory-items.generateSinglePdf', props.inventoryItem.id), '_blank');
+function printItem() {
+  window.open(route('admin.inventory-items.printSingle', props.inventoryItem.id), '_blank');
 }
 
 </script>
@@ -132,13 +132,13 @@ function downloadPdf() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="downloadPdf()" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                <Printer class="h-4 w-4" /> Download PDF
+              <button @click="printItem()" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link :href="route('admin.inventory-items.edit', props.inventoryItem.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                class="btn btn-primary">
                 Edit Item
               </Link>
             </div>

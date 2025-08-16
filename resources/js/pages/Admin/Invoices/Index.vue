@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus, Printer, Download } from 'lucide-vue-next';
+import { Plus, Printer, Download, Check } from 'lucide-vue-next';
 
 defineProps<{
   invoices: any;
@@ -22,6 +22,11 @@ const formatCurrency = (value: number | string) => {
 const formatDate = (dateString: string) => {
   return format(new Date(dateString), 'MMM dd, yyyy');
 };
+
+function approveInvoice(id: number) {
+  const form = useForm({});
+  form.post(route('admin.invoices.approve', id));
+}
 </script>
 
 <template>
@@ -40,6 +45,9 @@ const formatDate = (dateString: string) => {
           <a :href="route('admin.invoices.printAll')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-2 rounded-md transition" target="_blank">
             <Printer class="h-4 w-4" /> Print All
           </a>
+          <Link :href="route('admin.invoices.incoming')" class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white text-sm px-4 py-2 rounded-md transition">
+            Incoming
+          </Link>
           <Link :href="route('admin.invoices.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
             <Plus class="h-4 w-4" /> Create Invoice
           </Link>
@@ -71,15 +79,29 @@ const formatDate = (dateString: string) => {
               <td class="px-6 py-4">
                 <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
                   'bg-yellow-100 text-yellow-800': invoice.status === 'Pending',
+                  'bg-blue-100 text-blue-800': invoice.status === 'Issued',
                   'bg-green-100 text-green-800': invoice.status === 'Paid',
+                  'bg-purple-100 text-purple-800': invoice.status === 'Approved',
                   'bg-red-100 text-red-800': invoice.status === 'Overdue',
                 }">
                   {{ invoice.status }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-right space-x-3">
-                <Link :href="route('admin.invoices.show', invoice.id)" class="text-sm text-indigo-600">View</Link>
-                <a :href="route('admin.invoices.print', invoice.id)" class="text-sm text-gray-600" target="_blank">Print</a>
+              <td class="px-6 py-4">
+                <div class="flex justify-end items-center gap-2">
+                  <Link :href="route('admin.invoices.show', invoice.id)" class="inline-flex items-center gap-1 text-sm text-indigo-600">
+                    View
+                  </Link>
+                  <button
+                    v-if="invoice.status === 'Issued' || invoice.status === 'Pending'"
+                    @click.prevent="approveInvoice(invoice.id)"
+                    class="inline-flex items-center justify-center h-8 w-8 rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                    title="Approve Invoice"
+                    aria-label="Approve Invoice"
+                  >
+                    <Check class="h-4 w-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>

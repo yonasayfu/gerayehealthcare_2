@@ -28,6 +28,7 @@ class InvoiceService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('invoice_number', 'ilike', "%{$search}%")
+              ->orWhere('status', 'ilike', "%{$search}%")
               ->orWhereHas('patient', function ($q) use ($search) {
                   $q->where('full_name', 'ilike', "%{$search}%");
               });
@@ -36,6 +37,11 @@ class InvoiceService extends BaseService
     public function getAll(Request $request, array $with = [])
     {
         $query = $this->model->with(array_merge(['patient:id,full_name'], $with));
+
+        // Hide Pending invoices by default (Incoming items will be handled in a separate queue)
+        if (!$request->boolean('include_pending', false)) {
+            $query->whereNotIn('status', ['Pending']);
+        }
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
@@ -65,7 +71,12 @@ class InvoiceService extends BaseService
             $subtotal = $visits->sum(function ($v) {
                 return (float) $v->cost;
             });
-            $taxAmount = isset($data['tax_amount']) ? (float) $data['tax_amount'] : 0.0;
+            // If tax_amount is not provided, default to 15% of subtotal
+            if (array_key_exists('tax_amount', $data)) {
+                $taxAmount = (float) $data['tax_amount'];
+            } else {
+                $taxAmount = round($subtotal * 0.15, 2);
+            }
             $grandTotal = $subtotal + $taxAmount;
 
             // Prepare invoice payload
@@ -77,7 +88,7 @@ class InvoiceService extends BaseService
                 'tax_amount'   => $taxAmount,
                 'grand_total'  => $grandTotal,
                 'amount'       => $grandTotal, // amount due at creation
-                'status'       => $data['status'] ?? 'Pending',
+                'status'       => $data['status'] ?? 'Issued',
             ];
 
             // Create invoice
@@ -163,9 +174,10 @@ class InvoiceService extends BaseService
         }
     }
 
-    public function getById(int $id): Invoice
+    public function getById(int $id, array $with = []): Invoice
     {
-        return $this->model->with(['patient', 'items.visitService.staff', 'insuranceCompany'])->findOrFail($id);
+        $with = array_unique(array_merge(['patient', 'items.visitService.staff', 'insuranceCompany'], $with));
+        return $this->model->with($with)->findOrFail($id);
     }
 
     /**

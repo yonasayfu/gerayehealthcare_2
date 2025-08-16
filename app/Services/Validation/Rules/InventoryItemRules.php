@@ -9,12 +9,22 @@ class InventoryItemRules extends BaseResourceRules
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:100',
-            'unit_price' => 'required|numeric|min:0',
-            'quantity_in_stock' => 'required|integer|min:0',
-            'reorder_level' => 'required|integer|min:0',
+            'item_category' => 'nullable|string|max:100',
+            'item_type' => 'nullable|string|max:100',
+            'serial_number' => 'nullable|string|max:255',
+            'purchase_date' => 'nullable|date',
+            'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
             'supplier_id' => 'nullable|exists:suppliers,id',
-            'is_active' => 'boolean',
+            'assigned_to_type' => 'nullable|in:staff,patient,department,event',
+            'assigned_to_id' => 'nullable|integer',
+            'last_maintenance_date' => 'nullable|date',
+            'next_maintenance_due' => 'nullable|date|after_or_equal:last_maintenance_date',
+            'maintenance_schedule' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'status' => 'required|string|in:Available,In Use,Under Maintenance,Lost,Damaged,Retired',
+            // Optional inventory management fields if present in UI/model
+            'quantity_on_hand' => 'nullable|integer|min:0',
+            'reorder_level' => 'nullable|integer|min:0',
         ];
     }
     
@@ -23,12 +33,21 @@ class InventoryItemRules extends BaseResourceRules
         return [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'category' => 'required|string|max:100',
-            'unit_price' => 'required|numeric|min:0',
-            'quantity_in_stock' => 'required|integer|min:0',
-            'reorder_level' => 'required|integer|min:0',
+            'item_category' => 'nullable|string|max:100',
+            'item_type' => 'nullable|string|max:100',
+            'serial_number' => 'nullable|string|max:255',
+            'purchase_date' => 'nullable|date',
+            'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
             'supplier_id' => 'nullable|exists:suppliers,id',
-            'is_active' => 'boolean',
+            'assigned_to_type' => 'nullable|in:staff,patient,department,event',
+            'assigned_to_id' => 'nullable|integer',
+            'last_maintenance_date' => 'nullable|date',
+            'next_maintenance_due' => 'nullable|date|after_or_equal:last_maintenance_date',
+            'maintenance_schedule' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'status' => 'required|string|in:Available,In Use,Under Maintenance,Lost,Damaged,Retired',
+            'quantity_on_hand' => 'nullable|integer|min:0',
+            'reorder_level' => 'nullable|integer|min:0',
         ];
     }
 }

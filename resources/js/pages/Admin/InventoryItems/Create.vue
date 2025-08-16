@@ -3,6 +3,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import Form from './Form.vue';
 
+const props = defineProps({
+  suppliers: {
+    type: Array,
+    default: () => [],
+  },
+});
+
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Inventory Items', href: route('admin.inventory-items.index') },
@@ -47,13 +54,17 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" @submit="submit" />
+            <div v-if="Object.keys(form.errors).length" class="rounded-md bg-red-50 p-4 border border-red-200 text-red-800 text-sm">
+              Please correct the highlighted errors and try again.
+            </div>
+            <Form :form="form" :suppliers="props.suppliers" @submit="submit" />
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <button @click="submit" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+        <div class="p-6 border-t border-gray-200 rounded-b flex gap-2">
+            <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="button">
               {{ form.processing ? 'Creating...' : 'Create Item' }}
             </button>
+            <Link :href="route('admin.inventory-items.index')" class="btn btn-outline">Cancel</Link>
         </div>
 
     </div>

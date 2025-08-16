@@ -257,12 +257,13 @@ class VisitServiceService extends BaseService
         }
     }
 
-    public function getById(int $id): VisitService
+    public function getById(int $id, array $with = []): VisitService
     {
-        return $this->model->with([
+        $with = array_unique(array_merge([
             'patient',
             'staff',
-        ])->findOrFail($id);
+        ], $with));
+        return $this->model->with($with)->findOrFail($id);
     }
 
     

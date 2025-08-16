@@ -24,17 +24,25 @@ class InventoryAlertSeeder extends Seeder
         $itemIds = InventoryItem::pluck('id');
 
         foreach ($itemIds as $itemId) {
-            for ($i = 0; $i < rand(1, 2); $i++) { // Create 1 or 2 alerts per item
-                InventoryAlert::create([
-                    'item_id' => $itemId,
-                    'alert_type' => $faker->randomElement(['Low Stock', 'Expired', 'Maintenance Due', 'Damaged']),
-                    'threshold_value' => $faker->numberBetween(5, 25),
-                    'message' => $faker->sentence,
-                    'is_active' => $faker->boolean(80),
-                    'triggered_at' => Carbon::now()->subDays($faker->numberBetween(1, 45)),
-                    'due_date' => Carbon::now()->addDays($faker->numberBetween(7, 60)),
-                ]);
-            }
+            // One Active alert
+            InventoryAlert::create([
+                'item_id' => $itemId,
+                'alert_type' => 'Low Stock',
+                'threshold_value' => $faker->numberBetween(5, 25),
+                'message' => 'Stock below reorder level. Please restock soon.',
+                'is_active' => true,
+                'triggered_at' => Carbon::now()->subDays($faker->numberBetween(1, 10)),
+            ]);
+
+            // One Resolved alert
+            InventoryAlert::create([
+                'item_id' => $itemId,
+                'alert_type' => $faker->randomElement(['Maintenance Due', 'Warranty Expiry', 'Overdue Return']),
+                'threshold_value' => $faker->numberBetween(5, 25),
+                'message' => 'Previously flagged issue has been resolved.',
+                'is_active' => false,
+                'triggered_at' => Carbon::now()->subDays($faker->numberBetween(11, 45)),
+            ]);
         }
     }
 }

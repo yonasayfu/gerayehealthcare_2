@@ -5,18 +5,22 @@ namespace App\Services;
 use App\DTOs\CreateInventoryTransactionDTO;
 use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 
 class InventoryTransactionService extends BaseService
 {
+    use ExportableTrait;
     public function __construct(InventoryTransaction $inventoryTransaction)
     {
         parent::__construct($inventoryTransaction);
     }
 
-    public function getById(int $id): InventoryTransaction
+    public function getById(int $id, array $with = []): InventoryTransaction
     {
+        $with = array_unique(array_merge(['item', 'performedBy', 'request', 'fromAssignedTo', 'toAssignedTo'], $with));
         return $this->model
-            ->with(['item', 'performedBy', 'request', 'fromAssignedTo', 'toAssignedTo'])
+            ->with($with)
             ->findOrFail($id);
     }
 
@@ -52,5 +56,25 @@ class InventoryTransactionService extends BaseService
         } else {
             $query->orderBy('created_at', 'desc');
         }
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, $this->model, AdditionalExportConfigs::getInventoryTransactionConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, $this->model, AdditionalExportConfigs::getInventoryTransactionConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, $this->model, AdditionalExportConfigs::getInventoryTransactionConfig());
+    }
+
+    public function printSingle(InventoryTransaction $inventoryTransaction, Request $request)
+    {
+        return $this->handlePrintSingle($inventoryTransaction, $request, AdditionalExportConfigs::getInventoryTransactionConfig());
     }
 }

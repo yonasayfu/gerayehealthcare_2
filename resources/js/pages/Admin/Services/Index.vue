@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
-import { Plus, Edit, Trash2 } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next';
 import type { BreadcrumbItemType } from '@/types';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
@@ -111,8 +111,9 @@ const formatCurrency = (value: number | string) => {
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center space-x-2">
-                  <Link :href="route('admin.services.edit', service.id)" class="p-2 rounded-full hover:bg-blue-100"><Edit class="w-4 h-4 text-blue-600" /></Link>
-                  <button @click="destroy(service.id, service.name)" class="p-2 rounded-full hover:bg-red-100"><Trash2 class="w-4 h-4 text-red-600" /></button>
+                  <Link :href="route('admin.services.show', service.id)" class="p-2 rounded-full hover:bg-gray-100" title="View"><Eye class="w-4 h-4 text-gray-700" /></Link>
+                  <Link :href="route('admin.services.edit', service.id)" class="p-2 rounded-full hover:bg-blue-100" title="Edit"><Edit class="w-4 h-4 text-blue-600" /></Link>
+                  <button @click="destroy(service.id, service.name)" class="p-2 rounded-full hover:bg-red-100" title="Delete"><Trash2 class="w-4 h-4 text-red-600" /></button>
                 </div>
               </td>
             </tr>

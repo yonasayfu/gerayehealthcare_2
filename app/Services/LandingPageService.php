@@ -51,3 +51,4 @@ class LandingPageService extends BaseService
 
         return $query->paginate($request->input('per_page', 10));
     }
+}
