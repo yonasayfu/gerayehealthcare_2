@@ -237,11 +237,11 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('eligibility-criteria/{eligibility_criterion}/print', [EligibilityCriteriaController::class, 'printSingle'])->name('eligibility-criteria.print');
         Route::resource('eligibility-criteria', EligibilityCriteriaController::class);
 
-        Route::resource('event-recommendations', EventRecommendationController::class);
+        // Place specific routes before resource to avoid show route capturing them
         Route::get('event-recommendations/export', [EventRecommendationController::class, 'export'])->name('event-recommendations.export');
-        Route::get('event-recommendations/print-all', [EventRecommendationController::class, 'printAll'])->name('event-recommendations.printAll');
         Route::get('event-recommendations/print-current', [EventRecommendationController::class, 'printCurrent'])->name('event-recommendations.printCurrent');
         Route::get('event-recommendations/{event_recommendation}/print', [EventRecommendationController::class, 'printSingle'])->name('event-recommendations.print');
+        Route::resource('event-recommendations', EventRecommendationController::class);
 
         // Event Participants
         Route::resource('event-participants', EventParticipantController::class);

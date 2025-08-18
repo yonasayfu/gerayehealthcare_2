@@ -29,6 +29,21 @@ class EventRecommendationController extends BaseController
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
     }
 
+    public function export(Request $request)
+    {
+        return app(EventRecommendationService::class)->export($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return app(EventRecommendationService::class)->printCurrent($request);
+    }
+
+    public function printSingle(Request $request, EventRecommendation $event_recommendation)
+    {
+        return app(EventRecommendationService::class)->printSingle($request, $event_recommendation);
+    }
+
     public function create()
     {
         $events = Event::select('id', 'title')->orderBy('title')->get();

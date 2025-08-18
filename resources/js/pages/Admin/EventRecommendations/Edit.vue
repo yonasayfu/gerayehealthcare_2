@@ -1,17 +1,20 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 
 const props = defineProps({
     eventRecommendation: Object,
+    events: Array,
+    patients: Array,
 });
 
 const form = useForm({
     event_id: props.eventRecommendation.event_id,
-    source: props.eventRecommendation.source,
-    recommended_by: props.eventRecommendation.recommended_by,
+    source_channel: props.eventRecommendation.source_channel,
+    recommended_by_name: props.eventRecommendation.recommended_by_name,
+    recommended_by_phone: props.eventRecommendation.recommended_by_phone,
     patient_name: props.eventRecommendation.patient_name,
-    patient_phone: props.eventRecommendation.patient_phone,
+    phone_number: props.eventRecommendation.phone_number,
     notes: props.eventRecommendation.notes,
     status: props.eventRecommendation.status,
 });
@@ -44,14 +47,16 @@ const breadcrumbs = [
                     <div class="border-b border-gray-900/10 pb-12">
                         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event ID</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="number"
+                                    <select
                                         v-model="form.event_id"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option value="">Select Event</option>
+                                        <option v-for="e in props.events" :key="e.id" :value="e.id">{{ e.title }}</option>
+                                    </select>
                                     <div v-if="form.errors.event_id" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.event_id }}
                                     </div>
@@ -62,7 +67,7 @@ const breadcrumbs = [
                                 <label class="block text-sm font-medium text-gray-900 dark:text-white">Source</label>
                                 <div class="mt-2">
                                     <select
-                                        v-model="form.source"
+                                        v-model="form.source_channel"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
                                     >
@@ -71,22 +76,36 @@ const breadcrumbs = [
                                         <option value="form">Form</option>
                                         <option value="community_outreach">Community Outreach</option>
                                     </select>
-                                    <div v-if="form.errors.source" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.source }}
+                                    <div v-if="form.errors.source_channel" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.source_channel }}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Recommended By</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Recommended By (Name)</label>
                                 <div class="mt-2">
                                     <input
                                         type="text"
-                                        v-model="form.recommended_by"
+                                        v-model="form.recommended_by_name"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                     />
-                                    <div v-if="form.errors.recommended_by" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.recommended_by }}
+                                    <div v-if="form.errors.recommended_by_name" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.recommended_by_name }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Recommended By (Phone)</label>
+                                <div class="mt-2">
+                                    <input
+                                        type="text"
+                                        v-model="form.recommended_by_phone"
+                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                                    />
+                                    <div v-if="form.errors.recommended_by_phone" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.recommended_by_phone }}
                                     </div>
                                 </div>
                             </div>
@@ -111,11 +130,11 @@ const breadcrumbs = [
                                 <div class="mt-2">
                                     <input
                                         type="text"
-                                        v-model="form.patient_phone"
+                                        v-model="form.phone_number"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                     />
-                                    <div v-if="form.errors.patient_phone" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.patient_phone }}
+                                    <div v-if="form.errors.phone_number" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.phone_number }}
                                     </div>
                                 </div>
                             </div>

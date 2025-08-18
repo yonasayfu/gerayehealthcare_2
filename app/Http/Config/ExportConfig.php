@@ -181,6 +181,123 @@ class ExportConfig
     }
 
     /**
+     * Get export/print configuration for EventRecommendation model
+     */
+    public static function getEventRecommendationConfig(): array
+    {
+        return [
+            // Use ACTUAL DB columns here because the printing trait queries directly
+            'searchable_fields' => ['patient_name', 'source_channel', 'recommended_by_name', 'phone_number', 'status'],
+            'sortable_fields' => ['patient_name', 'source_channel', 'recommended_by_name', 'phone_number', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'event-recommendations',
+
+            // Default PDF config (fallback)
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Event Recommendations - Geraye Home Care Services',
+                'document_title' => 'Event Recommendations',
+                'filename_prefix' => 'event-recommendations',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'patient_name' => 'patient_name',
+                    'source_channel' => ['field' => 'source_channel', 'default' => '-'],
+                    'recommended_by_name' => ['field' => 'recommended_by_name', 'default' => '-'],
+                    'phone_number' => ['field' => 'phone_number', 'default' => '-'],
+                    'status' => ['field' => 'status', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'patient_name', 'label' => 'Patient Name'],
+                    ['key' => 'source_channel', 'label' => 'Source'],
+                    ['key' => 'recommended_by_name', 'label' => 'Recommended By'],
+                    ['key' => 'phone_number', 'label' => 'Patient Phone'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            // Current paginated view
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Event Recommendations (Current View) - Geraye Home Care Services',
+                'document_title' => 'Event Recommendations (Current View)',
+                'filename_prefix' => 'event-recommendations-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'fields' => [
+                    'patient_name' => 'patient_name',
+                    'source_channel' => ['field' => 'source_channel', 'default' => '-'],
+                    'recommended_by_name' => ['field' => 'recommended_by_name', 'default' => '-'],
+                    'phone_number' => ['field' => 'phone_number', 'default' => '-'],
+                    'status' => ['field' => 'status', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'patient_name', 'label' => 'Patient Name'],
+                    ['key' => 'source_channel', 'label' => 'Source'],
+                    ['key' => 'recommended_by_name', 'label' => 'Recommended By'],
+                    ['key' => 'phone_number', 'label' => 'Patient Phone'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            // All records view
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Event Recommendations - Geraye Home Care Services',
+                'document_title' => 'All Event Recommendations',
+                'filename_prefix' => 'event-recommendations',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'created_at',
+                'fields' => [
+                    'patient_name' => 'patient_name',
+                    'source' => ['field' => 'source', 'default' => '-'],
+                    'recommended_by' => ['field' => 'recommended_by', 'default' => '-'],
+                    'patient_phone' => ['field' => 'patient_phone', 'default' => '-'],
+                    'status' => ['field' => 'status', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'patient_name', 'label' => 'Patient Name'],
+                    ['key' => 'source', 'label' => 'Source'],
+                    ['key' => 'recommended_by', 'label' => 'Recommended By'],
+                    ['key' => 'patient_phone', 'label' => 'Patient Phone'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            // Single record view (optional)
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Event Recommendation Detail - Geraye Home Care Services',
+                'document_title' => 'Event Recommendation',
+                'filename_prefix' => 'event-recommendation-record',
+                'fields' => [
+                    'Patient Name' => 'patient_name',
+                    'Source' => ['field' => 'source_channel', 'default' => '-'],
+                    'Recommended By' => ['field' => 'recommended_by_name', 'default' => '-'],
+                    'Patient Phone' => ['field' => 'phone_number', 'default' => '-'],
+                    'Notes' => ['field' => 'notes', 'default' => '-'],
+                    'Status' => ['field' => 'status', 'default' => '-'],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'patient_name', 'label' => 'Patient Name'],
+                    ['key' => 'source_channel', 'label' => 'Source'],
+                    ['key' => 'recommended_by_name', 'label' => 'Recommended By'],
+                    ['key' => 'phone_number', 'label' => 'Patient Phone'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export/print configuration for Event model
      */
     public static function getEventConfig(): array
