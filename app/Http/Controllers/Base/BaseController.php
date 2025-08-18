@@ -17,6 +17,7 @@ class BaseController extends Controller
     protected $dataVariableName;
     protected $modelClass;
     protected $dtoClass; // New property for DTO class
+    protected $routeName; // Optional override for route base name
 
     public function __construct($service, $rulesClass, $viewName, $dataVariableName, $modelClass, $dtoClass = null)
     {
@@ -127,6 +128,9 @@ class BaseController extends Controller
 
     private function getRouteName()
     {
+        if (!empty($this->routeName)) {
+            return $this->routeName;
+        }
         $routeName = Str::kebab(Str::plural(class_basename($this->modelClass)));
         return $routeName;
     }

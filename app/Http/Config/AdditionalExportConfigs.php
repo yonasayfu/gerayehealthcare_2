@@ -774,20 +774,26 @@ class AdditionalExportConfigs
     public static function getEligibilityCriteriaConfig(): array
     {
         if (self::$eligibilityCriteriaConfig === null) {
-            self::$eligibilityCriteriaConfig = [
-                'searchable_fields' => ['criteria_name'],
-                'sortable_fields' => ['criteria_name', 'operator', 'value', 'created_at'],
-                'csv_headers' => ['Event ID', 'Criteria Name', 'Operator', 'Value'],
-                'csv_fields' => ['event_id', 'criteria_name', 'operator', 'value'],
+            // Updated base fields to match DB + UI
+            $legacy = [
+                'searchable_fields' => ['criteria_title', 'operator', 'value'],
+                'sortable_fields' => ['criteria_title', 'operator', 'value', 'created_at'],
+                'csv_headers' => ['Event', 'Criteria Title', 'Operator', 'Value'],
+                'csv_fields' => [
+                    ['field' => 'event.title', 'default' => '-'],
+                    'criteria_title',
+                    'operator',
+                    'value'
+                ],
                 'pdf_columns' => [
-                    ['key' => 'event_id', 'label' => 'Event ID', 'printWidth' => '20%'],
-                    ['key' => 'criteria_name', 'label' => 'Criteria Name', 'printWidth' => '30%'],
-                    ['key' => 'operator', 'label' => 'Operator', 'printWidth' => '25%'],
-                    ['key' => 'value', 'label' => 'Value', 'printWidth' => '25%'],
+                    ['key' => 'event_title', 'label' => 'Event', 'printWidth' => '30%'],
+                    ['key' => 'criteria_title', 'label' => 'Criteria Title', 'printWidth' => '30%'],
+                    ['key' => 'operator', 'label' => 'Operator', 'printWidth' => '20%'],
+                    ['key' => 'value', 'label' => 'Value', 'printWidth' => '20%'],
                 ],
                 'field_transformations' => [
-                    'event_id' => fn($value) => $value ?: '-',
-                    'criteria_name' => fn($value) => $value ?: '-',
+                    'event_title' => fn($value) => $value ?: '-',
+                    'criteria_title' => fn($value) => $value ?: '-',
                     'operator' => fn($value) => $value ?: '-',
                     'value' => fn($value) => $value ?: '-',
                 ],
@@ -805,18 +811,47 @@ class AdditionalExportConfigs
                     'orientation' => 'portrait',
                     'filename_prefix' => 'eligibility_criteria',
                     'fields' => [
-                        ['label' => 'Event ID', 'key' => 'event_id'],
-                        ['label' => 'Criteria Name', 'key' => 'criteria_name'],
+                        ['label' => 'Event', 'key' => 'event_title'],
+                        ['label' => 'Criteria Title', 'key' => 'criteria_title'],
                         ['label' => 'Operator', 'key' => 'operator'],
                         ['label' => 'Value', 'key' => 'value'],
                         ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                         ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
-                'relationships' => [],
+                'with_relations' => ['event'],
                 'default_sort' => ['created_at', 'desc'],
                 'per_page' => 5,
             ];
+
+            // New structure compatible with ExportableTrait
+            self::$eligibilityCriteriaConfig = array_merge($legacy, [
+                'filename_prefix' => 'eligibility_criteria',
+                'csv' => [
+                    'headers' => $legacy['csv_headers'],
+                    'fields' => $legacy['csv_fields'],
+                    'filename_prefix' => 'eligibility_criteria',
+                ],
+                'current_page' => [
+                    'view' => 'pdf-layout',
+                    'title' => $legacy['print_layout']['title'],
+                    'document_title' => $legacy['print_layout']['document_title'],
+                    'filename_prefix' => 'eligibility_criteria-current',
+                    'orientation' => $legacy['print_layout']['orientation'] ?? 'landscape',
+                    'include_index' => true,
+                    'columns' => $legacy['pdf_columns'],
+                ],
+                'single_record' => [
+                    'view' => 'pdf-layout',
+                    'title' => $legacy['single_print_layout']['title'],
+                    'document_title' => $legacy['single_print_layout']['document_title'],
+                    'filename_prefix' => 'eligibility_criteria',
+                    // For single record, columns acts as fields list in the universal single template
+                    'columns' => array_map(function ($f) {
+                        return ['key' => $f['key'], 'label' => $f['label'] ?? ucfirst(str_replace('_', ' ', $f['key']))];
+                    }, $legacy['single_print_layout']['fields']),
+                ],
+            ]);
         }
 
         return self::$eligibilityCriteriaConfig;

@@ -50,19 +50,12 @@ function destroy(id) {
 }
 
 function exportData(type: string) {
+    // Only CSV is supported
     if (type !== 'csv') return;
-    const params: Record<string, any> = {
-        type: 'csv',
-        search: search.value || undefined,
-        sort: sortField.value || undefined,
-        direction: sortDirection.value || undefined,
-        per_page: perPage.value || undefined,
-    };
-    window.open(route('admin.eligibility-criteria.export', params), '_blank');
+    window.open(route('admin.eligibility-criteria.export', { type: 'csv' }), '_blank');
 }
 
 function printCurrentView() {
-    // Use native window.print for current UI print, as requested
     window.print();
 }
 
@@ -81,12 +74,6 @@ function toggleSort(field) {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-            <!-- Print Header -->
-            <div class="hidden print:block text-center mb-4">
-                <img src="/images/geraye_logo.jpeg" alt="Geraye Health" class="mx-auto mb-2" style="height: 50px;" />
-                <h2 class="text-lg font-semibold">Eligibility Criteria</h2>
-                <p class="text-xs text-gray-500">Generated {{ formattedGeneratedDate }}</p>
-            </div>
             <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
                 <div>
                     <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Eligibility Criteria</h1>
@@ -113,7 +100,7 @@ function toggleSort(field) {
                         placeholder="Search criteria..."
                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                     />
-                    <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 </div>
 
                 <div>
@@ -132,8 +119,8 @@ function toggleSort(field) {
                 <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
                     <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
                         <tr>
-                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('criteria_title')">
-                                Criteria Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('criteria_name')">
+                                Criteria Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('operator')">
                                 Operator <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
@@ -146,7 +133,7 @@ function toggleSort(field) {
                     </thead>
                     <tbody>
                         <tr v-for="criterion in eligibilityCriteria.data" :key="criterion.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-                            <td class="px-6 py-4">{{ criterion.criteria_title }}</td>
+                            <td class="px-6 py-4">{{ criterion.criteria_name }}</td>
                             <td class="px-6 py-4">{{ criterion.operator }}</td>
                             <td class="px-6 py-4">{{ criterion.value }}</td>
                             <td class="px-6 py-4 text-right print:hidden">

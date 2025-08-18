@@ -28,6 +28,8 @@ class EligibilityCriteriaController extends BaseController
             EligibilityCriteria::class,
             CreateEligibilityCriteriaDTO::class
         );
+        // Ensure route names use 'eligibility-criteria' (resource name in routes/web.php)
+        $this->routeName = 'eligibility-criteria';
         $this->middleware('role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . '|' . \App\Enums\RoleEnum::ADMIN->value);
     }
 
@@ -49,5 +51,20 @@ class EligibilityCriteriaController extends BaseController
             lcfirst(class_basename($this->modelClass)) => $eligibilityCriteria,
             'events' => $events,
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->service->export($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->service->printCurrent($request);
+    }
+
+    public function printSingle(Request $request, EligibilityCriteria $eligibility_criterion)
+    {
+        return $this->service->printSingle($request, $eligibility_criterion);
     }
 }

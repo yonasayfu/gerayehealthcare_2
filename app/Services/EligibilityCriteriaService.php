@@ -4,9 +4,13 @@ namespace App\Services;
 
 use App\Models\EligibilityCriteria;
 use App\DTOs\CreateEligibilityCriteriaDTO;
+use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\AdditionalExportConfigs;
 
 class EligibilityCriteriaService extends BaseService
 {
+    use ExportableTrait;
     public function __construct(EligibilityCriteria $eligibilityCriteria)
     {
         parent::__construct($eligibilityCriteria);
@@ -18,5 +22,30 @@ class EligibilityCriteriaService extends BaseService
         return parent::create($data);
     }
 
-    // Add other methods as needed, e.g., update, delete, getById
+    // CSV-only export to match Events behavior
+    public function export(Request $request)
+    {
+        // Force CSV export only
+        $request->merge(['type' => 'csv']);
+        return $this->handleExport($request, EligibilityCriteria::class, AdditionalExportConfigs::getEligibilityCriteriaConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, EligibilityCriteria::class, AdditionalExportConfigs::getEligibilityCriteriaConfig());
+    }
+
+    public function printSingle(Request $request, EligibilityCriteria $eligibilityCriteria)
+    {
+        return $this->handlePrintSingle($request, $eligibilityCriteria, AdditionalExportConfigs::getEligibilityCriteriaConfig());
+    }
+
+    protected function applySearch($query, $search)
+    {
+        $query->where(function ($q) use ($search) {
+            $q->where('criteria_title', 'ILIKE', "%{$search}%")
+              ->orWhere('operator', 'ILIKE', "%{$search}%")
+              ->orWhere('value', 'ILIKE', "%{$search}%");
+        });
+    }
 }

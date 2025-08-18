@@ -7,22 +7,20 @@ class EligibilityCriteriaRules
     public static function store(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'criteria_type' => 'nullable|string|max:255',
+            'event_id' => 'required|integer|exists:events,id',
+            'criteria_title' => 'required|string|max:255',
+            'operator' => 'required|string|max:50',
             'value' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
         ];
     }
 
     public static function update(): array
     {
         return [
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'criteria_type' => 'nullable|string|max:255',
+            'event_id' => 'sometimes|required|integer|exists:events,id',
+            'criteria_title' => 'sometimes|required|string|max:255',
+            'operator' => 'sometimes|required|string|max:50',
             'value' => 'nullable|string|max:255',
-            'is_active' => 'boolean',
         ];
     }
 }

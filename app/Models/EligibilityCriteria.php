@@ -13,8 +13,20 @@ class EligibilityCriteria extends Model
 
     protected $fillable = [
         'event_id',
-        'criteria_name',
+        'criteria_title',
         'operator',
         'value',
     ];
+
+    // Relationships
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    // Accessors for export/print convenience
+    public function getEventTitleAttribute(): ?string
+    {
+        return $this->event->title ?? null;
+    }
 }

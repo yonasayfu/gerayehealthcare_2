@@ -2,9 +2,15 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 
+const props = defineProps({
+    events: Array,
+});
+
+const operators = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'ILIKE', 'IN', 'NOT IN'];
+
 const form = useForm({
     event_id: '',
-    criteria_name: '',
+    criteria_title: '',
     operator: '',
     value: '',
 });
@@ -37,14 +43,16 @@ const breadcrumbs = [
                     <div class="border-b border-gray-900/10 pb-12">
                         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event ID</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="number"
+                                    <select
                                         v-model="form.event_id"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option value="" disabled>Select an event</option>
+                                        <option v-for="e in props.events" :key="e.id" :value="e.id">{{ e.title }}</option>
+                                    </select>
                                     <div v-if="form.errors.event_id" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.event_id }}
                                     </div>
@@ -52,16 +60,16 @@ const breadcrumbs = [
                             </div>
 
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Criteria Name</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Criteria Title</label>
                                 <div class="mt-2">
                                     <input
                                         type="text"
-                                        v-model="form.criteria_name"
+                                        v-model="form.criteria_title"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
                                     />
-                                    <div v-if="form.errors.criteria_name" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.criteria_name }}
+                                    <div v-if="form.errors.criteria_title" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.criteria_title }}
                                     </div>
                                 </div>
                             </div>
@@ -69,12 +77,14 @@ const breadcrumbs = [
                             <div class="sm:col-span-3">
                                 <label class="block text-sm font-medium text-gray-900 dark:text-white">Operator</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="text"
+                                    <select
                                         v-model="form.operator"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option value="" disabled>Select an operator</option>
+                                        <option v-for="op in operators" :key="op" :value="op">{{ op }}</option>
+                                    </select>
                                     <div v-if="form.errors.operator" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.operator }}
                                     </div>
