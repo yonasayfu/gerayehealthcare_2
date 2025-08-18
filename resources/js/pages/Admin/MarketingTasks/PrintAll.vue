@@ -27,6 +27,7 @@ onMounted(() => {
                 <tr>
                     <th>Title</th>
                     <th>Task Code</th>
+                    <th>Expected Results</th>
                     <th>Campaign</th>
                     <th>Type</th>
                     <th>Status</th>
@@ -38,11 +39,12 @@ onMounted(() => {
                 <tr v-for="task in marketingTasks" :key="task.id">
                     <td>{{ task.title }}</td>
                     <td>{{ task.task_code ?? '-' }}</td>
+                    <td>{{ task.expected_results ?? '-' }}</td>
                     <td>{{ task.campaign?.campaign_name ?? '-' }}</td>
                     <td>{{ task.task_type ?? '-' }}</td>
                     <td>{{ task.status ?? '-' }}</td>
                     <td>{{ task.scheduled_at ? format(new Date(task.scheduled_at), 'PPP p') : '-' }}</td>
-                    <td>{{ task.assigned_to_staff?.full_name ?? '-' }}</td>
+                    <td>{{ task.assigned_to_staff?.user?.name ?? task.assigned_to_staff?.full_name ?? '-' }}</td>
                 </tr>
             </tbody>
         </table>

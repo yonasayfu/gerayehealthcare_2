@@ -28,12 +28,10 @@ const search = ref(props.filters?.search || '')
 const sortField = ref(props.filters?.sort || '')
 const sortDirection = ref(props.filters?.direction || 'asc')
 const perPage = ref(props.filters?.per_page || 5)
-const isPrintingAll = ref(false)
 
 // Trigger search, sort, pagination
 watch([search, sortField, sortDirection, perPage], debounce(() => {
-  // Don't refetch data if we are in the middle of printing all records
-  if (isPrintingAll.value) return;
+  
 
   const params: Record<string, string | number> = {
     search: search.value,
@@ -59,7 +57,7 @@ function destroy(id: number) {
 }
 
 // Fix: Pass filters with default empty object
-const { exportData, printCurrentView, printAllRecords } = useExport({ 
+const { exportData, printCurrentView } = useExport({ 
   routeName: 'admin.assignments', 
   filters: { ...(props.filters || {}), preview: true } 
 });
@@ -107,10 +105,6 @@ const formatDate = (dateString) => {
           
           <button @click="printCurrentView()" class="btn btn-dark" title="Print Current Page">
             <Printer class="h-4 w-4" /> Print Current
-          </button>
-          <button @click="printAllRecords()" class="btn btn-info" title="Print All Records">
-             <Printer class="h-4 w-4" />
-             Print All
           </button>
         </div>
       </div>

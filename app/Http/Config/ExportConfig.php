@@ -181,6 +181,174 @@ class ExportConfig
     }
 
     /**
+     * Get export/print configuration for MarketingBudget model
+     */
+    public static function getMarketingBudgetConfig(): array
+    {
+        return [
+            'searchable_fields' => ['budget_name', 'status', 'campaign.campaign_name', 'platform.name'],
+            'sortable_fields' => ['budget_name', 'allocated_amount', 'spent_amount', 'period_start', 'period_end', 'status', 'campaign_id', 'platform_id', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'marketing-budgets',
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Budget Name', 'Campaign', 'Platform', 'Allocated', 'Spent', 'Start Date', 'End Date', 'Status',
+                ],
+                'fields' => [
+                    'index',
+                    'budget_name',
+                    ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    ['field' => 'platform.name', 'default' => '-'],
+                    [
+                        'field' => 'allocated_amount',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    [
+                        'field' => 'spent_amount',
+                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                    ],
+                    [
+                        'field' => 'period_start',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'period_end',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status',
+                ],
+                'with_relations' => ['campaign', 'platform'],
+                'filename_prefix' => 'marketing-budgets',
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Marketing Budgets - Geraye',
+                'document_title' => 'Marketing Budgets Export',
+                'filename_prefix' => 'marketing-budgets-all',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'budget_name' => 'budget_name',
+                    'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'allocated_amount' => [
+                        'field' => 'allocated_amount',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    'spent_amount' => [
+                        'field' => 'spent_amount',
+                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                    ],
+                    'period_start' => [
+                        'field' => 'period_start',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'period_end' => [
+                        'field' => 'period_end',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'budget_name', 'label' => 'Budget Name'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'allocated_amount', 'label' => 'Allocated'],
+                    ['key' => 'spent_amount', 'label' => 'Spent'],
+                    ['key' => 'period_start', 'label' => 'Start Date'],
+                    ['key' => 'period_end', 'label' => 'End Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Marketing Budgets (Current View) - Geraye',
+                'document_title' => 'Marketing Budgets (Current View)',
+                'filename_prefix' => 'marketing-budgets-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'budget_name' => 'budget_name',
+                    'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'allocated_amount' => [
+                        'field' => 'allocated_amount',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    'spent_amount' => [
+                        'field' => 'spent_amount',
+                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                    ],
+                    'period_start' => [
+                        'field' => 'period_start',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'period_end' => [
+                        'field' => 'period_end',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'budget_name', 'label' => 'Budget Name'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'allocated_amount', 'label' => 'Allocated'],
+                    ['key' => 'spent_amount', 'label' => 'Spent'],
+                    ['key' => 'period_start', 'label' => 'Start Date'],
+                    ['key' => 'period_end', 'label' => 'End Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'filename_prefix' => 'marketing-budget-record',
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'Budget Name' => 'budget_name',
+                    'Campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'Platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'Allocated Amount' => [
+                        'field' => 'allocated_amount',
+                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                    ],
+                    'Spent Amount' => [
+                        'field' => 'spent_amount',
+                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                    ],
+                    'Period Start' => [
+                        'field' => 'period_start',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'Period End' => [
+                        'field' => 'period_end',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'Status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'budget_name', 'label' => 'Budget Name'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'allocated_amount', 'label' => 'Allocated Amount'],
+                    ['key' => 'spent_amount', 'label' => 'Spent Amount'],
+                    ['key' => 'period_start', 'label' => 'Period Start'],
+                    ['key' => 'period_end', 'label' => 'Period End'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export/print configuration for LandingPage model
      */
     public static function getLandingPageConfig(): array

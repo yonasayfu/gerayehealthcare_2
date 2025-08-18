@@ -25,7 +25,7 @@ class CampaignContentController extends BaseController
             'Admin/CampaignContents',
             'campaignContents',
             CampaignContent::class,
-            CreateCampaignContentDTO::class
+            null // Use full validated payload; DTO is incomplete and mismatched
         );
     }
 
@@ -33,10 +33,14 @@ class CampaignContentController extends BaseController
     {
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $contentTypes = ['text', 'image', 'video'];
+        $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
         return Inertia::render($this->viewName . '/Create', [
             'campaigns' => $campaigns,
             'platforms' => $platforms,
+            'contentTypes' => $contentTypes,
+            'statuses' => $statuses,
         ]);
     }
 
@@ -45,11 +49,25 @@ class CampaignContentController extends BaseController
         $campaignContent = $this->service->getById($id);
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $contentTypes = ['text', 'image', 'video'];
+        $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
         return Inertia::render($this->viewName . '/Edit', [
             lcfirst(class_basename($this->modelClass)) => $campaignContent,
             'campaigns' => $campaigns,
             'platforms' => $platforms,
+            'contentTypes' => $contentTypes,
+            'statuses' => $statuses,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $this->authorize('view', CampaignContent::class);
+        // Eager-load relations so Show.vue can render names
+        $campaignContent = $this->service->getById($id, ['campaign', 'platform']);
+        return Inertia::render($this->viewName . '/Show', [
+            lcfirst(class_basename($this->modelClass)) => $campaignContent,
         ]);
     }
 

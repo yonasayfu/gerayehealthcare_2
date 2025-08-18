@@ -36,7 +36,8 @@ class BaseController extends Controller
             'filters' => $request->only([
                 'search', 'sort', 'direction', 'per_page',
                 'sort_by', 'sort_order', 'active_only',
-                'campaign_id', 'is_active', 'language'
+                'campaign_id', 'platform_id', 'status', 'period_start', 'period_end',
+                'is_active', 'language'
             ])
         ]);
     }

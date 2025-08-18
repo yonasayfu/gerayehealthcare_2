@@ -21,10 +21,17 @@ class CampaignContentService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with($with);
+        // Always eager-load campaign and platform; merge with any additional requested relations
+        $with = array_unique(array_merge($with, ['campaign', 'platform']));
+        $query = $this->model->query()->with($with);
 
-        if ($request->has('search')) {
-            $this->applySearch($query, $request->input('search'));
+        if ($request->filled('search')) {
+            // Group search conditions to not break other where clauses
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ilike', "%{$search}%")
+                  ->orWhere('description', 'ilike', "%{$search}%");
+            });
         }
 
         if ($request->filled('campaign_id')) {
@@ -51,7 +58,8 @@ class CampaignContentService extends BaseService
             $query->orderBy($request->input('sort'), $direction);
         }
 
-        return $query->with(['campaign', 'platform'])->paginate($request->input('per_page', 10));
+        // Preserve current query string so pagination maintains filters/sort
+        return $query->paginate($request->input('per_page', 5))->withQueryString();
     }
 
     

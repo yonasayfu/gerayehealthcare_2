@@ -38,7 +38,7 @@ class LeadSourceService extends BaseService
             $query->orderBy('created_at', 'desc');
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 5));
     }
 
     public function toggleStatus(int $id): LeadSource

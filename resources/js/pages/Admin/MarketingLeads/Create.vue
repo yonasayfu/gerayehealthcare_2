@@ -10,6 +10,7 @@ const props = defineProps<{
   staffMembers: any[];
   patients: any[];
   statuses: string[];
+  countries?: string[];
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -58,7 +59,7 @@ function submit() {
         </div>
 
         <div class="p-6 space-y-6">
-            <Form :form="form" :campaigns="props.campaigns" :landingPages="props.landingPages" :staffMembers="props.staffMembers" :patients="props.patients" :statuses="props.statuses" />
+            <Form :form="form" :campaigns="props.campaigns" :landingPages="props.landingPages" :staffMembers="props.staffMembers" :patients="props.patients" :statuses="props.statuses" :countries="props.countries" />
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b">

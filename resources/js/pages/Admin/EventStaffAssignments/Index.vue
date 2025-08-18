@@ -71,7 +71,7 @@ function destroy(id: number) { // Explicitly type id
     }
 }
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.event-staff-assignments', filters: props.filters });
+const { exportData, printCurrentView } = useExport({ routeName: 'admin.event-staff-assignments', filters: props.filters });
 
 function toggleSort(field: string) { // Explicitly type field
     if (sortField.value === field) {
@@ -82,10 +82,7 @@ function toggleSort(field: string) { // Explicitly type field
     }
 }
 
-// Renamed from printAllAssignments to printAllRecords as per useExport composable
-const printAllAssignments = () => {
-    printAllRecords();
-};
+
 </script>
 
 <template>
@@ -107,9 +104,6 @@ const printAllAssignments = () => {
                     </button>
                     <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
                         <FileText class="h-4 w-4" /> PDF
-                    </button>
-                    <button @click="printAllAssignments" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print All
                     </button>
                     <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
                         <Printer class="h-4 w-4" /> Print Current View

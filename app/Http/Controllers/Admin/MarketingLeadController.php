@@ -43,6 +43,10 @@ class MarketingLeadController extends BaseController
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
 
         $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
+        $countries = [
+            'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark'
+        ];
 
         return Inertia::render($this->viewName . '/Create', [
             'campaigns' => $campaigns,
@@ -50,6 +54,7 @@ class MarketingLeadController extends BaseController
             'staffMembers' => $staffMembers,
             'patients' => $patients,
             'statuses' => $statuses,
+            'countries' => $countries,
         ]);
     }
 
@@ -68,6 +73,10 @@ class MarketingLeadController extends BaseController
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
 
         $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
+        $countries = [
+            'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark'
+        ];
 
         return Inertia::render($this->viewName . '/Edit', [
             lcfirst(class_basename($this->modelClass)) => $marketingLead,
@@ -76,6 +85,7 @@ class MarketingLeadController extends BaseController
             'staffMembers' => $staffMembers,
             'patients' => $patients,
             'statuses' => $statuses,
+            'countries' => $countries,
         ]);
     }
 

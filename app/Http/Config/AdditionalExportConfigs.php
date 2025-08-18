@@ -236,42 +236,7 @@ class AdditionalExportConfigs
             'default_sort' => 'created_at',
             'with_relations' => ['assignedStaff', 'campaign'],
             
-            'csv' => [
-                'headers' => ['Task Name', 'Campaign', 'Assigned Staff', 'Priority', 'Status', 'Due Date'],
-                'fields' => [
-                    'task_name',
-                    ['field' => 'campaign.campaign_name', 'default' => '-'],
-                    ['field' => 'assignedStaff.full_name', 'default' => '-'],
-                    'priority', 'status', 'due_date'
-                ],
-                'filename' => 'marketing_tasks.csv'
-            ],
-            
-            'pdf' => [
-                'title' => 'Marketing Tasks List',
-                'document_title' => 'Marketing Tasks List',
-                'filename' => 'marketing_tasks.pdf',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'fields' => [
-                    'task_name' => 'task_name',
-                    'campaign_name' => ['field' => 'campaign.campaign_name', 'default' => '-'],
-                    'assigned_staff' => ['field' => 'assignedStaff.full_name', 'default' => '-'],
-                    'priority' => 'priority',
-                    'status' => 'status',
-                    'due_date' => ['field' => 'due_date', 'default' => '-'],
-                ],
-                'columns' => [
-                    ['key' => 'task_name', 'label' => 'Task Name'],
-                    ['key' => 'campaign_name', 'label' => 'Campaign'],
-                    ['key' => 'assigned_staff', 'label' => 'Assigned Staff'],
-                    ['key' => 'priority', 'label' => 'Priority'],
-                    ['key' => 'status', 'label' => 'Status'],
-                    ['key' => 'due_date', 'label' => 'Due Date'],
-                ]
-            ],
-            
-            'print_current' => [
+            'current_page' => [
                 'title' => 'Marketing Tasks (Current View)',
                 'document_title' => 'Marketing Tasks (Current View)',
                 'filename' => 'marketing_tasks_current.pdf',
@@ -279,6 +244,7 @@ class AdditionalExportConfigs
                 'include_index' => true,
                 'fields' => [
                     'task_name' => 'task_name',
+                    'expected_results' => ['field' => 'expected_results', 'default' => '-'],
                     'priority' => 'priority',
                     'status' => 'status',
                     'due_date' => ['field' => 'due_date', 'default' => '-'],
@@ -286,13 +252,14 @@ class AdditionalExportConfigs
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
                     ['key' => 'task_name', 'label' => 'Task Name'],
+                    ['key' => 'expected_results', 'label' => 'Expected Results'],
                     ['key' => 'priority', 'label' => 'Priority'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'due_date', 'label' => 'Due Date'],
                 ]
             ],
             
-            'print_all' => [
+            'all_records' => [
                 'title' => 'All Marketing Tasks',
                 'document_title' => 'All Marketing Tasks',
                 'filename' => 'marketing_tasks_all.pdf',
@@ -301,6 +268,7 @@ class AdditionalExportConfigs
                 'default_sort' => 'task_name',
                 'fields' => [
                     'task_name' => 'task_name',
+                    'expected_results' => ['field' => 'expected_results', 'default' => '-'],
                     'priority' => 'priority',
                     'status' => 'status',
                     'due_date' => ['field' => 'due_date', 'default' => '-'],
@@ -308,6 +276,7 @@ class AdditionalExportConfigs
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
                     ['key' => 'task_name', 'label' => 'Task Name'],
+                    ['key' => 'expected_results', 'label' => 'Expected Results'],
                     ['key' => 'priority', 'label' => 'Priority'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'due_date', 'label' => 'Due Date'],
@@ -318,6 +287,7 @@ class AdditionalExportConfigs
                 'fields' => [
                     'Task Name' => 'task_name',
                     'Description' => ['field' => 'description', 'default' => '-'],
+                    'Expected Results' => ['field' => 'expected_results', 'default' => '-'],
                     'Campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
                     'Assigned Staff' => ['field' => 'assignedStaff.full_name', 'default' => '-'],
                     'Priority' => 'priority',

@@ -25,7 +25,7 @@ const form = useForm({
   media_url: '',
   scheduled_post_date: '',
   actual_post_date: '',
-  status: 'Draft',
+  status: 'draft',
   engagement_metrics: '',
 });
 

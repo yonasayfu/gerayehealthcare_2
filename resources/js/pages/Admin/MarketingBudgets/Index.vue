@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -92,9 +92,14 @@ function destroy(id: number) {
   }
 }
 
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
+const { exportData } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
+
+function printCurrentView() {
+  // Mirror Patients module: print the current index view with print-only styles
+  setTimeout(() => window.print(), 50);
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -118,21 +123,16 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all marketing budgets here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.marketing-budgets.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.marketing-budgets.create')" class="btn btn-primary">
             + Add Budget
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('csv')" class="btn btn-success">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="printAllBudgets" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+          
         </div>
       </div>
 
@@ -211,19 +211,19 @@ function toggleSort(field: string) {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.marketing-budgets.show', budget.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="btn-icon text-gray-500"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.marketing-budgets.edit', budget.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="btn-icon text-blue-600"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(budget.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button @click="destroy(budget.id)" class="btn-icon text-red-600" title="Delete">
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>

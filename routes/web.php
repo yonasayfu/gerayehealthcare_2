@@ -48,6 +48,11 @@ use Inertia\Inertia;
 // Public & General
 Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
+// Backward-compatible redirect: /admin -> /dashboard
+Route::get('/admin', function () {
+    return redirect()->route('dashboard');
+})->name('admin.legacy_redirect');
+
 // Public signed invoice PDF (no auth, signed URL required)
 Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPdf'])
     ->middleware('signed')

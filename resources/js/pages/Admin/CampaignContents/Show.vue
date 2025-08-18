@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
+import { Printer, Edit3 } from 'lucide-vue-next' // Import icons
 import { format } from 'date-fns' // For date formatting
 
 interface CampaignContent {
@@ -41,15 +42,26 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this campaign content?')) {
-    router.delete(route('admin.campaign-contents.destroy', id))
-  }
-}
+// Delete removed per request
 
 const formatJson = (json: Record<string, any>) => {
   return JSON.stringify(json, null, 2);
 };
+
+const metricEntries = computed(() => {
+  const m = (props.campaignContent?.engagement_metrics ?? {}) as Record<string, any>
+  if (m && typeof m === 'object' && !Array.isArray(m)) {
+    return Object.entries(m)
+  }
+  return [] as Array<[string, any]>
+})
+
+function valueType(val: any): 'null'|'array'|'object'|'number'|'boolean'|'string' {
+  if (val === null || val === undefined) return 'null'
+  if (Array.isArray(val)) return 'array'
+  if (typeof val === 'object') return 'object'
+  return typeof val as any
+}
 </script>
 
 <template>
@@ -119,8 +131,46 @@ const formatJson = (json: Record<string, any>) => {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Engagement Metrics</h2>
                   <div class="grid grid-cols-1">
                     <div>
-                      <p class="text-sm text-muted-foreground">Metrics (JSON):</p>
-                      <pre class="font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">{{ formatJson(campaignContent.engagement_metrics) }}</pre>
+                      <template v-if="metricEntries.length">
+                        <div class="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
+                          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-800/50">
+                              <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Metric</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Value</th>
+                              </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+                              <tr v-for="([key, val], idx) in metricEntries" :key="key + '-' + idx">
+                                <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-200">{{ key }}</td>
+                                <td class="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
+                                  <template v-if="valueType(val) === 'string' || valueType(val) === 'number' || valueType(val) === 'boolean'">
+                                    <span>{{ String(val) }}</span>
+                                  </template>
+                                  <template v-else-if="valueType(val) === 'null'">
+                                    <span class="text-gray-500">-</span>
+                                  </template>
+                                  <template v-else>
+                                    <details class="group">
+                                      <summary class="cursor-pointer select-none text-cyan-700 dark:text-cyan-400 hover:underline">
+                                        {{ valueType(val) === 'array' ? 'View items (' + val.length + ')' : 'View details' }}
+                                      </summary>
+                                      <pre class="mt-2 bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 overflow-auto text-xs">{{ formatJson(val) }}</pre>
+                                    </details>
+                                  </template>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <details class="mt-3">
+                          <summary class="cursor-pointer text-sm text-gray-600 dark:text-gray-300 hover:underline">View raw JSON</summary>
+                          <pre class="mt-2 font-mono text-xs text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 p-3 rounded-md overflow-auto">{{ formatJson(campaignContent.engagement_metrics) }}</pre>
+                        </details>
+                      </template>
+                      <template v-else>
+                        <p class="text-sm text-gray-500">No engagement metrics available.</p>
+                      </template>
                     </div>
                   </div>
                 </div>
@@ -149,18 +199,15 @@ const formatJson = (json: Record<string, any>) => {
 
         <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
+              <button @click="printPage" class="btn btn-dark">
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <Link
                 :href="route('admin.campaign-contents.edit', campaignContent.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                class="btn btn-primary"
               >
                 Edit Content
               </Link>
-              <button @click="destroy(campaignContent.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Content
-              </button>
             </div>
         </div>
 

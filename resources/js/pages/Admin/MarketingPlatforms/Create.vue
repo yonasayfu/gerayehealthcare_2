@@ -38,11 +38,12 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div class="p-6 space-y-6">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Platform Details</h2>
                 <Form :form="form" />
             </div>
 
             <div class="p-6 border-t border-gray-200 rounded-b">
-                <button :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
+                <button :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="btn btn-primary" type="submit">
                   {{ form.processing ? 'Creating...' : 'Create Platform' }}
                 </button>
             </div>

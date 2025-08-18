@@ -10,8 +10,8 @@ use App\Models\MarketingPlatform;
 use App\Services\Validation\Rules\MarketingBudgetRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\DTOs\CreateMarketingBudgetDTO;
-use App\DTOs\UpdateMarketingBudgetDTO;
+// Using direct validated arrays for create/update (no DTO)
+use App\Models\MarketingBudget as MarketingBudgetModel;
 
 class MarketingBudgetController extends BaseController
 {
@@ -22,9 +22,7 @@ class MarketingBudgetController extends BaseController
             MarketingBudgetRules::class,
             'Admin/MarketingBudgets',
             'marketingBudgets',
-            MarketingBudget::class,
-            CreateMarketingBudgetDTO::class,
-            UpdateMarketingBudgetDTO::class
+            MarketingBudget::class
         );
     }
 
@@ -32,10 +30,12 @@ class MarketingBudgetController extends BaseController
     {
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
 
         return Inertia::render($this->viewName . '/Create', [
             'campaigns' => $campaigns,
             'platforms' => $platforms,
+            'statuses' => $statuses,
         ]);
     }
 
@@ -44,11 +44,33 @@ class MarketingBudgetController extends BaseController
         $marketingBudget = $this->service->getById($id);
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
 
         return Inertia::render($this->viewName . '/Edit', [
             lcfirst(class_basename($this->modelClass)) => $marketingBudget,
             'campaigns' => $campaigns,
             'platforms' => $platforms,
+            'statuses' => $statuses,
         ]);
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->service->printAll($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->service->printCurrent($request);
+    }
+
+    public function printSingle(Request $request, MarketingBudgetModel $marketing_budget)
+    {
+        return $this->service->printSingle($request, $marketing_budget);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->service->export($request);
     }
 }

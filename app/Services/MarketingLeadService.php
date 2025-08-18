@@ -49,7 +49,7 @@ class MarketingLeadService extends BaseService
             $query->orderBy('created_at', 'desc');
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 5));
     }
 
     public function update(int $id, array|object $data): MarketingLead
@@ -64,5 +64,13 @@ class MarketingLeadService extends BaseService
         return parent::update($id, $data);
     }
 
+    /**
+     * Ensure single record fetch includes related entities for UI Show/Edit pages.
+     */
+    public function getById(int $id, array $with = [])
+    {
+        $relations = array_merge(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'], $with);
+        return parent::getById($id, $relations);
+    }
     
 }

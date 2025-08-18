@@ -68,9 +68,12 @@ const submit = () => {
             </div>
 
             <div class="p-6 border-t border-gray-200 rounded-b">
-                <button :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center" type="submit">
-                  {{ form.processing ? 'Saving...' : 'Save Changes' }}
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                  <Link :href="route('admin.marketing-budgets.index')" class="btn btn-outline">Cancel</Link>
+                  <button :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="btn btn-primary" type="submit">
+                    {{ form.processing ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                </div>
             </div>
         </form>
 

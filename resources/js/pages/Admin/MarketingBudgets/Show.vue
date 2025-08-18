@@ -27,19 +27,29 @@ const breadcrumbs = [
   { title: 'Marketing Budgets', href: route('admin.marketing-budgets.index') },
   { title: props.marketingBudget.budget_name, href: route('admin.marketing-budgets.show', props.marketingBudget.id) },
 ]
+
+function printCurrent() {
+  window.print();
+}
 </script>
 
 <template>
   <Head :title="marketingBudget.budget_name" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-6">
+    <div class="space-y-6 p-6 print:p-0 print:space-y-0">
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
         <h1 class="text-xl font-semibold text-gray-800 dark:text-white">{{ marketingBudget.budget_name }}</h1>
         <p class="text-sm text-muted-foreground">Details of the marketing budget.</p>
       </div>
 
-      <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow">
+      <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow print:shadow-none print:rounded-none print:bg-transparent">
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+          <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+          <p class="text-gray-600 dark:text-gray-400 print-document-title">Marketing Budget Record</p>
+          <hr class="my-3 border-gray-300 print:my-2">
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Budget Name:</p>
@@ -88,10 +98,21 @@ const breadcrumbs = [
           <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ marketingBudget.description ?? '-' }}</p>
         </div>
 
-        <div class="mt-6 flex justify-end print:hidden">
-          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+        <div class="mt-6 flex flex-wrap gap-2 justify-between sm:justify-start print:hidden">
+          <Link :href="route('admin.marketing-budgets.index')" class="btn btn-outline">
+            Back to List
+          </Link>
+          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn btn-primary">
             Edit Budget
           </Link>
+          <button @click="printCurrent" class="btn btn-dark" title="Print this budget">
+            Print Current
+          </button>
+        </div>
+
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <hr class="my-2 border-gray-300">
+          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
         </div>
       </div>
     </div>

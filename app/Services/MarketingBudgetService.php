@@ -2,15 +2,24 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateMarketingBudgetDTO;
 use App\Models\MarketingBudget;
 use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 
 class MarketingBudgetService extends BaseService
 {
+    use ExportableTrait;
     public function __construct(MarketingBudget $marketingBudget)
     {
         parent::__construct($marketingBudget);
+    }
+
+    public function getById(int $id, array $with = [])
+    {
+        // Ensure campaign and platform are always loaded for detail views
+        $with = array_merge(['campaign', 'platform'], $with);
+        return parent::getById($id, $with);
     }
 
     protected function applySearch($query, $search)
@@ -52,5 +61,23 @@ class MarketingBudgetService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, MarketingBudget::class, ExportConfig::getMarketingBudgetConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, MarketingBudget::class, ExportConfig::getMarketingBudgetConfig());
+    }
+
+    public function printSingle(Request $request, MarketingBudget $marketingBudget)
+    {
+        return $this->handlePrintSingle($request, $marketingBudget, ExportConfig::getMarketingBudgetConfig());
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, MarketingBudget::class, ExportConfig::getMarketingBudgetConfig());
+    }
 }

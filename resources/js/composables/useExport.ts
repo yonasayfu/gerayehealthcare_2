@@ -16,16 +16,15 @@ export function useExport(options: UseExportOptions) {
 
   const printCurrentView = () => {
     isProcessing.value = true;
-    setTimeout(() => {
-      try {
-        window.print();
-      } catch (error) {
-        console.error('Print failed:', error);
-        alert('Failed to open print dialog. Please check your browser settings or try again.');
-      } finally {
-        isProcessing.value = false;
-      }
-    }, 100);
+    try {
+      const url = route(`${options.routeName}.printCurrent`, { preview: true, ...options.filters });
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Print failed:', error);
+      alert('Failed to open print preview.');
+    } finally {
+      isProcessing.value = false;
+    }
   };
 
   const printAllRecords = () => {

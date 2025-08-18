@@ -68,6 +68,11 @@ const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
+// Index offset like Patient module
+const currentIndex = computed(() => {
+  return (props.campaignContents.current_page - 1) * props.campaignContents.per_page;
+});
+
 watch([search, sortField, sortDirection, perPage, campaignId, platformId, contentType, status, scheduledPostDateStart, scheduledPostDateEnd], debounce(() => {
   const params: Record<string, string | number> = {
     search: search.value,
@@ -97,7 +102,11 @@ function destroy(id: number) {
   }
 }
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.campaign-contents', filters: props.filters });
+const { exportData } = useExport({ routeName: 'admin.campaign-contents', filters: props.filters });
+
+function printCurrentView() {
+  setTimeout(() => window.print(), 50);
+}
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -121,20 +130,14 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all campaign contents here, including creation, editing, and deletion.</p>
         </div>
         <div class="flex-shrink-0 flex flex-wrap gap-2">
-          <Link :href="route('admin.campaign-contents.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.campaign-contents.create')" class="btn btn-primary">
             + Add Content
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('csv')" class="btn btn-success">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllRecords" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
         </div>
       </div>
@@ -182,6 +185,7 @@ function toggleSort(field: string) {
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
             <tr>
+              <th class="px-6 py-3">#</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('title')">
                 Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -204,7 +208,8 @@ function toggleSort(field: string) {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="content in campaignContents.data" :key="content.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+            <tr v-for="(content, index) in campaignContents.data" :key="content.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+              <td class="px-6 py-4">{{ currentIndex + index + 1 }}</td>
               <td class="px-6 py-4">{{ content.title }}</td>
               <td class="px-6 py-4">{{ content.campaign?.campaign_name ?? '-' }}</td>
               <td class="px-6 py-4">{{ content.platform?.name ?? '-' }}</td>
@@ -215,19 +220,19 @@ function toggleSort(field: string) {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.campaign-contents.show', content.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="btn-icon text-gray-500"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.campaign-contents.edit', content.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="btn-icon text-blue-600"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(content.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button @click="destroy(content.id)" class="btn-icon text-red-600" title="Delete">
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>

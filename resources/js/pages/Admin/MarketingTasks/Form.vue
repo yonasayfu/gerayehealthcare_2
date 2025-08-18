@@ -172,6 +172,17 @@ const formattedCompletedAt = computed({
     </div>
 
     <div class="col-span-full">
+      <label for="expected_results" class="block text-sm font-medium text-gray-900 dark:text-white">Expected Results</label>
+      <textarea
+        id="expected_results"
+        rows="3"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50 p-2.5"
+        v-model="props.form.expected_results"
+      ></textarea>
+      <InputError class="mt-2" :message="props.form.errors.expected_results" />
+    </div>
+
+    <div class="col-span-full">
       <label for="notes" class="block text-sm font-medium text-gray-900 dark:text-white">Notes</label>
       <textarea
         id="notes"

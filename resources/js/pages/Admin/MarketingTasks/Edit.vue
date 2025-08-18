@@ -8,6 +8,7 @@ interface MarketingTask {
   task_code: string;
   title: string;
   description: string;
+  expected_results?: string;
   task_type: string;
   status: string;
   scheduled_at: string;
@@ -44,6 +45,7 @@ const form = useForm({
   task_type: props.marketingTask.task_type,
   title: props.marketingTask.title,
   description: props.marketingTask.description,
+  expected_results: props.marketingTask.expected_results ?? '',
   scheduled_at: props.marketingTask.scheduled_at,
   completed_at: props.marketingTask.completed_at,
   status: props.marketingTask.status,

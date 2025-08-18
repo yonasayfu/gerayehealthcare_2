@@ -26,6 +26,7 @@ const form = useForm({
   task_type: '',
   title: '',
   description: '',
+  expected_results: '',
   scheduled_at: '',
   completed_at: '',
   status: 'Pending',

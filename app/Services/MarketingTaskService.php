@@ -17,6 +17,16 @@ class MarketingTaskService extends BaseService
         parent::__construct($marketingTask);
     }
 
+    public function getById(int $id, array $with = [])
+    {
+        // Ensure relationships are loaded for Show/Edit pages
+        $defaultWith = ['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'];
+        $with = array_unique(array_merge($defaultWith, $with));
+        $query = $this->model->newQuery()->with($with);
+        $model = $query->findOrFail($id);
+        return $model;
+    }
+
     protected function applySearch($query, $search)
     {
         $query->where('title', 'ilike', "%{$search}%")
@@ -61,7 +71,7 @@ class MarketingTaskService extends BaseService
             $query->orderBy('created_at', 'desc');
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 5))->withQueryString();
     }
 
     public function export(Request $request)

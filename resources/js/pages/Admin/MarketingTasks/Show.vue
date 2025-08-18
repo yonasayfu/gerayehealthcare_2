@@ -9,6 +9,7 @@ interface MarketingTask {
   task_code: string;
   title: string;
   description: string;
+  expected_results?: string;
   task_type: string;
   status: string;
   scheduled_at: string;
@@ -125,6 +126,11 @@ function destroy(id: number) {
                 </div>
 
                 <div>
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Expected Results</h2>
+                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.expected_results ?? '-' }}</p>
+                </div>
+
+                <div>
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
                   <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.notes ?? '-' }}</p>
                 </div>
@@ -139,18 +145,15 @@ function destroy(id: number) {
 
         <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
+              <button @click="printPage" class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-gray-900 hover:bg-gray-950 text-white rounded-md focus:ring-4 focus:ring-gray-300">
+                <Printer class="h-4 w-4" /> Print
               </button>
               <Link
                 :href="route('admin.marketing-tasks.edit', marketingTask.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                class="inline-flex items-center gap-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-sm px-4 py-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
               >
-                Edit Task
+                <Edit3 class="h-4 w-4" /> Edit
               </Link>
-              <button @click="destroy(marketingTask.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Task
-              </button>
             </div>
         </div>
 

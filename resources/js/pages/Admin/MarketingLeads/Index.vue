@@ -90,50 +90,6 @@ import { useExport } from '@/composables/useExport';
 
 const { printCurrentView, isProcessing } = useExport({ routeName: 'admin.marketing-leads', filters: props.filters });
 
-// Client-side Print All: load a large page with current filters, print, then restore pagination
-async function printAllCurrentFilters() {
-  if (isProcessing.value) return;
-  try {
-    isProcessing.value = true;
-    const originalPerPage = perPage.value;
-
-    // Build params with current filters and a high per_page
-    const params: Record<string, string | number> = {
-      search: search.value,
-      direction: sortDirection.value,
-      per_page: 1000, // load many rows to print all
-      status: status.value,
-      source_campaign_id: sourceCampaignId.value,
-    };
-    if (sortField.value) params.sort = sortField.value;
-
-    await router.get(route('admin.marketing-leads.index'), params, {
-      preserveState: true,
-      replace: true,
-      onSuccess: () => {
-        // Give Vue time to render table, then print
-        setTimeout(() => {
-          window.print();
-          // restore original per_page
-          const restoreParams = { ...params, per_page: originalPerPage } as Record<string, string | number>;
-          router.get(route('admin.marketing-leads.index'), restoreParams, {
-            preserveState: true,
-            replace: true,
-            onFinish: () => {
-              perPage.value = originalPerPage;
-              isProcessing.value = false;
-            },
-          });
-        }, 300);
-      },
-      onError: () => { isProcessing.value = false; },
-    });
-  } catch (e) {
-    console.error('Print all (client) failed', e);
-    isProcessing.value = false;
-  }
-}
-
 function toggleSort(field: string) {
   if (sortField.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -168,9 +124,6 @@ function toggleStatus(id: number) {
           <Link :href="route('admin.marketing-leads.create')" class="btn btn-primary">
             + Add Lead
           </Link>
-          <button @click="printAllCurrentFilters" :disabled="isProcessing" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
           <button @click="printCurrentView" :disabled="isProcessing" class="btn btn-dark">
             <Printer class="h-4 w-4" /> Print Current
           </button>

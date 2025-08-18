@@ -47,98 +47,91 @@ onMounted(() => {
 </template>
 
 <style>
-/* Basic styling for print */
+/* Patient-like print styles for consistency */
 .print-container {
-    font-family: Arial, sans-serif;
-    margin: 0.5cm;
+  font-family: Arial, sans-serif;
+  margin: 0.5cm;
 }
 
 .print-header-content {
-    text-align: center;
-    padding-top: 0.5cm;
-    padding-bottom: 0.5cm;
-    margin-bottom: 0.8cm;
+  text-align: center;
+  padding-top: 0.5cm;
+  padding-bottom: 0.5cm;
+  margin-bottom: 0.8cm;
 }
 
 .print-logo {
-    max-width: 150px;
-    max-height: 50px;
-    margin-bottom: 0.5rem;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  max-width: 150px;
+  max-height: 50px;
+  margin-bottom: 0.5rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .print-clinic-name {
-    font-size: 1.6rem;
-    margin-bottom: 0.2rem;
-    line-height: 1.2;
-    font-weight: bold;
+  font-size: 1.8rem;
+  margin-bottom: 0.2rem;
+  line-height: 1.2;
+  font-weight: bold;
 }
 
 .print-document-title {
-    font-size: 0.85rem;
-    color: #555;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-hr {
-    border-color: #ccc;
-}
+hr { border-color: #ccc; }
 
 .print-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8rem;
-    table-layout: fixed;
-}
-
-.print-table-header {
-    background-color: #f0f0f0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    text-transform: uppercase;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
 }
 
 .print-table th, .print-table td {
-    border: 1px solid #ddd;
-    padding: 0.4rem 0.6rem;
-    color: #000;
-    vertical-align: top;
-    word-break: break-word;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.6rem;
+  color: #000;
+  vertical-align: top;
+  word-break: break-word;
 }
 
 .print-table th {
-    font-weight: bold;
-    font-size: 0.7rem;
-    white-space: nowrap;
+  font-weight: 700;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background-color: #f0f0f0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  text-transform: uppercase;
 }
 
 .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  background-color: #f9f9f9;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .print-table-row {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
 
 .print-footer {
-    display: block;
-    text-align: center;
-    margin-top: 1cm;
-    font-size: 0.75rem;
-    color: #666;
+  display: block;
+  text-align: center;
+  margin-top: 1cm;
+  font-size: 0.8rem;
+  color: #666;
 }
 
-.print-footer hr {
-    border-color: #ccc;
-}
+.print-footer hr { border-color: #ccc; }
 
 @media print {
   @page {
-    size: A4 landscape;
+    size: A4; /* Portrait for consistency with Patient */
     margin: 0.5cm;
   }
 
@@ -148,7 +141,6 @@ hr {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    padding-bottom: 2cm !important;
     overflow: visible !important;
   }
 }

@@ -11,6 +11,7 @@ const props = defineProps<{
   staffMembers: any[];
   patients: any[];
   statuses: string[];
+  countries?: string[];
 }>();
 
 </script>
@@ -66,12 +67,14 @@ const props = defineProps<{
 
     <div>
       <label for="country" class="block text-sm font-medium text-gray-900 dark:text-white">Country</label>
-      <TextInput
+      <select
         id="country"
-        type="text"
-        class="mt-1 block w-full bg-gray-50"
         v-model="form.country"
-      />
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+      >
+        <option value="">Select a Country</option>
+        <option v-for="c in (countries ?? [])" :key="c" :value="c">{{ c }}</option>
+      </select>
       <InputError class="mt-2" :message="form.errors.country" />
     </div>
 
