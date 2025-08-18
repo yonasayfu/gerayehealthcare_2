@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/Components/Pagination.vue'
 import { format } from 'date-fns'
@@ -50,18 +50,15 @@ function destroy(id) {
 }
 
 function exportData(type) {
-    window.open(route('admin.events.export', { type }), '_blank');
+    // Only CSV is supported for Events export
+    if (type !== 'csv') return;
+    window.open(route('admin.events.export', { type: 'csv' }), '_blank');
 }
 
 function printCurrentView() {
-    // Use centralized backend handler for current page printing
-    window.open(route('admin.events.printCurrent'), '_blank');
+    // Use browser print to print current view
+    window.print();
 }
-
-const printAllEvents = () => {
-    // Use centralized backend handler for printing all records
-    window.open(route('admin.events.printAll'), '_blank');
-};
 
 function toggleSort(field) {
     if (sortField.value === field) {
@@ -90,14 +87,8 @@ function toggleSort(field) {
                     <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
                         <Download class="h-4 w-4" /> CSV
                     </button>
-                    <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <FileText class="h-4 w-4" /> PDF
-                    </button>
-                    <button @click="printAllEvents" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print All
-                    </button>
-                    <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print Current View
+                    <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-md">
+                        <Printer class="h-4 w-4" /> Print Current
                     </button>
                 </div>
             </div>

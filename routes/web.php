@@ -227,7 +227,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         // Events
         Route::get('events/export', [EventController::class, 'export'])->name('events.export');
-        Route::get('events/print-all', [EventController::class, 'printAll'])->name('events.printAll');
         Route::get('events/print-current', [EventController::class, 'printCurrent'])->name('events.printCurrent');
         Route::get('events/{event}/print', [EventController::class, 'printSingle'])->name('events.print');
         Route::resource('events', EventController::class);

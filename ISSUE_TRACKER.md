@@ -188,13 +188,13 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Fix the "per page 5" pagination.
 - [ ] Populate the filter and other dropdowns on create.vue and edit.vue.
 
-#### Module: Marketing Analytics (Complete)
+#### Module: Marketing Analytics (Complete 100%)
 - [x] Ensure this module correctly populates data from related modules.
 
 #### Module: Events (Complete)
 - [x] Fix the issue where nothing happens after data is inserted and submitted on create.vue and edit.vue.
 - [x] Remove CSV and PDF generation.
-- [ ] Fix the Element is missing end tag error on show.vue.
+- [x] Fix the Element is missing end tag error on show.vue.
 
 #### Module: Eligibility Criteria (Complete)
 - [x] Resolve the TypeError: Cannot read properties of undefined (reading 'data') error.

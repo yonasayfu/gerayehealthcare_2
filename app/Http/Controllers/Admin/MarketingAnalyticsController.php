@@ -39,4 +39,22 @@ class MarketingAnalyticsController extends Controller
         $funnelData = $this->marketingAnalyticsService->getConversionFunnel();
         return response()->json($funnelData);
     }
+
+    public function budgetPacing(Request $request)
+    {
+        $data = $this->marketingAnalyticsService->getBudgetPacing($request);
+        return response()->json($data);
+    }
+
+    public function staffPerformance(Request $request)
+    {
+        $data = $this->marketingAnalyticsService->getStaffPerformance($request);
+        return response()->json($data);
+    }
+
+    public function taskSla(Request $request)
+    {
+        $data = $this->marketingAnalyticsService->getTaskSla($request);
+        return response()->json($data);
+    }
 }

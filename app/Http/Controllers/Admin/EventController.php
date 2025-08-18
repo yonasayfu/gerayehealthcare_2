@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Services\EventService;
 use App\Services\Validation\Rules\EventRules;
 use App\DTOs\CreateEventDTO;
-use App\DTOs\UpdateEventDTO;
 use App\Enums\RoleEnum;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -23,10 +22,24 @@ class EventController extends BaseController
             'Admin/Events',
             'events',
             Event::class,
-            CreateEventDTO::class,
-            UpdateEventDTO::class
+            CreateEventDTO::class
         );
         $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
+    }
+
+    public function export(Request $request)
+    {
+        return app(EventService::class)->export($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return app(EventService::class)->printCurrent($request);
+    }
+
+    public function printSingle(Request $request, Event $event)
+    {
+        return app(EventService::class)->printSingle($request, $event);
     }
 
     public function create()

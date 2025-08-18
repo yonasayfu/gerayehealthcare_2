@@ -181,6 +181,135 @@ class ExportConfig
     }
 
     /**
+     * Get export/print configuration for Event model
+     */
+    public static function getEventConfig(): array
+    {
+        return [
+            'searchable_fields' => ['title', 'description', 'broadcast_status'],
+            'sortable_fields' => ['title', 'event_date', 'broadcast_status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'events',
+
+            'csv' => [
+                'headers' => ['#', 'Title', 'Description', 'Event Date', 'Free Service', 'Status'],
+                'fields' => [
+                    'index',
+                    'title',
+                    'description',
+                    [
+                        'field' => 'event_date',
+                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'is_free_service',
+                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; },
+                    ],
+                    'broadcast_status',
+                ],
+                'filename_prefix' => 'events',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Events - Geraye Home Care Services',
+                'document_title' => 'Events Export',
+                'filename_prefix' => 'events',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'title' => 'title',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'broadcast_status' => 'broadcast_status',
+                ],
+                'columns' => [
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'event_date', 'label' => 'Event Date'],
+                    ['key' => 'is_free_service', 'label' => 'Free Service'],
+                    ['key' => 'broadcast_status', 'label' => 'Status'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Events (Current View) - Geraye Home Care Services',
+                'document_title' => 'Events (Current View)',
+                'filename_prefix' => 'events-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'fields' => [
+                    'title' => 'title',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'broadcast_status' => 'broadcast_status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'event_date', 'label' => 'Event Date'],
+                    ['key' => 'is_free_service', 'label' => 'Free Service'],
+                    ['key' => 'broadcast_status', 'label' => 'Status'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Events - Geraye Home Care Services',
+                'document_title' => 'All Events',
+                'filename_prefix' => 'events',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'event_date',
+                'fields' => [
+                    'title' => 'title',
+                    'description' => ['field' => 'description', 'default' => '-'],
+                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'broadcast_status' => 'broadcast_status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'event_date', 'label' => 'Event Date'],
+                    ['key' => 'is_free_service', 'label' => 'Free Service'],
+                    ['key' => 'broadcast_status', 'label' => 'Status'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Event Detail - Geraye Home Care Services',
+                'document_title' => 'Event Detail',
+                'filename_prefix' => 'event-record',
+                'fields' => [
+                    'Title' => 'title',
+                    'Description' => ['field' => 'description', 'default' => '-'],
+                    'Event Date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Free Service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'Status' => 'broadcast_status',
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'event_date', 'label' => 'Event Date'],
+                    ['key' => 'is_free_service', 'label' => 'Free Service'],
+                    ['key' => 'broadcast_status', 'label' => 'Status'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export/print configuration for MarketingBudget model
      */
     public static function getMarketingBudgetConfig(): array
@@ -744,132 +873,7 @@ class ExportConfig
         ];
     }
 
-    /**
-     * Get export configuration for Event model
-     */
-    public static function getEventConfig(): array
-    {
-        return [
-            'searchable_fields' => ['title', 'description'],
-            'sortable_fields' => ['title', 'event_date', 'broadcast_status', 'created_at'],
-            'default_sort' => 'created_at',
-            'select_fields' => [
-                'title', 'description', 'event_date', 'is_free_service', 'broadcast_status',
-            ],
-
-            'csv' => [
-                'headers' => [
-                    'Title', 'Description', 'Event Date', 'Is Free Service', 'Broadcast Status',
-                ],
-                'fields' => [
-                    'title', 'description', 'event_date', 'is_free_service', 'broadcast_status',
-                ],
-                'filename_prefix' => 'events',
-            ],
-
-            'pdf' => [
-                'view' => 'pdf-layout',
-                'title' => 'Events List',
-                'document_title' => 'Events List',
-                'filename_prefix' => 'events',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'fields' => [
-                    'title' => 'title',
-                    'description' => 'description',
-                    'event_date' => 'event_date',
-                    'is_free_service' => [
-                        'field' => 'is_free_service',
-                        'transform' => function ($value, $model) {
-                            return $value ? 'Yes' : 'No';
-                        },
-                    ],
-                    'broadcast_status' => 'broadcast_status',
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Title'],
-                    ['key' => 'description', 'label' => 'Description'],
-                    ['key' => 'event_date', 'label' => 'Event Date'],
-                    ['key' => 'is_free_service', 'label' => 'Free Service'],
-                    ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ],
-            ],
-
-            'current_page' => [
-                'view' => 'pdf-layout',
-                'title' => 'Events List (Current View)',
-                'document_title' => 'Events List (Current View)',
-                'filename_prefix' => 'events-current',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'fields' => [
-                    'title' => 'title',
-                    'description' => 'description',
-                    'event_date' => 'event_date',
-                    'is_free_service' => [
-                        'field' => 'is_free_service',
-                        'transform' => function ($value, $model) {
-                            return $value ? 'Yes' : 'No';
-                        },
-                    ],
-                    'broadcast_status' => 'broadcast_status',
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Title'],
-                    ['key' => 'description', 'label' => 'Description'],
-                    ['key' => 'event_date', 'label' => 'Event Date'],
-                    ['key' => 'is_free_service', 'label' => 'Free Service'],
-                    ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ],
-            ],
-
-            'all_records' => [
-                'view' => 'pdf-layout',
-                'title' => 'Events List',
-                'document_title' => 'Events List',
-                'filename_prefix' => 'events',
-                'orientation' => 'landscape',
-                'include_index' => false,
-                'default_sort' => 'title',
-                'fields' => [
-                    'title' => 'title',
-                    'description' => 'description',
-                    'event_date' => 'event_date',
-                    'is_free_service' => [
-                        'field' => 'is_free_service',
-                        'transform' => function ($value, $model) {
-                            return $value ? 'Yes' : 'No';
-                        },
-                    ],
-                    'broadcast_status' => 'broadcast_status',
-                ],
-                'columns' => [
-                    ['key' => 'title', 'label' => 'Title'],
-                    ['key' => 'description', 'label' => 'Description'],
-                    ['key' => 'event_date', 'label' => 'Event Date'],
-                    ['key' => 'is_free_service', 'label' => 'Free Service'],
-                    ['key' => 'broadcast_status', 'label' => 'Broadcast Status'],
-                ],
-            ],
-
-            'single_record' => [
-                'view' => 'pdf-layout',
-                'filename_prefix' => 'event-record',
-                'fields' => [
-                    'Title' => 'title',
-                    'Description' => 'description',
-                    'Event Date' => 'event_date',
-                    'Free Service' => [
-                        'field' => 'is_free_service',
-                        'transform' => function ($value, $model) {
-                            return $value ? 'Yes' : 'No';
-                        },
-                    ],
-                    'Broadcast Status' => 'broadcast_status',
-                ],
-            ],
-        ];
-    }
+    
 
     /**
      * Get export configuration for Staff model

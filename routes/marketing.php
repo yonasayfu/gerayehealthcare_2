@@ -50,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('traffic-source-distribution', [AdminMarketingAnalyticsController::class, 'trafficSourceDistribution'])->name('traffic-source-distribution');
             Route::get('conversion-funnel', [AdminMarketingAnalyticsController::class, 'conversionFunnel'])->name('conversion-funnel');
             Route::get('generate-report', [AdminMarketingAnalyticsController::class, 'generateReport'])->name('generate-report');
+            Route::get('budget-pacing', [AdminMarketingAnalyticsController::class, 'budgetPacing'])->name('budget-pacing');
+            Route::get('staff-performance', [AdminMarketingAnalyticsController::class, 'staffPerformance'])->name('staff-performance');
+            Route::get('task-sla', [AdminMarketingAnalyticsController::class, 'taskSla'])->name('task-sla');
         });
 
         // Additional Admin actions

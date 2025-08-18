@@ -4,9 +4,10 @@ import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { DollarSign, Users, CreditCard, Activity } from 'lucide-vue-next';
 import { Bar, Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement } from 'chart.js';
+import axios from 'axios';
 
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement);
 
 interface DashboardStats {
   totalLeads: number;
@@ -46,6 +47,11 @@ const props = defineProps<{
   trafficSourceData: TrafficSourceItem[];
   conversionFunnelData: ConversionFunnelData;
 }>();
+
+// New analytics state
+const budgetPacing = ref<{ range: { start: string; end: string }; monthly: any[]; totals: any } | null>(null);
+const staffPerformance = ref<Array<any>>([]);
+const taskSla = ref<any>(null);
 
 // Counter animations (adapted from provided HTML)
 function animateValue(id: string, start: number, end: number, duration: number, prefix = '') {
@@ -98,6 +104,17 @@ onMounted(() => {
       card.classList.remove('shadow-lg');
     });
   });
+
+  // Fetch new analytics endpoints
+  axios.get('/admin/marketing-analytics/budget-pacing')
+    .then(res => budgetPacing.value = res.data)
+    .catch(() => budgetPacing.value = null);
+  axios.get('/admin/marketing-analytics/staff-performance')
+    .then(res => staffPerformance.value = res.data || [])
+    .catch(() => staffPerformance.value = []);
+  axios.get('/admin/marketing-analytics/task-sla')
+    .then(res => taskSla.value = res.data)
+    .catch(() => taskSla.value = { total: 0, completed: 0, on_time: 0, overdue_open: 0, overdue_completed: 0, on_time_rate: 0 });
 });
 
 // Chart data (using computed properties for reactivity)
@@ -136,6 +153,28 @@ const chartOptions = {
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
   const total = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
+};
+
+// Budget pacing chart (stacked bars + projected line)
+const budgetPacingChartData = computed(() => {
+  const months = budgetPacing.value?.monthly?.map((m: any) => m.month) || [];
+  const allocated = budgetPacing.value?.monthly?.map((m: any) => m.allocated) || [];
+  const spent = budgetPacing.value?.monthly?.map((m: any) => m.spent) || [];
+  const projected = budgetPacing.value?.monthly?.map((m: any) => m.projected_spend) || [];
+  return {
+    labels: months,
+    datasets: [
+      { type: 'bar' as const, label: 'Allocated', backgroundColor: '#e5e7eb', data: allocated, stack: 'budget' },
+      { type: 'bar' as const, label: 'Spent', backgroundColor: '#60a5fa', data: spent, stack: 'budget' },
+      { type: 'line' as const, label: 'Projected Spend', borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', data: projected, yAxisID: 'y' },
+    ],
+  };
+});
+const budgetPacingChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { position: 'top' as const } },
+  scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
 };
 </script>
 
@@ -379,13 +418,101 @@ const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
           <a :href="`/dashboard/marketing-analytics/campaign-performance/print-all`" target="_blank" class="ml-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             Print All
           </a>
-          <a :href="`/dashboard/marketing-analytics/campaign-performance/print-current`" target="_blank" class="ml-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus::ring-offset-2 focus:ring-indigo-500">
+          <a :href="`/dashboard/marketing-analytics/campaign-performance/print-current`" target="_blank" class="ml-2 inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus::ring-offset-2 focus:ring-indigo-500">
             Print Current
           </a>
         </h3>
         <div class="h-[350px] mt-4">
           <Bar :data="campaignBarChartData" :options="chartOptions" />
         </div>
+      </div>
+
+      <!-- Budget vs Actuals + Projected -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 transform transition duration-500 hover:scale-[1.01] card-hover animate-fadeIn" style="animation-delay: 1.35s">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-medium text-gray-700">Budget vs Actuals + Projected</h3>
+          <div v-if="budgetPacing?.range" class="text-sm text-gray-500">{{ budgetPacing.range.start }} → {{ budgetPacing.range.end }}</div>
+        </div>
+        <div class="h-[360px]">
+          <Bar v-if="budgetPacing" :data="budgetPacingChartData" :options="budgetPacingChartOptions" />
+          <div v-else class="text-gray-400 text-sm">Loading budget pacing...</div>
+        </div>
+        <div v-if="budgetPacing" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Allocated (Total)</div>
+            <div class="font-semibold">${{ Number(budgetPacing.totals.allocated || 0).toLocaleString() }}</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Projected Spend (Total)</div>
+            <div class="font-semibold">${{ Number(budgetPacing.totals.projected_spend || 0).toLocaleString() }}</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Pacing</div>
+            <div class="font-semibold" :class="budgetPacing.totals.overrun ? 'text-red-600' : 'text-green-600'">{{ (budgetPacing.totals.pacing * 100).toFixed(0) }}%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Performance Table -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 transform transition duration-500 hover:scale-[1.01] card-hover animate-fadeIn" style="animation-delay: 1.4s">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">Staff Performance</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-600">
+                <th class="py-2 pr-4">Staff</th>
+                <th class="py-2 pr-4">Leads</th>
+                <th class="py-2 pr-4">Contact Rate</th>
+                <th class="py-2 pr-4">Conversion Rate</th>
+                <th class="py-2 pr-4">Tasks Completed</th>
+                <th class="py-2 pr-4">On-time Rate</th>
+                <th class="py-2 pr-4">Overdue (Open)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in staffPerformance" :key="row.staff?.id ?? `unassigned-${Math.random()}`" class="border-t">
+                <td class="py-2 pr-4">{{ row.staff?.name || 'Unassigned' }}</td>
+                <td class="py-2 pr-4">{{ row.leads.total }}</td>
+                <td class="py-2 pr-4">{{ (row.leads.contact_rate * 100).toFixed(0) }}%</td>
+                <td class="py-2 pr-4">{{ (row.leads.conversion_rate * 100).toFixed(0) }}%</td>
+                <td class="py-2 pr-4">{{ row.tasks.tasks_completed }}</td>
+                <td class="py-2 pr-4" :class="row.tasks.on_time_rate >= 0.8 ? 'text-green-600' : 'text-yellow-600'">{{ (row.tasks.on_time_rate * 100).toFixed(0) }}%</td>
+                <td class="py-2 pr-4" :class="row.tasks.tasks_overdue_open > 0 ? 'text-red-600' : ''">{{ row.tasks.tasks_overdue_open }}</td>
+              </tr>
+              <tr v-if="!staffPerformance.length">
+                <td colspan="7" class="py-4 text-center text-gray-400">No data</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SLA Widget -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 transform transition duration-500 hover:scale-[1.01] card-hover animate-fadeIn" style="animation-delay: 1.45s">
+        <h3 class="text-lg font-medium text-gray-700 mb-4">SLA Summary</h3>
+        <div v-if="taskSla" class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Total Tasks</div>
+            <div class="font-semibold">{{ taskSla.total }}</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Completed</div>
+            <div class="font-semibold">{{ taskSla.completed }}</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">On-time</div>
+            <div class="font-semibold">{{ taskSla.on_time }}</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">On-time Rate</div>
+            <div class="font-semibold" :class="taskSla.on_time_rate >= 0.8 ? 'text-green-600' : 'text-yellow-600'">{{ (taskSla.on_time_rate * 100).toFixed(0) }}%</div>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-gray-500">Overdue (Open)</div>
+            <div class="font-semibold" :class="taskSla.overdue_open > 0 ? 'text-red-600' : ''">{{ taskSla.overdue_open }}</div>
+          </div>
+        </div>
+        <div v-else class="text-gray-400 text-sm">Loading SLA...</div>
       </div>
     </div>
   </AppLayout>

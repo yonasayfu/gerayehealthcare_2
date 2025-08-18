@@ -42,9 +42,9 @@ function destroy(id: number) {
             <h3 class="text-xl font-semibold">
                 Event Details: {{ event.title }}
             </h3>
-            <Link :href="route('admin.events.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+            <Link :href="route('admin.events.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center print:hidden">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
+           </Link>
         </div>
 
         <div class="p-6 space-y-6">
@@ -105,20 +105,23 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
+              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-md">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
+              <Link
+                :href="route('admin.events.index')"
+                class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
+              >
+                Back to list
+              </Link>
               <Link
                 :href="route('admin.events.edit', event.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
                 Edit Event
               </Link>
-              <button @click="destroy(event.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Event
-              </button>
             </div>
         </div>
 
@@ -278,45 +281,3 @@ function destroy(id: number) {
   }
 }
 </style>
-<environment_details>
-# VSCode Visible Files
-resources/js/pages/Admin/Events/Show.vue
-
-# VSCode Open Tabs
-app/Services/RoleService.php
-app/Http/Controllers/Admin/UserController.php
-app/Services/BaseService.php
-app/Services/UserService.php
-resources/js/pages/Admin/Users/Index.vue
-resources/js/components/Pagination.vue
-app/Http/Controllers/Insurance/EthiopianCalendarDayController.php
-resources/js/components/CalendarView.vue
-storage/logs/laravel.log
-resources/js/Composables/useEthiopianDate.ts
-resources/js/pages/Insurance/EthiopianCalendarDays/Index.vue
-resources/js/components/EthiopianDatePicker.vue
-routes/api.php
-tests/Feature/Insurance/DateConversionApiTest.php
-.env
-app/Http/Controllers/Api/DateConversionController.php
-resources/js/pages/Admin/Events/Show.vue
-resources/js/types/index.d.ts
-resources/js/app.ts
-app/Http/Controllers/Base/BaseController.php
-resources/js/pages/Insurance/EthiopianCalendarDays/Create.vue
-resources/js/pages/Insurance/EthiopianCalendarDays/Show.vue
-resources/js/pages/Insurance/EthiopianCalendarDays/Edit.vue
-resources/js/pages/Admin/Roles/Index.vue
-resources/js/pages/Admin/Roles/Edit.vue
-resources/js/pages/Admin/Users/Edit.vue
-resources/js/pages/Admin/Users/Show.vue
-
-# Current Time
-8/6/2025, 6:18:03 PM (Africa/Addis_Ababa, UTC+3:00)
-
-# Context Window Usage
-195,278 / 1,048.576K tokens used (19%)
-
-# Current Mode
-ACT MODE
-</environment_details>

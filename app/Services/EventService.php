@@ -5,9 +5,12 @@ namespace App\Services;
 use App\DTOs\CreateEventDTO;
 use App\Models\Event;
 use Illuminate\Http\Request;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 
 class EventService extends BaseService
 {
+    use ExportableTrait;
     public function __construct(Event $event)
     {
         parent::__construct($event);
@@ -17,5 +20,22 @@ class EventService extends BaseService
     {
         $query->where('title', 'ilike', "%{$search}%")
               ->orWhere('description', 'ilike', "%{$search}%");
+    }
+
+    public function export(Request $request)
+    {
+        // Force CSV-only export for Events
+        $request->merge(['format' => 'csv']);
+        return $this->handleExport($request, Event::class, ExportConfig::getEventConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, Event::class, ExportConfig::getEventConfig());
+    }
+
+    public function printSingle(Request $request, Event $event)
+    {
+        return $this->handlePrintSingle($request, $event, ExportConfig::getEventConfig());
     }
 }

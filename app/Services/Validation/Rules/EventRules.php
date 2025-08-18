@@ -9,12 +9,9 @@ class EventRules extends BaseResourceRules
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'capacity' => 'nullable|integer|min:1',
-            'is_public' => 'boolean',
-            'status' => 'required|string|in:Draft,Scheduled,In Progress,Completed,Cancelled',
+            'event_date' => 'required|date',
+            'is_free_service' => 'boolean',
+            'broadcast_status' => 'required|string|in:Draft,Published,Archived',
         ];
     }
     
@@ -23,12 +20,9 @@ class EventRules extends BaseResourceRules
         return [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'capacity' => 'nullable|integer|min:1',
-            'is_public' => 'boolean',
-            'status' => 'required|string|in:Draft,Scheduled,In Progress,Completed,Cancelled',
+            'event_date' => 'required|date',
+            'is_free_service' => 'boolean',
+            'broadcast_status' => 'required|string|in:Draft,Published,Archived',
         ];
     }
 }

@@ -11,6 +11,8 @@ use App\Models\LeadSource;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Models\MarketingTask;
+use App\Models\Staff;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
 
@@ -252,5 +254,277 @@ class MarketingAnalyticsService
             $campaigns->where('platform_id', $request->input('platform_id'));
         }
         return $campaigns->pluck('id')->all();
+    }
+
+    public function getBudgetPacing(Request $request): array
+    {
+        // Resolve date window
+        $start = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->startOfMonth();
+        $end = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->endOfDay() : Carbon::now()->endOfMonth();
+
+        // Base budget query filtered by campaign/platform and overlapping the window
+        $campaignIds = $this->getFilteredCampaignIds($request);
+        $budgets = MarketingBudget::query();
+        if (!empty($campaignIds)) {
+            $budgets->whereIn('campaign_id', $campaignIds);
+        }
+        if ($request->filled('platform_id')) {
+            $budgets->where('platform_id', $request->input('platform_id'));
+        }
+        // Overlap condition: budget period intersects [start, end]
+        $budgets->whereDate('period_start', '<=', $end->toDateString())
+                ->whereDate('period_end', '>=', $start->toDateString());
+
+        $rows = $budgets->get(['allocated_amount', 'spent_amount', 'period_start', 'period_end']);
+
+        // Aggregate by YYYY-MM within window
+        $byMonth = [];
+        foreach ($rows as $row) {
+            $pStart = Carbon::parse($row->period_start);
+            $pEnd = Carbon::parse($row->period_end);
+            // Clip to selected window
+            $clipStart = $pStart->greaterThan($start) ? $pStart : $start;
+            $clipEnd = $pEnd->lessThan($end) ? $pEnd : $end;
+            // Iterate months in clipped range
+            $cursor = (clone $clipStart)->startOfMonth();
+            while ($cursor <= $clipEnd) {
+                $key = $cursor->format('Y-m');
+                if (!isset($byMonth[$key])) {
+                    $byMonth[$key] = [
+                        'month' => $key,
+                        'allocated' => 0.0,
+                        'spent' => 0.0,
+                        'projected_spend' => 0.0,
+                        'overrun' => false,
+                        'pacing' => 0.0,
+                    ];
+                }
+                // Simple allocation: full amounts counted in overlapping months (can refine to pro‑rata if needed)
+                $byMonth[$key]['allocated'] += (float) $row->allocated_amount;
+                $byMonth[$key]['spent'] += (float) $row->spent_amount;
+                $cursor->addMonth();
+            }
+        }
+
+        // Compute pacing and projected spend for each month
+        foreach ($byMonth as $key => &$m) {
+            [$y, $mNum] = explode('-', $key);
+            $monthStart = Carbon::createFromDate((int)$y, (int)$mNum, 1)->startOfDay();
+            $monthEnd = (clone $monthStart)->endOfMonth();
+            // Clip month to [start, end]
+            $clipStart = $monthStart->greaterThan($start) ? $monthStart : $start;
+            $clipEnd = $monthEnd->lessThan($end) ? $monthEnd : $end;
+            $daysInWindow = $clipStart->diffInDays($clipEnd) + 1;
+            $daysElapsed = $clipStart->isFuture() ? 0 : min($daysInWindow, $clipStart->diffInDays(min(Carbon::now()->endOfDay(), $clipEnd)) + 1);
+
+            $elapsedRatio = $daysInWindow > 0 ? max(0, min(1, $daysElapsed / $daysInWindow)) : 0;
+            if ($elapsedRatio > 0) {
+                $m['projected_spend'] = round($m['spent'] / $elapsedRatio, 2);
+            } else {
+                $m['projected_spend'] = 0.0;
+            }
+            $m['pacing'] = $m['allocated'] > 0 ? round($m['projected_spend'] / $m['allocated'], 2) : 0.0;
+            $m['overrun'] = $m['projected_spend'] > $m['allocated'];
+        }
+        ksort($byMonth);
+
+        // Totals
+        $totals = [
+            'allocated' => array_sum(array_column($byMonth, 'allocated')),
+            'spent' => array_sum(array_column($byMonth, 'spent')),
+            'projected_spend' => array_sum(array_column($byMonth, 'projected_spend')),
+        ];
+        $totals['pacing'] = $totals['allocated'] > 0 ? round($totals['projected_spend'] / $totals['allocated'], 2) : 0.0;
+        $totals['overrun'] = $totals['projected_spend'] > $totals['allocated'];
+
+        return [
+            'range' => [
+                'start' => $start->toDateString(),
+                'end' => $end->toDateString(),
+            ],
+            'monthly' => array_values($byMonth),
+            'totals' => $totals,
+        ];
+    }
+
+    public function getStaffPerformance(Request $request): array
+    {
+        // Leads grouped by assigned staff
+        $leadQuery = $this->getFilteredLeadsQuery($request);
+        $leadRows = $leadQuery->selectRaw('assigned_staff_id as staff_id, COUNT(*) as total,
+                          SUM(CASE WHEN status in ("Contacted","Qualified","Converted") THEN 1 ELSE 0 END) as contacted,
+                          SUM(CASE WHEN status = "Qualified" THEN 1 ELSE 0 END) as qualified,
+                          SUM(CASE WHEN status = "Converted" THEN 1 ELSE 0 END) as converted')
+                              ->groupBy('assigned_staff_id')
+                              ->get();
+
+        // Tasks grouped by assigned staff
+        $taskQuery = MarketingTask::query();
+        if ($request->filled('campaign_id')) {
+            $taskQuery->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('platform_id')) {
+            $taskQuery->whereHas('campaign', function ($q) use ($request) {
+                $q->where('platform_id', $request->input('platform_id'));
+            });
+        }
+        if ($request->filled('start_date')) {
+            $taskQuery->whereDate('scheduled_at', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $taskQuery->whereDate('scheduled_at', '<=', $request->input('end_date'));
+        }
+        $now = Carbon::now();
+        $taskRows = $taskQuery->selectRaw('assigned_to_staff_id as staff_id,
+                            COUNT(*) as tasks_total,
+                            SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as tasks_completed,
+                            SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as tasks_on_time,
+                            SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as tasks_overdue_open,
+                            SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as tasks_overdue_completed',
+                            [$now])
+                            ->groupBy('assigned_to_staff_id')
+                            ->get();
+
+        // Merge by staff_id
+        $byStaff = [];
+        foreach ($leadRows as $r) {
+            $byStaff[$r->staff_id] = [
+                'staff_id' => $r->staff_id,
+                'leads' => [
+                    'total' => (int)$r->total,
+                    'contacted' => (int)$r->contacted,
+                    'qualified' => (int)$r->qualified,
+                    'converted' => (int)$r->converted,
+                    'contact_rate' => $r->total > 0 ? round($r->contacted / $r->total, 2) : 0,
+                    'qualification_rate' => $r->total > 0 ? round($r->qualified / $r->total, 2) : 0,
+                    'conversion_rate' => $r->total > 0 ? round($r->converted / $r->total, 2) : 0,
+                ],
+                'tasks' => [
+                    'tasks_total' => 0,
+                    'tasks_completed' => 0,
+                    'tasks_on_time' => 0,
+                    'tasks_overdue_open' => 0,
+                    'tasks_overdue_completed' => 0,
+                    'on_time_rate' => 0,
+                ],
+            ];
+        }
+        foreach ($taskRows as $t) {
+            if (!isset($byStaff[$t->staff_id])) {
+                $byStaff[$t->staff_id] = [
+                    'staff_id' => $t->staff_id,
+                    'leads' => [
+                        'total' => 0,
+                        'contacted' => 0,
+                        'qualified' => 0,
+                        'converted' => 0,
+                        'contact_rate' => 0,
+                        'qualification_rate' => 0,
+                        'conversion_rate' => 0,
+                    ],
+                    'tasks' => [
+                        'tasks_total' => 0,
+                        'tasks_completed' => 0,
+                        'tasks_on_time' => 0,
+                        'tasks_overdue_open' => 0,
+                        'tasks_overdue_completed' => 0,
+                        'on_time_rate' => 0,
+                    ],
+                ];
+            }
+            $byStaff[$t->staff_id]['tasks']['tasks_total'] = (int)$t->tasks_total;
+            $byStaff[$t->staff_id]['tasks']['tasks_completed'] = (int)$t->tasks_completed;
+            $byStaff[$t->staff_id]['tasks']['tasks_on_time'] = (int)$t->tasks_on_time;
+            $byStaff[$t->staff_id]['tasks']['tasks_overdue_open'] = (int)$t->tasks_overdue_open;
+            $byStaff[$t->staff_id]['tasks']['tasks_overdue_completed'] = (int)$t->tasks_overdue_completed;
+            $byStaff[$t->staff_id]['tasks']['on_time_rate'] = $t->tasks_completed > 0 ? round($t->tasks_on_time / $t->tasks_completed, 2) : 0;
+        }
+
+        // Enrich with staff names
+        $staffIds = array_values(array_filter(array_keys($byStaff), function ($id) {
+            return !is_null($id);
+        }));
+        $nameMap = [];
+        if (!empty($staffIds)) {
+            $nameMap = Staff::whereIn('id', $staffIds)->get()->mapWithKeys(function ($s) {
+                return [$s->id => ($s->full_name ?? ($s->first_name . ' ' . $s->last_name))];
+            })->toArray();
+        }
+        foreach ($byStaff as $id => &$row) {
+            if (is_null($id)) {
+                $row['staff'] = ['id' => null, 'name' => 'Unassigned'];
+            } else {
+                $row['staff'] = ['id' => $id, 'name' => $nameMap[$id] ?? ('Staff #' . $id)];
+            }
+        }
+
+        // Include all staff with zero metrics to ensure table visibility
+        $allStaff = Staff::select('id', 'first_name', 'last_name')->get();
+        foreach ($allStaff as $s) {
+            if (!isset($byStaff[$s->id])) {
+                $fullName = trim(($s->first_name ?? '') . ' ' . ($s->last_name ?? ''));
+                $byStaff[$s->id] = [
+                    'staff_id' => $s->id,
+                    'staff' => ['id' => $s->id, 'name' => $fullName !== '' ? $fullName : ('Staff #' . $s->id)],
+                    'leads' => [
+                        'total' => 0,
+                        'contacted' => 0,
+                        'qualified' => 0,
+                        'converted' => 0,
+                        'contact_rate' => 0,
+                        'qualification_rate' => 0,
+                        'conversion_rate' => 0,
+                    ],
+                    'tasks' => [
+                        'tasks_total' => 0,
+                        'tasks_completed' => 0,
+                        'tasks_on_time' => 0,
+                        'tasks_overdue_open' => 0,
+                        'tasks_overdue_completed' => 0,
+                        'on_time_rate' => 0,
+                    ],
+                ];
+            }
+        }
+
+        // Return list
+        return array_values($byStaff);
+    }
+
+    public function getTaskSla(Request $request): array
+    {
+        $query = MarketingTask::query();
+        if ($request->filled('campaign_id')) {
+            $query->where('campaign_id', $request->input('campaign_id'));
+        }
+        if ($request->filled('platform_id')) {
+            $query->whereHas('campaign', function ($q) use ($request) {
+                $q->where('platform_id', $request->input('platform_id'));
+            });
+        }
+        if ($request->filled('start_date')) {
+            $query->whereDate('scheduled_at', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('scheduled_at', '<=', $request->input('end_date'));
+        }
+        $now = Carbon::now();
+
+        $totals = $query->selectRaw('COUNT(*) as total,
+                        SUM(CASE WHEN status = "Completed" THEN 1 ELSE 0 END) as completed,
+                        SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as on_time,
+                        SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as overdue_open,
+                        SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as overdue_completed',
+                        [$now])
+                        ->first();
+
+        return [
+            'total' => (int)$totals->total,
+            'completed' => (int)$totals->completed,
+            'on_time' => (int)$totals->on_time,
+            'overdue_open' => (int)$totals->overdue_open,
+            'overdue_completed' => (int)$totals->overdue_completed,
+            'on_time_rate' => $totals->completed > 0 ? round($totals->on_time / $totals->completed, 2) : 0,
+        ];
     }
 }
