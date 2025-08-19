@@ -8,7 +8,6 @@ class CorporateClientRules
     {
         return [
             'organization_name' => 'required|string|max:255',
-            'organization_name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
@@ -22,7 +21,6 @@ class CorporateClientRules
     {
         return [
             'organization_name' => 'sometimes|required|string|max:255',
-            'organization_name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',

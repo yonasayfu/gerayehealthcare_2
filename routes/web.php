@@ -189,8 +189,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('insurance-companies/print-current', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printCurrent'])->name('insurance-companies.printCurrent');
         Route::get('insurance-companies/{insurance_company}/print', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printSingle'])->name('insurance-companies.print');
         Route::resource('insurance-companies', App\Http\Controllers\Insurance\InsuranceCompanyController::class);
-        Route::get('corporate-clients/export', [App\Http\Controllers\Insurance\CorporateClientController::class, 'export'])->name('corporate-clients.export');
-        Route::get('corporate-clients/print-all', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printAll'])->name('corporate-clients.printAll');
         Route::get('corporate-clients/print-current', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printCurrent'])->name('corporate-clients.printCurrent');
         Route::get('corporate-clients/{corporate_client}/print', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printSingle'])->name('corporate-clients.print');
         Route::resource('corporate-clients', App\Http\Controllers\Insurance\CorporateClientController::class);

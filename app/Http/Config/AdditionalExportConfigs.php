@@ -742,7 +742,6 @@ class AdditionalExportConfigs
                     'filename_prefix' => 'corporate_client',
                     'fields' => [
                         ['label' => 'Organization Name', 'key' => 'organization_name'],
-                        ['label' => 'Organization Name (Amharic)', 'key' => 'organization_name_amharic'],
                         ['label' => 'Contact Person', 'key' => 'contact_person'],
                         ['label' => 'Contact Email', 'key' => 'contact_email'],
                         ['label' => 'Contact Phone', 'key' => 'contact_phone'],

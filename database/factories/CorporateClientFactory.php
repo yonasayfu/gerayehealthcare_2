@@ -18,7 +18,6 @@ class CorporateClientFactory extends Factory
     {
         return [
             'organization_name' => $this->faker->company,
-            'organization_name_amharic' => $this->faker->company,
             'contact_person' => $this->faker->name,
             'contact_email' => $this->faker->unique()->safeEmail,
             'contact_phone' => $this->faker->phoneNumber,

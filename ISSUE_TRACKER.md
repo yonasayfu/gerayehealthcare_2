@@ -230,7 +230,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Fix the UI for show.vue.
 - [ ] Fix the search functionality and its UI.
 
-#### Module: Corporate Clients (Complete)
+#### Module: Corporate Clients (Complete 100%)
 - [ ] Fix the search functionality and its UI.
 - [x] Remove the "Organization Name (Amharic)" column.
 - [ ] Fix the UI for show.vue.
@@ -242,7 +242,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [x] Remove CSV and PDF.
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current."
-- [x] Remove the "Service Type (Amharic)" column.
+- [x] Remove the "Service Type (Amh∆aric)" column.
 - [ ] Fix the UI for show.vue and edit.vue.
 
 #### Module: Employee Insurance Records (Complete)
