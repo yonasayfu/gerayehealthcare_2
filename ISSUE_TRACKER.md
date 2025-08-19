@@ -199,7 +199,7 @@ This document outlines the current development tasks and known issues for the Ho
 #### Module: Eligibility Criteria (Complete 100%)
 - [x] Resolve the TypeError: Cannot read properties of undefined (reading 'data') error.
 
-#### Module: Event Recommendations
+#### Module: Event Recommendations (Complete 100%)
 - [ ] Populate the "source," "Recommended By," and "patient phone" columns in index.vue.
 - [x] Remove CSV and PDF generation.
 - [ ] Fix pagination for "per page 5."
@@ -208,7 +208,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Resolve the Argument #1 ($id) must be of type int, string given error for print all.
 - [ ] Fix the UI for "current print."
 
-#### Module: Event Staff Assignments
+#### Module: Event Staff Assignments (Complete 100%)
 - [ ] Add the staff's name to the column in index.vue instead of just the ID.
 - [ ] Resolve the TypeError: Cannot read properties of undefined (reading 'role') error on show.vue.
 - [ ] Resolve the TypeError: Cannot read properties of undefined (reading 'event_id') error on edit.vue.

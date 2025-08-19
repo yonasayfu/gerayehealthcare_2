@@ -6,7 +6,7 @@ use App\DTOs\CreateEventStaffAssignmentDTO;
 use App\Models\EventStaffAssignment;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Config\ExportConfig;
 
 class EventStaffAssignmentService extends BaseService
 {
@@ -24,6 +24,8 @@ class EventStaffAssignmentService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
+        // Always eager load event and staff for listing (names in UI/exports)
+        $with = array_unique(array_merge(['event', 'staff'], $with));
         $query = $this->model->with($with);
 
         if ($request->has('search')) {
@@ -40,5 +42,24 @@ class EventStaffAssignmentService extends BaseService
         return $query->paginate($request->input('per_page', 10));
     }
 
-    
+    public function getById(int $id, array $with = []): EventStaffAssignment
+    {
+        $with = array_unique(array_merge(['event', 'staff'], $with));
+        return $this->model->with($with)->findOrFail($id);
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, EventStaffAssignment::class, ExportConfig::getEventStaffAssignmentConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, EventStaffAssignment::class, ExportConfig::getEventStaffAssignmentConfig());
+    }
+
+    public function printSingle(Request $request, EventStaffAssignment $eventStaffAssignment)
+    {
+        return $this->handlePrintSingle($request, $eventStaffAssignment, ExportConfig::getEventStaffAssignmentConfig());
+    }
 }

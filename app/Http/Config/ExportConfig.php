@@ -181,6 +181,105 @@ class ExportConfig
     }
 
     /**
+     * Get export/print configuration for EventStaffAssignment model
+     */
+    public static function getEventStaffAssignmentConfig(): array
+    {
+        return [
+            'searchable_fields' => ['role', 'event.title', 'staff.first_name', 'staff.last_name'],
+            'sortable_fields' => ['role', 'event_id', 'staff_id', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'event-staff-assignments',
+            'with_relations' => ['event', 'staff'],
+
+            // Fallback PDF config (legacy path, not used by centralized flows)
+            'pdf' => [
+                'view' => 'exports.universal-report',
+                'title' => 'Event Staff Assignments - Geraye Home Care Services',
+                'document_title' => 'Event Staff Assignments',
+                'filename_prefix' => 'event-staff-assignments',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'fields' => [
+                    'event' => ['field' => 'event.title', 'default' => '-'],
+                    'staff' => ['field' => 'staff.full_name', 'default' => '-'],
+                    'role' => ['field' => 'role', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'event.title', 'label' => 'Event'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'role', 'label' => 'Role'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'exports.universal-report',
+                'title' => 'Event Staff Assignments (Current View) - Geraye Home Care Services',
+                'document_title' => 'Event Staff Assignments (Current View)',
+                'filename_prefix' => 'event-staff-assignments-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['event', 'staff'],
+                'fields' => [
+                    'event' => ['field' => 'event.title', 'default' => '-'],
+                    'staff' => ['field' => 'staff.full_name', 'default' => '-'],
+                    'role' => ['field' => 'role', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'event.title', 'label' => 'Event'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'role', 'label' => 'Role'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'exports.universal-report',
+                'title' => 'All Event Staff Assignments - Geraye Home Care Services',
+                'document_title' => 'All Event Staff Assignments',
+                'filename_prefix' => 'event-staff-assignments',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'created_at',
+                'with_relations' => ['event', 'staff'],
+                'fields' => [
+                    'event' => ['field' => 'event.title', 'default' => '-'],
+                    'staff' => ['field' => 'staff.full_name', 'default' => '-'],
+                    'role' => ['field' => 'role', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'event.title', 'label' => 'Event'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'role', 'label' => 'Role'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'exports.universal-single-record',
+                'title' => 'Event Staff Assignment - Geraye Home Care Services',
+                'document_title' => 'Event Staff Assignment',
+                'filename_prefix' => 'event-staff-assignment',
+                'with_relations' => ['event', 'staff'],
+                'fields' => [
+                    'Event' => ['field' => 'event.title', 'default' => '-'],
+                    'Staff' => ['field' => 'staff.full_name', 'default' => '-'],
+                    'Role' => ['field' => 'role', 'default' => '-'],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';}],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';}],
+                ],
+                'columns' => [
+                    ['key' => 'event.title', 'label' => 'Event'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'role', 'label' => 'Role'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
      * Get export/print configuration for EventRecommendation model
      */
     public static function getEventRecommendationConfig(): array
