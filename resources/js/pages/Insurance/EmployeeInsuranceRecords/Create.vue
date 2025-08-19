@@ -10,6 +10,7 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                     <form @submit.prevent="submit">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="mb-4">
                             <label for="patient_id" class="block text-sm font-medium text-gray-700">Patient</label>
                             <select id="patient_id" v-model="form.patient_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
@@ -47,7 +48,7 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="federal_id" class="block text-sm font-medium text-gray-700">Federal ID</label>
+                            <label for="federal_id" class="block text-sm font-medium text-gray-700">Fayda ID</label>
                             <input type="text" id="federal_id" v-model="form.federal_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             <div v-if="form.errors.federal_id" class="text-red-500 text-sm mt-1">{{ form.errors.federal_id }}</div>
                         </div>
@@ -71,8 +72,9 @@
                             </label>
                             <div v-if="form.errors.verified" class="text-red-500 text-sm mt-1">{{ form.errors.verified }}</div>
                         </div>
+                        </div>
 
-                        <button type="submit" :disabled="form.processing" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-300 disabled:opacity-25 transition">
+                        <button type="submit" :disabled="form.processing" class="inline-flex items-center px-4 py-2 bg-gray-900 border border-transparent rounded-md font-semibold text-sm text-white tracking-widest hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 transition">
                             Create Record
                         </button>
                     </form>
@@ -83,7 +85,7 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { useForm } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
 

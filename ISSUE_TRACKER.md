@@ -237,7 +237,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current."
 
-#### Module: Insurance Policies (Complete)
+#### Module: Insurance Policies (Complete 100%)
 - [x] Populate dropdown data on create.vue and edit.vue and check if submission works.
 - [x] Remove CSV and PDF.
 - [ ] Resolve the Call to undefined method error for print all.
@@ -245,12 +245,12 @@ This document outlines the current development tasks and known issues for the Ho
 - [x] Remove the "Service Type (Amh∆aric)" column.
 - [ ] Fix the UI for show.vue and edit.vue.
 
-#### Module: Employee Insurance Records (Complete)
+#### Module: Employee Insurance Records (Complete 100%)
 - [x] Use "Fayda ID" instead of "Federal ID" for consistency.
-- [ ] Fix the UI for show.vue and edit.vue.
+- [x] Fix the UI for show.vue and edit.vue.
 - [x] Populate dropdown data on create.vue and edit.vue.
-- [ ] Resolve the Call to undefined method error for print all.
-- [ ] Fix the UI for "print current."
+- [x] Resolve the Call to undefined method error for print all. (Removed route and button)
+- [x] Fix the UI for "print current." (Standardized dark button on Index + added on Show)
 
 #### Module: Insurance Claims (Complete)
 - [x] Remove CSV and PDF.
