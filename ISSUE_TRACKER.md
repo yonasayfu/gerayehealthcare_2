@@ -215,7 +215,7 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Resolve the Argument #1 ($id) must be of type int, string given error for print all.
 - [ ] Fix the UI for "print current" to use the recommended UI.
 
-#### Module: Event Broadcasts (Complete)
+#### Module: Event Broadcasts (Complete 100%)
 - [x] Resolve the Class "App\\Http\\Controllers\\Admin\\CreateEventBroadcastDTO" not found error on create.vue.
 - [x] Remove other export features and only keep "print current."
 - [ ] Create a seeder and test all features.

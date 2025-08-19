@@ -257,12 +257,10 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('event-staff-assignments/print-current', [EventStaffAssignmentController::class, 'printCurrent'])->name('event-staff-assignments.printCurrent');
         Route::get('event-staff-assignments/{event_staff_assignment}/print', [EventStaffAssignmentController::class, 'printSingle'])->name('event-staff-assignments.print');
 
-        // Event Broadcasts
-        Route::resource('event-broadcasts', EventBroadcastController::class);
-        Route::get('event-broadcasts/export', [EventBroadcastController::class, 'export'])->name('event-broadcasts.export');
-        Route::get('event-broadcasts/print-all', [EventBroadcastController::class, 'printAll'])->name('event-broadcasts.printAll');
+        // Event Broadcasts (keep only print-current)
+        // Define specific routes before resource to avoid parameter capture
         Route::get('event-broadcasts/print-current', [EventBroadcastController::class, 'printCurrent'])->name('event-broadcasts.printCurrent');
-        Route::get('event-broadcasts/{event_broadcast}/print', [EventBroadcastController::class, 'printSingle'])->name('event-broadcasts.print');
+        Route::resource('event-broadcasts', EventBroadcastController::class);
 
         // Admin Leave Requests
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)

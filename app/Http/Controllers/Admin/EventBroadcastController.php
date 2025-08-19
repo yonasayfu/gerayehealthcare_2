@@ -12,9 +12,11 @@ use App\Http\Controllers\Base\BaseController;
 use App\Services\EventBroadcastService;
 use App\Models\EventBroadcast;
 use App\DTOs\CreateEventBroadcastDTO;
+use App\Http\Traits\ExportableTrait;
 
 class EventBroadcastController extends BaseController
 {
+    use ExportableTrait;
     public function __construct(EventBroadcastService $eventBroadcastService)
     {
         parent::__construct(
@@ -50,5 +52,46 @@ class EventBroadcastController extends BaseController
             'events' => $events,
             'staff' => $staff,
         ]);
+    }
+
+    /**
+     * Print current page/view (PDF with pagination and current filters).
+     */
+    public function printCurrent(Request $request)
+    {
+        $config = $this->buildExportConfig();
+        return $this->handlePrintCurrent($request, EventBroadcast::class, $config);
+    }
+
+    /**
+     * Minimal export/print config for Event Broadcasts compatible with ExportableTrait.
+     */
+    private function buildExportConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'id', 'label' => '#'],
+            ['key' => 'event_id', 'label' => 'Event ID'],
+            ['key' => 'channel', 'label' => 'Channel'],
+            ['key' => 'message', 'label' => 'Message'],
+            ['key' => 'sent_by_staff_id', 'label' => 'Sent By Staff ID'],
+            ['key' => 'created_at', 'label' => 'Created At'],
+        ];
+
+        return [
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Event Broadcasts',
+                'filename_prefix' => 'event_broadcasts',
+                'orientation' => 'portrait',
+                'columns' => $pdfColumns,
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Event Broadcasts (Current View)',
+                'filename_prefix' => 'event_broadcasts_current',
+                'orientation' => 'portrait',
+                'columns' => $pdfColumns,
+            ],
+        ];
     }
 }

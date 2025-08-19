@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdminLayout from '@/layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 
 const props = defineProps<{
-  broadcast: any;
+  eventBroadcast: any;
 }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Event Broadcasts', href: route('admin.event-broadcasts.index') },
-  { title: props.broadcast.channel, href: route('admin.event-broadcasts.show', props.broadcast.id) },
+  { title: props.eventBroadcast.channel, href: route('admin.event-broadcasts.show', props.eventBroadcast.id) },
 ]
 
 function printPage() {
@@ -33,14 +33,14 @@ function destroy(id: number) {
 </script>
 
 <template>
-  <Head :title="`Event Broadcast: ${broadcast.channel}`" />
+  <Head :title="`Event Broadcast: ${eventBroadcast.channel}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
-                Event Broadcast Details: {{ broadcast.channel }}
+                Event Broadcast Details: {{ eventBroadcast.channel }}
             </h3>
             <Link :href="route('admin.event-broadcasts.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -61,20 +61,20 @@ function destroy(id: number) {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Broadcast Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Event ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ broadcast.event_id }}</p>
+                      <p class="text-sm text-muted-foreground">Event:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventBroadcast.event?.title ?? eventBroadcast.event_id }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Channel:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ broadcast.channel }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventBroadcast.channel }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Sent By Staff ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ broadcast.sent_by_staff_id }}</p>
+                      <p class="text-sm text-muted-foreground">Sent By:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ (eventBroadcast.sentByStaff ? (eventBroadcast.sentByStaff.first_name + ' ' + eventBroadcast.sentByStaff.last_name) : null) || eventBroadcast.sent_by_staff_id }}</p>
                     </div>
                     <div class="lg:col-span-3">
                       <p class="text-sm text-muted-foreground">Message:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ broadcast.message }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventBroadcast.message }}</p>
                     </div>
                   </div>
                 </div>
@@ -93,12 +93,12 @@ function destroy(id: number) {
                 <Printer class="h-4 w-4" /> Print Document
               </button>
               <Link
-                :href="route('admin.event-broadcasts.edit', broadcast.id)"
+                :href="route('admin.event-broadcasts.edit', eventBroadcast.id)"
                 class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
                 Edit Broadcast
               </Link>
-              <button @click="destroy(broadcast.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
+              <button @click="destroy(eventBroadcast.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
                 <Trash2 class="w-4 h-4" /> Delete Broadcast
               </button>
             </div>
