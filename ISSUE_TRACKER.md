@@ -222,7 +222,7 @@ This document outlines the current development tasks and known issues for the Ho
 
 ### Phase 4: Insurance and User Management Modules
 
-#### Module: Insurance Companies (Complete)
+#### Module: Insurance Companies (Complete 100%)
 - [x] Remove PDF generation.
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current" using the recommended UI.

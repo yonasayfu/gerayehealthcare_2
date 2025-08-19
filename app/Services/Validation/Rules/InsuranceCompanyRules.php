@@ -8,12 +8,10 @@ class InsuranceCompanyRules
     {
         return [
             'name' => 'required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
         ];
     }
 
@@ -21,12 +19,10 @@ class InsuranceCompanyRules
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
         ];
     }
 }
