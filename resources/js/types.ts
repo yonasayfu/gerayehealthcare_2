@@ -60,3 +60,39 @@ export interface Staff {
   created_at: string;
   updated_at: string;
 }
+
+// Insurance Policies
+export interface InsurancePolicy {
+  id: number;
+  insurance_company_id: number;
+  corporate_client_id: number;
+  service_type: string;
+  coverage_percentage: number | null;
+  coverage_type: string | null;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  insurance_company?: { id: number; name: string };
+  corporate_client?: { id: number; organization_name: string };
+}
+
+export interface InsurancePolicyPagination {
+  current_page: number;
+  data: InsurancePolicy[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: Array<{
+    url: string | null;
+    label: string;
+    active: boolean;
+  }>;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}
