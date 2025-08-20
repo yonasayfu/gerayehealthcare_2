@@ -1,5 +1,5 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -32,15 +32,15 @@ const printPage = () => {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event ID</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <tr v-for="assignment in assignments" :key="assignment.id">
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ assignment.event_id }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ assignment.staff_id }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ assignment.event?.title || assignment.event_title || assignment.event_id }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ assignment.staff?.full_name || `${assignment.staff?.first_name ?? ''} ${assignment.staff?.last_name ?? ''}`.trim() || assignment.staff_name || assignment.staff_id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ assignment.role }}</td>
                                 </tr>
                             </tbody>

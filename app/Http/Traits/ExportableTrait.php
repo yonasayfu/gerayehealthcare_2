@@ -25,6 +25,15 @@ trait ExportableTrait
             $this->applySorting($query, $request);
         }
 
+        // Allow per-config query customization for export (e.g., filter rows)
+        if ($type === 'csv') {
+            $csvConfigForQuery = $config['csv'] ?? [];
+            if (isset($csvConfigForQuery['query_callback']) && is_callable($csvConfigForQuery['query_callback'])) {
+                // Provide the query and request to the callback for advanced filtering
+                call_user_func($csvConfigForQuery['query_callback'], $query, $request);
+            }
+        }
+
         $data = $query->get();
 
         // Eager load relations for CSV export if configured

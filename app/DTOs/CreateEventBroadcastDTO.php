@@ -6,9 +6,8 @@ class CreateEventBroadcastDTO
 {
     public function __construct(
         public int $event_id,
-        public string $broadcast_channel,
-        public ?string $broadcast_date,
-        public ?string $status,
-        public ?string $notes
+        public string $channel,
+        public string $message,
+        public int $sent_by_staff_id
     ) {}
 }

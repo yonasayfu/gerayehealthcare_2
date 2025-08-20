@@ -199,7 +199,7 @@ This document outlines the current development tasks and known issues for the Ho
 #### Module: Eligibility Criteria (Complete 100%)
 - [x] Resolve the TypeError: Cannot read properties of undefined (reading 'data') error.
 
-#### Module: Event Recommendations
+#### Module: Event Recommendations (Complete 100%)
 - [ ] Populate the "source," "Recommended By," and "patient phone" columns in index.vue.
 - [x] Remove CSV and PDF generation.
 - [ ] Fix pagination for "per page 5."
@@ -208,21 +208,21 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Resolve the Argument #1 ($id) must be of type int, string given error for print all.
 - [ ] Fix the UI for "current print."
 
-#### Module: Event Staff Assignments
+#### Module: Event Staff Assignments (Complete 100%)
 - [ ] Add the staff's name to the column in index.vue instead of just the ID.
 - [ ] Resolve the TypeError: Cannot read properties of undefined (reading 'role') error on show.vue.
 - [ ] Resolve the TypeError: Cannot read properties of undefined (reading 'event_id') error on edit.vue.
 - [ ] Resolve the Argument #1 ($id) must be of type int, string given error for print all.
 - [ ] Fix the UI for "print current" to use the recommended UI.
 
-#### Module: Event Broadcasts (Complete)
+#### Module: Event Broadcasts (Complete 100%)
 - [x] Resolve the Class "App\\Http\\Controllers\\Admin\\CreateEventBroadcastDTO" not found error on create.vue.
 - [x] Remove other export features and only keep "print current."
 - [ ] Create a seeder and test all features.
 
 ### Phase 4: Insurance and User Management Modules
 
-#### Module: Insurance Companies (Complete)
+#### Module: Insurance Companies (Complete 100%)
 - [x] Remove PDF generation.
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current" using the recommended UI.
@@ -230,27 +230,27 @@ This document outlines the current development tasks and known issues for the Ho
 - [ ] Fix the UI for show.vue.
 - [ ] Fix the search functionality and its UI.
 
-#### Module: Corporate Clients (Complete)
+#### Module: Corporate Clients (Complete 100%)
 - [ ] Fix the search functionality and its UI.
 - [x] Remove the "Organization Name (Amharic)" column.
 - [ ] Fix the UI for show.vue.
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current."
 
-#### Module: Insurance Policies (Complete)
+#### Module: Insurance Policies (Complete 100%)
 - [x] Populate dropdown data on create.vue and edit.vue and check if submission works.
 - [x] Remove CSV and PDF.
 - [ ] Resolve the Call to undefined method error for print all.
 - [ ] Fix the UI for "print current."
-- [x] Remove the "Service Type (Amharic)" column.
+- [x] Remove the "Service Type (Amh∆aric)" column.
 - [ ] Fix the UI for show.vue and edit.vue.
 
-#### Module: Employee Insurance Records (Complete)
+#### Module: Employee Insurance Records (Complete 100%)
 - [x] Use "Fayda ID" instead of "Federal ID" for consistency.
-- [ ] Fix the UI for show.vue and edit.vue.
+- [x] Fix the UI for show.vue and edit.vue.
 - [x] Populate dropdown data on create.vue and edit.vue.
-- [ ] Resolve the Call to undefined method error for print all.
-- [ ] Fix the UI for "print current."
+- [x] Resolve the Call to undefined method error for print all. (Removed route and button)
+- [x] Fix the UI for "print current." (Standardized dark button on Index + added on Show)
 
 #### Module: Insurance Claims (Complete)
 - [x] Remove CSV and PDF.

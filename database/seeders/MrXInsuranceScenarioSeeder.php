@@ -30,7 +30,7 @@ class MrXInsuranceScenarioSeeder extends Seeder
 
         $aslmNgo = CorporateClient::firstOrCreate(
             ['organization_name' => 'ASLM NGO'],
-            ['organization_name_amharic' => 'ኤ.ኤስ.ኤል.ኤም. የሲቪል ማህበራት ድርጅት', 'contact_person' => 'Tigist Worku', 'contact_email' => 'info@aslmngo.org', 'contact_phone' => '+251944556677', 'tin_number' => '0012345678', 'trade_license_number' => 'TL/001/2015', 'address' => 'Addis Ababa']
+            ['contact_person' => 'Tigist Worku', 'contact_email' => 'info@aslmngo.org', 'contact_phone' => '+251944556677', 'tin_number' => '0012345678', 'trade_license_number' => 'TL/001/2015', 'address' => 'Addis Ababa']
         );
 
         $physiotherapyService = Service::firstOrCreate(

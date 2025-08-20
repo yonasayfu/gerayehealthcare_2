@@ -440,7 +440,96 @@ CREATE TABLE inventory_alerts (
     FOREIGN KEY (item_id) REFERENCES inventory_items(id)
 );
 ```
+-- Main entity for all external organizations
+CREATE TABLE partners (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    -- (From new proposal) 'type' is a clear name for categorization
+    type VARCHAR(100) NOT NULL, -- 'Corporate', 'NGO', 'School', 'Bank', 'Government Agency'
+    contact_person VARCHAR(255) NULL,
+    email VARCHAR(255) UNIQUE NULL,
+    phone VARCHAR(255) NULL,
+    address TEXT NULL,
+    -- (From new proposal) 'engagement_status' is a great, descriptive name for the partner's lifecycle
+    engagement_status VARCHAR(50) DEFAULT 'Prospect', -- 'Prospect', 'Active', 'Inactive'
+    -- (From my proposal) The staff member managing the relationship
+    account_manager_id BIGINT NULL,
+    notes TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (account_manager_id) REFERENCES staff(id) ON DELETE SET NULL
+);
 
+-- This table is CRITICAL for flexibility, separating the "who" from the "what"
+CREATE TABLE partner_agreements (
+    id BIGSERIAL PRIMARY KEY,
+    partner_id BIGINT NOT NULL,
+    agreement_title VARCHAR(255) NOT NULL,
+    agreement_type VARCHAR(100) NOT NULL, -- 'Referral Commission', 'Priority Service', 'Co-Marketing'
+    status VARCHAR(50) DEFAULT 'Draft', -- 'Draft', 'Active', 'Expired', 'Terminated'
+    start_date DATE NOT NULL,
+    end_date DATE NULL,
+    -- (From new proposal) 'priority_level' belongs here, as it's a term of an agreement
+    priority_service_level VARCHAR(50) NULL, -- 'Standard', 'Preferred', 'Premium'
+    -- (From my proposal) Detailed commission terms belong in the agreement
+    commission_type VARCHAR(50) NULL, -- 'Percentage', 'FixedAmountPerPatient'
+    commission_rate NUMERIC(8, 2) NULL,
+    terms_document_path VARCHAR(255) NULL,
+    signed_by_staff_id BIGINT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
+    FOREIGN KEY (signed_by_staff_id) REFERENCES staff(id) ON DELETE SET NULL
+);
+
+-- Tracks the referral event itself, linking all relevant entities
+CREATE TABLE referrals (
+    id BIGSERIAL PRIMARY KEY,
+    partner_id BIGINT NOT NULL,
+    agreement_id BIGINT NULL, -- The specific contract governing this referral
+    referred_patient_id BIGINT UNIQUE NOT NULL,
+    referral_date DATE NOT NULL,
+    -- (From new proposal) 'status' for tracking the referral lifecycle is essential
+    status VARCHAR(50) DEFAULT 'Pending', -- 'Pending', 'Converted', 'Rejected'
+    notes TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
+    FOREIGN KEY (agreement_id) REFERENCES partner_agreements(id) ON DELETE SET NULL,
+    FOREIGN KEY (referred_patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);
+
+-- The financial transaction log for commissions. This provides a clear audit trail.
+CREATE TABLE partner_commissions (
+    id BIGSERIAL PRIMARY KEY,
+    agreement_id BIGINT NOT NULL,
+    referral_id BIGINT NOT NULL,
+    invoice_id BIGINT NOT NULL, -- The specific invoice that triggered this commission
+    commission_amount NUMERIC(10, 2) NOT NULL, -- The calculated amount
+    calculation_date DATE NOT NULL,
+    payout_date DATE NULL,
+    status VARCHAR(50) DEFAULT 'Due', -- 'Due', 'Paid', 'Voided'
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (agreement_id) REFERENCES partner_agreements(id) ON DELETE CASCADE,
+    FOREIGN KEY (referral_id) REFERENCES referrals(id) ON DELETE CASCADE,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
+-- The CRM component for tracking interactions
+CREATE TABLE partner_engagements (
+    id BIGSERIAL PRIMARY KEY,
+    partner_id BIGINT NOT NULL,
+    staff_id BIGINT NOT NULL,
+    engagement_type VARCHAR(100) NOT NULL, -- 'Meeting', 'Call', 'Email', 'Event'
+    summary TEXT NOT NULL,
+    engagement_date TIMESTAMP NOT NULL,
+    follow_up_date DATE NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
+    FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
+);
 ### 4. Marketing Management
 
 ```sql
@@ -939,3 +1028,4 @@ CREATE TABLE payout_visit_service (
     FOREIGN KEY (staff_payout_id) REFERENCES staff_payouts(id) ON DELETE CASCADE,
     FOREIGN KEY (visit_service_id) REFERENCES visit_services(id) ON DELETE CASCADE
 );
+

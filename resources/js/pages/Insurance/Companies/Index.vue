@@ -7,7 +7,7 @@ import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
-import type { InsuranceCompanyPagination } from '@/types';
+// types imported as needed
 
 const props = defineProps<{
   insuranceCompanies: { // Define a more robust type for insuranceCompanies
@@ -28,8 +28,7 @@ const props = defineProps<{
   };
 }>()
 
-// Provide a default value for insuranceCompanies to prevent errors if it's not passed
-props.insuranceCompanies = props.insuranceCompanies || { data: [], links: [], current_page: 1, from: 0, last_page: 1, per_page: 10, to: 0, total: 0 };
+// Note: Do not mutate props. Assume backend provides the prop; handle empties defensively in template.
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -41,6 +40,17 @@ const search = ref(props.filters.search || '')
 const sortField = ref(props.filters.sort || '')
 const sortDirection = ref(props.filters.direction || 'asc')
 const perPage = ref(props.filters.per_page || 5)
+
+const canPrintCurrent = computed(() => {
+  return (props.insuranceCompanies?.data || []).length > 0
+})
+
+function clearSearch() {
+  search.value = ''
+  // focus back to input after clearing
+  const el = document.getElementById('companySearch') as HTMLInputElement | null
+  el?.focus()
+}
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
@@ -74,8 +84,8 @@ function exportData(type: 'csv' | 'pdf') {
 }
 
 function printCurrentView() {
-  // Use centralized backend handler for current page printing
-  window.open(route('admin.insurance-companies.printCurrent'), '_blank');
+  // Use native print of the current page (header/footer are present in template)
+  window.print()
 }
 
 const printAllCompanies = () => {
@@ -105,33 +115,45 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all insurance companies here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.insurance-companies.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
+          <Link :href="route('admin.insurance-companies.create')" class="btn btn-primary">
             + Add Company
           </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="exportData('csv')" class="btn btn-success">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
+          <button @click="printCurrentView" :disabled="!canPrintCurrent" class="btn btn-dark disabled:opacity-50 disabled:cursor-not-allowed" title="Preview printable PDF of the current page">
+            <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="printAllCompanies" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
+          <button @click="printAllCompanies" class="btn btn-info">
             <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
           </button>
         </div>
       </div>
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
         <div class="relative w-full md:w-1/3">
+          <label for="companySearch" class="sr-only">Search companies</label>
           <input
+            id="companySearch"
             type="text"
             v-model="search"
-            placeholder="Search companies..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+            @keyup.enter.prevent
+            placeholder="Search companies by name, contact, email, phone, or address"
+            aria-label="Search companies"
+            role="searchbox"
+            class="shadow-sm bg-gray-50 pl-9 pr-8 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
           />
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Search class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <button
+            v-if="search"
+            @click="clearSearch"
+            type="button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            aria-label="Clear search"
+            title="Clear search"
+          >
+            ×
+          </button>
         </div>
 
         <div>

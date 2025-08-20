@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
+import { Printer, Edit3 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 
 const props = defineProps<{
@@ -25,11 +25,7 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event recommendation?')) {
-    router.delete(route('admin.event-recommendations.destroy', id))
-  }
-}
+// Delete removed per UI policy; keeping page lean
 </script>
 
 <template>
@@ -38,7 +34,7 @@ function destroy(id: number) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white border border-4 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
+        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
                 Event Recommendation Details: {{ eventRecommendation.patient_name }}
             </h3>
@@ -50,6 +46,7 @@ function destroy(id: number) {
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
+                <!-- Print Header (Logo + Titles) -->
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                     <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -66,11 +63,11 @@ function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.source }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.source_channel }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Recommended By:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.recommended_by ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.recommended_by_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Patient Name:</p>
@@ -78,7 +75,7 @@ function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Patient Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.patient_phone ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.phone_number ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
@@ -99,19 +96,19 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
+              <Link :href="route('admin.event-recommendations.index')" class="btn btn-outline">
+                Back to List
+              </Link>
               <Link
                 :href="route('admin.event-recommendations.edit', eventRecommendation.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                class="btn btn-primary inline-flex items-center gap-1"
               >
-                Edit Recommendation
+                <Edit3 class="w-4 h-4" /> Edit Recommendation
               </Link>
-              <button @click="destroy(eventRecommendation.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Recommendation
+              <button @click="printPage" class="btn btn-dark inline-flex items-center gap-1">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
             </div>
         </div>

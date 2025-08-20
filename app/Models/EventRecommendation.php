@@ -11,10 +11,11 @@ class EventRecommendation extends Model
 
     protected $fillable = [
         'event_id',
-        'source',
-        'recommended_by',
+        'source_channel',
+        'recommended_by_name',
+        'recommended_by_phone',
         'patient_name',
-        'patient_phone',
+        'phone_number',
         'notes',
         'status',
     ];

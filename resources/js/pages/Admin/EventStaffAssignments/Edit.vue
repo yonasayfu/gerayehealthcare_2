@@ -1,25 +1,45 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const props = defineProps({
-    assignment: Object,
+    eventStaffAssignment: Object,
+    events: Array,
+    staff: Array,
+    existingAssignments: { type: Array, default: () => [] },
 });
 
 const form = useForm({
-    event_id: props.assignment.event_id,
-    staff_id: props.assignment.staff_id,
-    role: props.assignment.role,
+    event_id: props.eventStaffAssignment?.event_id,
+    staff_id: props.eventStaffAssignment?.staff_id,
+    role: props.eventStaffAssignment?.role,
+    notes: props.eventStaffAssignment?.notes ?? '',
+});
+
+const roles = [
+    'Coordinator',
+    'Nurse',
+    'Caregiver',
+    'Volunteer',
+    'Security',
+    'Other',
+];
+
+const isDuplicate = computed(() => {
+    if (!form.event_id || !form.staff_id) return false;
+    // Exclude current record by id
+    return props.existingAssignments?.some(a => a.event_id === form.event_id && a.staff_id === form.staff_id && a.id !== props.eventStaffAssignment?.id);
 });
 
 const submit = () => {
-    form.put(route('admin.event-staff-assignments.update', props.assignment.id));
+    form.put(route('admin.event-staff-assignments.update', props.eventStaffAssignment.id));
 };
 
 const breadcrumbs = [
     { title: 'Dashboard', href: route('dashboard') },
     { title: 'Event Staff Assignments', href: route('admin.event-staff-assignments.index') },
-    { title: 'Edit', href: route('admin.event-staff-assignments.edit', props.assignment.id) },
+    { title: 'Edit', href: route('admin.event-staff-assignments.edit', props.eventStaffAssignment.id) },
 ];
 </script>
 
@@ -36,18 +56,23 @@ const breadcrumbs = [
             </div>
 
             <div class="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
+                <div v-if="isDuplicate" class="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+                    Warning: This staff member is already assigned to the selected event. If you proceed, the server will block duplicates.
+                </div>
                 <form @submit.prevent="submit">
                     <div class="border-b border-gray-900/10 pb-12">
                         <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event ID</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="number"
-                                        v-model="form.event_id"
+                                    <select
+                                        v-model.number="form.event_id"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option disabled value="">Select an event</option>
+                                        <option v-for="e in props.events" :key="e.id" :value="e.id">{{ e.title }}</option>
+                                    </select>
                                     <div v-if="form.errors.event_id" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.event_id }}
                                     </div>
@@ -55,14 +80,16 @@ const breadcrumbs = [
                             </div>
 
                             <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Staff ID</label>
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Staff</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="number"
-                                        v-model="form.staff_id"
+                                    <select
+                                        v-model.number="form.staff_id"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option disabled value="">Select a staff</option>
+                                        <option v-for="s in props.staff" :key="s.id" :value="s.id">{{ s.first_name }} {{ s.last_name }}</option>
+                                    </select>
                                     <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.staff_id }}
                                     </div>
@@ -72,14 +99,31 @@ const breadcrumbs = [
                             <div class="sm:col-span-3">
                                 <label class="block text-sm font-medium text-gray-900 dark:text-white">Role</label>
                                 <div class="mt-2">
-                                    <input
-                                        type="text"
+                                    <select
                                         v-model="form.role"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                                         required
-                                    />
+                                    >
+                                        <option disabled value="">Select a role</option>
+                                        <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
+                                    </select>
                                     <div v-if="form.errors.role" class="text-red-500 text-sm mt-1">
                                         {{ form.errors.role }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-6">
+                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Notes</label>
+                                <div class="mt-2">
+                                    <textarea
+                                        v-model="form.notes"
+                                        rows="3"
+                                        placeholder="Optional instructions or details for this assignment"
+                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+                                    />
+                                    <div v-if="form.errors.notes" class="text-red-500 text-sm mt-1">
+                                        {{ form.errors.notes }}
                                     </div>
                                 </div>
                             </div>

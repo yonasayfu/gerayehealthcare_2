@@ -3,6 +3,46 @@ export interface BreadcrumbItemType {
   href: string;
 }
 
+// Employee Insurance Records
+export interface EmployeeInsuranceRecord {
+  id: number;
+  patient_id: number;
+  policy_id: number;
+  kebele_id: string | null;
+  woreda: string | null;
+  region: string | null;
+  federal_id: string | null; // Stored field name remains federal_id
+  ministry_department: string | null;
+  employee_id_number: string | null;
+  verified: boolean;
+  verified_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  patient?: { id: number; full_name: string };
+  insurance_policy?: { id: number; service_type: string; coverage_percentage: number | null };
+  policy?: { id: number; service_type: string; coverage_percentage: number | null };
+}
+
+export interface EmployeeInsuranceRecordPagination {
+  current_page: number;
+  data: EmployeeInsuranceRecord[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: Array<{
+    url: string | null;
+    label: string;
+    active: boolean;
+  }>;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}
+
 export interface InventoryItem {
   id: number;
   name: string;
@@ -59,4 +99,40 @@ export interface Staff {
   photo_url: string;
   created_at: string;
   updated_at: string;
+}
+
+// Insurance Policies
+export interface InsurancePolicy {
+  id: number;
+  insurance_company_id: number;
+  corporate_client_id: number;
+  service_type: string;
+  coverage_percentage: number | null;
+  coverage_type: string | null;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  insurance_company?: { id: number; name: string };
+  corporate_client?: { id: number; organization_name: string };
+}
+
+export interface InsurancePolicyPagination {
+  current_page: number;
+  data: InsurancePolicy[];
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: Array<{
+    url: string | null;
+    label: string;
+    active: boolean;
+  }>;
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
 }

@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             PagumeCampaignSeeder::class,
             LandingPageSeeder::class,
             IncomingInvoicesDemoSeeder::class,
+            EventBroadcastSeeder::class,
         ]);
 
         // Create sample data using factories

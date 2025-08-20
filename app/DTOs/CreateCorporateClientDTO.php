@@ -6,7 +6,6 @@ class CreateCorporateClientDTO
 {
     public function __construct(
         public string $organization_name,
-        public ?string $organization_name_amharic,
         public ?string $contact_person,
         public ?string $contact_email,
         public ?string $contact_phone,

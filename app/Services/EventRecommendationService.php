@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Models\EventRecommendation;
-use App\Models\Patient;
-use App\Models\EventParticipant;
 use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Config\ExportConfig;
+use App\Events\PatientCreatedFromRecommendation;
+use App\Events\EventParticipantRegistered;
 
 class EventRecommendationService extends BaseService
 {
@@ -26,7 +27,21 @@ class EventRecommendationService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with($with);
+        // Select with aliases so frontend keys remain simple and consistent
+        $query = $this->model->with($with)
+            ->select([
+                'id',
+                'event_id',
+                'patient_name',
+                'source_channel as source',
+                'recommended_by_name as recommended_by',
+                'recommended_by_phone',
+                'phone_number as patient_phone',
+                'notes',
+                'status',
+                'created_at',
+                'updated_at'
+            ]);
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
@@ -34,12 +49,35 @@ class EventRecommendationService extends BaseService
 
         if ($request->has('sort')) {
             $direction = $request->input('direction', 'asc');
-            $query->orderBy($request->input('sort'), $direction);
+            $sort = $request->input('sort');
+            $columnMap = [
+                'source' => 'source_channel',
+                'recommended_by' => 'recommended_by_name',
+                'patient_phone' => 'phone_number',
+            ];
+            $orderByColumn = $columnMap[$sort] ?? $sort;
+            $query->orderBy($orderByColumn, $direction);
         } else {
             $query->orderBy('created_at', 'desc');
         }
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 5));
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, EventRecommendation::class, ExportConfig::getEventRecommendationConfig());
+    }
+
+    public function printSingle(Request $request, EventRecommendation $eventRecommendation)
+    {
+        return $this->handlePrintSingle($request, $eventRecommendation, ExportConfig::getEventRecommendationConfig());
+    }
+
+    public function export(Request $request)
+    {
+        // Export (CSV) is intentionally not supported for Event Recommendations per UI spec
+        abort(404, 'Export not supported for Event Recommendations');
     }
 
     public function update(int $id, array|object $data): EventRecommendation
@@ -47,7 +85,7 @@ class EventRecommendationService extends BaseService
         $eventRecommendation = parent::update($id, $data);
 
         if ($data['status'] === 'approved') {
-            event(new PatientCreatedFromRecommendation($data['patient_name'], $data['patient_phone'], $eventRecommendation));
+            event(new PatientCreatedFromRecommendation($data['patient_name'], $data['phone_number'] ?? null, $eventRecommendation));
             event(new EventParticipantRegistered($data['event_id'], $eventRecommendation->linked_patient_id));
         }
 

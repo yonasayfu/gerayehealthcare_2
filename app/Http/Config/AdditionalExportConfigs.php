@@ -742,7 +742,6 @@ class AdditionalExportConfigs
                     'filename_prefix' => 'corporate_client',
                     'fields' => [
                         ['label' => 'Organization Name', 'key' => 'organization_name'],
-                        ['label' => 'Organization Name (Amharic)', 'key' => 'organization_name_amharic'],
                         ['label' => 'Contact Person', 'key' => 'contact_person'],
                         ['label' => 'Contact Email', 'key' => 'contact_email'],
                         ['label' => 'Contact Phone', 'key' => 'contact_phone'],
@@ -940,42 +939,66 @@ class AdditionalExportConfigs
             self::$employeeInsuranceRecordConfig = [
                 'searchable_fields' => ['kebele_id', 'employee_id_number'],
                 'sortable_fields' => ['kebele_id', 'woreda', 'region', 'federal_id', 'ministry_department', 'employee_id_number', 'verified', 'created_at'],
-                'csv_headers' => ['Patient Name', 'Policy', 'Kebele ID', 'Woreda', 'Region', 'Federal ID', 'Ministry Department', 'Employee ID Number', 'Verified', 'Verified At'],
-                'csv_fields' => ['patient_name', 'policy_service_type', 'kebele_id', 'woreda', 'region', 'federal_id', 'ministry_department', 'employee_id_number', 'verified_text', 'verified_at'],
-                'pdf_columns' => [
-                    ['key' => 'patient_name', 'label' => 'Patient', 'printWidth' => '15%'],
-                    ['key' => 'kebele_id', 'label' => 'Kebele ID', 'printWidth' => '12%'],
-                    ['key' => 'woreda', 'label' => 'Woreda', 'printWidth' => '12%'],
-                    ['key' => 'region', 'label' => 'Region', 'printWidth' => '12%'],
-                    ['key' => 'federal_id', 'label' => 'Federal ID', 'printWidth' => '12%'],
-                    ['key' => 'ministry_department', 'label' => 'Ministry/Dept', 'printWidth' => '15%'],
-                    ['key' => 'employee_id_number', 'label' => 'Employee ID', 'printWidth' => '12%'],
-                    ['key' => 'verified_text', 'label' => 'Verified', 'printWidth' => '10%'],
-                ],
-                'field_transformations' => [
-                    'patient_name' => fn($value) => $value ?: '-',
-                    'policy_service_type' => fn($value) => $value ?: '-',
-                    'kebele_id' => fn($value) => $value ?: '-',
-                    'woreda' => fn($value) => $value ?: '-',
-                    'region' => fn($value) => $value ?: '-',
-                    'federal_id' => fn($value) => $value ?: '-',
-                    'ministry_department' => fn($value) => $value ? (strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value) : '-',
-                    'employee_id_number' => fn($value) => $value ?: '-',
-                    'verified_text' => fn($value) => $value ? 'Yes' : 'No',
-                    'verified_at' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-',
-                ],
-                'print_layout' => [
-                    'title' => 'Employee Insurance Records List',
-                    'document_title' => 'Employee Insurance Records List',
-                    'paper_size' => 'a4',
-                    'orientation' => 'landscape',
+
+                // CSV export configuration (standardized)
+                'csv' => [
+                    'headers' => ['Patient Name', 'Policy', 'Verified'],
+                    'fields' => [
+                        'patient_name',
+                        'policy_service_type',
+                        'verified_text',
+                    ],
+                    // Exclude records without a verified_at timestamp
+                    'query_callback' => function ($query) {
+                        $query->whereNotNull('verified_at');
+                    },
                     'filename_prefix' => 'employee_insurance_records',
                 ],
-                'single_print_layout' => [
-                    'title' => 'Employee Insurance Record Details',
+
+                // Print current page configuration
+                'current_page' => [
+                    'view' => 'pdf-layout',
+                    'document_title' => 'Employee Insurance Records (Current View)',
+                    'filename_prefix' => 'employee_insurance_records_current',
+                    'orientation' => 'landscape',
+                    'include_index' => true,
+                    'columns' => [
+                        ['key' => 'index', 'label' => '#'],
+                        ['key' => 'patient_name', 'label' => 'Patient', 'printWidth' => '15%'],
+                        ['key' => 'kebele_id', 'label' => 'Kebele ID', 'printWidth' => '12%'],
+                        ['key' => 'woreda', 'label' => 'Woreda', 'printWidth' => '12%'],
+                        ['key' => 'region', 'label' => 'Region', 'printWidth' => '12%'],
+                        ['key' => 'federal_id', 'label' => 'Federal ID', 'printWidth' => '12%'],
+                        ['key' => 'ministry_department', 'label' => 'Ministry/Dept', 'printWidth' => '15%'],
+                        ['key' => 'employee_id_number', 'label' => 'Employee ID', 'printWidth' => '12%'],
+                        ['key' => 'verified_text', 'label' => 'Verified', 'printWidth' => '10%'],
+                    ],
+                ],
+
+                // Print all records configuration
+                'all_records' => [
+                    'view' => 'pdf-layout',
+                    'document_title' => 'All Employee Insurance Records',
+                    'filename_prefix' => 'employee_insurance_records_all',
+                    'orientation' => 'landscape',
+                    'include_index' => true,
+                    'columns' => [
+                        ['key' => 'index', 'label' => '#'],
+                        ['key' => 'patient_name', 'label' => 'Patient', 'printWidth' => '15%'],
+                        ['key' => 'kebele_id', 'label' => 'Kebele ID', 'printWidth' => '12%'],
+                        ['key' => 'woreda', 'label' => 'Woreda', 'printWidth' => '12%'],
+                        ['key' => 'region', 'label' => 'Region', 'printWidth' => '12%'],
+                        ['key' => 'federal_id', 'label' => 'Federal ID', 'printWidth' => '12%'],
+                        ['key' => 'ministry_department', 'label' => 'Ministry/Dept', 'printWidth' => '15%'],
+                        ['key' => 'employee_id_number', 'label' => 'Employee ID', 'printWidth' => '12%'],
+                        ['key' => 'verified_text', 'label' => 'Verified', 'printWidth' => '10%'],
+                    ],
+                ],
+
+                // Single record print configuration
+                'single_record' => [
+                    'view' => 'pdf-layout',
                     'document_title' => 'Employee Insurance Record Details',
-                    'paper_size' => 'a4',
-                    'orientation' => 'portrait',
                     'filename_prefix' => 'employee_insurance_record',
                     'fields' => [
                         ['label' => 'Patient Name', 'key' => 'patient_name'],
@@ -992,6 +1015,21 @@ class AdditionalExportConfigs
                         ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
+
+                // Field transformations used across exports/prints
+                'field_transformations' => [
+                    'patient_name' => fn($value) => $value ?: '-',
+                    'policy_service_type' => fn($value) => $value ?: '-',
+                    'kebele_id' => fn($value) => $value ?: '-',
+                    'woreda' => fn($value) => $value ?: '-',
+                    'region' => fn($value) => $value ?: '-',
+                    'federal_id' => fn($value) => $value ?: '-',
+                    'ministry_department' => fn($value) => $value ? (strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value) : '-',
+                    'employee_id_number' => fn($value) => $value ?: '-',
+                    'verified_text' => fn($value) => $value ? 'Yes' : 'No',
+                    'verified_at' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-',
+                ],
+
                 'relationships' => ['patient', 'policy'],
                 'default_sort' => ['kebele_id', 'asc'],
                 'per_page' => 5,

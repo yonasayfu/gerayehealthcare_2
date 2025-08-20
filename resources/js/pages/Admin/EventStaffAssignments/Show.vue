@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
+import { Printer, Edit3 } from 'lucide-vue-next'
 import { format } from 'date-fns'
+import { computed } from 'vue'
 
 const props = defineProps<{
-  assignment: any;
+  eventStaffAssignment: any
 }>()
+
+const assignment = computed(() => props.eventStaffAssignment)
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Event Staff Assignments', href: route('admin.event-staff-assignments.index') },
-  { title: props.assignment.role, href: route('admin.event-staff-assignments.show', props.assignment.id) },
+  { title: assignment.value?.role, href: route('admin.event-staff-assignments.show', assignment.value?.id) },
 ]
 
 function printPage() {
@@ -23,12 +26,6 @@ function printPage() {
       alert('Failed to open print dialog. Please check your browser settings or try again.');
     }
   }, 100);
-}
-
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event staff assignment?')) {
-    router.delete(route('admin.event-staff-assignments.destroy', id))
-  }
 }
 </script>
 
@@ -61,12 +58,12 @@ function destroy(id: number) {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Assignment Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Event ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.event_id }}</p>
+                      <p class="text-sm text-muted-foreground">Event:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.event?.title ?? '-' }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Staff ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.staff_id }}</p>
+                      <p class="text-sm text-muted-foreground">Staff:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ assignment.staff?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Role:</p>
@@ -83,7 +80,7 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
                 <Printer class="h-4 w-4" /> Print Document
@@ -94,9 +91,12 @@ function destroy(id: number) {
               >
                 Edit Assignment
               </Link>
-              <button @click="destroy(assignment.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Assignment
-              </button>
+              <Link
+                :href="route('admin.event-staff-assignments.index')"
+                class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-md transition"
+              >
+                ← Back to List
+              </Link>
             </div>
         </div>
 

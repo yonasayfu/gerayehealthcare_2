@@ -2,11 +2,11 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-import { useExport } from '@/Composables/useExport';
+// Removed useExport; using window.print for current page printing
 
 const props = defineProps({
     recommendations: Object,
@@ -50,7 +50,16 @@ function destroy(id) {
     }
 }
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.event-recommendations', filters: props.filters });
+function printPage() {
+  setTimeout(() => {
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Print failed:', error);
+      alert('Failed to open print dialog. Please try again.');
+    }
+  }, 100);
+}
 
 function toggleSort(field) {
     if (sortField.value === field) {
@@ -67,6 +76,13 @@ function toggleSort(field) {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6 print:p-0 print:space-y-0">
+            <!-- Print Header (Logo + Titles) -->
+            <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+                <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+                <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+                <p class="text-gray-600 dark:text-gray-400 print-document-title">Event Recommendations - Current Page</p>
+                <hr class="my-3 border-gray-300 print:my-2">
+            </div>
             <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
                 <div>
                     <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Event Recommendations</h1>
@@ -76,17 +92,8 @@ function toggleSort(field) {
                     <Link :href="route('admin.event-recommendations.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
                         + Add Recommendation
                     </Link>
-                    <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Download class="h-4 w-4" /> CSV
-                    </button>
-                    <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <FileText class="h-4 w-4" /> PDF
-                    </button>
-                    <button @click="printAllRecords" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print All
-                    </button>
-                    <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print Current View
+                    <button @click="printPage" class="btn btn-dark inline-flex items-center gap-1">
+                        <Printer class="h-4 w-4" /> Print Current
                     </button>
                 </div>
             </div>
@@ -99,7 +106,7 @@ function toggleSort(field) {
                         placeholder="Search recommendations..."
                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
                     />
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                    <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 </div>
 
                 <div>
@@ -124,6 +131,12 @@ function toggleSort(field) {
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
                                 Source <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
+                            <th class="px-6 py-3">
+                                Recommended By
+                            </th>
+                            <th class="px-6 py-3">
+                                Patient Phone
+                            </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
@@ -134,6 +147,8 @@ function toggleSort(field) {
                         <tr v-for="recommendation in recommendations.data" :key="recommendation.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
                             <td class="px-6 py-4">{{ recommendation.patient_name }}</td>
                             <td class="px-6 py-4">{{ recommendation.source }}</td>
+                            <td class="px-6 py-4">{{ recommendation.recommended_by ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ recommendation.patient_phone ?? '-' }}</td>
                             <td class="px-6 py-4">{{ recommendation.status }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
@@ -173,3 +188,20 @@ function toggleSort(field) {
         </div>
     </AppLayout>
 </template>
+
+<style>
+@media print {
+  @page { size: A4; margin: 0.5cm; }
+  body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  /* Hide app chrome during print */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  /* Show print-only blocks */
+  .hidden.print\:block { display: block !important; }
+  /* Header visuals */
+  .print-header-content { padding-top: 0.5cm !important; padding-bottom: 0.5cm !important; margin-bottom: 0.6cm !important; }
+  .print-logo { max-width: 150px; max-height: 50px; display: block; margin: 0 auto 0.5rem auto; }
+  .print-clinic-name { font-size: 1.6rem !important; margin-bottom: 0.2rem !important; }
+  .print-document-title { font-size: 0.95rem !important; color: #555 !important; }
+}
+</style>
