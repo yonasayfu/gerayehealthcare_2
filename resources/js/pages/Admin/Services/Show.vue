@@ -21,7 +21,7 @@ function formatCurrency(amount: number | string) {
 <template>
   <Head :title="`Service: ${service?.name ?? ''}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
       <div class="flex items-start justify-between p-5 border-b rounded-t">
         <h3 class="text-xl font-semibold">Service Details</h3>
         <Link :href="route('admin.services.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
@@ -61,7 +61,7 @@ function formatCurrency(amount: number | string) {
         </div>
       </div>
 
-      <div class="p-6 border-t border-gray-200 rounded-b">
+      <div class="p-6 border-t border-border rounded-b">
         <div class="flex flex-wrap gap-2">
           <Link :href="route('admin.services.index')" class="btn btn-outline">Back to List</Link>
           <Link :href="route('admin.services.edit', service?.id)" class="btn btn-primary inline-flex items-center gap-1">

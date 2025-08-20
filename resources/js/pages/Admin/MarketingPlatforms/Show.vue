@@ -46,7 +46,7 @@ function destroy(id: number) {
   <Head :title="marketingPlatform.name" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
@@ -58,40 +58,40 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 space-y-6 main-content-display print:hidden print-only">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8">
 
                 <div class="border-b pb-4 mb-4">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Platform Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4">Platform Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
                     <div>
                       <p class="text-sm text-muted-foreground">Platform Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingPlatform.name }}</p>
+                      <p class="font-medium text-foreground">{{ marketingPlatform.name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">API Endpoint:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingPlatform.api_endpoint ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingPlatform.api_endpoint ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm font-medium text-gray-500 dark:text-gray-400">API Credentials:</p>
-                      <p class="font-medium text-gray-900 dark:text-white break-all">{{ marketingPlatform.api_credentials ?? '-' }}</p>
+                      <p class="font-medium text-foreground break-all">{{ marketingPlatform.api_credentials ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Is Active:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingPlatform.is_active ? 'Yes' : 'No' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingPlatform.is_active ? 'Yes' : 'No' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Timestamps</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4">Timestamps</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6">
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingPlatform.created_at ? format(new Date(marketingPlatform.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingPlatform.created_at ? format(new Date(marketingPlatform.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingPlatform.updated_at ? format(new Date(marketingPlatform.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingPlatform.updated_at ? format(new Date(marketingPlatform.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -149,23 +149,20 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.marketing-platforms.index')" class="btn btn-outline">
                 Back to List
               </Link>
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link
                 :href="route('admin.marketing-platforms.edit', marketingPlatform.id)"
                 class="btn btn-primary"
               >
-                Edit Platform
+                Edit
               </Link>
-              <button @click="printPage" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
-              <button @click="destroy(marketingPlatform.id)" class="btn btn-danger">
-                <Trash2 class="w-4 h-4" /> Delete Platform
-              </button>
             </div>
         </div>
 

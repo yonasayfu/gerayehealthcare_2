@@ -26,7 +26,7 @@ function printPage() {
   <Head :title="`Supplier: ${props.supplier.name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:m-0 print:w-[95%] print:mx-auto print:border-0 print:shadow-none">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10 print:m-0 print:w-[95%] print:mx-auto print:border-0 print:shadow-none">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
@@ -38,7 +38,7 @@ function printPage() {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                   <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                   <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -47,27 +47,27 @@ function printPage() {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Supplier Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Supplier Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ supplier.name }}</p>
+                      <p class="font-medium text-foreground">{{ supplier.name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Contact Person:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ supplier.contact_person }}</p>
+                      <p class="font-medium text-foreground">{{ supplier.contact_person }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ supplier.email }}</p>
+                      <p class="font-medium text-foreground">{{ supplier.email }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ supplier.phone }}</p>
+                      <p class="font-medium text-foreground">{{ supplier.phone }}</p>
                     </div>
                     <div class="md:col-span-2 lg:col-span-2">
                       <p class="text-sm text-muted-foreground">Address:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ supplier.address }}</p>
+                      <p class="font-medium text-foreground">{{ supplier.address }}</p>
                     </div>
                   </div>
                 </div>
@@ -80,14 +80,15 @@ function printPage() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
+              <Link :href="route('admin.suppliers.index')" class="btn btn-outline">Back to List</Link>
               <button @click="printPage()" class="btn btn-dark inline-flex items-center gap-1 text-sm">
-                <Printer class="h-4 w-4" /> Print
+                <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link :href="route('admin.suppliers.edit', props.supplier.id)"
                 class="btn btn-primary text-sm">
-                Edit Supplier
+                Edit
               </Link>
             </div>
         </div>

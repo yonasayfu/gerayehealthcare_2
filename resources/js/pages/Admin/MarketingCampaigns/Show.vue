@@ -58,7 +58,7 @@ function printPage() {
   <Head :title="`Campaign: ${marketingCampaign.campaign_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
@@ -70,7 +70,7 @@ function printPage() {
         </div>
 
         <div class="p-6 space-y-6 print:p-0">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -80,103 +80,103 @@ function printPage() {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Campaign Identification</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Campaign Identification</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Campaign Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.campaign_name }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.campaign_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Campaign Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.campaign_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.campaign_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Platform:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.platform?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.platform?.name ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Campaign Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Campaign Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Campaign Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.campaign_type ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.campaign_type ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.status ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Start Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.start_date ? format(new Date(marketingCampaign.start_date), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.start_date ? format(new Date(marketingCampaign.start_date), 'PPP') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">End Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.end_date ? format(new Date(marketingCampaign.end_date), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.end_date ? format(new Date(marketingCampaign.end_date), 'PPP') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Budget Allocated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.budget_allocated }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.budget_allocated }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Budget Spent:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.budget_spent }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.budget_spent }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">UTM Parameters</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">UTM Parameters</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.utm_campaign ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.utm_campaign ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.utm_source ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.utm_source ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Medium:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.utm_medium ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.utm_medium ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Staff & Dates</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Staff & Dates</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Assigned Staff:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.assigned_staff?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.assigned_staff?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created By:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingCampaign.created_by_staff?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingCampaign.created_by_staff?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingCampaign.created_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingCampaign.created_at), 'PPP p') }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingCampaign.updated_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingCampaign.updated_at), 'PPP p') }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Additional Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Additional Details</h2>
                   <div class="grid grid-cols-1 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Target Audience:</p>
-                      <pre class="font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">{{ formatJson(marketingCampaign.target_audience) }}</pre>
+                      <pre class="font-medium text-foreground bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">{{ formatJson(marketingCampaign.target_audience) }}</pre>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Goals:</p>
-                      <pre class="font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">{{ formatJson(marketingCampaign.goals) }}</pre>
+                      <pre class="font-medium text-foreground bg-gray-100 dark:bg-gray-800 p-4 rounded-md overflow-auto">{{ formatJson(marketingCampaign.goals) }}</pre>
                     </div>
                   </div>
                 </div>
@@ -189,20 +189,20 @@ function printPage() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.marketing-campaigns.index')" class="btn btn-outline">
                 Back to List
               </Link>
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link
                 :href="route('admin.marketing-campaigns.edit', marketingCampaign.id)"
                 class="btn btn-primary"
               >
-                Edit Campaign
+                Edit
               </Link>
-              <button @click="printPage" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
             </div>
         </div>
 

@@ -43,7 +43,7 @@ function printCurrent() {
         <p class="text-sm text-muted-foreground">Details of the marketing budget.</p>
       </div>
 
-      <div class="bg-white dark:bg-gray-900 p-6 rounded-lg shadow print:shadow-none print:rounded-none print:bg-transparent">
+      <div class="print-document bg-card text-card-foreground p-6 rounded-lg shadow print:shadow-none print:rounded-none print:bg-transparent">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
           <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
           <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -102,12 +102,12 @@ function printCurrent() {
           <Link :href="route('admin.marketing-budgets.index')" class="btn btn-outline">
             Back to List
           </Link>
-          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn btn-primary">
-            Edit Budget
-          </Link>
           <button @click="printCurrent" class="btn btn-dark" title="Print this budget">
             Print Current
           </button>
+          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn btn-primary">
+            Edit
+          </Link>
         </div>
 
         <div class="hidden print:block text-center mt-4 text-sm text-gray-500">

@@ -60,7 +60,7 @@ function destroy(id: number) {
   <Head :title="`Lead: ${marketingLead.first_name} ${marketingLead.last_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
@@ -72,7 +72,7 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -82,103 +82,103 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Lead Identification</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Lead Identification</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Full Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.first_name }} {{ marketingLead.last_name }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.first_name }} {{ marketingLead.last_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Lead Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.lead_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.lead_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.status ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Contact Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.email ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.email ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.phone ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.phone ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Country:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.country ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.country ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Campaign & Conversion Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Campaign & Conversion Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Source Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.source_campaign?.campaign_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.source_campaign?.campaign_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Landing Page:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.landing_page?.page_title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.landing_page?.page_title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Lead Score:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.lead_score ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.lead_score ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Assigned Staff:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.assigned_staff?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.assigned_staff?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Converted Patient:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.converted_patient?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.converted_patient?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Conversion Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.conversion_date ? format(new Date(marketingLead.conversion_date), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.conversion_date ? format(new Date(marketingLead.conversion_date), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">UTM Parameters</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">UTM Parameters</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_source ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_source ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_campaign ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_campaign ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Medium:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_medium ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_medium ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes & Timestamps</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Notes & Timestamps</h2>
                   <div class="grid grid-cols-1 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div class="col-span-full">
                       <p class="text-sm text-muted-foreground">Notes:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.notes ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.notes ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingLead.created_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingLead.created_at), 'PPP p') }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingLead.updated_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingLead.updated_at), 'PPP p') }}</p>
                     </div>
                   </div>
                 </div>
@@ -191,20 +191,20 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.marketing-leads.index')" class="btn btn-outline">
                 Back to List
               </Link>
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link
                 :href="route('admin.marketing-leads.edit', marketingLead.id)"
                 class="btn btn-primary"
               >
-                Edit Lead
+                Edit
               </Link>
-              <button @click="printPage" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
             </div>
         </div>
 

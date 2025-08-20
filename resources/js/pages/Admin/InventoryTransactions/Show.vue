@@ -38,7 +38,7 @@ function printPage() {
   <Head :title="`Inventory Transaction: ${inventoryTransaction.id}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
@@ -50,7 +50,7 @@ function printPage() {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -60,49 +60,49 @@ function printPage() {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Transaction Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Transaction Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Item:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.item?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.item?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Transaction Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.transaction_type ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.transaction_type ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Quantity:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.quantity ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.quantity ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">From Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.from_location ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.from_location ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">To Location:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.to_location ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.to_location ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Performed By:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.performed_by?.first_name }} {{ inventoryTransaction.performed_by?.last_name }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.performed_by?.first_name }} {{ inventoryTransaction.performed_by?.last_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Notes:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.notes ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.notes ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Administrative Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Administrative Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.created_at ? format(new Date(inventoryTransaction.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.created_at ? format(new Date(inventoryTransaction.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryTransaction.updated_at ? format(new Date(inventoryTransaction.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryTransaction.updated_at ? format(new Date(inventoryTransaction.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -115,11 +115,9 @@ function printPage() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.inventory-transactions.index')" class="btn btn-outline">Back to List</Link>
-              <!-- Keep Edit only if route exists -->
-              <!-- <Link :href="route('admin.inventory-transactions.edit', inventoryTransaction.id)" class="btn btn-primary">Edit</Link> -->
               <button @click="printPage" class="btn btn-dark">
                 <Printer class="h-4 w-4" /> Print Current
               </button>

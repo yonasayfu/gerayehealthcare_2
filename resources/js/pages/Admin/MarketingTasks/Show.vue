@@ -53,7 +53,7 @@ function destroy(id: number) {
   <Head :title="`Marketing Task: ${marketingTask.title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
@@ -65,7 +65,7 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -75,64 +75,64 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Task Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Task Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Task Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.task_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Title:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Task Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_type ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.task_type ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.status ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.campaign?.campaign_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.campaign?.campaign_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Assigned To:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.assigned_to_staff?.user?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.assigned_to_staff?.user?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Related Content:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.related_content?.title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.related_content?.title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Doctor:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.doctor?.user?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.doctor?.user?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Scheduled At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.scheduled_at ? format(new Date(marketingTask.scheduled_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.scheduled_at ? format(new Date(marketingTask.scheduled_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Completed At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.completed_at ? format(new Date(marketingTask.completed_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.completed_at ? format(new Date(marketingTask.completed_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Description</h2>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.description ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Description</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.description ?? '-' }}</p>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Expected Results</h2>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.expected_results ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Expected Results</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.expected_results ?? '-' }}</p>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.notes ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Notes</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.notes ?? '-' }}</p>
                 </div>
 
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
@@ -143,16 +143,19 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-gray-900 hover:bg-gray-950 text-white rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print
+              <Link :href="route('admin.marketing-tasks.index')" class="btn btn-outline">
+                Back to List
+              </Link>
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link
                 :href="route('admin.marketing-tasks.edit', marketingTask.id)"
-                class="inline-flex items-center gap-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md text-sm px-4 py-2 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                class="btn btn-primary"
               >
-                <Edit3 class="h-4 w-4" /> Edit
+                Edit
               </Link>
             </div>
         </div>

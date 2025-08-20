@@ -24,15 +24,14 @@ const breadcrumbs = [
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
       <div class="flex justify-start mb-4">
-        <Link :href="route('admin.users.index')" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">
-          <ArrowLeft class="h-4 w-4" />
-          Back to User Management
+        <Link :href="route('admin.users.index')" class="btn btn-outline">
+          Back to List
         </Link>
       </div>
-      <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-6">
+      <div class="print-document bg-card text-card-foreground shadow rounded-lg p-6">
         <div class="flex items-center space-x-4">
           <div>
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">{{ user.name }}</h2>
+            <h2 class="text-2xl font-bold text-foreground">{{ user.name }}</h2>
             <div class="flex items-center gap-2 text-sm text-muted-foreground mt-1">
               <Mail class="h-4 w-4" />
               <a :href="`mailto:${user.email}`" class="hover:underline">{{ user.email }}</a>
@@ -41,7 +40,7 @@ const breadcrumbs = [
         </div>
 
         <div class="mt-8 border-t pt-6">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Assigned Roles</h3>
+          <h3 class="text-lg font-semibold text-foreground">Assigned Roles</h3>
           <div class="mt-4 flex flex-wrap gap-2">
             <span v-for="role in user.roles" :key="role.id" class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-semibold rounded-full dark:bg-indigo-900 dark:text-indigo-200">
               <Shield class="h-4 w-4" />
