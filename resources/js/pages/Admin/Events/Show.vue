@@ -36,7 +36,7 @@ function destroy(id: number) {
   <Head :title="`Event: ${event.title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
@@ -48,7 +48,7 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -58,41 +58,41 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Event Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Event Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Title:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.title }}</p>
+                      <p class="font-medium text-foreground">{{ event.title }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Event Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.event_date ? format(new Date(event.event_date), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ event.event_date ? format(new Date(event.event_date), 'PPP') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Free Service:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.is_free_service ? 'Yes' : 'No' }}</p>
+                      <p class="font-medium text-foreground">{{ event.is_free_service ? 'Yes' : 'No' }}</p>
                     </div>
                     <div class="lg:col-span-3">
                       <p class="text-sm text-muted-foreground">Description:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.description ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ event.description ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Administrative Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Administrative Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Broadcast Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.broadcast_status }}</p>
+                      <p class="font-medium text-foreground">{{ event.broadcast_status }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.created_at ? format(new Date(event.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ event.created_at ? format(new Date(event.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ event.updated_at ? format(new Date(event.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ event.updated_at ? format(new Date(event.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -105,20 +105,20 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-md">
+              <button @click="printPage" class="btn btn-dark">
                 <Printer class="h-4 w-4" /> Print Current
               </button>
               <Link
                 :href="route('admin.events.index')"
-                class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md"
+                class="btn btn-outline"
               >
                 Back to list
               </Link>
               <Link
                 :href="route('admin.events.edit', event.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                class="btn btn-primary"
               >
                 Edit Event
               </Link>

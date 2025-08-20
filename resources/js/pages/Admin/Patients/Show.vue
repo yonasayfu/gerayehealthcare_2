@@ -32,7 +32,7 @@ function destroy(id: number) {
   <Head :title="`Patient: ${patient.full_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
             <h3 class="text-xl font-semibold">
@@ -44,7 +44,7 @@ function destroy(id: number) {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -54,88 +54,88 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Patient Identification</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Patient Identification</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Full Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.full_name }}</p>
+                      <p class="font-medium text-foreground">{{ patient.full_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Patient Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.patient_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.patient_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Fayda ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.fayda_id ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.fayda_id ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Demographics</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Demographics</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Gender:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.gender ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.gender ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Date of Birth:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.date_of_birth ? format(new Date(patient.date_of_birth), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.date_of_birth ? format(new Date(patient.date_of_birth), 'PPP') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Age:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.age !== null ? patient.age : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.age !== null ? patient.age : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Contact Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Phone Number:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.phone_number ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.phone_number ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.email ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.email ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Emergency Contact:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.emergency_contact ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.emergency_contact ?? '-' }}</p>
                     </div>
                     <div class="lg:col-span-3">
                       <p class="text-sm text-muted-foreground">Address:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.address ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.address ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Administrative Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Administrative Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.source ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.source ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Geolocation:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.geolocation ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.geolocation ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Registered By:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">
+                      <p class="font-medium text-foreground">
                         <span v-if="patient.registered_by_staff">Staff: {{ patient.registered_by_staff.full_name }}</span>
                         <span v-else>-</span>
                       </p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Registered Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.created_at ? format(new Date(patient.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.created_at ? format(new Date(patient.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ patient.updated_at ? format(new Date(patient.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ patient.updated_at ? format(new Date(patient.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -145,7 +145,7 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.patients.index')" class="btn btn-outline">
                 Back to List
