@@ -31,7 +31,7 @@ function printPage() {
   <Head :title="`Staff: ${props.staff.first_name} ${props.staff.last_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
 
         <div class="flex items-center justify-between p-5 border-b rounded-t">
             <h3 class="text-xl font-semibold">
@@ -51,7 +51,7 @@ function printPage() {
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -61,55 +61,55 @@ function printPage() {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Staff Identification</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Staff Identification</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">First Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.first_name }}</p>
+                      <p class="font-medium text-foreground">{{ staff.first_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.last_name }}</p>
+                      <p class="font-medium text-foreground">{{ staff.last_name }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Contact Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.phone ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.phone ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.email ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.email ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Employment Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Employment Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Position:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.position ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.position ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Department:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.department ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.department ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.status ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Hire Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.hire_date ? format(new Date(staff.hire_date), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.hire_date ? format(new Date(staff.hire_date), 'PPP') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Hourly Rate:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">
+                      <p class="font-medium text-foreground">
                         {{ staff.hourly_rate !== null && staff.hourly_rate !== undefined && !isNaN(Number(staff.hourly_rate))
                           ? Number(staff.hourly_rate).toFixed(2)
                           : '-' }}
@@ -121,15 +121,15 @@ function printPage() {
                 
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">System Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">System Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.created_at ? format(new Date(staff.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.created_at ? format(new Date(staff.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ staff.updated_at ? format(new Date(staff.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ staff.updated_at ? format(new Date(staff.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -144,7 +144,7 @@ function printPage() {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
+        <div class="p-6 border-t border-border rounded-b">
             <div class="flex flex-wrap gap-2">
               <Link :href="route('admin.staff.index')" class="btn btn-outline print:hidden">
                 Back to List
@@ -154,7 +154,7 @@ function printPage() {
               </button>
               <Link :href="route('admin.staff.edit', props.staff.id)"
                 class="btn btn-primary print:hidden">
-                <Edit3 class="w-4 h-4" /> Edit Staff
+                Edit
               </Link>
             </div>
         </div>

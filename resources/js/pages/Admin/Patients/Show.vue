@@ -150,15 +150,15 @@ function destroy(id: number) {
               <Link :href="route('admin.patients.index')" class="btn btn-outline">
                 Back to List
               </Link>
+              <button @click="printSinglePatient" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link
                 :href="route('admin.patients.edit', patient.id)"
                 class="btn btn-primary"
               >
-                Edit Patient
+                Edit
               </Link>
-              <button @click="printSinglePatient" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
             </div>
         </div>
 

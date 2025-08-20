@@ -107,20 +107,20 @@ function destroy(id: number) {
 
         <div class="p-6 border-t border-border rounded-b print:hidden">
             <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
               <Link
                 :href="route('admin.events.index')"
                 class="btn btn-outline"
               >
-                Back to list
+                Back to List
               </Link>
+              <button @click="printPage" class="btn btn-dark">
+                <Printer class="h-4 w-4" /> Print Current
+              </button>
               <Link
                 :href="route('admin.events.edit', event.id)"
                 class="btn btn-primary"
               >
-                Edit Event
+                Edit
               </Link>
             </div>
         </div>
