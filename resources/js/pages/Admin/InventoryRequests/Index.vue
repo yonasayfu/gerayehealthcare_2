@@ -135,7 +135,7 @@ const { printCurrentView, isProcessing } = useExport({ routeName: 'admin.invento
               <td class="p-2">{{ request.priority }}</td>
               <td class="p-2 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
-                  <Link :href="route('admin.inventory-requests.show', request.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600" title="View Details"><Eye class="w-4 h-4" /></Link>
+                  <Link :href="route('admin.inventory-requests.show', request.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500" title="View Details"><Eye class="w-4 h-4" /></Link>
                   <Link :href="route('admin.inventory-requests.edit', request.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
                   <button @click="destroy(request.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900 text-red-600" title="Delete"><Trash2 class="w-4 h-4" /></button>
                 </div>
