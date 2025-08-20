@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
-import Pagination from '@/Components/Pagination.vue'
+import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
 const props = defineProps({

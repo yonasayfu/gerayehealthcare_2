@@ -283,8 +283,8 @@ onMounted(() => {
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
               :style="{ color: 'inherit' }"
             >
-              <option :value="null">Select Employer</option>
-              <option v-for="client in corporateClients" :key="client.id" :value="client.id">{{ (client as any).name ?? (client as any).organization_name }}</option>
+              <option :value="null" class="text-gray-900 dark:text-white">Select Employer</option>
+              <option v-for="client in corporateClients" :key="client.id" :value="client.id" class="text-gray-900 dark:text-white">{{ (client as any).name ?? (client as any).organization_name }}</option>
             </select>
             <div v-if="form.errors.corporate_client_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.corporate_client_id }}
@@ -300,8 +300,8 @@ onMounted(() => {
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
               :style="{ color: 'inherit' }"
             >
-              <option :value="null">Select Policy</option>
-              <option v-for="policy in insurancePolicies" :key="policy.id" :value="policy.id">{{ policy.service_type }}<span v-if="policy.coverage_percentage"> ({{ policy.coverage_percentage }}%)</span> - {{ policy.corporate_client?.name ?? policy.corporate_client?.organization_name }}</option>
+              <option :value="null" class="text-gray-900 dark:text-white">Select Policy</option>
+              <option v-for="policy in insurancePolicies" :key="policy.id" :value="policy.id" class="text-gray-900 dark:text-white">{{ policy.service_type }}<span v-if="policy.coverage_percentage"> ({{ policy.coverage_percentage }}%)</span> - {{ policy.corporate_client?.name ?? policy.corporate_client?.organization_name }}</option>
             </select>
             <div v-if="form.errors.policy_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.policy_id }}

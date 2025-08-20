@@ -42,46 +42,6 @@ class MarketingCampaignController extends BaseController
         return app(MarketingCampaignService::class)->printSingle($request, $marketing_campaign);
     }
 
-    // CSV export for marketing campaigns
-    public function export(Request $request)
-    {
-        $campaigns = MarketingCampaign::query()
-            ->with(['platform', 'assignedStaff', 'createdByStaff'])
-            ->orderBy('campaign_name')
-            ->get();
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="marketing_campaigns.csv"',
-        ];
-
-        $columns = [
-            'id', 'campaign_name', 'platform', 'start_date', 'end_date', 'status', 'urgentness', 'mandatoryness', 'responsible_staff', 'created_at',
-        ];
-
-        $callback = function () use ($campaigns, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            foreach ($campaigns as $campaign) {
-                fputcsv($file, [
-                    $campaign->id,
-                    $campaign->campaign_name,
-                    $campaign->platform ? $campaign->platform->name : '',
-                    $campaign->start_date,
-                    $campaign->end_date,
-                    $campaign->status,
-                    $campaign->urgentness ?? '',
-                    $campaign->mandatoryness ?? '',
-                    $campaign->assignedStaff ? $campaign->assignedStaff->first_name . ' ' . $campaign->assignedStaff->last_name : '',
-                    $campaign->created_at,
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
     /**
      * Override edit to provide select option lists to the Edit view.
      */
@@ -139,7 +99,7 @@ class MarketingCampaignController extends BaseController
 
         $this->service->update($id, $payload);
 
-        return redirect()->route('admin.' . 'marketing-campaigns' . '.index')
-            ->with('success', ucfirst('marketingCampaigns') . ' updated successfully.');
+        return redirect()->route('admin.'.'marketing-campaigns'.'.index')
+            ->with('success', ucfirst('marketingCampaigns').' updated successfully.');
     }
 }

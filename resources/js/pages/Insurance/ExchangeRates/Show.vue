@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { defineProps } from 'vue';
 import { Link } from '@inertiajs/vue3';
 

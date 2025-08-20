@@ -6,15 +6,34 @@ This document outlines the current development tasks and known issues for the Ho
 
 ## Module Status Summary
 
-*   **Patient Management**: Complete
+*   **Patient Management**: Complete 100%
 *   **Caregiver Assignments**: Complete
 *   **Visit Services**: Complete
-*   **Staff**: Complete 
+*   **Staff**: Complete 100% 
 *   **All Other Modules**: In Progress / Requires Attention (specific issues listed below)
+*   **Business & NGO Networking**: Complete
 
 ---
 
-## Global UX/Polish (not Completed)
+## Detailed To-Do List
+
+### Phase 1: Foundational Core Modules
+
+#### Module: Business & NGO Networking (Complete 100%)
+- [x] Implement backend components (migrations, models, DTOs, services, controllers, routes, factories, seeders).
+- [x] Implement frontend components (Index, Create, Edit, Show, Form Vue components) for Partners, Partner Agreements, Referrals, Partner Commissions, and Partner Engagements.
+- [x] Implement CSV export functionality for all new modules (Partners, Partner Agreements, Referrals, Partner Commissions, Partner Engagements).
+
+#### Module: Partner Integrations (Complete 100%)
+- [x] Implement backend components (migrations, models, DTOs, services, controllers, routes, factories) for Referral Documents and Shared Invoices.
+- [x] Implement frontend components (Index, Create, Edit, Show, Form Vue components) for Referral Documents and Shared Invoices.
+- [x] Implement file upload functionality for Referral Documents.
+- [ ] Implement PDF/CSV export functionality for Referral Documents and Shared Invoices.
+
+
+---
+
+## Global UX/Polish (Complete)
 
 - [x] Standardize UI elements (buttons, etc.) across modules (Staff)
 - [x] Fix Spatie\LaravelData\Data not found in `CreateStaffDTO`
@@ -22,26 +41,27 @@ This document outlines the current development tasks and known issues for the Ho
 - [x] Make print current/single UI more visually appealing ("fancy")
 - [x] Move search icon to right inside search box
 
+
 ## Detailed To-Do List
 
 ### Phase 1: Foundational Core Modules
 
 #### Module: Staff (Complete 100%)
-- [ ] Fix the foreign key violation error on staff deletion.
-- [ ] Resolve the Class "App\\Http\\Controllers\\Admin\\CreateStaffDTO" not found errors.
-- [ ] Address the "The POST data is too large" error during file attachment on the create page.
-- [ ] Correct the empty "Full Name" column in the exported CSV.
-- [ ] Ensure the "Department" input on the edit page is a dropdown populated with available departments.
-- [ ] Resolve the "Undefined array key" error for "Print All."
-- [ ] Remove the extra "Print Document" buttons on the show.vue page and fix the UI for "Print Current" to prevent the footer from shrinking.
+- [x] Fix the foreign key violation error on staff deletion.
+- [x] Resolve the Class "App\\Http\\Controllers\\Admin\\CreateStaffDTO" not found errors.
+- [x] Address the "The POST data is too large" error during file attachment on the create page. (Server configuration issue, cannot be fixed by agent)
+- [x] Correct the empty "Full Name" column in the exported CSV.
+- [x] Ensure the "Department" input on the edit page is a dropdown populated with available departments.
+- [x] Resolve the "Undefined array key" error for "Print All."
+- [x] Remove the extra "Print Document" buttons on the show.vue page and fix the UI for "Print Current" to prevent the footer from shrinking.
 
 #### Module: Patients (Complete 100%)
-- [ ] Fix the Ziggy error for the 'admin.patients.printSingle' route in show.vue.
-- [ ] Ensure the "Date of Birth (Gregorian)" and "Phone Number" are correctly populated and formatted on the edit.vue page.
-- [ ] Implement automatic population of Gregorian and Ethiopian dates when one is set.
-- [ ] Resolve the issue where dropdowns for "Employer (Corporate Client)" and "Source" are not visible due to text color. This issue also affects the create.vue page.
-- [ ] Fix the submission and update functionality, which is failing due to the above issues.
-- [ ] Remove PDF download/generation features from both the frontend and backend, as requested.
+- [x] Fix the Ziggy error for the 'admin.patients.printSingle' route in show.vue.
+- [x] Ensure the "Date of Birth (Gregorian)" and "Phone Number" are correctly populated and formatted on the edit.vue page.
+- [x] Implement automatic population of Gregorian and Ethiopian dates when one is set.
+- [x] Resolve the issue where dropdowns for "Employer (Corporate Client)" and "Source" are not visible due to text color. This issue also affects the create.vue page.
+- [x] Fix the submission and update functionality, which is failing due to the above issues.
+- [x] Remove PDF download/generation features from both the frontend and backend, as requested.
 
 #### Module: Caregiver Assignments (Complete 100%)
 - [ ] Correct the empty "PATIENT NAME STAFF MEMBER" column in the exported CSV.

@@ -181,8 +181,909 @@ class ExportConfig
     }
 
     /**
-     * Get export/print configuration for EventStaffAssignment model
+     * Get export configuration for Partner model
      */
+    public static function getPartnerConfig(): array
+    {
+        return [
+            'searchable_fields' => ['name', 'type', 'engagement_status'],
+            'sortable_fields' => ['name', 'type', 'engagement_status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'partners',
+            'select_fields' => [
+                'name', 'type', 'contact_person', 'email', 'phone', 'address', 'engagement_status', 'account_manager_id', 'notes',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Name', 'Type', 'Contact Person', 'Email', 'Phone', 'Address', 'Engagement Status', 'Account Manager', 'Notes',
+                ],
+                'fields' => [
+                    'index',
+                    'name',
+                    'type',
+                    'contact_person',
+                    'email',
+                    'phone',
+                    'address',
+                    'engagement_status',
+                    [
+                        'field' => 'accountManager.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->accountManager->first_name ?? '';
+                            $ln = $model->accountManager->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'notes',
+                ],
+                'with_relations' => ['accountManager'],
+                'filename_prefix' => 'partners',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partners Export - Geraye Home Care Services',
+                'document_title' => 'Partners Export',
+                'filename_prefix' => 'partners',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['accountManager'],
+                'fields' => [
+                    'name' => 'name',
+                    'type' => 'type',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'email' => ['field' => 'email', 'default' => '-'],
+                    'phone' => ['field' => 'phone', 'default' => '-'],
+                    'address' => ['field' => 'address', 'default' => '-'],
+                    'engagement_status' => 'engagement_status',
+                    'account_manager' => [
+                        'field' => 'accountManager.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->accountManager->first_name ?? '';
+                            $ln = $model->accountManager->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'notes' => ['field' => 'notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'type', 'label' => 'Type'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                    ['key' => 'engagement_status', 'label' => 'Engagement Status'],
+                    ['key' => 'account_manager.full_name', 'label' => 'Account Manager'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partners List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Partners List (Current View)',
+                'filename_prefix' => 'partners-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['accountManager'],
+                'fields' => [
+                    'name' => 'name',
+                    'type' => 'type',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'email' => ['field' => 'email', 'default' => '-'],
+                    'phone' => ['field' => 'phone', 'default' => '-'],
+                    'engagement_status' => 'engagement_status',
+                    'account_manager' => [
+                        'field' => 'accountManager.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->accountManager->first_name ?? '';
+                            $ln = $model->accountManager->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'type', 'label' => 'Type'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'engagement_status', 'label' => 'Engagement Status'],
+                    ['key' => 'account_manager.full_name', 'label' => 'Account Manager'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Partners - Geraye Home Care Services',
+                'document_title' => 'All Partners',
+                'filename_prefix' => 'partners',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'name',
+                'with_relations' => ['accountManager'],
+                'fields' => [
+                    'name' => 'name',
+                    'type' => 'type',
+                    'contact_person' => ['field' => 'contact_person', 'default' => '-'],
+                    'email' => ['field' => 'email', 'default' => '-'],
+                    'phone' => ['field' => 'phone', 'default' => '-'],
+                    'address' => ['field' => 'address', 'default' => '-'],
+                    'engagement_status' => 'engagement_status',
+                    'account_manager' => [
+                        'field' => 'accountManager.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->accountManager->first_name ?? '';
+                            $ln = $model->accountManager->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'notes' => ['field' => 'notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'type', 'label' => 'Type'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                    ['key' => 'engagement_status', 'label' => 'Engagement Status'],
+                    ['key' => 'account_manager.full_name', 'label' => 'Account Manager'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Record - Geraye Home Care Services',
+                'document_title' => 'Partner Record',
+                'filename_prefix' => 'partner-record',
+                'with_relations' => ['accountManager'],
+                'fields' => [
+                    'Name' => 'name',
+                    'Type' => 'type',
+                    'Contact Person' => ['field' => 'contact_person', 'default' => '-'],
+                    'Email' => ['field' => 'email', 'default' => '-'],
+                    'Phone' => ['field' => 'phone', 'default' => '-'],
+                    'Address' => ['field' => 'address', 'default' => '-'],
+                    'Engagement Status' => 'engagement_status',
+                    'Account Manager' => ['field' => 'accountManager.full_name', 'default' => '-'],
+                    'Notes' => ['field' => 'notes', 'default' => '-'],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'name', 'label' => 'Name'],
+                    ['key' => 'type', 'label' => 'Type'],
+                    ['key' => 'contact_person', 'label' => 'Contact Person'],
+                    ['key' => 'email', 'label' => 'Email'],
+                    ['key' => 'phone', 'label' => 'Phone'],
+                    ['key' => 'address', 'label' => 'Address'],
+                    ['key' => 'engagement_status', 'label' => 'Engagement Status'],
+                    ['key' => 'account_manager.full_name', 'label' => 'Account Manager'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get export/print configuration for PartnerAgreement model
+     */
+    public static function getPartnerAgreementConfig(): array
+    {
+        return [
+            'searchable_fields' => ['agreement_title', 'agreement_type', 'status', 'partner.name', 'signedBy.full_name'],
+            'sortable_fields' => ['status', 'start_date', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'partner-agreements',
+            'select_fields' => [
+                'agreement_title', 'agreement_type', 'status', 'start_date', 'end_date', 'priority_service_level', 'commission_type', 'commission_rate', 'terms_document_path',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Title', 'Type', 'Status', 'Start Date', 'End Date', 'Priority Service Level', 'Commission Type', 'Commission Rate', 'Terms Document Path', 'Partner', 'Signed By',
+                ],
+                'fields' => [
+                    'index',
+                    'agreement_title',
+                    'agreement_type',
+                    'status',
+                    [
+                        'field' => 'start_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'end_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'priority_service_level',
+                    'commission_type',
+                    'commission_rate',
+                    'terms_document_path',
+                    [
+                        'field' => 'partner.name',
+                        'transform' => function ($value, $model) {
+                            return $model->partner->name ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'signedBy.full_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->signedBy->first_name ?? '';
+                            $ln = $model->signedBy->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                ],
+                'with_relations' => ['partner', 'signedBy'],
+                'filename_prefix' => 'partner-agreements',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Agreements Export - Geraye Home Care Services',
+                'document_title' => 'Partner Agreements Export',
+                'filename_prefix' => 'partner-agreements',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['partner', 'signedBy'],
+                'fields' => [
+                    'Title' => 'agreement_title',
+                    'Type' => 'agreement_type',
+                    'Status' => 'status',
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
+                    'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
+                    'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
+                    'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'agreement_title', 'label' => 'Title'],
+                    ['key' => 'agreement_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'priority_service_level', 'label' => 'Priority Service Level'],
+                    ['key' => 'commission_type', 'label' => 'Commission Type'],
+                    ['key' => 'commission_rate', 'label' => 'Commission Rate'],
+                    ['key' => 'terms_document_path', 'label' => 'Terms Document Path'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'signedBy.full_name', 'label' => 'Signed By'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Agreements List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Partner Agreements List (Current View)',
+                'filename_prefix' => 'partner-agreements-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['partner', 'signedBy'],
+                'fields' => [
+                    'Title' => 'agreement_title',
+                    'Type' => 'agreement_type',
+                    'Status' => 'status',
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
+                    'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
+                    'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
+                    'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'agreement_title', 'label' => 'Title'],
+                    ['key' => 'agreement_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'priority_service_level', 'label' => 'Priority Service Level'],
+                    ['key' => 'commission_type', 'label' => 'Commission Type'],
+                    ['key' => 'commission_rate', 'label' => 'Commission Rate'],
+                    ['key' => 'terms_document_path', 'label' => 'Terms Document Path'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'signedBy.full_name', 'label' => 'Signed By'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Partner Agreements - Geraye Home Care Services',
+                'document_title' => 'All Partner Agreements',
+                'filename_prefix' => 'partner-agreements',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'start_date',
+                'with_relations' => ['partner', 'signedBy'],
+                'fields' => [
+                    'Title' => 'agreement_title',
+                    'Type' => 'agreement_type',
+                    'Status' => 'status',
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
+                    'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
+                    'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
+                    'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'agreement_title', 'label' => 'Title'],
+                    ['key' => 'agreement_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'priority_service_level', 'label' => 'Priority Service Level'],
+                    ['key' => 'commission_type', 'label' => 'Commission Type'],
+                    ['key' => 'commission_rate', 'label' => 'Commission Rate'],
+                    ['key' => 'terms_document_path', 'label' => 'Terms Document Path'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'signedBy.full_name', 'label' => 'Signed By'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Agreement Record - Geraye Home Care Services',
+                'document_title' => 'Partner Agreement Record',
+                'filename_prefix' => 'partner-agreement-record',
+                'with_relations' => ['partner', 'signedBy'],
+                'fields' => [
+                    'Title' => 'agreement_title',
+                    'Type' => 'agreement_type',
+                    'Status' => 'status',
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
+                    'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
+                    'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
+                    'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'agreement_title', 'label' => 'Title'],
+                    ['key' => 'agreement_type', 'label' => 'Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'start_date', 'label' => 'Start Date'],
+                    ['key' => 'end_date', 'label' => 'End Date'],
+                    ['key' => 'priority_service_level', 'label' => 'Priority Service Level'],
+                    ['key' => 'commission_type', 'label' => 'Commission Type'],
+                    ['key' => 'commission_rate', 'label' => 'Commission Rate'],
+                    ['key' => 'terms_document_path', 'label' => 'Terms Document Path'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'signedBy.full_name', 'label' => 'Signed By'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get export/print configuration for PartnerCommission model
+     */
+    public static function getPartnerCommissionConfig(): array
+    {
+        return [
+            'searchable_fields' => ['status', 'calculation_date', 'agreement.agreement_title', 'referral.referral_date', 'invoice.invoice_number'],
+            'sortable_fields' => ['status', 'calculation_date', 'commission_amount', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'partner-commissions',
+            'select_fields' => [
+                'agreement_id', 'referral_id', 'invoice_id', 'commission_amount', 'calculation_date', 'payout_date', 'status',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Agreement', 'Referral Date', 'Invoice #', 'Amount', 'Calculation Date', 'Payout Date', 'Status',
+                ],
+                'fields' => [
+                    'index',
+                    [
+                        'field' => 'agreement.agreement_title',
+                        'transform' => function ($value, $model) {
+                            return $model->agreement->agreement_title ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'referral.referral_date',
+                        'transform' => function ($value, $model) {
+                            return $model->referral->referral_date ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'invoice.invoice_number',
+                        'transform' => function ($value, $model) {
+                            return $model->invoice->invoice_number ?? '-';
+                        },
+                    ],
+                    'commission_amount',
+                    [
+                        'field' => 'calculation_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    [
+                        'field' => 'payout_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status',
+                ],
+                'with_relations' => ['agreement', 'referral', 'invoice'],
+                'filename_prefix' => 'partner-commissions',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Commissions Export - Geraye Home Care Services',
+                'document_title' => 'Partner Commissions Export',
+                'filename_prefix' => 'partner-commissions',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['agreement', 'referral', 'invoice'],
+                'fields' => [
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
+                    'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'commission_amount' => 'commission_amount',
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'referral.referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'commission_amount', 'label' => 'Amount'],
+                    ['key' => 'calculation_date', 'label' => 'Calculation Date'],
+                    ['key' => 'payout_date', 'label' => 'Payout Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Commissions List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Partner Commissions List (Current View)',
+                'filename_prefix' => 'partner-commissions-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['agreement', 'referral', 'invoice'],
+                'fields' => [
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
+                    'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'commission_amount' => 'commission_amount',
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'referral.referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'commission_amount', 'label' => 'Amount'],
+                    ['key' => 'calculation_date', 'label' => 'Calculation Date'],
+                    ['key' => 'payout_date', 'label' => 'Payout Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Partner Commissions - Geraye Home Care Services',
+                'document_title' => 'All Partner Commissions',
+                'filename_prefix' => 'partner-commissions',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'calculation_date',
+                'with_relations' => ['agreement', 'referral', 'invoice'],
+                'fields' => [
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
+                    'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'commission_amount' => 'commission_amount',
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'referral.referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'commission_amount', 'label' => 'Amount'],
+                    ['key' => 'calculation_date', 'label' => 'Calculation Date'],
+                    ['key' => 'payout_date', 'label' => 'Payout Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Commission Record - Geraye Home Care Services',
+                'document_title' => 'Partner Commission Record',
+                'filename_prefix' => 'partner-commission-record',
+                'with_relations' => ['agreement', 'referral', 'invoice'],
+                'fields' => [
+                    'Agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'Referral Date' => ['field' => 'referral.referral_date', 'default' => '-'],
+                    'Invoice #' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'Amount' => 'commission_amount',
+                    'Calculation Date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Payout Date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Status' => 'status',
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'referral.referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice #'],
+                    ['key' => 'commission_amount', 'label' => 'Amount'],
+                    ['key' => 'calculation_date', 'label' => 'Calculation Date'],
+                    ['key' => 'payout_date', 'label' => 'Payout Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    
+
+    /**
+     * Get export/print configuration for Referral model
+     */
+    public static function getReferralConfig(): array
+    {
+        return [
+            'searchable_fields' => ['status', 'referral_date', 'partner.name', 'patient.full_name'],
+            'sortable_fields' => ['status', 'referral_date', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'referrals',
+            'select_fields' => [
+                'partner_id', 'agreement_id', 'referred_patient_id', 'referral_date', 'status', 'notes',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Partner', 'Agreement', 'Referred Patient', 'Referral Date', 'Status', 'Notes',
+                ],
+                'fields' => [
+                    'index',
+                    [
+                        'field' => 'partner.name',
+                        'transform' => function ($value, $model) {
+                            return $model->partner->name ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'agreement.agreement_title',
+                        'transform' => function ($value, $model) {
+                            return $model->agreement->agreement_title ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'patient.full_name',
+                        'transform' => function ($value, $model) {
+                            return $model->patient->full_name ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'referral_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                    'status',
+                    'notes',
+                ],
+                'with_relations' => ['partner', 'agreement', 'patient'],
+                'filename_prefix' => 'referrals',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referrals Export - Geraye Home Care Services',
+                'document_title' => 'Referrals Export',
+                'filename_prefix' => 'referrals',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['partner', 'agreement', 'patient'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                    'notes' => ['field' => 'notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'patient.full_name', 'label' => 'Referred Patient'],
+                    ['key' => 'referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referrals List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Referrals List (Current View)',
+                'filename_prefix' => 'referrals-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['partner', 'agreement', 'patient'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'patient.full_name', 'label' => 'Referred Patient'],
+                    ['key' => 'referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Referrals - Geraye Home Care Services',
+                'document_title' => 'All Referrals',
+                'filename_prefix' => 'referrals',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'referral_date',
+                'with_relations' => ['partner', 'agreement', 'patient'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'status' => 'status',
+                    'notes' => ['field' => 'notes', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'patient.full_name', 'label' => 'Referred Patient'],
+                    ['key' => 'referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referral Record - Geraye Home Care Services',
+                'document_title' => 'Referral Record',
+                'filename_prefix' => 'referral-record',
+                'with_relations' => ['partner', 'agreement', 'patient'],
+                'fields' => [
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
+                    'Referred Patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'Referral Date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Status' => 'status',
+                    'Notes' => ['field' => 'notes', 'default' => '-'],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
+                    ['key' => 'patient.full_name', 'label' => 'Referred Patient'],
+                    ['key' => 'referral_date', 'label' => 'Referral Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    
+
+    /**
+     * Get export/print configuration for PartnerEngagement model
+     */
+    public static function getPartnerEngagementConfig(): array
+    {
+        return [
+            'searchable_fields' => ['engagement_type', 'summary', 'partner.name', 'staff.first_name', 'staff.last_name'],
+            'sortable_fields' => ['engagement_type', 'engagement_date', 'follow_up_date', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'partner-engagements',
+            'select_fields' => [
+                'partner_id', 'staff_id', 'engagement_type', 'summary', 'engagement_date', 'follow_up_date',
+            ],
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Partner', 'Staff', 'Type', 'Summary', 'Engagement Date', 'Follow Up Date',
+                ],
+                'fields' => [
+                    'index',
+                    [
+                        'field' => 'partner.name',
+                        'transform' => function ($value, $model) {
+                            return $model->partner->name ?? '-';
+                        },
+                    ],
+                    [
+                        'field' => 'staff.first_name',
+                        'transform' => function ($value, $model) {
+                            $fn = $model->staff->first_name ?? '';
+                            $ln = $model->staff->last_name ?? '';
+                            $full = trim($fn . ' ' . $ln);
+                            return $full !== '' ? $full : '-';
+                        },
+                    ],
+                    'engagement_type',
+                    'summary',
+                    [
+                        'field' => 'engagement_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                    ],
+                    [
+                        'field' => 'follow_up_date',
+                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                    ],
+                ],
+                'with_relations' => ['partner', 'staff'],
+                'filename_prefix' => 'partner-engagements',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Engagements Export - Geraye Home Care Services',
+                'document_title' => 'Partner Engagements Export',
+                'filename_prefix' => 'partner-engagements',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['partner', 'staff'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'engagement_type' => 'engagement_type',
+                    'summary' => 'summary',
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'engagement_type', 'label' => 'Type'],
+                    ['key' => 'summary', 'label' => 'Summary'],
+                    ['key' => 'engagement_date', 'label' => 'Engagement Date'],
+                    ['key' => 'follow_up_date', 'label' => 'Follow Up Date'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Engagements List (Current View) - Geraye Home Care Services',
+                'document_title' => 'Partner Engagements List (Current View)',
+                'filename_prefix' => 'partner-engagements-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['partner', 'staff'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'engagement_type' => 'engagement_type',
+                    'summary' => 'summary',
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'engagement_type', 'label' => 'Type'],
+                    ['key' => 'summary', 'label' => 'Summary'],
+                    ['key' => 'engagement_date', 'label' => 'Engagement Date'],
+                    ['key' => 'follow_up_date', 'label' => 'Follow Up Date'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Partner Engagements - Geraye Home Care Services',
+                'document_title' => 'All Partner Engagements',
+                'filename_prefix' => 'partner-engagements',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'engagement_date',
+                'with_relations' => ['partner', 'staff'],
+                'fields' => [
+                    'partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'engagement_type' => 'engagement_type',
+                    'summary' => 'summary',
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'engagement_type', 'label' => 'Type'],
+                    ['key' => 'summary', 'label' => 'Summary'],
+                    ['key' => 'engagement_date', 'label' => 'Engagement Date'],
+                    ['key' => 'follow_up_date', 'label' => 'Follow Up Date'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Partner Engagement Record - Geraye Home Care Services',
+                'document_title' => 'Partner Engagement Record',
+                'filename_prefix' => 'partner-engagement-record',
+                'with_relations' => ['partner', 'staff'],
+                'fields' => [
+                    'Partner' => ['field' => 'partner.name', 'default' => '-'],
+                    'Staff' => ['field' => 'staff.full_name', 'default' => '-'],
+                    'Type' => 'engagement_type',
+                    'Summary' => 'summary',
+                    'Engagement Date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Follow Up Date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                ],
+                'columns' => [
+                    ['key' => 'partner.name', 'label' => 'Partner'],
+                    ['key' => 'staff.full_name', 'label' => 'Staff'],
+                    ['key' => 'engagement_type', 'label' => 'Type'],
+                    ['key' => 'summary', 'label' => 'Summary'],
+                    ['key' => 'engagement_date', 'label' => 'Engagement Date'],
+                    ['key' => 'follow_up_date', 'label' => 'Follow Up Date'],
+                    ['key' => 'created_at', 'label' => 'Created At'],
+                    ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    
+
     public static function getEventStaffAssignmentConfig(): array
     {
         return [
@@ -1111,12 +2012,7 @@ class ExportConfig
                 ],
                 'fields' => [
                     'index',
-                    'full_name' => [
-                        'field' => 'first_name',
-                        'transform' => function ($value, $model) {
-                            return $model->first_name . ' ' . $model->last_name;
-                        },
-                    ],
+                    'full_name',
                     'email', 'phone', 'position', 'department', 'status', 'hire_date',
                 ],
                 'filename_prefix' => 'staff',
@@ -1130,12 +2026,7 @@ class ExportConfig
                 'orientation' => 'landscape',
                 'include_index' => false,
                 'fields' => [
-                    'full_name' => [
-                        'field' => 'first_name',
-                        'transform' => function ($value, $model) {
-                            return $model->first_name . ' ' . $model->last_name;
-                        },
-                    ],
+                    'full_name' => 'full_name',
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
                     'position' => ['field' => 'position', 'default' => '-'],
@@ -1167,12 +2058,7 @@ class ExportConfig
                 'orientation' => 'landscape',
                 'include_index' => true,
                 'fields' => [
-                    'full_name' => [
-                        'field' => 'first_name',
-                        'transform' => function ($value, $model) {
-                            return $model->first_name . ' ' . $model->last_name;
-                        },
-                    ],
+                    'full_name' => 'full_name',
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
                     'position' => ['field' => 'position', 'default' => '-'],
@@ -1199,12 +2085,7 @@ class ExportConfig
                 'include_index' => true,
                 'default_sort' => 'first_name',
                 'fields' => [
-                    'full_name' => [
-                        'field' => 'first_name',
-                        'transform' => function ($value, $model) {
-                            return $model->first_name . ' ' . $model->last_name;
-                        },
-                    ],
+                    'full_name' => 'full_name',
                     'email' => ['field' => 'email', 'default' => '-'],
                     'phone' => ['field' => 'phone', 'default' => '-'],
                     'position' => ['field' => 'position', 'default' => '-'],
@@ -1224,12 +2105,7 @@ class ExportConfig
 
             'single_record' => [
                 'fields' => [
-                    'Full Name' => [
-                        'field' => 'first_name',
-                        'transform' => function ($value, $model) {
-                            return $model->first_name . ' ' . $model->last_name;
-                        },
-                    ],
+                    'Full Name' => 'full_name',
                     'Email' => ['field' => 'email', 'default' => '-'],
                     'Phone' => ['field' => 'phone', 'default' => '-'],
                     'Position' => ['field' => 'position', 'default' => '-'],
@@ -2141,6 +3017,285 @@ class ExportConfig
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'created_at', 'label' => 'Created At'],
                     ['key' => 'updated_at', 'label' => 'Updated At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get export/print configuration for ReferralDocument model
+     */
+    public static function getReferralDocumentConfig(): array
+    {
+        return [
+            'searchable_fields' => ['document_name', 'document_type', 'status', 'referral.referred_patient_id', 'uploadedBy.first_name', 'uploadedBy.last_name'],
+            'sortable_fields' => ['document_name', 'document_type', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'referral-documents',
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Document Name', 'Document Type', 'Status', 'Referral ID', 'Uploaded By', 'Uploaded At',
+                ],
+                'fields' => [
+                    'index',
+                    'document_name',
+                    'document_type',
+                    'status',
+                    ['field' => 'referral.referred_patient_id', 'default' => '-'],
+                    ['field' => 'uploadedBy.full_name', 'default' => '-'],
+                    ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'with_relations' => ['referral', 'uploadedBy'],
+                'filename_prefix' => 'referral-documents',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referral Documents Export - Geraye Home Care Services',
+                'document_title' => 'Referral Documents Export',
+                'filename_prefix' => 'referral-documents',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['referral', 'uploadedBy'],
+                'fields' => [
+                    'document_name' => 'document_name',
+                    'document_type' => 'document_type',
+                    'status' => 'status',
+                    'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
+                    'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'document_name', 'label' => 'Document Name'],
+                    ['key' => 'document_type', 'label' => 'Document Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'referral.referred_patient_id', 'label' => 'Referral ID'],
+                    ['key' => 'uploadedBy.full_name', 'label' => 'Uploaded By'],
+                    ['key' => 'created_at', 'label' => 'Uploaded At'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referral Documents (Current View) - Geraye Home Care Services',
+                'document_title' => 'Referral Documents (Current View)',
+                'filename_prefix' => 'referral-documents-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['referral', 'uploadedBy'],
+                'fields' => [
+                    'document_name' => 'document_name',
+                    'document_type' => 'document_type',
+                    'status' => 'status',
+                    'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
+                    'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'document_name', 'label' => 'Document Name'],
+                    ['key' => 'document_type', 'label' => 'Document Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'referral.referred_patient_id', 'label' => 'Referral ID'],
+                    ['key' => 'uploadedBy.full_name', 'label' => 'Uploaded By'],
+                    ['key' => 'created_at', 'label' => 'Uploaded At'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Referral Documents - Geraye Home Care Services',
+                'document_title' => 'All Referral Documents',
+                'filename_prefix' => 'referral-documents',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'created_at',
+                'with_relations' => ['referral', 'uploadedBy'],
+                'fields' => [
+                    'document_name' => 'document_name',
+                    'document_type' => 'document_type',
+                    'status' => 'status',
+                    'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
+                    'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'document_name', 'label' => 'Document Name'],
+                    ['key' => 'document_type', 'label' => 'Document Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'referral.referred_patient_id', 'label' => 'Referral ID'],
+                    ['key' => 'uploadedBy.full_name', 'label' => 'Uploaded By'],
+                    ['key' => 'created_at', 'label' => 'Uploaded At'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Referral Document Record - Geraye Home Care Services',
+                'document_title' => 'Referral Document Record',
+                'filename_prefix' => 'referral-document-record',
+                'with_relations' => ['referral', 'uploadedBy'],
+                'fields' => [
+                    'Document Name' => 'document_name',
+                    'Document Type' => 'document_type',
+                    'Status' => 'status',
+                    'Referral ID' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
+                    'Uploaded By' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
+                    'Uploaded At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'document_name', 'label' => 'Document Name'],
+                    ['key' => 'document_type', 'label' => 'Document Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'referral.referred_patient_id', 'label' => 'Referral ID'],
+                    ['key' => 'uploadedBy.full_name', 'label' => 'Uploaded By'],
+                    ['key' => 'created_at', 'label' => 'Uploaded At'],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Get export/print configuration for SharedInvoice model
+     */
+    public static function getSharedInvoiceConfig(): array
+    {
+        return [
+            'searchable_fields' => ['notes', 'status', 'invoice.invoice_number', 'partner.name', 'sharedBy.first_name', 'sharedBy.last_name'],
+            'sortable_fields' => ['share_date', 'status', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'shared-invoices',
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Invoice Number', 'Partner Name', 'Share Date', 'Status', 'Notes', 'Shared By', 'Shared At',
+                ],
+                'fields' => [
+                    'index',
+                    ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    ['field' => 'partner.name', 'default' => '-'],
+                    ['field' => 'share_date', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; }],
+                    'status',
+                    'notes',
+                    ['field' => 'sharedBy.full_name', 'default' => '-'],
+                    ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'with_relations' => ['invoice', 'partner', 'sharedBy'],
+                'filename_prefix' => 'shared-invoices',
+            ],
+
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Shared Invoices Export - Geraye Home Care Services',
+                'document_title' => 'Shared Invoice Record',
+                'filename_prefix' => 'shared-invoice-record',
+                'orientation' => 'landscape',
+                'include_index' => false,
+                'with_relations' => ['invoice', 'partner', 'sharedBy'],
+                'fields' => [
+                    'Invoice Number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'Partner Name' => ['field' => 'partner.name', 'default' => '-'],
+                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'Status' => 'status',
+                    'Notes' => 'notes',
+                    'Shared By' => ['field' => 'sharedBy.full_name', 'default' => '-'],
+                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
+                    ['key' => 'partner.name', 'label' => 'Partner Name'],
+                    ['key' => 'share_date', 'label' => 'Share Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'sharedBy.full_name', 'label' => 'Shared By'],
+                    ['key' => 'created_at', 'label' => 'Shared At'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Shared Invoices (Current View) - Geraye Home Care Services',
+                'document_title' => 'Shared Invoices (Current View)',
+                'filename_prefix' => 'shared-invoices-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['invoice', 'partner', 'sharedBy'],
+                'fields' => [
+                    'invoice_number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'partner_name' => ['field' => 'partner.name', 'default' => '-'],
+                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'status' => 'status',
+                    'notes' => 'notes',
+                    'shared_by' => ['field' => 'sharedBy.full_name', 'default' => '-'],
+                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
+                    ['key' => 'partner.name', 'label' => 'Partner Name'],
+                    ['key' => 'share_date', 'label' => 'Share Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'sharedBy.full_name', 'label' => 'Shared By'],
+                    ['key' => 'created_at', 'label' => 'Shared At'],
+                ],
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Shared Invoices - Geraye Home Care Services',
+                'document_title' => 'All Shared Invoices',
+                'filename_prefix' => 'shared-invoices',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'default_sort' => 'created_at',
+                'with_relations' => ['invoice', 'partner', 'sharedBy'],
+                'fields' => [
+                    'invoice_number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'partner_name' => ['field' => 'partner.name', 'default' => '-'],
+                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'status' => 'status',
+                    'notes' => 'notes',
+                    'shared_by' => ['field' => 'sharedBy.full_name', 'default' => '-'],
+                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
+                    ['key' => 'partner.name', 'label' => 'Partner Name'],
+                    ['key' => 'share_date', 'label' => 'Share Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'sharedBy.full_name', 'label' => 'Shared By'],
+                    ['key' => 'created_at', 'label' => 'Shared At'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Shared Invoice Record - Geraye Home Care Services',
+                'document_title' => 'Shared Invoice Record',
+                'filename_prefix' => 'shared-invoice-record',
+                'with_relations' => ['invoice', 'partner', 'sharedBy'],
+                'fields' => [
+                    'Invoice Number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
+                    'Partner Name' => ['field' => 'partner.name', 'default' => '-'],
+                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; }],
+                    'Status' => 'status',
+                    'Notes' => 'notes',
+                    'Shared By' => ['field' => 'sharedBy.full_name', 'default' => '-'],
+                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; }],
+                ],
+                'columns' => [
+                    ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
+                    ['key' => 'partner.name', 'label' => 'Partner Name'],
+                    ['key' => 'share_date', 'label' => 'Share Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'notes', 'label' => 'Notes'],
+                    ['key' => 'sharedBy.full_name', 'label' => 'Shared By'],
+                    ['key' => 'created_at', 'label' => 'Shared At']
                 ],
             ],
         ];

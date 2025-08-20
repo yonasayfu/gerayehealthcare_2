@@ -110,4 +110,12 @@ class Staff extends Model
         // Use the 'public' disk so this works regardless of APP_URL changes
         return Storage::disk('public')->url($this->photo);
     }
+
+    /**
+     * Documents uploaded by this staff member.
+     */
+    public function referralDocuments(): HasMany
+    {
+        return $this->hasMany(ReferralDocument::class, 'uploaded_by_staff_id');
+    }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('caregiver_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_id')->constrained()->onDelete('cascade');
+            $table->foreignId('staff_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->timestamp('shift_start')->nullable();
             $table->timestamp('shift_end')->nullable();

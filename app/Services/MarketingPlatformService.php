@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateMarketingPlatformDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingPlatform;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class MarketingPlatformService extends BaseService
 {
+    use ExportableTrait;
+
     public function __construct(MarketingPlatform $marketingPlatform)
     {
         parent::__construct($marketingPlatform);
@@ -43,10 +45,14 @@ class MarketingPlatformService extends BaseService
 
     public function toggleStatus(MarketingPlatform $marketingPlatform): MarketingPlatform
     {
-        $marketingPlatform->is_active = !$marketingPlatform->is_active;
+        $marketingPlatform->is_active = ! $marketingPlatform->is_active;
         $marketingPlatform->save();
+
         return $marketingPlatform;
     }
 
-    
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, MarketingPlatform::class, ExportConfig::getMarketingPlatformConfig());
+    }
 }

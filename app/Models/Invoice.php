@@ -42,7 +42,7 @@ class Invoice extends Model
         static::creating(function ($invoice) {
             $latestInvoice = self::latest('id')->first();
             $nextId = $latestInvoice ? $latestInvoice->id + 1 : 1;
-            $invoice->invoice_number = 'INV-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+            $invoice->invoice_number = 'INV-'.str_pad($nextId, 5, '0', STR_PAD_LEFT);
         });
     }
 
@@ -65,5 +65,10 @@ class Invoice extends Model
     public function insuranceCompany(): BelongsTo
     {
         return $this->belongsTo(InsuranceCompany::class);
+    }
+
+    public function sharedInvoices(): HasMany
+    {
+        return $this->hasMany(SharedInvoice::class);
     }
 }
