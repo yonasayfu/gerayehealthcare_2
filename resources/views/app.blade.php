@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  @class(['dark' => ($appearance ?? 'system') == 'dark'])>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  @class([
+    'dark' => ($appearance ?? 'system') == 'dark',
+    'theme-dark' => ($appearance ?? 'system') == 'dark',
+    'theme-light' => ($appearance ?? 'system') == 'light',
+])>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,13 +11,30 @@
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
-                const appearance = '{{ $appearance ?? "system" }}';
+                let appearance = '{{ $appearance ?? "system" }}';
+                if (appearance === 'theme-dark') appearance = 'dark';
+                if (appearance === 'theme-light') appearance = 'light';
 
-                if (appearance === 'system') {
+                const root = document.documentElement;
+                const removeThemeClasses = () => {
+                    root.classList.remove('theme-light', 'theme-dark');
+                };
+
+                if (appearance === 'dark') {
+                    removeThemeClasses();
+                    root.classList.add('dark', 'theme-dark');
+                } else if (appearance === 'light') {
+                    removeThemeClasses();
+                    root.classList.remove('dark');
+                    root.classList.add('theme-light');
+                } else {
                     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
+                    removeThemeClasses();
                     if (prefersDark) {
-                        document.documentElement.classList.add('dark');
+                        root.classList.add('dark', 'theme-dark');
+                    } else {
+                        root.classList.remove('dark');
+                        root.classList.add('theme-light');
                     }
                 }
             })();

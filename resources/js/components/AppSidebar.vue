@@ -268,7 +268,7 @@ const isSidebarCollapsed = ref(false);
   <Sidebar 
     collapsible="icon" 
     v-model:collapsed="isSidebarCollapsed"
-    class="sidebar"
+    class="sidebar bg-sidebar text-sidebar-foreground"
   >
     <SidebarHeader>
         <SidebarMenu>
