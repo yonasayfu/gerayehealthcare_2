@@ -4,6 +4,14 @@
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
+      <!-- Print-only header for branding -->
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 print-document-title">Shared Invoices</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
+
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Shared Invoices</h1>
@@ -23,14 +31,38 @@
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 print:hidden">
+          <div class="relative w-full md:w-1/3">
+            <input
+              type="text"
+              v-model="search"
+              placeholder="Search shared invoices..."
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-3 py-2.5"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
+        </div>
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
               <th class="px-6 py-3">ID</th>
               <th class="px-6 py-3">Invoice Number</th>
               <th class="px-6 py-3">Partner Name</th>
-              <th class="px-6 py-3">Share Date</th>
-              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('share_date')">
+                Share Date <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
+                Status <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
               <th class="px-6 py-3">Shared By</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
@@ -65,14 +97,22 @@
       </div>
 
       <Pagination v-if="sharedInvoices.data && sharedInvoices.data.length > 0" :links="sharedInvoices.links" class="mt-6 flex justify-center print:hidden" />
+
+      <!-- Print-only footer -->
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300">
+        <p>Printed on: {{ new Date().toLocaleString() }}</p>
+      </div>
     </div>
   </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link, useForm } from '@inertiajs/vue3'
-import { Edit3, Trash2, Eye, Printer } from 'lucide-vue-next'
+import { Head, Link, useForm, router } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+import debounce from 'lodash/debounce'
+import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
 import Pagination from '@/components/Pagination.vue'
 import { useExport } from '@/composables/useExport'
 
@@ -90,9 +130,69 @@ const { printCurrentView, printAllRecords, isProcessing } = useExport({ routeNam
 
 const form = useForm({})
 
+// Filters
+const search = ref(props.filters?.search || '')
+const sortField = ref(props.filters?.sort || '')
+const sortDirection = ref(props.filters?.direction || 'desc')
+const perPage = ref(props.filters?.per_page || 5)
+
+// Watch filters with debounce
+watch([search, sortField, sortDirection, perPage], debounce(() => {
+  const params = {
+    search: search.value,
+    per_page: perPage.value,
+    direction: sortDirection.value,
+  }
+  if (sortField.value) params.sort = sortField.value
+
+  router.get(route('admin.shared-invoices.index'), params, {
+    preserveState: true,
+    replace: true,
+  })
+}, 400))
+
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+}
+
 const deleteInvoice = (id) => {
   if (confirm('Are you sure you want to delete this shared invoice?')) {
     form.delete(route('admin.shared-invoices.destroy', id))
   }
 }
 </script>
+
+<style>
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+  }
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+  }
+  .hidden.print\:block { display: block !important; }
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .print-clinic-name { font-size: 1.8rem !important; margin-bottom: 0.2rem !important; line-height: 1.2 !important; }
+  .print-document-title { font-size: 0.9rem !important; color: #555 !important; }
+}
+</style>

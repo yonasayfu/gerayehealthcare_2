@@ -40,7 +40,7 @@ const engagementStatuses = [
     <div>
       <label class="block text-sm font-medium text-gray-700">Type</label>
       <select v-model="form.type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-        <option value="">Select Type</option>
+        <option disabled value="">Select Type</option>
         <option v-for="typeOption in partnerTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors.type">{{ form.errors.type }}</span>
@@ -98,7 +98,7 @@ const engagementStatuses = [
     <div>
       <label class="block text-sm font-medium text-gray-700">Engagement Status</label>
       <select v-model="form.engagement_status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-        <option value="">Select Status</option>
+        <option disabled value="">Select Status</option>
         <option v-for="statusOption in engagementStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors.engagement_status">{{ form.errors.engagement_status }}</span>

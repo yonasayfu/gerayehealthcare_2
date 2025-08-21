@@ -16,7 +16,7 @@ Buttons (left to right):
 Add [Entity]
 Export CSV
 Print Current
-Print All
+
 Search: Right-aligned search input with debounce (300–500ms).
 Per-page selector: Optional; default pagination is 5 (consistent with BaseService::getAll()).
 Example toolbar (pseudo-Vue):
@@ -36,7 +36,7 @@ vue
 3) Tables (Index pages)
 Header order: Matches ExportConfig columns order when reasonable.
 Sortable columns: Visual caret; clicking toggles asc/desc; syncs to URL query.
-Index column: Optional leading “#” when include_index is true (mirrors PDF).
+Index column:  leading “#” when include_index is true (mirrors PDF).
 Truncation: Truncate long text with tooltip on hover.
 Empty state: Friendly empty-state message with “Create” CTA.
 Example table header cell (pseudo):
@@ -140,7 +140,8 @@ Search: Placeholder "Search by name, email, position...".
 Exports/Print: Buttons route to centralized handlers (CSV/PDF/print current/all/single).
 10) Minimal checklist to implement a module UI
 Buttons: Add [Entity], Export CSV, Print Current, Print All.
-Show footer (standard): Back to List (btn btn-outline), Edit (btn btn-primary), Print Current (btn btn-dark). No Delete.
+
+11) Show footer (standard): Back to List (btn btn-outline), Edit (btn btn-primary), Print Current (btn btn-dark). No Delete.
 Forms: Save/Update (btn btn-primary), Cancel (btn btn-outline). Delete only on Edit, right-aligned, with confirmation.
 Search + sort + pagination (default per-page 5).
 Table columns consistent with module config.

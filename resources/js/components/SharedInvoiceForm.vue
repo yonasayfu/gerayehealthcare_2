@@ -4,7 +4,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Invoice ID -->
                 <div>
-                    <InputLabel for="invoice_id" value="Invoice" />
+                    <label for="invoice_id" class="block text-sm font-medium text-gray-700">Invoice</label>
                     <select
                         id="invoice_id"
                         v-model="form.invoice_id"
@@ -21,7 +21,7 @@
 
                 <!-- Partner ID -->
                 <div>
-                    <InputLabel for="partner_id" value="Partner" />
+                    <label for="partner_id" class="block text-sm font-medium text-gray-700">Partner</label>
                     <select
                         id="partner_id"
                         v-model="form.partner_id"
@@ -38,12 +38,12 @@
 
                 <!-- Share Date -->
                 <div>
-                    <InputLabel for="share_date" value="Share Date" />
-                    <TextInput
+                    <label for="share_date" class="block text-sm font-medium text-gray-700">Share Date</label>
+                    <input
                         id="share_date"
                         v-model="form.share_date"
                         type="date"
-                        class="mt-1 block w-full"
+                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                         required
                     />
                     <InputError class="mt-2" :message="form.errors.share_date" />
@@ -51,7 +51,7 @@
 
                 <!-- Status -->
                 <div>
-                    <InputLabel for="status" value="Status" />
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                     <select
                         id="status"
                         v-model="form.status"
@@ -67,7 +67,7 @@
 
                 <!-- Notes -->
                 <div>
-                    <InputLabel for="notes" value="Notes" />
+                    <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
                     <textarea
                         id="notes"
                         v-model="form.notes"
@@ -78,9 +78,9 @@
             </div>
 
             <div class="flex items-center justify-end mt-6">
-                <PrimaryButton :disabled="form.processing">
+                <button type="submit" :disabled="form.processing" class="btn btn-primary">
                     {{ editMode ? 'Update' : 'Create' }} Shared Invoice
-                </PrimaryButton>
+                </button>
             </div>
         </div>
     </form>
@@ -88,10 +88,7 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
-import InputLabel from '@/components/InputLabel.vue';
-import TextInput from '@/components/TextInput.vue';
 import InputError from '@/components/InputError.vue';
-import PrimaryButton from '@/components/PrimaryButton.vue';
 
 const props = defineProps({
     sharedInvoice: {
@@ -126,7 +123,7 @@ const form = useForm({
 
 const submit = () => {
     if (props.editMode) {
-        form.put(route('admin.shared-invoices.update', props.sharedInvoice.id));
+        form.put(route('admin.shared-invoices.update', { shared_invoice: props.sharedInvoice.id }));
     } else {
         form.post(route('admin.shared-invoices.store'));
     }

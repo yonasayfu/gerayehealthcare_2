@@ -30,15 +30,42 @@ class ReferralDocumentController extends Controller
     {
         $perPage = (int) $request->input('per_page', 5);
         $perPage = in_array($perPage, [5,10,25,50,100]) ? $perPage : 5;
+        $search = (string) $request->input('search', '');
+        $sort = (string) $request->input('sort', '');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
 
-        $referralDocuments = ReferralDocument::with(['referral', 'uploadedBy'])
-            ->latest()
-            ->paginate($perPage)
-            ->withQueryString();
+        $sortable = [
+            'id' => 'id',
+            'document_name' => 'document_name',
+            'document_type' => 'document_type',
+            'status' => 'status',
+            'created_at' => 'created_at',
+        ];
+
+        $query = ReferralDocument::with(['referral', 'uploadedBy']);
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('document_name', 'ilike', "%{$search}%")
+                    ->orWhere('document_type', 'ilike', "%{$search}%")
+                    ->orWhere('status', 'ilike', "%{$search}%");
+            });
+        }
+
+        if ($sort && isset($sortable[$sort])) {
+            $query->orderBy($sortable[$sort], $direction);
+        } else {
+            $query->latest();
+        }
+
+        $referralDocuments = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('Admin/ReferralDocuments/Index', [
             'referralDocuments' => $referralDocuments,
             'filters' => [
+                'search' => $search,
+                'sort' => $sort,
+                'direction' => $direction,
                 'per_page' => $perPage,
             ],
         ]);

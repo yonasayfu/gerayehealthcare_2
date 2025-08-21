@@ -121,6 +121,11 @@ class BaseController extends Controller
             $payload = $validatedData;
         }
 
+        // Important: avoid overwriting existing DB values with nulls for fields not present
+        $payload = array_filter($payload, function ($value) {
+            return !is_null($value);
+        });
+
         $this->service->update($id, $payload);
 
         return redirect()->route('admin.'.$this->getRouteName().'.index')->with('success', ucfirst($this->dataVariableName).' updated successfully.');

@@ -23,15 +23,25 @@
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
-        <div class="flex items-center justify-end gap-3 p-3 print:hidden">
-          <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 print:hidden">
+          <div class="relative w-full md:w-1/3">
+            <input
+              type="text"
+              v-model="search"
+              placeholder="Search documents..."
+              class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-3 py-2.5"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
         <!-- Print-only Header -->
         <div class="hidden print:block print-header-content">
@@ -46,9 +56,15 @@
             <tr>
               <th class="px-6 py-3">ID</th>
               <th class="px-6 py-3">Referral</th>
-              <th class="px-6 py-3">Document Name</th>
-              <th class="px-6 py-3">Document Type</th>
-              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('document_name')">
+                Document Name <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('document_type')">
+                Document Type <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
+                Status <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
               <th class="px-6 py-3">Uploaded By</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
@@ -105,7 +121,8 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
-import { Edit3, Trash2, Eye, Printer } from 'lucide-vue-next'
+import debounce from 'lodash/debounce'
+import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
 import Pagination from '@/components/Pagination.vue'
 import { useExport } from '@/composables/useExport'
 import { useClinicInfo } from '@/composables/useClinicInfo'
@@ -125,15 +142,35 @@ const { getClinicName, getClinicLogo, getPrintFooterText } = useClinicInfo()
 
 const form = useForm({})
 
-// Per-page selector state and watcher
+// Filters
+const search = ref(props.filters?.search || '')
+const sortField = ref(props.filters?.sort || '')
+const sortDirection = ref(props.filters?.direction || 'desc')
 const perPage = ref(props.filters?.per_page || 5)
 
-watch(perPage, (val) => {
-  router.get(route('admin.referral-documents.index'), { per_page: val }, {
+// Watch filters with debounce
+watch([search, sortField, sortDirection, perPage], debounce(() => {
+  const params = {
+    search: search.value,
+    per_page: perPage.value,
+    direction: sortDirection.value,
+  }
+  if (sortField.value) params.sort = sortField.value
+
+  router.get(route('admin.referral-documents.index'), params, {
     preserveState: true,
     replace: true,
   })
-})
+}, 400))
+
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+}
 
 const deleteDocument = (id) => {
   if (confirm('Are you sure you want to delete this referral document?')) {
