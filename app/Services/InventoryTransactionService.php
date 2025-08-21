@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateInventoryTransactionDTO;
+use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryTransaction;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class InventoryTransactionService extends BaseService
 {
     use ExportableTrait;
+
     public function __construct(InventoryTransaction $inventoryTransaction)
     {
         parent::__construct($inventoryTransaction);
@@ -19,6 +19,7 @@ class InventoryTransactionService extends BaseService
     public function getById(int $id, array $with = []): InventoryTransaction
     {
         $with = array_unique(array_merge(['item', 'performedBy', 'request', 'fromAssignedTo', 'toAssignedTo'], $with));
+
         return $this->model
             ->with($with)
             ->findOrFail($id);
@@ -27,7 +28,7 @@ class InventoryTransactionService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->where('transaction_type', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
+            ->orWhereHas('item', fn ($q) => $q->where('name', 'like', "%$search%"));
     }
 
     public function getAll(Request $request, array $with = [])
@@ -75,6 +76,6 @@ class InventoryTransactionService extends BaseService
 
     public function printSingle(InventoryTransaction $inventoryTransaction, Request $request)
     {
-        return $this->handlePrintSingle($inventoryTransaction, $request, AdditionalExportConfigs::getInventoryTransactionConfig());
+        return $this->handlePrintSingle($request, $inventoryTransaction, AdditionalExportConfigs::getInventoryTransactionConfig());
     }
 }

@@ -144,11 +144,25 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Ethiopian Calendar Days', routeName: 'admin.ethiopian-calendar-days.index', icon: CalendarDays, permission: 'view ethiopian calendar days' },
     ],
   },
+  {
+    group: 'Business & NGO Networking',
+    icon: Users,
+    items: [
+      { title: 'Partners', routeName: 'admin.partners.index', icon: Users, permission: 'view partners' },
+      { title: 'Agreements', routeName: 'admin.partner-agreements.index', icon: FileText, permission: 'view partner agreements' },
+      { title: 'Referrals', routeName: 'admin.referrals.index', icon: ArrowBigRight, permission: 'view referrals' },
+      { title: 'Commissions', routeName: 'admin.partner-commissions.index', icon: DollarSign, permission: 'view partner commissions' },
+      { title: 'Engagements', routeName: 'admin.partner-engagements.index', icon: ClipboardList, permission: 'view partner engagements' },
+    ],
+  },
   communicationNavGroup,
   {
-    group: 'Integrations',
-    icon: Globe2,
-    items: [],
+    group: 'Partner Integrations',
+    icon: GitFork,
+    items: [
+      { title: 'Referral Documents', routeName: 'admin.referral-documents.index', icon: Folder, permission: 'view referral documents' },
+      { title: 'Shared Invoices', routeName: 'admin.shared-invoices.index', icon: Receipt, permission: 'view shared invoices' },
+    ],
   },
     {
       group: 'System Management',

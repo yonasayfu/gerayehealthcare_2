@@ -3,30 +3,29 @@
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\VisitServiceController;
-
+use App\Http\Controllers\Admin\EligibilityCriteriaController;
+use App\Http\Controllers\Admin\EventBroadcastController;
 // Admin Controllers
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\EventParticipantController;
+use App\Http\Controllers\Admin\EventRecommendationController;
+use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\ReferralDocumentController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\SharedInvoiceController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
 use App\Http\Controllers\Admin\StaffController;
-
 use App\Http\Controllers\Admin\StaffPayoutController;
 use App\Http\Controllers\Admin\TaskDelegationController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\EligibilityCriteriaController;
-use App\Http\Controllers\Admin\EventRecommendationController;
-use App\Http\Controllers\Admin\EventParticipantController;
-use App\Http\Controllers\Admin\EventStaffAssignmentController;
-use App\Http\Controllers\Admin\EventBroadcastController;
+use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-
 // Staff Controllers
 use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
@@ -34,7 +33,6 @@ use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
 use Illuminate\Support\Facades\Auth;
-
 // Common Controllers
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,7 +44,7 @@ use Inertia\Inertia;
  */
 
 // Public & General
-Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
+Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 
 // Backward-compatible redirect: /admin -> /dashboard
 Route::get('/admin', function () {
@@ -66,26 +64,24 @@ Route::get('dashboard', function () {
     } elseif ($user->hasRole(RoleEnum::STAFF->value)) {
         return app(StaffDashboardController::class)->index();
     }
+
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Debug Route for Permissions
 
-
 // Messaging & Notifications
 Route::middleware(['auth', 'verified'])->group(function () {
-    //Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
+    // Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
-            ->name('notifications.markAsRead');
+        ->name('notifications.markAsRead');
 });
 
-
-
 // Admin & Super Admin
-Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
+Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
@@ -112,9 +108,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::resource('assignments', CaregiverAssignmentController::class);
 
         // Visit Services
-        Route::get('visit-services/print-all', [VisitServiceController::class, 'printAll'])->name('visit-services.printAll');
-        Route::get('visit-services/print-current', [VisitServiceController::class, 'printCurrent'])->name('visit-services.printCurrent');
-        Route::get('visit-services/{visit_service}/print', [VisitServiceController::class, 'printSingle'])->name('visit-services.print');
         Route::resource('visit-services', VisitServiceController::class);
 
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
@@ -131,7 +124,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
 
         Route::get('inventory-transactions/export', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'export'])->name('inventory-transactions.export');
         Route::get('inventory-transactions/print-all', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printAll'])->name('inventory-transactions.printAll');
-        Route::get('inventory-transactions/pdf', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'generatePdf'])->name('inventory-transactions.generatePdf');
+
         Route::get('inventory-transactions/{inventory_transaction}/print', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printSingle'])->name('inventory-transactions.printSingle');
         Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class);
 
@@ -153,6 +146,49 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('staff/print-current', [StaffController::class, 'printCurrent'])->name('staff.printCurrent');
         Route::get('staff/{staff}/print', [StaffController::class, 'printSingle'])->name('staff.print');
         Route::resource('staff', StaffController::class);
+
+        // Partners
+        Route::get('partners/export', [\App\Http\Controllers\Admin\PartnerController::class, 'export'])->name('partners.export');
+        Route::get('partners/print-all', [\App\Http\Controllers\Admin\PartnerController::class, 'printAll'])->name('partners.printAll');
+        Route::get('partners/print-current', [\App\Http\Controllers\Admin\PartnerController::class, 'printCurrent'])->name('partners.printCurrent');
+        Route::get('partners/{partner}/print', [\App\Http\Controllers\Admin\PartnerController::class, 'printSingle'])->name('partners.printSingle');
+        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class);
+
+        // Partner Agreements
+        Route::get('partner-agreements/export', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'export'])->name('partner-agreements.export');
+        Route::get('partner-agreements/print-all', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printAll'])->name('partner-agreements.printAll');
+        Route::get('partner-agreements/print-current', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printCurrent'])->name('partner-agreements.printCurrent');
+        Route::get('partner-agreements/{partner_agreement}/print', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printSingle'])->name('partner-agreements.printSingle');
+        Route::resource('partner-agreements', \App\Http\Controllers\Admin\PartnerAgreementController::class);
+
+        // Referrals
+        Route::get('referrals/export', [\App\Http\Controllers\Admin\ReferralController::class, 'export'])->name('referrals.export');
+        Route::get('referrals/print-all', [\App\Http\Controllers\Admin\ReferralController::class, 'printAll'])->name('referrals.printAll');
+        Route::get('referrals/print-current', [\App\Http\Controllers\Admin\ReferralController::class, 'printCurrent'])->name('referrals.printCurrent');
+        Route::get('referrals/{referral}/print', [\App\Http\Controllers\Admin\ReferralController::class, 'printSingle'])->name('referrals.printSingle');
+        Route::resource('referrals', \App\Http\Controllers\Admin\ReferralController::class);
+
+        // Partner Commissions
+        Route::get('partner-commissions/export', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'export'])->name('partner-commissions.export');
+        Route::get('partner-commissions/print-all', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printAll'])->name('partner-commissions.printAll');
+        Route::get('partner-commissions/print-current', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printCurrent'])->name('partner-commissions.printCurrent');
+        Route::get('partner-commissions/{partner_commission}/print', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printSingle'])->name('partner-commissions.printSingle');
+        Route::resource('partner-commissions', \App\Http\Controllers\Admin\PartnerCommissionController::class);
+
+        // Partner Engagements
+        Route::get('partner-engagements/export', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'export'])->name('partner-engagements.export');
+        Route::get('partner-engagements/print-all', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printAll'])->name('partner-engagements.printAll');
+        Route::get('partner-engagements/print-current', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printCurrent'])->name('partner-engagements.printCurrent');
+        Route::get('partner-engagements/{partner_engagement}/print', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printSingle'])->name('partner-engagements.printSingle');
+        Route::resource('partner-engagements', \App\Http\Controllers\Admin\PartnerEngagementController::class);
+
+        // Partner Integrations - Referral Documents (place specific routes before resource)
+        Route::get('referral-documents/export', [ReferralDocumentController::class, 'export'])->name('referral-documents.export');
+        Route::get('referral-documents/print-all', [ReferralDocumentController::class, 'printAll'])->name('referral-documents.printAll');
+        Route::get('referral-documents/print-current', [ReferralDocumentController::class, 'printCurrent'])->name('referral-documents.printCurrent');
+        Route::get('referral-documents/{referral_document}/print', [ReferralDocumentController::class, 'printSingle'])->name('referral-documents.printSingle');
+        Route::resource('referral-documents', ReferralDocumentController::class);
+        Route::resource('shared-invoices', SharedInvoiceController::class);
 
         // Staff Availabilities
         Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])
@@ -272,7 +308,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
             ->parameters(['task-delegations' => 'task_delegation']);
 
         // System Management (Super Admin only)
-        Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
+        Route::middleware('role:'.RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
         });
@@ -285,7 +321,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
     });
 
 // Staff-Specific
-Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
+Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
@@ -329,6 +365,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     });
 
 // Auth & Settings
-require __DIR__ . '/auth.php';
-require __DIR__ . '/settings.php';
-require __DIR__ . '/marketing.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/marketing.php';

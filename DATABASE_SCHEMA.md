@@ -530,6 +530,42 @@ CREATE TABLE partner_engagements (
     FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
     FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
 );
+
+
+-- 10. Partner Integrations
+
+-- referral_documents
+CREATE TABLE referral_documents (
+    id BIGSERIAL PRIMARY KEY,
+    referral_id BIGINT NOT NULL,
+    uploaded_by_staff_id BIGINT NULL,
+    document_name VARCHAR(255) NOT NULL,
+    document_path VARCHAR(255) NOT NULL,
+    document_type VARCHAR(100) NULL, -- 'Clinical Summary', 'Prescription', 'Lab Result', 'Imaging Report'
+    status VARCHAR(50) DEFAULT 'Uploaded', -- 'Uploaded', 'Sent', 'Received', 'Reviewed'
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (referral_id) REFERENCES referrals(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by_staff_id) REFERENCES staff(id) ON DELETE SET NULL
+);
+COMMENT ON TABLE referral_documents IS 'Manages medical and administrative documents associated with a partner referral.';
+
+-- shared_invoices
+CREATE TABLE shared_invoices (
+    id BIGSERIAL PRIMARY KEY,
+    invoice_id BIGINT NOT NULL,
+    partner_id BIGINT NOT NULL,
+    shared_by_staff_id BIGINT NULL,
+    share_date DATE NOT NULL,
+    status VARCHAR(50) DEFAULT 'Shared', -- 'Shared', 'Acknowledged', 'Action-Required'
+    notes TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE,
+    FOREIGN KEY (partner_id) REFERENCES partners(id) ON DELETE CASCADE,
+    FOREIGN KEY (shared_by_staff_id) REFERENCES staff(id) ON DELETE SET NULL
+);
+COMMENT ON TABLE shared_invoices IS 'Tracks invoices that are explicitly shared with partners for commission or collaboration purposes.';
 ### 4. Marketing Management
 
 ```sql

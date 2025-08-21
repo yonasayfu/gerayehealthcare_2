@@ -174,4 +174,18 @@ class Patient extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * All referral documents associated with this patient via referrals.
+     */
+    public function referralDocuments()
+    {
+        return $this->hasManyThrough(
+            ReferralDocument::class,   // Final model
+            Referral::class,           // Intermediate model
+            'referred_patient_id',     // Foreign key on referrals table...
+            'referral_id',             // Foreign key on referral_documents table...
+            'id',                      // Local key on patients table
+            'id'                       // Local key on referrals table
+        );
+    }
 }

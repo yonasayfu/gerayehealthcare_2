@@ -33,4 +33,13 @@ class InventoryTransactionController extends BaseController
         return app(InventoryTransactionService::class)->printCurrent(request());
     }
 
+    public function printAll(Request $request)
+    {
+        return app(InventoryTransactionService::class)->printAll($request);
+    }
+
+    public function printSingle(InventoryTransaction $inventoryTransaction, Request $request)
+    {
+        return app(InventoryTransactionService::class)->printSingle($inventoryTransaction, $request);
+    }
 }

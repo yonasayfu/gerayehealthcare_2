@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('staff_availabilities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_id')->constrained()->onDelete('cascade');
+            $table->foreignId('staff_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamp('start_time');
             $table->timestamp('end_time');
             $table->string('status'); // No default - status must be explicitly provided.

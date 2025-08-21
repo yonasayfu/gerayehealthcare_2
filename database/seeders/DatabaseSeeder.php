@@ -18,10 +18,16 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             StaffSeeder::class, // Staff must be seeded before Patients
             PatientSeeder::class,
+            PartnerSeeder::class,
+            PartnerAgreementSeeder::class,
+            ReferralSeeder::class,
+            ReferralDocumentSeeder::class,
+            PartnerCommissionSeeder::class,
+            PartnerEngagementSeeder::class,
             StaffAvailabilitySeeder::class,
             StaffPayoutSeeder::class,
             CaregiverAssignmentSeeder::class,
-            ServiceSeeder::class, 
+            ServiceSeeder::class,
             LeaveRequestSeeder::class,
             InventorySeeder::class,
             InventoryRequestSeeder::class,
@@ -37,6 +43,7 @@ class DatabaseSeeder extends Seeder
             PagumeCampaignSeeder::class,
             LandingPageSeeder::class,
             IncomingInvoicesDemoSeeder::class,
+            SharedInvoiceSeeder::class,
             EventBroadcastSeeder::class,
         ]);
 
