@@ -51,36 +51,48 @@ function submit() {
   <Head title="Edit Patient" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="space-y-6 p-6">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Edit Patient
-            </h3>
-            <Link :href="route('admin.patients.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Patient</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Update patient information below.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <Link
+            :href="route('admin.patients.index')"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-700"
+          >
+            Back
+          </Link>
+        </div>
+      </div>
+
+      <!-- Form card -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
+        <form @submit.prevent="submit" class="space-y-4">
+          <!-- reuse shared Form component (no changes to props/logic) -->
+          <Form :form="form" :corporateClients="props.corporateClients" :insurancePolicies="props.insurancePolicies" />
+          <div class="flex justify-end gap-2 pt-2">
+            <Link
+              :href="route('admin.patients.index')"
+              class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-600"
+            >
+              Cancel
             </Link>
-        </div>
 
-        <div class="p-6 space-y-6">
-            <Form :form="form" :corporateClients="props.corporateClients" :insurancePolicies="props.insurancePolicies" />
-        </div>
-
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex flex-wrap items-center gap-2">
-              <Link :href="route('admin.patients.index')" class="btn btn-outline">Cancel</Link>
-              <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
-                {{ form.processing ? 'Saving...' : 'Save Changes' }}
-              </button>
-              <button
-                class="btn btn-danger ml-auto"
-                @click="() => { if (confirm('Are you sure you want to delete this patient? This action cannot be undone.')) { router.delete(route('admin.patients.destroy', props.patient.id)) } }"
-              >
-                Delete
-              </button>
-            </div>
-        </div>
-
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            >
+              {{ form.processing ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </AppLayout>
 </template>

@@ -276,15 +276,20 @@ onMounted(() => {
         </div>
 
         <div class="sm:col-span-3">
-          <label class="block text-sm font-medium text-gray-900 dark:text-white">Employer (Corporate Client)</label>
+          <label class="block text-sm font-medium text-gray-900 dark:text-white mb-1">Employer (Corporate Client)</label>
           <div class="mt-2">
             <select
               v-model="form.corporate_client_id"
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
-              :style="{ color: 'inherit' }"
             >
-              <option :value="null" class="text-gray-900 dark:text-white">Select Employer</option>
-              <option v-for="client in corporateClients" :key="client.id" :value="client.id" class="text-gray-900 dark:text-white">{{ (client as any).name ?? (client as any).organization_name }}</option>
+              <option value="">Select employer</option>
+              <option
+                v-for="c in corporateClients"
+                :key="c.id ?? c.value ?? JSON.stringify(c)"
+                :value="c.id ?? c.value ?? null"
+              >
+                {{ c.name ?? c.organization_name ?? c.organization ?? '—' }}
+              </option>
             </select>
             <div v-if="form.errors.corporate_client_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.corporate_client_id }}
@@ -293,15 +298,20 @@ onMounted(() => {
         </div>
 
         <div class="sm:col-span-3">
-          <label class="block text-sm font-medium text-gray-900 dark:text-white">Insurance Policy</label>
+          <label class="block text-sm font-medium text-gray-900 dark:text-white mb-1">Insurance Policy</label>
           <div class="mt-2">
             <select
               v-model="form.policy_id"
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
-              :style="{ color: 'inherit' }"
             >
-              <option :value="null" class="text-gray-900 dark:text-white">Select Policy</option>
-              <option v-for="policy in insurancePolicies" :key="policy.id" :value="policy.id" class="text-gray-900 dark:text-white">{{ policy.service_type }}<span v-if="policy.coverage_percentage"> ({{ policy.coverage_percentage }}%)</span> - {{ policy.corporate_client?.name ?? policy.corporate_client?.organization_name }}</option>
+              <option value="">Select policy</option>
+              <option
+                v-for="p in insurancePolicies"
+                :key="p.id ?? p.value ?? JSON.stringify(p)"
+                :value="p.id ?? p.value ?? null"
+              >
+                {{ p.policy_number ?? p.name ?? p.service_type ?? '—' }}
+              </option>
             </select>
             <div v-if="form.errors.policy_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.policy_id }}

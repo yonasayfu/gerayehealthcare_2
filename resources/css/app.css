@@ -69,6 +69,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -150,19 +151,28 @@
     }
 
     /* Filled variants */
-    .btn-primary { /* Teal/Cyan: primary actions (Create/Save/Schedule) */
+    .btn-primary {
+        /* Teal/Cyan: primary actions (Create/Save/Schedule) */
         @apply text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-300;
     }
-    .btn-success { /* Green: success/export */
+
+    .btn-success {
+        /* Green: success/export */
         @apply text-white bg-green-600 hover:bg-green-700 focus:ring-green-300;
     }
-    .btn-info { /* Blue: info/print-all */
+
+    .btn-info {
+        /* Blue: info/print-all */
         @apply text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300;
     }
-    .btn-dark { /* Slate: neutral emphasis (print current) */
+
+    .btn-dark {
+        /* Slate: neutral emphasis (print current) */
         @apply text-white bg-slate-700 hover:bg-slate-800 focus:ring-slate-300;
     }
-    .btn-danger { /* Destructive */
+
+    .btn-danger {
+        /* Destructive */
         @apply text-white bg-red-600 hover:bg-red-700 focus:ring-red-300;
     }
 
@@ -174,5 +184,60 @@
     /* Icon-only small button */
     .btn-icon {
         @apply inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900;
+    }
+
+    /* Glass button utility used by CRUD action buttons */
+    .btn-glass {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        transition: background-color .15s, border-color .15s, transform .08s;
+        background-color: rgba(255, 255, 255, 0.62);
+        color: #111827;
+        /* gray-900 */
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        /* subtle border */
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-glass:active {
+        transform: translateY(0);
+    }
+
+    .btn-glass:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+
+    /* Dark variant */
+    .dark .btn-glass {
+        background-color: rgba(255, 255, 255, 0.04);
+        /* translucent on dark */
+        color: #f8fafc;
+        /* gray-50 */
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
+    }
+
+    .dark .btn-glass:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Optional small size */
+    .btn-glass-sm {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.8125rem;
     }
 }

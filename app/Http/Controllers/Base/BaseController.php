@@ -62,7 +62,7 @@ class BaseController extends Controller
             // Prepare data for DTO instantiation
             $dtoData = $this->prepareDataForDTO($validatedData);
             // Instantiate DTO from the prepared data array
-            $dto = ($this->dtoClass)::from($dtoData);
+            $dto = new ($this->dtoClass)($request->all());
             $payload = $dto->toArray();
         } else {
             $payload = $validatedData;

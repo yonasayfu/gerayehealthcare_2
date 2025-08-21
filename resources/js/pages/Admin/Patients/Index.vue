@@ -102,42 +102,61 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
+      <!-- Header / actions -->
       <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Patients</h1>
-          <p class="text-sm text-muted-foreground">Manage all patient records here.</p>
-          <p class="text-sm text-muted-foreground">Today's Date: {{ currentDate }}</p>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Patients</h1>
+          <p class="text-sm text-muted-foreground dark:text-gray-300">Manage all patient records here.</p>
+          <p class="text-sm text-muted-foreground dark:text-gray-300">Today's Date: {{ currentDate }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.patients.create')" class="btn btn-primary">
+          <Link
+            :href="route('admin.patients.create')"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+          >
             + Add Patient
           </Link>
-          <button @click="exportData('csv')" class="btn btn-success">
-            <Download class="h-4 w-4" /> CSV
+
+          <button
+            @click="exportData('csv')"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+            aria-label="Export CSV"
+          >
+            <Download class="h-4 w-4 mr-2" /> CSV
           </button>
-          <button @click="printCurrentView" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
+
+          <button
+            @click="printCurrentView"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-gray-700 text-white shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500"
+            aria-label="Print Current"
+          >
+            <Printer class="h-4 w-4 mr-2" /> Print Current
           </button>
-          <button @click="printAllPatients" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
+
+          <button
+            @click="printAllPatients"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-sky-600 text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:bg-sky-500 dark:hover:bg-sky-600"
+          >
+            <Printer class="h-4 w-4 mr-2" /> Print All
           </button>
         </div>
       </div>
 
+      <!-- Search / per page -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
         <div class="relative w-full md:w-1/3">
           <input
             type="text"
             v-model="search"
             placeholder="Search patients..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5"
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100"
           />
-          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-400" />
         </div>
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -147,18 +166,19 @@ function toggleSort(field: string) {
         </div>
       </div>
 
-      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+      <!-- Table -->
+      <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Patient List (Current View)</p>
             <hr class="my-3 border-gray-300 print:my-2">
         </div>
-        
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
-          <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
+
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-100 print-table">
+          <thead class="bg-gray-100 dark:bg-gray-700 text-xs uppercase text-gray-600 dark:text-gray-300 print-table-header">
             <tr>
-              <th class="px-6 py-3">#</th> <!-- Added index column header -->
+              <th class="px-6 py-3">#</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('full_name')">
                 Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -184,39 +204,44 @@ function toggleSort(field: string) {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(patient, index) in patients.data" :key="patient.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-               <td class="px-6 py-4">{{ currentIndex + index + 1 }}</td> 
-              <td class="px-6 py-4">{{ patient.full_name }}</td>
-              <td class="px-6 py-4">{{ patient.patient_code ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.fayda_id ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.age !== undefined && patient.age !== null ? patient.age : (patient.date_of_birth ? Math.max(0, new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() - ((new Date().getMonth() < new Date(patient.date_of_birth).getMonth()) || (new Date().getMonth() === new Date(patient.date_of_birth).getMonth() && new Date().getDate() < new Date(patient.date_of_birth).getDate()) ? 1 : 0)) : '-') }}</td>
-              <td class="px-6 py-4">{{ patient.gender ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.phone_number ?? '-' }}</td>
-              <td class="px-6 py-4">{{ patient.source ?? '-' }}</td>
+            <tr v-for="(patient, index) in patients.data" :key="patient.id"
+                class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 print-table-row">
+              <td class="px-6 py-4 text-gray-700 dark:text-gray-200">{{ currentIndex + index + 1 }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.full_name }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.patient_code ?? '-' }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.fayda_id ?? '-' }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.age !== undefined && patient.age !== null ? patient.age : (patient.date_of_birth ? Math.max(0, new Date().getFullYear() - new Date(patient.date_of_birth).getFullYear() - ((new Date().getMonth() < new Date(patient.date_of_birth).getMonth()) || (new Date().getMonth() === new Date(patient.date_of_birth).getMonth() && new Date().getDate() < new Date(patient.date_of_birth).getDate()) ? 1 : 0)) : '-') }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.gender ?? '-' }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.phone_number ?? '-' }}</td>
+              <td class="px-6 py-4 text-gray-800 dark:text-gray-100">{{ patient.source ?? '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.patients.show', patient.id)"
-                    class="btn-icon text-gray-500"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.patients.edit', patient.id)"
-                    class="btn-icon text-blue-600"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(patient.id)" class="btn-icon text-red-600" title="Delete">
+                  <button
+                    @click="destroy(patient.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
             <tr v-if="patients.data.length === 0">
-              <td colspan="8" class="text-center px-6 py-4 text-gray-400">No patients found.</td>
+              <td colspan="9" class="text-center px-6 py-4 text-gray-400 dark:text-gray-400">No patients found.</td>
             </tr>
           </tbody>
         </table>

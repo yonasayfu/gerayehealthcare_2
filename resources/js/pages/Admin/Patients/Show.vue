@@ -29,146 +29,147 @@ function destroy(id: number) {
 </script>
 
 <template>
-  <Head :title="`Patient: ${patient.full_name}`" />
+  <Head :title="`Patient: ${props.patient.full_name || 'Patient'}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-background text-foreground border border-border rounded-lg shadow relative m-10">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-            <h3 class="text-xl font-semibold">
-                Patient Details: {{ patient.full_name }}
-            </h3>
-            <Link :href="route('admin.patients.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <div class="flex items-start justify-between p-5 border-b dark:border-gray-700 rounded-t print:hidden">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Patient Details: {{ props.patient.full_name }}
+        </h3>
+        <Link
+          :href="route('admin.patients.index')"
+          type="button"
+          class="text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white bg-transparent rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </Link>
+      </div>
 
-        <div class="p-6 space-y-6">
-            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+      <div class="p-6 space-y-6">
+        <div class="print-document bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
-                <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
-                    <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-                    <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
-                    <p class="text-gray-600 dark:text-gray-400 print-document-title">Patient Record Document</p>
-                    <hr class="my-3 border-gray-300 print:my-2">
-                </div>
+          <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+            <p class="text-gray-600 dark:text-gray-400 print-document-title">Patient Record Document</p>
+            <hr class="my-3 border-gray-300 dark:border-gray-600 print:my-2">
+          </div>
 
-                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Patient Identification</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">Full Name:</p>
-                      <p class="font-medium text-foreground">{{ patient.full_name }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Patient Code:</p>
-                      <p class="font-medium text-foreground">{{ patient.patient_code ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Fayda ID:</p>
-                      <p class="font-medium text-foreground">{{ patient.fayda_id ?? '-' }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Demographics</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">Gender:</p>
-                      <p class="font-medium text-foreground">{{ patient.gender ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Date of Birth:</p>
-                      <p class="font-medium text-foreground">{{ patient.date_of_birth ? format(new Date(patient.date_of_birth), 'PPP') : '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Age:</p>
-                      <p class="font-medium text-foreground">{{ patient.age !== null ? patient.age : '-' }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Contact Information</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">Phone Number:</p>
-                      <p class="font-medium text-foreground">{{ patient.phone_number ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-foreground">{{ patient.email ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Emergency Contact:</p>
-                      <p class="font-medium text-foreground">{{ patient.emergency_contact ?? '-' }}</p>
-                    </div>
-                    <div class="lg:col-span-3">
-                      <p class="text-sm text-muted-foreground">Address:</p>
-                      <p class="font-medium text-foreground">{{ patient.address ?? '-' }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Administrative Details</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
-                    <div>
-                      <p class="text-sm text-muted-foreground">Source:</p>
-                      <p class="font-medium text-foreground">{{ patient.source ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Geolocation:</p>
-                      <p class="font-medium text-foreground">{{ patient.geolocation ?? '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Registered By:</p>
-                      <p class="font-medium text-foreground">
-                        <span v-if="patient.registered_by_staff">Staff: {{ patient.registered_by_staff.full_name }}</span>
-                        <span v-else>-</span>
-                      </p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Registered Date:</p>
-                      <p class="font-medium text-foreground">{{ patient.created_at ? format(new Date(patient.created_at), 'PPP p') : '-' }}</p>
-                    </div>
-                    <div>
-                      <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-foreground">{{ patient.updated_at ? format(new Date(patient.updated_at), 'PPP p') : '-' }}</p>
-                    </div>
-                  </div>
-                </div>
-
-                
-
+          <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 print:mb-2">Patient Identification</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Full Name:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.full_name }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Patient Code:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.patient_code ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Fayda ID:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.fayda_id ?? '-' }}</p>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="p-6 border-t border-border rounded-b print:hidden">
-            <div class="flex flex-wrap gap-2">
-              <Link :href="route('admin.patients.index')" class="btn btn-outline">
-                Back to List
-              </Link>
-              <button @click="printSinglePatient" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
-              </button>
-              <Link
-                :href="route('admin.patients.edit', patient.id)"
-                class="btn btn-primary"
-              >
-                Edit
-              </Link>
+          <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 print:mb-2">Demographics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Gender:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.gender ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Date of Birth:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.date_of_birth ? format(new Date(props.patient.date_of_birth), 'PPP') : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Age:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.age !== null ? props.patient.age : '-' }}</p>
+              </div>
             </div>
-        </div>
+          </div>
 
-        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
-          <hr class="my-2 border-gray-300">
-          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+          <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 print:mb-2">Contact Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Phone Number:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.phone_number ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Email:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.email ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Emergency Contact:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.emergency_contact ?? '-' }}</p>
+              </div>
+              <div class="lg:col-span-3">
+                <p class="text-sm text-gray-600 dark:text-gray-300">Address:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.address ?? '-' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 print:mb-2">Administrative Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Source:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.source ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Geolocation:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.geolocation ?? '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Registered By:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">
+                  <span v-if="props.patient.registered_by_staff">Staff: {{ props.patient.registered_by_staff.full_name }}</span>
+                  <span v-else>-</span>
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Registered Date:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.created_at ? format(new Date(props.patient.created_at), 'PPP p') : '-' }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Last Updated:</p>
+                <p class="font-medium text-gray-800 dark:text-gray-100">{{ props.patient.updated_at ? format(new Date(props.patient.updated_at), 'PPP p') : '-' }}</p>
+              </div>
+            </div>
+          </div>
+
         </div>
+      </div>
+
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex flex-wrap gap-2">
+          <Link :href="route('admin.patients.index')" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-600">
+            Back to List
+          </Link>
+          <button @click="printSinglePatient" class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-gray-700 text-white hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500">
+            <Printer class="h-4 w-4 mr-2" /> Print Current
+          </button>
+          <Link
+            :href="route('admin.patients.edit', props.patient.id)"
+            class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+          >
+            Edit
+          </Link>
+        </div>
+      </div>
+
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300 dark:border-gray-600">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
 
     </div>
-
   </AppLayout>
 </template>
 

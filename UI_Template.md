@@ -1,149 +1,155 @@
-UI Consistency Reference (for module implementers)
-Purpose: Give UI agents a compact, actionable guide to build or fix module UIs (like Staff) consistently with the rest of the app.
+# UI Template — Dark / Light theme guidance
 
-Use this as a template. Replace labels/fields per module.
+Purpose
+- Single reference for implementing theme-safe UI for existing modules and new CRUD modules.
+- Use this as the checklist and pattern whenever you create/update pages/components so dark mode remains readable and consistent.
 
-1) Core Layouts
-App shell: Inertia pages under resources/js/Pages/Admin/<Module>/
-Index.vue (list)
-Create.vue (form)
-Edit.vue (form)
-Card/page layout: Single-column container with page title, toolbar, table/form.
-Spacing: Use consistent spacing scale (xs/sm/md/lg). Keep breathing room around toolbars and tables.
-Typography: Use standard heading for page titles; body text 14–16px.
-2) Standard Actions (Top Toolbar)
-Buttons (left to right):
-Add [Entity]
-Export CSV
-Print Current
-Print All
-Search: Right-aligned search input with debounce (300–500ms).
-Per-page selector: Optional; default pagination is 5 (consistent with BaseService::getAll()).
-Example toolbar (pseudo-Vue):
+Principles
+- Prefer semantic tokens (CSS variables) over hard-coded color classes.
+- Use Tailwind `dark:` utilities and CSS variables together.
+- Ensure charts, icons and images get theme-aware colors (either via CSS variables or runtime reconfiguration).
+- Update shared primitives first (buttons, inputs, dropdowns, tables, cards, modals). Then update page-level CRUD views.
 
-vue
-<div class="toolbar">
-  <div class="left">
-    <Link href="{ route('admin.staff.create') }" class="btn btn-primary">Create Staff</Link>
-  </div>
-  <div class="right">
-    <input v-model="filters.search" placeholder="Search by name, email, position..." />
-    <button @click="exportCsv" class="btn btn-success"><Download class="h-4 w-4"/> Export CSV</button>
-    <button @click="printCurrent" class="btn btn-dark"><Printer class="h-4 w-4"/> Print Current</button>
-    <button @click="printAll" class="btn btn-info"><Printer class="h-4 w-4"/> Print All</button>
-  </div>
-</div>
-3) Tables (Index pages)
-Header order: Matches ExportConfig columns order when reasonable.
-Sortable columns: Visual caret; clicking toggles asc/desc; syncs to URL query.
-Index column: Optional leading “#” when include_index is true (mirrors PDF).
-Truncation: Truncate long text with tooltip on hover.
-Empty state: Friendly empty-state message with “Create” CTA.
-Example table header cell (pseudo):
+Files to update (global)
+1. resources/css/app.css
+   - Add CSS variable palette for light and dark themes.
+   - Ensure `.theme-dark` / `.dark` variables set.
+2. resources/js/composables/useAppearance.ts
+   - Ensure theme toggling reliably adds/removes `dark` (and `theme-dark`) classes on documentElement; expose a re-runable color update.
+3. resources/views/app.blade.php
+   - Ensure initial theme class is emitted server-side to avoid FOUC (flash of wrong theme).
+4. src/shared components (location: resources/js/components or similar)
+   - StatCard.vue
+   - Button.vue
+   - Dropdown.vue
+   - Table.vue / DataTable.vue
+   - Modal.vue / Dialog.vue
+   - Input/Textarea/Select components
+   - Toast/Notification components
+   - Layouts/AppLayout.vue and Sidebar/Nav components
 
-vue
-<th @click="sortBy('last_name')" :class="{ sorted: sort==='last_name' }">
-  Last Name
-  <SortIcon :direction="direction" v-if="sort==='last_name'" />
-</th>
-4) Forms (Create/Edit)
-Preload data: Only what’s needed to render the form (e.g., config('hr.departments') for Staff).
-Validation display: Inline errors under fields; top-level alert for form submit errors.
-Submit buttons:
-Primary “Save”
-Secondary “Cancel” (back to index)
-Consistent field order: Name, Contacts, Role/Dept, Status, Dates, Notes.
-Minimal form actions:
+Common module pages to update per CRUD (example module path)
+- resources/js/pages/Admin/<ModuleName>/Index.vue
+- resources/js/pages/Admin/<ModuleName>/Create.vue
+- resources/js/pages/Admin/<ModuleName>/Edit.vue
+- resources/js/pages/Admin/<ModuleName>/Show.vue
 
-vue
-<div class="form-actions">
-  <button type="submit" class="btn btn-primary">Save</button>
-  <Link :href="route('admin.staff.index')" class="btn">Cancel</Link>
-</div>
-5) Colors and Buttons
-Primary: For Create/Save.
-Outline/Neutral: For Export/Print actions.
-Destructive: For Delete with confirm modal.
-Keep contrast accessible (WCAG AA). Avoid introducing new palettes per module.
-If using Tailwind, use the centralized button classes defined in `resources/css/app.css` (@layer components):
+Checklist to apply per CRUD module (do one module at a time)
+1. Update shared primitives (only once)
+   - Buttons: use classes like `btn bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-100` (or use variables).
+   - Dropdowns / selects: invert background/text in dark mode; ensure options text uses `dark:text-...`.
+   - Table rows / headers: header `bg-gray-100 dark:bg-gray-700` and cell text `text-gray-800 dark:text-gray-200`.
+   - Cards: `bg-white dark:bg-gray-800` and `text-gray-900 dark:text-gray-100`.
+   - Inputs: border and placeholder colors: `border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400`.
+   - Modals: overlay + content background with dark variants.
+2. Update page-level views
+   - Index.vue: table headings, action buttons, badges, pagination controls.
+   - Show.vue: label / value pairs — labels should be `text-muted` and values `text-gray-800 dark:text-gray-200`.
+   - Create/Edit: form labels, placeholders, required/validation messages (`text-red-600 dark:text-red-400`), submit/cancel buttons.
+   - Ensure back/print/edit buttons have sufficient contrast in dark mode.
+3. Charts & Canvas
+   - Use CSS variables or a themeColors ref to configure Chart.js/Apex on mount and when theme toggles.
+   - Example: set legend/tick/toolip colors to `getComputedStyle(document.documentElement).getPropertyValue('--fg')` (or a runtime ref).
+4. Images / Icons
+   - Avoid images with transparent text. Provide alternative (SVG with currentColor) or add CSS filters for dark mode if necessary.
+5. Accessibility check
+   - Minimum contrast for body text: WCAG AA ~ 4.5:1 for normal text. Prefer `text-gray-200` over `text-gray-400` for small text on dark backgrounds.
 
-- `.btn` base + one color variant
-- Filled variants: `.btn-primary` (cyan), `.btn-success` (green), `.btn-info` (blue), `.btn-dark` (slate), `.btn-danger` (red)
-- Outline/neutral: `.btn-outline`
-- Icon-only actions: `.btn-icon`
+Key snippets
 
-Example toolbar usage:
+1) CSS variables (resources/css/app.css)
+```css
+/* filepath: c:\MyProject\gerayehealthcare_2\resources\css\app.css */
+/* ...existing code... */
+:root{
+  --bg: #ffffff;
+  --card-bg: #ffffff;
+  --fg: #1f2937; /* gray-800 */
+  --muted: #6b7280; /* gray-500 */
+  --border: #e5e7eb; /* gray-200 */
+  --ring: rgba(59,130,246,0.3);
+}
 
-```vue
-<div class="flex flex-wrap gap-2">
-  <Link :href="route('admin.module.create')" class="btn btn-primary">+ Create</Link>
-  <button @click="exportCsv" class="btn btn-success"><Download class="h-4 w-4"/> CSV</button>
-  <button @click="printCurrent" class="btn btn-dark"><Printer class="h-4 w-4"/> Print Current</button>
-  <button @click="printAll" class="btn btn-info"><Printer class="h-4 w-4"/> Print All</button>
-</div>
+.dark, .theme-dark {
+  --bg: #0b1220; /* near-black bg */
+  --card-bg: #0f1724; /* slightly lighter */
+  --fg: #e5e7eb; /* gray-200 */
+  --muted: #9ca3af; /* gray-400 */
+  --border: #374151; /* gray-700 */
+  --ring: rgba(99,102,241,0.18);
+}
+
+/* Use variables in utility classes if desired */
+.bg-app { background-color: var(--bg); }
+.text-fg { color: var(--fg); }
+.bg-card { background-color: var(--card-bg); }
+/* ...existing code... */
 ```
 
-Example icon actions in tables:
-
-```vue
-<div class="inline-flex items-center justify-end space-x-2">
-  <Link :href="route('admin.module.show', row.id)" class="btn-icon text-indigo-600" title="View"><Eye class="w-4 h-4"/></Link>
-  <Link :href="route('admin.module.edit', row.id)" class="btn-icon text-blue-600" title="Edit"><Edit3 class="w-4 h-4"/></Link>
-  <button @click="destroy(row.id)" class="btn-icon text-red-600 hover:text-red-800" title="Delete"><Trash2 class="w-4 h-4"/></button>
-</div>
+2) useAppearance guidance (resources/js/composables/useAppearance.ts)
+```ts
+// filepath: c:\MyProject\gerayehealthcare_2\resources\js\composables\useAppearance.ts
+// ...existing code...
+export function setTheme(isDark: boolean) {
+  const el = document.documentElement;
+  if (isDark) {
+    el.classList.add('dark','theme-dark');
+  } else {
+    el.classList.remove('dark','theme-dark');
+  }
+  // trigger a global event or call to update chart colors if needed
+  window.dispatchEvent(new CustomEvent('theme:changed'));
+}
 ```
 
-Palette mapping (do not override per module):
+3) Chart.js runtime theme update (example)
+```ts
+// Inside a page component setup():
+const applyChartTheme = () => {
+  const isDark = document.documentElement.classList.contains('dark');
+  const textColor = isDark ? '#E5E7EB' : '#374151';
+  // update options object or rerender chart
+};
 
-- Create/Save/Schedule → `.btn-primary`
-- Export CSV → `.btn-success`
-- Print Current → `.btn-dark`
-- Print All → `.btn-info`
-- Delete → `.btn-danger`
+onMounted(() => {
+  applyChartTheme();
+  window.addEventListener('theme:changed', applyChartTheme);
+});
+onUnmounted(() => {
+  window.removeEventListener('theme:changed', applyChartTheme);
+});
+```
 
-Centralization policy: Do not hardcode button colors per page. Always use these classes so changes apply globally.
+Button / action examples
+- Back / Edit / Print buttons:
+  - Use: `class="inline-flex items-center px-3 py-1.5 rounded text-sm font-medium bg-white text-gray-900 border border-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"`
+  - For danger / primary use consistent dark variants: `bg-indigo-600 text-white dark:bg-indigo-500`
 
-6) Export/Print UI Contract
-Actions must map to centralized backend:
-Export CSV → csv
-// Export PDF removed by policy; use Print All / Print Current via browser and universal templates
-Print Current → current_page
-Print All → all_records
-Print Single (from show/detail) → single_record
-Config-driven: No hardcoded columns in Vue. Use the same columns/labels as 
-ExportConfig
- where feasible.
-File names: Respect filename_prefix (no “filename” key).
-View: Always pdf-layout in backend.
-7) PDF/Print Layouts
-Universal views:
-- resources/views/universal-report.blade.php (lists/tabular reports)
-- resources/views/universal-single-record.blade.php (single record details)
-Special case retained: resources/views/insurance_claim_single.blade.php
-Component: Use x-printable-report for consistent headers/tables.
-Branding: Consistent header (logo/title), footer (page number/date), table styling.
-Orientation: Controlled by ExportConfig (portrait/landscape).
-Index column: Shown when include_index is true.
-Backend: Centralized via ExportableTrait using the universal templates.
-UI agent only ensures action links exist; layout comes from server-rendered PDF template.
+Example mapping for CRUD fields (labels/values)
+- Label: `text-sm text-muted-foreground dark:text-gray-300`
+- Value: `text-sm text-gray-800 dark:text-gray-100`
+- Field container: `bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-3`
 
-8) UX Behaviors
-Loading states: Show spinners on table load and form submit.
-Confirmations: Use modal for destructive actions (Delete).
-Toasts/alerts: Success and error feedback after actions.
-Keyboard and a11y: Focus management on modals; button labels, alt text.
-9) Staff module specifics
-Preload: departments and positions via config('hr.departments') and config('hr.positions') in `StaffController@create` and `@edit`.
-Forms: Position uses a dropdown bound to `positions`; `hourly_rate` uses `v-model.number` to ensure numeric values.
-Index: Includes leading “#” index column; columns mirror `ExportConfig::getStaffConfig()`.
-Search: Placeholder "Search by name, email, position...".
-Exports/Print: Buttons route to centralized handlers (CSV/PDF/print current/all/single).
-10) Minimal checklist to implement a module UI
-Buttons: Add [Entity], Export CSV, Print Current, Print All.
-Show footer (standard): Back to List (btn btn-outline), Edit (btn btn-primary), Print Current (btn btn-dark). No Delete.
-Forms: Save/Update (btn btn-primary), Cancel (btn btn-outline). Delete only on Edit, right-aligned, with confirmation.
-Search + sort + pagination (default per-page 5).
-Table columns consistent with module config.
-Create/Edit forms with inline validation + Save/Cancel.
-Print/Export buttons linked to backend centralized handlers.
-Preload only necessary lists for forms.
+Testing & QA (manual)
+1. Start dev server: `npm run dev` and `php artisan serve` (Windows).
+2. Open dashboard and toggle theme (app toggle or manually add/remove `dark` on <html>).
+3. Visit CRUD pages for the module:
+   - Index: check table header, rows, action buttons, pagination.
+   - Create/Edit: check inputs, dropdowns, validation colors.
+   - Show: check labels/values and action buttons.
+4. Charts: verify axes, legends and tooltips switch color.
+5. Images: ensure logos/icons visible on dark bg; if not, provide alternate SVG or add `filter: invert(1) hue-rotate(...)` as last resort.
+
+Workflow for module-by-module updates
+1. Update shared primitives (one time).
+2. Pick a module (suggestion order): Users, Patients, Inventory, Appointments.
+3. Update Index -> Create -> Edit -> Show in that order.
+4. Run smoke tests and ask for confirmation before next module.
+
+Commit / PR message suggestion
+- "chore(ui): add theme token guidance and update dashboard chart/text to support dark mode"
+- For each module change: "fix(ui): make <ModuleName> CRUD dark-mode friendly"
+
+If you confirm, I will:
+- Create/modify UI_Template.md with the content above (done here).
+- Then start the next module you prefer (suggest Users module). Which module should I update first?
