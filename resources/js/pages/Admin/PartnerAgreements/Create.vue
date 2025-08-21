@@ -27,9 +27,21 @@ const form = useForm({
 })
 
 function submit() {
-  form.post(route('admin.partner-agreements.store'), {
-    preserveScroll: true,
-  })
+  form
+    .transform((data: any) => ({
+      ...data,
+      partner_id: data.partner_id != null ? Number(data.partner_id) : null,
+      end_date: data.end_date || null,
+      priority_service_level: data.priority_service_level || null,
+      commission_type: data.commission_type || null,
+      commission_rate: data.commission_rate ?? null,
+      terms_document_path: data.terms_document_path || null,
+      signed_by_staff_id: data.signed_by_staff_id != null ? Number(data.signed_by_staff_id) : null,
+    }))
+    .post(route('admin.partner-agreements.store'), {
+      preserveScroll: true,
+      onFinish: () => form.transform((d: any) => d), // reset transform
+    })
 }
 </script>
 

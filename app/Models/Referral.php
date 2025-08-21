@@ -25,7 +25,7 @@ class Referral extends Model
 
     public function agreement()
     {
-        return $this->belongsTo(PartnerAgreement::class);
+        return $this->belongsTo(PartnerAgreement::class, 'agreement_id');
     }
 
     public function patient()

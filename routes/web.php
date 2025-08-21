@@ -163,7 +163,6 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
 
         // Referrals
         Route::get('referrals/export', [\App\Http\Controllers\Admin\ReferralController::class, 'export'])->name('referrals.export');
-        Route::get('referrals/print-all', [\App\Http\Controllers\Admin\ReferralController::class, 'printAll'])->name('referrals.printAll');
         Route::get('referrals/print-current', [\App\Http\Controllers\Admin\ReferralController::class, 'printCurrent'])->name('referrals.printCurrent');
         Route::get('referrals/{referral}/print', [\App\Http\Controllers\Admin\ReferralController::class, 'printSingle'])->name('referrals.printSingle');
         Route::resource('referrals', \App\Http\Controllers\Admin\ReferralController::class);

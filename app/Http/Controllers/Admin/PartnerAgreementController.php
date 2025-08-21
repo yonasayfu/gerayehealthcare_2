@@ -80,6 +80,15 @@ class PartnerAgreementController extends BaseController
         ]);
     }
 
+    public function show($id)
+    {
+        $partnerAgreement = $this->service->getById($id, ['partner', 'signedBy']);
+
+        return Inertia::render('Admin/PartnerAgreements/Show', [
+            'partnerAgreement' => $partnerAgreement,
+        ]);
+    }
+
     public function export(Request $request)
     {
         return $this->service->export($request);

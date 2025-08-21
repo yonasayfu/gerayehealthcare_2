@@ -20,7 +20,7 @@ const referralStatuses = [
     <!-- Partner -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Partner</label>
-      <select v-model="form.partner_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model.number="form.partner_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
         <option :value="null">Select Partner</option>
         <option v-for="partner in partners" :key="partner.id" :value="partner.id">{{ partner.name }}</option>
       </select>
@@ -30,7 +30,7 @@ const referralStatuses = [
     <!-- Partner Agreement -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Partner Agreement</label>
-      <select v-model="form.agreement_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model.number="form.agreement_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
         <option :value="null">Select Agreement</option>
         <option v-for="agreement in partnerAgreements" :key="agreement.id" :value="agreement.id">{{ agreement.title }}</option>
       </select>
@@ -40,7 +40,7 @@ const referralStatuses = [
     <!-- Referred Patient -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Referred Patient</label>
-      <select v-model="form.referred_patient_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model.number="form.referred_patient_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
         <option :value="null">Select Patient</option>
         <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.name }}</option>
       </select>

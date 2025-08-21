@@ -42,6 +42,15 @@ class ReferralController extends BaseController
         ]);
     }
 
+    public function show($id)
+    {
+        $referral = $this->service->getById($id, ['partner', 'agreement', 'patient']);
+
+        return Inertia::render('Admin/Referrals/Show', [
+            'referral' => $referral,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('Admin/Referrals/Create', [
@@ -96,11 +105,6 @@ class ReferralController extends BaseController
     public function export(Request $request)
     {
         return $this->service->export($request);
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->service->printAll($request);
     }
 
     public function printCurrent(Request $request)

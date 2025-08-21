@@ -36,9 +36,26 @@ const form = useForm({
 });
 
 function submit() {
-  form.post(route('admin.referrals.update', { referral: props.referral.id }), {
-    preserveScroll: true,
-  });
+  form
+    .transform((data: any) => ({
+      ...data,
+      partner_id: data.partner_id != null ? Number(data.partner_id) : null,
+      agreement_id: data.agreement_id != null ? Number(data.agreement_id) : null,
+      referred_patient_id: data.referred_patient_id != null ? Number(data.referred_patient_id) : null,
+      referral_date: data.referral_date,
+      status: data.status || null,
+      notes: data.notes || null,
+    }))
+    .post(route('admin.referrals.update', { referral: props.referral.id }), {
+      preserveScroll: true,
+      onFinish: () => form.transform((d: any) => d),
+    });
+}
+
+function handleDelete() {
+  if (window.confirm('Are you sure you want to delete this referral?')) {
+    router.delete(route('admin.referrals.destroy', { referral: props.referral.id }))
+  }
 }
 </script>
 
@@ -69,7 +86,7 @@ function submit() {
               </button>
               <button
                 class="btn btn-danger ml-auto"
-                @click="() => { if (confirm('Are you sure you want to delete this referral?')) { router.delete(route('admin.referrals.destroy', { referral: props.referral.id })) } }"
+                @click="handleDelete"
               >
                 Delete
               </button>

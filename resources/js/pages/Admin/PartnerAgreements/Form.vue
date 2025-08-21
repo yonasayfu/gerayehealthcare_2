@@ -37,8 +37,8 @@ const commissionTypes = [
     <!-- Partner -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Partner</label>
-      <select v-model="form.partner_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-        <option :value="null">Select Partner</option>
+      <select v-model.number="form.partner_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+        <option disabled :value="null">Select Partner</option>
         <option v-for="partner in partners" :key="partner.id" :value="partner.id">{{ partner.name }}</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors.partner_id">{{ form.errors.partner_id }}</span>
@@ -61,7 +61,7 @@ const commissionTypes = [
     <div>
       <label class="block text-sm font-medium text-gray-700">Agreement Type</label>
       <select v-model="form.agreement_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-        <option value="">Select Type</option>
+        <option disabled value="">Select Type</option>
         <option v-for="typeOption in agreementTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors.agreement_type">{{ form.errors.agreement_type }}</span>
@@ -71,7 +71,7 @@ const commissionTypes = [
     <div>
       <label class="block text-sm font-medium text-gray-700">Status</label>
       <select v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
-        <option value="">Select Status</option>
+        <option disabled value="">Select Status</option>
         <option v-for="statusOption in agreementStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors.status">{{ form.errors.status }}</span>
@@ -148,7 +148,7 @@ const commissionTypes = [
     <!-- Signed By Staff -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Signed By Staff</label>
-      <select v-model="form.signed_by_staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model.number="form.signed_by_staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
         <option :value="null">Select Staff</option>
         <option v-for="staffMember in staff" :key="staffMember.id" :value="staffMember.id">{{ staffMember.name }}</option>
       </select>

@@ -182,9 +182,9 @@ class BaseController extends Controller
             $name = $parameter->getName();
             if (array_key_exists($name, $validatedData)) {
                 $value = $validatedData[$name];
-                // Ensure staff_id is always an int
-                if ($name === 'staff_id') {
-                    \Log::debug('prepareDataForDTO: staff_id value', ['value' => $value]);
+                // Ensure common FK ids are always integers
+                if (in_array($name, ['staff_id', 'partner_id', 'signed_by_staff_id', 'agreement_id', 'referred_patient_id'], true)) {
+                    \Log::debug('prepareDataForDTO: casting integer id', ['field' => $name, 'value' => $value]);
                     if (is_array($value)) {
                         // Try to extract a numeric value from the array
                         if (isset($value['id']) && is_numeric($value['id'])) {
@@ -195,7 +195,7 @@ class BaseController extends Controller
                             if (! empty($numeric)) {
                                 $value = array_shift($numeric);
                             } else {
-                                throw new \InvalidArgumentException('staff_id must be an integer or contain an id key. Got: '.json_encode($value));
+                                throw new \InvalidArgumentException($name.' must be an integer or contain an id key. Got: '.json_encode($value));
                             }
                         }
                     }

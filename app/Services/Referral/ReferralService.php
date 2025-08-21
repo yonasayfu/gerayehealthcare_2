@@ -6,6 +6,7 @@ use App\Http\Config\ExportConfig;
 use App\Http\Traits\ExportableTrait;
 use App\Models\Referral;
 use App\Services\BaseService;
+use Illuminate\Http\Request;
 
 class ReferralService extends BaseService
 {
@@ -25,5 +26,22 @@ class ReferralService extends BaseService
     protected function getExportConfig(): array
     {
         return ExportConfig::getReferralConfig();
+    }
+
+    // Public API used by ReferralController
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, Referral::class, $this->getExportConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, Referral::class, $this->getExportConfig());
+    }
+
+    public function printSingle(Request $request, $id)
+    {
+        $referral = Referral::findOrFail($id);
+        return $this->handlePrintSingle($request, $referral, $this->getExportConfig());
     }
 }
