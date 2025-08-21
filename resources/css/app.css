@@ -145,6 +145,69 @@
     --sidebar-ring: hsl(212.7 26.8% 83.9%);
 }
 
+:root {
+    /* semantic colors — change once to theme whole app */
+    --ui-bg: 255, 255, 255;
+    --ui-text: 15, 23, 42;
+    --accent: 79, 70, 229;
+    /* indigo-600 (example) */
+    --glass-alpha: 0.65;
+
+    /* sizes */
+    --btn-padding-y: .625rem;
+    /* 10px */
+    --btn-padding-x: 1rem;
+    /* 16px */
+    --btn-font-size: .95rem;
+    /* ~15px */
+    --btn-radius: .5rem;
+    /* 8px */
+}
+
+.btn-glass {
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-size: var(--btn-font-size);
+    border-radius: var(--btn-radius);
+    font-weight: 600;
+    gap: .625rem;
+    background: linear-gradient(180deg, rgba(var(--ui-bg), var(--glass-alpha)), rgba(var(--ui-bg), 0.45));
+    color: rgb(var(--ui-text));
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    backdrop-filter: blur(8px) saturate(140%);
+    transition: transform .12s, box-shadow .12s;
+}
+
+.btn-glass:focus {
+    box-shadow: 0 0 0 4px rgba(var(--accent), 0.12);
+    outline: none;
+}
+
+/* small / compact (table action column) */
+.btn-glass-sm {
+    padding: .4rem .6rem;
+    font-size: .85rem;
+}
+
+/* primary variant example */
+.btn-primary {
+    background: linear-gradient(180deg, rgba(79, 70, 229, 0.95), rgba(67, 56, 202, 0.95));
+    color: #fff;
+    border: 1px solid rgba(67, 56, 202, 0.9);
+}
+
+.dark .btn-glass {
+    color: #f8fafc;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn-glass {
+        transition: none;
+        transform: none;
+    }
+}
+
 @layer components {
     .btn {
         @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
@@ -186,58 +249,156 @@
         @apply inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900;
     }
 
-    /* Glass button utility used by CRUD action buttons */
+    /* Glass button utility used by CRUD action buttons (liquid / macOS Tahoe inspired) */
     .btn-glass {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.375rem;
-        font-size: 0.875rem;
-        font-weight: 500;
+        gap: .5rem;
+        padding: .5rem .75rem;
+        border-radius: .5rem;
+        font-size: .875rem;
+        font-weight: 600;
         line-height: 1;
         cursor: pointer;
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
-        transition: background-color .15s, border-color .15s, transform .08s;
-        background-color: rgba(255, 255, 255, 0.62);
-        color: #111827;
+        -webkit-backdrop-filter: blur(8px) saturate(140%);
+        backdrop-filter: blur(8px) saturate(140%);
+        transition: background-color .15s, border-color .15s, transform .08s, box-shadow .12s;
+        background: linear-gradient(180deg, rgba(255, 255, 255, .65), rgba(255, 255, 255, .45));
+        color: #0f172a;
         /* gray-900 */
         border: 1px solid rgba(15, 23, 42, 0.06);
-        /* subtle border */
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+        box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08), inset 0 2px 6px rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-glass:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
     }
 
     .btn-glass:hover {
-        transform: translateY(-1px);
+        transform: translateY(-2px);
     }
 
     .btn-glass:active {
         transform: translateY(0);
     }
 
-    .btn-glass:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    /* Liquid highlight */
+    .btn-glass::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.12) 100%);
+        mix-blend-mode: screen;
+        transform: translateX(-40%) rotate(-8deg);
+        opacity: .85;
+        filter: blur(6px);
+    }
+
+    /* small variant */
+    .btn-glass-sm {
+        padding: .35rem .6rem;
+        font-size: .8125rem;
+        gap: .375rem;
     }
 
     /* Dark variant */
     .dark .btn-glass {
-        background-color: rgba(255, 255, 255, 0.04);
-        /* translucent on dark */
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
         color: #f8fafc;
-        /* gray-50 */
         border: 1px solid rgba(255, 255, 255, 0.06);
-        box-shadow: 0 1px 2px rgba(2, 6, 23, 0.6);
+        box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6), inset 0 2px 8px rgba(255, 255, 255, 0.02);
     }
 
-    .dark .btn-glass:hover {
-        background-color: rgba(255, 255, 255, 0.06);
+    .dark .btn-glass::after {
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0.01) 60%, rgba(255, 255, 255, 0.04) 100%);
+        opacity: .6;
     }
 
-    /* Optional small size */
-    .btn-glass-sm {
-        padding: 0.35rem 0.5rem;
-        font-size: 0.8125rem;
+    /* Icon sizing helper */
+    .btn-glass svg,
+    .btn-glass .icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* LIQUID GLASS STYLES (macOS Tahoe / liquid glass) */
+    .liquidGlass-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        padding: 0.75rem;
+        -webkit-backdrop-filter: blur(12px) saturate(150%);
+        backdrop-filter: blur(12px) saturate(150%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08), inset 0 6px 18px rgba(255, 255, 255, 0.45);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .dark .liquidGlass-wrapper {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45), inset 0 6px 18px rgba(255, 255, 255, 0.02);
+    }
+
+    .liquidGlass-wrapper:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
+    }
+
+    /* stronger highlight pseudo-element */
+    .liquidGlass-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.06) 35%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0) 100%);
+        mix-blend-mode: screen;
+        filter: blur(8px);
+        transform: translateX(-30%) rotate(-6deg);
+        opacity: .95;
+        z-index: 0;
+    }
+
+    /* subtle inner shine */
+    .liquidGlass-inner-shine {
+        position: absolute;
+        top: -25%;
+        left: -10%;
+        width: 140%;
+        height: 80%;
+        pointer-events: none;
+        background: radial-gradient(600px 160px at 20% 10%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.02) 35%, transparent 60%);
+        transform: rotate(-6deg);
+        z-index: 1;
+    }
+
+    /* content sits above layers */
+    .liquidGlass-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* make sure .btn-glass is above inner shine */
+    .liquidGlass-content .btn-glass {
+        position: relative;
+        z-index: 3;
+    }
+
+    /* fallback for browsers that ignore backdrop-filter */
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+        .liquidGlass-wrapper {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .dark .liquidGlass-wrapper {
+            background: rgba(17, 24, 39, 0.85);
+        }
     }
 }

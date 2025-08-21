@@ -192,10 +192,10 @@ watch(currentTab, (newTab) => {
 </script>
 
 <template>
-  <Head title="Dashboard" />
-
   <AppLayout>
-    <div class="flex-1 space-y-4 p-8 pt-6">
+    <Head title="Dashboard" />
+
+    <div class="p-6 space-y-6">
       <DashboardTabs @tab-change="handleTabChange" />
 
       <div v-if="currentTab === 'Overview'">
@@ -341,6 +341,53 @@ watch(currentTab, (newTab) => {
           </li>
         </ul>
       </div>
+
+      <!-- Liquid glass demo card (no logic change) -->
+      <div class="liquidGlass-wrapper max-w-3xl mx-auto">
+        <div class="liquidGlass-effect" aria-hidden="true"></div>
+        <div class="liquidGlass-tint" aria-hidden="true"></div>
+        <div class="liquidGlass-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="liquidGlass-title">Overview — Patients</div>
+              <div class="liquidGlass-sub">Recent admissions, quick actions and exports</div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <a :href="route('admin.patients.create')" class="btn-glass btn-glass-sm">
+                <span>Add Patient</span>
+              </a>
+              <button @click="printAllPatients" class="btn-glass btn-glass-sm">
+                <span>Print All</span>
+              </button>
+              <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- optional small stats row (visual only) -->
+          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
+              <div class="text-xs text-gray-600 dark:text-gray-300">Total Patients</div>
+              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.total_patients ?? '-' }}</div>
+            </div>
+            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
+              <div class="text-xs text-gray-600 dark:text-gray-300">Active Today</div>
+              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.active_today ?? '-' }}</div>
+            </div>
+            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
+              <div class="text-xs text-gray-600 dark:text-gray-300">New This Week</div>
+              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.new_week ?? '-' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ...rest of existing dashboard content ... -->
+
     </div>
   </AppLayout>
 </template>

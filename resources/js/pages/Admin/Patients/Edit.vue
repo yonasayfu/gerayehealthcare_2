@@ -53,32 +53,27 @@ function submit() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
 
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Patient</h1>
-          <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Update patient information below.</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <Link
-            :href="route('admin.patients.index')"
-            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-700"
-          >
-            Back
-          </Link>
+      <!-- Liquid-glass header: Back button removed -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Patient</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Update patient information below.</p>
+          </div>
+          <!-- intentionally no Back button here -->
         </div>
       </div>
 
-      <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <!-- reuse shared Form component (no changes to props/logic) -->
           <Form :form="form" :corporateClients="props.corporateClients" :insurancePolicies="props.insurancePolicies" />
+
+          <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
           <div class="flex justify-end gap-2 pt-2">
             <Link
               :href="route('admin.patients.index')"
-              class="inline-flex items-center px-3 py-2 rounded-md text-sm bg-white text-gray-800 border border-gray-200 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-700 dark:hover:bg-gray-600"
+              class="btn-glass btn-glass-sm"
             >
               Cancel
             </Link>
@@ -86,7 +81,7 @@ function submit() {
             <button
               type="submit"
               :disabled="form.processing"
-              class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+              class="btn-glass btn-glass-sm"
             >
               {{ form.processing ? 'Saving...' : 'Save Changes' }}
             </button>

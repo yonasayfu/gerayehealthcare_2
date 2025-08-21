@@ -97,61 +97,59 @@ function toggleSort(field: string) {
 </script>
 
 <template>
-  <Head title="Patients" />
+  <AppLayout>
+    <Head title="Patients" />
 
-  <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-6 print:p-0 print:space-y-0">
+    <div class="flex-1 space-y-4 p-6">
 
-      <!-- Header / actions -->
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Patients</h1>
-          <p class="text-sm text-muted-foreground dark:text-gray-300">Manage all patient records here.</p>
-          <p class="text-sm text-muted-foreground dark:text-gray-300">Today's Date: {{ currentDate }}</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link
-            :href="route('admin.patients.create')"
-            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-600"
-          >
-            + Add Patient
-          </Link>
+      <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
 
-          <button
-            @click="exportData('csv')"
-            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 dark:bg-emerald-500 dark:hover:bg-emerald-600"
-            aria-label="Export CSV"
-          >
-            <Download class="h-4 w-4 mr-2" /> CSV
-          </button>
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Patients</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage patient records</p>
+            </div>
 
-          <button
-            @click="printCurrentView"
-            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-gray-700 text-white shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-600 dark:hover:bg-gray-500"
-            aria-label="Print Current"
-          >
-            <Printer class="h-4 w-4 mr-2" /> Print Current
-          </button>
+            <!-- (removed header search) -->
+          </div>
 
-          <button
-            @click="printAllPatients"
-            class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium bg-sky-600 text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:bg-sky-500 dark:hover:bg-sky-600"
-          >
-            <Printer class="h-4 w-4 mr-2" /> Print All
-          </button>
+          <div class="flex items-center gap-2 print:hidden">
+            <a :href="route('admin.patients.create')" class="btn-glass">
+              <span>Add Patient</span>
+            </a>
+
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+
+            <button @click="printAllPatients" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print All</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Search / per page -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <div class="relative w-full md:w-1/3">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
           <input
-            type="text"
             v-model="search"
+            type="text"
             placeholder="Search patients..."
-            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100"
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
           />
-          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 dark:text-gray-400" />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
         </div>
 
         <div>
@@ -255,3 +253,51 @@ function toggleSort(field: string) {
     </div>
   </AppLayout>
 </template>
+
+<style>
+/* ...existing styles... */
+
+/* Search card — pop / glass effect */
+.search-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.45));
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(15,23,42,0.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.06), inset 0 2px 6px rgba(255,255,255,0.5);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+  z-index: 2;
+}
+
+/* dark variant uses inherited .dark rules from .btn-glass / liquidGlass */
+.dark .search-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.45), inset 0 2px 8px rgba(255,255,255,0.02);
+}
+
+/* hover / focus pop */
+.search-card:hover,
+.search-card:focus-within {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 14px 30px rgba(2,6,23,0.10);
+}
+
+/* input sizing */
+.search-card input {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  background: transparent;
+}
+
+/* accessibility: reduce motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .search-card,
+  .search-card:hover,
+  .search-card:focus-within {
+    transition: none;
+    transform: none;
+  }
+}
+</style>
