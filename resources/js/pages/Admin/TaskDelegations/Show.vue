@@ -22,13 +22,19 @@ const props = defineProps<{
     { title: 'Task Delegations', href: route('admin.task-delegations.index') },
     { title: props.taskDelegation.title, href: '' }
   ]">
-    <div class="bg-background text-foreground border border-border rounded-lg shadow m-6">
-      <div class="flex items-center justify-between p-5 border-b border-border">
-        <h3 class="text-xl font-semibold">Task Details</h3>
-        <div class="flex gap-2">
-          <Link :href="route('admin.task-delegations.index')" class="btn btn-outline">Back to List</Link>
-          <Link :href="route('admin.task-delegations.edit', { task_delegation: props.taskDelegation.id })" class="btn btn-primary">Edit</Link>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
+
+      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Task Delegation Details</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Task Delegation: {{ item.name || item.title || item.id }}</p>
+          </div>
+          <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
+      </div>
       </div>
 
       <div class="p-6 space-y-4">

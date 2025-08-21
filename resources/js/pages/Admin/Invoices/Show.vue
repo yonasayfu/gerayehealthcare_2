@@ -75,29 +75,19 @@ const closeShare = () => (showShare.value = false);
 <template>
   <Head :title="`Invoice ${invoice.invoice_number}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Invoice {{ invoice.invoice_number }}
-            </h3>
-            <div class="ml-auto inline-flex items-center gap-2 relative">
-              <a :href="route('admin.invoices.print', invoice.id)" target="_blank" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-md transition">
-                <Printer class="h-4 w-4" /> Print
-              </a>
-              <a :href="downloadUrl" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-2 rounded-md transition">
-                <Download class="h-4 w-4" /> Download PDF
-              </a>
-              <!-- Share dropdown -->
-              <div class="relative" @keydown.escape.prevent.stop="closeShare">
-                <button @click="toggleShare" type="button" class="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs px-3 py-2 rounded-md transition">
-                  <Share2 class="h-4 w-4" /> Share
-                </button>
-                <div v-if="showShare" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black/5 z-20">
-                  <div class="py-1 text-sm">
-                    <button @click="shareViaTelegram(); closeShare()" class="w-full text-left px-3 py-2 hover:bg-gray-50">Share via Telegram</button>
-                    <button @click="copyPublicLink(); closeShare()" class="w-full text-left px-3 py-2 hover:bg-gray-50">Copy Public Link</button>
-                  </div>
+      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Invoice Details</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Invoice: {{ item.name || item.title || item.id }}</p>
+          </div>
+          <!-- top actions intentionally removed to avoid duplication; see footer -->
+        </div>
+      </div>
                 </div>
               </div>
               <Link :href="route('admin.invoices.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center">
@@ -107,24 +97,19 @@ const closeShare = () => (showShare.value = false);
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-8">
-                <div class="flex justify-between items-start mb-8">
-                  <div>
-                    <h1 class="text-2xl font-bold text-gray-800">INVOICE</h1>
-                    <p class="text-gray-500">{{ invoice.invoice_number }}</p>
-                  </div>
-                  <div class="text-right">
-                    <h2 class="text-xl font-semibold">Your Company Name</h2>
-                    <p class="text-sm text-gray-500">123 Health St, Med-City, 1000</p>
-                  </div>
-                </div>
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                  <div>
-                    <h3 class="font-semibold text-gray-500">BILL TO</h3>
-                    <p class="font-bold">{{ invoice.patient.full_name }}</p>
-                    <p>{{ invoice.patient.address }}</p>
-                  </div>
+      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Invoice Details</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Invoice: {{ item.name || item.title || item.id }}</p>
+          </div>
+          <!-- top actions intentionally removed to avoid duplication; see footer -->
+        </div>
+      </div>
                   <div class="text-right">
                     <p><span class="font-semibold">Invoice Date:</span> {{ formatDate(invoice.invoice_date) }}</p>
                     <p><span class="font-semibold">Due Date:</span> {{ formatDate(invoice.due_date) }}</p>

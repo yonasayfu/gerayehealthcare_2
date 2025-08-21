@@ -15,7 +15,7 @@ const props = defineProps({
     <TextInput
       id="name"
       type="text"
-      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
       v-model="props.form.name"
       required
       autofocus
@@ -28,7 +28,7 @@ const props = defineProps({
     <TextInput
       id="api_endpoint"
       type="url"
-      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
       v-model="props.form.api_endpoint"
     />
     <InputError class="mt-2" :message="props.form.errors.api_endpoint" />
@@ -39,7 +39,7 @@ const props = defineProps({
     <TextInput
       id="api_credentials"
       type="text"
-      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
       v-model="props.form.api_credentials"
     />
     <InputError class="mt-2" :message="props.form.errors.api_credentials" />

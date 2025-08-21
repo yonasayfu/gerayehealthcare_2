@@ -99,11 +99,11 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button @click="exportData('csv')" class="btn btn-success" title="Export CSV" aria-label="Export CSV">
+          <button @click="exportData('csv')" class="btn-glass btn-glass-sm" title="Export CSV" aria-label="Export CSV">
             <Download class="h-4 w-4" />
             <span class="ml-2">CSV</span>
           </button>
-          <button @click="printCurrentView" class="btn btn-dark" title="Print current page" aria-label="Print current page">
+          <button @click="printCurrentView" class="btn-glass btn-glass-sm" title="Print current page" aria-label="Print current page">
             <Printer class="h-4 w-4" />
             <span class="ml-2">Print Current</span>
           </button>
@@ -112,14 +112,21 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 
       <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
         <!-- Search and Filter Section -->
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-          <div class="relative w-full md:w-1/3">
-            <input type="text" v-model="search" placeholder="Search transactions..." class="w-full input input-bordered pr-9" />
-            <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-          </div>
+              <!-- Search / per page -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search inventory transactions..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
+          />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
+        </div>
           <div>
             <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="25">25</option>

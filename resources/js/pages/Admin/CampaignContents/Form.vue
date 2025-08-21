@@ -39,7 +39,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="title"
         type="text"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.title"
         required
         autofocus
@@ -92,7 +92,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="media_url"
         type="url"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.media_url"
       />
       <InputError class="mt-2" :message="props.form.errors.media_url" />
@@ -116,7 +116,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="scheduled_post_date"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedScheduledPostDate"
       />
       <InputError class="mt-2" :message="props.form.errors.scheduled_post_date" />
@@ -127,7 +127,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="actual_post_date"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedActualPostDate"
       />
       <InputError class="mt-2" :message="props.form.errors.actual_post_date" />

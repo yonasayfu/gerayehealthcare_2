@@ -78,7 +78,7 @@ function destroy(id: number) {
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Items per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 text-sm">
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -111,14 +111,26 @@ function destroy(id: number) {
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
-                  <Link :href="route('admin.users.show', user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="View User">
-                    <Eye class="w-4 h-4 text-gray-600" />
+                  <Link
+                    :href="route('admin.users.show', user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
                   </Link>
-                  <Link :href="route('admin.users.edit', user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700" title="Edit Role">
-                    <Edit3 class="w-4 h-4 text-blue-600" />
+                  <Link
+                    :href="route('admin.users.edit', user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
+                    title="Edit"
+                  >
+                    <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-gray-700" title="Delete User">
-                    <Trash2 class="w-4 h-4 text-red-600" />
+                  <button
+                    @click="destroy(user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
+                    <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>

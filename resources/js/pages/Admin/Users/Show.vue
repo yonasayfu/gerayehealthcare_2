@@ -24,30 +24,23 @@ const breadcrumbs = [
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
       <div class="flex justify-start mb-4">
-        <Link :href="route('admin.users.index')" class="btn btn-outline">
+        <Link :href="route('admin.users.index')" class="btn-glass btn-glass-sm">
           Back to List
         </Link>
       </div>
-      <div class="print-document bg-card text-card-foreground shadow rounded-lg p-6">
-        <div class="flex items-center space-x-4">
-          <div>
-            <h2 class="text-2xl font-bold text-foreground">{{ user.name }}</h2>
-            <div class="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <Mail class="h-4 w-4" />
-              <a :href="`mailto:${user.email}`" class="hover:underline">{{ user.email }}</a>
-            </div>
-          </div>
-        </div>
+          <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="mt-8 border-t pt-6">
-          <h3 class="text-lg font-semibold text-foreground">Assigned Roles</h3>
-          <div class="mt-4 flex flex-wrap gap-2">
-            <span v-for="role in user.roles" :key="role.id" class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-800 text-sm font-semibold rounded-full dark:bg-indigo-900 dark:text-indigo-200">
-              <Shield class="h-4 w-4" />
-              {{ role.name }}
-            </span>
-            <span v-if="!user.roles || user.roles.length === 0" class="text-gray-500 italic">No roles assigned.</span>
+      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">User Details</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">User: {{ item.name || item.title || item.id }}</p>
           </div>
+          <!-- top actions intentionally removed to avoid duplication; see footer -->
+        </div>
+      </div>
         </div>
       </div>
     </div>

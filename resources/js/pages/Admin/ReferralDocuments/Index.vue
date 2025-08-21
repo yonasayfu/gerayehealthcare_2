@@ -4,28 +4,40 @@
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Referral Documents</h1>
-          <p class="text-sm text-muted-foreground">Manage all referral documents here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.referral-documents.create')" class="btn btn-primary">
-            + Add Document
-          </Link>
-          <button @click="printAllRecords" :disabled="isProcessing" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrent" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Referral Documents</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage referral documents</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.referral-documents.create')" class="btn-glass">
+              <span>Add Referral Document</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="flex items-center justify-end gap-3 p-3 print:hidden">
           <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>

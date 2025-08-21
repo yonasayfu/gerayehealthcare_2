@@ -31,7 +31,7 @@ const engagementStatuses = [
         type="text"
         placeholder="Partner Name"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.name">{{ form.errors.name }}</span>
     </div>
@@ -39,7 +39,7 @@ const engagementStatuses = [
     <!-- Type -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Type</label>
-      <select v-model="form.type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.type" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select Type</option>
         <option v-for="typeOption in partnerTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
@@ -53,7 +53,7 @@ const engagementStatuses = [
         v-model="form.contact_person"
         type="text"
         placeholder="Contact Person Name"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.contact_person">{{ form.errors.contact_person }}</span>
     </div>
@@ -65,7 +65,7 @@ const engagementStatuses = [
         v-model="form.email"
         type="email"
         placeholder="Email Address"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.email">{{ form.errors.email }}</span>
     </div>
@@ -77,7 +77,7 @@ const engagementStatuses = [
         v-model="form.phone"
         type="text"
         placeholder="Phone Number"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.phone">{{ form.errors.phone }}</span>
     </div>
@@ -89,7 +89,7 @@ const engagementStatuses = [
         v-model="form.address"
         placeholder="Full Address"
         rows="3"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       ></textarea>
       <span class="text-red-500 text-xs" v-if="form.errors.address">{{ form.errors.address }}</span>
     </div>
@@ -97,7 +97,7 @@ const engagementStatuses = [
     <!-- Engagement Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Engagement Status</label>
-      <select v-model="form.engagement_status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.engagement_status" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select Status</option>
         <option v-for="statusOption in engagementStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>
@@ -107,7 +107,7 @@ const engagementStatuses = [
     <!-- Account Manager -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Account Manager</label>
-      <select v-model="form.account_manager_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.account_manager_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Account Manager</option>
         <option v-for="staffMember in staff" :key="staffMember.id" :value="staffMember.id">{{ staffMember.name }}</option>
       </select>
@@ -121,7 +121,7 @@ const engagementStatuses = [
         v-model="form.notes"
         placeholder="Any additional notes about the partner"
         rows="5"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       ></textarea>
       <span class="text-red-500 text-xs" v-if="form.errors.notes">{{ form.errors.notes }}</span>
     </div>

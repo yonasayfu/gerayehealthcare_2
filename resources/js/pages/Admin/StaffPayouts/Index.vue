@@ -133,32 +133,29 @@ const chartOptions = {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Payouts & Performance</h1>
-        <p class="text-sm text-muted-foreground">Review earnings, performance metrics, and process payments for staff.</p>
-      </div>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-        <div class="relative w-full md:w-1/3">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Search staff by name..."
-            class="form-input w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-        <div class="flex items-center gap-3">
-          <a :href="route('admin.staff-payouts.printAll')" target="_blank" class="btn btn-info">
-            Print All
-          </a>
-          <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
-          <select id="per-page" v-model="perPage" class="form-select rounded-md shadow-sm text-sm">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Staff Payouts</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage staff payouts</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.staff-payouts.create')" class="btn-glass">
+              <span>Add Staff Payout</span>
+            </Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 

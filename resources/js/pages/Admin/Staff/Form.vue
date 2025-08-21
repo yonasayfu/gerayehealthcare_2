@@ -51,7 +51,7 @@ onBeforeUnmount(() => {
         type="text"
         placeholder="First Name"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.first_name">{{ form.errors.first_name }}</span>
     </div>
@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
         type="text"
         placeholder="Last Name"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.last_name">{{ form.errors.last_name }}</span>
     </div>
@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
         type="email"
         placeholder="Email"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.email">{{ form.errors.email }}</span>
     </div>
@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
         v-model="form.phone"
         type="text"
         placeholder="Phone"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.phone">{{ form.errors.phone }}</span>
     </div>
@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
     <!-- Position -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Position</label>
-      <select v-model="form.position" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.position" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select position</option>
         <option v-for="pos in positions" :key="pos" :value="pos">{{ pos }}</option>
       </select>
@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
         step="0.01"
         min="0"
         placeholder="e.g., 50.00"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.hourly_rate">{{ form.errors.hourly_rate }}</span>
     </div>
@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
     <!-- Department -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Department</label>
-      <select v-model="form.department" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select department</option>
         <option v-for="department in departments" :key="department" :value="department">{{ department }}</option>
       </select>
@@ -131,7 +131,7 @@ onBeforeUnmount(() => {
     <!-- Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Status</label>
-      <select v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.status" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
       </select>
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
       <input
         v-model="form.hire_date"
         type="date"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.hire_date">{{ form.errors.hire_date }}</span>
     </div>
@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
         type="file"
         accept="image/*"
         @change="form.photo = ($event.target as HTMLInputElement).files ? ($event.target as HTMLInputElement).files[0] : null"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.photo">{{ form.errors.photo }}</span>
 

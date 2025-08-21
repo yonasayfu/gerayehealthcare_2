@@ -18,7 +18,7 @@ console.log('Form.vue - form.category initial:', props.form.category);
     <TextInput
       id="name"
       type="text"
-      class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+      class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
       v-model="props.form.name"
       required
       autofocus

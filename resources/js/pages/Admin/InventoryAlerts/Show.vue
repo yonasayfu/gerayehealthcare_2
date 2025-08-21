@@ -30,14 +30,14 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
         <div class="flex items-center gap-2">
           <Link
             :href="returnTo || route('admin.inventory-alerts.index')"
-            class="btn btn-outline"
+            class="btn-glass btn-glass-sm"
             title="Back"
           >
             <ArrowLeft class="w-4 h-4" /> Back
           </Link>
           <Link
             :href="route('admin.inventory-alerts.edit', inventoryAlert.id)"
-            class="btn btn-info"
+            class="btn-glass btn-glass-sm"
             title="Edit Alert"
           >
             <Edit3 class="w-4 h-4" /> Edit
@@ -119,7 +119,7 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
               </div>
             </div>
             <div class="flex gap-2 pt-2">
-              <Link :href="route('admin.task-delegations.edit', inventoryAlert.delegatedTask.id)" class="btn btn-info">Edit Task</Link>
+              <Link :href="route('admin.task-delegations.edit', inventoryAlert.delegatedTask.id)" class="btn-glass btn-glass-sm">Edit Task</Link>
             </div>
           </template>
 
@@ -132,7 +132,7 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
                 inventory_alert_id: inventoryAlert.id,
                 return_to: route('admin.inventory-alerts.show', { inventory_alert: inventoryAlert.id })
               })"
-              class="btn btn-success inline-flex items-center gap-2"
+              class="btn-glass btn-glass-sm"
             >
               <ClipboardList class="w-4 h-4" /> Delegate Task
             </Link>

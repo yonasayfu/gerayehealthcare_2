@@ -185,21 +185,31 @@ function clearFilters() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div class="flex-grow min-w-0">
-          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Marketing Tasks Management</h1>
-          <p class="text-sm text-muted-foreground">Manage all marketing tasks here, including creation, editing, and deletion.</p>
-        </div>
-        <div class="flex-shrink-0 flex flex-wrap gap-2">
-          <Link :href="route('admin.marketing-tasks.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Task
-          </Link>
-          <div class="flex-shrink-0 flex flex-wrap gap-2">
-            <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-900 hover:bg-gray-950 text-white rounded-md focus:ring-4 focus:ring-gray-300">
-              <Printer class="h-4 w-4" /> Print Current
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Marketing Tasks</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage marketing tasks</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.marketing-tasks.create')" class="btn-glass">
+              <span>Add Marketing Task</span>
+            </Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
             </button>
           </div>
         </div>
+      </div>
       </div>
 
 
@@ -218,7 +228,7 @@ function clearFilters() {
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -314,19 +324,23 @@ function clearFilters() {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.marketing-tasks.show', task.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.marketing-tasks.edit', task.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(task.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button
+                    @click="destroy(task.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>

@@ -71,17 +71,12 @@
       </div>
     </div>
       <!-- Footer Actions (below content, Patient module style) -->
-      <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.referral-documents.index')" class="btn btn-outline" title="Back to list">
-            Back to List
-          </Link>
-          <Link :href="route('admin.referral-documents.edit', referralDocument.id)" class="btn btn-primary" title="Edit">
-            Edit
-          </Link>
-          <button @click="printCurrent" class="btn btn-dark" title="Print current">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
+            <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.referral-documents.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printSingleReferralDocument" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.referral-documents.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 

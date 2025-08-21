@@ -4,21 +4,33 @@
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Shared Invoices</h1>
-          <p class="text-sm text-muted-foreground">Manage all shared invoices here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.shared-invoices.create')" class="btn btn-primary">
-            + Add Shared Invoice
-          </Link>
-          <button @click="printAllRecords" :disabled="isProcessing" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" :disabled="isProcessing" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Shared Invoices</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage shared invoices</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.shared-invoices.create')" class="btn-glass">
+              <span>Add Shared Invoice</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 

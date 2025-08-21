@@ -91,31 +91,31 @@ const onPrintCurrent = () => {
   <Head title="Inventory Alerts" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Alerts</h1>
-          <p class="text-sm text-muted-foreground">Items that are low in stock and need attention.</p>
-        </div>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
 
-      <!-- Legend explaining status colors -->
-      <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-300 print:hidden">
-        <span class="inline-flex items-center gap-2">
-          <span class="inline-block h-3 w-3 rounded-full bg-red-400"></span>
-          Active alert (needs attention)
-        </span>
-        <span class="inline-flex items-center gap-2">
-          <span class="inline-block h-3 w-3 rounded-full bg-green-400"></span>
-          Resolved
-        </span>
-      </div>
-        <div class="flex flex-wrap gap-2">
-          <button @click="onPrintCurrent" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
-          <button @click="onPrintAll" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Inventory Alerts</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage inventory alerts</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.inventory-alerts.create')" class="btn-glass">
+              <span>Add Inventory Alert</span>
+            </Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
+      </div>
       </div>
 
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
@@ -129,7 +129,7 @@ const onPrintCurrent = () => {
                 Show only active
               </label>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>

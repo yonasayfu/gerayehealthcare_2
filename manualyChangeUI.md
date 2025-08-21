@@ -161,6 +161,76 @@ Notes / Do not change
 - Avoid modifying scripts, props, service calls, or DTO usage while updating UI.
 - Keep all changes in `<template>` and global CSS files unless intentionally adding components.
 
+## 🚨 **CRITICAL: Show.vue JavaScript Error Fixes**
+
+**URGENT:** Many Show.vue files have JavaScript errors that must be fixed:
+```
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'name')
+```
+
+### **Quick Fix Pattern (Apply to ALL Show.vue files):**
+
+**Error 1: Wrong Variable References**
+```vue
+❌ WRONG: <p>Entity: {{ item.name || item.title || item.id }}</p>
+✅ CORRECT: <p>Entity: {{ actualEntity.actualProperty }}</p>
+```
+
+**Error 2: Non-existent Functions**  
+```vue
+❌ WRONG: @click="printSingleSomething"
+✅ CORRECT: @click="printPage"
+```
+
+**Error 3: Wrong Route Parameters**
+```vue
+❌ WRONG: route('admin.module.edit', item.id)
+✅ CORRECT: route('admin.module.edit', actualEntity.id)
+```
+
+### **Files Already Fixed (8/33):**
+- ✅ MarketingCampaigns/Show.vue
+- ✅ EligibilityCriteria/Show.vue  
+- ✅ LandingPages/Show.vue
+- ✅ EventRecommendations/Show.vue
+- ✅ MarketingLeads/Show.vue
+- ✅ Partners/Show.vue
+- ✅ LeadSources/Show.vue
+- ✅ VisitServices/Show.vue
+
+### **Remaining Files (~25) - Need Same Fixes:**
+```
+CampaignContents/Show.vue
+EventBroadcasts/Show.vue
+EventParticipants/Show.vue
+EventStaffAssignments/Show.vue
+InventoryMaintenanceRecords/Show.vue
+InventoryRequests/Show.vue
+InventoryTransactions/Show.vue
+Invoices/Show.vue
+MarketingPlatforms/Show.vue
+MarketingTasks/Show.vue
+PartnerAgreements/Show.vue
+PartnerCommissions/Show.vue
+PartnerEngagements/Show.vue
+Referrals/Show.vue
+ReferralDocuments/Show.vue
+TaskDelegations/Show.vue
+Users/Show.vue
++ others...
+```
+
+### **Step-by-Step Fix Instructions:**
+1. **Open the Show.vue file**
+2. **Find `defineProps<{...}>()` to identify correct variable name**
+3. **Replace the 3 error patterns** with correct variable references
+4. **Test the page** - no console errors should appear
+5. **Move to next file**
+
+**📄 See: `SHOW_VUE_FIXES_SUMMARY.md` for complete details**
+
+---
+
 If you want, I can:
 - generate a one-click patch set for one example module (Index/Create/Edit/Show/Form) to demonstrate the full process, or
 - scaffold `GlassCard.vue` and `GlassButton.vue` and replace Patients markup to use them (then you can

@@ -20,7 +20,7 @@ const commissionStatuses = [
     <!-- Agreement -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Agreement</label>
-      <select v-model="form.agreement_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.agreement_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Agreement</option>
         <option v-for="agreement in partnerAgreements" :key="agreement.id" :value="agreement.id">{{ agreement.title }}</option>
       </select>
@@ -30,7 +30,7 @@ const commissionStatuses = [
     <!-- Referral -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Referral</label>
-      <select v-model="form.referral_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.referral_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Referral</option>
         <option v-for="referral in referrals" :key="referral.id" :value="referral.id">{{ referral.referral_date }}</option>
       </select>
@@ -40,7 +40,7 @@ const commissionStatuses = [
     <!-- Invoice -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Invoice</label>
-      <select v-model="form.invoice_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.invoice_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Invoice</option>
         <option v-for="invoice in invoices" :key="invoice.id" :value="invoice.id">{{ invoice.invoice_number }}</option>
       </select>
@@ -56,7 +56,7 @@ const commissionStatuses = [
         step="0.01"
         min="0"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.commission_amount">{{ form.errors.commission_amount }}</span>
     </div>
@@ -68,7 +68,7 @@ const commissionStatuses = [
         v-model="form.calculation_date"
         type="date"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.calculation_date">{{ form.errors.calculation_date }}</span>
     </div>
@@ -79,7 +79,7 @@ const commissionStatuses = [
       <input
         v-model="form.payout_date"
         type="date"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.payout_date">{{ form.errors.payout_date }}</span>
     </div>
@@ -87,7 +87,7 @@ const commissionStatuses = [
     <!-- Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Status</label>
-      <select v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.status" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select Status</option>
         <option v-for="statusOption in commissionStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>

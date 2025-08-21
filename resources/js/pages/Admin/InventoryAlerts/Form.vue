@@ -27,7 +27,7 @@ const alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue 
         <div class="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
           <div class="sm:col-span-3">
             <label for="item_id" class="block text-sm font-medium text-gray-900 dark:text-white">Item (Optional)</label>
-            <select id="item_id" v-model="form.item_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+            <select id="item_id" v-model="form.item_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
               <option :value="null">All Items</option>
               <option v-for="item in inventoryItems" :key="item.id" :value="item.id">{{ item.name }}</option>
             </select>
@@ -36,7 +36,7 @@ const alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue 
 
           <div class="sm:col-span-3">
             <label for="alert_type" class="block text-sm font-medium text-gray-900 dark:text-white">Alert Type</label>
-            <select id="alert_type" v-model="form.alert_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required>
+            <select id="alert_type" v-model="form.alert_type" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" required>
               <option :value="null">Select Alert Type</option>
               <option v-for="type in alertTypes" :key="type" :value="type">{{ type }}</option>
             </select>
@@ -45,13 +45,13 @@ const alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue 
 
           <div class="col-span-full">
             <label for="message" class="block text-sm font-medium text-gray-900 dark:text-white">Alert Message</label>
-            <textarea id="message" v-model="form.message" rows="3" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" required></textarea>
+            <textarea id="message" v-model="form.message" rows="3" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" required></textarea>
             <div v-if="form.errors.message" class="text-red-500 text-sm mt-1">{{ form.errors.message }}</div>
           </div>
 
           <div class="sm:col-span-3">
             <label for="threshold_value" class="block text-sm font-medium text-gray-900 dark:text-white">Threshold Value (if applicable)</label>
-            <input type="text" id="threshold_value" v-model="form.threshold_value" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" placeholder="e.g., 5 (for low stock), 2025-12-31 (for expiry)" />
+            <input type="text" id="threshold_value" v-model="form.threshold_value" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" placeholder="e.g., 5 (for low stock), 2025-12-31 (for expiry)" />
             <div v-if="form.errors.threshold_value" class="text-red-500 text-sm mt-1">{{ form.errors.threshold_value }}</div>
           </div>
 

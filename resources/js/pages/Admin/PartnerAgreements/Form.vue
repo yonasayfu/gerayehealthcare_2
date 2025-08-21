@@ -37,7 +37,7 @@ const commissionTypes = [
     <!-- Partner -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Partner</label>
-      <select v-model="form.partner_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.partner_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Partner</option>
         <option v-for="partner in partners" :key="partner.id" :value="partner.id">{{ partner.name }}</option>
       </select>
@@ -52,7 +52,7 @@ const commissionTypes = [
         type="text"
         placeholder="e.g., Annual Referral Agreement"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.agreement_title">{{ form.errors.agreement_title }}</span>
     </div>
@@ -60,7 +60,7 @@ const commissionTypes = [
     <!-- Agreement Type -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Agreement Type</label>
-      <select v-model="form.agreement_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.agreement_type" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select Type</option>
         <option v-for="typeOption in agreementTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
@@ -70,7 +70,7 @@ const commissionTypes = [
     <!-- Status -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Status</label>
-      <select v-model="form.status" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.status" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="">Select Status</option>
         <option v-for="statusOption in agreementStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>
@@ -84,7 +84,7 @@ const commissionTypes = [
         v-model="form.start_date"
         type="date"
         required
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.start_date">{{ form.errors.start_date }}</span>
     </div>
@@ -95,7 +95,7 @@ const commissionTypes = [
       <input
         v-model="form.end_date"
         type="date"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.end_date">{{ form.errors.end_date }}</span>
     </div>
@@ -103,7 +103,7 @@ const commissionTypes = [
     <!-- Priority Service Level -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Priority Service Level</label>
-      <select v-model="form.priority_service_level" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.priority_service_level" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Level</option>
         <option v-for="level in priorityServiceLevels" :key="level" :value="level">{{ level }}</option>
       </select>
@@ -113,7 +113,7 @@ const commissionTypes = [
     <!-- Commission Type -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Commission Type</label>
-      <select v-model="form.commission_type" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.commission_type" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Type</option>
         <option v-for="typeOption in commissionTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
@@ -128,7 +128,7 @@ const commissionTypes = [
         type="number"
         step="0.01"
         min="0"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.commission_rate">{{ form.errors.commission_rate }}</span>
     </div>
@@ -140,7 +140,7 @@ const commissionTypes = [
         v-model="form.terms_document_path"
         type="text"
         placeholder="e.g., /documents/agreement_v1.pdf"
-        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+        class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
       <span class="text-red-500 text-xs" v-if="form.errors.terms_document_path">{{ form.errors.terms_document_path }}</span>
     </div>
@@ -148,7 +148,7 @@ const commissionTypes = [
     <!-- Signed By Staff -->
     <div>
       <label class="block text-sm font-medium text-gray-700">Signed By Staff</label>
-      <select v-model="form.signed_by_staff_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5">
+      <select v-model="form.signed_by_staff_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option :value="null">Select Staff</option>
         <option v-for="staffMember in staff" :key="staffMember.id" :value="staffMember.id">{{ staffMember.name }}</option>
       </select>

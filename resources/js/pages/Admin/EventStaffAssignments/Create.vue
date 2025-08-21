@@ -42,105 +42,40 @@ const breadcrumbs = [
 </script>
 
 <template>
-    <Head title="Create Event Staff Assignment" />
+  <Head title="Create New Event Staff Assignment" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="space-y-6 p-6">
-            <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Create New Event Staff Assignment</h1>
-                    <p class="text-sm text-muted-foreground">Fill in the details to create a new event staff assignment.</p>
-                </div>
-            </div>
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="space-y-6 p-6">
 
-            <div class="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
-                <div v-if="isDuplicate" class="mb-4 p-3 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-                    Warning: This staff member is already assigned to the selected event. If you proceed, the server will block duplicates.
-                </div>
-                <form @submit.prevent="submit">
-                    <div class="border-b border-gray-900/10 pb-12">
-                        <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                            <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Event</label>
-                                <div class="mt-2">
-                                    <select
-                                        v-model.number="form.event_id"
-                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                                        required
-                                    >
-                                        <option disabled value="">Select an event</option>
-                                        <option v-for="e in props.events" :key="e.id" :value="e.id">{{ e.title }}</option>
-                                    </select>
-                                    <div v-if="form.errors.event_id" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.event_id }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Staff</label>
-                                <div class="mt-2">
-                                    <select
-                                        v-model.number="form.staff_id"
-                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                                        required
-                                    >
-                                        <option disabled value="">Select a staff</option>
-                                        <option v-for="s in props.staff" :key="s.id" :value="s.id">{{ s.first_name }} {{ s.last_name }}</option>
-                                    </select>
-                                    <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.staff_id }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-3">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Role</label>
-                                <div class="mt-2">
-                                    <select
-                                        v-model="form.role"
-                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                                        required
-                                    >
-                                        <option disabled value="">Select a role</option>
-                                        <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
-                                    </select>
-                                    <div v-if="form.errors.role" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.role }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-6">
-                                <label class="block text-sm font-medium text-gray-900 dark:text-white">Notes</label>
-                                <div class="mt-2">
-                                    <textarea
-                                        v-model="form.notes"
-                                        rows="3"
-                                        placeholder="Optional instructions or details for this assignment"
-                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                                    />
-                                    <div v-if="form.errors.notes" class="text-red-500 text-sm mt-1">
-                                        {{ form.errors.notes }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex items-center justify-end gap-x-6">
-                        <Link :href="route('admin.event-staff-assignments.index')" class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-400">Cancel</Link>
-                        <button
-                            type="submit"
-                            class="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
-                            :class="{ 'opacity-25': form.processing }"
-                            :disabled="form.processing"
-                        >
-                            Create Assignment
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <!-- Liquid-glass header (no Back button here) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Create New Event Staff Assignment</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Fill required information to create a event staff assignment.</p>
+          </div>
         </div>
-    </AppLayout>
+      </div>
+
+      <!-- Form card -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
+        <form @submit.prevent="submit" class="space-y-4">
+          <Form :form="form" v-bind="$props" />
+          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
+          <div class="flex justify-end gap-2 pt-2">
+            <Link :href="route('admin.event-staff-assignments.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="btn-glass btn-glass-sm"
+            >
+              {{ form.processing ? 'Creating...' : 'Create Event Staff Assignment' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </AppLayout>
 </template>

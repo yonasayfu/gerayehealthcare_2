@@ -99,13 +99,13 @@ function printCurrent() {
         </div>
 
         <div class="mt-6 flex flex-wrap gap-2 justify-between sm:justify-start print:hidden">
-          <Link :href="route('admin.marketing-budgets.index')" class="btn btn-outline">
+          <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">
             Back to List
           </Link>
-          <button @click="printCurrent" class="btn btn-dark" title="Print this budget">
+          <button @click="printCurrent" class="btn-glass btn-glass-sm" title="Print this budget">
             Print Current
           </button>
-          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn btn-primary">
+          <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn-glass btn-glass-sm">
             Edit
           </Link>
         </div>

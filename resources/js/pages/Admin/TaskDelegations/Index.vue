@@ -84,16 +84,33 @@ const breadcrumbs = [
     <div class="space-y-6 p-6">
 
       <!-- Header & Actions -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-muted/40 p-4 rounded-lg shadow print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold">Task Delegations</h1>
-          <p class="text-sm text-muted-foreground">Assign and manage tasks for staff members.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link
-            :href="route('admin.task-delegations.create')"
-            class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded"
-          >+ Assign Task</Link>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Task Delegations</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage task delegations</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.task-delegations.create')" class="btn-glass">
+              <span>Add Task Delegation</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -105,7 +122,7 @@ const breadcrumbs = [
           </div>
           <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white"><option value="5">5</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">><option value="5">5</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select>
           </div>
       </div>
 
@@ -151,20 +168,24 @@ const breadcrumbs = [
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.task-delegations.show', { task_delegation: task.id })"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    :href="route('admin.task-delegations.show', delegation.id)"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.task-delegations.edit', { task_delegation: task.id })"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    :href="route('admin.task-delegations.edit', delegation.id)"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(task.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button
+                    @click="destroy(delegation.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
