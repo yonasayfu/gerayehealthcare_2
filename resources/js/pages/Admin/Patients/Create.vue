@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import Form from './Form.vue' // Adjust path if Form.vue is in a different directory
-import type { BreadcrumbItemType, PatientForm } from '@/types' // Import PatientForm type
+import Form from './Form.vue'
+import type { BreadcrumbItemType, PatientForm } from '@/types'
 
 const props = defineProps<{
   corporateClients: Array<any>;
@@ -12,22 +12,23 @@ const props = defineProps<{
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Patients', href: route('admin.patients.index') },
-  { title: 'Create', href: route('admin.patients.create') },
+  { title: 'Create New Patient' },
 ]
 
-// Initialize an empty form for a new patient
+// Initialize an empty form for a new patient with sensible defaults
 const form = useForm<any>({
-  full_name: null,
-  fayda_id: null,
-  date_of_birth: null,
-  ethiopian_date_of_birth: null,
+  full_name: '',
+  fayda_id: '',
+  date_of_birth: '',
+  ethiopian_date_of_birth: '',
   gender: null,
-  address: null,
-  phone_number: null,
-  email: null,
+  address: '',
+  phone_number: '',
+  email: '',
+  emergency_contact: '',
   source: null,
-  emergency_contact: null,
-  geolocation: null,
+  geolocation: '',
+  // Keep selects empty by default so user must choose (null = "Select ...")
   corporate_client_id: null,
   policy_id: null,
 })

@@ -282,16 +282,16 @@ onMounted(() => {
               v-model="form.corporate_client_id"
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
             >
-              <option value="">Select employer</option>
+              <option :value="null">Select employer</option>
               <option
                 v-for="c in corporateClients"
-                :key="c.id ?? c.value ?? JSON.stringify(c)"
-                :value="c.id ?? c.value ?? null"
+                :key="c.id"
+                :value="c.id"
               >
-                {{ c.name ?? c.organization_name ?? c.organization ?? '—' }}
+                {{ c.name ?? c.organization_name ?? '—' }}
               </option>
             </select>
-            <div v-if="form.errors.corporate_client_id" class="text-red-500 text-sm mt-1">
+            <div v-if="form.errors?.corporate_client_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.corporate_client_id }}
             </div>
           </div>
@@ -304,16 +304,16 @@ onMounted(() => {
               v-model="form.policy_id"
               class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
             >
-              <option value="">Select policy</option>
+              <option :value="null">Select policy</option>
               <option
                 v-for="p in insurancePolicies"
-                :key="p.id ?? p.value ?? JSON.stringify(p)"
-                :value="p.id ?? p.value ?? null"
+                :key="p.id"
+                :value="p.id"
               >
                 {{ p.policy_number ?? p.name ?? p.service_type ?? '—' }}
               </option>
             </select>
-            <div v-if="form.errors.policy_id" class="text-red-500 text-sm mt-1">
+            <div v-if="form.errors?.policy_id" class="text-red-500 text-sm mt-1">
               {{ form.errors.policy_id }}
             </div>
           </div>
