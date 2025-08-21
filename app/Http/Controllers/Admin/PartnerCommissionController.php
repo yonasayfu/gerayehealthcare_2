@@ -42,6 +42,15 @@ class PartnerCommissionController extends BaseController
         ]);
     }
 
+    public function show($id)
+    {
+        $partnerCommission = $this->service->getById($id, ['agreement', 'referral', 'invoice']);
+
+        return Inertia::render('Admin/PartnerCommissions/Show', [
+            'partnerCommission' => $partnerCommission,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('Admin/PartnerCommissions/Create', [
@@ -96,11 +105,6 @@ class PartnerCommissionController extends BaseController
     public function export(Request $request)
     {
         return $this->service->export($request);
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->service->printAll($request);
     }
 
     public function printCurrent(Request $request)

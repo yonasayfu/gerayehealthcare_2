@@ -169,7 +169,6 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
 
         // Partner Commissions
         Route::get('partner-commissions/export', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'export'])->name('partner-commissions.export');
-        Route::get('partner-commissions/print-all', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printAll'])->name('partner-commissions.printAll');
         Route::get('partner-commissions/print-current', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printCurrent'])->name('partner-commissions.printCurrent');
         Route::get('partner-commissions/{partner_commission}/print', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printSingle'])->name('partner-commissions.printSingle');
         Route::resource('partner-commissions', \App\Http\Controllers\Admin\PartnerCommissionController::class);

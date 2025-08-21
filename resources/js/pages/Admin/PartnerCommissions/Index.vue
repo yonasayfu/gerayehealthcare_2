@@ -58,10 +58,6 @@ function printCurrentView() {
   }, 100);
 }
 
-const printAllPartnerCommissions = () => {
-  window.open(route('admin.partner-commissions.printAll', { preview: true }), '_blank');
-};
-
 function toggleSort(field: string) {
   if (sortField.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -92,9 +88,6 @@ function toggleSort(field: string) {
           </button>
           <button @click="printCurrentView" class="btn btn-dark">
             <Printer class="h-4 w-4" /> Print Current
-          </button>
-          <button @click="printAllPartnerCommissions" class="btn btn-info">
-            <Printer class="h-4 w-4" /> Print All
           </button>
         </div>
       </div>
