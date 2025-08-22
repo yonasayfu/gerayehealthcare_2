@@ -86,6 +86,7 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import { useClinicInfo } from '@/composables/useClinicInfo'
 import { Printer } from 'lucide-vue-next'
 import { format } from 'date-fns'
@@ -104,10 +105,15 @@ const form = useForm({})
 
 const { getClinicName, getClinicLogo, getPrintFooterText } = useClinicInfo()
 
-const deleteDocument = () => {
-  if (confirm('Are you sure you want to delete this referral document?')) {
-    form.delete(route('admin.referral-documents.destroy', props.referralDocument.id))
-  }
+const deleteDocument = async () => {
+  const ok = await confirmDialog({
+    title: 'Delete Referral Document',
+    message: 'Are you sure you want to delete this referral document?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  form.delete(route('admin.referral-documents.destroy', props.referralDocument.id))
 }
 
 const printCurrent = () => {

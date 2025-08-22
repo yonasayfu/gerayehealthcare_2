@@ -105,6 +105,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import type { BreadcrumbItemType, EmployeeInsuranceRecord } from '@/types';
 import { format } from 'date-fns';
+import { confirmDialog } from '@/lib/confirm';
 
 const props = defineProps<{ employeeInsuranceRecord: EmployeeInsuranceRecord }>();
 
@@ -116,10 +117,15 @@ const breadcrumbs: BreadcrumbItemType[] = [
 
 // print functionality removed for Employee Insurance Records module
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this record?')) {
-    router.delete(route('admin.employee-insurance-records.destroy', id));
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Employee Insurance Record',
+    message: 'Are you sure you want to delete this record?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.employee-insurance-records.destroy', id));
 }
 
 </script>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch, computed } from 'vue';
 import debounce from 'lodash/debounce';
 import { ArrowUpDown, Printer, Eye, Edit3, Trash2, Search } from 'lucide-vue-next';
@@ -48,12 +49,17 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   router.get(route('admin.inventory-requests.index'), params, { preserveState: true, replace: true });
 }, 300));
 
-const destroy = (id: number) => {
-  if (confirm('Are you sure you want to delete this request?')) {
-    router.delete(route('admin.inventory-requests.destroy', id), {
-      preserveScroll: true,
-    });
-  }
+const destroy = async (id: number) => {
+  const ok = await confirmDialog({
+    title: 'Delete Inventory Request',
+    message: 'Are you sure you want to delete this request?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.inventory-requests.destroy', id), {
+    preserveScroll: true,
+  });
 };
 
 import { useExport } from '@/composables/useExport';
@@ -122,7 +128,7 @@ const { printCurrentView, isProcessing } = useExport({ routeName: 'admin.invento
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>

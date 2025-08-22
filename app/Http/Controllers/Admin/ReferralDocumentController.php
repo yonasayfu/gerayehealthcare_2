@@ -115,7 +115,7 @@ class ReferralDocumentController extends Controller
 
             $this->referralDocumentService->createReferralDocument($dto);
 
-            return redirect()->route('admin.referral-documents.index')->with('success', 'Referral document created successfully.');
+            return redirect()->route('admin.referral-documents.index')->with('banner', 'Referral document created successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
             file_put_contents(storage_path('logs/referral_document_error.log'), $e->getMessage()."\n".$e->getTraceAsString(), FILE_APPEND);
 
@@ -159,14 +159,14 @@ class ReferralDocumentController extends Controller
 
         $this->referralDocumentService->updateReferralDocument($referralDocument, $dto);
 
-        return redirect()->route('admin.referral-documents.index')->with('success', 'Referral document updated successfully.');
+        return redirect()->route('admin.referral-documents.index')->with('banner', 'Referral document updated successfully.')->with('bannerStyle', 'success');
     }
 
     public function destroy(ReferralDocument $referralDocument)
     {
         $this->referralDocumentService->deleteReferralDocument($referralDocument);
 
-        return redirect()->route('admin.referral-documents.index')->with('success', 'Referral document deleted successfully.');
+        return redirect()->route('admin.referral-documents.index')->with('banner', 'Referral document deleted successfully.')->with('bannerStyle', 'danger');
     }
 
     public function export(Request $request)

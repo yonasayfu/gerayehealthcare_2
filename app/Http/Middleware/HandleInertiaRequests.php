@@ -23,8 +23,8 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         $roles = [];
         $permissions = [];
+        // Load roles and permissions for authenticated users (needed for navigation)
         if ($user) {
-            // Guard against missing Spatie methods in environments/users without HasRoles
             if (method_exists($user, 'getRoleNames')) {
                 $roles = $user->getRoleNames()->toArray();
             }
@@ -32,6 +32,11 @@ class HandleInertiaRequests extends Middleware
                 $permissions = $user->getAllPermissions()->pluck('name')->toArray();
             }
         }
+
+        $flashData = [
+            'banner' => $request->session()->get('banner'),
+            'bannerStyle' => $request->session()->get('bannerStyle'),
+        ];
 
         return [
             ...parent::share($request),
@@ -50,6 +55,7 @@ class HandleInertiaRequests extends Middleware
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
+            'flash' => $flashData,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

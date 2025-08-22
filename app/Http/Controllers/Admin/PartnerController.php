@@ -90,6 +90,6 @@ class PartnerController extends BaseController
 
         $this->service->update($id, $payload);
 
-        return redirect()->route('admin.partners.index')->with('success', 'Partners updated successfully.');
+        return redirect()->route('admin.partners.index')->with('banner', 'Partners updated successfully.')->with('bannerStyle', 'success');
     }
 }

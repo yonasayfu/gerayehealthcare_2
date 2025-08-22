@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
@@ -25,10 +26,15 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event?')) {
-    router.delete(route('admin.events.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Event',
+    message: 'Are you sure you want to delete this event?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.events.destroy', id))
 }
 </script>
 

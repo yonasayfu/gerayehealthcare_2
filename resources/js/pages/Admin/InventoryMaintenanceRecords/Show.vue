@@ -44,7 +44,6 @@ function printPage() {
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
       </div>
-        </div>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import { confirmDialog } from '@/lib/confirm'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import type { BreadcrumbItemType } from '@/types'
 import { format } from 'date-fns'
@@ -26,10 +27,15 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this inventory request?')) {
-    router.delete(route('admin.inventory-requests.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Inventory Request',
+    message: 'Are you sure you want to delete this request?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.inventory-requests.destroy', id))
 }
 </script>
 

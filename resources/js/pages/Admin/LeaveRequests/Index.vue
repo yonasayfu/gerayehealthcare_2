@@ -195,7 +195,7 @@ const statusColor = (status: string) => {
           </div>
           <div class="flex items-center gap-2">
             <label for="per-page" class="text-sm text-gray-600 dark:text-gray-400">Per Page:</label>
-            <select id="per-page" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+            <select id="per-page" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="20">20</option>

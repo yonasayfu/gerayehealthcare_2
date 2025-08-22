@@ -6,6 +6,7 @@ import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'luci
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 const props = defineProps({
     eligibilityCriteria: Object,
@@ -43,10 +44,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
     });
 }, 500));
 
-function destroy(id) {
-    if (confirm('Are you sure you want to delete this eligibility criteria?')) {
-        router.delete(route('admin.eligibility-criteria.destroy', id));
-    }
+async function destroy(id) {
+    const ok = await confirmDialog({
+        title: 'Delete Eligibility Criteria',
+        message: 'Are you sure you want to delete this eligibility criteria?',
+        confirmText: 'Delete',
+        variant: 'danger',
+    })
+    if (!ok) return
+    router.delete(route('admin.eligibility-criteria.destroy', id))
 }
 
 function exportData(type: string) {
@@ -132,7 +138,7 @@ function toggleSort(field) {
 
                 <div>
                     <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -166,21 +172,21 @@ function toggleSort(field) {
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.eligibility-criteria.show', item.id)"
+                    :href="route('admin.eligibility-criteria.show', criterion.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.eligibility-criteria.edit', item.id)"
+                    :href="route('admin.eligibility-criteria.edit', criterion.id)"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(item.id)"
+                    @click="destroy(criterion.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >

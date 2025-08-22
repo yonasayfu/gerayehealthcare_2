@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Edit3, Trash2 } from 'lucide-vue-next';
 
@@ -18,12 +19,17 @@ const breadcrumbs = [
   { title: 'Role Management', href: route('admin.roles.index') },
 ];
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
-    router.delete(route('admin.roles.destroy', id), {
-      preserveScroll: true,
-    });
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Role',
+    message: 'Are you sure you want to delete this role? This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.roles.destroy', id), {
+    preserveScroll: true,
+  });
 }
 </script>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
@@ -108,10 +109,15 @@ watch([search, sortField, sortDirection, perPage, selectedEventId, selectedStaff
     });
 }, 500));
 
-function destroy(id: number) { // Explicitly type id
-    if (confirm('Are you sure you want to delete this event staff assignment?')) {
-        router.delete(route('admin.event-staff-assignments.destroy', id));
-    }
+async function destroy(id: number) { // Explicitly type id
+    const ok = await confirmDialog({
+        title: 'Delete Event Staff Assignment',
+        message: 'Are you sure you want to delete this event staff assignment?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+    })
+    if (!ok) return
+    router.delete(route('admin.event-staff-assignments.destroy', id))
 }
 
 function printPage() {
@@ -193,7 +199,7 @@ function truncate(str: string | undefined, n = 60): string {
 
                 <div>
                     <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>

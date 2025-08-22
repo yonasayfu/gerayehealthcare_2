@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
@@ -62,10 +63,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this corporate client?')) {
-    router.delete(route('admin.corporate-clients.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Corporate Client',
+    message: 'Are you sure you want to delete this corporate client?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.corporate-clients.destroy', id))
 }
 
 function printCurrentView() {

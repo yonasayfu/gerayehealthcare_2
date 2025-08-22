@@ -5,6 +5,7 @@ import Form from './Form.vue'
 import type { BreadcrumbItem, InertiaForm, InsuranceClaim } from '@/types'
 import { watch } from 'vue';
 import { format } from 'date-fns';
+import { confirmDialog } from '@/lib/confirm'
 
 const props = defineProps<{
   insuranceClaim: InsuranceClaim;
@@ -71,6 +72,17 @@ watch(() => props.insuranceClaim, (newVal) => {
 const submit = () => {
     form.put(route('admin.insurance-claims.update', props.insuranceClaim.id));
 };
+
+const destroy = async () => {
+  const ok = await confirmDialog({
+    title: 'Delete Insurance Claim',
+    message: 'Are you sure you want to delete this insurance claim? This action cannot be undone.',
+    confirmText: 'Delete',
+    variant: 'danger',
+  })
+  if (!ok) return
+  router.delete(route('admin.insurance-claims.destroy', props.insuranceClaim.id))
+}
 </script>
 
 <template>
@@ -106,7 +118,7 @@ const submit = () => {
               </button>
               <button
                 class="btn btn-danger ml-auto"
-                @click="() => { if (confirm('Are you sure you want to delete this insurance claim? This action cannot be undone.')) { router.delete(route('admin.insurance-claims.destroy', props.insuranceClaim.id)) } }"
+                @click="destroy"
               >
                 Delete
               </button>

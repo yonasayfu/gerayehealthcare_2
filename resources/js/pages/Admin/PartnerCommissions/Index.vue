@@ -6,6 +6,7 @@ import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'luci
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 const props = defineProps<{ partnerCommissions: any; filters: any }>()
 
@@ -35,12 +36,17 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this partner commission?')) {
-    router.delete(route('admin.partner-commissions.destroy', id), {
-      preserveScroll: true,
-    })
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Partner Commission',
+    message: 'Are you sure you want to delete this partner commission?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.partner-commissions.destroy', id), {
+    preserveScroll: true,
+  })
 }
 
 function exportCsv() {
@@ -73,8 +79,6 @@ function toggleSort(field: string) {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-
-<<<<<<< HEAD
             <!-- Liquid glass header with search card (no logic changed) -->
       <div class="liquidGlass-wrapper print:hidden">
         <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
@@ -93,7 +97,7 @@ function toggleSort(field: string) {
             <Link :href="route('admin.partner-commissions.create')" class="btn-glass">
               <span>Add Partner Commission</span>
             </Link>
-            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+            <button @click="exportCsv()" class="btn-glass btn-glass-sm">
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </button>
@@ -102,23 +106,6 @@ function toggleSort(field: string) {
               <span class="hidden sm:inline">Print Current</span>
             </button>
           </div>
-=======
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Partner Commissions</h1>
-          <p class="text-sm text-muted-foreground">Manage all partner commissions here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.partner-commissions.create')" class="btn btn-primary">
-            + Add Commission
-          </Link>
-          <button @click="exportCsv()" class="btn btn-success">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="printCurrentView" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
->>>>>>> yonas/feature/modern-refacotr
         </div>
       </div>
 
@@ -137,7 +124,7 @@ function toggleSort(field: string) {
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>

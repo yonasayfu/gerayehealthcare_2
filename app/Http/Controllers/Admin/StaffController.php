@@ -69,6 +69,6 @@ class StaffController extends BaseController
 
         $this->service->update($id, $validatedData);
 
-        return redirect()->route('admin.staff.index')->with('success', 'Staff updated successfully.');
+        return redirect()->route('admin.staff.index')->with('banner', 'Staff updated successfully.')->with('bannerStyle', 'success');
     }
 }

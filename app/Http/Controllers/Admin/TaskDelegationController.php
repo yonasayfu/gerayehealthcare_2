@@ -78,10 +78,10 @@ class TaskDelegationController extends BaseController
         // Redirect back to return_to if provided, else index
         $returnTo = $request->input('return_to');
         if ($returnTo) {
-            return redirect()->to($returnTo)->with('success', 'Task delegation created and linked successfully.');
+            return redirect()->to($returnTo)->with('banner', 'Task delegation created and linked successfully.')->with('bannerStyle', 'success');
         }
 
         return redirect()->route('admin.' . $this->getRouteName() . '.index')
-            ->with('success', ucfirst($this->dataVariableName) . ' created successfully.');
+            ->with('banner', ucfirst($this->dataVariableName) . ' created successfully.')->with('bannerStyle', 'success');
     }
 }

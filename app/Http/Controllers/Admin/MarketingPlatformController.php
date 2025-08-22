@@ -29,6 +29,6 @@ class MarketingPlatformController extends BaseController
     {
         $this->service->toggleStatus($marketing_platform);
 
-        return redirect()->back()->with('success', 'Platform status updated.');
+        return redirect()->back()->with('banner', 'Platform status updated.')->with('bannerStyle', 'success');
     }
 }

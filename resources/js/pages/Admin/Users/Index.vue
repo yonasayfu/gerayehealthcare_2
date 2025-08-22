@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Edit3, Trash2, Shield, Eye } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
+import { confirmDialog } from '@/lib/confirm';
 import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
 
@@ -40,12 +41,17 @@ watch([search, perPage], debounce((newValues) => {
     });
 }, 300));
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this user? This will also delete their associated staff profile.')) {
-    router.delete(route('admin.users.destroy', id), {
-      preserveScroll: true,
-    });
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete User',
+    message: 'Are you sure you want to delete this user? This will also delete their associated staff profile.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.users.destroy', id), {
+    preserveScroll: true,
+  });
 }
 </script>
 
@@ -78,7 +84,7 @@ function destroy(id: number) {
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Items per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>

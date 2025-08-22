@@ -6,6 +6,7 @@ import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } 
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 import type { ExchangeRatePagination } from '@/types';
 
@@ -51,10 +52,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this exchange rate?')) {
-    router.delete(route('admin.exchange-rates.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Exchange Rate',
+    message: 'Are you sure you want to delete this exchange rate?',
+    confirmText: 'Delete',
+    variant: 'danger',
+  })
+  if (!ok) return
+  router.delete(route('admin.exchange-rates.destroy', id))
 }
 
 function exportData(type: 'csv' | 'pdf') {

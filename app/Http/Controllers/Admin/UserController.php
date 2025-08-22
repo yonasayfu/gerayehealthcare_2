@@ -52,7 +52,7 @@ class UserController extends BaseController
 
         $user->syncRoles($validatedData['role']);
 
-        return redirect()->route('admin.users.index')->with('success', 'User role updated successfully.');
+        return redirect()->route('admin.users.index')->with('banner', 'User role updated successfully.')->with('bannerStyle', 'success');
     }
 
     public function show($id)

@@ -37,7 +37,7 @@
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
         <div class="flex items-center justify-end gap-3 p-3 print:hidden">
           <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -129,6 +129,7 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch } from 'vue'
 import debounce from 'lodash/debounce'
 import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
@@ -181,10 +182,15 @@ function toggleSort(field) {
   }
 }
 
-const deleteDocument = (id) => {
-  if (confirm('Are you sure you want to delete this referral document?')) {
-    form.delete(route('admin.referral-documents.destroy', id))
-  }
+const deleteDocument = async (id) => {
+  const ok = await confirmDialog({
+    title: 'Delete Referral Document',
+    message: 'Are you sure you want to delete this referral document?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  form.delete(route('admin.referral-documents.destroy', id))
 }
 
 const printCurrent = () => {

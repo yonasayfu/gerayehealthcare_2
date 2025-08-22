@@ -10,6 +10,7 @@ import CalendarView from '@/components/CalendarView.vue'
 import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
 import { useEthiopianDate } from '@/composables/useEthiopianDate';
 import type { EthiopianCalendarDayPagination } from '@/types';
+import { confirmDialog } from '@/lib/confirm'
 
 const gregorianInput = ref('');
 const ethiopianInput = ref(''); // This will store the Ethiopian date string from the picker
@@ -79,10 +80,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this ethiopian calendar day?')) {
-    router.delete(route('admin.ethiopian-calendar-days.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Ethiopian Calendar Day',
+    message: 'Are you sure you want to delete this ethiopian calendar day?',
+    confirmText: 'Delete',
+    variant: 'danger',
+  })
+  if (!ok) return
+  router.delete(route('admin.ethiopian-calendar-days.destroy', id))
 }
 
 function toggleSort(field: string) {

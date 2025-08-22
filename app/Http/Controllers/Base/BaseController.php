@@ -56,27 +56,35 @@ class BaseController extends Controller
 
     public function store(Request $request)
     {
-        $validatedData = $this->validateRequest($request, 'store');
+        try {
+            $validatedData = $this->validateRequest($request, 'store');
 
-        if ($this->dtoClass) {
-            // Prepare data for DTO instantiation
-            $dtoData = $this->prepareDataForDTO($validatedData);
-            // Instantiate DTO from the prepared data array
-            $dto = new ($this->dtoClass)($request->all());
-            $payload = $dto->toArray();
-        } else {
-            $payload = $validatedData;
+            if ($this->dtoClass) {
+                $dtoData = $this->prepareDataForDTO($validatedData);
+                $dto = ($this->dtoClass)::from($dtoData);
+                $payload = $dto->toArray();
+            } else {
+                $payload = $validatedData;
+            }
+
+            $this->service->create($payload);
+
+            // Explicitly flash data to session
+            $request->session()->flash('banner', ucfirst($this->dataVariableName).' created successfully.');
+            $request->session()->flash('bannerStyle', 'success');
+
+            return redirect()->route('admin.'.$this->getRouteName().'.index');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
+        } catch (\Exception $e) {
+            Log::error('Error in BaseController store method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
-
-        $this->service->create($payload);
-
-        return redirect()->route('admin.'.$this->getRouteName().'.index')->with('success', ucfirst($this->dataVariableName).' created successfully.');
     }
 
     public function show($id)
     {
         $data = $this->service->getById($id);
-        Log::info('Data retrieved in BaseController@show:', ['data' => $data]);
 
         // Conditionally add ethiopian_date for EthiopianCalendarDay model
         if ($this->modelClass === \App\Models\EthiopianCalendarDay::class && $data->gregorian_date) {
@@ -99,7 +107,6 @@ class BaseController extends Controller
     public function edit($id)
     {
         $data = $this->service->getById($id);
-        Log::info('Data retrieved in BaseController@edit:', ['data' => $data]);
         // Ensure the prop name matches the frontend's camelCase expectation
         $propName = lcfirst(class_basename($this->modelClass));
 
@@ -108,34 +115,52 @@ class BaseController extends Controller
 
     public function update(Request $request, $id)
     {
-        $model = $this->service->getById($id);
-        $validatedData = $this->validateRequest($request, 'update', $model);
+        try {
+            $model = $this->service->getById($id);
+            $validatedData = $this->validateRequest($request, 'update', $model);
 
-        if ($this->dtoClass) {
-            // Prepare data for DTO instantiation
-            $dtoData = $this->prepareDataForDTO($validatedData);
-            // Instantiate DTO from the prepared data array
-            $dto = ($this->dtoClass)::from($dtoData);
-            $payload = $dto->toArray();
-        } else {
-            $payload = $validatedData;
+            if ($this->dtoClass) {
+                $dtoData = $this->prepareDataForDTO($validatedData);
+                $dto = ($this->dtoClass)::from($dtoData);
+                $payload = $dto->toArray();
+            } else {
+                $payload = $validatedData;
+            }
+
+            // Important: avoid overwriting existing DB values with nulls for fields not present
+            $payload = array_filter($payload, function ($value) {
+                return !is_null($value);
+            });
+
+            $this->service->update($id, $payload);
+
+            // Explicitly flash data to session
+            $request->session()->flash('banner', ucfirst($this->dataVariableName).' updated successfully.');
+            $request->session()->flash('bannerStyle', 'success');
+
+            return redirect()->route('admin.'.$this->getRouteName().'.index');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
+        } catch (\Exception $e) {
+            Log::error('Error in BaseController update method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
-
-        // Important: avoid overwriting existing DB values with nulls for fields not present
-        $payload = array_filter($payload, function ($value) {
-            return !is_null($value);
-        });
-
-        $this->service->update($id, $payload);
-
-        return redirect()->route('admin.'.$this->getRouteName().'.index')->with('success', ucfirst($this->dataVariableName).' updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $this->service->delete($id);
+        try {
+            $this->service->delete($id);
 
-        return redirect()->route('admin.'.$this->getRouteName().'.index')->with('success', ucfirst($this->dataVariableName).' deleted successfully.');
+            // Explicitly flash data to session
+            $request->session()->flash('banner', ucfirst($this->dataVariableName).' deleted successfully.');
+            $request->session()->flash('bannerStyle', 'danger');
+
+            return redirect()->route('admin.'.$this->getRouteName().'.index');
+        } catch (\Exception $e) {
+            Log::error('Error in BaseController destroy method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->with('banner', 'An unexpected error occurred during deletion: '.$e->getMessage())->with('bannerStyle', 'danger');
+        }
     }
 
     private function getRouteName()
@@ -184,7 +209,6 @@ class BaseController extends Controller
                 $value = $validatedData[$name];
                 // Ensure common FK ids are always integers
                 if (in_array($name, ['staff_id', 'partner_id', 'signed_by_staff_id', 'agreement_id', 'referred_patient_id'], true)) {
-                    \Log::debug('prepareDataForDTO: casting integer id', ['field' => $name, 'value' => $value]);
                     if (is_array($value)) {
                         // Try to extract a numeric value from the array
                         if (isset($value['id']) && is_numeric($value['id'])) {

@@ -62,7 +62,7 @@ class MyVisitController extends Controller
             'status' => 'In Progress',
         ]);
 
-        return back()->with('success', 'Checked in successfully.');
+        return back()->with('banner', 'Checked in successfully.')->with('bannerStyle', 'success');
     }
 
     /**
@@ -83,7 +83,7 @@ class MyVisitController extends Controller
             'status' => 'Completed',
         ]);
 
-        return back()->with('success', 'Checked out successfully.');
+        return back()->with('banner', 'Checked out successfully.')->with('bannerStyle', 'success');
     }
 
     /**
@@ -133,9 +133,9 @@ class MyVisitController extends Controller
                 event_id: $visit->event_id
             );
             $this->visitServiceService->update($visit->id, $dto);
-            return redirect()->route('staff.my-visits.index')->with('success', 'Visit report filed successfully.');
+            return redirect()->route('staff.my-visits.index')->with('banner', 'Visit report filed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+            return back()->withErrors(['error' => $e->getMessage()])->withInput()->with('banner', $e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 }

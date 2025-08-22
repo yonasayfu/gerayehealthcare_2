@@ -64,7 +64,7 @@ class CaregiverAssignmentController extends BaseController
         $data = $this->dtoClass ? new ($this->dtoClass)(...$this->prepareDataForDTO($validatedData)) : $validatedData;
         $this->service->create($data);
 
-        return redirect()->route('admin.assignments.index')->with('success', 'Assignment created successfully.');
+        return redirect()->route('admin.assignments.index')->with('banner', 'Assignment created successfully.')->with('bannerStyle', 'success');
     }
 
     public function update(Request $request, $id)
@@ -74,13 +74,13 @@ class CaregiverAssignmentController extends BaseController
         $data = $this->dtoClass ? new (UpdateCaregiverAssignmentDTO::class)(...$this->prepareDataForDTO($validatedData)) : $validatedData;
         $this->service->update($id, $data);
 
-        return redirect()->route('admin.assignments.index')->with('success', 'Assignment updated successfully.');
+        return redirect()->route('admin.assignments.index')->with('banner', 'Assignment updated successfully.')->with('bannerStyle', 'success');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $this->service->delete($id);
 
-        return redirect()->route('admin.assignments.index')->with('success', 'Assignment deleted successfully.');
+        return redirect()->route('admin.assignments.index')->with('banner', 'Assignment deleted successfully.')->with('bannerStyle', 'danger');
     }
 }
