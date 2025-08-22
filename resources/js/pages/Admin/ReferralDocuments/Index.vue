@@ -72,7 +72,14 @@
           <tbody>
             <tr v-for="document in referralDocuments.data" :key="document.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
               <td class="px-6 py-4">{{ document.id }}</td>
-              <td class="px-6 py-4">{{ document.referral ? document.referral.referred_patient_id : 'N/A' }}</td>
+              <td class="px-6 py-4">
+                <span v-if="document.referral && document.referral.patient">
+                  {{ document.referral.patient.full_name }} ({{ document.referral.patient.patient_code }})
+                </span>
+                <span v-else>
+                  N/A
+                </span>
+              </td>
               <td class="px-6 py-4">{{ document.document_name }}</td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 text-xs">
