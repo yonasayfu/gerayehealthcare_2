@@ -44,7 +44,16 @@ function destroy(id: number) {
 }
 
 function exportCsv() {
-  window.open(route('admin.partner-engagements.export', { type: 'csv' }), '_blank');
+  window.open(
+    route('admin.partner-engagements.export', {
+      type: 'csv',
+      search: search.value || undefined,
+      sort: sortField.value || undefined,
+      direction: sortDirection.value || undefined,
+      per_page: perPage.value || undefined,
+    }),
+    '_blank'
+  );
 }
 
 function printCurrentView() {

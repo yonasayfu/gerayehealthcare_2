@@ -145,7 +145,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
     ],
   },
   {
-    group: 'Business & NGO Networking',
+    group: 'Partnerships',
     icon: Users,
     items: [
       { title: 'Partners', routeName: 'admin.partners.index', icon: Users, permission: 'view partners' },
@@ -153,17 +153,11 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Referrals', routeName: 'admin.referrals.index', icon: ArrowBigRight, permission: 'view referrals' },
       { title: 'Commissions', routeName: 'admin.partner-commissions.index', icon: DollarSign, permission: 'view partner commissions' },
       { title: 'Engagements', routeName: 'admin.partner-engagements.index', icon: ClipboardList, permission: 'view partner engagements' },
-    ],
-  },
-  communicationNavGroup,
-  {
-    group: 'Partner Integrations',
-    icon: GitFork,
-    items: [
       { title: 'Referral Documents', routeName: 'admin.referral-documents.index', icon: Folder, permission: 'view referral documents' },
       { title: 'Shared Invoices', routeName: 'admin.shared-invoices.index', icon: Receipt, permission: 'view shared invoices' },
     ],
   },
+  communicationNavGroup,
     {
       group: 'System Management',
       icon: Settings,

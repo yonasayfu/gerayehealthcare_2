@@ -42,7 +42,7 @@ class ReferralDocumentController extends Controller
             'created_at' => 'created_at',
         ];
 
-        $query = ReferralDocument::with(['referral', 'uploadedBy']);
+        $query = ReferralDocument::with(['referral.patient', 'uploadedBy']);
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {

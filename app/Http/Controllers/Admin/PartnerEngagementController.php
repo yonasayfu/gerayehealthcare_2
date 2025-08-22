@@ -41,6 +41,16 @@ class PartnerEngagementController extends BaseController
         ]);
     }
 
+    public function show($id)
+    {
+        // Ensure related Partner and Staff are loaded for the Show view
+        $partnerEngagement = $this->service->getById($id, ['partner', 'staff']);
+
+        return Inertia::render($this->viewName.'/Show', [
+            'partnerEngagement' => $partnerEngagement,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('Admin/PartnerEngagements/Create', [
