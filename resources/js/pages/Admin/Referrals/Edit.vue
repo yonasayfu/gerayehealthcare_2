@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, Link, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
@@ -52,10 +53,15 @@ function submit() {
     });
 }
 
-function handleDelete() {
-  if (window.confirm('Are you sure you want to delete this referral?')) {
-    router.delete(route('admin.referrals.destroy', { referral: props.referral.id }))
-  }
+async function handleDelete() {
+  const ok = await confirmDialog({
+    title: 'Delete Referral',
+    message: 'Are you sure you want to delete this referral?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.referrals.destroy', { referral: props.referral.id }))
 }
 </script>
 

@@ -106,7 +106,7 @@ class SharedInvoiceController extends Controller
 
             $this->sharedInvoiceService->createSharedInvoice($dto);
 
-            return redirect()->route('admin.shared-invoices.index')->with('success', 'Invoice shared successfully.');
+            return redirect()->route('admin.shared-invoices.index')->with('banner', 'Invoice shared successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
             file_put_contents(storage_path('logs/shared_invoice_error.log'), $e->getMessage()."\n".$e->getTraceAsString(), FILE_APPEND);
 
@@ -151,7 +151,7 @@ class SharedInvoiceController extends Controller
 
         $this->sharedInvoiceService->updateSharedInvoice($sharedInvoice, $dto);
 
-        return redirect()->route('admin.shared-invoices.show', $sharedInvoice)->with('success', 'Shared invoice updated successfully.');
+        return redirect()->route('admin.shared-invoices.show', $sharedInvoice)->with('banner', 'Shared invoice updated successfully.')->with('bannerStyle', 'success');
     }
 
     public function destroy(SharedInvoice $sharedInvoice)

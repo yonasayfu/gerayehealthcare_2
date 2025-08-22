@@ -51,6 +51,6 @@ class LeaveRequestController extends Controller
 
         $this->leaveRequestService->create($dto);
 
-        return redirect()->back()->with('success', 'Leave request submitted successfully.');
+        return redirect()->back()->with('banner', 'Leave request submitted successfully.')->with('bannerStyle', 'success');
     }
 }

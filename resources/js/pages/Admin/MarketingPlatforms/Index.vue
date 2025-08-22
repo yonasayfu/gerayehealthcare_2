@@ -6,6 +6,7 @@ import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, ToggleLeft, ToggleRig
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 interface MarketingPlatform {
   id: number;
@@ -70,10 +71,15 @@ watch([search, sortField, sortDirection, perPage, isActive], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing platform?')) {
-    router.delete(route('admin.marketing-platforms.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Platform',
+    message: 'Are you sure you want to delete this marketing platform?',
+    confirmText: 'Delete',
+    variant: 'danger',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-platforms.destroy', id))
 }
 
 function openPrintCurrent() {

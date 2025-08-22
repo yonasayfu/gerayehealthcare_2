@@ -6,11 +6,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
-import Alpine from 'alpinejs';
 import axios from 'axios'; // Import axios
-
-window.Alpine = Alpine;
-Alpine.start();
 
 // Configure Axios to send CSRF token
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
@@ -18,8 +14,6 @@ axios.defaults.headers.common['X-CSRF-TOKEN'] = (document.querySelector('meta[na
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 import AppLayout from '@/layouts/AppLayout.vue';
-import PrintableReport from '@/components/PrintableReport.vue';
-import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Re-add global registration
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -31,8 +25,6 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue)
             .component('AppLayout', AppLayout)
-            .component('PrintableReport', PrintableReport)
-            .component('EthiopianDatePicker', EthiopianDatePicker) // Re-register EthiopianDatePicker
             .mount(el);
     },
     progress: {

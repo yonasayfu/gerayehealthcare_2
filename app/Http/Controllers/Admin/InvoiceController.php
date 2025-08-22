@@ -143,7 +143,7 @@ class InvoiceController extends BaseController
         ]);
 
         return redirect()->route('admin.invoices.show', $invoice->id)
-            ->with('success', 'Invoice generated successfully');
+            ->with('banner', 'Invoice generated successfully')->with('bannerStyle', 'success');
     }
 
     /**
@@ -152,6 +152,6 @@ class InvoiceController extends BaseController
     public function approve(Invoice $invoice)
     {
         $invoice->update(['status' => 'Approved']);
-        return redirect()->back()->with('success', 'Invoice approved');
+        return redirect()->back()->with('banner', 'Invoice approved')->with('bannerStyle', 'success');
     }
 }

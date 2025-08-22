@@ -100,6 +100,6 @@ class MarketingCampaignController extends BaseController
         $this->service->update($id, $payload);
 
         return redirect()->route('admin.'.'marketing-campaigns'.'.index')
-            ->with('success', ucfirst('marketingCampaigns').' updated successfully.');
+            ->with('banner', ucfirst('marketingCampaigns').' updated successfully.')->with('bannerStyle', 'success');
     }
 }

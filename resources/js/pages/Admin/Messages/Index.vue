@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
 import { useForm, usePage, Link } from '@inertiajs/vue3';
+import { confirmDialog } from '@/lib/confirm'
 import { format, isToday, isYesterday } from 'date-fns';
 import {
   LayoutGrid, UserPlus, UserCog, CalendarClock, Stethoscope, MessageCircle,
@@ -187,28 +188,32 @@ const isMyMessage = (message: MessageItem) => {
   return message.sender_id === page.props.auth.user.id;
 };
 
-const deleteMessage = (messageId: number) => {
-  if (confirm('Are you sure you want to delete this message?')) {
-    form.delete(route('admin.messages.destroy', messageId), {
-      preserveScroll: true,
-      onSuccess: () => {
-        toast({
-          title: 'Message deleted',
-          description: 'The message has been successfully deleted.',
-        });
-        // Re-fetch messages for the current conversation
-        window.location.href = route('admin.messages.index', selectedConversation.value?.id);
-      },
-      onError: (errors) => {
-        console.error('Message delete error:', errors);
-        toast({
-          title: 'Failed to delete message',
-          description: errors.error || 'An unknown error occurred.',
-          variant: 'destructive',
-        });
-      },
-    });
-  }
+const deleteMessage = async (messageId: number) => {
+  const ok = await confirmDialog({
+    title: 'Delete Message',
+    message: 'Are you sure you want to delete this message?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  form.delete(route('admin.messages.destroy', messageId), {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast({
+        title: 'Message deleted',
+        description: 'The message has been successfully deleted.',
+      });
+      window.location.href = route('admin.messages.index', selectedConversation.value?.id);
+    },
+    onError: (errors) => {
+      console.error('Message delete error:', errors);
+      toast({
+        title: 'Failed to delete message',
+        description: errors.error || 'An unknown error occurred.',
+        variant: 'destructive',
+      });
+    },
+  });
 };
 
 const downloadAttachment = (messageId: number) => {

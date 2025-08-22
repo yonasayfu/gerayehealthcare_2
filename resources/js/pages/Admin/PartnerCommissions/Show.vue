@@ -45,22 +45,19 @@ function printPage() {
   <Head :title="`Partner Commission: #${props.partnerCommission.id}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
-
-      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
+      <!-- compact liquid glass header -->
       <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
         <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Partner Commission Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Partner Commission: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Partner Commission: #{{ partnerCommission.id }}</p>
           </div>
-          <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
       </div>
-        </div>
 
-        <div class="p-6 space-y-6">
+      <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
@@ -128,12 +125,12 @@ function printPage() {
             </div>
         </div>
 
-              <!-- footer actions (single source of actions, right aligned) -->
+      <!-- footer actions -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.partner-commissions.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSinglePartnerCommission" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.partner-commissions.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.partner-commissions.edit', partnerCommission.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 

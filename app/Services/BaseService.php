@@ -28,15 +28,13 @@ class BaseService
             $query->orderBy($request->input('sort'), $direction);
         }
 
-        return $query->paginate($request->input('per_page', 5));
+        return $query->paginate($request->input('per_page', 15));
     }
 
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
         
-        Log::info('Data being passed to model create:', ['data' => $data]);
-
         return $this->model->create($data);
     }
 

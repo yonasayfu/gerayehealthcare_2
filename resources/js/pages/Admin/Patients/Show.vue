@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
 import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
 import { format } from 'date-fns' // For date formatting
+import { confirmDialog } from '@/lib/confirm'
 
 
 const props = defineProps<{
@@ -21,10 +22,15 @@ function printSinglePatient() {
   window.print();
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this patient?')) {
-    router.delete(route('admin.patients.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Patient',
+    message: 'Are you sure you want to delete this patient?',
+    confirmText: 'Delete',
+    variant: 'danger',
+  })
+  if (!ok) return
+  router.delete(route('admin.patients.destroy', id))
 }
 </script>
 

@@ -87,9 +87,9 @@ class InsuranceClaimController extends BaseController
 
         try {
             $claim = $this->service->processPayment($id, $validatedData);
-            return Redirect::back()->with('success', 'Payment processed successfully.');
+            return Redirect::back()->with('banner', 'Payment processed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Failed to process payment: ' . $e->getMessage());
+            return Redirect::back()->with('banner', 'Failed to process payment: ' . $e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 
@@ -102,9 +102,9 @@ class InsuranceClaimController extends BaseController
 
         try {
             $claim = $this->service->updateClaimStatus($id, $validatedData['status'], $validatedData['denial_reason'] ?? null);
-            return Redirect::back()->with('success', 'Claim status updated successfully.');
+            return Redirect::back()->with('banner', 'Claim status updated successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Failed to update claim status: ' . $e->getMessage());
+            return Redirect::back()->with('banner', 'Failed to update claim status: ' . $e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 }

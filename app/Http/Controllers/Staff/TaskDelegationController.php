@@ -48,7 +48,7 @@ class TaskDelegationController extends Controller
         $this->taskDelegationService->create($dto);
 
         return redirect()->route('staff.task-delegations.index')
-                         ->with('success','Task created.');
+                         ->with('banner','Task created.')->with('bannerStyle', 'success');
     }
 
     

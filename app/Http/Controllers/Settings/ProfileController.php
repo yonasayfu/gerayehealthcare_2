@@ -38,7 +38,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        return to_route('profile.edit')->with('banner', 'Your profile has been updated.')->with('bannerStyle', 'success');
     }
 
     /**
@@ -57,6 +57,6 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('banner', 'Your profile has been deleted.')->with('bannerStyle', 'danger');
     }
 }

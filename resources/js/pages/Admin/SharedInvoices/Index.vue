@@ -22,7 +22,7 @@
             <Link :href="route('admin.shared-invoices.create')" class="btn-glass">
               <span>Add Shared Invoice</span>
             </Link>
-            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+            <button @click="exportCsv()" class="btn-glass btn-glass-sm">
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </button>
@@ -116,9 +116,10 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import debounce from 'lodash/debounce'
-import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
+import { Edit3, Trash2, Eye, Printer, ArrowUpDown, Download } from 'lucide-vue-next'
 import Pagination from '@/components/Pagination.vue'
 import { useExport } from '@/composables/useExport'
+import { confirmDialog } from '@/lib/confirm'
 
 const props = defineProps({
   sharedInvoices: Object,
@@ -164,10 +165,26 @@ function toggleSort(field) {
   }
 }
 
-const deleteInvoice = (id) => {
-  if (confirm('Are you sure you want to delete this shared invoice?')) {
-    form.delete(route('admin.shared-invoices.destroy', id))
+async function deleteInvoice(id) {
+  const ok = await confirmDialog({
+    title: 'Delete Shared Invoice',
+    message: 'Are you sure you want to delete this shared invoice?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  form.delete(route('admin.shared-invoices.destroy', id))
+}
+
+function exportCsv() {
+  const params = {
+    type: 'csv',
+    search: search.value || undefined,
+    sort: sortField.value || undefined,
+    direction: sortDirection.value || undefined,
+    per_page: perPage.value || undefined,
   }
+  window.open(route('admin.shared-invoices.export', params), '_blank')
 }
 </script>
 

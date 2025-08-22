@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
@@ -43,10 +44,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
     });
 }, 500));
 
-function destroy(id) {
-    if (confirm('Are you sure you want to delete this event?')) {
-        router.delete(route('admin.events.destroy', id));
-    }
+async function destroy(id) {
+    const ok = await confirmDialog({
+        title: 'Delete Event',
+        message: 'Are you sure you want to delete this event?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+    })
+    if (!ok) return
+    router.delete(route('admin.events.destroy', id))
 }
 
 function exportData(type) {
@@ -120,7 +126,7 @@ function toggleSort(field) {
 
                 <div>
                     <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -160,7 +166,8 @@ function toggleSort(field) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="event in events.data" :key="event.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+                        <template v-for="(event, idx) in (events.data || [])" :key="(event && event.id) ? event.id : idx">
+                        <tr v-if="event" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
                             <td class="px-6 py-4">{{ event.title }}</td>
                             <td class="px-6 py-4">{{ event.description }}</td>
                             <td class="px-6 py-4">{{ event.event_date ? format(new Date(event.event_date), 'PPP') : '-' }}</td>
@@ -169,21 +176,21 @@ function toggleSort(field) {
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.events.show', event.id)"
+                    :href="(event && event.id) ? route('admin.events.show', event.id) : '#'"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.events.edit', event.id)"
+                    :href="(event && event.id) ? route('admin.events.edit', event.id) : '#'"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(event.id)"
+                    @click="(event && event.id) && destroy(event.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >
@@ -192,14 +199,15 @@ function toggleSort(field) {
                 </div>
                             </td>
                         </tr>
-                        <tr v-if="events.data.length === 0">
+                        </template>
+                        <tr v-if="events.data && events.data.length === 0">
                             <td colspan="6" class="text-center px-6 py-4 text-gray-400">No events found.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <Pagination v-if="events.data.length > 0" :links="events.links" class="mt-6 flex justify-center print:hidden" />
+            <Pagination v-if="events.data && events.data.length > 0" :links="events.links" class="mt-6 flex justify-center print:hidden" />
 
             <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
                 <hr class="my-2 border-gray-300">

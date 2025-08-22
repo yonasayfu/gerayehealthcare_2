@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
+import { confirmDialog } from '@/lib/confirm'
 import type { BreadcrumbItem, InsuranceClaim } from '@/types';
 import { format } from 'date-fns'; // For date formatting
 
@@ -20,10 +21,15 @@ function printSingleClaim() {
   window.print();
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this insurance claim?')) {
-    router.delete(route('admin.insurance-claims.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Insurance Claim',
+    message: 'Are you sure you want to delete this insurance claim?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.insurance-claims.destroy', id))
 }
 </script>
 

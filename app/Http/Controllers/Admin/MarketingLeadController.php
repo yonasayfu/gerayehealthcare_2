@@ -116,6 +116,6 @@ class MarketingLeadController extends BaseController
 
         $this->service->update($id, method_exists($dto, 'toArray') ? $dto->toArray() : (array) $dto);
 
-        return redirect()->route('admin.marketing-leads.index')->with('success', 'Marketing lead updated successfully.');
+        return redirect()->route('admin.marketing-leads.index')->with('banner', 'Marketing lead updated successfully.')->with('bannerStyle', 'success');
     }
 }

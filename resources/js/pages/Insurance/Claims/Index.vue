@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
@@ -59,10 +60,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this insurance claim?')) {
-    router.delete(route('admin.insurance-claims.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Insurance Claim',
+    message: 'Are you sure you want to delete this insurance claim?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.insurance-claims.destroy', id))
 }
 
 function toggleSort(field: string) {
@@ -174,7 +180,8 @@ function printCurrentView() {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(claim, index) in insuranceClaims.data" :key="claim.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+            <template v-for="(claim, index) in (insuranceClaims.data || [])" :key="(claim && claim.id) ? claim.id : index">
+            <tr v-if="claim" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
               <td class="px-6 py-4">{{ currentIndex + index + 1 }}</td>
               <td class="px-6 py-4">{{ claim.claim_status ?? '-' }}</td>
               <td class="px-6 py-4">{{ claim.coverage_amount ?? '-' }}</td>
@@ -190,33 +197,34 @@ function printCurrentView() {
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.insurance-claims.show', claim.id)"
+                    :href="(claim && claim.id) ? route('admin.insurance-claims.show', claim.id) : '#'"
                     class="btn-icon text-gray-500"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.insurance-claims.edit', claim.id)"
+                    :href="(claim && claim.id) ? route('admin.insurance-claims.edit', claim.id) : '#'"
                     class="btn-icon text-blue-600"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(claim.id)" class="btn-icon text-red-600" title="Delete">
+                  <button @click="(claim && claim.id) && destroy(claim.id)" class="btn-icon text-red-600" title="Delete">
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
-            <tr v-if="insuranceClaims.data.length === 0">
+            </template>
+            <tr v-if="(insuranceClaims.data && insuranceClaims.data.length === 0)">
               <td colspan="13" class="text-center px-6 py-4 text-gray-400">No insurance claims found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <Pagination v-if="insuranceClaims.data.length > 0" :links="insuranceClaims.links" class="mt-6 flex justify-center print:hidden" />
+      <Pagination v-if="insuranceClaims.data && insuranceClaims.data.length > 0" :links="insuranceClaims.links" class="mt-6 flex justify-center print:hidden" />
       <p v-if="insuranceClaims.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300 print:hidden">
         Showing {{ insuranceClaims.from || 0 }}–{{ insuranceClaims.to || 0 }} of {{ insuranceClaims.total }}
       </p>

@@ -297,10 +297,10 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         Route::resource('event-broadcasts', EventBroadcastController::class);
 
         // Admin Leave Requests
+        Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
-            ->names('leave-requests') // Name routes as admin.leave-requests.* while keeping the URI
-            ->only(['index', 'update']);
+            ->only(['update']);
 
         // Global Search
         Route::get('global-search', [App\Http\Controllers\Admin\GlobalSearchController::class, 'search'])->name('global-search');
@@ -370,3 +370,17 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/marketing.php';
+
+// Test Routes (remove in production)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('test/ui', function () {
+        return Inertia::render('Test/UITest');
+    })->name('test.ui');
+    
+    Route::post('test/flash-message', function () {
+        return redirect()->route('test.ui')->with([
+            'banner' => 'This is a test toast notification! Your UI implementations are working correctly.',
+            'bannerStyle' => 'success'
+        ]);
+    })->name('test.flash-message');
+});

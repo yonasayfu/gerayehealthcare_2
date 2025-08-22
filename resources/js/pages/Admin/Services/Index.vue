@@ -5,6 +5,7 @@ import Pagination from '@/components/Pagination.vue';
 import { Plus, Edit, Trash2, Eye } from 'lucide-vue-next';
 import type { BreadcrumbItemType } from '@/types';
 import { ref, watch } from 'vue';
+import { confirmDialog } from '@/lib/confirm'
 import debounce from 'lodash/debounce';
 
 const props = defineProps<{
@@ -46,10 +47,15 @@ watch([search, perPage], debounce(([searchValue, perPageValue]) => {
     });
 }, 300));
 
-const destroy = (id: number, name: string) => {
-  if (confirm(`Are you sure you want to delete the service "${name}"?`)) {
-    router.delete(route('admin.services.destroy', id));
-  }
+const destroy = async (id: number, name: string) => {
+  const ok = await confirmDialog({
+    title: 'Delete Service',
+    message: `Are you sure you want to delete the service "${name}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.services.destroy', id));
 };
 
 const formatCurrency = (value: number | string) => {
@@ -80,7 +86,7 @@ const formatCurrency = (value: number | string) => {
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Items per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>

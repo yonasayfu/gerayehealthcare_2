@@ -5,6 +5,8 @@ import DashboardHeader from '@/components/DashboardHeader.vue';
 import DashboardTabs from '@/components/DashboardTabs.vue';
 import StatCard from '@/components/StatCard.vue';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import axios from 'axios';
+import MarketingAnalyticsDashboard from '@/components/MarketingAnalyticsDashboard.vue';
 
 import { DollarSign, Users, CreditCard, Activity, Bell } from 'lucide-vue-next';
 import { Bar, Pie } from 'vue-chartjs';
@@ -12,7 +14,7 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
-const currentTab = ref('Overview');
+const currentTab = ref('Analytics');
 
 function handleTabChange(tab: string) {
   currentTab.value = tab;
@@ -147,7 +149,7 @@ const dashboardStats = ref({
 /* API fetchers */
 const fetchDashboardData = async () => {
   try {
-    const response = await axios.get(route('api.admin.marketing-analytics.dashboardData'));
+    const response = await axios.get(route('admin.marketing-analytics.dashboard-data'));
     dashboardStats.value = response.data;
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
@@ -156,7 +158,7 @@ const fetchDashboardData = async () => {
 
 const fetchCampaignPerformance = async () => {
   try {
-    const response = await axios.get(route('api.admin.marketing-analytics.campaignPerformance'));
+    const response = await axios.get(route('admin.marketing-analytics.campaign-performance'));
     campaignPerformanceData.value = response.data.data || [];
   } catch (error) {
     console.error('Error fetching campaign performance:', error);
@@ -165,7 +167,7 @@ const fetchCampaignPerformance = async () => {
 
 const fetchTrafficSourceDistribution = async () => {
   try {
-    const response = await axios.get(route('api.admin.marketing-analytics.trafficSourceDistribution'));
+    const response = await axios.get(route('admin.marketing-analytics.traffic-source-distribution'));
     trafficSourceData.value = response.data || [];
   } catch (error) {
     console.error('Error fetching traffic source distribution:', error);
@@ -174,7 +176,7 @@ const fetchTrafficSourceDistribution = async () => {
 
 const fetchConversionFunnel = async () => {
   try {
-    const response = await axios.get(route('api.admin.marketing-analytics.conversionFunnel'));
+    const response = await axios.get(route('admin.marketing-analytics.conversion-funnel'));
     conversionFunnelData.value = response.data || {};
   } catch (error) {
     console.error('Error fetching conversion funnel:', error);
@@ -196,84 +198,8 @@ watch(currentTab, (newTab) => {
     <Head title="Dashboard" />
 
     <div class="p-6 space-y-6">
-      <DashboardTabs @tab-change="handleTabChange" />
 
-      <div v-if="currentTab === 'Overview'">
-        <!-- Row 1: Stat Cards -->
-        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
-            title="Patients Acquired"
-            :value="dashboardStats.patientsAcquired.toLocaleString()"
-            change=""
-            :icon="Users"
-            color="bg-purple-100 dark:bg-purple-900/20"
-          />
-          <StatCard
-            title="Cost Per Acquisition (CPA)"
-            :value="dashboardStats.cpa.toLocaleString()"
-            change=""
-            :icon="DollarSign"
-            color="bg-orange-100 dark:bg-orange-900/20"
-          />
-          <StatCard
-            title="Revenue Generated"
-            :value="dashboardStats.revenueGenerated.toLocaleString()"
-            change=""
-            :icon="CreditCard"
-            color="bg-teal-100 dark:bg-teal-900/20"
-          />
-          <StatCard
-            title="Return on Investment (ROI)"
-            :value="dashboardStats.roi + '%'"
-            change=""
-            :icon="Activity"
-            color="bg-pink-100 dark:bg-pink-900/20"
-          />
-        </div>
-
-        <!-- Row 2: Bar Chart, Pie Chart, and Table -->
-        <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 mt-4">
-          <div class="col-span-full lg:col-span-1">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Monthly Patient Registrations Overview</h3>
-            <div class="h-[350px] mt-4">
-              <Bar :data="barChartData" :options="barChartOptions" />
-            </div>
-          </div>
-
-          <div class="col-span-full lg:col-span-1">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Patient Demographics by Department</h3>
-            <div class="h-[350px] mt-4 flex items-center justify-center">
-              <Pie :data="pieChartData" :options="pieChartOptions" />
-            </div>
-          </div>
-
-          <div class="col-span-full lg:col-span-1">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Recent Appointments</h3>
-            <div class="mt-4 overflow-x-auto">
-              <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                  <tr>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Patient</th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Date</th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Time</th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(appointment, index) in recentAppointments" :key="index" :class="{'bg-gray-50 dark:bg-gray-700': index % 2 === 0, 'bg-white dark:bg-gray-800': index % 2 !== 0}">
-                    <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.patient }}</td>
-                    <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.date }}</td>
-                    <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.time }}</td>
-                    <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.status }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div v-else-if="currentTab === 'Analytics'">
+      <div>
         <MarketingAnalyticsDashboard
           :dashboardStats="dashboardStats"
           :campaignPerformanceData="campaignPerformanceData"
@@ -282,111 +208,7 @@ watch(currentTab, (newTab) => {
         />
       </div>
 
-      <div v-else-if="currentTab === 'Reports'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">Operational Reports</h3>
-        <p class="text-muted-foreground mb-4">Generate and view detailed reports for various operational aspects.</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 class="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">Monthly Revenue Summary (July 2025)</h4>
-            <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
-              <li>Total Revenue: $150,000</li>
-              <li>Insurance Claims Processed: $80,000</li>
-              <li>Outstanding Invoices: $20,000</li>
-            </ul>
-          </div>
-          <div>
-            <h4 class="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">Staff Performance (Q2 2025)</h4>
-            <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
-              <li>Top Performer (Visits): Nurse A (120 visits)</li>
-              <li>Highest Patient Satisfaction: Dr. B (4.9/5)</li>
-              <li>Leave Requests Approved: 15</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div v-else-if="currentTab === 'Notifications'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">System Notifications</h3>
-        <p class="text-muted-foreground mb-4">Important alerts and updates from the Home-to-Home Care Platform.</p>
-
-        <ul class="mt-4 space-y-3">
-          <li class="p-3 bg-white dark:bg-gray-700 rounded-md shadow-sm flex items-center space-x-3">
-            <Bell class="h-5 w-5 text-blue-500 dark:text-blue-300" />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">New Patient Registered: <span class="text-blue-600 dark:text-blue-400">Sarah Connor</span></p>
-              <p class="text-xs text-muted-foreground">Assigned to Dr. Smith. (5 minutes ago)</p>
-            </div>
-          </li>
-          <li class="p-3 bg-white dark:bg-gray-700 rounded-md shadow-sm flex items-center space-x-3">
-            <Activity class="h-5 w-5 text-green-500 dark:text-green-300" />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Visit Completed: <span class="text-green-600 dark:text-green-400">Patient ID #P1023</span></p>
-              <p class="text-xs text-muted-foreground">Notes and vitals uploaded. (1 hour ago)</p>
-            </div>
-          </li>
-          <li class="p-3 bg-white dark:bg-gray-700 rounded-md shadow-sm flex items-center space-x-3">
-            <CreditCard class="h-5 w-5 text-yellow-500 dark:text-yellow-300" />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Pending Invoice: <span class="text-yellow-600 dark:text-yellow-400">Invoice #INV2025-001</span></p>
-              <p class="text-xs text-muted-foreground">Due in 3 days. (Yesterday)</p>
-            </div>
-          </li>
-          <li class="p-3 bg-white dark:bg-gray-700 rounded-md shadow-sm flex items-center space-x-3">
-            <Users class="h-5 w-5 text-purple-500 dark:text-purple-300" />
-            <div>
-              <p class="font-medium text-gray-900 dark:text-gray-100">Staff Availability Update: <span class="text-purple-600 dark:text-purple-400">Nurse Johnson</span></p>
-              <p class="text-xs text-muted-foreground">New shifts added for next week. (2 days ago)</p>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Liquid glass demo card (no logic change) -->
-      <div class="liquidGlass-wrapper max-w-3xl mx-auto">
-        <div class="liquidGlass-effect" aria-hidden="true"></div>
-        <div class="liquidGlass-tint" aria-hidden="true"></div>
-        <div class="liquidGlass-shine" aria-hidden="true"></div>
-
-        <div class="liquidGlass-content">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="liquidGlass-title">Overview — Patients</div>
-              <div class="liquidGlass-sub">Recent admissions, quick actions and exports</div>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <a :href="route('admin.patients.create')" class="btn-glass btn-glass-sm">
-                <span>Add Patient</span>
-              </a>
-              <button @click="printAllPatients" class="btn-glass btn-glass-sm">
-                <span>Print All</span>
-              </button>
-              <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
-                <span>Export CSV</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- optional small stats row (visual only) -->
-          <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
-              <div class="text-xs text-gray-600 dark:text-gray-300">Total Patients</div>
-              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.total_patients ?? '-' }}</div>
-            </div>
-            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
-              <div class="text-xs text-gray-600 dark:text-gray-300">Active Today</div>
-              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.active_today ?? '-' }}</div>
-            </div>
-            <div class="p-3 rounded-lg bg-white/40 dark:bg-white/6 shadow-sm">
-              <div class="text-xs text-gray-600 dark:text-gray-300">New This Week</div>
-              <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ props?.stats?.new_week ?? '-' }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ...rest of existing dashboard content ... -->
+      <!-- Only marketing analytics content remains -->
 
     </div>
   </AppLayout>

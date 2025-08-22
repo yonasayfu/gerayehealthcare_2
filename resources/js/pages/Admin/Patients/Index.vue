@@ -62,10 +62,28 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this patient?')) {
-    router.delete(route('admin.patients.destroy', id))
-  }
+// Delete confirmation modal state
+const showConfirm = ref(false)
+const pendingDeleteId = ref<number | null>(null)
+
+function confirmDelete(id: number) {
+  pendingDeleteId.value = id
+  showConfirm.value = true
+}
+
+function cancelDelete() {
+  showConfirm.value = false
+  pendingDeleteId.value = null
+}
+
+function proceedDelete() {
+  if (!pendingDeleteId.value) return
+  router.delete(route('admin.patients.destroy', pendingDeleteId.value), {
+    onFinish: () => {
+      showConfirm.value = false
+      pendingDeleteId.value = null
+    },
+  })
 }
 
 function exportData(type: 'csv', preview: boolean = false) {
@@ -229,7 +247,7 @@ function toggleSort(field: string) {
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(patient.id)"
+                    @click="confirmDelete(patient.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >
@@ -246,6 +264,20 @@ function toggleSort(field: string) {
       </div>
 
       <Pagination v-if="patients.data.length > 0" :links="patients.links" class="mt-6 flex justify-center print:hidden" />
+
+      <!-- Confirm Delete Modal -->
+      <div v-if="showConfirm" class="fixed inset-0 z-[60] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/40" @click="cancelDelete" aria-hidden="true"></div>
+        <div role="dialog" aria-modal="true" aria-labelledby="confirm-title"
+             class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+          <h3 id="confirm-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Patient</h3>
+          <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">Are you sure you want to delete this patient? This action cannot be undone.</p>
+          <div class="mt-6 flex justify-end gap-2">
+            <button type="button" @click="cancelDelete" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Cancel</button>
+            <button type="button" @click="proceedDelete" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">Delete</button>
+          </div>
+        </div>
+      </div>
       <p v-if="patients.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300 print:hidden">
         Showing {{ patients.from || 0 }}–{{ patients.to || 0 }} of {{ patients.total }}
       </p>

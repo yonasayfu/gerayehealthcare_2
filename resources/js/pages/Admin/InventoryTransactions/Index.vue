@@ -1,6 +1,7 @@
-<![CDATA[<script setup lang="ts">
+<script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 import { ArrowUpDown, Printer, Download, Eye, Search, Trash2, Edit3 } from 'lucide-vue-next';
@@ -64,11 +65,18 @@ const toggleSort = (column: string) => {
   }
 };
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this inventory transaction?')) {
-    router.delete(route('admin.inventory-transactions.destroy', id));
-  }
-}
+const destroy = async (id: number) => {
+  const ok = await confirmDialog({
+    title: 'Delete Inventory Transaction',
+    message: 'Are you sure you want to delete this transaction?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.inventory-transactions.destroy', id), {
+    preserveScroll: true,
+  });
+};
 
 watch([search, perPage], debounce(() => {
   filters.value.search = search.value;
@@ -126,7 +134,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
           <div>
             <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="25">25</option>

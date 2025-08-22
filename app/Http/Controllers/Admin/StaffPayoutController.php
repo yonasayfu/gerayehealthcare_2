@@ -39,9 +39,9 @@ class StaffPayoutController extends Controller
                 notes: 'Manual Payout'
             );
             $this->staffPayoutService->processPayout($dto);
-            return back()->with('success', 'Payout processed successfully.');
+            return back()->with('banner', 'Payout processed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->with('banner', $e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 

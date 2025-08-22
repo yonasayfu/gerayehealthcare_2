@@ -6,6 +6,7 @@ import { Download, Edit3, Trash2, ArrowUpDown, Eye, Search, Printer } from 'luci
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 import type { EmployeeInsuranceRecordPagination } from '@/types';
 
@@ -51,10 +52,15 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this employee insurance record?')) {
-    router.delete(route('admin.employee-insurance-records.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Employee Insurance Record',
+    message: 'Are you sure you want to delete this employee insurance record?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.employee-insurance-records.destroy', id))
 }
 
 function exportCsv() {
