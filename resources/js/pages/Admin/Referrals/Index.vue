@@ -58,9 +58,6 @@ function printCurrentView() {
   }, 100);
 }
 
-const printAllReferrals = () => {
-  window.open(route('admin.referrals.printAll', { preview: true }), '_blank');
-};
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -78,6 +75,7 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
+<<<<<<< HEAD
             <!-- Liquid glass header with search card (no logic changed) -->
       <div class="liquidGlass-wrapper print:hidden">
         <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
@@ -105,6 +103,24 @@ function toggleSort(field: string) {
               <span class="hidden sm:inline">Print Current</span>
             </button>
           </div>
+=======
+      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
+        <div>
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Referrals</h1>
+          <p class="text-sm text-muted-foreground">Manage all referral records here.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <Link :href="route('admin.referrals.create')" class="btn btn-primary">
+            + Add Referral
+          </Link>
+          <button @click="exportCsv()" class="btn btn-success">
+            <Download class="h-4 w-4" /> CSV
+          </button>
+          <button @click="printCurrentView" class="btn btn-dark">
+            <Printer class="h-4 w-4" /> Print Current
+          </button>
+          
+>>>>>>> yonas/feature/modern-refacotr
         </div>
       </div>
 

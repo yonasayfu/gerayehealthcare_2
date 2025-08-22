@@ -15,15 +15,13 @@ export function useExport(options: UseExportOptions) {
   };
 
   const printCurrentView = () => {
-    isProcessing.value = true;
+    // Use browser print for current view to ensure consistent on-page print styling
+    // Toolbars should use `print:hidden` classes in the page templates
     try {
-      const url = route(`${options.routeName}.printCurrent`, { preview: true, ...options.filters });
-      window.open(url, '_blank');
+      window.print();
     } catch (error) {
       console.error('Print failed:', error);
-      alert('Failed to open print preview.');
-    } finally {
-      isProcessing.value = false;
+      alert('Failed to open print dialog.');
     }
   };
 

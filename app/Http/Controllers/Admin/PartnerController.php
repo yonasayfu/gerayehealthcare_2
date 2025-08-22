@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreatePartnerDTO;
+use App\DTOs\UpdatePartnerDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Partner;
 use App\Models\Staff;
@@ -70,5 +71,25 @@ class PartnerController extends BaseController
     public function printSingle(Request $request, $id)
     {
         return $this->service->printSingle($request, $id);
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Validate using same rules class
+        $model = $this->service->getById($id);
+        $validatedData = $this->validateRequest($request, 'update', $model);
+
+        // Build Update DTO explicitly
+        $dto = UpdatePartnerDTO::from($validatedData);
+        $payload = $dto->toArray();
+
+        // Do not overwrite existing DB values with nulls
+        $payload = array_filter($payload, function ($value) {
+            return !is_null($value);
+        });
+
+        $this->service->update($id, $payload);
+
+        return redirect()->route('admin.partners.index')->with('success', 'Partners updated successfully.');
     }
 }

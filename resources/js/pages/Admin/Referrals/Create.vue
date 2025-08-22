@@ -22,10 +22,22 @@ const form = useForm({
 })
 
 function submit() {
-  form.post(route('admin.referrals.store'), {
-    preserveScroll: true,
-  })
+  form
+    .transform((data: any) => ({
+      ...data,
+      partner_id: (data.partner_id === '' || data.partner_id == null) ? null : Number(data.partner_id),
+      agreement_id: (data.agreement_id === '' || data.agreement_id == null) ? null : Number(data.agreement_id),
+      referred_patient_id: (data.referred_patient_id === '' || data.referred_patient_id == null) ? null : Number(data.referred_patient_id),
+      referral_date: data.referral_date,
+      status: data.status || null,
+      notes: data.notes || null,
+    }))
+    .post(route('admin.referrals.store'), {
+      preserveScroll: true,
+      onFinish: () => form.transform((d: any) => d),
+    })
 }
+
 </script>
 
 <template>

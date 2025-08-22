@@ -163,14 +163,12 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
 
         // Referrals
         Route::get('referrals/export', [\App\Http\Controllers\Admin\ReferralController::class, 'export'])->name('referrals.export');
-        Route::get('referrals/print-all', [\App\Http\Controllers\Admin\ReferralController::class, 'printAll'])->name('referrals.printAll');
         Route::get('referrals/print-current', [\App\Http\Controllers\Admin\ReferralController::class, 'printCurrent'])->name('referrals.printCurrent');
         Route::get('referrals/{referral}/print', [\App\Http\Controllers\Admin\ReferralController::class, 'printSingle'])->name('referrals.printSingle');
         Route::resource('referrals', \App\Http\Controllers\Admin\ReferralController::class);
 
         // Partner Commissions
         Route::get('partner-commissions/export', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'export'])->name('partner-commissions.export');
-        Route::get('partner-commissions/print-all', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printAll'])->name('partner-commissions.printAll');
         Route::get('partner-commissions/print-current', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printCurrent'])->name('partner-commissions.printCurrent');
         Route::get('partner-commissions/{partner_commission}/print', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printSingle'])->name('partner-commissions.printSingle');
         Route::resource('partner-commissions', \App\Http\Controllers\Admin\PartnerCommissionController::class);
@@ -188,6 +186,10 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         Route::get('referral-documents/print-current', [ReferralDocumentController::class, 'printCurrent'])->name('referral-documents.printCurrent');
         Route::get('referral-documents/{referral_document}/print', [ReferralDocumentController::class, 'printSingle'])->name('referral-documents.printSingle');
         Route::resource('referral-documents', ReferralDocumentController::class);
+        Route::get('shared-invoices/export', [SharedInvoiceController::class, 'export'])->name('shared-invoices.export');
+        Route::get('shared-invoices/print-all', [SharedInvoiceController::class, 'printAll'])->name('shared-invoices.printAll');
+        Route::get('shared-invoices/print-current', [SharedInvoiceController::class, 'printCurrent'])->name('shared-invoices.printCurrent');
+        Route::get('shared-invoices/{shared_invoice}/print', [SharedInvoiceController::class, 'printSingle'])->name('shared-invoices.printSingle');
         Route::resource('shared-invoices', SharedInvoiceController::class);
 
         // Staff Availabilities

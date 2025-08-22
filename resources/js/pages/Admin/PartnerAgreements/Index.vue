@@ -157,6 +157,9 @@ function toggleSort(field: string) {
               </th>
               <th class="px-6 py-3">Start Date</th>
               <th class="px-6 py-3">End Date</th>
+              <th class="px-6 py-3">Commission Type</th>
+              <th class="px-6 py-3">Terms Document</th>
+              <th class="px-6 py-3">Signed By</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
           </thead>
@@ -167,10 +170,19 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ agreement.agreement_type }}</td>
               <td class="px-6 py-4">{{ agreement.partner?.name ?? '-' }}</td>
               <td class="px-6 py-4">{{ agreement.status }}</td>
-              <td class="px-6 py-4">{{ agreement.start_date }}</td>
-              <td class="px-6 py-4">{{ agreement.end_date ?? '-' }}</td>
+              <td class="px-6 py-4">{{ agreement.start_date || '-' }}</td>
+              <td class="px-6 py-4">{{ agreement.end_date || '-' }}</td>
+              <td class="px-6 py-4">{{ agreement.commission_type || '-' }}</td>
+              <td class="px-6 py-4">{{ agreement.terms_document_path || '-' }}</td>
+              <td class="px-6 py-4">
+                {{ agreement.signed_by?.first_name
+                  ? (agreement.signed_by.first_name + ' ' + (agreement.signed_by.last_name || ''))
+                  : (agreement.signed_by?.name || agreement.signedBy?.name || '-')
+                }}
+              </td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
+<<<<<<< HEAD
                   <Link
                     :href="route('admin.partner-agreements.show', agreement.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -183,6 +195,13 @@ function toggleSort(field: string) {
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
+=======
+                  <Link :href="route('admin.partner-agreements.show', agreement.id)" class="btn-icon text-indigo-600" title="View Details">
+  <Eye class="w-4 h-4" />
+</Link>
+
+                  <Link :href="route('admin.partner-agreements.edit', agreement.id)" class="btn-icon text-blue-600" title="Edit">
+>>>>>>> yonas/feature/modern-refacotr
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button

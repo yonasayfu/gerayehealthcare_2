@@ -58,9 +58,15 @@
             <tr>
               <th class="px-6 py-3">ID</th>
               <th class="px-6 py-3">Referral</th>
-              <th class="px-6 py-3">Document Name</th>
-              <th class="px-6 py-3">Document Type</th>
-              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('document_name')">
+                Document Name <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('document_type')">
+                Document Type <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
+                Status <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
               <th class="px-6 py-3">Uploaded By</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
@@ -117,7 +123,8 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
-import { Edit3, Trash2, Eye, Printer } from 'lucide-vue-next'
+import debounce from 'lodash/debounce'
+import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
 import Pagination from '@/components/Pagination.vue'
 import { useExport } from '@/composables/useExport'
 import { useClinicInfo } from '@/composables/useClinicInfo'
@@ -137,15 +144,35 @@ const { getClinicName, getClinicLogo, getPrintFooterText } = useClinicInfo()
 
 const form = useForm({})
 
-// Per-page selector state and watcher
+// Filters
+const search = ref(props.filters?.search || '')
+const sortField = ref(props.filters?.sort || '')
+const sortDirection = ref(props.filters?.direction || 'desc')
 const perPage = ref(props.filters?.per_page || 5)
 
-watch(perPage, (val) => {
-  router.get(route('admin.referral-documents.index'), { per_page: val }, {
+// Watch filters with debounce
+watch([search, sortField, sortDirection, perPage], debounce(() => {
+  const params = {
+    search: search.value,
+    per_page: perPage.value,
+    direction: sortDirection.value,
+  }
+  if (sortField.value) params.sort = sortField.value
+
+  router.get(route('admin.referral-documents.index'), params, {
     preserveState: true,
     replace: true,
   })
-})
+}, 400))
+
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+}
 
 const deleteDocument = (id) => {
   if (confirm('Are you sure you want to delete this referral document?')) {
