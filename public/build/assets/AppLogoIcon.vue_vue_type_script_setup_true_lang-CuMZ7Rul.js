@@ -1,0 +1,1 @@
+import{s,f as o,g as a,y as r}from"./vendor-BwD25tKZ.js";const t="/images/geraye_logo.jpeg",p=s({inheritAttrs:!1,__name:"AppLogoIcon",props:{className:{}},setup(n){return(e,c)=>(a(),o("img",r({src:t,class:e.className},e.$attrs,{alt:"Geraye Home Care Services Logo",class:"h-8 w-auto border-none"}),null,16))}});export{p as _};

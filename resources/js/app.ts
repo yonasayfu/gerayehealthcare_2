@@ -3,7 +3,7 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
-import { createApp, h } from 'vue';
+import { createApp, h, defineAsyncComponent } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import axios from 'axios'; // Import axios
@@ -13,7 +13,8 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.headers.common['X-CSRF-TOKEN'] = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
-import AppLayout from '@/layouts/AppLayout.vue';
+// Register AppLayout as an async component to avoid bundling it into the main app chunk
+const AppLayout = defineAsyncComponent(() => import('@/layouts/AppLayout.vue'));
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

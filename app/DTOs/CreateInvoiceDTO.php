@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateInvoiceDTO
+class CreateInvoiceDTO extends BaseDTO
 {
     public function __construct(
         public int $patient_id,

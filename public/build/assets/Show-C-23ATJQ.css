@@ -1,0 +1,1 @@
+@media print{.avoid-break,table,thead,tbody,tr,td,th{break-inside:avoid;page-break-inside:avoid}img{page-break-inside:avoid}}

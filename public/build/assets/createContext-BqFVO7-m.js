@@ -1,0 +1,1 @@
+import{bo as s,bp as c}from"./vendor-BwD25tKZ.js";function x(t,r){const e=typeof t=="string"&&!r?`${t}Context`:r,i=Symbol(e);return[n=>{const o=s(i,n);if(o||o===null)return o;throw new Error(`Injection \`${i.toString()}\` not found. Component must be used within ${Array.isArray(t)?`one of the following components: ${t.join(", ")}`:`\`${t}\``}`)},n=>(c(i,n),n)]}export{x as c};

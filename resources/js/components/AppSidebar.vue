@@ -16,10 +16,10 @@ import type { FunctionalComponent } from 'vue';
 import type { LucideProps } from 'lucide-vue-next';
 import {
   LayoutGrid, UserPlus, UserCog, CalendarClock, Stethoscope, MessageCircle,
-  Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
-  Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
-  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Search, Warehouse, Package, FileText, Wrench, Bell,
-  ChevronUp, Minimize2, Maximize2, GitFork, BarChart
+  Receipt, ShieldCheck, ClipboardList, ArrowBigRight,
+  Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder,
+  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Warehouse, Package, FileText, Wrench, Bell,
+  Minimize2, Maximize2, GitFork, BarChart
 } from 'lucide-vue-next'
 
 interface SidebarNavItem {

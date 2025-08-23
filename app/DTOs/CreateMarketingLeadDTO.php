@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateMarketingLeadDTO
+class CreateMarketingLeadDTO extends BaseDTO
 {
     public function __construct(
         public ?string $lead_code,

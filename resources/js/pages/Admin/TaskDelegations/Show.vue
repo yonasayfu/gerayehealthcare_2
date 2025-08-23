@@ -30,7 +30,7 @@ const props = defineProps<{
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Task Delegation Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Task Delegation: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Task Delegation: {{ props.taskDelegation.title || props.taskDelegation.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -71,6 +71,5 @@ const props = defineProps<{
           <div class="text-sm whitespace-pre-wrap text-foreground">{{ props.taskDelegation.notes }}</div>
         </div>
       </div>
-    </div>
   </AppLayout>
 </template>

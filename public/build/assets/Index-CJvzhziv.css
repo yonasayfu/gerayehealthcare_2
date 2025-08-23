@@ -1,0 +1,1 @@
+@media print{@page{size:A4;margin:12mm}.app-sidebar,.app-sidebar-header,header[role=banner],nav[role=navigation]{display:none!important}.hidden.print\:block{display:block!important}}

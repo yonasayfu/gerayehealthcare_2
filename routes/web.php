@@ -100,6 +100,39 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         // Resource route (already correctly defined relative to the group)
         Route::resource('patients', PatientController::class);
 
+        // Optimized Patient Controller for performance testing
+        Route::prefix('optimized')->name('optimized.')->group(function () {
+            Route::get('patients/export', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'export'])->name('patients.export');
+            Route::get('patients/print-all', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printAll'])->name('patients.printAll');
+            Route::get('patients/print-current', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printCurrent'])->name('patients.printCurrent');
+            Route::get('patients/{patient}/print', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printSingle'])->name('patients.printSingle');
+            Route::get('patients/quick-search', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'quickSearch'])->name('patients.quickSearch');
+            Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class);
+            
+            // Optimized Staff Controller
+            Route::get('staff/export', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'export'])->name('staff.export');
+            Route::get('staff/print-all', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printAll'])->name('staff.printAll');
+            Route::get('staff/print-current', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printCurrent'])->name('staff.printCurrent');
+            Route::get('staff/{staff}/print', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printSingle'])->name('staff.printSingle');
+            Route::get('staff/quick-search', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'quickSearch'])->name('staff.quickSearch');
+            Route::get('staff/available', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'availableStaff'])->name('staff.available');
+            Route::post('staff/bulk-update', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'bulkUpdate'])->name('staff.bulkUpdate');
+            Route::resource('staff', \App\Http\Controllers\Admin\OptimizedStaffController::class);
+            
+            // Optimized Inventory Controller
+            Route::get('inventory-items/export', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'export'])->name('inventory-items.export');
+            Route::get('inventory-items/print-all', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
+            Route::get('inventory-items/print-current', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printCurrent'])->name('inventory-items.printCurrent');
+            Route::get('inventory-items/{inventory_item}/print', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
+            Route::get('inventory-items/quick-search', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'quickSearch'])->name('inventory-items.quickSearch');
+            Route::get('inventory-items/low-stock', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'lowStockAlerts'])->name('inventory-items.lowStock');
+            Route::get('inventory-items/maintenance-due', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'maintenanceDue'])->name('inventory-items.maintenanceDue');
+            Route::post('inventory-items/bulk-quantities', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'bulkUpdateQuantities'])->name('inventory-items.bulkQuantities');
+            Route::post('inventory-items/{inventory_item}/adjust-stock', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'adjustStock'])->name('inventory-items.adjustStock');
+            Route::get('inventory-items/dashboard-data', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'dashboardData'])->name('inventory-items.dashboardData');
+            Route::resource('inventory-items', \App\Http\Controllers\Admin\OptimizedInventoryItemController::class);
+        });
+
         // Caregiver Assignments
         Route::get('assignments/export', [CaregiverAssignmentController::class, 'export'])->name('assignments.export');
         Route::get('assignments/print-all', [CaregiverAssignmentController::class, 'printAll'])->name('assignments.printAll');
@@ -384,3 +417,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('test.flash-message');
 });
+
+// Cache Performance Test Routes (remove in production)
+require __DIR__.'/cache-test.php';
+
+// Performance Comparison Test Routes (remove in production)
+require __DIR__.'/performance-test.php';

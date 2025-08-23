@@ -2,7 +2,7 @@
 
 declare global {
     interface Window {
-        Alpine: any; // Declare Alpine on the Window interface
+        // Global window interface extensions
     }
 }
 

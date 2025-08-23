@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateInventoryMaintenanceRecordDTO
+class CreateInventoryMaintenanceRecordDTO extends BaseDTO
 {
     public function __construct(
         public int $item_id,

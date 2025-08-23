@@ -5,6 +5,7 @@
         "build": "npx vite build",
         "build:ssr": "vite build && vite build --ssr",
         "dev": "npx vite",
+        "analyze": "cross-env ANALYZE=1 vite build",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix"
@@ -24,6 +25,7 @@
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
+        "rollup-plugin-visualizer": "^5.14.0",
         "typescript-eslint": "^8.23.0",
         "vue-tsc": "^2.2.4"
     },
@@ -37,7 +39,6 @@
         "@types/js-cookie": "^3.0.6",
         "@vitejs/plugin-vue": "^6.0.1",
         "@vueuse/core": "^12.8.2",
-        "alpinejs": "^3.14.9",
         "chart.js": "^4.5.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -49,7 +50,6 @@
         "lodash": "^4.17.21",
         "lucide-vue-next": "^0.468.0",
         "mitt": "^3.0.1",
-        "puppeteer": "^24.15.0",
         "radix-vue": "^1.9.17",
         "reka-ui": "^2.2.0",
         "tailwind-merge": "^3.2.0",

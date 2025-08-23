@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Shield, Mail, ArrowLeft } from 'lucide-vue-next';
 
 const props = defineProps<{
   user: {
@@ -36,13 +35,12 @@ const breadcrumbs = [
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">User Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">User: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">User: {{ user.name || user.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
       </div>
         </div>
       </div>
-    </div>
   </AppLayout>
 </template>

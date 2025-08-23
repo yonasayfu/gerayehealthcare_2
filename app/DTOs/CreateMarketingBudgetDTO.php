@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateMarketingBudgetDTO
+class CreateMarketingBudgetDTO extends BaseDTO
 {
     public function __construct(
         public ?int $campaign_id,

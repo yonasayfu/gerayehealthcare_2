@@ -8,12 +8,6 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import axios from 'axios';
 import MarketingAnalyticsDashboard from '@/components/MarketingAnalyticsDashboard.vue';
 
-import { DollarSign, Users, CreditCard, Activity, Bell } from 'lucide-vue-next';
-import { Bar, Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
-
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
-
 const currentTab = ref('Analytics');
 
 function handleTabChange(tab: string) {

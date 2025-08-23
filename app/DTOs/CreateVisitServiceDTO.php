@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateVisitServiceDTO
+class CreateVisitServiceDTO extends BaseDTO
 {
     public function __construct(
         public int $patient_id,
