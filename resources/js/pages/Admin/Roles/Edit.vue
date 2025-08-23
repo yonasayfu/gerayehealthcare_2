@@ -21,6 +21,12 @@ const form = useForm({
 const submit = () => {
   form.put(route('admin.roles.update', props.role.id));
 };
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Role Management', href: route('admin.roles.index') },
+  { title: 'Edit Role', href: route('admin.roles.edit', props.role.id) },
+];
 </script>
 <template>
   <Head title="Edit Role" />

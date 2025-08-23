@@ -13,7 +13,7 @@ const props = defineProps<{
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Invoices', href: route('admin.invoices.index') },
-  { title: props.invoice.invoice_number },
+  { title: props.invoice.invoice_number, href: route('admin.invoices.show', props.invoice.id) },
 ];
 
 const formatCurrency = (value: number | string) => {
@@ -70,6 +70,10 @@ const downloadUrl = computed(() => `${route('admin.invoices.print', props.invoic
 const showShare = ref(false);
 const toggleShare = () => (showShare.value = !showShare.value);
 const closeShare = () => (showShare.value = false);
+
+const printCurrent = () => {
+  setTimeout(() => window.print(), 30);
+};
 </script>
 
 <template>
@@ -84,13 +88,17 @@ const closeShare = () => (showShare.value = false);
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Invoice Details</h3>
             <p class="text-sm text-gray-600 dark:text-gray-300">Invoice: {{ invoice.invoice_number }}</p>
           </div>
-          <Link :href="route('admin.invoices.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 inline-flex items-center">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </Link>
+          <!-- top actions removed to avoid duplication; see bottom action bar -->
         </div>
       </div>
 
       <div class="p-6 space-y-6">
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+          <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+          <p class="text-gray-600 dark:text-gray-400 print-document-title">Invoice</p>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h4 class="font-semibold mb-2">Bill To:</h4>
@@ -140,9 +148,37 @@ const closeShare = () => (showShare.value = false);
         </div>
       </div>
 
-      <div class="p-6 border-t border-gray-200 rounded-b">
-        <!-- Add any buttons or actions here if needed -->
+      <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.invoices.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printCurrent" class="btn-glass btn-glass-sm">
+            <Printer class="icon" />
+            <span class="hidden sm:inline">Print Current</span>
+          </button>
+          <a :href="downloadUrl" class="btn-glass btn-glass-sm">
+            <Download class="icon" />
+            <span class="hidden sm:inline">Download PDF</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
     </div>
   </AppLayout>
 </template>
+
+<style>
+@page { size: A4 portrait; margin: 12mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .print-header-content { page-break-inside: avoid; }
+  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+  table { border-collapse: collapse; }
+  hr { display: none !important; }
+  .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
+}
+</style>

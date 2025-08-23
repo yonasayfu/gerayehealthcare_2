@@ -3,14 +3,37 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
 import { confirmDialog } from '@/lib/confirm'
-import type { BreadcrumbItem, InsuranceClaim } from '@/types';
+import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns'; // For date formatting
+
+interface InsuranceClaim {
+  id: number;
+  claim_status?: string;
+  coverage_amount?: number | null;
+  paid_amount?: number | null;
+  submitted_at?: string | null;
+  processed_at?: string | null;
+  payment_due_date?: string | null;
+  payment_received_at?: string | null;
+  payment_method?: string | null;
+  receipt_number?: string | null;
+  reimbursement_required?: boolean;
+  is_pre_authorized?: boolean;
+  pre_authorization_code?: string | null;
+  email_status?: string | null;
+  email_sent_at?: string | null;
+  invoice?: {
+    invoice_number?: string | null;
+    grand_total?: number | string | null;
+    patient?: { full_name?: string; phone_number?: string; email?: string } | null;
+  } | null;
+}
 
 const props = defineProps<{
   insuranceClaim: InsuranceClaim;
 }>()
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Insurance Claims', href: route('admin.insurance-claims.index') },
   { title: `Claim #${props.insuranceClaim.id}`, href: route('admin.insurance-claims.show', props.insuranceClaim.id) },
@@ -37,15 +60,16 @@ async function destroy(id: number) {
   <Head :title="`Insurance Claim: ${insuranceClaim.id}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="bg-white border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-            <h3 class="text-xl font-semibold">
-                Insurance Claim Details: #{{ insuranceClaim.id }}
-            </h3>
-            <Link :href="route('admin.insurance-claims.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
+        <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+          <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+          <div class="liquidGlass-content flex items-center justify-between p-6">
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Insurance Claim Details</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Claim #{{ insuranceClaim.id }}</p>
+            </div>
+          </div>
         </div>
 
         <div class="p-6 space-y-6">
@@ -55,7 +79,6 @@ async function destroy(id: number) {
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                     <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
                     <p class="text-gray-600 dark:text-gray-400 print-document-title">Insurance Claim Document</p>
-                    <hr class="my-3 border-gray-300 print:my-2">
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
@@ -158,25 +181,23 @@ async function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-            <div class="flex flex-wrap gap-2">
-              <Link :href="route('admin.insurance-claims.index')" class="btn btn-outline">
-                Back to List
-              </Link>
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+            <div class="flex justify-end gap-2">
+              <Link :href="route('admin.insurance-claims.index')" class="btn-glass btn-glass-sm">Back to List</Link>
               <Link
                 :href="route('admin.insurance-claims.edit', insuranceClaim.id)"
-                class="btn btn-primary"
+                class="btn-glass btn-glass-sm"
               >
                 Edit Claim
               </Link>
-              <button @click="printSingleClaim" class="btn btn-dark">
-                <Printer class="h-4 w-4" /> Print Current
+              <button @click="printSingleClaim" class="btn-glass btn-glass-sm">
+                <Printer class="icon" />
+                <span class="hidden sm:inline">Print Current</span>
               </button>
             </div>
         </div>
 
-        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
-          <hr class="my-2 border-gray-300">
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
           <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
         </div>
 

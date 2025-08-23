@@ -15,6 +15,26 @@
         thead { background: #f3f4f6; }
         .kv { margin-bottom: 6px; }
         .kv .label { font-weight: 600; margin-right: 6px; }
+        /* Optional stamp at top-right */
+        .stamp {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            z-index: 1200;
+            opacity: 0.85;
+            text-align: center;
+        }
+        .stamp img { max-width: 120px; max-height: 120px; }
+        .stamp .stamp-text {
+            display: inline-block;
+            padding: 6px 10px;
+            border: 2px solid #c53030;
+            color: #c53030;
+            font-weight: 700;
+            font-size: 12px;
+            transform: rotate(-12deg);
+            background: rgba(255,255,255,0.85);
+        }
         .footer { 
             position: fixed; 
             bottom: 0; 
@@ -36,6 +56,15 @@
     </style>
 </head>
 <body>
+    @if(!empty($headerInfo['stamp_image']) || !empty($headerInfo['stamp_text']))
+        <div class="stamp">
+            @if(!empty($headerInfo['stamp_image']) && file_exists($headerInfo['stamp_image']))
+                <img src="{{ $headerInfo['stamp_image'] }}" alt="Stamp" />
+            @elseif(!empty($headerInfo['stamp_text']))
+                <span class="stamp-text">{{ $headerInfo['stamp_text'] }}</span>
+            @endif
+        </div>
+    @endif
     <div class="header">
         @if(!empty($headerInfo['logo']) && file_exists($headerInfo['logo']))
             <img class="logo" src="{{ $headerInfo['logo'] }}" alt="Logo">

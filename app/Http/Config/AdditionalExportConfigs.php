@@ -594,56 +594,7 @@ class AdditionalExportConfigs
     }
 
 
-
-    private static $exchangeRateConfig = null;
-
-    public static function getExchangeRateConfig(): array
-    {
-        if (self::$exchangeRateConfig === null) {
-            self::$exchangeRateConfig = [
-                'searchable_fields' => ['currency_code', 'source'],
-                'sortable_fields' => ['currency_code', 'rate_to_etb', 'source', 'date_effective', 'created_at'],
-                'csv_headers' => ['Currency Code', 'Rate to ETB', 'Source', 'Date Effective'],
-                'csv_fields' => ['currency_code', 'rate_to_etb', 'source', 'date_effective'],
-                'pdf_columns' => [
-                    ['key' => 'currency_code', 'label' => 'Currency Code', 'printWidth' => '20%'],
-                    ['key' => 'rate_to_etb', 'label' => 'Rate to ETB', 'printWidth' => '25%'],
-                    ['key' => 'source', 'label' => 'Source', 'printWidth' => '30%'],
-                    ['key' => 'date_effective', 'label' => 'Date Effective', 'printWidth' => '25%'],
-                ],
-                'field_transformations' => [
-                    'rate_to_etb' => fn($value) => number_format($value, 4),
-                    'date_effective' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A',
-                ],
-                'print_layout' => [
-                    'title' => 'Exchange Rates List',
-                    'document_title' => 'Exchange Rates List',
-                    'paper_size' => 'a4',
-                    'orientation' => 'landscape',
-                    'filename_prefix' => 'exchange_rates',
-                ],
-                'single_print_layout' => [
-                    'title' => 'Exchange Rate Details',
-                    'document_title' => 'Exchange Rate Details',
-                    'paper_size' => 'a4',
-                    'orientation' => 'portrait',
-                    'filename_prefix' => 'exchange_rate',
-                    'fields' => [
-                        ['label' => 'Currency Code', 'key' => 'currency_code'],
-                        ['label' => 'Rate to ETB', 'key' => 'rate_to_etb', 'transform' => fn($value) => number_format($value, 4)],
-                        ['label' => 'Source', 'key' => 'source'],
-                        ['label' => 'Date Effective', 'key' => 'date_effective', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
-                    ],
-                ],
-                'relationships' => [],
-                'default_sort' => ['created_at', 'desc'],
-                'per_page' => 5,
-            ];
-        }
-
-        return self::$exchangeRateConfig;
-    }
+    // Exchange Rates module removed: config intentionally deleted.
 
     private static $ethiopianCalendarDayConfig = null;
 
@@ -1141,5 +1092,190 @@ class AdditionalExportConfigs
         ];
     }
 
-    
+    public static function getMedicalDocumentConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'patient.full_name', 'label' => 'Patient'],
+            ['key' => 'document_type', 'label' => 'Type'],
+            ['key' => 'title', 'label' => 'Title'],
+            ['key' => 'document_date', 'label' => 'Date'],
+            ['key' => 'is_printed', 'label' => 'Printed'],
+            ['key' => 'createdBy.full_name', 'label' => 'Created By'],
+        ];
+
+        return [
+            'csv' => [
+                'headers' => ['Patient', 'Type', 'Title', 'Date', 'Printed', 'Created By'],
+                'fields' => [
+                    ['field' => 'patient.full_name', 'default' => '-'],
+                    'document_type',
+                    ['field' => 'title', 'default' => '-'],
+                    ['field' => 'document_date', 'default' => '-'],
+                    [
+                        'field' => 'is_printed',
+                        'transform' => fn($v) => $v ? 'Yes' : 'No',
+                    ],
+                    ['field' => 'createdBy.full_name', 'default' => '-'],
+                ],
+                'filename_prefix' => 'medical_documents',
+            ],
+            'pdf' => [
+                'title' => 'Medical Documents',
+                'document_title' => 'Medical Documents',
+                'filename_prefix' => 'medical_documents',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'all_records' => [
+                'title' => 'All Medical Documents',
+                'document_title' => 'All Medical Documents',
+                'filename_prefix' => 'medical_documents',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'include_index' => true,
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'current_page' => [
+                'title' => 'Medical Documents (Current View)',
+                'document_title' => 'Medical Documents (Current View)',
+                'filename_prefix' => 'medical_documents_current',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'single_record' => [
+                'title' => 'Medical Document Details',
+                'document_title' => 'Medical Document Details',
+                'filename_prefix' => 'medical_document',
+                'paper' => 'a5',
+                'view' => 'pdf-layout',
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'document_type', 'label' => 'Type'],
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'document_date', 'label' => 'Date'],
+                    ['key' => 'is_printed', 'label' => 'Printed'],
+                    ['key' => 'createdBy.full_name', 'label' => 'Created By'],
+                ],
+                'fields' => [
+                    'Patient' => ['field' => 'patient.full_name', 'default' => '-'],
+                    'Type' => 'document_type',
+                    'Title' => ['field' => 'title', 'default' => '-'],
+                    'Date' => ['field' => 'document_date', 'default' => '-'],
+                    'Printed' => [
+                        'field' => 'is_printed',
+                        'transform' => fn($v) => $v ? 'Yes' : 'No',
+                    ],
+                    'Created By' => ['field' => 'createdBy.full_name', 'default' => '-'],
+                ],
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+        ];
+    }
+
+    public static function getPrescriptionConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'patient_name', 'label' => 'Patient'],
+            ['key' => 'prescribed_date', 'label' => 'Date'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'created_by', 'label' => 'Created By'],
+        ];
+
+        return [
+            'csv' => [
+                'headers' => ['Patient', 'Date', 'Status', 'Items Count'],
+                'fields' => [
+                    ['field' => 'patient.full_name', 'default' => '-'],
+                    ['field' => 'prescribed_date', 'default' => '-'],
+                    'status',
+                    ['field' => 'items_count', 'transform' => fn($v, $m) => isset($m['items']) ? count($m['items']) : ($m->items()->count() ?? 0)],
+                ],
+                'filename_prefix' => 'prescriptions',
+            ],
+            'pdf' => [
+                'title' => 'Prescriptions',
+                'document_title' => 'Prescriptions',
+                'filename_prefix' => 'prescriptions',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'all_records' => [
+                'title' => 'All Prescriptions',
+                'document_title' => 'All Prescriptions',
+                'filename_prefix' => 'prescriptions',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'include_index' => true,
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'current_page' => [
+                'title' => 'Prescriptions (Current View)',
+                'document_title' => 'Prescriptions (Current View)',
+                'filename_prefix' => 'prescriptions_current',
+                'orientation' => 'portrait',
+                'paper' => 'a5',
+                'view' => 'pdf-layout',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+            'single_record' => [
+                'title' => 'Prescription Details',
+                'document_title' => 'Prescription Details',
+                'filename_prefix' => 'prescription',
+                'paper' => 'a5',
+                'orientation' => 'portrait',
+                'view' => 'pdf-layout',
+                'columns' => [
+                    ['key' => 'patient_name', 'label' => 'Patient'],
+                    ['key' => 'prescribed_date', 'label' => 'Date'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'created_by', 'label' => 'Created By'],
+                ],
+                'fields' => [
+                    'Patient' => ['field' => 'patient_name', 'default' => '-'],
+                    'Prescribed Date' => ['field' => 'prescribed_date', 'default' => '-'],
+                    'Status' => ['field' => 'status', 'default' => '-'],
+                    'Created By' => ['field' => 'created_by', 'default' => '-'],
+                ],
+                'with_relations' => ['patient', 'createdBy'],
+                'header_info' => [
+                    'stamp_text' => 'Official - Exchange Copy',
+                ],
+            ],
+        ];
+    }
 }

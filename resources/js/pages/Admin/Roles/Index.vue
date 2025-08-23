@@ -37,14 +37,17 @@ async function destroy(id: number) {
   <Head title="Role Management" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Role Management</h1>
-          <p class="text-sm text-muted-foreground">Create and manage user roles and their permissions.</p>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Role Management</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Create and manage user roles and their permissions.</p>
+          </div>
+          <Link :href="route('admin.roles.create')" class="btn-glass btn-glass-sm">
+            + Add New Role
+          </Link>
         </div>
-        <Link :href="route('admin.roles.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-          + Add New Role
-        </Link>
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">

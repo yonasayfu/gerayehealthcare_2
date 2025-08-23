@@ -77,9 +77,12 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-end mt-6">
-                <button type="submit" :disabled="form.processing" class="btn btn-primary">
-                    {{ editMode ? 'Update' : 'Create' }} Shared Invoice
+            <div class="flex justify-end gap-2 mt-6">
+                <Link :href="route('admin.shared-invoices.index')" class="btn-glass btn-glass-sm">
+                    Cancel
+                </Link>
+                <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
+                    {{ form.processing ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save' : 'Create') }}
                 </button>
             </div>
         </div>
@@ -87,7 +90,7 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 
 const props = defineProps({

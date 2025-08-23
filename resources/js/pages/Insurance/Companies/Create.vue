@@ -1,17 +1,22 @@
 <template>
     <Head title="Create Insurance Company" />
     <AppLayout :breadcrumbs="breadcrumbs">
-      <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+      <div class="space-y-6 p-6">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-          <h3 class="text-xl font-semibold">Create New Insurance Company</h3>
-          <Link :href="route('admin.insurance-companies.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </Link>
+        <div class="liquidGlass-wrapper relative overflow-hidden rounded-xl p-5">
+          <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-white/5"></div>
+          <div class="relative flex items-center justify-between">
+            <div>
+              <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Create New Insurance Company</h1>
+              <p class="text-sm text-muted-foreground">Fill company details and save.</p>
+            </div>
+            <Link :href="route('admin.insurance-companies.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          </div>
         </div>
 
-        <div class="p-6 space-y-6">
-          <form @submit.prevent="submit">
+        <div class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg">
+          <div class="p-6 space-y-6">
+            <form @submit.prevent="submit">
             <div v-if="Object.keys(form.errors).length" class="rounded-md bg-red-50 p-4 border border-red-200 text-red-800 text-sm">
               Please correct the highlighted errors and try again.
             </div>
@@ -48,17 +53,18 @@
               </div>
             </div>
           </form>
-        </div>
-
-        <div class="p-6 border-t border-gray-200 rounded-b">
-          <div class="flex flex-wrap gap-2">
-            <Link :href="route('admin.insurance-companies.index')" class="btn btn-outline">Cancel</Link>
-            <button @click="submit" :disabled="form.processing" class="btn btn-primary" type="submit">
-              {{ form.processing ? 'Creating...' : 'Create Company' }}
-            </button>
           </div>
-        </div>
 
+          <div class="p-6 border-t border-gray-200 rounded-b">
+            <div class="flex flex-wrap gap-2">
+              <Link :href="route('admin.insurance-companies.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+              <button @click="submit" :disabled="form.processing" class="btn-glass btn-glass-sm" type="submit">
+                {{ form.processing ? 'Creating...' : 'Create Company' }}
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
     </AppLayout>
 </template>

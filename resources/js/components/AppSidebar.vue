@@ -81,6 +81,14 @@ const allAdminNavItems: SidebarNavGroup[] = [
     ],
   },
   {
+    group: 'Medical Records',
+    icon: FileText,
+    items: [
+      { title: 'Medical Documents', routeName: 'admin.medical-documents.index', icon: Folder, permission: 'view medical documents' },
+      { title: 'Prescriptions', routeName: 'admin.prescriptions.index', icon: FileText, permission: 'view prescriptions' },
+    ],
+  },
+  {
     group: 'Administrative Tools',
     icon: UserCog,
     items: [
@@ -140,7 +148,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Insurance Policies', routeName: 'admin.insurance-policies.index', icon: FileText, permission: 'view insurance policies' },
       { title: 'Employee Insurance Records', routeName: 'admin.employee-insurance-records.index', icon: ClipboardList, permission: 'view employee insurance records' },
       { title: 'Insurance Claims', routeName: 'admin.insurance-claims.index', icon: Receipt, permission: 'view insurance claims' },
-      { title: 'Exchange Rates', routeName: 'admin.exchange-rates.index', icon: DollarSign, permission: 'view exchange rates' },
       { title: 'Ethiopian Calendar Days', routeName: 'admin.ethiopian-calendar-days.index', icon: CalendarDays, permission: 'view ethiopian calendar days' },
     ],
   },

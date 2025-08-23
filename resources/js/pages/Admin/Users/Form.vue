@@ -3,13 +3,14 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{
   form: ReturnType<typeof useForm>;
+  departments?: string[];
 }>();
 
 const emit = defineEmits(['submit']);
 </script>
 
 <template>
-  <form @submit.prevent="emit('submit')" class="space-y-8">
+  <div class="space-y-8">
     <!-- User Account Details Section -->
     <div class="space-y-4">
       <h3 class="font-medium text-lg text-gray-900 dark:text-white">User Account Details</h3>
@@ -62,7 +63,15 @@ const emit = defineEmits(['submit']);
         </div>
         <div>
           <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-          <input id="department" type="text" v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
+          <template v-if="props.departments && props.departments.length">
+            <select id="department" v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+              <option value="">Select department</option>
+              <option v-for="dept in props.departments" :key="dept" :value="dept">{{ dept }}</option>
+            </select>
+          </template>
+          <template v-else>
+            <input id="department" type="text" v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
+          </template>
           <div v-if="form.errors.department" class="text-red-500 text-sm mt-1">{{ form.errors.department }}</div>
         </div>
         <div>
@@ -72,5 +81,5 @@ const emit = defineEmits(['submit']);
         </div>
       </div>
     </div>
-  </form>
+  </div>
 </template>

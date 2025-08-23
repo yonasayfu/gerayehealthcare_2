@@ -94,21 +94,24 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Employee Insurance Records</h1>
-          <p class="text-sm text-muted-foreground">Manage all employee insurance records here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.employee-insurance-records.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Record
-          </Link>
-          <button @click="exportCsv" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="printCurrentView" class="btn btn-dark inline-flex items-center gap-1 text-sm px-3 py-2">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+      <div class="liquidGlass-wrapper relative overflow-hidden rounded-xl p-5 print:hidden">
+        <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-white/5"></div>
+        <div class="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Employee Insurance Records</h1>
+            <p class="text-sm text-muted-foreground">Manage all employee insurance records here.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <Link :href="route('admin.employee-insurance-records.create')" class="btn-glass btn-glass-sm inline-flex items-center gap-2">
+              + Add Record
+            </Link>
+            <button @click="exportCsv" class="btn-glass btn-glass-sm inline-flex items-center gap-1">
+              <Download class="h-4 w-4" /> CSV
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm inline-flex items-center gap-1">
+              <Printer class="h-4 w-4" /> Print Current
+            </button>
+          </div>
         </div>
       </div>
 
@@ -140,7 +143,6 @@ function toggleSort(field: string) {
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Employee Insurance Records List (Current View)</p>
-            <hr class="my-3 border-gray-300 print:my-2">
         </div>
         
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
@@ -211,10 +213,24 @@ function toggleSort(field: string) {
       <Pagination v-if="employeeInsuranceRecords.data.length > 0" :links="employeeInsuranceRecords.links" class="mt-6 flex justify-center print:hidden" />
       
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
+        <p>Printed on: {{ formattedGeneratedDate }}</p>
+      </div>
 
     </div>
   </AppLayout>
 </template>
+
+<style>
+@page { size: A4 portrait; margin: 12mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .print-header-content { page-break-inside: avoid; }
+  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+  table { border-collapse: collapse; }
+  hr { display: none !important; }
+  .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
+}
+</style>
 

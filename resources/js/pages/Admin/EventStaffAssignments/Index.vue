@@ -172,11 +172,7 @@ function truncate(str: string | undefined, n = 60): string {
             <Link :href="route('admin.event-staff-assignments.create')" class="btn-glass">
               <span>Add Event Staff Assignment</span>
             </Link>
-            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
-              <Download class="icon" />
-              <span class="hidden sm:inline">Export CSV</span>
-            </button>
-            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+            <button @click="printPage" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
             </button>
@@ -272,21 +268,21 @@ function truncate(str: string | undefined, n = 60): string {
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.event-staff-assignments.show', item.id)"
+                    :href="route('admin.event-staff-assignments.show', assignment.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.event-staff-assignments.edit', item.id)"
+                    :href="route('admin.event-staff-assignments.edit', assignment.id)"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(item.id)"
+                    @click="destroy(assignment.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >
