@@ -6,9 +6,7 @@ use App\DTOs\CreateMarketingTaskDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Services\MarketingTaskService;
 use App\Models\MarketingTask;
-use App\Models\MarketingCampaign;
-use App\Models\Staff;
-use App\Models\CampaignContent;
+use App\Services\CachedDropdownService;
 use App\Services\Validation\Rules\MarketingTaskRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -37,8 +35,9 @@ class MarketingTaskController extends BaseController
     {
         $data = $this->service->getAll($request);
 
-        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
-        $staffs = Staff::with('user:id,name')->select('id', 'user_id')->orderBy('id', 'asc')->get();
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffs = CachedDropdownService::getStaffWithUsers();
 
         // Task types and statuses: align with factory and UI options
         $taskTypes = [
@@ -49,8 +48,13 @@ class MarketingTaskController extends BaseController
             'SEO Optimization',
         ];
         $filters = $request->only([
-            'search', 'sort', 'direction', 'per_page',
-            'campaign_id', 'assigned_to_staff_id', 'task_type',
+            'search',
+            'sort',
+            'direction',
+            'per_page',
+            'campaign_id',
+            'assigned_to_staff_id',
+            'task_type',
         ]);
 
         return Inertia::render($this->viewName . '/Index', [
@@ -67,9 +71,10 @@ class MarketingTaskController extends BaseController
      */
     public function create()
     {
-        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
-        $staffMembers = Staff::with('user:id,name')->select('id', 'user_id')->orderBy('id', 'asc')->get();
-        $contents = CampaignContent::select('id', 'title')->orderBy('title')->get();
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffMembers = CachedDropdownService::getStaffWithUsers();
+        $contents = CachedDropdownService::getCampaignContent();
 
         $taskTypes = [
             'Email Campaign',
@@ -96,9 +101,10 @@ class MarketingTaskController extends BaseController
     {
         $data = $this->service->getById($id);
 
-        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
-        $staffs = Staff::with('user:id,name')->select('id', 'user_id')->orderBy('id', 'asc')->get();
-        $campaignContents = CampaignContent::select('id', 'title')->orderBy('title')->get();
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffs = CachedDropdownService::getStaffWithUsers();
+        $campaignContents = CachedDropdownService::getCampaignContent();
 
         $taskTypes = [
             'Email Campaign',
