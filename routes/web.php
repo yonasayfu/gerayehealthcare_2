@@ -35,6 +35,8 @@ use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
 use Illuminate\Support\Facades\Auth;
 // Common Controllers
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 /*
@@ -55,6 +57,77 @@ Route::get('/admin', function () {
 Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPdf'])
     ->middleware('signed')
     ->name('invoices.public_pdf');
+
+// Performance testing route
+Route::get('/performance-test', function (Request $request) {
+    $startTime = microtime(true);
+    $queryCount = 0;
+    
+    // Listen to queries
+    DB::listen(function ($query) use (&$queryCount) {
+        $queryCount++;
+    });
+    
+    $results = [];
+    
+    // Test 1: Simple database connection
+    $testStart = microtime(true);
+    try {
+        DB::connection()->getPdo();
+        $results['database_connection'] = [
+            'status' => 'success',
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    } catch (Exception $e) {
+        $results['database_connection'] = [
+            'status' => 'error',
+            'error' => $e->getMessage(),
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    }
+    
+    // Test 2: Basic model query
+    $testStart = microtime(true);
+    try {
+        $patientCount = \App\Models\Patient::count();
+        $results['basic_query'] = [
+            'status' => 'success',
+            'result' => "Found {$patientCount} patients",
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    } catch (Exception $e) {
+        $results['basic_query'] = [
+            'status' => 'error',
+            'error' => $e->getMessage(),
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    }
+    
+    $totalTime = microtime(true) - $startTime;
+    
+    $recommendations = [];
+    if ($totalTime > 0.1) {
+        $recommendations[] = "Total execution time is " . round($totalTime * 1000, 2) . "ms. Consider optimizing slow operations.";
+    }
+    if ($queryCount > 10) {
+        $recommendations[] = "High query count ({$queryCount}). Consider using eager loading or caching.";
+    }
+    if (empty($recommendations)) {
+        $recommendations[] = "Backend performance looks good. Check frontend optimization and network conditions.";
+    }
+    
+    return response()->json([
+        'total_execution_time' => round($totalTime * 1000, 2) . ' ms',
+        'total_queries' => $queryCount,
+        'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
+        'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'environment' => app()->environment(),
+        'tests' => $results,
+        'recommendations' => $recommendations
+    ]);
+})->name('performance.test');
 
 // Shared Dashboard
 Route::get('dashboard', function () {

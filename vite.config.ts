@@ -40,27 +40,56 @@ export default defineConfig({
     },
     build: {
         target: 'esnext',
-        minify: 'esbuild',
+        minify: 'terser', // Use terser for better compression
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true,
+            },
+        },
         rollupOptions: {
             output: {
+                // Simple but effective chunking strategy
                 manualChunks(id) {
-                    // Split core vendor libs
-                    if (id.includes('node_modules')) {
-                        if (id.includes('vue') || id.includes('@inertiajs') || id.includes('axios') || id.includes('ziggy-js')) {
-                            return 'vendor';
-                        }
-                        // Put charting libs in their own chunk
-                        if (id.includes('chart.js') || id.includes('vue-chartjs')) {
-                            return 'charts';
-                        }
-                        // Group lucide icons separately (tree-shakeable, but this isolates if many icons are used)
-                        if (id.includes('lucide-vue-next')) {
-                            return 'icons';
-                        }
+                    // Vue core
+                    if (id.includes('vue') && !id.includes('vue-chartjs')) {
+                        return 'vue-core';
                     }
-                    // Leave others to default chunking
+                    // Inertia
+                    if (id.includes('@inertiajs')) {
+                        return 'inertia';
+                    }
+                    // Charts
+                    if (id.includes('chart.js') || id.includes('vue-chartjs')) {
+                        return 'charts';
+                    }
+                    // Calendar
+                    if (id.includes('@fullcalendar')) {
+                        return 'calendar';
+                    }
+                    // Icons
+                    if (id.includes('lucide-vue-next')) {
+                        return 'icons';
+                    }
+                    // UI Framework
+                    if (id.includes('reka-ui') || id.includes('@vueuse')) {
+                        return 'ui-framework';
+                    }
+                    // Utils
+                    if (id.includes('axios') || id.includes('lodash') || id.includes('date-fns')) {
+                        return 'utils';
+                    }
+                    // Ziggy routes
+                    if (id.includes('ziggy-js')) {
+                        return 'ziggy';
+                    }
+                    // Everything else in misc
+                    if (id.includes('node_modules')) {
+                        return 'misc';
+                    }
                 },
             },
         },
+        chunkSizeWarningLimit: 1000, // Increase warning limit for large chunks
     },
 });
