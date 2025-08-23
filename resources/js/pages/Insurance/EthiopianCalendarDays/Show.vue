@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <div class="mt-6 border-t pt-6">
+        <div class="mt-6 border-t pt-6 flex justify-end">
           <Link :href="route('admin.ethiopian-calendar-days.edit', ethiopianCalendarDay.id)" class="inline-flex items-center px-4 py-2 bg-blue-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-300 disabled:opacity-25 transition">
             Edit Day
           </Link>

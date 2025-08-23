@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 import debounce from 'lodash/debounce'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Pagination from '@/components/Pagination.vue'
-import { ArrowUpDown, Edit3, Trash2, Eye } from 'lucide-vue-next'
+import { ArrowUpDown, Edit3, Trash2, Eye, Printer, Download } from 'lucide-vue-next'
 
 // ————————————————
 // 1. Destructure props: use `assignee` here
@@ -29,13 +29,10 @@ const { taskDelegations, filters } = defineProps<{
     };
   }
   filters: {
-    type: Object,
-    default: () => ({
-      search: '',
-      sort_by: 'due_date',
-      sort_order: 'asc',
-      per_page: 5,
-    }),
+    search: string
+    sort_by: string
+    sort_order: 'asc' | 'desc'
+    per_page: number
   },
 }>()
 const search    = ref(filters.search || '')
@@ -43,7 +40,33 @@ const sortBy    = ref(filters.sort_by)
 const sortOrder = ref(filters.sort_order)
 const perPage   = ref(filters.per_page || 5)
 
-// Export/Print features removed per requirements
+// Export/Print handlers
+function exportData(format: 'csv') {
+  // Client-side CSV export of currently visible rows
+  const rows = taskDelegations.data
+  const header = ['Title', 'Assigned To', 'Due Date', 'Status']
+  const csv = [
+    header.join(','),
+    ...rows.map((t) => [
+      '"' + (t.title ?? '') + '"',
+      '"' + (t.assignee?.first_name + ' ' + t.assignee?.last_name) + '"',
+      '"' + new Date(t.due_date).toLocaleDateString() + '"',
+      '"' + (t.status ?? '') + '"',
+    ].join(',')),
+  ].join('\n')
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'task_delegations.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function printCurrentView() {
+  window.print()
+}
 
 watch([search, sortBy, sortOrder, perPage], debounce(([searchValue, sort_byValue, sort_orderValue, perPageValue]) => {
   router.get(
@@ -173,21 +196,21 @@ const breadcrumbs = [
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.task-delegations.show', delegation.id)"
+                    :href="route('admin.task-delegations.show', task.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.task-delegations.edit', delegation.id)"
+                    :href="route('admin.task-delegations.edit', task.id)"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(delegation.id)"
+                    @click="destroy(task.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >

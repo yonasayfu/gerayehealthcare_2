@@ -39,7 +39,7 @@ function printPage() {
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Inventory Maintenance Record Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Inventory Maintenance Record: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Inventory Maintenance Record: {{ maintenanceRecord.item?.name || maintenanceRecord.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -130,8 +130,8 @@ function printPage() {
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.inventory-maintenance-records.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSingleInventoryMaintenanceRecord" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.inventory-maintenance-records.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.inventory-maintenance-records.edit', maintenanceRecord.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 

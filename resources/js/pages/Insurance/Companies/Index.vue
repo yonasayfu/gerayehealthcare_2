@@ -121,16 +121,16 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all insurance companies here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.insurance-companies.create')" class="btn btn-primary">
+          <Link :href="route('admin.insurance-companies.create')" class="btn-glass btn-glass-sm">
             + Add Company
           </Link>
-          <button @click="exportData('csv')" class="btn btn-success">
+          <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
             <Download class="h-4 w-4" /> CSV
           </button>
-          <button @click="printCurrentView" :disabled="!canPrintCurrent" class="btn btn-dark disabled:opacity-50 disabled:cursor-not-allowed" title="Preview printable PDF of the current page">
+          <button @click="printCurrentView" :disabled="!canPrintCurrent" class="btn-glass btn-glass-sm disabled:opacity-50 disabled:cursor-not-allowed" title="Preview printable PDF of the current page">
             <Printer class="h-4 w-4" /> Print Current
           </button>
-          <button @click="printAllCompanies" class="btn btn-info">
+          <button @click="printAllCompanies" class="btn-glass btn-glass-sm">
             <Printer class="h-4 w-4" /> Print All
           </button>
         </div>

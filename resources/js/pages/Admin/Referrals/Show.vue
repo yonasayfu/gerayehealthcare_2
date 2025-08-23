@@ -52,7 +52,7 @@ function printPage() {
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Referral Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Referral: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Referral: {{ props.referral.patient?.full_name ?? props.referral.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -74,23 +74,23 @@ function printPage() {
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Partner:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.partner?.name ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.partner?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Agreement:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.agreement?.agreement_title ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.agreement?.agreement_title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Referred Patient:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.patient?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.patient?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Referral Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.referral_date }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.referral_date }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.status }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.status }}</p>
                     </div>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ function printPage() {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
                   <div class="grid grid-cols-1 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.notes ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.notes ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -109,11 +109,11 @@ function printPage() {
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.created_at ? format(new Date(referral.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.created_at ? format(new Date(props.referral.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ referral.updated_at ? format(new Date(referral.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.referral.updated_at ? format(new Date(props.referral.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -132,12 +132,11 @@ function printPage() {
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.referrals.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSingleReferral" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.referrals.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.referrals.edit', props.referral.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
-
-    </div>
+    
   </AppLayout>
 </template>
 

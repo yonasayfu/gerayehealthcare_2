@@ -51,7 +51,7 @@ function printPage() {
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Partner Engagement Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Partner Engagement: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Partner Engagement: {{ props.partnerEngagement.summary?.substring(0, 30) ?? props.partnerEngagement.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -73,27 +73,27 @@ function printPage() {
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Partner:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.partner?.name ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.partner?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Staff:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.staff?.first_name }} {{ partnerEngagement.staff?.last_name }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.staff?.first_name }} {{ props.partnerEngagement.staff?.last_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.engagement_type }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.engagement_type }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Summary:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.summary }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.summary }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Engagement Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.engagement_date }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.engagement_date }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Follow Up Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.follow_up_date ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.follow_up_date ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -103,11 +103,11 @@ function printPage() {
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.created_at ? format(new Date(partnerEngagement.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.created_at ? format(new Date(props.partnerEngagement.created_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ partnerEngagement.updated_at ? format(new Date(partnerEngagement.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ props.partnerEngagement.updated_at ? format(new Date(props.partnerEngagement.updated_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
@@ -126,12 +126,11 @@ function printPage() {
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.partner-engagements.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSinglePartnerEngagement" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.partner-engagements.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.partner-engagements.edit', props.partnerEngagement.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 
-    </div>
   </AppLayout>
 </template>
 

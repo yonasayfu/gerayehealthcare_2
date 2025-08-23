@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\EventParticipantRegistered;
+use App\Models\EventParticipant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 

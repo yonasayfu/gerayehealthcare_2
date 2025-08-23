@@ -81,7 +81,7 @@
             </div>
 
             <div class="p-6 border-t border-gray-200 rounded-b">
-                <div class="flex flex-wrap gap-2">
+                <div class="flex items-center justify-end flex-wrap gap-2">
                     <Link :href="route('admin.employee-insurance-records.index')" class="btn-glass btn-glass-sm">Cancel</Link>
                     <button type="submit" @click="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
                         {{ form.processing ? 'Creating...' : 'Create Record' }}

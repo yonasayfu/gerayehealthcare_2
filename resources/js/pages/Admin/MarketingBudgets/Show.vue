@@ -98,7 +98,7 @@ function printCurrent() {
           <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ marketingBudget.description ?? '-' }}</p>
         </div>
 
-        <div class="mt-6 flex flex-wrap gap-2 justify-between sm:justify-start print:hidden">
+        <div class="mt-6 flex flex-wrap gap-2 justify-end print:hidden">
           <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">
             Back to List
           </Link>

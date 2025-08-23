@@ -76,7 +76,7 @@ function valueType(val: any): 'null'|'array'|'object'|'number'|'boolean'|'string
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Campaign Content Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Campaign Content: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Campaign Content: {{ campaignContent.title || campaignContent.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -204,8 +204,8 @@ function valueType(val: any): 'null'|'array'|'object'|'number'|'boolean'|'string
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.campaign-contents.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSingleCampaignContent" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.campaign-contents.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.campaign-contents.edit', campaignContent.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 

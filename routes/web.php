@@ -309,6 +309,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
+            ->names('leave-requests')
             ->only(['update']);
 
         // Global Search

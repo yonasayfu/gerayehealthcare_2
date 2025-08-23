@@ -60,7 +60,7 @@
             </div>
           </div>
 
-          <div class="mt-6 flex items-center gap-2">
+          <div class="mt-6 flex items-center justify-end gap-2">
             <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
               Update Client
             </button>

@@ -13,6 +13,17 @@ const props = defineProps<{
     assignee?: { first_name: string; last_name: string }
   }
 }>()
+
+function printPage() {
+  setTimeout(() => {
+    try {
+      window.print()
+    } catch (error) {
+      console.error('Print failed:', error)
+      alert('Failed to open print dialog. Please try again or check your browser settings.')
+    }
+  }, 100)
+}
 </script>
 
 <template>
@@ -30,12 +41,12 @@ const props = defineProps<{
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Task Delegation Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Task Delegation: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Task Delegation: {{ props.taskDelegation.title || props.taskDelegation.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
       </div>
-      </div>
+      <!-- keep content and footer within the same card container -->
 
       <div class="p-6 space-y-4">
         <div>
@@ -69,6 +80,14 @@ const props = defineProps<{
         <div v-if="props.taskDelegation.notes">
           <div class="text-xs text-muted-foreground">Notes</div>
           <div class="text-sm whitespace-pre-wrap text-foreground">{{ props.taskDelegation.notes }}</div>
+        </div>
+      </div>
+      <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.task-delegations.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.task-delegations.edit', props.taskDelegation.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus, Printer, Download, Check } from 'lucide-vue-next';
+import { Plus, Printer, Download, Check, Eye } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 defineProps<{
@@ -34,6 +34,7 @@ function approveInvoice(id: number) {
   const form = useForm({});
   form.post(route('admin.invoices.approve', id));
 }
+
 </script>
 
 <template>
@@ -121,7 +122,7 @@ function approveInvoice(id: number) {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.invoices.show', invoice.id)"
-                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="btn-icon text-indigo-600"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
@@ -129,7 +130,7 @@ function approveInvoice(id: number) {
                   <button
                     v-if="invoice.status === 'Issued' || invoice.status === 'Pending'"
                     @click.prevent="approveInvoice(invoice.id)"
-                    class="inline-flex items-center p-2 rounded-md text-green-600 hover:bg-green-50 dark:text-green-300 dark:hover:bg-gray-700"
+                    class="btn-icon text-green-600 hover:bg-green-50 dark:hover:bg-green-900"
                     title="Approve Invoice"
                   >
                     <Check class="w-4 h-4" />
