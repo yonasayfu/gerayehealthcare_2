@@ -7,7 +7,7 @@ import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns' // Keep this import
 
-import type { PatientPagination } from '@/types'; // Import PatientPagination type
+import type { PatientPagination } from '@/types/index.d.ts';
 
 const props = defineProps<{
   patients: PatientPagination;
@@ -159,7 +159,7 @@ function toggleSort(field: string) {
 
       <!-- Search / per page -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <!-- Responsive search input container -->
         <div class="search-glass relative w-full md:w-1/3">
           <input
             v-model="search"
@@ -183,7 +183,7 @@ function toggleSort(field: string) {
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+      <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent relative z-10">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
