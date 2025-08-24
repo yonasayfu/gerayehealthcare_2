@@ -98,4 +98,3 @@ const breadcrumbs = [
     </div>
   </AppLayout>
 </template>
-</script>

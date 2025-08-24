@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateEventParticipantDTO
+class CreateEventParticipantDTO extends BaseDTO
 {
     public function __construct(
         public int $event_id,

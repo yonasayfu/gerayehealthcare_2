@@ -2,9 +2,7 @@
 
 namespace App\DTOs;
 
-use Spatie\LaravelData\Data;
-
-class CreateInventoryItemDTO extends Data
+class CreateInventoryItemDTO extends BaseDTO
 {
     public function __construct(
         public string $name,

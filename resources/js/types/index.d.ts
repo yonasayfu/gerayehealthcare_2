@@ -2,7 +2,7 @@
 
 declare global {
     interface Window {
-        Alpine: any; // Declare Alpine on the Window interface
+        // Global window interface extensions
     }
 }
 
@@ -16,6 +16,7 @@ interface Patient {
     full_name: string;
     patient_code: string | null;
     fayda_id: string | null;
+    date_of_birth: string | null;
     age: number | null;
     gender: string | null;
     phone_number: string | null;
@@ -89,7 +90,14 @@ interface InsuranceClaimPagination {
     total: number;
 }
 
-export { BreadcrumbItem, Patient, PatientPagination, EthiopianCalendarDay, EthiopianCalendarDayPagination, InsuranceClaim, InsuranceClaimPagination };
+export { BreadcrumbItem, Patient, PatientPagination, EthiopianCalendarDay, EthiopianCalendarDayPagination, InsuranceClaim, InsuranceClaimPagination, User, Staff, InertiaForm };
+
+// Type aliases for easier importing
+export type BreadcrumbItemType = BreadcrumbItem;
+export type PatientType = Patient;
+export type PatientPaginationType = PatientPagination;
+export type UserType = User;
+export type StaffType = Staff;
 
 interface User {
     id: number;

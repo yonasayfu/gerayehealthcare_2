@@ -51,7 +51,11 @@ function printPage() {
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Partner Engagement Details</h3>
+<<<<<<< HEAD
+            <p class="text-sm text-gray-600 dark:text-gray-300">Partner Engagement: {{ partnerEngagement.partner?.name || partnerEngagement.summary || partnerEngagement.id }}</p>
+=======
             <p class="text-sm text-gray-600 dark:text-gray-300">Partner Engagement: {{ props.partnerEngagement.summary?.substring(0, 30) ?? props.partnerEngagement.id }}</p>
+>>>>>>> yonas/feature/modern-refacotr
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -127,7 +131,11 @@ function printPage() {
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.partner-engagements.index')" class="btn-glass btn-glass-sm">Back to List</Link>
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+<<<<<<< HEAD
+          <Link :href="route('admin.partner-engagements.edit', partnerEngagement.id)" class="btn-glass btn-glass-sm">Edit</Link>
+=======
           <Link :href="route('admin.partner-engagements.edit', props.partnerEngagement.id)" class="btn-glass btn-glass-sm">Edit</Link>
+>>>>>>> yonas/feature/modern-refacotr
         </div>
       </div>
 

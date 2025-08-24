@@ -4,6 +4,8 @@
 
 @import './print.css';
 
+@import './responsive-fixes.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
@@ -425,4 +427,62 @@
             background: rgba(17, 24, 39, 0.85);
         }
     }
+}
+
+/* Performance fallbacks and reduced-effects for liquidGlass */
+@layer components {
+  /* Opt-in class to reduce transparency/blurs globally within a container */
+  .reduced-transparency .liquidGlass-wrapper {
+    -webkit-backdrop-filter: blur(4px) saturate(120%);
+    backdrop-filter: blur(4px) saturate(120%);
+    background: linear-gradient(180deg, rgba(255,255,255, 0.9), rgba(255,255,255, 0.6));
+    box-shadow: 0 6px 16px rgba(2, 6, 23, 0.06);
+  }
+
+  .reduced-transparency .liquidGlass-wrapper::before,
+  .reduced-transparency .liquidGlass-inner-shine {
+    display: none; /* drop extra highlight layers */
+  }
+
+  /* Attribute-driven lightweight variant without changing markup structure */
+  .liquidGlass-wrapper[data-variant="lite"] {
+    -webkit-backdrop-filter: blur(6px) saturate(130%);
+    backdrop-filter: blur(6px) saturate(130%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.4));
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.07);
+  }
+
+  .dark .liquidGlass-wrapper[data-variant="lite"] {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.4);
+  }
+
+  /* Small screens: tone down heavy effects to keep scrolling responsive */
+  @media (max-width: 640px) {
+    .liquidGlass-wrapper {
+      -webkit-backdrop-filter: blur(6px) saturate(130%);
+      backdrop-filter: blur(6px) saturate(130%);
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06), inset 0 4px 12px rgba(255, 255, 255, 0.35);
+    }
+
+    .liquidGlass-wrapper::before { opacity: .8; filter: blur(6px); }
+    .liquidGlass-inner-shine { display: none; }
+  }
+
+  /* Respect users who reduce motion: remove hover lifts and animated highlight */
+  @media (prefers-reduced-motion: reduce) {
+    .liquidGlass-wrapper { transition: none; }
+    .liquidGlass-wrapper:hover { transform: none; box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08); }
+  }
+
+  /* Utility: completely disable backdrop-filter if needed via class */
+  .no-backdrop-filter .liquidGlass-wrapper {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .dark.no-backdrop-filter .liquidGlass-wrapper {
+    background: rgba(17, 24, 39, 0.85);
+  }
 }

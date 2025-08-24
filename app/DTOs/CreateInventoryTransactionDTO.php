@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateInventoryTransactionDTO
+class CreateInventoryTransactionDTO extends BaseDTO
 {
     public function __construct(
         public int $item_id,
