@@ -92,9 +92,9 @@
   z-index: 20 !important;
 }
 
-/* Global search dropdown positioning */
-#global-search-container .absolute.z-50 {
-  z-index: 55 !important;
+/* Global search - now uses modal overlay, no special z-index needed */
+#global-search-container {
+  position: relative;
 }
 
 /* 6. Breadcrumb and Title Responsiveness */
@@ -214,4 +214,21 @@
       padding: 0.5rem !important;
     }
   }
+}
+
+/* 13. Text Utilities for Global Search */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

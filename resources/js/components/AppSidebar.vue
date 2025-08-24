@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
@@ -37,31 +37,70 @@ interface SidebarNavGroup {
   superAdminOnly?: boolean;
 }
 
-import { type AppPageProps } from '@/types';
+
 
 const props = defineProps<{
   unreadCount?: number;
   inventoryAlertCount?: number; // Add this line
 }>()
 
-const page = usePage<AppPageProps>();
-const user = computed(() => page.props.auth.user);
+const page = usePage<any>();
+const user = computed(() => page.props.auth?.user);
 const userRoles = computed(() => user.value?.roles || []);
 
 const can = (permission: string): boolean => {
     if (!user.value) return false;
-    if (user.value.roles.includes('Super Admin')) return true;
+    if (user.value.roles?.includes('Super Admin')) return true;
     if (user.value.permissions === null) return false;
-    return user.value.permissions.includes(permission);
+    return user.value.permissions?.includes(permission) || false;
 }
 
 const isSuperAdmin = computed(() => userRoles.value.includes('Super Admin'))
 const isAdmin = computed(() => userRoles.value.includes('Admin'))
 const isStaff = computed(() => userRoles.value.includes('Staff'))
 
-// Track open groups
+// Track open groups with localStorage persistence
+const SIDEBAR_STORAGE_KEY = 'sidebar-open-groups'
+const SIDEBAR_EXPAND_ALL_KEY = 'sidebar-expand-all'
+
+// Initialize from localStorage or empty array
 const openGroups = ref<string[]>([])
 const areAllGroupsExpanded = ref(false)
+
+// Load sidebar state from localStorage on component mount
+const loadSidebarState = () => {
+  try {
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY)
+    const expandedState = localStorage.getItem(SIDEBAR_EXPAND_ALL_KEY)
+    
+    if (stored) {
+      openGroups.value = JSON.parse(stored)
+    }
+    
+    if (expandedState) {
+      areAllGroupsExpanded.value = JSON.parse(expandedState)
+    }
+  } catch (error) {
+    console.warn('Failed to load sidebar state from localStorage:', error)
+    openGroups.value = []
+    areAllGroupsExpanded.value = false
+  }
+}
+
+// Save sidebar state to localStorage
+const saveSidebarState = () => {
+  try {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(openGroups.value))
+    localStorage.setItem(SIDEBAR_EXPAND_ALL_KEY, JSON.stringify(areAllGroupsExpanded.value))
+  } catch (error) {
+    console.warn('Failed to save sidebar state to localStorage:', error)
+  }
+}
+
+// Watch for changes and save to localStorage
+watch([openGroups, areAllGroupsExpanded], () => {
+  saveSidebarState()
+}, { deep: true })
 
 const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
@@ -230,6 +269,7 @@ const toggleGroup = (groupName: string, event?: Event) => {
       const allGroupNames = mainNavItems.value.map((group: SidebarNavGroup) => group.group);
       openGroups.value = allGroupNames;
     }
+    // State will be saved automatically by the watcher
   });
 }
 
@@ -260,16 +300,15 @@ const toggleAllGroups = (event?: Event) => {
     areAllGroupsExpanded.value = true
   }
   
-  // Ensure the state is preserved
-  nextTick(() => {
-    if (areAllGroupsExpanded.value) {
-      const allGroupNames = mainNavItems.value.map((group: SidebarNavGroup) => group.group);
-      openGroups.value = allGroupNames;
-    }
-  });
+  // State will be saved automatically by the watcher
 }
 
 const isSidebarCollapsed = ref(false);
+
+// Load sidebar state when component mounts
+onMounted(() => {
+  loadSidebarState()
+})
 </script>
 
 <template>
@@ -328,7 +367,7 @@ const isSidebarCollapsed = ref(false);
                                             @click.stop>
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
-                                            <span v-if="item.title === 'Alerts' && inventoryAlertCount > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount }}</span>
+                                            <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -344,7 +383,7 @@ const isSidebarCollapsed = ref(false);
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton 
-                    @click.stop="(event) => toggleAllGroups(event)"
+                    @click.stop="(event: Event) => toggleAllGroups(event)"
                     class="w-full justify-between px-2 py-2 text-sm hover:bg-muted/30 rounded-md"
                     :aria-expanded="areAllGroupsExpanded"
                 >

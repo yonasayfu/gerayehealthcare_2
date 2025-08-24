@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventParticipantController;
 use App\Http\Controllers\Admin\EventRecommendationController;
 use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\PatientController;
@@ -46,7 +47,7 @@ use Inertia\Inertia;
  */
 
 // Public & General
-Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
 // Backward-compatible redirect: /admin -> /dashboard
 Route::get('/admin', function () {
@@ -62,14 +63,14 @@ Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPd
 Route::get('/performance-test', function (Request $request) {
     $startTime = microtime(true);
     $queryCount = 0;
-    
+
     // Listen to queries
     DB::listen(function ($query) use (&$queryCount) {
         $queryCount++;
     });
-    
+
     $results = [];
-    
+
     // Test 1: Simple database connection
     $testStart = microtime(true);
     try {
@@ -85,7 +86,7 @@ Route::get('/performance-test', function (Request $request) {
             'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
         ];
     }
-    
+
     // Test 2: Basic model query
     $testStart = microtime(true);
     try {
@@ -102,9 +103,9 @@ Route::get('/performance-test', function (Request $request) {
             'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
         ];
     }
-    
+
     $totalTime = microtime(true) - $startTime;
-    
+
     $recommendations = [];
     if ($totalTime > 0.1) {
         $recommendations[] = "Total execution time is " . round($totalTime * 1000, 2) . "ms. Consider optimizing slow operations.";
@@ -115,7 +116,7 @@ Route::get('/performance-test', function (Request $request) {
     if (empty($recommendations)) {
         $recommendations[] = "Backend performance looks good. Check frontend optimization and network conditions.";
     }
-    
+
     return response()->json([
         'total_execution_time' => round($totalTime * 1000, 2) . ' ms',
         'total_queries' => $queryCount,
@@ -154,7 +155,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Admin & Super Admin
-Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value])
+Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
@@ -181,7 +182,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
             Route::get('patients/{patient}/print', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printSingle'])->name('patients.printSingle');
             Route::get('patients/quick-search', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'quickSearch'])->name('patients.quickSearch');
             Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class);
-            
+
             // Optimized Staff Controller
             Route::get('staff/export', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'export'])->name('staff.export');
             Route::get('staff/print-all', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printAll'])->name('staff.printAll');
@@ -191,7 +192,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
             Route::get('staff/available', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'availableStaff'])->name('staff.available');
             Route::post('staff/bulk-update', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'bulkUpdate'])->name('staff.bulkUpdate');
             Route::resource('staff', \App\Http\Controllers\Admin\OptimizedStaffController::class);
-            
+
             // Optimized Inventory Controller
             Route::get('inventory-items/export', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'export'])->name('inventory-items.export');
             Route::get('inventory-items/print-all', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
@@ -409,14 +410,14 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
             ->only(['update']);
 
         // Global Search
-        Route::get('global-search', [App\Http\Controllers\Admin\GlobalSearchController::class, 'search'])->name('global-search');
+        Route::get('global-search', [GlobalSearchController::class, 'search'])->name('global-search');
 
         // Task Delegations (Admin)
         Route::resource('task-delegations', AdminTaskController::class)
             ->parameters(['task-delegations' => 'task_delegation']);
 
         // System Management (Super Admin only)
-        Route::middleware('role:'.RoleEnum::SUPER_ADMIN->value)->group(function () {
+        Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
         });
@@ -429,7 +430,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
     });
 
 // Staff-Specific
-Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
+Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
@@ -473,16 +474,16 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
     });
 
 // Auth & Settings
-require __DIR__.'/auth.php';
-require __DIR__.'/settings.php';
-require __DIR__.'/marketing.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/marketing.php';
 
 // Test Routes (remove in production)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('test/ui', function () {
         return Inertia::render('Test/UITest');
     })->name('test.ui');
-    
+
     Route::post('test/flash-message', function () {
         return redirect()->route('test.ui')->with([
             'banner' => 'This is a test toast notification! Your UI implementations are working correctly.',
@@ -492,7 +493,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Cache Performance Test Routes (remove in production)
-require __DIR__.'/cache-test.php';
+require __DIR__ . '/cache-test.php';
 
 // Performance Comparison Test Routes (remove in production)
-require __DIR__.'/performance-test.php';
+require __DIR__ . '/performance-test.php';
