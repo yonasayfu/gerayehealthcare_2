@@ -87,6 +87,10 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
+        // Dashboard overview data (Super Admin KPIs)
+        Route::get('overview-data', [AdminDashboardController::class, 'overviewData'])->name('overview-data');
+        Route::get('overview-series', [AdminDashboardController::class, 'overviewSeries'])->name('overview-series');
+
         // Patients
         Route::get('patients/export', [PatientController::class, 'export'])->name('patients.export');
 

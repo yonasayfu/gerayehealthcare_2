@@ -26,6 +26,36 @@ const fmtPct = (v: number | null | undefined) =>
   `${(v ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
 
 const topTrafficSources = computed(() => (trafficSourceData.value || []).slice(0, 5))
+
+// Currency formatter (align with app global if present)
+const appCurrency = (window as any)?.appCurrency || 'USD'
+const money = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency', currency: appCurrency, minimumFractionDigits: 2 }).format(Number(v || 0))
+
+// Build a friendly conversion funnel from whatever keys exist
+const funnelStages = computed(() => {
+  const d = conversionFunnelData.value || {}
+  // Preferred order; include only if present
+  const order = [
+    { key: 'impressions', label: 'Impressions' },
+    { key: 'clicks', label: 'Clicks' },
+    { key: 'leads', label: 'Leads' },
+    { key: 'appointments', label: 'Appointments' },
+    { key: 'patients', label: 'Patients' },
+    { key: 'revenue', label: 'Revenue', isMoney: true },
+  ]
+  const stages = order
+    .filter(s => d[s.key] !== undefined && d[s.key] !== null)
+    .map(s => ({ ...s, value: Number(d[s.key]) }))
+
+  // Compute step conversion rate vs previous stage when numeric
+  return stages.map((s, idx) => {
+    const prev = idx > 0 ? stages[idx - 1] : undefined
+    const rate = prev && prev.value > 0 && !s.isMoney
+      ? (s.value / prev.value) * 100
+      : null
+    return { ...s, rate }
+  })
+})
 </script>
 
 <template>
@@ -88,14 +118,22 @@ const topTrafficSources = computed(() => (trafficSourceData.value || []).slice(0
       </div>
     </div>
 
-    <!-- Conversion Funnel Raw -->
+    <!-- Conversion Funnel -->
     <div class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow">
-      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Conversion Funnel (raw)</h4>
+      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Conversion Funnel</h4>
       <template v-if="$props.loading">
-        <div class="h-24 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div v-for="i in 6" :key="i" class="h-20 rounded animate-pulse bg-gray-200 dark:bg-gray-700" />
+        </div>
       </template>
       <template v-else>
-        <pre v-if="conversionFunnelData && Object.keys(conversionFunnelData).length" class="text-xs overflow-auto bg-gray-50 dark:bg-gray-900 p-3 rounded text-gray-800 dark:text-gray-200">{{ JSON.stringify(conversionFunnelData, null, 2) }}</pre>
+        <div v-if="funnelStages.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div v-for="s in funnelStages" :key="s.key" class="p-3 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ s.label }}</div>
+            <div class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ s.isMoney ? money(s.value) : s.value.toLocaleString() }}</div>
+            <div v-if="s.rate !== null" class="text-xs text-gray-500 dark:text-gray-400 mt-1">Step conv: {{ (s.rate as number).toFixed(1) }}%</div>
+          </div>
+        </div>
         <div v-else class="text-sm text-gray-500">No conversion funnel data</div>
       </template>
     </div>
