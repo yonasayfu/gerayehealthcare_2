@@ -1058,3 +1058,122 @@ CREATE TABLE payout_visit_service (
     FOREIGN KEY (visit_service_id) REFERENCES visit_services(id) ON DELETE CASCADE
 );
 
+## Reporting SQL Views (Planned)
+
+These read-only SQL views will back the three top-level quarterly/half-year/year reports. They aggregate existing transactional tables; no new tables are introduced. Views are designed for performant filtering by date ranges and granularity.
+
+### 1) service_volume_quarterly_view
+- Purpose: Service volumes by time bucket and service category, including event and non-event services.
+- Backed by: `visit_services`, `services`, optional `events` link.
+- Key columns:
+  - `bucket_date` DATE (first day of quarter/half/year depending on granularity)
+  - `bucket_label` TEXT (e.g., '2025-Q1', '2025-H1', '2025')
+  - `granularity` TEXT CHECK IN ('quarter','half','year')
+  - `service_category` TEXT
+  - `total_visits` INTEGER
+  - `unique_patients` INTEGER
+  - `is_event_service` BOOLEAN
+
+Stub:
+```sql
+-- CREATE OR REPLACE VIEW service_volume_quarterly_view AS
+-- SELECT
+--   DATE_TRUNC('quarter', vs.scheduled_at)::date AS bucket_date,
+--   TO_CHAR(DATE_TRUNC('quarter', vs.scheduled_at), 'YYYY-"Q"Q') AS bucket_label,
+--   'quarter'::text AS granularity,
+--   s.category AS service_category,
+--   COUNT(*) AS total_visits,
+--   COUNT(DISTINCT vs.patient_id) AS unique_patients,
+--   (vs.event_id IS NOT NULL) AS is_event_service
+-- FROM visit_services vs
+-- LEFT JOIN services s ON s.id = vs.service_id
+-- GROUP BY 1,2,4,7;
+```
+
+### 2) revenue_ar_quarterly_view
+- Purpose: Revenue, AR movements, and collections over time.
+- Backed by: `invoices`, `invoice_items`, `insurance_claims` (for AR/collections), optionally payments table if present.
+- Key columns:
+  - `bucket_date` DATE
+  - `bucket_label` TEXT
+  - `granularity` TEXT
+  - `gross_revenue` NUMERIC(15,2)
+  - `discounts` NUMERIC(15,2)
+  - `net_revenue` NUMERIC(15,2)
+  - `claims_submitted` NUMERIC(15,2)
+  - `claims_paid` NUMERIC(15,2)
+  - `ending_ar_balance` NUMERIC(15,2)
+
+Stub:
+```sql
+-- CREATE OR REPLACE VIEW revenue_ar_quarterly_view AS
+-- WITH inv AS (
+--   SELECT DATE_TRUNC('quarter', invoice_date)::date AS bucket_date,
+--          TO_CHAR(DATE_TRUNC('quarter', invoice_date), 'YYYY-"Q"Q') AS bucket_label,
+--          SUM(grand_total) AS gross_revenue
+--   FROM invoices
+--   GROUP BY 1,2
+-- ), claims AS (
+--   SELECT DATE_TRUNC('quarter', COALESCE(payment_received_at, submitted_at))::date AS bucket_date,
+--          TO_CHAR(DATE_TRUNC('quarter', COALESCE(payment_received_at, submitted_at)), 'YYYY-"Q"Q') AS bucket_label,
+--          SUM(coverage_amount) AS claims_submitted,
+--          SUM(paid_amount) AS claims_paid
+--   FROM insurance_claims
+--   GROUP BY 1,2
+-- )
+-- SELECT i.bucket_date, i.bucket_label, 'quarter'::text AS granularity,
+--        i.gross_revenue,
+--        0::numeric AS discounts,
+--        i.gross_revenue - 0::numeric AS net_revenue,
+--        COALESCE(c.claims_submitted,0) AS claims_submitted,
+--        COALESCE(c.claims_paid,0) AS claims_paid,
+--        NULL::numeric AS ending_ar_balance
+-- FROM inv i
+-- LEFT JOIN claims c USING (bucket_date, bucket_label);
+```
+
+### 3) marketing_roi_quarterly_view
+- Purpose: ROI and funnel metrics by marketing campaign/platform over time.
+- Backed by: `marketing_campaigns`, `campaign_metrics`, `marketing_leads`, `patients`, `invoices` (revenue attribution by campaign where available).
+- Key columns:
+  - `bucket_date` DATE
+  - `bucket_label` TEXT
+  - `granularity` TEXT
+  - `campaign_id` BIGINT
+  - `campaign_name` TEXT
+  - `platform_id` BIGINT
+  - `impressions` INT
+  - `clicks` INT
+  - `conversions` INT
+  - `leads_generated` INT
+  - `patients_acquired` INT
+  - `spend` NUMERIC(15,2)
+  - `attributed_revenue` NUMERIC(15,2)
+  - `roi_pct` NUMERIC(9,2)
+
+Stub:
+```sql
+-- CREATE OR REPLACE VIEW marketing_roi_quarterly_view AS
+-- SELECT
+--   DATE_TRUNC('quarter', cm.date)::date AS bucket_date,
+--   TO_CHAR(DATE_TRUNC('quarter', cm.date), 'YYYY-"Q"Q') AS bucket_label,
+--   'quarter'::text AS granularity,
+--   mc.id AS campaign_id,
+--   mc.campaign_name,
+--   mc.platform_id,
+--   SUM(cm.impressions) AS impressions,
+--   SUM(cm.clicks) AS clicks,
+--   SUM(cm.conversions) AS conversions,
+--   SUM(cm.leads_generated) AS leads_generated,
+--   SUM(cm.patients_acquired) AS patients_acquired,
+--   SUM(mc.budget_spent) AS spend,
+--   0::numeric AS attributed_revenue,
+--   NULL::numeric AS roi_pct
+-- FROM campaign_metrics cm
+-- JOIN marketing_campaigns mc ON mc.id = cm.campaign_id
+-- GROUP BY 1,2,4,5,6;
+```
+
+Notes:
+- All views will be parameter-agnostic; controllers apply date filtering and choose granularity by aggregating from base daily/transactional data.
+- Financial formatting and bilingual labels are handled at the app layer (see ExportableTrait system).

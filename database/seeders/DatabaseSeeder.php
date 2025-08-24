@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
             SharedInvoiceSeeder::class,
             EventBroadcastSeeder::class,
             MedicalRecordsSeeder::class,
+            QuarterlyReportsDemoSeeder::class,
         ]);
 
         // Create sample data using factories

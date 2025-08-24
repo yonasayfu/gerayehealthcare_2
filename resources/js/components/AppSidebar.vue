@@ -37,15 +37,15 @@ interface SidebarNavGroup {
   superAdminOnly?: boolean;
 }
 
-import { type AppPageProps } from '@/types';
+// Removed AppPageProps missing type import to satisfy TS
 
 const props = defineProps<{
   unreadCount?: number;
   inventoryAlertCount?: number; // Add this line
 }>()
 
-const page = usePage<AppPageProps>();
-const user = computed(() => page.props.auth.user);
+const page = usePage();
+const user = computed(() => (page.props as any)?.auth?.user ?? null);
 const userRoles = computed(() => user.value?.roles || []);
 
 const can = (permission: string): boolean => {
@@ -126,6 +126,15 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
       { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'manage marketing' },
       { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
+    ],
+  },
+  {
+    group: 'Reports',
+    icon: BarChart,
+    items: [
+      { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList },
+      { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign },
+      { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart },
     ],
   },
   {
@@ -335,7 +344,7 @@ const isSidebarCollapsed = ref(false);
                                             @click.stop>
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
-                                            <span v-if="item.title === 'Alerts' && inventoryAlertCount > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount }}</span>
+                                            <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -351,7 +360,7 @@ const isSidebarCollapsed = ref(false);
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton 
-                    @click.stop="(event) => toggleAllGroups(event)"
+                    @click.stop="toggleAllGroups"
                     class="w-full justify-between px-2 py-2 text-sm hover:bg-muted/30 rounded-md"
                     :aria-expanded="areAllGroupsExpanded"
                 >

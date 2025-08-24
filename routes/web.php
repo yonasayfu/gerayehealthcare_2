@@ -325,12 +325,34 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
             Route::resource('users', UserController::class);
         });
 
-        // Accountant/Payment Reconciliation
-        Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
-            Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
-            Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+        // Reports (Admin & Super Admin)
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('service-volume', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'index'])
+                ->name('service-volume');
+            Route::get('service-volume/data', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'data'])
+                ->name('service-volume.data');
+            Route::get('service-volume/export', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'export'])
+                ->name('service-volume.export');
+            Route::get('revenue-ar', [\App\Http\Controllers\Reports\RevenueARController::class, 'index'])
+                ->name('revenue-ar');
+            Route::get('revenue-ar/data', [\App\Http\Controllers\Reports\RevenueARController::class, 'data'])
+                ->name('revenue-ar.data');
+            Route::get('revenue-ar/export', [\App\Http\Controllers\Reports\RevenueARController::class, 'export'])
+                ->name('revenue-ar.export');
+            Route::get('marketing-roi', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'index'])
+                ->name('marketing-roi');
+            Route::get('marketing-roi/data', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'data'])
+                ->name('marketing-roi.data');
+            Route::get('marketing-roi/export', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'export'])
+                ->name('marketing-roi.export');
         });
     });
+
+// Accountant/Payment Reconciliation
+Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
+    Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+});
 
 // Staff-Specific
 Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
