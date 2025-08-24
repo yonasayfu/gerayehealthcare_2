@@ -19,7 +19,12 @@ class MarketingAnalyticsController extends Controller
     public function dashboardData(Request $request)
     {
         $data = $this->marketingAnalyticsService->getDashboardData($request);
-        return Inertia::render('Admin/MarketingAnalytics/Dashboard', $data);
+        // If this is an Inertia navigation, return an Inertia view as required
+        if ($request->header('X-Inertia')) {
+            return Inertia::render('Admin/MarketingAnalytics/Dashboard', $data);
+        }
+        // Otherwise, return JSON for axios usage in the dashboard page
+        return response()->json($data['dashboardStats']);
     }
 
     public function campaignPerformance(Request $request)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reports;
 use App\Enums\RoleEnum;
 use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingRoiView;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
@@ -29,9 +30,18 @@ class MarketingRoiController extends Controller
 
     public function data(Request $request)
     {
-        $query = MarketingRoiView::query();
-        $this->applyFilters($query, $request);
-        $data = $query->orderBy('bucket_date')->get();
+        $cacheKey = 'report:marketing_roi:' . md5(json_encode([
+            'from' => $request->input('date_from'),
+            'to' => $request->input('date_to'),
+            'granularity' => $request->input('granularity'),
+            'platform' => $request->input('platform'),
+        ]));
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
+            $query = MarketingRoiView::query();
+            $this->applyFilters($query, $request);
+            return $query->orderBy('bucket_date')->get();
+        });
 
         return response()->json(['data' => $data]);
     }

@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
+import KpiCard from '@/components/KpiCard.vue'
 import { type BreadcrumbItemType as BreadcrumbItem } from '@/types'
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,6 +24,11 @@ const is_event_service = ref<string>('') // '','1','0'
 
 const loading = ref(false)
 const rows = ref<any[]>([])
+
+// Aggregated KPIs
+const totalServices = computed(() => rows.value.reduce((s, r) => s + (Number(r.total_visits) || 0), 0))
+const uniquePatients = computed(() => rows.value.reduce((m, r) => Math.max(m, Number(r.unique_patients) || 0), 0))
+const avgServicesPerPatient = computed(() => uniquePatients.value > 0 ? (totalServices.value / uniquePatients.value) : 0)
 
 function buildQuery() {
   const params = new URLSearchParams()
@@ -128,29 +134,44 @@ onMounted(fetchData)
         </div>
       </div>
 
-      <!-- KPI Cards -->
+      <!-- KPI Cards with Loading Skeletons -->
       <div class="grid gap-4 md:grid-cols-3">
-        <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
-          <div class="text-xs text-muted-foreground">Total Services</div>
-          <div class="mt-1 text-2xl font-semibold">—</div>
+        <div v-if="loading" class="grid gap-4 md:grid-cols-3 md:col-span-3">
+          <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
+            <div class="h-4 w-28 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-7 w-24 mt-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          </div>
+          <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
+            <div class="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-7 w-20 mt-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          </div>
+          <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
+            <div class="h-4 w-44 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-7 w-28 mt-2 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          </div>
         </div>
-        <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
-          <div class="text-xs text-muted-foreground">Unique Patients</div>
-          <div class="mt-1 text-2xl font-semibold">—</div>
-        </div>
-        <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
-          <div class="text-xs text-muted-foreground">Avg Services/Patient</div>
-          <div class="mt-1 text-2xl font-semibold">—</div>
-        </div>
+        <template v-else>
+          <KpiCard title="Total Services" :value="totalServices.toLocaleString()" color="blue" />
+          <KpiCard title="Unique Patients" :value="uniquePatients.toLocaleString()" color="green" />
+          <KpiCard title="Avg Services/Patient" :value="avgServicesPerPatient.toFixed(2)" color="indigo" />
+        </template>
       </div>
 
-      <!-- Chart/Table placeholders -->
+      <!-- Chart/Table with Skeletons and Empty State -->
       <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">
-        <div v-if="loading" class="h-48 grid place-items-center text-sm text-muted-foreground">Loading…</div>
-        <div v-else class="text-sm text-muted-foreground">
-          <div class="mb-2">Rows: {{ rows.length }}</div>
-          <pre class="text-xs whitespace-pre-wrap max-h-56 overflow-auto">{{ rows.slice(0, 5) }}</pre>
-        </div>
+        <template v-if="loading">
+          <div class="space-y-3">
+            <div class="h-5 w-24 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div class="h-40 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+          </div>
+        </template>
+        <template v-else>
+          <div v-if="rows.length === 0" class="text-sm text-muted-foreground">No data available for the selected filters.</div>
+          <div v-else class="text-sm text-muted-foreground">
+            <div class="mb-2">Rows: {{ rows.length }}</div>
+            <pre class="text-xs whitespace-pre-wrap max-h-56 overflow-auto">{{ rows.slice(0, 5) }}</pre>
+          </div>
+        </template>
       </div>
 
       <div class="rounded-xl border bg-white p-4 dark:border-sidebar-border dark:bg-background">

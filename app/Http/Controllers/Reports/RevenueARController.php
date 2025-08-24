@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Reports;
 use App\Enums\RoleEnum;
 use App\Http\Traits\ExportableTrait;
 use App\Models\RevenueArView;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
@@ -30,9 +31,17 @@ class RevenueARController extends Controller
 
     public function data(Request $request)
     {
-        $query = RevenueArView::query();
-        $this->applyFilters($query, $request);
-        $data = $query->orderBy('bucket_date')->get();
+        $cacheKey = 'report:revenue_ar:' . md5(json_encode([
+            'from' => $request->input('date_from'),
+            'to' => $request->input('date_to'),
+            'granularity' => $request->input('granularity'),
+        ]));
+
+        $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
+            $query = RevenueArView::query();
+            $this->applyFilters($query, $request);
+            return $query->orderBy('bucket_date')->get();
+        });
 
         return response()->json(['data' => $data]);
     }
