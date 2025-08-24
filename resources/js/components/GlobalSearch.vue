@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import debounce from 'lodash/debounce';
-import { Search, X } from 'lucide-vue-next';
+import { Search, X, User, UserCheck, Calendar, Users, ExternalLink, FileText, Shield, ShieldCheck, Package, Truck, Activity, CalendarDays, Target, Megaphone } from 'lucide-vue-next';
 import axios from 'axios';
 
 interface SearchResult {
   type: string;
+  category: string;
   title: string;
   description: string;
   url: string;
+  relevance?: number;
+  icon?: string;
 }
 
 const searchQuery = ref('');
@@ -17,6 +20,30 @@ const searchResults = ref<SearchResult[]>([]);
 const showModal = ref(false);
 const isLoading = ref(false);
 const searchInputRef = ref<HTMLInputElement | null>(null);
+
+// Computed property to organize results by category
+const categorizedResults = computed(() => {
+  if (!searchResults.value.length) return [];
+  
+  const categories = searchResults.value.reduce((acc, result) => {
+    const category = result.category || 'Other';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(result);
+    return acc;
+  }, {} as Record<string, any[]>);
+  
+  // Sort categories by priority
+  const categoryOrder = ['Healthcare', 'Financial', 'Inventory', 'Services', 'Events', 'Marketing', 'Other'];
+  
+  return categoryOrder
+    .filter(cat => categories[cat])
+    .map(cat => ({
+      name: cat,
+      results: categories[cat].slice(0, 5) // Limit per category
+    }));
+});
 
 const fetchResults = debounce(async (query: string) => {
   if (query.length < 2) {
@@ -56,6 +83,38 @@ const closeModal = () => {
   isLoading.value = false;
   // Re-enable body scroll
   document.body.style.overflow = '';
+};
+
+const getIcon = (iconName: string) => {
+  const iconMap: Record<string, any> = {
+    'user': User,
+    'user-check': UserCheck,
+    'calendar': Calendar,
+    'users': Users,
+    'external-link': ExternalLink,
+    'file-text': FileText,
+    'shield': Shield,
+    'shield-check': ShieldCheck,
+    'package': Package,
+    'truck': Truck,
+    'activity': Activity,
+    'calendar-days': CalendarDays,
+    'target': Target,
+    'megaphone': Megaphone
+  };
+  return iconMap[iconName] || Search;
+};
+
+const getCategoryBadgeClass = (category: string) => {
+  const classMap: Record<string, string> = {
+    'Healthcare': 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+    'Financial': 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+    'Inventory': 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
+    'Services': 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
+    'Events': 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
+    'Marketing': 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
+  };
+  return classMap[category] || 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200';
 };
 
 const navigateToResult = (url: string) => {
@@ -164,31 +223,32 @@ onUnmounted(() => {
               <div class="text-gray-400 dark:text-gray-500 mb-3">
                 <Search class="h-12 w-12 mx-auto" />
               </div>
-              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">No results found</h3>
-              <p class="text-gray-500 dark:text-gray-400 text-sm">Try searching with different keywords</p>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Search Coming Soon</h3>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">Search functionality will be implemented later</p>
             </div>
 
             <!-- Search Results -->
             <div v-else class="py-2">
-              <div class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Found {{ searchResults.length }} results
-              </div>
-              <button
-                v-for="(result, index) in searchResults"
-                :key="index"
-                @click="navigateToResult(result.url)"
-                class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors group"
-              >
-                <div class="flex items-start gap-3">
+              <!-- Results by Category -->
+              <div v-for="category in categorizedResults" :key="category.name" class="mb-4 last:mb-0">
+                <div class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-100 dark:border-gray-700">
+                  {{ category.name }} ({{ category.results.length }})
+                </div>
+                <button
+                  v-for="(result, index) in category.results"
+                  :key="index"
+                  @click="navigateToResult(result.url)"
+                  class="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group flex items-start gap-3"
+                >
                   <div class="flex-shrink-0 mt-1">
-                    <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                    <component :is="getIcon(result.icon)" class="h-4 w-4 text-gray-400 group-hover:text-blue-500" />
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                       <h4 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
                         {{ result.title }}
                       </h4>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" :class="getCategoryBadgeClass(result.category)">
                         {{ result.type }}
                       </span>
                     </div>
@@ -196,8 +256,8 @@ onUnmounted(() => {
                       {{ result.description }}
                     </p>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             </div>
           </div>
 

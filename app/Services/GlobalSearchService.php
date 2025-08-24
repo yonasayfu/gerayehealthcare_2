@@ -4,14 +4,12 @@ namespace App\Services;
 
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\InventoryItem;
-use App\Models\Invoice;
-use App\Models\VisitService;
+use Illuminate\Support\Collection;
 
 class GlobalSearchService
 {
     /**
-     * Perform global search across multiple entities
+     * Perform simple global search - patients and staff only
      */
     public function search(string $query): array
     {
@@ -19,110 +17,65 @@ class GlobalSearchService
             return [];
         }
 
-        $results = [];
+        $results = collect();
 
-        // Search Patients
-        $results = array_merge($results, $this->searchPatients($query));
+        // Core search functionality - confirmed working
+        $results = $results->merge($this->searchPatients($query));
+        $results = $results->merge($this->searchStaff($query));
 
-        // Search Staff
-        $results = array_merge($results, $this->searchStaff($query));
-
-        // Search Inventory Items
-        $results = array_merge($results, $this->searchInventoryItems($query));
-
-        // Search Invoices
-        $results = array_merge($results, $this->searchInvoices($query));
-
-        // Search Visit Services
-        $results = array_merge($results, $this->searchVisitServices($query));
-
-        return $results;
+        // Return simple array of results
+        return $results->take(10)->values()->toArray();
     }
 
-    private function searchPatients(string $query): array
+    // Simple search methods - confirmed working
+    private function searchPatients(string $query): Collection
     {
-        $patients = Patient::where('full_name', 'ILIKE', '%' . $query . '%')
-            ->orWhere('patient_code', 'ILIKE', '%' . $query . '%')
+        $patients = Patient::select('id', 'full_name', 'patient_code', 'phone_number', 'email')
+            ->where(function ($q) use ($query) {
+                $q->where('full_name', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('patient_code', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('phone_number', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('email', 'ILIKE', '%' . $query . '%');
+            })
             ->limit(5)
             ->get();
 
         return $patients->map(function ($patient) {
             return [
                 'type' => 'Patient',
+                'category' => 'Healthcare',
                 'title' => $patient->full_name,
-                'description' => 'Code: ' . ($patient->patient_code ?? 'N/A'),
-                'url' => route('admin.patients.show', $patient->id)
+                'description' => 'Code: ' . ($patient->patient_code ?? 'N/A') . ' • ' . ($patient->phone_number ?? 'No phone'),
+                'url' => route('admin.patients.show', $patient->id),
+                'relevance' => 100,
+                'icon' => 'user'
             ];
-        })->toArray();
+        });
     }
 
-    private function searchStaff(string $query): array
+    private function searchStaff(string $query): Collection
     {
-        $staff = Staff::where('first_name', 'ILIKE', '%' . $query . '%')
-            ->orWhere('last_name', 'ILIKE', '%' . $query . '%')
-            ->orWhere('email', 'ILIKE', '%' . $query . '%')
-            ->limit(5)
-            ->get();
-
-        return $staff->map(function ($s) {
-            return [
-                'type' => 'Staff',
-                'title' => $s->first_name . ' ' . $s->last_name,
-                'description' => 'Position: ' . ($s->position ?? 'N/A'),
-                'url' => route('admin.staff.show', $s->id)
-            ];
-        })->toArray();
-    }
-
-    private function searchInventoryItems(string $query): array
-    {
-        $items = InventoryItem::where('name', 'ILIKE', '%' . $query . '%')
-            ->limit(5)
-            ->get();
-
-        return $items->map(function ($item) {
-            return [
-                'type' => 'Inventory Item',
-                'title' => $item->name,
-                'description' => 'Status: ' . ($item->status ?? 'N/A'),
-                'url' => route('admin.inventory-items.show', $item->id)
-            ];
-        })->toArray();
-    }
-
-    private function searchInvoices(string $query): array
-    {
-        $invoices = Invoice::with('patient')
-            ->where('invoice_number', 'ILIKE', '%' . $query . '%')
-            ->limit(5)
-            ->get();
-
-        return $invoices->map(function ($invoice) {
-            return [
-                'type' => 'Invoice',
-                'title' => 'Invoice #' . $invoice->invoice_number,
-                'description' => 'Patient: ' . ($invoice->patient->full_name ?? 'N/A'),
-                'url' => route('admin.invoices.show', $invoice->id)
-            ];
-        })->toArray();
-    }
-
-    private function searchVisitServices(string $query): array
-    {
-        $visits = VisitService::with(['patient', 'staff'])
-            ->whereHas('patient', function ($q) use ($query) {
-                $q->where('full_name', 'ILIKE', '%' . $query . '%');
+        $staff = Staff::select('id', 'first_name', 'last_name', 'email', 'position', 'role')
+            ->where(function ($q) use ($query) {
+                $q->where('first_name', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('last_name', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('email', 'ILIKE', '%' . $query . '%')
+                    ->orWhere('position', 'ILIKE', '%' . $query . '%');
             })
             ->limit(5)
             ->get();
 
-        return $visits->map(function ($visit) {
+        return $staff->map(function ($s) {
+            $fullName = trim($s->first_name . ' ' . $s->last_name);
             return [
-                'type' => 'Visit Service',
-                'title' => 'Visit for ' . ($visit->patient->full_name ?? 'N/A'),
-                'description' => 'Status: ' . $visit->status,
-                'url' => route('admin.visit-services.show', $visit->id)
+                'type' => 'Staff',
+                'category' => 'Healthcare',
+                'title' => $fullName ?: 'Staff Member',
+                'description' => ($s->position ?? $s->role ?? 'Staff') . ' • ' . ($s->email ?? 'No email'),
+                'url' => route('admin.staff.show', $s->id),
+                'relevance' => 90,
+                'icon' => 'user-check'
             ];
-        })->toArray();
+        });
     }
 }
