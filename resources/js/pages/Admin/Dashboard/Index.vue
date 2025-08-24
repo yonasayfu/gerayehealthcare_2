@@ -8,13 +8,15 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import axios from 'axios';
 import MarketingAnalyticsDashboard from '@/components/MarketingAnalyticsDashboard.vue';
 
-import { DollarSign, Users, CreditCard, Activity, Bell } from 'lucide-vue-next';
-import { Bar, Pie } from 'vue-chartjs';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
-
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
-
 const currentTab = ref('Analytics');
+
+// Loading flags for API calls
+const loading = ref({
+  dashboard: false,
+  campaign: false,
+  traffic: false,
+  funnel: false,
+});
 
 function handleTabChange(tab: string) {
   currentTab.value = tab;
@@ -148,38 +150,50 @@ const dashboardStats = ref({
 
 /* API fetchers */
 const fetchDashboardData = async () => {
+  loading.value.dashboard = true;
   try {
     const response = await axios.get(route('admin.marketing-analytics.dashboard-data'));
     dashboardStats.value = response.data;
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
+  } finally {
+    loading.value.dashboard = false;
   }
 };
 
 const fetchCampaignPerformance = async () => {
+  loading.value.campaign = true;
   try {
     const response = await axios.get(route('admin.marketing-analytics.campaign-performance'));
     campaignPerformanceData.value = response.data.data || [];
   } catch (error) {
     console.error('Error fetching campaign performance:', error);
+  } finally {
+    loading.value.campaign = false;
   }
 };
 
 const fetchTrafficSourceDistribution = async () => {
+  loading.value.traffic = true;
   try {
     const response = await axios.get(route('admin.marketing-analytics.traffic-source-distribution'));
     trafficSourceData.value = response.data || [];
   } catch (error) {
     console.error('Error fetching traffic source distribution:', error);
+  } finally {
+    loading.value.traffic = false;
   }
 };
 
 const fetchConversionFunnel = async () => {
+  loading.value.funnel = true;
   try {
     const response = await axios.get(route('admin.marketing-analytics.conversion-funnel'));
     conversionFunnelData.value = response.data || {};
   } catch (error) {
     console.error('Error fetching conversion funnel:', error);
+  } finally {
+    loading.value.funnel = false;
   }
 };
 
@@ -205,6 +219,7 @@ watch(currentTab, (newTab) => {
           :campaignPerformanceData="campaignPerformanceData"
           :trafficSourceData="trafficSourceData"
           :conversionFunnelData="conversionFunnelData"
+          :loading="loading.dashboard || loading.campaign || loading.traffic || loading.funnel"
         />
       </div>
 

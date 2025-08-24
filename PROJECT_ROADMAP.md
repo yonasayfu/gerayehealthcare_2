@@ -121,25 +121,21 @@ Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
    - Exchange rates (CRUD, search, export, print)
    - Ethiopian calendar days (CRUD, search, export, print)
 
-8. [X] Visit & Service Management (In Progress)
+8. [✓] Visit & Service Management (In Progress)
    - Daily visit schedule for caregivers
    - Check-in/check-out via GPS (proof of visit)
    - Digital notes and reports from each visit
    - Upload prescriptions, vitals, and images
    - Cost tracking, invoicing, service and assignment linking
 
-9. [X] Communication
+9. [✓] Communication
    - Secure in-app chat between staff and patients
    - Notification system (reminders, updates)
    - Video consultation option
 
-10. [X] Billing & Payments
-    - Invoice generation
-    - Service pricing packages
-    - Payment gateway integration
-    - Receipt history
 
-11. [X] Medical Records & Documentation
+
+11. [✓] Medical Records & Documentation
     - Digital prescriptions
     - Lab result uploads
     - Progress notes and treatment plans
@@ -149,21 +145,17 @@ Link to details: see ISSUE_TRACKER.md for per-module tasks and priorities.
     - Digital marketing ROI reports
     - Revenue summaries
 
-13. [X] Partner Integrations
+13. [✓] Partner Integrations
     - Hospital & pharmacy referral tracker
     - Commission and invoice sharing
     - Referral document upload & status sync
 
-14. [X] Business & NGO Networking
+14. [✓] Business & NGO Networking
     - Track engagement with orgs, banks, schools
     - Priority service levels
     - Revenue sharing from referrals
 
-15. [X] International Referrals
-    - Global partner hospital directory
-    - Referral request system
-    - Visa & travel documentation tracking
-    - Cross-border commission reporting
+
 
 
 ## 3. Technology Stack

@@ -2,25 +2,23 @@
   <Head :title="`Employee Insurance Record: ${employeeInsuranceRecord.patient?.full_name || 'Record'}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+    <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-        <h3 class="text-xl font-semibold">
-          Employee Insurance Record Details: {{ employeeInsuranceRecord.patient?.full_name || 'Record' }}
-        </h3>
-        <Link :href="route('admin.employee-insurance-records.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-        </Link>
-      </div>
+      <div class="liquidGlass-wrapper relative overflow-hidden rounded-xl p-5 print:hidden">
+        <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-white/5"></div>
+        <div class="relative flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Employee Insurance Record Details</h1>
+            <p class="text-sm text-muted-foreground">{{ employeeInsuranceRecord.patient?.full_name || 'Record' }}</p>
+          </div>
+        </div>
 
-      <div class="p-6 space-y-6">
-        <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+      <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
           <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Employee Insurance Record Document</p>
-            <hr class="my-3 border-gray-300 print:my-2">
           </div>
 
           <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
@@ -82,17 +80,17 @@
 
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.employee-insurance-records.index')" class="btn btn-outline">
-            Back to List
-          </Link>
-          <Link :href="route('admin.employee-insurance-records.edit', employeeInsuranceRecord.id)" class="btn btn-primary">
+          <Link :href="route('admin.employee-insurance-records.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <Link :href="route('admin.employee-insurance-records.edit', employeeInsuranceRecord.id)" class="btn-glass btn-glass-sm">
             Edit Record
           </Link>
+          <button @click="printSingleRecord" class="btn-glass btn-glass-sm">
+            <Printer class="h-4 w-4" /> Print Current
+          </button>
         </div>
       </div>
 
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
-        <hr class="my-2 border-gray-300">
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
         <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 
@@ -103,6 +101,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { Printer } from 'lucide-vue-next';
 import type { BreadcrumbItemType, EmployeeInsuranceRecord } from '@/types';
 import { format } from 'date-fns';
 import { confirmDialog } from '@/lib/confirm';
@@ -115,7 +114,9 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: props.employeeInsuranceRecord.patient?.full_name || 'Record', href: route('admin.employee-insurance-records.show', props.employeeInsuranceRecord.id) },
 ];
 
-// print functionality removed for Employee Insurance Records module
+function printSingleRecord() {
+  window.print();
+}
 
 async function destroy(id: number) {
   const ok = await confirmDialog({

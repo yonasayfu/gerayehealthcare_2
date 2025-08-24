@@ -46,10 +46,17 @@ class InsuranceClaimController extends BaseController
 
     public function create()
     {
-        $patients = Patient::all(['id', 'full_name']);
-        $invoices = Invoice::all(['id', 'invoice_number', 'grand_total']);
-        $insuranceCompanies = InsuranceCompany::all(['id', 'name']);
-        $insurancePolicies = InsurancePolicy::all(['id', 'service_type', 'coverage_percentage']);
+        // OPTIMIZED: Use select with pagination instead of all()
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->limit(1000)->get();
+        $invoices = Invoice::select('id', 'invoice_number', 'grand_total', 'patient_id')
+            ->with('patient:id,full_name')
+            ->orderBy('invoice_number')
+            ->limit(1000)
+            ->get();
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $insurancePolicies = InsurancePolicy::select('id', 'service_type', 'coverage_percentage')
+            ->orderBy('service_type')
+            ->get();
 
         return Inertia::render($this->viewName . '/Create', [
             'patients' => $patients,
@@ -62,10 +69,17 @@ class InsuranceClaimController extends BaseController
     public function edit($id)
     {
         $insuranceClaim = $this->service->getById($id);
-        $patients = Patient::all(['id', 'full_name']);
-        $invoices = Invoice::all(['id', 'invoice_number', 'grand_total']);
-        $insuranceCompanies = InsuranceCompany::all(['id', 'name']);
-        $insurancePolicies = InsurancePolicy::all(['id', 'service_type', 'coverage_percentage']);
+        // OPTIMIZED: Use select with limits instead of all()
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->limit(1000)->get();
+        $invoices = Invoice::select('id', 'invoice_number', 'grand_total', 'patient_id')
+            ->with('patient:id,full_name')
+            ->orderBy('invoice_number')
+            ->limit(1000)
+            ->get();
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $insurancePolicies = InsurancePolicy::select('id', 'service_type', 'coverage_percentage')
+            ->orderBy('service_type')
+            ->get();
 
         return Inertia::render($this->viewName . '/Edit', [
             'insuranceClaim' => $insuranceClaim,

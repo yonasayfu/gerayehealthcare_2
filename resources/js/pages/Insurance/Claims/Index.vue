@@ -8,9 +8,19 @@ import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
-import type { InsuranceClaimPagination, BreadcrumbItem } from '@/types';
+import type { BreadcrumbItemType } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [
+interface InsuranceClaimPagination {
+  current_page: number;
+  per_page: number;
+  data: any[];
+  links: Array<{ url: string | null; label: string; active: boolean }>;
+  from: number;
+  to: number;
+  total: number;
+}
+
+const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Insurance Claims', href: route('admin.insurance-claims.index') },
 ]
@@ -93,18 +103,20 @@ function printCurrentView() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Insurance Claims</h1>
-          <p class="text-sm text-muted-foreground">Manage all insurance claims here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.insurance-claims.create')" class="btn btn-primary">
-            + Add Claim
-          </Link>
-          <button @click="printCurrentView" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Insurance Claims</h1>
+            <p class="text-sm text-muted-foreground">Manage all insurance claims here.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <Link :href="route('admin.insurance-claims.create')" class="btn-glass btn-glass-sm">+ Add Claim</Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -136,7 +148,6 @@ function printCurrentView() {
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Insurance Claims List (Current View)</p>
-            <hr class="my-3 border-gray-300 print:my-2">
         </div>
         
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
@@ -229,6 +240,24 @@ function printCurrentView() {
         Showing {{ insuranceClaims.from || 0 }}–{{ insuranceClaims.to || 0 }} of {{ insuranceClaims.total }}
       </p>
 
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+        <p>Printed on: {{ formattedGeneratedDate }}</p>
+      </div>
+
     </div>
   </AppLayout>
 </template>
+
+<style>
+@page { size: A4 portrait; margin: 12mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .print-header-content { page-break-inside: avoid; }
+  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+  table { border-collapse: collapse; }
+  hr { display: none !important; }
+  .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
+}
+</style>

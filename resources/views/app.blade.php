@@ -57,8 +57,14 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        <!-- Optimize Bunny Fonts loading -->
+        <link rel="dns-prefetch" href="//fonts.bunny.net">
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <!-- Preload the stylesheet for faster first paint, then apply -->
+        <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript>
+            <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
+        </noscript>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         @routes
         

@@ -3,9 +3,8 @@
 namespace App\DTOs;
 
 use Illuminate\Http\UploadedFile;
-use Spatie\LaravelData\Data;
 
-class CreateStaffDTO extends Data
+class CreateStaffDTO extends BaseDTO
 {
     public function __construct(
         public readonly ?string $first_name,

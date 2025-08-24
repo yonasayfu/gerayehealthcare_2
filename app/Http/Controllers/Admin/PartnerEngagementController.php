@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreatePartnerEngagementDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Models\Partner;
 use App\Models\PartnerEngagement;
-use App\Models\Staff;
 use App\Services\PartnerEngagement\PartnerEngagementService;
+use App\Services\CachedDropdownService;
 use App\Services\Validation\Rules\PartnerEngagementRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,13 +29,23 @@ class PartnerEngagementController extends BaseController
     {
         $data = $this->service->getAll($request, ['partner', 'staff']);
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only([
-                'search', 'sort', 'direction', 'per_page',
-                'sort_by', 'sort_order', 'active_only',
-                'campaign_id', 'platform_id', 'status', 'period_start', 'period_end',
-                'is_active', 'language',
+                'search',
+                'sort',
+                'direction',
+                'per_page',
+                'sort_by',
+                'sort_order',
+                'active_only',
+                'campaign_id',
+                'platform_id',
+                'status',
+                'period_start',
+                'period_end',
+                'is_active',
+                'language',
             ]),
         ]);
     }
@@ -46,24 +55,28 @@ class PartnerEngagementController extends BaseController
         // Ensure related Partner and Staff are loaded for the Show view
         $partnerEngagement = $this->service->getById($id, ['partner', 'staff']);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             'partnerEngagement' => $partnerEngagement,
         ]);
     }
 
     public function create()
     {
+        // OPTIMIZED: Use cached dropdown service
+        $partners = CachedDropdownService::getPartners();
+        $staff = CachedDropdownService::getActiveStaff();
+
         return Inertia::render('Admin/PartnerEngagements/Create', [
-            'partners' => Partner::all()->map(function ($partner) {
+            'partners' => $partners->map(function ($partner) {
                 return [
                     'id' => $partner->id,
                     'name' => $partner->name,
                 ];
             }),
-            'staff' => Staff::all()->map(function ($staff) {
+            'staff' => $staff->map(function ($staffMember) {
                 return [
-                    'id' => $staff->id,
-                    'name' => $staff->first_name.' '.$staff->last_name,
+                    'id' => $staffMember->id,
+                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
                 ];
             }),
         ]);
@@ -73,18 +86,22 @@ class PartnerEngagementController extends BaseController
     {
         $partnerEngagement = $this->service->getById($id, ['partner', 'staff']);
 
+        // OPTIMIZED: Use cached dropdown service
+        $partners = CachedDropdownService::getPartners();
+        $staff = CachedDropdownService::getActiveStaff();
+
         return Inertia::render('Admin/PartnerEngagements/Edit', [
             'partnerEngagement' => $partnerEngagement,
-            'partners' => Partner::all()->map(function ($partner) {
+            'partners' => $partners->map(function ($partner) {
                 return [
                     'id' => $partner->id,
                     'name' => $partner->name,
                 ];
             }),
-            'staff' => Staff::all()->map(function ($staff) {
+            'staff' => $staff->map(function ($staffMember) {
                 return [
-                    'id' => $staff->id,
-                    'name' => $staff->first_name.' '.$staff->last_name,
+                    'id' => $staffMember->id,
+                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
                 ];
             }),
         ]);

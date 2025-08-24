@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateStaffAvailabilityDTO
+class CreateStaffAvailabilityDTO extends BaseDTO
 {
     public function __construct(
         public int $staff_id,

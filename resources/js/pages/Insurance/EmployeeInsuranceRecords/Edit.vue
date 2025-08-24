@@ -1,16 +1,20 @@
 <template>
     <AppLayout title="Edit Employee Insurance Record">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Edit Employee Insurance Record
-            </h2>
-        </template>
+        <div class="space-y-6 p-6">
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                    <form @submit.prevent="submit">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="liquidGlass-wrapper relative overflow-hidden rounded-xl p-5">
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-white/5"></div>
+                <div class="relative flex items-center justify-between">
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Employee Insurance Record</h1>
+                        <p class="text-sm text-muted-foreground">Update details and save.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg">
+                <div class="p-6">
+                    <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="mb-4">
                             <label for="patient_id" class="block text-sm font-medium text-gray-700">Patient</label>
                             <select id="patient_id" v-model="form.patient_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
@@ -72,21 +76,26 @@
                             </label>
                             <div v-if="form.errors.verified" class="text-red-500 text-sm mt-1">{{ form.errors.verified }}</div>
                         </div>
-                        </div>
-
-                        <button type="submit" :disabled="form.processing" class="inline-flex items-center px-4 py-2 bg-gray-900 border border-transparent rounded-md font-semibold text-sm text-white tracking-widest hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 transition">
-                            Save Changes
-                        </button>
                     </form>
                 </div>
             </div>
+
+            <div class="p-6 border-t border-gray-200 rounded-b">
+                <div class="flex flex-wrap gap-2">
+                    <Link :href="route('admin.employee-insurance-records.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+                    <button type="submit" @click="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
+                        {{ form.processing ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                </div>
+            </div>
+
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, Link } from '@inertiajs/vue3';
 import { defineProps } from 'vue';
 
 const props = defineProps({

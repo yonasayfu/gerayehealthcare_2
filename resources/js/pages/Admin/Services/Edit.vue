@@ -48,7 +48,7 @@ const submit = () => {
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <ServiceForm :form="form" v-bind="$props" />
 
           <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
           <div class="flex justify-end gap-2 pt-2">
@@ -62,7 +62,7 @@ const submit = () => {
             <button
               type="submit"
               :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
+              class="btn-glass btn-primary btn-glass-sm"
             >
               {{ form.processing ? 'Saving...' : 'Save Changes' }}
             </button>

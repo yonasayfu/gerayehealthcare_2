@@ -10,7 +10,10 @@ use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\EventParticipantController;
 use App\Http\Controllers\Admin\EventRecommendationController;
 use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\MedicalDocumentController;
+use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\ReferralDocumentController;
@@ -35,6 +38,8 @@ use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
 use Illuminate\Support\Facades\Auth;
 // Common Controllers
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 /*
@@ -44,7 +49,7 @@ use Inertia\Inertia;
  */
 
 // Public & General
-Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
+Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
 
 // Backward-compatible redirect: /admin -> /dashboard
 Route::get('/admin', function () {
@@ -55,6 +60,77 @@ Route::get('/admin', function () {
 Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPdf'])
     ->middleware('signed')
     ->name('invoices.public_pdf');
+
+// Performance testing route
+Route::get('/performance-test', function (Request $request) {
+    $startTime = microtime(true);
+    $queryCount = 0;
+
+    // Listen to queries
+    DB::listen(function ($query) use (&$queryCount) {
+        $queryCount++;
+    });
+
+    $results = [];
+
+    // Test 1: Simple database connection
+    $testStart = microtime(true);
+    try {
+        DB::connection()->getPdo();
+        $results['database_connection'] = [
+            'status' => 'success',
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    } catch (Exception $e) {
+        $results['database_connection'] = [
+            'status' => 'error',
+            'error' => $e->getMessage(),
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    }
+
+    // Test 2: Basic model query
+    $testStart = microtime(true);
+    try {
+        $patientCount = \App\Models\Patient::count();
+        $results['basic_query'] = [
+            'status' => 'success',
+            'result' => "Found {$patientCount} patients",
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    } catch (Exception $e) {
+        $results['basic_query'] = [
+            'status' => 'error',
+            'error' => $e->getMessage(),
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+        ];
+    }
+
+    $totalTime = microtime(true) - $startTime;
+
+    $recommendations = [];
+    if ($totalTime > 0.1) {
+        $recommendations[] = "Total execution time is " . round($totalTime * 1000, 2) . "ms. Consider optimizing slow operations.";
+    }
+    if ($queryCount > 10) {
+        $recommendations[] = "High query count ({$queryCount}). Consider using eager loading or caching.";
+    }
+    if (empty($recommendations)) {
+        $recommendations[] = "Backend performance looks good. Check frontend optimization and network conditions.";
+    }
+
+    return response()->json([
+        'total_execution_time' => round($totalTime * 1000, 2) . ' ms',
+        'total_queries' => $queryCount,
+        'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
+        'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB',
+        'php_version' => PHP_VERSION,
+        'laravel_version' => app()->version(),
+        'environment' => app()->environment(),
+        'tests' => $results,
+        'recommendations' => $recommendations
+    ]);
+})->name('performance.test');
 
 // Shared Dashboard
 Route::get('dashboard', function () {
@@ -81,7 +157,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Admin & Super Admin
-Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value])
+Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
@@ -100,6 +176,39 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         // Resource route (already correctly defined relative to the group)
         Route::resource('patients', PatientController::class);
 
+        // Optimized Patient Controller for performance testing
+        Route::prefix('optimized')->name('optimized.')->group(function () {
+            Route::get('patients/export', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'export'])->name('patients.export');
+            Route::get('patients/print-all', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printAll'])->name('patients.printAll');
+            Route::get('patients/print-current', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printCurrent'])->name('patients.printCurrent');
+            Route::get('patients/{patient}/print', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printSingle'])->name('patients.printSingle');
+            Route::get('patients/quick-search', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'quickSearch'])->name('patients.quickSearch');
+            Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class);
+
+            // Optimized Staff Controller
+            Route::get('staff/export', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'export'])->name('staff.export');
+            Route::get('staff/print-all', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printAll'])->name('staff.printAll');
+            Route::get('staff/print-current', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printCurrent'])->name('staff.printCurrent');
+            Route::get('staff/{staff}/print', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'printSingle'])->name('staff.printSingle');
+            Route::get('staff/quick-search', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'quickSearch'])->name('staff.quickSearch');
+            Route::get('staff/available', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'availableStaff'])->name('staff.available');
+            Route::post('staff/bulk-update', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'bulkUpdate'])->name('staff.bulkUpdate');
+            Route::resource('staff', \App\Http\Controllers\Admin\OptimizedStaffController::class);
+
+            // Optimized Inventory Controller
+            Route::get('inventory-items/export', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'export'])->name('inventory-items.export');
+            Route::get('inventory-items/print-all', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
+            Route::get('inventory-items/print-current', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printCurrent'])->name('inventory-items.printCurrent');
+            Route::get('inventory-items/{inventory_item}/print', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
+            Route::get('inventory-items/quick-search', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'quickSearch'])->name('inventory-items.quickSearch');
+            Route::get('inventory-items/low-stock', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'lowStockAlerts'])->name('inventory-items.lowStock');
+            Route::get('inventory-items/maintenance-due', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'maintenanceDue'])->name('inventory-items.maintenanceDue');
+            Route::post('inventory-items/bulk-quantities', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'bulkUpdateQuantities'])->name('inventory-items.bulkQuantities');
+            Route::post('inventory-items/{inventory_item}/adjust-stock', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'adjustStock'])->name('inventory-items.adjustStock');
+            Route::get('inventory-items/dashboard-data', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'dashboardData'])->name('inventory-items.dashboardData');
+            Route::resource('inventory-items', \App\Http\Controllers\Admin\OptimizedInventoryItemController::class);
+        });
+
         // Caregiver Assignments
         Route::get('assignments/export', [CaregiverAssignmentController::class, 'export'])->name('assignments.export');
         Route::get('assignments/print-all', [CaregiverAssignmentController::class, 'printAll'])->name('assignments.printAll');
@@ -109,6 +218,20 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
 
         // Visit Services
         Route::resource('visit-services', VisitServiceController::class);
+
+        // Medical Documents
+        Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
+        Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
+        Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
+        Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
+        Route::resource('medical-documents', MedicalDocumentController::class);
+
+        // Prescriptions
+        Route::get('prescriptions/export', [PrescriptionController::class, 'export'])->name('prescriptions.export');
+        Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
+        Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
+        Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
+        Route::resource('prescriptions', PrescriptionController::class);
 
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
         Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
@@ -245,14 +368,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
         Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
         Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
-        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
-        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
-        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
-        Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
-        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
-        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
-        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
-        Route::resource('exchange-rates', App\Http\Controllers\Insurance\ExchangeRateController::class);
+        // Exchange Rates feature removed
         Route::get('ethiopian-calendar-days/export', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'export'])->name('ethiopian-calendar-days.export');
         Route::get('ethiopian-calendar-days/print-all', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printAll'])->name('ethiopian-calendar-days.printAll');
         Route::get('ethiopian-calendar-days/print-current', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printCurrent'])->name('ethiopian-calendar-days.printCurrent');
@@ -300,30 +416,53 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.
         Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
+            ->names('leave-requests')
             ->only(['update']);
 
         // Global Search
-        Route::get('global-search', [App\Http\Controllers\Admin\GlobalSearchController::class, 'search'])->name('global-search');
+        Route::get('global-search', [GlobalSearchController::class, 'search'])->name('global-search');
 
         // Task Delegations (Admin)
         Route::resource('task-delegations', AdminTaskController::class)
             ->parameters(['task-delegations' => 'task_delegation']);
 
         // System Management (Super Admin only)
-        Route::middleware('role:'.RoleEnum::SUPER_ADMIN->value)->group(function () {
+        Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
             Route::resource('roles', RoleController::class);
             Route::resource('users', UserController::class);
         });
 
-        // Accountant/Payment Reconciliation
-        Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
-            Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
-            Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+        // Reports (Admin & Super Admin)
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('service-volume', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'index'])
+                ->name('service-volume');
+            Route::get('service-volume/data', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'data'])
+                ->name('service-volume.data');
+            Route::get('service-volume/export', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'export'])
+                ->name('service-volume.export');
+            Route::get('revenue-ar', [\App\Http\Controllers\Reports\RevenueARController::class, 'index'])
+                ->name('revenue-ar');
+            Route::get('revenue-ar/data', [\App\Http\Controllers\Reports\RevenueARController::class, 'data'])
+                ->name('revenue-ar.data');
+            Route::get('revenue-ar/export', [\App\Http\Controllers\Reports\RevenueARController::class, 'export'])
+                ->name('revenue-ar.export');
+            Route::get('marketing-roi', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'index'])
+                ->name('marketing-roi');
+            Route::get('marketing-roi/data', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'data'])
+                ->name('marketing-roi.data');
+            Route::get('marketing-roi/export', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'export'])
+                ->name('marketing-roi.export');
         });
     });
 
+// Accountant/Payment Reconciliation
+Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
+    Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+});
+
 // Staff-Specific
-Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
+Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
@@ -367,16 +506,16 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
     });
 
 // Auth & Settings
-require __DIR__.'/auth.php';
-require __DIR__.'/settings.php';
-require __DIR__.'/marketing.php';
+require __DIR__ . '/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/marketing.php';
 
 // Test Routes (remove in production)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('test/ui', function () {
         return Inertia::render('Test/UITest');
     })->name('test.ui');
-    
+
     Route::post('test/flash-message', function () {
         return redirect()->route('test.ui')->with([
             'banner' => 'This is a test toast notification! Your UI implementations are working correctly.',
@@ -384,3 +523,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
     })->name('test.flash-message');
 });
+
+// Cache Performance Test Routes (remove in production)
+require __DIR__ . '/cache-test.php';
+
+// Performance Comparison Test Routes (remove in production)
+require __DIR__ . '/performance-test.php';

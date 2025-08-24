@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreatePartnerCommissionDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Models\Invoice;
-use App\Models\PartnerAgreement;
 use App\Models\PartnerCommission;
-use App\Models\Referral;
 use App\Services\PartnerCommission\PartnerCommissionService;
+use App\Services\CachedDropdownService;
 use App\Services\Validation\Rules\PartnerCommissionRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -31,13 +29,23 @@ class PartnerCommissionController extends BaseController
     {
         $data = $this->service->getAll($request, ['agreement', 'referral', 'invoice']);
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only([
-                'search', 'sort', 'direction', 'per_page',
-                'sort_by', 'sort_order', 'active_only',
-                'campaign_id', 'platform_id', 'status', 'period_start', 'period_end',
-                'is_active', 'language',
+                'search',
+                'sort',
+                'direction',
+                'per_page',
+                'sort_by',
+                'sort_order',
+                'active_only',
+                'campaign_id',
+                'platform_id',
+                'status',
+                'period_start',
+                'period_end',
+                'is_active',
+                'language',
             ]),
         ]);
     }
@@ -53,20 +61,25 @@ class PartnerCommissionController extends BaseController
 
     public function create()
     {
+        // OPTIMIZED: Use cached dropdown service
+        $partnerAgreements = CachedDropdownService::getPartnerAgreements();
+        $referrals = CachedDropdownService::getReferrals();
+        $invoices = CachedDropdownService::getInvoices();
+
         return Inertia::render('Admin/PartnerCommissions/Create', [
-            'partnerAgreements' => PartnerAgreement::all()->map(function ($agreement) {
+            'partnerAgreements' => $partnerAgreements->map(function ($agreement) {
                 return [
                     'id' => $agreement->id,
                     'title' => $agreement->agreement_title,
                 ];
             }),
-            'referrals' => Referral::all()->map(function ($referral) {
+            'referrals' => $referrals->map(function ($referral) {
                 return [
                     'id' => $referral->id,
                     'referral_date' => $referral->referral_date,
                 ];
             }),
-            'invoices' => Invoice::all()->map(function ($invoice) {
+            'invoices' => $invoices->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,
@@ -79,21 +92,26 @@ class PartnerCommissionController extends BaseController
     {
         $partnerCommission = $this->service->getById($id, ['agreement', 'referral', 'invoice']);
 
+        // OPTIMIZED: Use cached dropdown service
+        $partnerAgreements = CachedDropdownService::getPartnerAgreements();
+        $referrals = CachedDropdownService::getReferrals();
+        $invoices = CachedDropdownService::getInvoices();
+
         return Inertia::render('Admin/PartnerCommissions/Edit', [
             'partnerCommission' => $partnerCommission,
-            'partnerAgreements' => PartnerAgreement::all()->map(function ($agreement) {
+            'partnerAgreements' => $partnerAgreements->map(function ($agreement) {
                 return [
                     'id' => $agreement->id,
                     'title' => $agreement->agreement_title,
                 ];
             }),
-            'referrals' => Referral::all()->map(function ($referral) {
+            'referrals' => $referrals->map(function ($referral) {
                 return [
                     'id' => $referral->id,
                     'referral_date' => $referral->referral_date,
                 ];
             }),
-            'invoices' => Invoice::all()->map(function ($invoice) {
+            'invoices' => $invoices->map(function ($invoice) {
                 return [
                     'id' => $invoice->id,
                     'invoice_number' => $invoice->invoice_number,

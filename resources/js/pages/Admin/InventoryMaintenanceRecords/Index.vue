@@ -73,7 +73,7 @@ const toggleSort = (field: string) => {
 };
 
 
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
 const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-maintenance-records', filters: props.filters });
 

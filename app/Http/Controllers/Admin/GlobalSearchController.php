@@ -17,9 +17,7 @@ class GlobalSearchController extends Controller
 
     public function search(Request $request)
     {
-        $query = $request->input('q');
-        $results = $this->globalSearchService->search($query);
-
-        return response()->json($results);
+        // Just return empty results for now - UI only
+        return response()->json([]);
     }
 }

@@ -4,7 +4,6 @@ import type { BreadcrumbItemType } from '@/types';
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { eventBus } from '@/lib/eventBus'; // Import eventBus
-import { Bell, MessageSquareText } from 'lucide-vue-next'; // Import icons
 import { formatDistanceToNow } from 'date-fns'; // For time formatting
 import Toast from '@/components/Toast.vue';
 import ConfirmModal from '@/components/ConfirmModal.vue';

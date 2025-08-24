@@ -3,9 +3,15 @@
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">Edit Corporate Client</h1>
-        <p class="text-sm text-muted-foreground">Update the details of this corporate client.</p>
+      <div class="liquidGlass-wrapper relative overflow-hidden rounded-xl p-5">
+        <div class="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/10 to-white/5"></div>
+        <div class="relative flex items-center justify-between">
+          <div>
+            <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Edit Corporate Client</h1>
+            <p class="text-sm text-muted-foreground">Update the details of this corporate client.</p>
+          </div>
+          <Link :href="route('admin.corporate-clients.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+        </div>
       </div>
 
       <div class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg">
@@ -54,11 +60,11 @@
             </div>
           </div>
 
-          <div class="mt-6 flex items-center gap-2">
-            <button type="submit" :disabled="form.processing" class="btn btn-primary">
+          <div class="mt-6 flex items-center justify-end gap-2">
+            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
               Update Client
             </button>
-            <Link :href="route('admin.corporate-clients.index')" class="btn btn-secondary">Cancel</Link>
+            <Link :href="route('admin.corporate-clients.index')" class="btn-glass btn-glass-sm">Cancel</Link>
           </div>
         </form>
       </div>

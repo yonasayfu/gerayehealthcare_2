@@ -6,8 +6,8 @@ use App\DTOs\CreatePartnerDTO;
 use App\DTOs\UpdatePartnerDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Partner;
-use App\Models\Staff;
 use App\Services\Partner\PartnerService;
+use App\Services\CachedDropdownService;
 use App\Services\Validation\Rules\PartnerRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -28,11 +28,14 @@ class PartnerController extends BaseController
 
     public function create()
     {
+        // OPTIMIZED: Use cached dropdown service
+        $staff = CachedDropdownService::getActiveStaff();
+
         return Inertia::render('Admin/Partners/Create', [
-            'staff' => Staff::all()->map(function ($staff) {
+            'staff' => $staff->map(function ($staffMember) {
                 return [
-                    'id' => $staff->id,
-                    'name' => $staff->first_name.' '.$staff->last_name,
+                    'id' => $staffMember->id,
+                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
                 ];
             }),
         ]);
@@ -42,12 +45,15 @@ class PartnerController extends BaseController
     {
         $partner = $this->service->getById($id);
 
+        // OPTIMIZED: Use cached dropdown service
+        $staff = CachedDropdownService::getActiveStaff();
+
         return Inertia::render('Admin/Partners/Edit', [
             'partner' => $partner,
-            'staff' => Staff::all()->map(function ($staff) {
+            'staff' => $staff->map(function ($staffMember) {
                 return [
-                    'id' => $staff->id,
-                    'name' => $staff->first_name.' '.$staff->last_name,
+                    'id' => $staffMember->id,
+                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
                 ];
             }),
         ]);

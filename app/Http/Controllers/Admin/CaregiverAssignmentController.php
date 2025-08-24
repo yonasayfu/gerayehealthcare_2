@@ -9,6 +9,7 @@ use App\Models\CaregiverAssignment;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Services\CaregiverAssignmentService;
+use App\Services\CachedDropdownService;
 use App\Services\Validation\Rules\CaregiverAssignmentRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,19 +30,21 @@ class CaregiverAssignmentController extends BaseController
 
     public function create()
     {
-        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
-        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        // OPTIMIZED: Use cached dropdown service
+        $patients = CachedDropdownService::getPatients();
+        $staff = CachedDropdownService::getActiveStaff();
 
-        return Inertia::render($this->viewName.'/Create', compact('patients', 'staff'));
+        return Inertia::render($this->viewName . '/Create', compact('patients', 'staff'));
     }
 
     public function edit($id)
     {
         $assignment = $this->service->getById($id);
-        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
-        $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+        // OPTIMIZED: Use cached dropdown service
+        $patients = CachedDropdownService::getPatients();
+        $staff = CachedDropdownService::getActiveStaff();
 
-        return Inertia::render($this->viewName.'/Edit', [
+        return Inertia::render($this->viewName . '/Edit', [
             'assignment' => $assignment,
             'patients' => $patients,
             'staff' => $staff,
@@ -53,7 +56,7 @@ class CaregiverAssignmentController extends BaseController
         $assignment = $this->service->getById($id);
         $assignment->load(['patient', 'staff']);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             'assignment' => $assignment,
         ]);
     }

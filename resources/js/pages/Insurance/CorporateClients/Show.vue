@@ -10,19 +10,20 @@
         <hr class="my-3 border-gray-300 print:my-2">
       </div>
 
-      <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:m-0 print:shadow-none print:border-0 print:rounded-none print:bg-transparent">
-
-        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-          <h3 class="text-xl font-semibold">
-            Corporate Client: {{ corporateClient.organization_name }}
-          </h3>
-          <Link :href="route('admin.corporate-clients.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" title="Close">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </Link>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Corporate Client: {{ corporateClient.organization_name }}</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Record details</p>
+          </div>
+          <!-- intentionally no Back button here -->
         </div>
+      </div>
 
+      <div class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg">
         <div class="p-6 space-y-6">
-          <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+          <div class="overflow-x-auto bg-white dark:bg-gray-900 rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
             <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2 avoid-break">
               <h2 class="text-lg font-semibold text-gray-800 mb-4 print:mb-2">Client Details</h2>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
@@ -75,14 +76,14 @@
         </div>
 
         <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-          <div class="flex flex-wrap gap-2">
-            <Link :href="route('admin.corporate-clients.index')" class="btn btn-outline">
+          <div class="flex items-center justify-end flex-wrap gap-2">
+            <Link :href="route('admin.corporate-clients.index')" class="btn-glass btn-glass-sm">
               Back to List
             </Link>
-            <button @click="printCurrent" class="btn btn-dark">
+            <button @click="printCurrent" class="btn-glass btn-glass-sm">
               <Printer class="h-4 w-4" /> Print Current
             </button>
-            <Link :href="route('admin.corporate-clients.edit', corporateClient.id)" class="btn btn-primary">
+            <Link :href="route('admin.corporate-clients.edit', corporateClient.id)" class="btn-glass btn-glass-sm">
               Edit Client
             </Link>
           </div>

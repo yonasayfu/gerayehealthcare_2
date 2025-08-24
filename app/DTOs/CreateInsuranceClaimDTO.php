@@ -2,7 +2,7 @@
 
 namespace App\DTOs;
 
-class CreateInsuranceClaimDTO
+class CreateInsuranceClaimDTO extends BaseDTO
 {
     public function __construct(
         public int $patient_id,

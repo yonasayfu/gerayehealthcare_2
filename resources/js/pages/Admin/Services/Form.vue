@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { InertiaForm } from '@/types'
 import { ref, onMounted, watchEffect } from 'vue'
 
 interface LocalErrors {
@@ -7,7 +6,7 @@ interface LocalErrors {
 }
 
 const props = defineProps<{
-  form: InertiaForm<any>,
+  form: any,
   localErrors?: LocalErrors
 }>()
 
@@ -41,7 +40,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <form @submit.prevent="emit('submit')">
+  <div>
     <div class="border-b border-gray-900/10 pb-12">
       <h2 class="text-base font-semibold text-gray-900 dark:text-white">Service Information</h2>
       <p class="mt-1 text-sm text-muted-foreground">
@@ -142,14 +141,5 @@ watchEffect(() => {
       </div>
     </div>
 
-    <div class="flex justify-end space-x-3 mt-6">
-      <button
-        type="submit"
-        class="inline-flex items-center px-5 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-md text-sm font-medium transition"
-        :disabled="form.processing"
-      >
-        {{ form.processing ? 'Saving...' : 'Save Service' }}
-      </button>
-    </div>
-  </form>
+  </div>
 </template>
