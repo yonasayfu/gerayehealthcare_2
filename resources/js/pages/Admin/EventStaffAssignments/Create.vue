@@ -61,16 +61,48 @@ const breadcrumbs = [
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Event</label>
+              <select v-model="form.event_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option value="">Select Event</option>
+                <option v-for="ev in events" :key="ev.id" :value="ev.id">{{ ev.title ?? ev.name ?? ('Event #' + ev.id) }}</option>
+              </select>
+              <span class="text-red-500 text-xs" v-if="form.errors.event_id">{{ form.errors.event_id }}</span>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Staff</label>
+              <select v-model="form.staff_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option value="">Select Staff</option>
+                <option v-for="s in staff" :key="s.id" :value="s.id">{{ s.full_name ?? s.name ?? ('Staff #' + s.id) }}</option>
+              </select>
+              <span class="text-red-500 text-xs" v-if="form.errors.staff_id">{{ form.errors.staff_id }}</span>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Role</label>
+              <select v-model="form.role" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option value="">Select Role</option>
+                <option v-for="r in roles" :key="r" :value="r">{{ r }}</option>
+              </select>
+              <span class="text-red-500 text-xs" v-if="form.errors.role">{{ form.errors.role }}</span>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Notes</label>
+              <textarea v-model="form.notes" rows="4" placeholder="Optional notes..." class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"></textarea>
+              <span class="text-red-500 text-xs" v-if="form.errors.notes">{{ form.errors.notes }}</span>
+            </div>
+          </div>
+
+          <p v-if="isDuplicate" class="text-amber-600 text-sm">Warning: This staff is already assigned to the selected event.</p>
+
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.event-staff-assignments.index')" class="btn-glass btn-glass-sm">Cancel</Link>
 
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
+            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
               {{ form.processing ? 'Creating...' : 'Create Event Staff Assignment' }}
             </button>
           </div>

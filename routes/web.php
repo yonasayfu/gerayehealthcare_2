@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\EventRecommendationController;
 use App\Http\Controllers\Admin\EventStaffAssignmentController;
 use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\MedicalDocumentController;
+use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\ReferralDocumentController;
@@ -217,6 +219,20 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         // Visit Services
         Route::resource('visit-services', VisitServiceController::class);
 
+        // Medical Documents
+        Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
+        Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
+        Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
+        Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
+        Route::resource('medical-documents', MedicalDocumentController::class);
+
+        // Prescriptions
+        Route::get('prescriptions/export', [PrescriptionController::class, 'export'])->name('prescriptions.export');
+        Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
+        Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
+        Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
+        Route::resource('prescriptions', PrescriptionController::class);
+
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
         Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
         Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');
@@ -352,14 +368,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
         Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
         Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
-        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
-        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
-        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
-        Route::get('exchange-rates/export', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'export'])->name('exchange-rates.export');
-        Route::get('exchange-rates/print-all', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printAll'])->name('exchange-rates.printAll');
-        Route::get('exchange-rates/print-current', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printCurrent'])->name('exchange-rates.printCurrent');
-        Route::get('exchange-rates/{exchange_rate}/print', [App\Http\Controllers\Insurance\ExchangeRateController::class, 'printSingle'])->name('exchange-rates.print');
-        Route::resource('exchange-rates', App\Http\Controllers\Insurance\ExchangeRateController::class);
+        // Exchange Rates feature removed
         Route::get('ethiopian-calendar-days/export', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'export'])->name('ethiopian-calendar-days.export');
         Route::get('ethiopian-calendar-days/print-all', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printAll'])->name('ethiopian-calendar-days.printAll');
         Route::get('ethiopian-calendar-days/print-current', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printCurrent'])->name('ethiopian-calendar-days.printCurrent');
@@ -407,6 +416,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
+            ->names('leave-requests')
             ->only(['update']);
 
         // Global Search
@@ -422,12 +432,34 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
             Route::resource('users', UserController::class);
         });
 
-        // Accountant/Payment Reconciliation
-        Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
-            Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
-            Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+        // Reports (Admin & Super Admin)
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('service-volume', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'index'])
+                ->name('service-volume');
+            Route::get('service-volume/data', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'data'])
+                ->name('service-volume.data');
+            Route::get('service-volume/export', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'export'])
+                ->name('service-volume.export');
+            Route::get('revenue-ar', [\App\Http\Controllers\Reports\RevenueARController::class, 'index'])
+                ->name('revenue-ar');
+            Route::get('revenue-ar/data', [\App\Http\Controllers\Reports\RevenueARController::class, 'data'])
+                ->name('revenue-ar.data');
+            Route::get('revenue-ar/export', [\App\Http\Controllers\Reports\RevenueARController::class, 'export'])
+                ->name('revenue-ar.export');
+            Route::get('marketing-roi', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'index'])
+                ->name('marketing-roi');
+            Route::get('marketing-roi/data', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'data'])
+                ->name('marketing-roi.data');
+            Route::get('marketing-roi/export', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'export'])
+                ->name('marketing-roi.export');
         });
     });
+
+// Accountant/Payment Reconciliation
+Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
+    Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
+});
 
 // Staff-Specific
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])

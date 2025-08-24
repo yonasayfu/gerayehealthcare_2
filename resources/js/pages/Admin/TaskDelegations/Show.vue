@@ -13,6 +13,17 @@ const props = defineProps<{
     assignee?: { first_name: string; last_name: string }
   }
 }>()
+
+function printPage() {
+  setTimeout(() => {
+    try {
+      window.print()
+    } catch (error) {
+      console.error('Print failed:', error)
+      alert('Failed to open print dialog. Please try again or check your browser settings.')
+    }
+  }, 100)
+}
 </script>
 
 <template>
@@ -35,7 +46,7 @@ const props = defineProps<{
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
       </div>
-      </div>
+      <!-- keep content and footer within the same card container -->
 
       <div class="p-6 space-y-4">
         <div>
@@ -71,5 +82,14 @@ const props = defineProps<{
           <div class="text-sm whitespace-pre-wrap text-foreground">{{ props.taskDelegation.notes }}</div>
         </div>
       </div>
+      <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.task-delegations.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.task-delegations.edit', props.taskDelegation.id)" class="btn-glass btn-glass-sm">Edit</Link>
+        </div>
+      </div>
+    </div>
   </AppLayout>
 </template>

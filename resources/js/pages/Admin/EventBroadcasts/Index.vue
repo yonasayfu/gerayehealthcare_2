@@ -164,21 +164,21 @@ function toggleSort(field: string) {
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.event-broadcasts.show', item.id)"
+                    :href="route('admin.event-broadcasts.show', broadcast.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.event-broadcasts.edit', item.id)"
+                    :href="route('admin.event-broadcasts.edit', broadcast.id)"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(item.id)"
+                    @click="destroy(broadcast.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >

@@ -50,7 +50,7 @@ async function destroy(id: number) {
         <div class="liquidGlass-content flex items-center justify-between p-6">
           <div class="print:hidden">
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Event Participant Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Event Participant: {{ item.name || item.title || item.id }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Event Participant: {{ participant?.id }}</p>
           </div>
           <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
@@ -96,8 +96,8 @@ async function destroy(id: number) {
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
           <Link :href="route('admin.event-participants.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printSingleEventParticipant" class="btn-glass btn-glass-sm">Print Current</button>
-          <Link :href="route('admin.event-participants.edit', item.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.event-participants.edit', participant.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
 

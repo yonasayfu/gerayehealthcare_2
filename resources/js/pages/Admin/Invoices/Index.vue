@@ -3,7 +3,8 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus, Printer, Download, Check } from 'lucide-vue-next';
+import { Plus, Printer, Download, Check, Eye } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 defineProps<{
   invoices: any;
@@ -23,10 +24,17 @@ const formatDate = (dateString: string) => {
   return format(new Date(dateString), 'MMM dd, yyyy');
 };
 
+const formattedGeneratedDate = computed(() => format(new Date(), 'PPP p'));
+
+function printCurrentView() {
+  setTimeout(() => window.print(), 30);
+}
+
 function approveInvoice(id: number) {
   const form = useForm({});
   form.post(route('admin.invoices.approve', id));
 }
+
 </script>
 
 <template>
@@ -52,17 +60,21 @@ function approveInvoice(id: number) {
             <Link :href="route('admin.invoices.create')" class="btn-glass">
               <span>Create Invoice</span>
             </Link>
-            <Link :href="route('admin.invoices.incoming')" class="btn-glass btn-glass-sm">
-              <span>Incoming</span>
-            </Link>
             <a :href="route('admin.invoices.export')" class="btn-glass btn-glass-sm">
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </a>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
             <a :href="route('admin.invoices.printAll')" class="btn-glass btn-glass-sm" target="_blank">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print All</span>
             </a>
+            <Link :href="route('admin.invoices.incoming')" class="btn-glass btn-glass-sm">
+              <span>Incoming</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -72,7 +84,6 @@ function approveInvoice(id: number) {
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
             <p class="text-gray-600 dark:text-gray-400 print-document-title">Invoice List (Current View)</p>
-            <hr class="my-3 border-gray-300 print:my-2">
         </div>
 
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-100 print-table">
@@ -111,7 +122,7 @@ function approveInvoice(id: number) {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.invoices.show', invoice.id)"
-                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="btn-icon text-indigo-600"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
@@ -119,7 +130,7 @@ function approveInvoice(id: number) {
                   <button
                     v-if="invoice.status === 'Issued' || invoice.status === 'Pending'"
                     @click.prevent="approveInvoice(invoice.id)"
-                    class="inline-flex items-center p-2 rounded-md text-green-600 hover:bg-green-50 dark:text-green-300 dark:hover:bg-gray-700"
+                    class="btn-icon text-green-600 hover:bg-green-50 dark:hover:bg-green-900"
                     title="Approve Invoice"
                   >
                     <Check class="w-4 h-4" />
@@ -133,7 +144,24 @@ function approveInvoice(id: number) {
           </tbody>
         </table>
       </div>
-
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
+        <p>Document Generated: {{ formattedGeneratedDate }}</p>
+      </div>
     </div>
   </AppLayout>
 </template>
+
+<style>
+@page { size: A4 portrait; margin: 12mm; }
+@media print {
+  html, body { background: #fff !important; }
+  .print-header-content { page-break-inside: avoid; }
+  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+  .print-table { font-size: 11px; border-collapse: collapse; }
+  .print-table th, .print-table td { border: 1px solid #d1d5db; padding: 6px 8px; }
+  .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
+  hr { display: none !important; }
+}
+</style>

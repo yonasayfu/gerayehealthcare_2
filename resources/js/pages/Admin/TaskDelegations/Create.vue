@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { ref } from 'vue'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import Pagination from '@/components/Pagination.vue'
+import Form from './Form.vue'
 
 const props = defineProps<{
   staff: { id: number; first_name: string; last_name: string }[],
@@ -41,6 +37,12 @@ function submit() {
     }
   })
 }
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Task Delegations', href: route('admin.task-delegations.index') },
+  { title: 'Create', href: null },
+]
 </script>
 
 <template>

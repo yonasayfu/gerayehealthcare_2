@@ -3,6 +3,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Trash2, ArrowUpDown, Filter, Edit3, PlusCircle } from 'lucide-vue-next'
+import Pagination from '@/components/Pagination.vue'
 import debounce from 'lodash/debounce'
 
 const props = defineProps<{
@@ -112,7 +113,7 @@ const openCreateModal = () => {
     showModal.value = true;
 };
 
-const openEditModal = (availability) => {
+const openEditModal = (availability: any) => {
     isEditMode.value = true;
     form.id = availability.id;
     form.staff_id = String(availability.staff_id);
@@ -192,15 +193,18 @@ function toggleSort(field: string) {
   }
 }
 
-const getStaffFullName = (staff) => {
+const getStaffFullName = (staff: any) => {
     if (!staff) return 'N/A';
     return `${staff.first_name || ''} ${staff.last_name || ''}`.trim();
 }
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleString();
 }
+
+// expose a generic server error if backend returns a top-level error key
+const serverError = computed(() => (form.errors as any)?.error)
 </script>
 
 <template>
@@ -212,7 +216,7 @@ const formatDate = (dateString) => {
             <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Availability Records</h1>
             <p class="text-sm text-muted-foreground">Review and manage all staff availability slots.</p>
         </div>
-        <button @click="openCreateModal" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold px-4 py-2 rounded-lg text-sm shadow-md">
+        <button @click="openCreateModal" class="btn-glass btn-primary inline-flex items-center gap-2">
           <PlusCircle class="h-4 w-4" />
           Add New Slot
         </button>
@@ -293,11 +297,11 @@ const formatDate = (dateString) => {
               <td class="px-6 py-4">{{ formatDate(availability.end_time) }}</td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
-                    <button @click="openEditModal(availability)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100" title="Edit Slot">
-                        <Edit3 class="w-4 h-4 text-blue-600" />
+                    <button @click="openEditModal(availability)" class="btn-icon text-blue-600" title="Edit Slot">
+                        <Edit3 class="w-4 h-4" />
                     </button>
-                    <button @click="destroy(availability.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100" title="Delete Slot">
-                        <Trash2 class="w-4 h-4 text-red-600" />
+                    <button @click="destroy(availability.id)" class="btn-icon text-red-600 hover:bg-red-100 dark:hover:bg-red-900" title="Delete Slot">
+                        <Trash2 class="w-4 h-4" />
                     </button>
                 </div>
               </td>
@@ -308,38 +312,10 @@ const formatDate = (dateString) => {
           </tbody>
         </table>
       </div>
-      <!-- Pagination -->
-      <div v-if="availabilities && availabilities.meta" class="flex items-center justify-between mt-4">
-        <div class="text-sm text-muted-foreground">
-          Showing {{ (availabilities.meta && availabilities.meta.from) ? availabilities.meta.from : 0 }}
-          to {{ (availabilities.meta && availabilities.meta.to) ? availabilities.meta.to : 0 }}
-          of {{ (availabilities.meta && availabilities.meta.total) ? availabilities.meta.total : 0 }} results
-        </div>
-        <div class="flex items-center gap-1">
-          <template v-if="availabilities.links && availabilities.links.length">
-            <button
-              v-for="link in availabilities.links"
-              :key="(link.label || '') + String(!!link.active)"
-              :disabled="!link.url"
-              v-html="link.label"
-              @click="goToPage(link.url)"
-              class="px-3 py-1 border rounded text-sm"
-              :class="[link.active ? 'bg-cyan-600 text-white border-cyan-600' : 'hover:bg-gray-100', !link.url ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer']"
-            />
-          </template>
-          <template v-else>
-            <button
-              class="px-3 py-1 border rounded text-sm hover:bg-gray-100"
-              :disabled="availabilities.meta.current_page <= 1"
-              @click="goToPageNumber(availabilities.meta.current_page - 1)"
-            >Previous</button>
-            <span class="px-2 text-sm">Page {{ availabilities.meta.current_page }} of {{ availabilities.meta.last_page }}</span>
-            <button
-              class="px-3 py-1 border rounded text-sm hover:bg-gray-100"
-              :disabled="availabilities.meta.current_page >= availabilities.meta.last_page"
-              @click="goToPageNumber(availabilities.meta.current_page + 1)"
-            >Next</button>
-          </template>
+      <!-- Pagination (match shared UI) -->
+      <div class="mt-4">
+        <div class="flex justify-center">
+          <Pagination :links="availabilities.links" />
         </div>
       </div>
     </div>
@@ -379,8 +355,8 @@ const formatDate = (dateString) => {
                 </div>
                 
                 <!-- Error Message -->
-                <div v-if="form.errors.error" class="text-red-500 text-sm mt-1 p-3 bg-red-50 border border-red-200 rounded">
-                    {{ form.errors.error }}
+                <div v-if="serverError" class="text-red-500 text-sm mt-1 p-3 bg-red-50 border border-red-200 rounded">
+                    {{ serverError }}
                 </div>
                 
                 <div class="flex justify-end space-x-3 pt-4">

@@ -173,6 +173,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
                 <td class="p-2 text-right">
                   <div class="inline-flex items-center justify-end space-x-2">
                     <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="btn-icon text-indigo-600" title="View"><Eye class="w-4 h-4" /></Link>
+                    <Link :href="route('admin.inventory-transactions.edit', transaction.id)" class="btn-icon text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
                   </div>
                 </td>
               </tr>

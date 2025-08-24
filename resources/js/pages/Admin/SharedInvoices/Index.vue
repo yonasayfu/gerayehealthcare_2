@@ -35,6 +35,11 @@
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+          <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+          <p class="text-gray-600 dark:text-gray-400 print-document-title">Shared Invoices (Current View)</p>
+        </div>
         <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-3 print:hidden">
           <div class="relative w-full md:w-1/3">
             <input

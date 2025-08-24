@@ -20,8 +20,7 @@ class TaskDelegationController extends BaseController
             'Admin/TaskDelegations',
             'taskDelegations',
             TaskDelegation::class,
-            'App\\DTOs\\CreateTaskDelegationDTO',
-            'App\\DTOs\\UpdateTaskDelegationDTO'
+            'App\\DTOs\\CreateTaskDelegationDTO'
         );
     }
 

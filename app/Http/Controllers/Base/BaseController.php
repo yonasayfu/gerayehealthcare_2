@@ -61,8 +61,8 @@ class BaseController extends Controller
 
             if ($this->dtoClass) {
                 $dtoData = $this->prepareDataForDTO($validatedData);
-                $dto = ($this->dtoClass)::from($dtoData);
-                $payload = $dto->toArray();
+                // For plain PHP DTOs (no static from() / toArray()), use the prepared array directly
+                $payload = $dtoData;
             } else {
                 $payload = $validatedData;
             }
@@ -121,8 +121,8 @@ class BaseController extends Controller
 
             if ($this->dtoClass) {
                 $dtoData = $this->prepareDataForDTO($validatedData);
-                $dto = ($this->dtoClass)::from($dtoData);
-                $payload = $dto->toArray();
+                // For plain PHP DTOs (no static from() / toArray()), use the prepared array directly
+                $payload = $dtoData;
             } else {
                 $payload = $validatedData;
             }
@@ -163,7 +163,7 @@ class BaseController extends Controller
         }
     }
 
-    private function getRouteName()
+    protected function getRouteName()
     {
         if (! empty($this->routeName)) {
             return $this->routeName;

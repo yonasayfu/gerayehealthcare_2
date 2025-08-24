@@ -68,7 +68,7 @@ const destroy = async (id: number) => {
   });
 };
 
-import { useExport } from '@/Composables/useExport';
+import { useExport } from '@/composables/useExport';
 
 const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-items', filters: props.filters });
 

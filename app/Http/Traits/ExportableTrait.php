@@ -110,20 +110,34 @@ trait ExportableTrait
                 $data->load($pdfConfig['with_relations']);
             }
 
+            $paper = $pdfConfig['paper'] ?? $pdfConfig['paper_size'] ?? 'a4';
+            $orientation = $pdfConfig['orientation'] ?? 'portrait';
+
+            $headerInfo = [
+                'logo' => public_path('images/geraye_logo.jpeg'),
+                'clinic_name' => 'Geraye Home Care Services',
+                'document_title' => $pdfConfig['document_title'],
+                'paper_size' => $paper,
+            ];
+            if (!empty($pdfConfig['header_info']) && is_array($pdfConfig['header_info'])) {
+                $headerInfo = array_merge($headerInfo, $pdfConfig['header_info']);
+            }
+
+            $footerInfo = [
+                'generated_date' => now()->format('F j, Y, g:i a'),
+            ];
+            if (!empty($pdfConfig['footer_info']) && is_array($pdfConfig['footer_info'])) {
+                $footerInfo = array_merge($footerInfo, $pdfConfig['footer_info']);
+            }
+
             $pdf = Pdf::loadView($pdfConfig['view'], [
                 'data' => $data,
                 'title' => $pdfConfig['document_title'],
                 'columns' => $pdfConfig['columns'] ?? [], // Pass columns instead of fields
                 'hide_footer' => $pdfConfig['hide_footer'] ?? false,
-                'headerInfo' => [
-                    'logo' => public_path('images/geraye_logo.jpeg'),
-                    'clinic_name' => 'Geraye Home Care Services',
-                    'document_title' => $pdfConfig['document_title'],
-                ],
-                'footerInfo' => [
-                    'generated_date' => now()->format('F j, Y, g:i a'),
-                ],
-            ])->setPaper('a4', $pdfConfig['orientation'] ?? 'portrait');
+                'headerInfo' => $headerInfo,
+                'footerInfo' => $footerInfo,
+            ])->setPaper($paper, $orientation);
 
             if ($request->input('preview')) {
                 return $pdf->stream($pdfConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
@@ -155,10 +169,11 @@ trait ExportableTrait
 
         // Check if all_records config exists, otherwise use default
         $allRecordsConfig = $config['all_records'] ?? $config['pdf'] ?? [
-            'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+            'view' => 'pdf-layout',
             'document_title' => 'All Records',
             'filename_prefix' => 'export',
-            'orientation' => 'landscape'
+            'orientation' => 'landscape',
+            'paper' => 'a4',
         ];
 
         // Eager load relations for print all
@@ -174,20 +189,34 @@ trait ExportableTrait
             });
         }
 
+        $paper = $allRecordsConfig['paper'] ?? $allRecordsConfig['paper_size'] ?? 'a4';
+        $orientation = $allRecordsConfig['orientation'] ?? 'landscape';
+
+        $headerInfo = [
+            'logo' => public_path('images/geraye_logo.jpeg'),
+            'clinic_name' => 'Geraye Home Care Services',
+            'document_title' => $allRecordsConfig['document_title'] ?? 'All Records',
+            'paper_size' => $paper,
+        ];
+        if (!empty($allRecordsConfig['header_info']) && is_array($allRecordsConfig['header_info'])) {
+            $headerInfo = array_merge($headerInfo, $allRecordsConfig['header_info']);
+        }
+
+        $footerInfo = [
+            'generated_date' => now()->format('F j, Y, g:i a'),
+        ];
+        if (!empty($allRecordsConfig['footer_info']) && is_array($allRecordsConfig['footer_info'])) {
+            $footerInfo = array_merge($footerInfo, $allRecordsConfig['footer_info']);
+        }
+
         $pdf = Pdf::loadView($allRecordsConfig['view'], [
             'data' => $data,
             'title' => $allRecordsConfig['document_title'] ?? 'All Records',
             'columns' => $allRecordsConfig['columns'] ?? [], // Pass columns instead of fields
             'hide_footer' => $allRecordsConfig['hide_footer'] ?? false,
-            'headerInfo' => [
-                'logo' => public_path('images/geraye_logo.jpeg'),
-                'clinic_name' => 'Geraye Home Care Services',
-                'document_title' => $allRecordsConfig['document_title'] ?? 'All Records',
-            ],
-            'footerInfo' => [
-                'generated_date' => now()->format('F j, Y, g:i a'),
-            ],
-        ])->setPaper('a4', $allRecordsConfig['orientation'] ?? 'landscape');
+            'headerInfo' => $headerInfo,
+            'footerInfo' => $footerInfo,
+        ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
             return $pdf->stream($allRecordsConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
@@ -213,10 +242,11 @@ trait ExportableTrait
 
         // Check if current_page config exists, otherwise use default
         $currentPageConfig = $config['current_page'] ?? $config['pdf'] ?? [
-            'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+            'view' => 'pdf-layout',
             'document_title' => 'Current View',
             'filename_prefix' => 'export-current',
-            'orientation' => 'portrait'
+            'orientation' => 'portrait',
+            'paper' => 'a4',
         ];
 
         // Eager load relations for print current
@@ -226,20 +256,34 @@ trait ExportableTrait
 
         $data = $query->paginate($request->input('per_page', 5));
 
+        $paper = $currentPageConfig['paper'] ?? $currentPageConfig['paper_size'] ?? 'a4';
+        $orientation = $currentPageConfig['orientation'] ?? 'portrait';
+
+        $headerInfo = [
+            'logo' => public_path('images/geraye_logo.jpeg'),
+            'clinic_name' => 'Geraye Home Care Services',
+            'document_title' => $currentPageConfig['document_title'] ?? 'Current View',
+            'paper_size' => $paper,
+        ];
+        if (!empty($currentPageConfig['header_info']) && is_array($currentPageConfig['header_info'])) {
+            $headerInfo = array_merge($headerInfo, $currentPageConfig['header_info']);
+        }
+
+        $footerInfo = [
+            'generated_date' => now()->format('F j, Y, g:i a'),
+        ];
+        if (!empty($currentPageConfig['footer_info']) && is_array($currentPageConfig['footer_info'])) {
+            $footerInfo = array_merge($footerInfo, $currentPageConfig['footer_info']);
+        }
+
         $pdf = Pdf::loadView($currentPageConfig['view'], [
             'data' => $data,
             'title' => $currentPageConfig['document_title'] ?? 'Current View',
             'columns' => $currentPageConfig['columns'] ?? [], // Pass columns instead of fields
             'hide_footer' => $currentPageConfig['hide_footer'] ?? false,
-            'headerInfo' => [
-                'logo' => public_path('images/geraye_logo.jpeg'),
-                'clinic_name' => 'Geraye Home Care Services',
-                'document_title' => $currentPageConfig['document_title'] ?? 'Current View',
-            ],
-            'footerInfo' => [
-                'generated_date' => now()->format('F j, Y, g:i a'),
-            ],
-        ])->setPaper('a4', $currentPageConfig['orientation'] ?? 'portrait');
+            'headerInfo' => $headerInfo,
+            'footerInfo' => $footerInfo,
+        ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
             return $pdf->stream($currentPageConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
@@ -252,9 +296,11 @@ trait ExportableTrait
     {
         // Check if single_record config exists, otherwise use default
         $singleRecordConfig = $config['single_record'] ?? $config['pdf'] ?? [
-            'view' => 'pdf-layout', // Changed from 'print-layout' to 'pdf-layout'
+            'view' => 'pdf-layout',
             'document_title' => 'Record Details',
-            'filename_prefix' => 'record'
+            'filename_prefix' => 'record',
+            'paper' => 'a4',
+            'orientation' => 'portrait',
         ];
 
         // Eager load relations for single record
@@ -262,20 +308,34 @@ trait ExportableTrait
             $modelInstance->load($singleRecordConfig['with_relations']);
         }
 
+        $paper = $singleRecordConfig['paper'] ?? $singleRecordConfig['paper_size'] ?? 'a4';
+        $orientation = $singleRecordConfig['orientation'] ?? 'portrait';
+
+        $headerInfo = [
+            'logo' => public_path('images/geraye_logo.jpeg'),
+            'clinic_name' => 'Geraye Home Care Services',
+            'document_title' => $singleRecordConfig['document_title'] ?? 'Record Details',
+            'paper_size' => $paper,
+        ];
+        if (!empty($singleRecordConfig['header_info']) && is_array($singleRecordConfig['header_info'])) {
+            $headerInfo = array_merge($headerInfo, $singleRecordConfig['header_info']);
+        }
+
+        $footerInfo = [
+            'generated_date' => now()->format('F j, Y, g:i a'),
+        ];
+        if (!empty($singleRecordConfig['footer_info']) && is_array($singleRecordConfig['footer_info'])) {
+            $footerInfo = array_merge($footerInfo, $singleRecordConfig['footer_info']);
+        }
+
         $pdf = Pdf::loadView($singleRecordConfig['view'], [
             'data' => $modelInstance, 
             'title' => $singleRecordConfig['document_title'] ?? 'Record Details', 
             'columns' => $singleRecordConfig['columns'] ?? [], // Pass columns instead of fields
             'hide_footer' => $singleRecordConfig['hide_footer'] ?? false,
-            'headerInfo' => [
-                'logo' => public_path('images/geraye_logo.jpeg'),
-                'clinic_name' => 'Geraye Home Care Services',
-                'document_title' => $singleRecordConfig['document_title'] ?? 'Record Details',
-            ],
-            'footerInfo' => [
-                'generated_date' => now()->format('F j, Y, g:i a'),
-            ],
-        ])->setPaper('a4', 'portrait');
+            'headerInfo' => $headerInfo,
+            'footerInfo' => $footerInfo,
+        ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
             return $pdf->stream($singleRecordConfig['filename_prefix'] . '_' . $modelInstance->id . '.pdf');

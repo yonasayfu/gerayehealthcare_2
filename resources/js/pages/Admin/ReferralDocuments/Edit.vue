@@ -17,27 +17,12 @@
       </div>
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
-        <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
-
-          <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link
-              :href="route('admin.referral-documents.index')"
-              class="btn-glass btn-glass-sm"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
-              {{ form.processing ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
-        </form>
+        <ReferralDocumentForm
+          :referralDocument="props.referralDocument"
+          :referrals="props.referrals"
+          :staff="props.staff"
+          :editMode="true"
+        />
       </div>
     </div>
   </AppLayout>

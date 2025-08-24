@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\PatientCreatedFromRecommendation;
+use App\Models\Patient;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 

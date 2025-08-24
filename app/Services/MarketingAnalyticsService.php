@@ -15,6 +15,8 @@ use App\Models\MarketingTask;
 use App\Models\Staff;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use App\Models\MarketingRoiView;
+use Illuminate\Support\Facades\Cache;
 
 class MarketingAnalyticsService
 {
@@ -33,22 +35,9 @@ class MarketingAnalyticsService
         $filteredMetricQuery = $this->getFilteredCampaignMetricsQuery($request);
         $filteredCampaignIds = $this->getFilteredCampaignIds($request);
 
-        // Marketing spend from budgets (filtered by campaign/platform and date overlap if provided)
-        $budgetQuery = MarketingBudget::query();
-        if (!empty($filteredCampaignIds)) {
-            $budgetQuery->whereIn('campaign_id', $filteredCampaignIds);
-        }
-        if ($request->filled('platform_id')) {
-            $budgetQuery->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $start = $request->input('start_date');
-            $end = $request->input('end_date');
-            // budgets overlapping the selected window
-            $budgetQuery->whereDate('period_start', '<=', $end)
-                        ->whereDate('period_end', '>=', $start);
-        }
-        $totalMarketingSpend = (float) $budgetQuery->sum('spent_amount');
+        // Use unified ROI series (MarketingRoiView) for spend/revenue/roi to ensure single source of truth with reports
+        $roiSeries = $this->getRoiSeries($request);
+        $totalMarketingSpend = (float) ($roiSeries['totals']['spend'] ?? 0);
 
         // Patients acquired through marketing (filter by campaign and acquisition_date window)
         $patientsQuery = Patient::whereNotNull('marketing_campaign_id');
@@ -64,9 +53,9 @@ class MarketingAnalyticsService
         $patientsAcquired = (int) $patientsQuery->count();
         $cpa = $patientsAcquired > 0 ? round($totalMarketingSpend / $patientsAcquired, 2) : 0;
 
-        // Revenue generated (filtered)
-        $revenueGenerated = (float) $filteredMetricQuery->clone()->sum('revenue_generated');
-        $roi = $totalMarketingSpend > 0 ? round((($revenueGenerated - $totalMarketingSpend) / $totalMarketingSpend) * 100, 2) : 0;
+        // Revenue generated and ROI from unified series
+        $revenueGenerated = (float) ($roiSeries['totals']['revenue'] ?? 0);
+        $roi = (float) ($roiSeries['totals']['roi_percent'] ?? 0);
 
         // Time-series campaign performance
         $campaignPerformanceData = $this->getFilteredCampaignMetricsQuery($request)
@@ -110,6 +99,52 @@ class MarketingAnalyticsService
             'campaignPerformanceData' => $campaignPerformanceData,
             'trafficSourceData' => $trafficSourceData,
             'conversionFunnelData' => $conversionFunnelData,
+        ];
+    }
+
+    /**
+     * Unified ROI series from MarketingRoiView with simple caching.
+     * Returns ['series' => [...], 'totals' => ['revenue' => float, 'spend' => float, 'roi_percent' => float]]
+     */
+    public function getRoiSeries(Request $request): array
+    {
+        $cacheKey = 'svc:roi:' . md5(json_encode([
+            'from' => $request->input('date_from'),
+            'to' => $request->input('date_to'),
+            'granularity' => $request->input('granularity'),
+            // Support both platform and platform_id for flexibility
+            'platform' => $request->input('platform') ?? $request->input('platform_id'),
+        ]));
+
+        $rows = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
+            $q = MarketingRoiView::query();
+            if ($request->filled('date_from')) {
+                $q->whereDate('bucket_date', '>=', $request->input('date_from'));
+            }
+            if ($request->filled('date_to')) {
+                $q->whereDate('bucket_date', '<=', $request->input('date_to'));
+            }
+            if ($request->filled('granularity')) {
+                $q->where('granularity', $request->input('granularity'));
+            }
+            // Allow filtering by platform string or id if present in the view
+            if ($request->filled('platform')) {
+                $q->where('platform', $request->input('platform'));
+            }
+            return $q->orderBy('bucket_date')->get();
+        });
+
+        $revenue = (float) $rows->sum('revenue_generated');
+        $spend = (float) $rows->sum('spend');
+        $roiPercent = $spend > 0 ? round((($revenue - $spend) / $spend) * 100, 2) : 0.0;
+
+        return [
+            'series' => $rows->toArray(),
+            'totals' => [
+                'revenue' => $revenue,
+                'spend' => $spend,
+                'roi_percent' => $roiPercent,
+            ],
         ];
     }
 

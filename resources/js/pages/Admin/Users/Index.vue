@@ -59,14 +59,17 @@ async function destroy(id: number) {
   <Head title="User Management" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">User Management</h1>
-          <p class="text-sm text-muted-foreground">Assign roles and manage all system users.</p>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">User Management</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Assign roles and manage all system users.</p>
+          </div>
+          <Link :href="route('admin.users.create')" class="btn-glass btn-glass-sm">
+            + Add New Staff User
+          </Link>
         </div>
-        <Link :href="route('admin.users.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-          + Add New Staff User
-        </Link>
       </div>
 
        <!-- Filters -->

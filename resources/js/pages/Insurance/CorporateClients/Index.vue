@@ -101,18 +101,19 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Corporate Clients</h1>
-          <p class="text-sm text-muted-foreground">Manage all corporate clients here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.corporate-clients.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Client
-          </Link>
-          <button @click="printCurrentView" class="btn btn-dark">
-            <Printer class="h-4 w-4" /> Print Current
-          </button>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Corporate Clients</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Manage all corporate clients here.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <Link :href="route('admin.corporate-clients.create')" class="btn-glass btn-glass-sm">+ Add Client</Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="h-4 w-4" /> Print Current
+            </button>
+          </div>
         </div>
       </div>
 

@@ -13,13 +13,18 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-  // Get the first role name, or default to ''
   role: (props.user.roles && props.user.roles[0]?.name) || '',
 });
 
 const submit = () => {
   form.put(route('admin.users.update', props.user.id));
 };
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'User Management', href: route('admin.users.index') },
+  { title: 'Edit User', href: route('admin.users.edit', props.user.id) },
+];
 </script>
 
 <template>
@@ -41,23 +46,29 @@ const submit = () => {
       </div>
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
-        <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+        <form @submit.prevent="submit" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">User Name</label>
+              <input type="text" :value="props.user.name" disabled class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg block w-full p-2.5 bg-gray-50 dark:bg-gray-900/50" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+              <input type="email" :value="props.user.email" disabled class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg block w-full p-2.5 bg-gray-50 dark:bg-gray-900/50" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+              <select v-model="form.role" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option value="">Select a role</option>
+                <option v-for="r in props.roles" :key="r" :value="r">{{ r }}</option>
+              </select>
+              <div v-if="form.errors.role" class="text-red-500 text-sm mt-1">{{ form.errors.role }}</div>
+            </div>
+          </div>
 
-          <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
           <div class="flex justify-end gap-2 pt-2">
-            <Link
-              :href="route('admin.users.index')"
-              class="btn-glass btn-glass-sm"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
+            <Link :href="route('admin.users.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
               {{ form.processing ? 'Saving...' : 'Save Changes' }}
             </button>
           </div>

@@ -15,6 +15,12 @@ const form = useForm({
 const submit = () => {
   form.post(route('admin.roles.store'));
 };
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Role Management', href: route('admin.roles.index') },
+  { title: 'Create Role', href: route('admin.roles.create') },
+];
 </script>
 <template>
   <Head title="Create New Role" />
@@ -36,7 +42,7 @@ const submit = () => {
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :all-permissions="permissions" />
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.roles.index')" class="btn-glass btn-glass-sm">Cancel</Link>

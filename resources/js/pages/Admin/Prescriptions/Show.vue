@@ -1,0 +1,137 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Head, Link } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Printer, ArrowLeft, Edit3 } from 'lucide-vue-next'
+import { format } from 'date-fns'
+
+const props = defineProps<{ prescription: any }>()
+
+const breadcrumbs = [
+  { title: 'Dashboard', href: route('dashboard') },
+  { title: 'Prescriptions', href: route('admin.prescriptions.index') },
+  { title: `#${props.prescription?.id ?? ''}`, href: null },
+]
+
+const formattedDate = computed(() => {
+  const d = props.prescription?.prescribed_date
+  return d ? format(new Date(d), 'PPP') : '-'
+})
+
+function printSingle() {
+  requestAnimationFrame(() => window.print())
+}
+</script>
+
+<template>
+  <Head title="Prescription Details" />
+
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="space-y-6 p-6 print:p-0">
+      <div class="liquidGlass-wrapper">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content p-4">
+          <div class="mb-4">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Prescription #{{ prescription.id }}</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Patient: {{ prescription.patient?.full_name || prescription.patient?.patient_code || '-' }}</p>
+          </div>
+
+          <div class="hidden print:block text-center mb-4 print:mb-2">
+            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+            <p class="text-gray-600 dark:text-gray-400 print-document-title">Prescription</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <div class="text-sm text-gray-500">Prescribed Date</div>
+              <div class="font-medium">{{ formattedDate }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500">Status</div>
+              <div class="font-medium capitalize">{{ prescription.status }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500">Created By</div>
+              <div class="font-medium">{{ prescription.created_by?.full_name || '-' }}</div>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="text-sm text-gray-500">Instructions</div>
+            <div class="whitespace-pre-wrap">{{ prescription.instructions || '-' }}</div>
+          </div>
+
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Items</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm print-table">
+                <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
+                  <tr>
+                    <th class="px-4 py-2">Medication</th>
+                    <th class="px-4 py-2">Dosage</th>
+                    <th class="px-4 py-2">Frequency</th>
+                    <th class="px-4 py-2">Duration</th>
+                    <th class="px-4 py-2">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="it in prescription.items || []" :key="it.id" class="border-b dark:border-gray-700">
+                    <td class="px-4 py-2">{{ it.medication_name }}</td>
+                    <td class="px-4 py-2">{{ it.dosage }}</td>
+                    <td class="px-4 py-2">{{ it.frequency }}</td>
+                    <td class="px-4 py-2">{{ it.duration }}</td>
+                    <td class="px-4 py-2">{{ it.notes }}</td>
+                  </tr>
+                  <tr v-if="!prescription.items || prescription.items.length === 0">
+                    <td class="px-4 py-3 text-center text-gray-400" colspan="5">No items.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Bottom actions (hidden in print) for consistency -->
+          <div class="mt-6 flex items-center justify-between gap-2 print:hidden">
+            <Link :href="route('admin.prescriptions.index')" class="btn-glass btn-glass-sm">
+              <ArrowLeft class="icon" />
+              <span class="hidden sm:inline">Back</span>
+            </Link>
+            <div class="flex items-center gap-2">
+              <Link :href="route('admin.prescriptions.edit', prescription.id)" class="btn-glass btn-glass-sm">
+                <Edit3 class="icon" />
+                <span class="hidden sm:inline">Edit</span>
+              </Link>
+              <button @click="printSingle" class="btn-glass btn-glass-sm">
+                <Printer class="icon" />
+                <span class="hidden sm:inline">Print</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+            <p>Generated on: {{ new Date().toLocaleString() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </AppLayout>
+</template>
+
+<style>
+/* Professional A5 print layout for single prescription */
+@page {
+  size: A5 portrait;
+  margin: 12mm;
+}
+@media print {
+  html, body { background: #fff !important; }
+  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+  .print-table { font-size: 11px; border-collapse: collapse; }
+  .print-table th, .print-table td { border: 1px solid #d1d5db; padding: 6px 8px; }
+  /* Remove any hr that may appear as shadow in print */
+  hr { display: none !important; }
+}
+</style>

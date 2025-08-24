@@ -3,7 +3,7 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
-import { DollarSign } from 'lucide-vue-next';
+import { DollarSign, Printer } from 'lucide-vue-next';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 import { computed } from 'vue';
@@ -71,7 +71,7 @@ watch(perPage, (value) => {
   router.get(route('admin.staff-payouts.index'), { per_page: value, search: searchQuery.value }, { preserveState: true, replace: true });
 });
 
-const processPayout = (staffId: number, staffName: string, amount: string) => {
+const processPayout = (staffId: number, staffName: string, amount: unknown) => {
   if (!confirm(`Process payout of ${formatCurrency(amount)} for ${staffName}?`)) return
   alertMessage.value = null
   alertType.value = null
@@ -95,9 +95,13 @@ const processPayout = (staffId: number, staffName: string, amount: string) => {
     })
 }
 
-const formatCurrency = (value: string | null) => {
-  const amount = parseFloat(value || '0');
+const formatCurrency = (value: unknown) => {
+  const amount = parseFloat(String(value ?? '0'));
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+};
+
+const printCurrentView = () => {
+  window.print();
 };
 
 // Updated Chart Data to use performanceData
@@ -148,9 +152,6 @@ const chartOptions = {
           </div>
 
           <div class="flex items-center gap-2 print:hidden">
-            <Link :href="route('admin.staff-payouts.create')" class="btn-glass">
-              <span>Add Staff Payout</span>
-            </Link>
             <button @click="printCurrentView" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>

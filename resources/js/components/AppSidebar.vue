@@ -37,15 +37,15 @@ interface SidebarNavGroup {
   superAdminOnly?: boolean;
 }
 
-
+// Removed AppPageProps missing type import to satisfy TS
 
 const props = defineProps<{
   unreadCount?: number;
   inventoryAlertCount?: number; // Add this line
 }>()
 
-const page = usePage<any>();
-const user = computed(() => page.props.auth?.user);
+const page = usePage();
+const user = computed(() => (page.props as any)?.auth?.user ?? null);
 const userRoles = computed(() => user.value?.roles || []);
 
 const can = (permission: string): boolean => {
@@ -120,6 +120,14 @@ const allAdminNavItems: SidebarNavGroup[] = [
     ],
   },
   {
+    group: 'Medical Records',
+    icon: FileText,
+    items: [
+      { title: 'Medical Documents', routeName: 'admin.medical-documents.index', icon: Folder, permission: 'view medical documents' },
+      { title: 'Prescriptions', routeName: 'admin.prescriptions.index', icon: FileText, permission: 'view prescriptions' },
+    ],
+  },
+  {
     group: 'Administrative Tools',
     icon: UserCog,
     items: [
@@ -160,6 +168,15 @@ const allAdminNavItems: SidebarNavGroup[] = [
     ],
   },
   {
+    group: 'Reports',
+    icon: BarChart,
+    items: [
+      { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList },
+      { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign },
+      { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart },
+    ],
+  },
+  {
     group: 'Events Management',
     icon: CalendarDays,
     items: [
@@ -179,7 +196,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Insurance Policies', routeName: 'admin.insurance-policies.index', icon: FileText, permission: 'view insurance policies' },
       { title: 'Employee Insurance Records', routeName: 'admin.employee-insurance-records.index', icon: ClipboardList, permission: 'view employee insurance records' },
       { title: 'Insurance Claims', routeName: 'admin.insurance-claims.index', icon: Receipt, permission: 'view insurance claims' },
-      { title: 'Exchange Rates', routeName: 'admin.exchange-rates.index', icon: DollarSign, permission: 'view exchange rates' },
       { title: 'Ethiopian Calendar Days', routeName: 'admin.ethiopian-calendar-days.index', icon: CalendarDays, permission: 'view ethiopian calendar days' },
     ],
   },
