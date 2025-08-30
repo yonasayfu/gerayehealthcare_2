@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateVisitServiceDTO;
 use App\DTOs\UpdateVisitServiceDTO;
 use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait;
 use App\Services\VisitServiceService;
 use App\Models\VisitService;
 use App\Models\Patient;
@@ -15,6 +16,7 @@ use Inertia\Inertia;
 
 class VisitServiceController extends BaseController
 {
+    use ExportableTrait;
     public function __construct(VisitServiceService $visitServiceService)
     {
         parent::__construct(
@@ -53,5 +55,25 @@ class VisitServiceController extends BaseController
             'patients' => $patients,
             'staff' => $staff
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, VisitService::class, \App\Http\Config\ExportConfig::getVisitServiceConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, VisitService::class, \App\Http\Config\ExportConfig::getVisitServiceConfig());
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return $this->handlePrintCurrent($request, VisitService::class, \App\Http\Config\ExportConfig::getVisitServiceConfig());
+    }
+
+    public function printSingle(Request $request, VisitService $visit_service)
+    {
+        return $this->handlePrintSingle($request, $visit_service, \App\Http\Config\ExportConfig::getVisitServiceConfig());
     }
 }

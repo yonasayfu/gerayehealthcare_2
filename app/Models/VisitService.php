@@ -36,6 +36,11 @@ class VisitService extends Model
         'is_paid_to_staff',
     ];
 
+    // Ensure safe defaults for DB NOT NULL columns
+    protected $attributes = [
+        'is_paid_to_staff' => false,
+    ];
+
     protected $casts = [
         'scheduled_at' => 'datetime',
         'check_in_time' => 'datetime',

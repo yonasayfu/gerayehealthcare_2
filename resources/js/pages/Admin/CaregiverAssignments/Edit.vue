@@ -62,23 +62,15 @@ function submit() {
         <form @submit.prevent="submit" class="space-y-4">
           <Form :form="form" :patients="props.patients" :staff="props.staff" />
           <!-- Footer actions -->
-          <div class="flex justify-between items-center gap-2 pt-2">
+          <div class="flex justify-end items-center gap-2 pt-2">
+            <Link :href="route('admin.assignments.index')" class="btn-glass btn-glass-sm">Cancel</Link>
             <button
-              class="btn-glass btn-glass-sm text-red-600"
-              @click="() => { if (confirm('Delete this assignment?')) { router.delete(route('admin.assignments.destroy', props.assignment.id)) } }"
+              type="submit"
+              :disabled="form.processing"
+              class="btn-glass btn-glass-sm"
             >
-              Delete
+              {{ form.processing ? 'Saving...' : 'Save Changes' }}
             </button>
-            <div class="flex gap-2">
-              <Link :href="route('admin.assignments.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-              <button
-                type="submit"
-                :disabled="form.processing"
-                class="btn-glass btn-glass-sm"
-              >
-                {{ form.processing ? 'Saving...' : 'Save Changes' }}
-              </button>
-            </div>
           </div>
         </form>
       </div>

@@ -2494,6 +2494,83 @@ class ExportConfig
     }
 
     /**
+     * Get export configuration for VisitService model
+     */
+    public static function getVisitServiceConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'patient.full_name', 'label' => 'Patient'],
+            ['key' => 'staff_full_name', 'label' => 'Staff'],
+            ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'cost', 'label' => 'Cost'],
+        ];
+
+        return [
+            'csv' => [
+                'headers' => ['#', 'Patient', 'Staff', 'Scheduled At', 'Status', 'Cost'],
+                'fields' => [
+                    'index',
+                    'patient.full_name',
+                    'staff_full_name',
+                    'scheduled_at',
+                    'status',
+                    'cost',
+                ],
+                'with_relations' => ['patient', 'staff'],
+                'filename_prefix' => 'visit_services',
+            ],
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Services',
+                'document_title' => 'Visit Services',
+                'filename_prefix' => 'visit_services',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+                'with_relations' => ['patient', 'staff'],
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Services (Current View)',
+                'document_title' => 'Visit Services (Current View)',
+                'filename_prefix' => 'visit_services_current',
+                'orientation' => 'landscape',
+                'columns' => array_merge([
+                    ['key' => 'index', 'label' => '#'],
+                ], $pdfColumns),
+                'with_relations' => ['patient', 'staff'],
+            ],
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Visit Services',
+                'document_title' => 'All Visit Services',
+                'filename_prefix' => 'visit_services_all',
+                'orientation' => 'landscape',
+                'columns' => array_merge([
+                    ['key' => 'index', 'label' => '#'],
+                ], $pdfColumns),
+                'with_relations' => ['patient', 'staff'],
+            ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'title' => 'Visit Service Details',
+                'document_title' => 'Visit Service Details',
+                'filename_prefix' => 'visit_service',
+                'columns' => [
+                    ['key' => 'patient.full_name', 'label' => 'Patient'],
+                    ['key' => 'staff_full_name', 'label' => 'Staff'],
+                    ['key' => 'scheduled_at', 'label' => 'Scheduled At'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'visit_notes', 'label' => 'Notes'],
+                    ['key' => 'service_description', 'label' => 'Description'],
+                    ['key' => 'cost', 'label' => 'Cost'],
+                ],
+                'with_relations' => ['patient', 'staff'],
+            ],
+        ];
+    }
+
+    /**
      * Get export configuration for Invoice model
      */
     public static function getInvoiceConfig(): array

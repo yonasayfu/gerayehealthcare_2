@@ -97,6 +97,11 @@ class VisitServiceService extends BaseService
             unset($data['vitals_file']);
         }
 
+        // Ensure boolean defaults to avoid DB null constraint issues
+        if (!array_key_exists('is_paid_to_staff', $data)) {
+            $data['is_paid_to_staff'] = false;
+        }
+
         $visitService = parent::create($data);
 
         // Trigger event for staff assignment
@@ -156,6 +161,10 @@ class VisitServiceService extends BaseService
             $data['vitals_file'] = $data['vitals_file']->store('visits/vitals', 'public');
         } else {
             unset($data['vitals_file']);
+        }
+
+        if (!array_key_exists('is_paid_to_staff', $data) && $visitService->is_paid_to_staff === null) {
+            $data['is_paid_to_staff'] = false;
         }
 
         $updatedVisitService = parent::update($id, $data);

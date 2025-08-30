@@ -86,4 +86,27 @@ class CaregiverAssignmentController extends BaseController
 
         return redirect()->route('admin.assignments.index')->with('banner', 'Assignment deleted successfully.')->with('bannerStyle', 'danger');
     }
+
+    // Export and print endpoints delegating to service implementations
+    public function export(Request $request)
+    {
+        return app(\App\Services\CaregiverAssignmentService::class)->export($request);
+    }
+
+    public function printAll(Request $request)
+    {
+        return app(\App\Services\CaregiverAssignmentService::class)->printAll($request);
+    }
+
+    public function printCurrent(Request $request)
+    {
+        return app(\App\Services\CaregiverAssignmentService::class)->printCurrent($request);
+    }
+
+    public function printSingle(Request $request, $assignment)
+    {
+        $svc = app(\App\Services\CaregiverAssignmentService::class);
+        $model = $svc->getById($assignment, ['patient','staff']);
+        return $this->handlePrintSingle($request, $model, \App\Http\Config\ExportConfig::getCaregiverAssignmentConfig());
+    }
 }
