@@ -27,4 +27,39 @@ class PatientController extends Controller
     {
         return new PatientResource($patient);
     }
+
+    // Return the patient record linked to the authenticated user (if exists)
+    public function me(Request $request)
+    {
+        $user = $request->user();
+        $patient = Patient::where('email', $user->email)->first();
+
+        if (!$patient) {
+            return response()->json(['message' => 'Patient record not found for this user'], 404);
+        }
+
+        return new PatientResource($patient);
+    }
+
+    // Update limited fields on the authenticated user's patient profile
+    public function updateMe(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => ['sometimes', 'string', 'max:255'],
+            'phone_number' => ['sometimes', 'string', 'max:255'],
+            'address' => ['sometimes', 'string', 'max:1000'],
+        ]);
+
+        $user = $request->user();
+        $patient = Patient::where('email', $user->email)->first();
+
+        if (!$patient) {
+            return response()->json(['message' => 'Patient record not found for this user'], 404);
+        }
+
+        $this->patientService->update($patient->id, $validated);
+        $patient->refresh();
+
+        return new PatientResource($patient);
+    }
 }
