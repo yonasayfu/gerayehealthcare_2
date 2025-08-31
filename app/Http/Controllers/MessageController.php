@@ -22,7 +22,34 @@ class MessageController extends Controller
         $messages = [];
         $selectedConversationUser = null;
 
-        $conversationsQuery = User::where('id', '!=', $user->id);
+        // Limit conversation list to authorized counterparts
+        $conversationsQuery = User::where('id', '!=', $user->id)
+            ->where(function ($q) use ($user) {
+                // Staff can chat with other staff and assigned patients
+                if ($user->staff) {
+                    $q->whereHas('staff')
+                      ->orWhereIn('id', function ($sub) use ($user) {
+                          $sub->select('user_id')->from('patients')
+                              ->whereIn('id', function ($sub2) use ($user) {
+                                  $sub2->select('patient_id')->from('caregiver_assignments')
+                                      ->where('staff_id', optional($user->staff)->id)
+                                      ->where('status', 'Assigned');
+                              });
+                      });
+                } else {
+                    // Patient can chat only with assigned staff
+                    $q->whereIn('id', function ($sub) use ($user) {
+                        $sub->select('user_id')->from('staff')
+                            ->whereIn('id', function ($sub2) use ($user) {
+                                $sub2->select('staff_id')->from('caregiver_assignments')
+                                    ->whereIn('patient_id', function ($sub3) use ($user) {
+                                        $sub3->select('id')->from('patients')->where('user_id', $user->id);
+                                    })
+                                    ->where('status', 'Assigned');
+                            });
+                    });
+                }
+            });
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -88,7 +115,11 @@ class MessageController extends Controller
             return response()->json(['error' => 'Message content or an attachment is required.'], 422);
         }
 
-        Message::create([ // No need to assign to $message variable if not used after
+        // Authorization: ensure sender may message receiver
+        $recipient = User::findOrFail($validated['receiver_id']);
+        $this->authorize('communicate', $recipient);
+
+        Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $validated['receiver_id'],
             'message' => $messageContent,
@@ -98,7 +129,6 @@ class MessageController extends Controller
         ]);
 
         // Dispatch the notification to the recipient (assuming NewMessageReceived notification is correctly set up)
-        $recipient = User::find($validated['receiver_id']);
         if ($recipient) {
             // Note: If you need to pass the newly created message to the notification,
             // you'd retrieve it before this point. For now, assuming basic notification.

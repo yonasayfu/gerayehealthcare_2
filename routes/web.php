@@ -156,6 +156,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('notifications.markAsRead');
 });
 
+// API Docs (Swagger UI)
+Route::get('/api-docs', function () {
+    return view('swagger');
+})->name('api.docs');
+
+Route::get('/api-docs/spec', function () {
+    $path = base_path('docs/openapi-v1.yaml');
+    abort_unless(file_exists($path), 404);
+    return response()->file($path, [
+        'Content-Type' => 'application/yaml',
+        'Cache-Control' => 'no-cache',
+    ]);
+})->name('api.docs.spec');
+
 // Admin & Super Admin
 Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
     ->prefix('dashboard')

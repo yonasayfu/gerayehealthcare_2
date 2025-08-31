@@ -36,20 +36,28 @@ class MessageController extends Controller
             ->groupBy('sender_id')
             ->pluck('unread', 'user_id');
 
-        $data = $counterparts->map(function ($u) use ($unreadCounts) {
+        // Last message per counterpart for ordering
+        $lastMessages = Message::selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as uid, MAX(created_at) as last_at', [$userId])
+            ->where(function ($q) use ($userId) { $q->where('sender_id', $userId)->orWhere('receiver_id', $userId); })
+            ->groupBy('uid')
+            ->pluck('last_at', 'uid');
+
+        $data = $counterparts->map(function ($u) use ($unreadCounts, $lastMessages) {
             return [
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
                 'unread' => (int)($unreadCounts[$u->id] ?? 0),
+                'last_at' => $lastMessages[$u->id] ?? null,
             ];
-        });
+        })->sortByDesc('last_at')->values();
 
         return response()->json(['data' => $data]);
     }
 
     public function thread(Request $request, User $user)
     {
+        $this->authorize('communicate', $user);
         $authId = $request->user()->id;
 
         // Mark messages from other user to me as read
@@ -69,6 +77,7 @@ class MessageController extends Controller
 
     public function send(SendMessageRequest $request, User $user)
     {
+        $this->authorize('communicate', $user);
         $validated = $request->validated();
         if (empty($validated['message']) && !$request->hasFile('attachment')) {
             return response()->json(['message' => 'Message text or attachment required'], 422);
