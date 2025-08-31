@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, computed, onMounted, onUnmounted } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
-import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smile, File, Image } from 'lucide-vue-next';
+import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smile, File, Image, Check, CheckCheck, Clock } from 'lucide-vue-next';
 import { format } from 'date-fns';
 import axios from 'axios';
 import type { User, Message, Conversation, AppPageProps } from '@/types';
@@ -25,6 +25,8 @@ const selectedConversation = ref<Conversation | null>(null);
 const messages = ref<Message[]>([]);
 const loading = ref<boolean>(false);
 const showConversationList = ref(true);
+const isCounterpartTyping = ref(false)
+let typingPollHandle: number | null = null
 
 const form = useForm({
   receiver_id: null as number | null,
@@ -186,6 +188,7 @@ watch(() => props.isOpen, (newVal: boolean) => {
   if (newVal) {
     if (currentWindowWidth.value < 768) showConversationList.value = true;
     fetchMessages(props.initialConversationId || null);
+    startTypingPoll();
   }
 });
 
@@ -216,6 +219,7 @@ watch(() => selectedConversation.value, (newVal: Conversation | null) => {
     form.receiver_id = newId;
     fetchMessages(newId);
     if (currentWindowWidth.value < 768) showConversationList.value = false;
+    startTypingPoll();
   }
   previousSelectedConversationId.value = newId;
 }, { immediate: true });
@@ -273,6 +277,27 @@ const submit = async () => {
 const selectConversation = (convoId: number) => {
   selectedConversation.value = conversations.value.find(c => c.id === convoId) || null;
 };
+
+// --- Typing indicator ---
+const sendTyping = () => {
+  if (!form.receiver_id) return;
+  // Fire-and-forget typing ping
+  axios.post(route('messages.typing'), { receiver_id: form.receiver_id }).catch(() => {})
+}
+
+const startTypingPoll = () => {
+  if (!selectedConversation.value) return;
+  if (typingPollHandle) window.clearInterval(typingPollHandle);
+  const poll = async () => {
+    if (!selectedConversation.value) return;
+    try {
+      const res = await axios.get(route('messages.typingStatus', selectedConversation.value.id))
+      isCounterpartTyping.value = !!(res.data?.typing)
+    } catch (_) { /* ignore */ }
+  }
+  poll();
+  typingPollHandle = window.setInterval(poll, 2000)
+}
 </script>
 
 <template>
@@ -390,6 +415,10 @@ const selectConversation = (convoId: number) => {
             
             <!-- Messages Area -->
             <div ref="chatContainer" class="flex-grow p-6 overflow-y-auto space-y-4 custom-scrollbar min-h-0">
+              <div v-if="isCounterpartTyping" class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                <span class="inline-flex w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span>{{ selectedConversation.name }} is typing...</span>
+              </div>
               <div v-if="messages.length === 0 && loading" class="text-center text-muted-foreground py-10">Loading messages...</div>
               <div v-else-if="messages.length === 0 && !loading" class="text-center text-muted-foreground py-10">
                 <p>No messages yet with {{ selectedConversation.name }}.</p>
@@ -430,12 +459,19 @@ const selectConversation = (convoId: number) => {
                           <span>{{ (message.attachment_filename || (message.attachment && message.attachment.filename)) || 'Download File' }}</span>
                       </a>
                   </div>
-                  <p 
-                    class="text-xs mt-1 text-right"
-                    :class="message.sender_id === authUser.id ? 'text-blue-100' : 'text-gray-500'"
-                  >
-                    {{ format(new Date(message.created_at), 'p') }}
-                  </p>
+                  <div class="flex items-center justify-end gap-1 mt-1">
+                    <span 
+                      class="text-[11px]"
+                      :class="message.sender_id === authUser.id ? 'text-blue-100' : 'text-gray-500'"
+                    >
+                      {{ format(new Date(message.created_at), 'p') }}
+                    </span>
+                    <template v-if="message.sender_id === authUser.id">
+                      <Clock v-if="message.isOptimistic" class="w-3.5 h-3.5 text-blue-100" />
+                      <CheckCheck v-else-if="message.read_at" class="w-3.5 h-3.5 text-blue-100" title="Read" />
+                      <Check v-else class="w-3.5 h-3.5 text-blue-100" title="Sent" />
+                    </template>
+                  </div>
                 </div>
               </div>
             </div>
@@ -491,6 +527,7 @@ const selectConversation = (convoId: number) => {
                   placeholder="Type your message here..."
                   class="flex-grow form-input rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
                   autocomplete="off"
+                  @input="sendTyping"
                 />
                 
                 <button

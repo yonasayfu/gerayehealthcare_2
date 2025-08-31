@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreMessageRequest;
+use Illuminate\Support\Facades\Cache;
 
 class MessageController extends Controller
 {
@@ -209,5 +210,32 @@ class MessageController extends Controller
         $message->update(['read_at' => null]);
 
         return response()->noContent();
+    }
+
+    /**
+     * Indicate the current user is typing to a receiver (short-lived flag).
+     */
+    public function typing(Request $request)
+    {
+        $validated = $request->validate([
+            'receiver_id' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $receiver = User::findOrFail($validated['receiver_id']);
+        $this->authorize('communicate', $receiver);
+
+        $key = sprintf('typing:%d:%d', Auth::id(), $receiver->id);
+        Cache::put($key, true, now()->addSeconds(5));
+        return response()->noContent();
+    }
+
+    /**
+     * Check if the given user is typing to the authenticated user.
+     */
+    public function typingStatus(Request $request, User $user)
+    {
+        $this->authorize('communicate', $user);
+        $key = sprintf('typing:%d:%d', $user->id, Auth::id());
+        return response()->json(['typing' => Cache::has($key)]);
     }
 }

@@ -151,6 +151,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
+    Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.markAsRead');
