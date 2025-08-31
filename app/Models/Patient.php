@@ -20,6 +20,7 @@ class Patient extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'full_name',
         'fayda_id',
         'date_of_birth',
@@ -108,6 +109,11 @@ class Patient extends Model
      * @var array
      */
     protected $appends = ['age'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the staff member who registered the patient.

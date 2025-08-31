@@ -17,7 +17,7 @@ class BillingController extends Controller
 {
     protected function patientForUser($user): ?Patient
     {
-        return Patient::where('email', $user->email)->first();
+        return Patient::where('user_id', $user->id)->first();
     }
 
     public function myInvoices(Request $request)
@@ -66,4 +66,3 @@ class BillingController extends Controller
         return new InsuranceClaimResource($claim->load(['invoice', 'insuranceCompany', 'policy']));
     }
 }
-

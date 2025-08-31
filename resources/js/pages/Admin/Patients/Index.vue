@@ -95,8 +95,8 @@ function exportData(type: 'csv', preview: boolean = false) {
 }
 
 function printCurrentView() {
-  // Trigger browser print of the current index view
-  setTimeout(() => window.print(), 50);
+  // Use server-side PDF for consistent header/footer
+  window.open(route('admin.patients.printCurrent', { preview: true }), '_blank')
 }
 
 const printAllPatients = () => {

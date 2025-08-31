@@ -33,7 +33,7 @@ class PatientController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $patient = Patient::where('email', $user->email)->first();
+        $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
             return response()->json(['message' => 'Patient record not found for this user'], 404);
@@ -46,7 +46,7 @@ class PatientController extends Controller
     public function updateMe(UpdateSelfPatientRequest $request)
     {
         $user = $request->user();
-        $patient = Patient::where('email', $user->email)->first();
+        $patient = Patient::where('user_id', $user->id)->first();
 
         if (!$patient) {
             return response()->json(['message' => 'Patient record not found for this user'], 404);

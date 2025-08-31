@@ -60,9 +60,9 @@ class VisitServiceController extends Controller
             ->when($user->staff, function ($q) use ($user) {
                 $q->where('staff_id', $user->staff->id);
             }, function ($q) use ($user) {
-                // If not staff, try to scope by patient email
+                // If not staff, scope by patient user_id
                 $q->whereHas('patient', function ($pq) use ($user) {
-                    $pq->where('email', $user->email);
+                    $pq->where('user_id', $user->id);
                 });
             });
 

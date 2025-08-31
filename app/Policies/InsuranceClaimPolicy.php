@@ -10,8 +10,7 @@ class InsuranceClaimPolicy
 {
     public function view(User $user, InsuranceClaim $claim): bool
     {
-        $patient = Patient::where('email', $user->email)->first();
+        $patient = Patient::where('user_id', $user->id)->first();
         return $patient && $claim->patient_id === $patient->id;
     }
 }
-
