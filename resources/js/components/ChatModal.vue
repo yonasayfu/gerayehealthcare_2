@@ -28,6 +28,16 @@ const showConversationList = ref(true);
 const isCounterpartTyping = ref(false)
 let typingPollHandle: number | null = null
 
+// Minimize handling (local, in addition to parent emit)
+const isMinimized = ref(false)
+const toggleMinimize = () => {
+  isMinimized.value = true
+  emit('minimize')
+}
+const restoreFromMinimize = () => {
+  isMinimized.value = false
+}
+
 const form = useForm({
   receiver_id: null as number | null,
   message: '',
@@ -35,7 +45,9 @@ const form = useForm({
 });
 
 const attachmentInput = ref<HTMLInputElement | null>(null);
-const messageInput = ref<HTMLInputElement | null>(null);
+const messageInput = ref<HTMLTextAreaElement | null>(null);
+const attachmentPreviewUrl = ref<string | null>(null)
+const isSending = ref(false)
 
 // --- Window Width for Responsiveness ---
 const currentWindowWidth = ref(0);
@@ -102,11 +114,19 @@ const triggerAttachmentInput = () => {
 const handleAttachmentChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
   form.attachment = target.files?.[0] || null;
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+  if (form.attachment && form.attachment.type.startsWith('image/')) {
+    attachmentPreviewUrl.value = URL.createObjectURL(form.attachment)
+  } else {
+    attachmentPreviewUrl.value = null
+  }
 };
 
 const removeAttachment = () => {
   form.attachment = null;
   if (attachmentInput.value) attachmentInput.value.value = '';
+  if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+  attachmentPreviewUrl.value = null
 };
 
 // --- Emoji Handling (Fixed) ---
@@ -226,9 +246,10 @@ watch(() => selectedConversation.value, (newVal: Conversation | null) => {
 
 // --- Message Submission (Fixed) ---
 const submit = async () => {
-  if (!form.receiver_id || (!form.message.trim() && !form.attachment)) return;
+  if (!form.receiver_id || (!form.message.trim() && !form.attachment) || isSending.value) return;
   
   try {
+    isSending.value = true
     // Create optimistic message
     const tempMessage: Message = {
       id: Date.now(), // Temporary ID
@@ -263,7 +284,9 @@ const submit = async () => {
     form.message = '';
     form.attachment = null;
     if (attachmentInput.value) attachmentInput.value.value = '';
-    
+    if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
+    attachmentPreviewUrl.value = null
+
     // Refetch to get actual message from server
     fetchMessages(form.receiver_id);
   } catch (error) {
@@ -271,6 +294,9 @@ const submit = async () => {
     // Remove optimistic message on error
     messages.value = messages.value.filter(m => m.id !== tempMessage.id);
     alert('Failed to send message. Please try again.');
+  } finally {
+    isSending.value = false
+    nextTick(() => messageInput.value?.focus())
   }
 };
 
@@ -305,20 +331,21 @@ const startTypingPoll = () => {
        :class="{ 'fixed inset-0 !bottom-0 !right-0 !top-0 !left-0': currentWindowWidth < 768 }" >
     <div
       ref="modalRef"
-      class="relative bg-card text-foreground rounded-xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ease-in-out"
+      class="relative bg-white/70 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/50 text-foreground rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ease-in-out"
       :style="{
         width: currentWindowWidth < 768 ? '95vw' : (modalWidth + 'px'),
         height: currentWindowWidth < 768 ? '90vh' : (modalHeight + 'px'),
         maxWidth: currentWindowWidth < 768 ? '95vw' : '100%',
         maxHeight: currentWindowWidth < 768 ? '90vh' : '100%',
       }"
+      v-show="!isMinimized"
     >
-      <div class="p-3 border-b border-border flex justify-between items-center bg-card">
+      <div class="p-3 border-b border-gray-200/70 dark:border-gray-700/60 flex justify-between items-center bg-transparent">
         <h2 class="text-lg font-semibold flex items-center gap-2">
           <MessageSquareText class="w-5 h-5 text-primary" /> GeraChat 
         </h2>
         <div class="flex items-center gap-2">
-          <button @click="emit('minimize')" class="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition">
+          <button @click="toggleMinimize" class="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition">
             <Minus class="w-5 h-5" />
           </button>
           <button @click="emit('close')" class="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition">
@@ -337,7 +364,7 @@ const startTypingPoll = () => {
         <div v-show="showConversationList || currentWindowWidth >= 768"
              class="w-full md:w-1/3 flex flex-col bg-background border-r md:border-border overflow-hidden"
              :class="{ 'border-b': currentWindowWidth < 768 }">
-          <div class="p-4 border-b border-border relative">
+          <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 relative">
             <input
               type="text"
               v-model="search"
@@ -376,7 +403,7 @@ const startTypingPoll = () => {
 
         <!-- Chat Area -->
         <div v-show="!showConversationList || currentWindowWidth >= 768"
-             class="w-full md:w-2/3 flex flex-col bg-background min-h-0">
+             class="w-full md:w-2/3 flex flex-col bg-transparent min-h-0">
           <template v-if="loading && !selectedConversation">
             <div class="flex-grow flex items-center justify-center">
               <div class="text-center text-muted-foreground">
@@ -401,7 +428,7 @@ const startTypingPoll = () => {
           
           <template v-else>
             <!-- Chat Header -->
-            <div class="p-4 border-b border-border bg-card flex justify-between items-center">
+            <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 bg-transparent flex justify-between items-center">
               <h2 class="text-lg font-semibold">{{ selectedConversation.name }}</h2>
               <p class="text-sm text-muted-foreground hidden md:block">{{ selectedConversation.staff?.position || 'User' }}</p>
               <button 
@@ -477,7 +504,7 @@ const startTypingPoll = () => {
             </div>
             
             <!-- Message Input Area -->
-            <div class="p-4 border-t border-border bg-card relative">
+            <div class="p-4 border-t border-gray-200/70 dark:border-gray-700/60 bg-transparent relative">
               <div v-if="showEmojiPicker" class="absolute bottom-full right-0 mb-2 z-10 shadow-lg rounded-lg overflow-hidden">
                 <EmojiPicker :native="true" @select="onEmojiSelect" />
               </div>
@@ -513,21 +540,26 @@ const startTypingPoll = () => {
                   <Smile class="w-5 h-5" />
                 </button>
 
-                <div v-if="form.attachment" class="flex items-center text-sm bg-muted rounded-full px-3 py-1 flex-shrink-0 max-w-[120px] overflow-hidden whitespace-nowrap text-ellipsis">
-                    <span class="truncate max-w-[80px]">{{ form.attachment.name }}</span>
-                    <button type="button" @click="removeAttachment" class="ml-2 text-muted-foreground hover:text-foreground">
-                        <X class="w-4 h-4" />
-                    </button>
+                <div v-if="form.attachment" class="flex items-center gap-3 flex-shrink-0 max-w-[220px]">
+                  <div v-if="attachmentPreviewUrl" class="w-12 h-12 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <img :src="attachmentPreviewUrl" alt="preview" class="w-full h-full object-cover" />
+                  </div>
+                  <div v-else class="text-xs bg-muted rounded-full px-3 py-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                    {{ form.attachment.name }}
+                  </div>
+                  <button type="button" @click="removeAttachment" class="text-muted-foreground hover:text-foreground">
+                    <X class="w-4 h-4" />
+                  </button>
                 </div>
 
-                <input
+                <textarea
                   ref="messageInput"
                   v-model="form.message"
-                  type="text"
-                  placeholder="Type your message here..."
-                  class="flex-grow form-input rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
-                  autocomplete="off"
-                  @input="sendTyping"
+                  placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+                  class="flex-grow resize-none rounded-xl border border-input px-4 py-2.5 text-sm leading-5 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 min-h-[44px] max-h-[140px] overflow-y-auto"
+                  rows="1"
+                  @input="() => { sendTyping(); if (messageInput.value) { messageInput.value.style.height = 'auto'; messageInput.value.style.height = Math.min(messageInput.value.scrollHeight, 140) + 'px'; } }"
+                  @keydown.enter.prevent="!$event.shiftKey ? submit() : null"
                 />
                 
                 <button
@@ -535,7 +567,11 @@ const startTypingPoll = () => {
                   :disabled="form.processing || (!form.message.trim() && !form.attachment) || !selectedConversation?.id"
                   class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground disabled:opacity-40 disabled:cursor-not-allowed transition duration-150 ease-in-out flex-shrink-0"
                 >
-                  <Send class="w-5 h-5" />
+                  <svg v-if="isSending" class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <Send v-else class="w-5 h-5" />
                 </button>
               </form>
             </div>
@@ -551,7 +587,16 @@ const startTypingPoll = () => {
       >
         <GripVertical class="w-5 h-5 rotate-45" />
       </div>
+      <!-- Minimized pill -->
     </div>
+    <button
+      v-if="isMinimized && currentWindowWidth >= 768"
+      @click="restoreFromMinimize"
+      class="mt-2 ml-auto flex items-center gap-2 rounded-full px-4 py-2 bg-white/80 dark:bg-gray-900/70 backdrop-blur border border-gray-200/60 dark:border-gray-700/60 shadow hover:shadow-md transition"
+    >
+      <MessageSquareText class="w-4 h-4 text-primary" />
+      <span class="text-sm">Open Chat</span>
+    </button>
   </div>
 </template>
 

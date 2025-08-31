@@ -13,45 +13,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call other seeders first to ensure roles and base data exist
+        // Minimal seed for messaging demo: roles, staff, patients (<=7 total)
         $this->call([
             RolesAndPermissionsSeeder::class,
-            StaffSeeder::class, // Staff must be seeded before Patients
+            StaffSeeder::class,
             PatientSeeder::class,
-            PartnerSeeder::class,
-            PartnerAgreementSeeder::class,
-            ReferralSeeder::class,
-            ReferralDocumentSeeder::class,
-            PartnerCommissionSeeder::class,
-            PartnerEngagementSeeder::class,
-            StaffAvailabilitySeeder::class,
-            StaffPayoutSeeder::class,
-            CaregiverAssignmentSeeder::class,
-            ServiceSeeder::class,
-            LeaveRequestSeeder::class,
-            InventorySeeder::class,
-            InventoryRequestSeeder::class,
-            InventoryAlertSeeder::class,
-            StaffAvailabilityDemoSeeder::class,
-            StaffPayoutDemoSeeder::class,
-            MarketingModuleMainSeeder::class,
-            MarketingRelatedSeeder::class,
-            CampaignContentSeeder::class,
-            MarketingTaskSeeder::class,
-            LeadSourceSeeder::class,
-            MrXInsuranceScenarioSeeder::class,
-            PagumeCampaignSeeder::class,
-            LandingPageSeeder::class,
-            IncomingInvoicesDemoSeeder::class,
-            SharedInvoiceSeeder::class,
-            EventBroadcastSeeder::class,
-            MedicalRecordsSeeder::class,
-            QuarterlyReportsDemoSeeder::class,
         ]);
-
-        // Create sample data using factories
-        \App\Models\VisitService::factory(6)->create();
-        \App\Models\Message::factory(6)->create();
 
         // --- THE FIX IS HERE ---
         // Use updateOrCreate to safely create or update the admin users.

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreMessageRequest;
 use Illuminate\Support\Facades\Cache;
+use App\Enums\RoleEnum;
+use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
@@ -23,69 +25,117 @@ class MessageController extends Controller
         $messages = [];
         $selectedConversationUser = null;
 
-        // Limit conversation list to authorized counterparts
-        $conversationsQuery = User::where('id', '!=', $user->id)
-            ->where(function ($q) use ($user) {
-                // Staff can chat with other staff and assigned patients
-                if ($user->staff) {
-                    $q->whereHas('staff')
-                      ->orWhereIn('id', function ($sub) use ($user) {
-                          $sub->select('user_id')->from('patients')
-                              ->whereIn('id', function ($sub2) use ($user) {
-                                  $sub2->select('patient_id')->from('caregiver_assignments')
-                                      ->where('staff_id', optional($user->staff)->id)
-                                      ->where('status', 'Assigned');
-                              });
-                      });
-                } else {
-                    // Patient can chat only with assigned staff
-                    $q->whereIn('id', function ($sub) use ($user) {
-                        $sub->select('user_id')->from('staff')
-                            ->whereIn('id', function ($sub2) use ($user) {
-                                $sub2->select('staff_id')->from('caregiver_assignments')
-                                    ->whereIn('patient_id', function ($sub3) use ($user) {
-                                        $sub3->select('id')->from('patients')->where('user_id', $user->id);
-                                    })
-                                    ->where('status', 'Assigned');
-                            });
-                    });
-                }
-            });
+        try {
+            // Limit conversation list to authorized counterparts, with admin override
+            $base = User::where('id', '!=', $user->id);
+
+            $conversationsQuery = (clone $base)->where(function ($q) use ($user) {
+                    if ($user->hasRole(RoleEnum::SUPER_ADMIN->value) || $user->hasRole(RoleEnum::ADMIN->value)) {
+                        // Admins see all staff and all patients linked to a user
+                        $q->whereHas('staff')
+                          ->orWhereIn('id', function ($sub) {
+                              $sub->select('user_id')->from('patients')->whereNotNull('user_id');
+                          });
+                        return;
+                    }
+
+                    // Staff can chat with other staff and assigned patients
+                    if ($user->staff) {
+                        $q->whereHas('staff')
+                          ->orWhereIn('id', function ($sub) use ($user) {
+                              $sub->select('user_id')->from('patients')
+                                  ->whereIn('id', function ($sub2) use ($user) {
+                                      $sub2->select('patient_id')->from('caregiver_assignments')
+                                          ->where('staff_id', optional($user->staff)->id)
+                                          ->where('status', 'Assigned');
+                                  });
+                          });
+                    } else {
+                        // Patient can chat only with assigned staff
+                        $q->whereIn('id', function ($sub) use ($user) {
+                            $sub->select('user_id')->from('staff')
+                                ->whereIn('id', function ($sub2) use ($user) {
+                                    $sub2->select('staff_id')->from('caregiver_assignments')
+                                        ->whereIn('patient_id', function ($sub3) use ($user) {
+                                            $sub3->select('id')->from('patients')->where('user_id', $user->id);
+                                        })
+                                        ->where('status', 'Assigned');
+                                });
+                        });
+                    }
+                });
+
+            // Also include any counterparts I already have messages with
+            $directIds = Message::query()
+                ->selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as uid', [$user->id])
+                ->where(function ($q) use ($user) {
+                    $q->where('sender_id', $user->id)->orWhere('receiver_id', $user->id);
+                })
+                ->pluck('uid')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($directIds->isNotEmpty()) {
+                $conversationsQuery = (clone $base)->where(function ($q) use ($conversationsQuery, $directIds) {
+                    $q->whereIn('id', $conversationsQuery->pluck('id'))
+                      ->orWhereIn('id', $directIds);
+                });
+            }
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $conversationsQuery->where('name', 'ilike', "%{$search}%")
-                             ->orWhere('email', 'ilike', "%{$search}%");
+            $conversationsQuery->where(function ($sq) use ($search) {
+                $sq->where('name', 'ilike', "%{$search}%")
+                   ->orWhere('email', 'ilike', "%{$search}%");
+            });
         }
 
-        $conversations = $conversationsQuery->orderBy('name', 'asc')->get();
+            $conversations = $conversationsQuery->orderBy('name', 'asc')->limit(100)->get();
 
-        if ($recipient) {
-            $selectedConversationUser = $recipient;
-        } elseif ($conversations->isNotEmpty()) {
-            $selectedConversationUser = $conversations->first();
+            if ($recipient) {
+                $selectedConversationUser = $recipient;
+                // Ensure recipient appears in conversations for UI
+                if (!$conversations->contains('id', $recipient->id)) {
+                    $conversations->push($recipient);
+                }
+            } elseif ($conversations->isNotEmpty()) {
+                $selectedConversationUser = $conversations->first();
+            }
+
+            if ($selectedConversationUser) {
+                Message::where('sender_id', $selectedConversationUser->id)
+                    ->where('receiver_id', $user->id)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => now()]);
+
+                $messages = Message::where(function ($query) use ($user, $selectedConversationUser) {
+                    $query->where('sender_id', $user->id)
+                          ->where('receiver_id', $selectedConversationUser->id);
+                })->orWhere(function ($query) use ($user, $selectedConversationUser) {
+                    $query->where('sender_id', $selectedConversationUser->id)
+                          ->where('receiver_id', $user->id);
+                })->with(['sender', 'receiver'])->orderBy('created_at', 'asc')->get();
+            }
+
+            return response()->json([
+                'conversations' => $conversations,
+                'selectedConversation' => $selectedConversationUser ? $selectedConversationUser->load('staff') : null,
+                'messages' => $messages,
+            ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Chat getData failed', [
+                'message' => $e->getMessage(),
+                'trace' => substr($e->getTraceAsString(), 0, 2000),
+            ]);
+            // Fail-safe empty response instead of 500
+            return response()->json([
+                'conversations' => [],
+                'selectedConversation' => null,
+                'messages' => [],
+            ]);
         }
-
-        if ($selectedConversationUser) {
-            Message::where('sender_id', $selectedConversationUser->id)
-                ->where('receiver_id', $user->id)
-                ->whereNull('read_at')
-                ->update(['read_at' => now()]);
-
-            $messages = Message::where(function ($query) use ($user, $selectedConversationUser) {
-                $query->where('sender_id', $user->id)
-                      ->where('receiver_id', $selectedConversationUser->id);
-            })->orWhere(function ($query) use ($user, $selectedConversationUser) {
-                $query->where('sender_id', $selectedConversationUser->id)
-                      ->where('receiver_id', $user->id);
-            })->with(['sender', 'receiver'])->orderBy('created_at', 'asc')->get();
-        }
-
-        return response()->json([
-            'conversations' => $conversations,
-            'selectedConversation' => $selectedConversationUser ? $selectedConversationUser->load('staff') : null,
-            'messages' => $messages,
-        ]);
     }
 
     /**
