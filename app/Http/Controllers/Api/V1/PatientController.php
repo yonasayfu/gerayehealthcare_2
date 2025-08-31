@@ -7,6 +7,7 @@ use App\Http\Resources\PatientResource;
 use App\Models\Patient;
 use App\Services\PatientService;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\V1\UpdateSelfPatientRequest;
 
 class PatientController extends Controller
 {
@@ -42,14 +43,8 @@ class PatientController extends Controller
     }
 
     // Update limited fields on the authenticated user's patient profile
-    public function updateMe(Request $request)
+    public function updateMe(UpdateSelfPatientRequest $request)
     {
-        $validated = $request->validate([
-            'full_name' => ['sometimes', 'string', 'max:255'],
-            'phone_number' => ['sometimes', 'string', 'max:255'],
-            'address' => ['sometimes', 'string', 'max:1000'],
-        ]);
-
         $user = $request->user();
         $patient = Patient::where('email', $user->email)->first();
 
@@ -57,7 +52,7 @@ class PatientController extends Controller
             return response()->json(['message' => 'Patient record not found for this user'], 404);
         }
 
-        $this->patientService->update($patient->id, $validated);
+        $this->patientService->update($patient->id, $request->validated());
         $patient->refresh();
 
         return new PatientResource($patient);

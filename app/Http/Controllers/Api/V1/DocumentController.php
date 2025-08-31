@@ -8,6 +8,7 @@ use App\Models\MedicalDocument;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Api\V1\StoreMedicalDocumentRequest;
 
 class DocumentController extends Controller
 {
@@ -35,16 +36,7 @@ class DocumentController extends Controller
     // Secure download
     public function download(Request $request, MedicalDocument $document)
     {
-        $user = $request->user();
-        $allowed = false;
-        if ($user->staff && $document->created_by_staff_id === $user->staff->id) {
-            $allowed = true;
-        }
-        $patient = Patient::where('email', $user->email)->first();
-        if ($patient && $document->patient_id === $patient->id) {
-            $allowed = true;
-        }
-        if (!$allowed) return response()->json(['message' => 'Forbidden'], 403);
+        $this->authorize('view', $document);
 
         if (!$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
             return response()->json(['message' => 'File not found'], 404);
@@ -53,20 +45,11 @@ class DocumentController extends Controller
     }
 
     // Staff upload
-    public function store(Request $request)
+    public function store(StoreMedicalDocumentRequest $request)
     {
-        $user = $request->user();
-        if (!$user->staff) return response()->json(['message' => 'Forbidden'], 403);
+        $this->authorize('create', MedicalDocument::class);
 
-        $validated = $request->validate([
-            'patient_id' => ['required', 'integer', 'exists:patients,id'],
-            'document_type' => ['required', 'string', 'max:255'],
-            'title' => ['required', 'string', 'max:255'],
-            'document_date' => ['required', 'date'],
-            'summary' => ['nullable', 'string', 'max:5000'],
-            'file' => ['required', 'file', 'max:20480'], // 20MB
-        ]);
-
+        $validated = $request->validated();
         $path = $request->file('file')->store('medical-documents', 'public');
 
         $doc = MedicalDocument::create([
@@ -76,10 +59,9 @@ class DocumentController extends Controller
             'document_date' => $validated['document_date'],
             'file_path' => $path,
             'summary' => $validated['summary'] ?? null,
-            'created_by_staff_id' => $user->staff->id,
+            'created_by_staff_id' => $request->user()->staff->id,
         ]);
 
         return new MedicalDocumentResource($doc->load(['patient', 'createdBy']));
     }
 }
-

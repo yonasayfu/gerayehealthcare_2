@@ -10,19 +10,15 @@ use App\Models\VisitService;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
+use App\Http\Requests\Api\V1\StoreVisitServiceRequest;
+use App\Http\Requests\Api\V1\UpdateVisitServiceRequest;
 
 class VisitServiceController extends Controller
 {
-    public function store(Request $request)
+    public function store(StoreVisitServiceRequest $request)
     {
-        $validated = $request->validate([
-            'patient_id' => ['nullable', 'integer', 'exists:patients,id'],
-            'scheduled_at' => ['required', 'date'],
-            'service_description' => ['nullable', 'string', 'max:1000'],
-        ]);
-
         // Determine patient_id: if not provided, infer from user email
-        $patientId = $validated['patient_id'] ?? null;
+        $patientId = $request->validated()['patient_id'] ?? null;
         if (!$patientId) {
             $patientId = optional(Patient::where('email', $request->user()->email)->first())->id;
         }
@@ -34,24 +30,19 @@ class VisitServiceController extends Controller
         $visit = VisitService::create([
             'patient_id' => $patientId,
             'staff_id' => optional($request->user()->staff)->id, // if staff books for themselves
-            'scheduled_at' => $validated['scheduled_at'],
-            'service_description' => $validated['service_description'] ?? null,
+            'scheduled_at' => $request->validated()['scheduled_at'],
+            'service_description' => $request->validated()['service_description'] ?? null,
             'status' => 'Scheduled',
         ]);
 
         return new VisitServiceResource($visit->load(['patient', 'staff']));
     }
 
-    public function update(Request $request, VisitService $visitService)
+    public function update(UpdateVisitServiceRequest $request, VisitService $visitService)
     {
         $this->authorize('update', $visitService);
 
-        $validated = $request->validate([
-            'scheduled_at' => ['sometimes', 'date'],
-            'service_description' => ['sometimes', 'string', 'max:1000'],
-        ]);
-
-        $visitService->update($validated);
+        $visitService->update($request->validated());
         return new VisitServiceResource($visitService->fresh(['patient', 'staff']));
     }
 

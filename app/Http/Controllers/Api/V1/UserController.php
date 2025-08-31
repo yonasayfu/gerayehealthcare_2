@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
 use App\Http\Resources\UserResource;
+use App\Http\Requests\Api\V1\UpdateUserRequest;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -18,14 +19,9 @@ class UserController extends Controller
         return new UserResource($request->user());
     }
 
-    public function update(Request $request)
+    public function update(UpdateUserRequest $request)
     {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['sometimes', 'email', 'max:255'],
-        ]);
-
-        $user = $this->userService->update($request->user()->id, $validated);
+        $user = $this->userService->update($request->user()->id, $request->validated());
 
         return new UserResource($user);
     }

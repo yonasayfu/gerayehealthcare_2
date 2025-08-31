@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\MedicalDocument;
+use App\Models\Patient;
+use App\Models\User;
+
+class MedicalDocumentPolicy
+{
+    public function view(User $user, MedicalDocument $doc): bool
+    {
+        if ($user->staff && $doc->created_by_staff_id === $user->staff->id) return true;
+        $patient = Patient::where('email', $user->email)->first();
+        return $patient && $doc->patient_id === $patient->id;
+    }
+
+    public function create(User $user): bool
+    {
+        return (bool) $user->staff;
+    }
+}
+

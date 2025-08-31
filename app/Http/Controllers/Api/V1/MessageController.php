@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Api\V1\SendMessageRequest;
 
 class MessageController extends Controller
 {
@@ -66,13 +67,9 @@ class MessageController extends Controller
         return MessageResource::collection($messages);
     }
 
-    public function send(Request $request, User $user)
+    public function send(SendMessageRequest $request, User $user)
     {
-        $validated = $request->validate([
-            'message' => ['nullable', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:10240'], // 10MB
-        ]);
-
+        $validated = $request->validated();
         if (empty($validated['message']) && !$request->hasFile('attachment')) {
             return response()->json(['message' => 'Message text or attachment required'], 422);
         }
@@ -97,4 +94,3 @@ class MessageController extends Controller
         return new MessageResource($message->load(['sender', 'receiver']));
     }
 }
-

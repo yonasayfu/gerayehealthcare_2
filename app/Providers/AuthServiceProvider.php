@@ -18,6 +18,9 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\MarketingTask::class => \App\Policies\MarketingTaskPolicy::class,
         \App\Models\ReferralDocument::class => \App\Policies\ReferralDocumentPolicy::class,
         \App\Models\VisitService::class => \App\Policies\VisitServicePolicy::class,
+        \App\Models\MedicalDocument::class => \App\Policies\MedicalDocumentPolicy::class,
+        \App\Models\Invoice::class => \App\Policies\InvoicePolicy::class,
+        \App\Models\InsuranceClaim::class => \App\Policies\InsuranceClaimPolicy::class,
     ];
 
     /**
