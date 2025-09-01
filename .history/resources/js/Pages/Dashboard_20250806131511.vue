@@ -1,26 +1,24 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, usePage } from '@inertiajs/vue3'
-import { type BreadcrumbItemType } from '@/types'
-import { computed } from 'vue'
+import { Head } from '@inertiajs/vue3'
+import { type BreadcrumbItem } from '@/types'
+import Sidebar from '@/components/ui/sidebar/Sidebar.vue';
 
 // Icons (you can change to better match your UI later)
 import { FileText, ClipboardList, CalendarDays } from 'lucide-vue-next'
 
-const breadcrumbs: BreadcrumbItemType[] = [
+const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
 ]
-
-const page = usePage();
-const userRoles = computed(() => (page.props as any)?.auth?.user?.roles || []);
-const isStaff = computed(() => userRoles.value.includes('Staff'));
 </script>
 
 <template>
   <Head title="Dashboard" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="flex-1 space-y-4 p-4 md:p-6">
+    <div class="flex">
+      <Sidebar />
+      <div class="flex-1 space-y-4 p-4 md:p-6">
       <!-- Dashboard Widgets -->
       <div class="grid gap-4 md:grid-cols-3">
         <!-- Widget 1: Recent Invoices -->
@@ -61,11 +59,9 @@ const isStaff = computed(() => userRoles.value.includes('Staff'));
       </div>
 
       <!-- Main Content Placeholder -->
-      <div v-if="!isStaff" class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
+      <div class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
         Welcome to your admin dashboard. Select a section from the sidebar to begin.
       </div>
-      <div v-else class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
-        Welcome to your staff dashboard. Select a section from the sidebar to begin.
       </div>
     </div>
   </AppLayout>

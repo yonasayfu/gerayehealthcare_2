@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, usePage } from '@inertiajs/vue3'
-import { type BreadcrumbItemType } from '@/types'
+import { type BreadcrumbItem } from '@/types'
 import { computed } from 'vue'
 
 // Icons (you can change to better match your UI later)
 import { FileText, ClipboardList, CalendarDays } from 'lucide-vue-next'
 
-const breadcrumbs: BreadcrumbItemType[] = [
+const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
 ]
 

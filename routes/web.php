@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitServiceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\MessageController as WebMessageController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 // Staff Controllers
 use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestController;
@@ -151,11 +152,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])->name('messages.export');
+    Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
+    Route::patch('/messages/{message}', [WebMessageController::class, 'update'])->name('messages.update');
     Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
     Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])
+        ->name('notifications.markAllRead');
 });
 
 // API Docs (Swagger UI)

@@ -17,7 +17,7 @@ class StoreMessageRequest extends FormRequest
             'receiver_id' => ['required', 'integer', 'exists:users,id'],
             'message' => ['nullable', 'string', 'max:5000'],
             'attachment' => ['nullable', 'file', 'max:20480'],
+            'reply_to_id' => ['nullable', 'integer', 'exists:messages,id'],
         ];
     }
 }
-

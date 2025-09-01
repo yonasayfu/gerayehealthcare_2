@@ -64,6 +64,15 @@ const markAsRead = async (notificationId: string, conversationId: number | null 
 
 onMounted(() => {
     fetchNotifications()
+    // Reset badge when opening the dropdown
+    watch(() => showNotifications.value, async (open) => {
+        if (open && unreadCount.value > 0) {
+            try {
+                await axios.post(route('notifications.markAllRead'))
+                await fetchNotifications()
+            } catch (e) { /* ignore */ }
+        }
+    })
     // Optionally, poll for new notifications every X seconds
     // setInterval(fetchNotifications, 30000); // e.g., every 30 seconds
 })
@@ -115,7 +124,9 @@ onUnmounted(() => {
                     @click="showNotifications = !showNotifications"
                 >
                     <Bell class="animate-tada text-indigo-600" />
-                    <span v-if="unreadCount > 0" class="bg-destructive absolute -end-0.5 -top-0.5 block size-2 shrink-0 rounded-full"></span>
+                    <span v-if="unreadCount > 0" class="absolute -end-2 -top-2 inline-flex items-center justify-center rounded-full bg-red-600 text-white text-[10px] px-1.5 py-0.5 min-w-[16px]">
+                        {{ unreadCount }}
+                    </span>
                 </Button>
                 <div v-if="showNotifications" class="absolute right-0 mt-2 w-80 overflow-hidden rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800 z-50">
                     <div class="border-b px-4 py-2 text-sm font-semibold text-gray-800 dark:border-gray-700 dark:text-gray-100">

@@ -49,6 +49,23 @@ const messageInput = ref<HTMLTextAreaElement | null>(null);
 const attachmentPreviewUrl = ref<string | null>(null)
 const isSending = ref(false)
 
+// Reply / Edit / Draft state
+const replyTarget = ref<Message | null>(null)
+const editingMessageId = ref<number | null>(null)
+const editingText = ref<string>('')
+
+// Draft persistence per conversation
+const draftKey = computed(() => selectedConversation.value ? `chat:draft:${selectedConversation.value.id}` : null)
+const saveDraft = () => {
+  if (!draftKey.value) return
+  localStorage.setItem(draftKey.value, form.message)
+}
+const loadDraft = () => {
+  if (!draftKey.value) return
+  const d = localStorage.getItem(draftKey.value)
+  if (d !== null) form.message = d
+}
+
 // --- Window Width for Responsiveness ---
 const currentWindowWidth = ref(0);
 
@@ -240,6 +257,8 @@ watch(() => selectedConversation.value, (newVal: Conversation | null) => {
     fetchMessages(newId);
     if (currentWindowWidth.value < 768) showConversationList.value = false;
     startTypingPoll();
+    // load saved draft for this conversation
+    nextTick(loadDraft)
   }
   previousSelectedConversationId.value = newId;
 }, { immediate: true });
@@ -274,6 +293,7 @@ const submit = async () => {
     formData.append('receiver_id', form.receiver_id.toString());
     formData.append('message', form.message);
     if (form.attachment) formData.append('attachment', form.attachment);
+    if (replyTarget.value) formData.append('reply_to_id', String(replyTarget.value.id))
     
     // Submit to server
     await axios.post(route('messages.store'), formData, {
@@ -286,6 +306,9 @@ const submit = async () => {
     if (attachmentInput.value) attachmentInput.value.value = '';
     if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
     attachmentPreviewUrl.value = null
+    replyTarget.value = null
+    // clear draft for this conversation
+    if (draftKey.value) localStorage.removeItem(draftKey.value)
 
     // Refetch to get actual message from server
     fetchMessages(form.receiver_id);
@@ -297,6 +320,9 @@ const submit = async () => {
   } finally {
     isSending.value = false
     nextTick(() => messageInput.value?.focus())
+    if (messageInput.value) {
+      messageInput.value.style.height = 'auto'
+    }
   }
 };
 
@@ -309,6 +335,8 @@ const sendTyping = () => {
   if (!form.receiver_id) return;
   // Fire-and-forget typing ping
   axios.post(route('messages.typing'), { receiver_id: form.receiver_id }).catch(() => {})
+  // Save draft as user types
+  saveDraft()
 }
 
 const startTypingPoll = () => {
@@ -323,6 +351,41 @@ const startTypingPoll = () => {
   }
   poll();
   typingPollHandle = window.setInterval(poll, 2000)
+}
+
+// Actions: reply, edit, delete
+const startReply = (m: Message) => {
+  replyTarget.value = m
+  nextTick(() => messageInput.value?.focus())
+}
+const clearReply = () => { replyTarget.value = null }
+const startEdit = (m: Message) => {
+  editingMessageId.value = m.id
+  editingText.value = m.message || ''
+}
+const cancelEdit = () => {
+  editingMessageId.value = null
+  editingText.value = ''
+}
+const saveEdit = async (m: Message) => {
+  if (!editingMessageId.value) return
+  try {
+    await axios.patch(route('messages.update', m.id), { message: editingText.value })
+    const idx = messages.value.findIndex(x => x.id === m.id)
+    if (idx !== -1) messages.value[idx].message = editingText.value
+    cancelEdit()
+  } catch (e) {
+    alert('Failed to edit message')
+  }
+}
+const deleteMessage = async (m: Message) => {
+  if (!confirm('Delete this message?')) return
+  try {
+    await axios.delete(route('messages.destroy', m.id))
+    messages.value = messages.value.filter(x => x.id !== m.id)
+  } catch (e) {
+    alert('Failed to delete message')
+  }
 }
 </script>
 
@@ -376,29 +439,32 @@ const startTypingPoll = () => {
           <div class="flex-grow overflow-y-auto custom-scrollbar">
             <div v-if="loading && conversations.length === 0" class="p-4 text-center text-muted-foreground">Loading conversations...</div>
             <div v-else-if="conversations.length === 0" class="p-4 text-center text-muted-foreground">No conversations found.</div>
-            <div
-              v-else
-              v-for="convo in conversations"
-              :key="convo.id"
-              @click="selectConversation(convo.id)"
-              class="flex items-center gap-3 p-4 border-b border-border hover:bg-muted transition cursor-pointer"
-              :class="{ 'bg-primary/10': selectedConversation?.id === convo.id }"
-            >
-              <img 
-                v-if="convo.profile_photo_url" 
-                :src="convo.profile_photo_url" 
-                :alt="convo.name" 
-                class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              <div
+                v-else
+                v-for="convo in conversations"
+                :key="convo.id"
+                @click="selectConversation(convo.id)"
+                class="flex items-center gap-3 p-4 border-b border-border hover:bg-muted transition cursor-pointer"
+                :class="{ 'bg-primary/10': selectedConversation?.id === convo.id }"
               >
-              <div v-else class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-sm font-medium flex-shrink-0">
-                {{ convo.name.charAt(0).toUpperCase() }}
-              </div>
-              <div class="min-w-0">
-                <p class="font-medium truncate">{{ convo.name }}</p>
-                <p class="text-xs text-muted-foreground truncate">{{ convo.staff?.position || 'User' }}</p>
+                <img 
+                  v-if="convo.profile_photo_url" 
+                  :src="convo.profile_photo_url" 
+                  :alt="convo.name" 
+                  class="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                >
+                <div v-else class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-sm font-medium flex-shrink-0">
+                  {{ convo.name.charAt(0).toUpperCase() }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="truncate" :class="convo.unread > 0 ? 'font-semibold' : 'font-medium'">{{ convo.name }}</p>
+                  <p class="text-xs text-muted-foreground truncate">{{ convo.staff?.position || 'User' }}</p>
+                </div>
+                <div v-if="convo.unread > 0" class="ml-2 inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs px-2 py-0.5">
+                  {{ convo.unread }}
+                </div>
               </div>
             </div>
-          </div>
         </div>
 
         <!-- Chat Area -->
@@ -430,7 +496,10 @@ const startTypingPoll = () => {
             <!-- Chat Header -->
             <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 bg-transparent flex justify-between items-center">
               <h2 class="text-lg font-semibold">{{ selectedConversation.name }}</h2>
-              <p class="text-sm text-muted-foreground hidden md:block">{{ selectedConversation.staff?.position || 'User' }}</p>
+              <div class="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+                <span>{{ selectedConversation.staff?.position || 'User' }}</span>
+                <a :href="route('messages.export', selectedConversation.id)" class="px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-accent">Download Chat</a>
+              </div>
               <button 
                 v-if="currentWindowWidth < 768" 
                 @click="showConversationList = true" 
@@ -467,6 +536,21 @@ const startTypingPoll = () => {
                     'opacity-80': message.isOptimistic
                   }"
                 >
+                  <!-- Reply preview (quoted) -->
+                  <div v-if="message.reply_to_id" class="mb-2 pl-2 border-l-2"
+                    :class="message.sender_id === authUser.id ? 'border-white/50 text-white/80' : 'border-gray-500 text-gray-700'">
+                    <p class="text-xs truncate">Replying to #{{ message.reply_to_id }}</p>
+                  </div>
+
+                  <!-- Edit mode -->
+                  <template v-if="editingMessageId === message.id">
+                    <textarea v-model="editingText" class="w-full rounded-md p-2 text-sm text-gray-900" rows="2"></textarea>
+                    <div class="flex justify-end gap-2 mt-2">
+                      <button class="text-xs px-2 py-1 rounded bg-gray-200" @click="cancelEdit">Cancel</button>
+                      <button class="text-xs px-2 py-1 rounded bg-indigo-600 text-white" @click="saveEdit(message)">Save</button>
+                    </div>
+                  </template>
+                  <template v-else>
                   <p class="break-words" v-if="message.message">{{ message.message }}</p>
                   <div v-if="message.attachment || message.attachment_url" class="mt-2 p-2 bg-white/20 rounded-md">
                       <a 
@@ -486,6 +570,7 @@ const startTypingPoll = () => {
                           <span>{{ (message.attachment_filename || (message.attachment && message.attachment.filename)) || 'Download File' }}</span>
                       </a>
                   </div>
+                  </template>
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span 
                       class="text-[11px]"
@@ -499,6 +584,18 @@ const startTypingPoll = () => {
                       <Check v-else class="w-3.5 h-3.5 text-blue-100" title="Sent" />
                     </template>
                   </div>
+
+                  <!-- Actions menu -->
+                  <div class="absolute top-1" :class="message.sender_id === authUser.id ? 'left-1' : 'right-1'">
+                    <div class="flex gap-1">
+                      <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50"
+                        @click="startReply(message)">Reply</button>
+                      <template v-if="message.sender_id === authUser.id">
+                        <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50" @click="startEdit(message)">Edit</button>
+                        <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50" @click="deleteMessage(message)">Delete</button>
+                      </template>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -507,6 +604,12 @@ const startTypingPoll = () => {
             <div class="p-4 border-t border-gray-200/70 dark:border-gray-700/60 bg-transparent relative">
               <div v-if="showEmojiPicker" class="absolute bottom-full right-0 mb-2 z-10 shadow-lg rounded-lg overflow-hidden">
                 <EmojiPicker :native="true" @select="onEmojiSelect" />
+              </div>
+
+              <!-- Reply target chip -->
+              <div v-if="replyTarget" class="absolute -top-7 left-4 right-4 text-xs flex items-center justify-between bg-accent/40 px-2 py-1 rounded">
+                <span>Replying to: {{ replyTarget.message?.slice(0,40) || 'Attachment' }}</span>
+                <button class="text-muted-foreground hover:text-foreground" @click="clearReply"><X class="w-3 h-3" /></button>
               </div>
 
               <form @submit.prevent="submit" class="flex items-end gap-2">

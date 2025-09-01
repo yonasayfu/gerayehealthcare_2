@@ -43,5 +43,21 @@ class DatabaseSeeder extends Seeder
             ]
         );
         $adminUser->assignRole(RoleEnum::ADMIN->value);
+
+        // Seed 2 initial messages to demo notifications
+        $staff = \App\Models\Staff::with('user')->first();
+        $patient = \App\Models\Patient::with('user')->first();
+        if ($staff && $staff->user && $patient && $patient->user) {
+            \App\Models\Message::firstOrCreate([
+                'sender_id' => $staff->user->id,
+                'receiver_id' => $patient->user->id,
+                'message' => 'Welcome to Geraye! Let us know how we can help.',
+            ]);
+            \App\Models\Message::firstOrCreate([
+                'sender_id' => $patient->user->id,
+                'receiver_id' => $staff->user->id,
+                'message' => 'Thank you doctor. I will send my information shortly.',
+            ]);
+        }
     }
 }

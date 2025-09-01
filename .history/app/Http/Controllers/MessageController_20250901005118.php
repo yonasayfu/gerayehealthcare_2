@@ -298,26 +298,6 @@ class MessageController extends Controller
     }
 
     /**
-     * React to a direct message (emoji per user).
-     */
-    public function react(Request $request, Message $message)
-    {
-        // Ensure the authenticated user is part of the conversation
-        $user = Auth::user();
-        if ($message->sender_id !== $user->id && $message->receiver_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized to react to this message.'], 403);
-        }
-        $data = $request->validate(['emoji' => ['required','string','max:16']]);
-        \App\Models\Reaction::firstOrCreate([
-            'reactable_type' => Message::class,
-            'reactable_id' => $message->id,
-            'user_id' => $user->id,
-            'emoji' => $data['emoji'],
-        ]);
-        return response()->noContent();
-    }
-
-    /**
      * Indicate the current user is typing to a receiver (short-lived flag).
      */
     public function typing(Request $request)
@@ -364,10 +344,10 @@ class MessageController extends Controller
             fputcsv($out, ['Time', 'Sender', 'Receiver', 'Message']);
 
             $messages = Message::where(function ($q) use ($authId, $user) {
-                    $q->where('sender_id', $authId)->where('receiver_id', $user->id);
+                    $q->where('sender_id', $authId).where('receiver_id', $user->id);
                 })
                 ->orWhere(function ($q) use ($authId, $user) {
-                    $q->where('sender_id', $user->id)->where('receiver_id', $authId);
+                    $q->where('sender_id', $user->id).where('receiver_id', $authId);
                 })
                 ->with(['sender','receiver'])
                 ->orderBy('created_at')

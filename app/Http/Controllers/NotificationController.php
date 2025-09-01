@@ -48,4 +48,14 @@ if ($notification->notifiable_id !== Auth::id()) {
 
         return response()->noContent();
     }
+
+    /**
+     * Mark all notifications as read for the authenticated user.
+     */
+    public function markAllRead(Request $request)
+    {
+        $user = Auth::user();
+        $user->unreadNotifications()->update(['read_at' => now()]);
+        return response()->noContent();
+    }
 }
