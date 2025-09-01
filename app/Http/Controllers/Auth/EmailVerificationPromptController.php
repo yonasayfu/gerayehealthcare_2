@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\BaseController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class EmailVerificationPromptController extends Controller
+class EmailVerificationPromptController extends BaseController
 {
     /**
      * Show the email verification prompt page.
