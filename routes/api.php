@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\Api\V1\AuthController;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Api\V1\PatientController;
-use App\Http\Controllers\Api\V1\UserController;
-use App\Http\Controllers\Api\V1\VisitServiceController as ApiVisitServiceController;
-use App\Http\Controllers\Api\V1\CaregiverAssignmentController as ApiCaregiverAssignmentController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DateConversionController;
-use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BillingController as ApiBillingController;
+use App\Http\Controllers\Api\V1\CaregiverAssignmentController as ApiCaregiverAssignmentController;
+use App\Http\Controllers\Api\V1\DocumentController as ApiDocumentController;
 use App\Http\Controllers\Api\V1\MessageController as ApiMessageController;
 use App\Http\Controllers\Api\V1\NotificationController as ApiNotificationController;
+use App\Http\Controllers\Api\V1\PatientController;
 use App\Http\Controllers\Api\V1\PushTokenController;
-use App\Http\Controllers\Api\V1\DocumentController as ApiDocumentController;
-use App\Http\Controllers\Api\V1\BillingController as ApiBillingController;
+use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\VisitServiceController as ApiVisitServiceController;
 use App\Http\Controllers\GroupMessageController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
@@ -29,6 +29,8 @@ Route::prefix('v1')->group(function () {
         // Profile endpoints
         Route::get('/me', [UserController::class, 'me']);
         Route::patch('/me', [UserController::class, 'update']);
+
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
         Route::apiResource('patients', PatientController::class)->only(['index', 'show']);
 
@@ -57,6 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/messages/threads/{user}/messages', [ApiMessageController::class, 'send'])->middleware('throttle:30,1');
 
         // Group Messaging
+        Route::post('/groups', [GroupMessageController::class, 'createGroup'])->name('groups.create');
         Route::get('/groups', [GroupMessageController::class, 'getGroups'])->name('groups.list');
         Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
         Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->name('groups.messages.store');
@@ -83,8 +86,72 @@ Route::prefix('v1')->group(function () {
         Route::get('/insurance/policies/my', [ApiBillingController::class, 'myPolicies']);
         Route::get('/insurance/claims/my', [ApiBillingController::class, 'myClaims']);
         Route::get('/insurance/claims/{claim}', [ApiBillingController::class, 'showClaim']);
+
+        // Marketing APIs
+        Route::prefix('marketing')->group(function () {
+            Route::get('/campaigns', [App\Http\Controllers\Api\V1\MarketingController::class, 'campaigns']);
+            Route::post('/campaigns', [App\Http\Controllers\Api\V1\MarketingController::class, 'createCampaign']);
+            Route::put('/campaigns/{campaign}', [App\Http\Controllers\Api\V1\MarketingController::class, 'updateCampaign']);
+            Route::delete('/campaigns/{campaign}', [App\Http\Controllers\Api\V1\MarketingController::class, 'deleteCampaign']);
+            Route::get('/campaigns/{campaign}/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'campaignLeads']);
+
+            Route::get('/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'leads']);
+            Route::post('/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'createLead']);
+            Route::post('/leads/{lead}/convert', [App\Http\Controllers\Api\V1\MarketingController::class, 'convertLead']);
+
+            Route::get('/analytics', [App\Http\Controllers\Api\V1\MarketingController::class, 'analytics']);
+        });
+
+        // Inventory APIs
+        Route::prefix('inventory')->group(function () {
+            Route::get('/items', [App\Http\Controllers\Api\V1\InventoryController::class, 'items']);
+            Route::post('/items', [App\Http\Controllers\Api\V1\InventoryController::class, 'createItem']);
+            Route::put('/items/{item}', [App\Http\Controllers\Api\V1\InventoryController::class, 'updateItem']);
+            Route::delete('/items/{item}', [App\Http\Controllers\Api\V1\InventoryController::class, 'deleteItem']);
+            Route::post('/items/{item}/adjust-stock', [App\Http\Controllers\Api\V1\InventoryController::class, 'adjustStock']);
+
+            Route::get('/requests', [App\Http\Controllers\Api\V1\InventoryController::class, 'requests']);
+            Route::post('/requests', [App\Http\Controllers\Api\V1\InventoryController::class, 'createRequest']);
+
+            Route::get('/analytics', [App\Http\Controllers\Api\V1\InventoryController::class, 'analytics']);
+        });
+
+        // Insurance APIs
+        Route::prefix('insurance')->group(function () {
+            Route::get('/companies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'companies']);
+            Route::post('/companies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createCompany']);
+
+            Route::get('/policies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'policies']);
+            Route::post('/policies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createPolicy']);
+
+            Route::get('/claims', [App\Http\Controllers\Api\V1\InsuranceController::class, 'claims']);
+            Route::post('/claims', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createClaim']);
+            Route::put('/claims/{claim}/status', [App\Http\Controllers\Api\V1\InsuranceController::class, 'updateClaimStatus']);
+
+            Route::get('/analytics', [App\Http\Controllers\Api\V1\InsuranceController::class, 'analytics']);
+        });
+
+        // Analytics APIs
+        Route::prefix('analytics')->group(function () {
+            Route::get('/dashboard', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'dashboard']);
+            Route::get('/patients', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'patients']);
+            Route::get('/visits', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'visits']);
+            Route::get('/revenue', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'revenue']);
+            Route::get('/staff', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'staff']);
+        });
+
+        // Bulk Operations APIs
+        Route::prefix('bulk')->group(function () {
+            Route::post('/patients', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createPatients']);
+            Route::put('/patients', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'updatePatients']);
+            Route::post('/staff', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createStaff']);
+            Route::post('/inventory-items', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createInventoryItems']);
+            Route::delete('/delete', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'bulkDelete']);
+            Route::post('/export', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'bulkExport']);
+            Route::get('/operations/{operationId}/status', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'getOperationStatus']);
+        });
     });
-    
+
     // Date conversion routes
     Route::post('/convert-to-ethiopian', [DateConversionController::class, 'convertToEthiopian']);
     Route::post('/convert-gregorian-to-ethiopian', [DateConversionController::class, 'convertGregorianToEthiopian']);
