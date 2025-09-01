@@ -214,6 +214,8 @@ class MessageController extends Controller
             $recipient->notify(new NewMessageReceived($message->load('sender')));
         }
 
+        broadcast(new \App\Events\NewMessage($message));
+
         // IMPORTANT CHANGE: Return no content for Inertia AJAX requests
         return response()->noContent();
     }
@@ -313,12 +315,15 @@ class MessageController extends Controller
             return response()->json(['error' => 'Unauthorized to react to this message.'], 403);
         }
         $data = $request->validate(['emoji' => ['required','string','max:16']]);
-        \App\Models\Reaction::firstOrCreate([
+        $reaction = \App\Models\Reaction::firstOrCreate([
             'reactable_type' => Message::class,
             'reactable_id' => $message->id,
             'user_id' => $user->id,
             'emoji' => $data['emoji'],
         ]);
+
+        broadcast(new \App\Events\MessageReacted($reaction));
+
         return response()->noContent();
     }
 

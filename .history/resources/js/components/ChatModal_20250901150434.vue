@@ -460,11 +460,7 @@ const cancelEdit = () => {
 const saveEdit = async (m: Message) => {
   if (!editingMessageId.value) return
   try {
-    if (isGroupsTab.value) {
-      await axios.patch(route('groups.messages.update', { group: selectedGroup.value.id, message: m.id }), { message: editingText.value })
-    } else {
-      await axios.patch(route('messages.update', m.id), { message: editingText.value })
-    }
+    await axios.patch(route('messages.update', m.id), { message: editingText.value })
     const idx = messages.value.findIndex(x => x.id === m.id)
     if (idx !== -1) messages.value[idx].message = editingText.value
     cancelEdit()
@@ -475,11 +471,7 @@ const saveEdit = async (m: Message) => {
 const deleteMessage = async (m: Message) => {
   if (!confirm('Delete this message?')) return
   try {
-    if (isGroupsTab.value) {
-      await axios.delete(route('groups.messages.destroy', { group: selectedGroup.value.id, message: m.id }))
-    } else {
-      await axios.delete(route('messages.destroy', m.id))
-    }
+    await axios.delete(route('messages.destroy', m.id))
     messages.value = messages.value.filter(x => x.id !== m.id)
   } catch (e) {
     alert('Failed to delete message')
@@ -668,6 +660,14 @@ const groupedReactions = (reactions: any[]) => {
           <template v-else-if="selectedConversation || selectedGroup">
             <!-- Chat Header -->
             <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 bg-transparent flex justify-between items-center">
+              <h2 v-if="selectedConversation" class="text-lg font-semibold">{{ selectedConversation.name }}</h2>
+              <h2 v-if="selectedGroup" class="text-lg font-semibold">{{ selectedGroup.name }}</h2>
+              <div v-if="selectedConversation" class="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+                <span>{{ selectedConversation.staff?.position || 'User' }}</span>
+                <a :href="route('messages.export', selectedConversation.id)" class="px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-accent">Download Chat</a>
+              </div>
+              <button 
+                v-if="currentWindowWidth < 768" 
               <h2 v-if="selectedConversation" class="text-lg font-semibold">{{ selectedConversation.name }}</h2>
               <h2 v-if="selectedGroup" class="text-lg font-semibold">{{ selectedGroup.name }}</h2>
               <div v-if="selectedConversation" class="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
@@ -896,8 +896,8 @@ const groupedReactions = (reactions: any[]) => {
          :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
          class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
       <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <button v-if="contextMenu.owned && !isGroupsTab" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned && !isGroupsTab" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
       <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
         <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
         <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>

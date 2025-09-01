@@ -2,7 +2,8 @@
 
 declare global {
     interface Window {
-        // Global window interface extensions
+        Pusher: any;
+        Echo: any;
     }
 }
 
@@ -96,6 +97,57 @@ export { BreadcrumbItem, Patient, PatientPagination, EthiopianCalendarDay, Ethio
 export type BreadcrumbItemType = BreadcrumbItem;
 export type PatientType = Patient;
 export type PatientPaginationType = PatientPagination;
+
+export interface Group {
+    id: number;
+    name: string;
+    created_by: number;
+    members_count: number;
+}
+
+
+export interface Reaction {
+    id: number;
+    user_id: number;
+    emoji: string;
+}
+
+export interface Message {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    message: string | null;
+    attachment_path?: string | null;
+    attachment_filename?: string | null;
+    attachment_mime_type?: string | null;
+    created_at: string;
+    read_at?: string | null;
+    reply_to_id?: number | null;
+    sender?: User;
+    receiver?: User;
+    reactions?: Reaction[];
+    replyTo?: Message | null;
+    isOptimistic?: boolean;
+    attachment?: { filename: string; url: string; mime_type: string } | null;
+    attachment_url?: string;
+}
+
+export interface Conversation {
+    id: number;
+    name: string;
+    email: string;
+    profile_photo_url: string | null;
+    staff: Staff | null;
+    unread: number;
+}
+
+export interface AppPageProps {
+    auth: {
+        user: User;
+    };
+    // Add other page props as needed
+}
+
 export type UserType = User;
 export type StaffType = Staff;
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\NotificationController as ApiNotificationControl
 use App\Http\Controllers\Api\V1\PushTokenController;
 use App\Http\Controllers\Api\V1\DocumentController as ApiDocumentController;
 use App\Http\Controllers\Api\V1\BillingController as ApiBillingController;
+use App\Http\Controllers\GroupMessageController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
@@ -54,6 +55,14 @@ Route::prefix('v1')->group(function () {
         Route::get('/messages/threads', [ApiMessageController::class, 'threads'])->middleware('throttle:60,1');
         Route::get('/messages/threads/{user}', [ApiMessageController::class, 'thread'])->middleware('throttle:60,1');
         Route::post('/messages/threads/{user}/messages', [ApiMessageController::class, 'send'])->middleware('throttle:30,1');
+
+        // Group Messaging
+        Route::get('/groups', [GroupMessageController::class, 'getGroups'])->name('groups.list');
+        Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
+        Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->name('groups.messages.store');
+        Route::patch('/groups/{group}/messages/{message}', [GroupMessageController::class, 'update'])->name('groups.messages.update');
+        Route::delete('/groups/{group}/messages/{message}', [GroupMessageController::class, 'destroy'])->name('groups.messages.destroy');
+        Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('groups.messages.react');
 
         // Notifications
         Route::get('/notifications', [ApiNotificationController::class, 'index']);

@@ -5,7 +5,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smile, File, Image, Check, CheckCheck, Clock } from 'lucide-vue-next';
 import { format } from 'date-fns';
 import axios from 'axios';
-import type { User, Message, Conversation, AppPageProps } from '@/types';
+import type { User, Message, Conversation, AppPageProps, Group } from '@/types'; // Added Group type
 import EmojiPicker from 'vue3-emoji-picker';
 import 'vue3-emoji-picker/css';
 

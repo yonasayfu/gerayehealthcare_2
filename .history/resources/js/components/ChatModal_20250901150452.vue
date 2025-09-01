@@ -460,11 +460,7 @@ const cancelEdit = () => {
 const saveEdit = async (m: Message) => {
   if (!editingMessageId.value) return
   try {
-    if (isGroupsTab.value) {
-      await axios.patch(route('groups.messages.update', { group: selectedGroup.value.id, message: m.id }), { message: editingText.value })
-    } else {
-      await axios.patch(route('messages.update', m.id), { message: editingText.value })
-    }
+    await axios.patch(route('messages.update', m.id), { message: editingText.value })
     const idx = messages.value.findIndex(x => x.id === m.id)
     if (idx !== -1) messages.value[idx].message = editingText.value
     cancelEdit()
@@ -475,11 +471,7 @@ const saveEdit = async (m: Message) => {
 const deleteMessage = async (m: Message) => {
   if (!confirm('Delete this message?')) return
   try {
-    if (isGroupsTab.value) {
-      await axios.delete(route('groups.messages.destroy', { group: selectedGroup.value.id, message: m.id }))
-    } else {
-      await axios.delete(route('messages.destroy', m.id))
-    }
+    await axios.delete(route('messages.destroy', m.id))
     messages.value = messages.value.filter(x => x.id !== m.id)
   } catch (e) {
     alert('Failed to delete message')
@@ -896,8 +888,8 @@ const groupedReactions = (reactions: any[]) => {
          :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
          class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
       <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <button v-if="contextMenu.owned && !isGroupsTab" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned && !isGroupsTab" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
       <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
         <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
         <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
@@ -936,6 +928,14 @@ const groupedReactions = (reactions: any[]) => {
   scrollbar-color: hsl(var(--muted)) hsl(var(--background));
 }
 
+/* Message bubble styling */
+.bg-blue-500 {
+  background-color: #3b82f6;
+}
+
+.bg-gray-200 {
+  background-color: #e5e7eb;
+}
 /* Message bubble styling */
 .bg-blue-500 {
   background-color: #3b82f6;
