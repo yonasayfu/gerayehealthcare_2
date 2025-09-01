@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Services\Validation\Rules\MessageRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMessageRequest extends FormRequest
@@ -13,11 +14,21 @@ class StoreMessageRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
-            'receiver_id' => ['required', 'integer', 'exists:users,id'],
-            'message' => ['nullable', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:20480'],
-            'reply_to_id' => ['nullable', 'integer', 'exists:messages,id'],
-        ];
+        return MessageRules::createRules();
+    }
+
+    public function messages(): array
+    {
+        return MessageRules::messages();
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $errors = MessageRules::validateMessageContent($this->all());
+            foreach ($errors as $error) {
+                $validator->errors()->add('message', $error);
+            }
+        });
     }
 }

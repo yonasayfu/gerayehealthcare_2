@@ -7,7 +7,7 @@ import {
   LayoutGrid, UserPlus, UserCog, CalendarClock, Stethoscope, MessageCircle,
   Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
-  ChevronRight, CalendarCheck, UserCheck, Settings, Paperclip, Send, Trash2, Download, Check, CheckCheck
+  ChevronRight, CalendarCheck, UserCheck, Settings, Paperclip, Send, Trash2, Download, Check, CheckCheck, X
 } from 'lucide-vue-next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -144,7 +144,8 @@ const removeAttachment = () => {
 };
 
 const sendMessage = () => {
-  if (!form.message && !form.attachment) {
+  // Enhanced validation
+  if (!form.message?.trim() && !form.attachment) {
     toast({
       title: 'Cannot send empty message',
       description: 'Please type a message or attach a file.',
@@ -153,20 +154,58 @@ const sendMessage = () => {
     return;
   }
 
+  if (!selectedConversation.value) {
+    toast({
+      title: 'No conversation selected',
+      description: 'Please select a conversation first.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  // Check message length
+  if (form.message && form.message.length > 5000) {
+    toast({
+      title: 'Message too long',
+      description: 'Message cannot exceed 5000 characters.',
+      variant: 'destructive',
+    });
+    return;
+  }
+
+  // Set receiver_id for the form
+  form.receiver_id = selectedConversation.value.id;
+
   form.post(route('admin.messages.store'), {
     preserveScroll: true,
     onSuccess: () => {
       messageInput.value = '';
+      form.reset('message');
       removeAttachment();
+      toast({
+        title: 'Message sent',
+        description: 'Your message has been sent successfully.',
+      });
       // After sending, re-fetch data to update messages and conversations
       // This will trigger the watch on props.messages and scroll to bottom
       window.location.href = route('admin.messages.index', selectedConversation.value?.id);
     },
     onError: (errors) => {
       console.error('Message send error:', errors);
+
+      // Handle specific validation errors
+      let errorMessage = 'An unknown error occurred.';
+      if (errors.message) {
+        errorMessage = Array.isArray(errors.message) ? errors.message[0] : errors.message;
+      } else if (errors.attachment) {
+        errorMessage = Array.isArray(errors.attachment) ? errors.attachment[0] : errors.attachment;
+      } else if (errors.receiver_id) {
+        errorMessage = 'Invalid recipient selected.';
+      }
+
       toast({
         title: 'Failed to send message',
-        description: errors.message || 'An unknown error occurred.',
+        description: errorMessage,
         variant: 'destructive',
       });
     },
@@ -218,6 +257,22 @@ const deleteMessage = async (messageId: number) => {
 
 const downloadAttachment = (messageId: number) => {
   window.open(route('admin.messages.download', messageId), '_blank');
+};
+
+// Auto-resize textarea
+const autoResize = (event: Event) => {
+  const textarea = event.target as HTMLTextAreaElement;
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+};
+
+// Format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 const markMessageAsRead = (messageId: number) => {
@@ -399,25 +454,63 @@ const getAttachmentDisplay = (message: MessageItem) => {
           <div class="flex items-center gap-2">
             <img v-if="attachmentInput?.type.startsWith('image/')" :src="attachmentPreview" class="h-16 w-16 object-cover rounded-md" />
             <span v-else class="text-xl">{{ getAttachmentIcon(attachmentInput?.type || '') }}</span>
-            <span>{{ attachmentInput?.name }}</span>
+            <div class="flex flex-col">
+              <span class="font-medium">{{ attachmentInput?.name }}</span>
+              <span class="text-xs text-muted-foreground">{{ formatFileSize(attachmentInput?.size || 0) }}</span>
+            </div>
           </div>
-          <Button variant="ghost" size="sm" @click="removeAttachment">X</Button>
+          <Button variant="ghost" size="sm" @click="removeAttachment">
+            <X class="h-4 w-4" />
+          </Button>
         </div>
-        <div class="relative">
-          <Input
-            v-model="messageInput"
-            placeholder="Type your message..."
-            class="pr-20"
-            @keyup.enter="sendMessage"
-          />
-          <div class="absolute inset-y-0 right-0 flex items-center">
-             <label for="attachment-input" class="cursor-pointer p-2">
-                <Paperclip class="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                <Input id="attachment-input" type="file" class="hidden" @change="handleAttachmentChange" />
-            </label>
-            <Button @click="sendMessage" :disabled="form.processing" size="icon" class="mr-2">
-                <Send class="h-5 w-5" />
-            </Button>
+
+        <div class="space-y-2">
+          <div class="relative">
+            <textarea
+              v-model="messageInput"
+              placeholder="Type your message..."
+              class="w-full min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-20"
+              @keydown.enter.exact.prevent="sendMessage"
+              @keydown.enter.shift.exact="messageInput += '\n'"
+              rows="1"
+              @input="autoResize"
+            />
+            <div class="absolute inset-y-0 right-0 flex items-center">
+               <label for="attachment-input" class="cursor-pointer p-2 hover:bg-accent rounded-md transition-colors">
+                  <Paperclip class="h-5 w-5 text-muted-foreground hover:text-foreground" />
+                  <Input
+                    id="attachment-input"
+                    type="file"
+                    class="hidden"
+                    accept="image/*,application/pdf,.doc,.docx,.txt,.csv,.xlsx,.ppt,.pptx"
+                    @change="handleAttachmentChange"
+                  />
+              </label>
+              <Button
+                @click="sendMessage"
+                :disabled="form.processing || (!messageInput.trim() && !attachmentInput)"
+                size="icon"
+                class="mr-2"
+              >
+                  <Send class="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+
+          <!-- Character counter and status -->
+          <div class="flex justify-between items-center text-xs text-muted-foreground">
+            <div class="flex items-center gap-2">
+              <span v-if="form.processing" class="flex items-center gap-1">
+                <div class="animate-spin h-3 w-3 border border-current border-t-transparent rounded-full"></div>
+                Sending...
+              </span>
+              <span v-else-if="messageInput.length > 0">
+                {{ messageInput.length }}/5000 characters
+              </span>
+            </div>
+            <div class="text-xs text-muted-foreground">
+              Press Enter to send, Shift+Enter for new line
+            </div>
           </div>
         </div>
       </div>

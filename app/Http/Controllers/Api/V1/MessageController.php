@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Validation\Rules\MessageRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Api\V1\SendMessageRequest;
 
-class MessageController extends Controller
+class MessageController extends BaseApiController
 {
     public function threads(Request $request)
     {
