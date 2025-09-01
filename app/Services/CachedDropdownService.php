@@ -229,4 +229,82 @@ class CachedDropdownService
         self::getReferrals();
         self::getInvoices();
     }
+
+    /**
+     * Get custom dropdown data with caching
+     *
+     * @param string $key
+     * @param callable $callback
+     * @param int $ttl
+     * @return mixed
+     */
+    public static function getCustom(string $key, callable $callback, int $ttl = 300)
+    {
+        $cacheKey = 'dropdown_custom_' . $key;
+        return Cache::remember($cacheKey, $ttl, $callback);
+    }
+
+    /**
+     * Forget custom dropdown data
+     *
+     * @param string $key
+     * @return bool
+     */
+    public static function forgetCustom(string $key): bool
+    {
+        return Cache::forget('dropdown_custom_' . $key);
+    }
+
+    /**
+     * Get cache statistics
+     *
+     * @return array
+     */
+    public static function getCacheStats(): array
+    {
+        $cacheKeys = [
+            'dropdown_active_staff', 'dropdown_patients', 'dropdown_insurance_companies',
+            'dropdown_services', 'dropdown_events', 'dropdown_marketing_campaigns',
+            'dropdown_campaign_content', 'dropdown_staff_with_users', 'dropdown_partners',
+            'dropdown_partner_agreements', 'dropdown_referrals', 'dropdown_invoices'
+        ];
+
+        $stats = [];
+        foreach ($cacheKeys as $key) {
+            $stats[$key] = Cache::has($key) ? 'cached' : 'not_cached';
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Refresh specific cache
+     *
+     * @param string $type
+     * @return void
+     */
+    public static function refresh(string $type): void
+    {
+        $cacheKey = 'dropdown_' . strtolower($type);
+        Cache::forget($cacheKey);
+
+        $method = 'get' . ucfirst($type);
+        if (method_exists(self::class, $method)) {
+            self::$method();
+        }
+    }
+
+    /**
+     * Get memory usage statistics
+     *
+     * @return array
+     */
+    public static function getMemoryStats(): array
+    {
+        return [
+            'memory_usage' => memory_get_usage(true),
+            'memory_peak' => memory_get_peak_usage(true),
+            'cache_stats' => self::getCacheStats(),
+        ];
+    }
 }
