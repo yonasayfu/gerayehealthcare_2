@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, computed, onMounted, onUnmounted } from 'vue';
+import debounce from 'lodash/debounce';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smile, File, Image, Check, CheckCheck, Clock } from 'lucide-vue-next';
 import { format } from 'date-fns';
@@ -61,9 +62,9 @@ const saveDraft = () => {
   localStorage.setItem(draftKey.value, form.message)
 }
 const loadDraft = () => {
-  if (!draftKey.value) return
+  if (!draftKey.value) { form.message = ''; return }
   const d = localStorage.getItem(draftKey.value)
-  if (d !== null) form.message = d
+  form.message = d !== null ? d : ''
 }
 
 // --- Window Width for Responsiveness ---
@@ -177,27 +178,22 @@ const fetchMessages = async (recipientId: number | null = null, searchQuery: str
     const response = await axios.get(route('messages.data', { recipient: recipientId, search: searchQuery }));
     let fetchedConversations: Conversation[] = response.data.conversations || [];
 
-    // Add current user to conversations if needed
-    const user = authUser.value;
-    if (user && !fetchedConversations.some(c => c.id === user.id)) {
-      fetchedConversations = [{
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        profile_photo_url: user.profile_photo_url,
-        staff: user.staff || null
-      }, ...fetchedConversations];
-    }
     conversations.value = fetchedConversations;
 
     // Handle selected conversation
-    let newSelectedConversation = response.data.selectedConversation || null;
-    if (!newSelectedConversation) {
-      if (props.initialConversationId) {
+    let newSelectedConversation = null as any;
+    // Prefer the recipientId explicitly requested
+    if (recipientId) {
+      newSelectedConversation = fetchedConversations.find(c => c.id === recipientId) || null;
+    } else {
+      newSelectedConversation = response.data.selectedConversation || null;
+      if (!newSelectedConversation && props.initialConversationId) {
         newSelectedConversation = fetchedConversations.find(c => c.id === props.initialConversationId) || null;
       }
       if (!newSelectedConversation && fetchedConversations.length > 0) {
-        newSelectedConversation = fetchedConversations[0];
+        // Do not auto-select current user; pick the first non-self if available
+        const userId = authUser.value?.id
+        newSelectedConversation = fetchedConversations.find(c => c.id !== userId) || fetchedConversations[0];
       }
     }
 
@@ -229,12 +225,16 @@ watch(() => props.isOpen, (newVal: boolean) => {
   }
 });
 
-watch(search, (value: string) => {
+const debouncedSearch = debounce((val:string) => {
   if (selectedConversation.value) {
-    fetchMessages(selectedConversation.value.id, value);
+    fetchMessages(selectedConversation.value.id, val)
   } else {
-    fetchMessages(null, value);
+    fetchMessages(null, val)
   }
+}, 300)
+
+watch(search, (value: string) => {
+  debouncedSearch(value)
 });
 
 const scrollToBottom = () => {
@@ -328,11 +328,15 @@ const submit = async () => {
 
 const selectConversation = (convoId: number) => {
   selectedConversation.value = conversations.value.find(c => c.id === convoId) || null;
+  if (selectedConversation.value) {
+    showConversationList.value = false
+    fetchMessages(convoId)
+  }
 };
 
 // --- Typing indicator ---
 const sendTyping = () => {
-  if (!form.receiver_id) return;
+  if (!form.receiver_id || isGroupsTab.value) return;
   // Fire-and-forget typing ping
   axios.post(route('messages.typing'), { receiver_id: form.receiver_id }).catch(() => {})
   // Save draft as user types
@@ -386,6 +390,24 @@ const deleteMessage = async (m: Message) => {
   } catch (e) {
     alert('Failed to delete message')
   }
+}
+
+// Context menu state and handlers
+const contextMenu = ref<{visible: boolean, x: number, y: number, msg: any|null, owned: boolean}>({visible: false, x: 0, y: 0, msg: null, owned: false})
+const openContextMenu = (e: MouseEvent, m: any) => {
+  e.preventDefault();
+  const owned = m.sender_id === authUser.value?.id
+  contextMenu.value = { visible: true, x: e.clientX, y: e.clientY, msg: m, owned }
+  document.addEventListener('click', closeContextMenu, { once: true })
+}
+const closeContextMenu = () => { contextMenu.value.visible = false; contextMenu.value.msg = null }
+const onCtxReply = () => { if (contextMenu.value.msg) startReply(contextMenu.value.msg); closeContextMenu() }
+const onCtxEdit = () => { if (contextMenu.value.msg) startEdit(contextMenu.value.msg); closeContextMenu() }
+const onCtxDelete = () => { if (contextMenu.value.msg) deleteMessage(contextMenu.value.msg); closeContextMenu() }
+const onCtxReact = (emoji: string) => {
+  if (!contextMenu.value.msg) return;
+  axios.post(route('messages.react', contextMenu.value.msg.id), { emoji }).catch(()=>{})
+  closeContextMenu()
 }
 </script>
 
@@ -480,7 +502,23 @@ const deleteMessage = async (m: Message) => {
                 <p class="mt-2">Loading messages...</p>
               </div>
             </div>
-          </template>
+            
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
           
           <template v-else-if="!selectedConversation">
             <div class="flex-grow flex items-center justify-center p-6 text-center">
@@ -490,7 +528,23 @@ const deleteMessage = async (m: Message) => {
                 <p class="text-sm">Choose a person from the left pane to start chatting.</p>
               </div>
             </div>
-          </template>
+            
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
           
           <template v-else>
             <!-- Chat Header -->
@@ -529,7 +583,7 @@ const deleteMessage = async (m: Message) => {
                 :class="[message.sender_id === authUser.id ? 'justify-end' : 'justify-start']"
               >
                 <div
-                  class="max-w-[75%] rounded-xl px-4 py-2 text-sm shadow relative"
+                  class="group max-w-[75%] rounded-xl px-4 py-2 text-sm shadow relative"
                   :class="{
                     'bg-blue-500 text-white self-end': message.sender_id === authUser.id,
                     'bg-gray-200 text-gray-800 self-start': message.sender_id !== authUser.id,
@@ -549,7 +603,23 @@ const deleteMessage = async (m: Message) => {
                       <button class="text-xs px-2 py-1 rounded bg-gray-200" @click="cancelEdit">Cancel</button>
                       <button class="text-xs px-2 py-1 rounded bg-indigo-600 text-white" @click="saveEdit(message)">Save</button>
                     </div>
-                  </template>
+                    
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
                   <template v-else>
                   <p class="break-words" v-if="message.message">{{ message.message }}</p>
                   <div v-if="message.attachment || message.attachment_url" class="mt-2 p-2 bg-white/20 rounded-md">
@@ -563,14 +633,62 @@ const deleteMessage = async (m: Message) => {
                           <template v-if="(message.attachment_mime_type && message.attachment_mime_type.startsWith('image/')) || 
                                          (message.attachment && message.attachment.mime_type?.startsWith('image/'))">
                             <Image class="w-5 h-5" />
-                          </template>
+                            
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
                           <template v-else>
                             <File class="w-5 h-5" />
-                          </template>
+                            
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
                           <span>{{ (message.attachment_filename || (message.attachment && message.attachment.filename)) || 'Download File' }}</span>
                       </a>
                   </div>
-                  </template>
+                    
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span 
                       class="text-[11px]"
@@ -582,19 +700,34 @@ const deleteMessage = async (m: Message) => {
                       <Clock v-if="message.isOptimistic" class="w-3.5 h-3.5 text-blue-100" />
                       <CheckCheck v-else-if="message.read_at" class="w-3.5 h-3.5 text-blue-100" title="Read" />
                       <Check v-else class="w-3.5 h-3.5 text-blue-100" title="Sent" />
-                    </template>
+                      
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
                   </div>
 
-                  <!-- Actions menu -->
-                  <div class="absolute top-1" :class="message.sender_id === authUser.id ? 'left-1' : 'right-1'">
-                    <div class="flex gap-1">
-                      <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50"
-                        @click="startReply(message)">Reply</button>
-                      <template v-if="message.sender_id === authUser.id">
-                        <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50" @click="startEdit(message)">Edit</button>
-                        <button class="text-[11px] px-2 py-0.5 rounded bg-white/30 hover:bg-white/50" @click="deleteMessage(message)">Delete</button>
-                      </template>
-                    </div>
+                  <!-- Actions menu (ellipsis on hover) -->
+                  <div class="absolute top-1 opacity-0 group-hover:opacity-100 transition" :class="message.sender_id === authUser.id ? 'left-1' : 'right-1'">
+                    <button
+                      class="text-xs px-2 py-0.5 rounded border border-gray-300/70 dark:border-gray-600/70 bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-100 shadow"
+                      title="More"
+                      @click.stop="openContextMenu($event, message)"
+                    >
+                      •••
+                    </button>
                   </div>
                 </div>
               </div>
@@ -659,7 +792,7 @@ const deleteMessage = async (m: Message) => {
                   ref="messageInput"
                   v-model="form.message"
                   placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
-                  class="flex-grow resize-none rounded-xl border border-input px-4 py-2.5 text-sm leading-5 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 min-h-[44px] max-h-[140px] overflow-y-auto"
+                  class="w-full flex-grow resize-none rounded-xl border border-input px-4 py-2.5 text-sm leading-5 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 min-h-[44px] max-h-[140px] overflow-y-auto"
                   rows="1"
                   @input="() => { sendTyping(); if (messageInput.value) { messageInput.value.style.height = 'auto'; messageInput.value.style.height = Math.min(messageInput.value.scrollHeight, 140) + 'px'; } }"
                   @keydown.enter.prevent="!$event.shiftKey ? submit() : null"
@@ -678,7 +811,23 @@ const deleteMessage = async (m: Message) => {
                 </button>
               </form>
             </div>
-          </template>
+            
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
+</template>
         </div>
       </div>
       
@@ -701,6 +850,34 @@ const deleteMessage = async (m: Message) => {
       <span class="text-sm">Open Chat</span>
     </button>
   </div>
+
+  <!-- Context Menu -->
+  <div v-if="contextMenu.visible" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }" class="fixed z-[99999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+    <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+    <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+    <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+    <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+      <button @click="onCtxReact('👍')">👍</button>
+      <button @click="onCtxReact('❤️')">❤️</button>
+      <button @click="onCtxReact('😊')">😊</button>
+    </div>
+  </div>
+  
+  <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
+  <teleport to="body">
+    <div v-if="contextMenu.visible"
+         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
+      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
+      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
+      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <style scoped>

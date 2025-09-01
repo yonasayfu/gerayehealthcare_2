@@ -39,9 +39,12 @@ class MessageController extends Controller
                         return;
                     }
 
-                    // Staff can chat with other staff and assigned patients
+                    // Staff can chat with other staff, admins, and assigned patients
                     if ($user->staff) {
                         $q->whereHas('staff')
+                          ->orWhereHas('roles', function ($rq) {
+                              $rq->whereIn('name', [\App\Enums\RoleEnum::ADMIN->value, \App\Enums\RoleEnum::SUPER_ADMIN->value]);
+                          })
                           ->orWhereIn('id', function ($sub) use ($user) {
                               $sub->select('user_id')->from('patients')
                                   ->whereIn('id', function ($sub2) use ($user) {
@@ -122,7 +125,9 @@ class MessageController extends Controller
                 })->orWhere(function ($query) use ($user, $selectedConversationUser) {
                     $query->where('sender_id', $selectedConversationUser->id)
                           ->where('receiver_id', $user->id);
-                })->with(['sender', 'receiver'])->orderBy('created_at', 'asc')->get();
+                })->with(['sender', 'receiver', 'reactions', 'replyTo'])
+                  ->orderBy('created_at', 'asc')
+                  ->get();
             }
 
             // Shape conversations with unread counts for UI

@@ -36,6 +36,8 @@ use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GroupMessageController;
 use Illuminate\Support\Facades\Auth;
 // Common Controllers
 use Illuminate\Support\Facades\Route;
@@ -155,6 +157,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])->name('messages.export');
     Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
+
+    // Groups
+    Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
+    Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
+    Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
+    Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->name('groups.messages.store');
+    Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('groups.messages.react');
     Route::patch('/messages/{message}', [WebMessageController::class, 'update'])->name('messages.update');
     Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
     Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
