@@ -5,6 +5,9 @@ import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
+// Read CSRF token from meta for Echo auth requests
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || undefined;
+
 window.Echo = new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
@@ -13,6 +16,14 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_REVERB_PORT,
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
+    authEndpoint: '/broadcasting/auth',
+    withCredentials: true,
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': csrfToken ?? '',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    },
 });
 
 import { createInertiaApp } from '@inertiajs/vue3';
@@ -23,6 +34,8 @@ import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import axios from 'axios';
 
+axios.defaults.withCredentials = true; // Crucial for sending cookies with requests
+
 // Configure Axios with minimal overhead
 const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 if (token) {
@@ -30,49 +43,65 @@ if (token) {
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 }
 
-// Lazy load AppLayout to reduce initial bundle
-const AppLayout = defineAsyncComponent({
-    loader: () => import('@/layouts/AppLayout.vue'),
-    loadingComponent: () => h('div', { class: 'min-h-screen bg-gray-50 flex items-center justify-center' }, [
-        h('div', { class: 'animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600' })
-    ]),
-    delay: 200, // Only show loading after 200ms
-    timeout: 10000, // Timeout after 10 seconds
-});
+// Fetch CSRF cookie for Sanctum SPA authentication, then initialize the app
+axios.get('/sanctum/csrf-cookie').then(() => {
+    // Lazy load AppLayout to reduce initial bundle
+    const AppLayout = defineAsyncComponent({
+        loader: () => import('@/layouts/AppLayout.vue'),
+        loadingComponent: () => h('div', { class: 'min-h-screen bg-gray-50 flex items-center justify-center' }, [
+            h('div', { class: 'animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600' })
+        ]),
+        delay: 200, // Only show loading after 200ms
+        timeout: 10000, // Timeout after 10 seconds
+    });
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+    const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) => {
-        // Simple component resolution without dynamic options
-        const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue');
-        return resolvePageComponent(`./pages/${name}.vue`, pages).catch((error) => {
-            console.error(`Failed to load component: ${name}`, error);
-            // Fallback component
-            return import('./components/ErrorFallback.vue').catch(() => ({
-                template: '<div class="p-8 text-center"><h1 class="text-xl font-semibold text-red-600">Component not found</h1><p class="text-gray-600 mt-2">The requested page could not be loaded.</p></div>'
-            }));
-        });
-    },
-    setup({ el, App, props, plugin }) {
-        const app = createApp({ render: () => h(App, props) })
-            .use(plugin)
-            .use(ZiggyVue)
-            .component('AppLayout', AppLayout);
+    createInertiaApp({
+        title: (title) => (title ? `${title} - ${appName}` : appName),
+        resolve: (name) => {
+            // Simple component resolution without dynamic options
+            const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue');
+            return resolvePageComponent(`./pages/${name}.vue`, pages).catch((error) => {
+                console.error(`Failed to load component: ${name}`, error);
+                // Fallback component
+                return import('./components/ErrorFallback.vue').catch(() => ({
+                    template: '<div class="p-8 text-center"><h1 class="text-xl font-semibold text-red-600">Component not found</h1><p class="text-gray-600 mt-2">The requested page could not be loaded.</p></div>'
+                }));
+            });
+        },
+        setup({ el, App, props, plugin }) {
+            const app = createApp({ render: () => h(App, props) })
+                .use(plugin)
+                .use(ZiggyVue)
+                .component('AppLayout', AppLayout);
+                
+            // Global error handling
+            app.config.errorHandler = (err, instance, info) => {
+                console.error('Vue error:', err, info);
+            };
             
-        // Global error handling
-        app.config.errorHandler = (err, instance, info) => {
-            console.error('Vue error:', err, info);
-        };
-        
-        app.mount(el);
-    },
-    progress: {
-        color: '#4B5563',
-        includeCSS: true,
-        showSpinner: true,
-    },
+            app.mount(el);
+        },
+        progress: {
+            color: '#4B5563',
+            includeCSS: true,
+            showSpinner: true,
+        },
+    });
+}).catch(error => {
+    console.error('Failed to fetch CSRF cookie:', error);
+    // Optionally, render a fallback UI here if the app cannot start
+    const root = document.getElementById('app');
+    if (root) {
+        root.innerHTML = `
+            <div style="font-family: sans-serif; padding: 2rem; text-align: center; background-color: #fef2f2; color: #991b1b;">
+                <h1 style="font-size: 1.5rem; font-weight: bold;">Application failed to start</h1>
+                <p style="margin-top: 0.5rem;">Could not connect to the server to initialize a secure session. Please check your network connection and try again.</p>
+                <p style="margin-top: 1rem; font-size: 0.875rem; color: #7f1d1d;">Error: ${error.message}</p>
+            </div>
+        `;
+    }
 });
 
 // Initialize theme after app setup

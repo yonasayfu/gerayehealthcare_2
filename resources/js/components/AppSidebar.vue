@@ -19,7 +19,7 @@ import {
   Receipt, ShieldCheck, ClipboardList, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder,
   ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Warehouse, Package, FileText, Wrench, Bell,
-  Minimize2, Maximize2, GitFork, BarChart
+  Minimize2, Maximize2, GitFork, BarChart, Pill, FlaskConical
 } from 'lucide-vue-next'
 
 interface SidebarNavItem {
@@ -46,18 +46,29 @@ const props = defineProps<{
 
 const page = usePage();
 const user = computed(() => (page.props as any)?.auth?.user ?? null);
-const userRoles = computed(() => user.value?.roles || []);
+// Normalize roles to lowercase for consistent checks
+const userRoles = computed(() => (user.value?.roles || []).map((r: string) => r.toLowerCase()));
 
 const can = (permission: string): boolean => {
     if (!user.value) return false;
-    if (user.value.roles?.includes('Super Admin')) return true;
-    if (user.value.permissions === null) return false;
+
+    // Check if user is super admin
+    if (userRoles.value?.some((role: string) => role === 'super-admin')) {
+        return true;
+    }
+
+    // Check if user has the specific permission
     return user.value.permissions?.includes(permission) || false;
 }
 
-const isSuperAdmin = computed(() => userRoles.value.includes('Super Admin'))
-const isAdmin = computed(() => userRoles.value.includes('Admin'))
-const isStaff = computed(() => userRoles.value.includes('Staff'))
+const hasRole = (role: string): boolean => {
+    if (!user.value) return false;
+    return userRoles.value?.includes(role.toLowerCase()) || false;
+}
+
+const isSuperAdmin = computed(() => userRoles.value.includes('super-admin'))
+const isAdmin = computed(() => userRoles.value.includes('admin'))
+const isStaff = computed(() => userRoles.value.includes('staff'))
 
 // Track open groups with localStorage persistence
 const SIDEBAR_STORAGE_KEY = 'sidebar-open-groups'
@@ -105,7 +116,10 @@ watch([openGroups, areAllGroupsExpanded], () => {
 const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
-    items: [],
+    items: [
+        { title: 'Messages', routeName: 'dashboard', icon: MessageCircle }, // This will open the chat modal
+        { title: 'Notifications', routeName: 'dashboard', icon: Bell },
+    ],
 };
 
 const allAdminNavItems: SidebarNavGroup[] = [
@@ -234,18 +248,33 @@ const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isStaff.value) {
         return [
             {
+                group: 'Patient Care',
+                icon: UserPlus,
+                items: [
+                    { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
+                    { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
+                    { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
+                    { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
+                    { title: 'Appointments', routeName: 'admin.appointments.index', icon: CalendarDays, permission: 'view appointments' },
+                ]
+            },
+            {
                 group: 'My Tools',
                 icon: UserCheck,
                 items: [
-                    { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
-                    { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
                     { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
                     { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
                     { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
                     { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
-                    { title: 'My Campaigns', routeName: 'staff.marketing-campaigns.index', icon: Megaphone },
-                    { title: 'My Leads', routeName: 'staff.marketing-leads.index', icon: Users },
-                    { title: 'My Marketing Tasks', routeName: 'staff.marketing-tasks.index', icon: ClipboardList },
+                ]
+            },
+            {
+                group: 'Clinical Tools',
+                icon: Stethoscope,
+                items: [
+                    { title: 'Medical Records', routeName: 'admin.medical-records.index', icon: FileText, permission: 'view medical records' },
+                    { title: 'Prescriptions', routeName: 'admin.prescriptions.index', icon: Pill, permission: 'view prescriptions' },
+                    { title: 'Lab Results', routeName: 'admin.lab-results.index', icon: FlaskConical, permission: 'view lab results' },
                 ]
             },
             communicationNavGroup,

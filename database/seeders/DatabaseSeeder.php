@@ -13,36 +13,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Minimal seed for messaging demo: roles, staff, patients (<=7 total)
+        // Comprehensive seed for full RBAC system with test users
         $this->call([
             RolesAndPermissionsSeeder::class,
+            TestUsersSeeder::class,
             StaffSeeder::class,
             PatientSeeder::class,
         ]);
 
-        // --- THE FIX IS HERE ---
+        // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---
         // Use updateOrCreate to safely create or update the admin users.
         // This prevents duplicate email errors on subsequent seeding.
 
-        // Create or find the Super Admin user
-        $superAdminUser = User::updateOrCreate(
+        // Create or find the Legacy Super Admin user (if not created by TestUsersSeeder)
+        $legacySuperAdminUser = User::updateOrCreate(
             ['email' => 'superadmin@geraye.com'],
             [
-                'name' => 'Super Admin',
+                'name' => 'Legacy Super Admin',
                 'password' => bcrypt('password'),
             ]
         );
-        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $legacySuperAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
 
-        // Create or find the Admin user
-        $adminUser = User::updateOrCreate(
+        // Create or find the Legacy Admin user (if not created by TestUsersSeeder)
+        $legacyAdminUser = User::updateOrCreate(
             ['email' => 'admin@geraye.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Legacy Admin User',
                 'password' => bcrypt('password'),
             ]
         );
-        $adminUser->assignRole(RoleEnum::ADMIN->value);
+        $legacyAdminUser->assignRole(RoleEnum::ADMIN->value);
 
         // Seed 2 initial messages to demo notifications
         $staff = \App\Models\Staff::with('user')->first();

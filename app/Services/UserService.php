@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Enums\RoleEnum;
 use Illuminate\Http\Request;
 
 class UserService extends BaseService
@@ -62,7 +63,8 @@ class UserService extends BaseService
                 'hire_date' => $data['hire_date'] ?? null,
             ]);
 
-            $user->assignRole('Staff');
+            // Assign canonical staff role using enum value (lowercase)
+            $user->assignRole(RoleEnum::STAFF->value);
 
             return $user;
         });

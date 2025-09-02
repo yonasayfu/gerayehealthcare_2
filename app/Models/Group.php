@@ -11,10 +11,25 @@ class Group extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','created_by'];
+    protected $fillable = ['name', 'description', 'created_by'];
 
-    public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
-    public function members(): HasMany { return $this->hasMany(GroupMember::class); }
-    public function messages(): HasMany { return $this->hasMany(GroupMessage::class); }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function members(): HasMany
+    {
+        return $this->hasMany(GroupMember::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(GroupMessage::class);
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'group_members')->withPivot('role');
+    }
 }
-

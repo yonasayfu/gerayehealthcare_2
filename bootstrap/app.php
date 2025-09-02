@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'ensure_staff_linked' => \App\Http\Middleware\EnsureStaffLinked::class,
+            'custom_role' => \App\Http\Middleware\RoleMiddleware::class,
+            'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -37,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Resource not found.'], 404);
                 }
+
                 return back()->with('error', 'Resource not found.');
             }
 
@@ -44,6 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $e->getMessage(), 'errors' => []], 422);
                 }
+
                 return back()->with('error', $e->getMessage());
             }
 

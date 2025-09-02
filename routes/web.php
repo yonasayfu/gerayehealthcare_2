@@ -150,23 +150,58 @@ Route::get('dashboard', function () {
 // Debug Route for Permissions
 
 // Messaging & Notifications
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Route::get('/messages/data', [MessageController::class, 'getData'])->name('messages.data');
+Route::middleware(['auth'])->group(function () {
+    // Basic messaging - available to all authenticated users
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
-    Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])->name('messages.export');
     Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
+    Route::patch('/messages/{message}', [MessageController::class, 'update'])->name('messages.update');
+    Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
+    Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
 
-    // Groups
+    // Message export - requires permission
+    Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])
+        ->middleware('custom_permission:export messages')
+        ->name('messages.export');
+
+    // Groups - available to all authenticated users
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
     Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->name('groups.messages.store');
     Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('groups.messages.react');
-    Route::patch('/messages/{message}', [WebMessageController::class, 'update'])->name('messages.update');
-    Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
-    Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
+
+    // Users for group creation - available to all authenticated users
+    Route::get('/users/for-groups', function () {
+        $users = \App\Models\User::select('id', 'name', 'email')
+            ->where('id', '!=', Auth::id())
+            ->orderBy('name')
+            ->get();
+        return response()->json(['data' => $users]);
+    })->name('users.for-groups');
+
+    // Inventory alerts count - available to all authenticated users
+    Route::get('/dashboard/inventory-alerts/count', function () {
+        try {
+            $count = \App\Models\InventoryAlert::count();
+            return response()->json(['count' => $count]);
+        } catch (\Exception $e) {
+            return response()->json(['count' => 0]);
+        }
+    })->name('inventory-alerts.count.public');
+
+    // Debug route to check authentication
+    Route::get('/debug/auth', function () {
+        return response()->json([
+            'authenticated' => Auth::check(),
+            'user_id' => Auth::id(),
+            'user_name' => Auth::user()?->name,
+            'user_roles' => Auth::user()?->roles?->pluck('name'),
+            'user_permissions' => Auth::user()?->permissions,
+        ]);
+    })->name('debug.auth');
+
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
         ->name('notifications.markAsRead');

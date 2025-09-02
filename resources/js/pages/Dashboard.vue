@@ -12,8 +12,9 @@ const breadcrumbs: BreadcrumbItemType[] = [
 ]
 
 const page = usePage();
-const userRoles = computed(() => (page.props as any)?.auth?.user?.roles || []);
-const isStaff = computed(() => userRoles.value.includes('Staff'));
+// Normalize roles to lowercase for consistent checks
+const userRoles = computed(() => ((page.props as any)?.auth?.user?.roles || []).map((r: string) => r.toLowerCase()));
+const isStaff = computed(() => userRoles.value.includes('staff'));
 </script>
 
 <template>

@@ -6,6 +6,7 @@ import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smi
 import { format } from 'date-fns';
 import axios from 'axios';
 import type { User, Message, Conversation, AppPageProps } from '@/types';
+import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import EmojiPicker from 'vue3-emoji-picker';
 import 'vue3-emoji-picker/css';
 
@@ -19,6 +20,52 @@ const emit = defineEmits(['close', 'minimize']);
 const page = usePage<AppPageProps>();
 const authUser = computed<User>(() => page.props.auth.user);
 
+// Permission checking functions
+const hasPermission = (permission: string): boolean => {
+  if (!authUser.value) return false;
+
+  // Check if user is super admin
+  if (authUser.value.roles?.some((role: string) => role === 'super-admin' || role === 'Super Admin')) {
+    return true;
+  }
+
+  // Check if user has the specific permission
+  return authUser.value.permissions?.includes(permission) || false;
+};
+
+const hasRole = (role: string): boolean => {
+  if (!authUser.value) return false;
+  return authUser.value.roles?.includes(role) || false;
+};
+
+const canEditMessage = (message: any): boolean => {
+  if (!authUser.value || !message) return false;
+
+  // User can edit their own messages
+  if (message.sender_id === authUser.value.id) return true;
+
+  // Admins can edit all messages
+  if (hasRole('super-admin') || hasRole('admin') || hasPermission('edit all messages')) {
+    return true;
+  }
+
+  return false;
+};
+
+const canDeleteMessage = (message: any): boolean => {
+  if (!authUser.value || !message) return false;
+
+  // User can delete their own messages
+  if (message.sender_id === authUser.value.id) return true;
+
+  // Admins can delete all messages
+  if (hasRole('super-admin') || hasRole('admin') || hasPermission('delete all messages')) {
+    return true;
+  }
+
+  return false;
+};
+
 const chatContainer = ref<HTMLElement | null>(null);
 const search = ref<string>('');
 const conversations = ref<Conversation[]>([]);
@@ -30,7 +77,9 @@ const loading = ref<boolean>(false);
 const showConversationList = ref(true);
 const isCounterpartTyping = ref(false)
 const isGroupsTab = ref(false)
+const showCreateGroupModal = ref(false)
 let typingPollHandle: number | null = null
+let currentGroupChannel: any = null;
 
 // Minimize handling (local, in addition to parent emit)
 const isMinimized = ref(false)
@@ -82,10 +131,64 @@ onMounted(() => {
   window.addEventListener('resize', updateWindowWidth);
   modalWidth.value = currentWindowWidth.value > 1024 ? 800 : Math.min(currentWindowWidth.value - 40, 600);
   modalHeight.value = currentWindowWidth.value > 768 ? 600 : Math.min(currentWindowWidth.value - 80, 500);
+
+  // Subscribe to user channel for real-time updates
+  try {
+    window.Echo.private(`users.${authUser.value.id}`)
+      .listen('NewMessage', (e: { message: Message }) => {
+        if (selectedConversation.value?.id === e.message.sender_id || selectedConversation.value?.id === e.message.receiver_id) {
+          messages.value.push(e.message);
+          scrollToBottom();
+        }
+      })
+      .listen('MessageReacted', (e: { reaction: Reaction }) => {
+        const message = messages.value.find(m => m.id === e.reaction.reactable_id);
+        if (message) {
+          if (!message.reactions) message.reactions = [];
+          const existingReactionIndex = message.reactions.findIndex(r => r.id === e.reaction.id);
+          if (existingReactionIndex !== -1) {
+            message.reactions[existingReactionIndex] = e.reaction;
+          } else {
+            message.reactions.push(e.reaction);
+          }
+        }
+      })
+      .listen('MessageUpdated', (e: { message: Message }) => {
+        const index = messages.value.findIndex(m => m.id === e.message.id);
+        if (index !== -1) {
+          messages.value[index] = e.message;
+        }
+      })
+      .listen('MessageDeleted', (e: { messageId: number }) => {
+        messages.value = messages.value.filter(m => m.id !== e.messageId);
+      });
+  } catch (error) {
+    console.warn('Broadcasting not available:', error);
+  }
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateWindowWidth);
+
+  // Unsubscribe from user channel
+  try {
+    window.Echo.private(`users.${authUser.value.id}`)
+      .stopListening('NewMessage')
+      .stopListening('MessageReacted')
+      .stopListening('MessageUpdated')
+      .stopListening('MessageDeleted');
+
+    // Unsubscribe from current group channel if any
+    if (currentGroupChannel) {
+      window.Echo.private(`groups.${selectedGroup.value.id}`)
+        .stopListening('NewMessage')
+        .stopListening('MessageReacted')
+        .stopListening('MessageUpdated')
+        .stopListening('MessageDeleted');
+    }
+  } catch (error) {
+    console.warn('Error unsubscribing from channels:', error);
+  }
 });
 
 // --- Resizing Logic ---
@@ -323,6 +426,51 @@ watch(() => selectedConversation.value, (newVal: Conversation | null) => {
   previousSelectedConversationId.value = newId;
 }, { immediate: true });
 
+watch(selectedGroup, (newGroup, oldGroup) => {
+  try {
+    // Unsubscribe from old group channel
+    if (oldGroup && currentGroupChannel) {
+      window.Echo.private(`groups.${oldGroup.id}`)
+        .stopListening('NewMessage')
+        .stopListening('MessageReacted')
+        .stopListening('MessageUpdated')
+        .stopListening('MessageDeleted');
+    }
+
+    // Subscribe to new group channel
+    if (newGroup) {
+      currentGroupChannel = window.Echo.private(`groups.${newGroup.id}`)
+      .listen('NewMessage', (e: { message: Message }) => {
+        messages.value.push(e.message);
+        scrollToBottom();
+      })
+      .listen('MessageReacted', (e: { reaction: Reaction }) => {
+        const message = messages.value.find(m => m.id === e.reaction.reactable_id);
+        if (message) {
+          if (!message.reactions) message.reactions = [];
+          const existingReactionIndex = message.reactions.findIndex(r => r.id === e.reaction.id);
+          if (existingReactionIndex !== -1) {
+            message.reactions[existingReactionIndex] = e.reaction;
+          } else {
+            message.reactions.push(e.reaction);
+          }
+        }
+      })
+      .listen('MessageUpdated', (e: { message: Message }) => {
+        const index = messages.value.findIndex(m => m.id === e.message.id);
+        if (index !== -1) {
+          messages.value[index] = e.message;
+        }
+      })
+      .listen('MessageDeleted', (e: { messageId: number }) => {
+        messages.value = messages.value.filter(m => m.id !== e.messageId);
+      });
+    }
+  } catch (error) {
+    console.warn('Error managing group channels:', error);
+  }
+});
+
 // --- Message Submission (Fixed) ---
 const submit = async () => {
   if (isGroupsTab.value) {
@@ -360,10 +508,11 @@ const submit = async () => {
   } else {
     if (!form.receiver_id || (!form.message.trim() && !form.attachment) || isSending.value) return;
     
+    let tempMessage: Message | null = null; // Declare outside try block
     try {
       isSending.value = true
       // Create optimistic message
-      const tempMessage: Message = {
+      tempMessage = { // Assign value here
         id: Date.now(), // Temporary ID
         sender_id: authUser.value.id,
         receiver_id: form.receiver_id,
@@ -408,7 +557,9 @@ const submit = async () => {
     } catch (error) {
       console.error('Error sending message:', error);
       // Remove optimistic message on error
-      messages.value = messages.value.filter(m => m.id !== tempMessage.id);
+      if (tempMessage) { // Check if tempMessage was assigned
+        messages.value = messages.value.filter(m => m.id !== tempMessage.id);
+      }
       alert('Failed to send message. Please try again.');
     } finally {
       isSending.value = false
@@ -430,6 +581,9 @@ const sendTyping = () => {
 }
 
 const startTypingPoll = () => {
+  // Temporarily disabled to prevent 403 errors
+  return;
+
   if (!selectedConversation.value || isGroupsTab.value) return;
   if (typingPollHandle) window.clearInterval(typingPollHandle);
   const poll = async () => {
@@ -487,7 +641,23 @@ const deleteMessage = async (m: Message) => {
 }
 
 // Context menu state and handlers
-const contextMenu = ref<{visible: boolean, x: number, y: number, msg: any|null, owned: boolean}>({visible: false, x: 0, y: 0, msg: null, owned: false})
+const contextMenu = ref<{
+  visible: boolean,
+  x: number,
+  y: number,
+  msg: any|null,
+  owned: boolean,
+  canEdit: boolean,
+  canDelete: boolean
+}>({
+  visible: false,
+  x: 0,
+  y: 0,
+  msg: null,
+  owned: false,
+  canEdit: false,
+  canDelete: false
+})
 const longPressTimer = ref<number | null>(null);
 
 const onTouchStart = (event: TouchEvent, message: Message) => {
@@ -505,15 +675,116 @@ const onTouchEnd = () => {
 
 const openContextMenu = (e: MouseEvent | TouchEvent, m: any) => {
   e.preventDefault();
-  const owned = m.sender_id === authUser.value?.id
-  const touch = e instanceof TouchEvent ? e.touches[0] || e.changedTouches[0] : e;
-  contextMenu.value = { visible: true, x: touch.clientX, y: touch.clientY, msg: m, owned }
-  document.addEventListener('click', closeContextMenu, { once: true })
+  e.stopPropagation();
+
+  // Close any existing context menu first
+  closeContextMenu();
+
+  const owned = m.sender_id === authUser.value?.id;
+  const canEdit = canEditMessage(m);
+  const canDelete = canDeleteMessage(m);
+
+  let x: number, y: number;
+
+  if (e instanceof TouchEvent) {
+    const touch = e.touches[0] || e.changedTouches[0];
+    x = touch.clientX;
+    y = touch.clientY;
+  } else {
+    x = e.clientX;
+    y = e.clientY;
+  }
+
+  // Adjust position if menu would go off-screen
+  const menuWidth = 180;
+  const menuHeight = 150;
+
+  if (x + menuWidth > window.innerWidth) {
+    x = window.innerWidth - menuWidth - 10;
+  }
+
+  if (y + menuHeight > window.innerHeight) {
+    y = window.innerHeight - menuHeight - 10;
+  }
+
+  // Ensure minimum distance from edges
+  x = Math.max(10, x);
+  y = Math.max(10, y);
+
+  contextMenu.value = {
+    visible: true,
+    x,
+    y,
+    msg: m,
+    owned,
+    canEdit,
+    canDelete
+  };
+
+  // Close menu when clicking outside - use nextTick to avoid immediate closure
+  nextTick(() => {
+    const handleClickOutside = (event: Event) => {
+      const target = event.target as Element;
+      if (!target.closest('.context-menu')) {
+        closeContextMenu();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside, { once: true });
+    document.addEventListener('contextmenu', handleClickOutside, { once: true });
+  });
 }
-const closeContextMenu = () => { contextMenu.value.visible = false; contextMenu.value.msg = null }
-const onCtxReply = () => { if (contextMenu.value.msg) startReply(contextMenu.value.msg); closeContextMenu() }
-const onCtxEdit = () => { if (contextMenu.value.msg) startEdit(contextMenu.value.msg); closeContextMenu() }
-const onCtxDelete = () => { if (contextMenu.value.msg) deleteMessage(contextMenu.value.msg); closeContextMenu() }
+
+const closeContextMenu = () => {
+  contextMenu.value.visible = false;
+  contextMenu.value.msg = null;
+  contextMenu.value.owned = false;
+  contextMenu.value.canEdit = false;
+  contextMenu.value.canDelete = false;
+}
+const onCtxReply = () => {
+  if (contextMenu.value.msg) {
+    startReply(contextMenu.value.msg);
+    // Focus on message input
+    nextTick(() => {
+      const messageInput = document.querySelector('#message-input') as HTMLTextAreaElement;
+      if (messageInput) {
+        messageInput.focus();
+      }
+    });
+  }
+  closeContextMenu();
+}
+
+const onCtxEdit = () => {
+  if (contextMenu.value.msg && contextMenu.value.canEdit) {
+    startEdit(contextMenu.value.msg);
+    // Focus on message input
+    nextTick(() => {
+      const messageInput = document.querySelector('#message-input') as HTMLTextAreaElement;
+      if (messageInput) {
+        messageInput.focus();
+        messageInput.select();
+      }
+    });
+  }
+  closeContextMenu();
+}
+
+const onCtxDelete = async () => {
+  if (contextMenu.value.msg && contextMenu.value.canDelete) {
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+      try {
+        await deleteMessage(contextMenu.value.msg);
+      } catch (error) {
+        console.error('Failed to delete message:', error);
+        alert('Failed to delete message. Please try again.');
+      }
+    }
+  }
+  closeContextMenu();
+}
 const onCtxReact = (emoji: string) => {
   if (!contextMenu.value.msg) return;
   if (isGroupsTab.value) {
@@ -534,6 +805,24 @@ const groupedReactions = (reactions: any[]) => {
     return acc
   }, {} as Record<string, any[]>)
 }
+
+const handleGroupCreated = async (newGroup: Group) => {
+  // Refresh groups list from server to ensure consistency
+  await fetchGroups();
+
+  // Select the newly created group
+  const createdGroup = groups.value.find(g => g.id === newGroup.id);
+  if (createdGroup) {
+    selectedGroup.value = createdGroup;
+  } else {
+    // Fallback: add the group if not found in the refreshed list
+    groups.value.push(newGroup);
+    selectedGroup.value = newGroup;
+  }
+
+  showCreateGroupModal.value = false;
+  showConversationList.value = false; // Hide conversation list to show chat area
+};
 </script>
 
 <template>
@@ -579,6 +868,13 @@ const groupedReactions = (reactions: any[]) => {
               <button @click="isGroupsTab = false" class="px-4 py-2 text-sm font-medium w-1/2" :class="!isGroupsTab ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'">People</button>
               <button @click="isGroupsTab = true" class="px-4 py-2 text-sm font-medium w-1/2" :class="isGroupsTab ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'">Groups</button>
             </div>
+            <button
+              v-if="isGroupsTab && (hasPermission('create groups') || hasRole('admin') || hasRole('super-admin'))"
+              @click="showCreateGroupModal = true"
+              class="w-full mb-4 px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition"
+            >
+              Create New Group
+            </button>
             <input
               type="text"
               v-model="search"
@@ -715,6 +1011,19 @@ const groupedReactions = (reactions: any[]) => {
                     'opacity-80': message.isOptimistic
                   }"
                 >
+                  <!-- 3-dot menu button -->
+                  <button
+                    @click.stop.prevent="openContextMenu($event, message)"
+                    class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                    :class="{
+                      'text-white hover:bg-white/20': message.sender_id === authUser.id,
+                      'text-gray-600 hover:bg-gray-300': message.sender_id !== authUser.id
+                    }"
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                    </svg>
+                  </button>
                   <!-- Reply preview (quoted) -->
                   <div v-if="message.reply_to_id" class="mb-2 pl-2 border-l-2"
                     :class="message.sender_id === authUser.id ? 'border-white/50 text-white/80' : 'border-gray-500 text-gray-700'">
@@ -762,17 +1071,6 @@ const groupedReactions = (reactions: any[]) => {
                       <CheckCheck v-else-if="message.read_at" class="w-3.5 h-3.5 text-blue-100" title="Read" />
                       <Check v-else class="w-3.5 h-3.5 text-blue-100" title="Sent" />
 </template>
-                  </div>
-
-                  <!-- Actions menu (ellipsis on hover) -->
-                  <div class="absolute top-1 opacity-0 group-hover:opacity-100 transition" :class="message.sender_id === authUser.id ? 'left-1' : 'right-1'">
-                    <button
-                      class="text-xs px-2 py-0.5 rounded border border-gray-300/70 dark:border-gray-600/70 bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-gray-100 shadow"
-                      title="More"
-                      @click.stop="openContextMenu($event, message)"
-                    >
-                      •••
-                    </button>
                   </div>
 
                   <!-- Reactions -->
@@ -847,7 +1145,7 @@ const groupedReactions = (reactions: any[]) => {
                   placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
                   class="w-full flex-grow resize-none rounded-xl border border-input px-4 py-2.5 text-sm leading-5 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 min-h-[44px] max-h-[140px] overflow-y-auto"
                   rows="1"
-                  @input="() => { sendTyping(); if (messageInput.value) { messageInput.value.style.height = 'auto'; messageInput.value.style.height = Math.min(messageInput.value.scrollHeight, 140) + 'px'; } }"
+                  @input="(event) => { sendTyping(); const target = event.target as HTMLTextAreaElement; if (target) { target.style.height = 'auto'; target.style.height = Math.min(target.scrollHeight, 140) + 'px'; } }"
                   @keydown.enter.prevent="!$event.shiftKey ? submit() : null"
                 />
                 
@@ -893,18 +1191,59 @@ const groupedReactions = (reactions: any[]) => {
   <!-- Context Menu (teleport to body to avoid z-index/overflow issues) -->
   <teleport to="body">
     <div v-if="contextMenu.visible"
-         :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
-         class="fixed z-[2147483647] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-md text-sm">
-      <button class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxReply">Reply</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxEdit">Edit</button>
-      <button v-if="contextMenu.owned" class="block w-full text-left px-3 py-2 hover:bg-accent" @click="onCtxDelete">Delete</button>
-      <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700 flex gap-2">
-        <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
-        <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
-        <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+         :style="{
+           top: contextMenu.y + 'px',
+           left: contextMenu.x + 'px',
+           zIndex: 2147483647
+         }"
+         class="context-menu fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl text-sm min-w-[180px] overflow-hidden"
+         @click.stop>
+      <div class="py-1">
+        <button
+          class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          @click="onCtxReply"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+          </svg>
+          Reply
+        </button>
+        <button
+          v-if="contextMenu.canEdit"
+          class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          @click="onCtxEdit"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Edit
+        </button>
+        <button
+          v-if="contextMenu.canDelete"
+          class="flex items-center w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors"
+          @click="onCtxDelete"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+          Delete
+        </button>
+      </div>
+      <div class="border-t border-gray-200 dark:border-gray-700 px-3 py-2">
+        <div class="flex gap-1 flex-wrap">
+          <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
+          <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
+          <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
+        </div>
       </div>
     </div>
   </teleport>
+
+  <CreateGroupModal
+    :show="showCreateGroupModal"
+    @close="showCreateGroupModal = false"
+    @groupCreated="handleGroupCreated"
+  />
 </template>
 
 <style scoped>

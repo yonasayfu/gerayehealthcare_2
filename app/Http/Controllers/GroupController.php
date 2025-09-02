@@ -22,17 +22,51 @@ class GroupController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => ['required','string','max:255'],
-            'member_ids' => ['array'],
-            'member_ids.*' => ['integer','exists:users,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:500'],
+            'members' => ['array'],
+            'members.*' => ['integer', 'exists:users,id'],
         ]);
-        $group = Group::create(['name' => $data['name'], 'created_by' => Auth::id()]);
-        GroupMember::create(['group_id' => $group->id, 'user_id' => Auth::id(), 'role' => 'owner']);
-        foreach (($data['member_ids'] ?? []) as $uid) {
-            if ($uid === Auth::id()) continue;
-            GroupMember::firstOrCreate(['group_id' => $group->id, 'user_id' => $uid], ['role' => 'member']);
+
+        // Create the group
+        $group = Group::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'created_by' => Auth::id()
+        ]);
+
+        // Add the creator as owner
+        GroupMember::create([
+            'group_id' => $group->id,
+            'user_id' => Auth::id(),
+            'role' => 'owner'
+        ]);
+
+        // Add selected members
+        foreach (($data['members'] ?? []) as $uid) {
+            if ($uid === Auth::id()) continue; // Skip creator
+            GroupMember::firstOrCreate([
+                'group_id' => $group->id,
+                'user_id' => $uid
+            ], [
+                'role' => 'member'
+            ]);
         }
-        return response()->json(['data' => $group->load('members.user')], 201);
+
+        // Load the group with members for response
+        $group->load('members.user:id,name,email');
+
+        // For AJAX requests, return JSON response
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Group created successfully!',
+                'data' => $group
+            ], 201);
+        }
+
+        // For regular form submissions, return Inertia response
+        return back()->with('success', 'Group created successfully!')->with('group', $group);
     }
 }
 
