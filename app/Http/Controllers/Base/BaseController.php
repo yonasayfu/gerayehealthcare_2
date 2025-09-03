@@ -63,6 +63,9 @@ class BaseController extends Controller
                 $dtoData = $this->prepareDataForDTO($validatedData);
                 // For plain PHP DTOs (no static from() / toArray()), use the prepared array directly
                 $payload = $dtoData;
+                if ($this->dtoClass === \App\DTOs\CreateVisitServiceDTO::class && ! isset($payload['is_paid_to_staff'])) {
+                    $payload['is_paid_to_staff'] = false;
+                }
             } else {
                 $payload = $validatedData;
             }
@@ -78,6 +81,7 @@ class BaseController extends Controller
             return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
         } catch (\Exception $e) {
             Log::error('Error in BaseController store method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }
@@ -129,7 +133,7 @@ class BaseController extends Controller
 
             // Important: avoid overwriting existing DB values with nulls for fields not present
             $payload = array_filter($payload, function ($value) {
-                return !is_null($value);
+                return ! is_null($value);
             });
 
             $this->service->update($id, $payload);
@@ -143,6 +147,7 @@ class BaseController extends Controller
             return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
         } catch (\Exception $e) {
             Log::error('Error in BaseController update method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }
@@ -159,6 +164,7 @@ class BaseController extends Controller
             return redirect()->route('admin.'.$this->getRouteName().'.index');
         } catch (\Exception $e) {
             Log::error('Error in BaseController destroy method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
             return back()->with('banner', 'An unexpected error occurred during deletion: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }

@@ -80,7 +80,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view system logs', 'manage system maintenance', 'view system health',
 
             // Communication & Messaging
-            'view messages', 'send messages', 'delete messages', 'manage group messages',
+            'view messages', 'send messages', 'delete messages', 'manage group messages', 'create groups', 'export messages',
             'view notifications', 'send notifications', 'manage notification settings',
 
             // Profile & Personal
@@ -93,6 +93,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view appointments', 'create appointments', 'edit appointments', 'cancel appointments',
             'view visit services', 'create visit services', 'edit visit services',
             'view medical documents', 'upload medical documents', 'download medical documents',
+            'view lab results', 'create lab results', 'edit lab results', 'delete lab results',
         ];
 
         foreach ($permissions as $permission) {
@@ -141,7 +142,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view system health', 'view system logs',
 
             // Communication
-            'view messages', 'send messages', 'view notifications',
+            'view messages', 'send messages', 'view notifications', 'create groups', 'manage group messages', 'export messages',
 
             // Personal
             'view own profile', 'edit own profile', 'change own password',
@@ -262,6 +263,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'view appointments', 'create appointments', 'edit appointments',
             'view visit services', 'create visit services', 'edit visit services',
             'view medical documents', 'upload medical documents', 'download medical documents',
+            'view lab results', 'create lab results', 'edit lab results',
 
             // Assignment Management (View Own)
             'view assignments',

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Services\GlobalSearchService;
+use Illuminate\Http\Request;
 
 class GlobalSearchController extends Controller
 {
@@ -17,7 +17,9 @@ class GlobalSearchController extends Controller
 
     public function search(Request $request)
     {
-        // Just return empty results for now - UI only
-        return response()->json([]);
+        $query = $request->input('q', '');
+        $results = $this->globalSearchService->search($query);
+
+        return response()->json($results);
     }
 }

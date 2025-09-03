@@ -15,16 +15,16 @@ Each issue is listed as a **checkbox item** so developers/AI agents can track pr
 ## 1. **Message Module**
 
 * [x] File attachments not working.
-* [ ] Cannot send messages as user (e.g., Yonas) to legacy super admin/admin.
-* [ ] Stored messages not fetched/displayed.
-* [ ] Edit/Delete/3-dot actions don’t trigger (only in console, dialog closes).
-* [ ] Search UI placeholder misaligned.
-* [ ] User list initials not styled (circle + color missing).
-* [ ] Text area not responsive (works for super admin only).
-* [ ] CEO cannot create group; Super admin can but UI buggy (group disappears).
+* [x] Cannot send messages as user (e.g., Yonas) to legacy super admin/admin.
+* [x] Stored messages not fetched/displayed.
+* [x] Edit/Delete/3-dot actions don’t trigger (only in console, dialog closes).
+* [x] Search UI placeholder misaligned.
+* [x] User list initials not styled (circle + color missing).
+* [x] Text area not responsive (works for super admin only).
+* [x] CEO cannot create group; Super admin can but UI buggy (group disappears).
 * [x] CEO cannot download chat (403 Access Denied).
-* [ ] Chat modal resize persists → needs reset option.
-* [ ] No settings functionality.
+* [x] Chat modal resize persists → needs reset option.
+* [x] No settings functionality.
 * [x] WebSocket connection fails.
 * [x] Vue errors:
 
@@ -35,8 +35,8 @@ Each issue is listed as a **checkbox item** so developers/AI agents can track pr
 
 ## 2. **Notifications**
 
-* [ ] Indicator doesn’t reset after reading.
-* [ ] Bell dropdown cannot close (close icon missing, padding collapsed).
+* [x] Indicator doesn’t reset after reading.
+* [x] Bell dropdown cannot close (close icon missing, padding collapsed).
 
 ---
 

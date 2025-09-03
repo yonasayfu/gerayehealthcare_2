@@ -22,8 +22,8 @@ class EnsureStaffLinked
             return redirect()->route('login');
         }
 
-        // Bypass for admin roles
-        if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::ADMIN->value])) {
+        // Bypass for admin and executive roles
+        if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::CEO->value, RoleEnum::COO->value, RoleEnum::ADMIN->value])) {
             return $next($request);
         }
 

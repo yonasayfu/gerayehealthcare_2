@@ -375,6 +375,10 @@ watch(() => props.isOpen, (newVal: boolean) => {
       fetchMessages(props.initialConversationId || null);
     }
     startTypingPoll();
+  } else {
+    // Reset modal size
+    modalWidth.value = 800;
+    modalHeight.value = 600;
   }
 });
 
@@ -508,66 +512,25 @@ const submit = async () => {
   } else {
     if (!form.receiver_id || (!form.message.trim() && !form.attachment) || isSending.value) return;
     
-    let tempMessage: Message | null = null; // Declare outside try block
-    try {
-      isSending.value = true
-      // Create optimistic message
-      tempMessage = { // Assign value here
-        id: Date.now(), // Temporary ID
-        sender_id: authUser.value.id,
-        receiver_id: form.receiver_id,
-        message: form.message,
-        attachment: form.attachment ? {
-          filename: form.attachment.name,
-          url: URL.createObjectURL(form.attachment),
-          mime_type: form.attachment.type
-        } : null,
-        created_at: new Date().toISOString(),
-        isOptimistic: true
-      };
-      
-      // Add to messages immediately
-      messages.value = [...messages.value, tempMessage];
-      scrollToBottom();
-      
-      // Prepare form data
-      const formData = new FormData();
-      formData.append('receiver_id', form.receiver_id.toString());
-      formData.append('message', form.message);
-      if (form.attachment) formData.append('attachment', form.attachment);
-      if (replyTarget.value) formData.append('reply_to_id', String(replyTarget.value.id))
-      
-      // Submit to server
-      await axios.post(route('messages.store'), formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      // Clear form fields
-      form.message = '';
-      form.attachment = null;
-      if (attachmentInput.value) attachmentInput.value.value = '';
-      if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value)
-      attachmentPreviewUrl.value = null
-      replyTarget.value = null
-      // clear draft for this conversation
-      if (draftKey.value) localStorage.removeItem(draftKey.value)
-
-      // Refetch to get actual message from server
-      fetchMessages(form.receiver_id);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      // Remove optimistic message on error
-      if (tempMessage) { // Check if tempMessage was assigned
-        messages.value = messages.value.filter(m => m.id !== tempMessage.id);
-      }
-      alert('Failed to send message. Please try again.');
-    } finally {
-      isSending.value = false
-      nextTick(() => messageInput.value?.focus())
-      if (messageInput.value && messageInput.value.style) {
-        messageInput.value.style.height = 'auto'
-      }
-    }
+    form.post(route('messages.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            i.value = ""
+            form.reset('message')
+            g() // removeAttachment
+            r({ title: 'Message sent', description: 'Your message has been sent successfully.' })
+            window.location.href = route('admin.messages.index', n.value?.id)
+        },
+        onError: e => {
+            let t = "An unknown error occurred.";
+            e.message ? t = Array.isArray(e.message) ? e.message[0] : e.message : e.attachment ? t = Array.isArray(e.attachment) ? e.attachment[0] : e.attachment : e.receiver_id && (t = "Invalid recipient selected."), r({
+                title: "Failed to send message",
+                description: t,
+                variant: "destructive"
+            })
+        },
+        onFinish: () => {}
+    });
   }
 };
 
@@ -723,15 +686,17 @@ const openContextMenu = (e: MouseEvent | TouchEvent, m: any) => {
 
   // Close menu when clicking outside - use nextTick to avoid immediate closure
   nextTick(() => {
-    const handleClickOutside = (event: Event) => {
-      const target = event.target as Element;
-      if (!target.closest('.context-menu')) {
-        closeContextMenu();
-      }
-    };
+    setTimeout(() => {
+        const handleClickOutside = (event: Event) => {
+          const target = event.target as Element;
+          if (!target.closest('.context-menu')) {
+            closeContextMenu();
+          }
+        };
 
-    document.addEventListener('click', handleClickOutside, { once: true });
-    document.addEventListener('contextmenu', handleClickOutside, { once: true });
+        document.addEventListener('click', handleClickOutside, { once: true });
+        document.addEventListener('contextmenu', handleClickOutside, { once: true });
+    }, 0);
   });
 }
 
@@ -806,20 +771,9 @@ const groupedReactions = (reactions: any[]) => {
   }, {} as Record<string, any[]>)
 }
 
-const handleGroupCreated = async (newGroup: Group) => {
-  // Refresh groups list from server to ensure consistency
-  await fetchGroups();
-
-  // Select the newly created group
-  const createdGroup = groups.value.find(g => g.id === newGroup.id);
-  if (createdGroup) {
-    selectedGroup.value = createdGroup;
-  } else {
-    // Fallback: add the group if not found in the refreshed list
-    groups.value.push(newGroup);
-    selectedGroup.value = newGroup;
-  }
-
+const handleGroupCreated = (newGroup: Group) => {
+  groups.value.push(newGroup);
+  selectedGroup.value = newGroup;
   showCreateGroupModal.value = false;
   showConversationList.value = false; // Hide conversation list to show chat area
 };
@@ -875,13 +829,13 @@ const handleGroupCreated = async (newGroup: Group) => {
             >
               Create New Group
             </button>
+            <Search class="absolute left-7 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
             <input
               type="text"
               v-model="search"
               placeholder="Search conversations..."
-              class="pr-10 form-input w-full rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
+              class="pl-10 pr-4 form-input w-full rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
             />
-            <Search class="absolute right-7 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
           </div>
           <div class="flex-grow overflow-y-auto custom-scrollbar">
             <template v-if="!isGroupsTab">
@@ -901,7 +855,7 @@ const handleGroupCreated = async (newGroup: Group) => {
                     :alt="convo.name" 
                     class="w-10 h-10 rounded-full object-cover flex-shrink-0"
                   >
-                  <div v-else class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-sm font-medium flex-shrink-0">
+                  <div v-else class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium flex-shrink-0">
                     {{ convo.name.charAt(0).toUpperCase() }}
                   </div>
                   <div class="min-w-0 flex-1">

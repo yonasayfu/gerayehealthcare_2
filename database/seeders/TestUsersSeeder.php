@@ -31,6 +31,19 @@ class TestUsersSeeder extends Seeder
                 ],
             ],
             [
+                'name' => 'Yonas Sayfu',
+                'email' => 'yonas@gerayehealthcare.com',
+                'password' => 'CEO123!',
+                'role' => RoleEnum::CEO,
+                'staff_data' => [
+                    'first_name' => 'Yonas',
+                    'last_name' => 'Sayfu',
+                    'position' => 'Chief Executive Officer',
+                    'department' => 'Executive',
+                    'phone' => '+251911000002',
+                ],
+            ],
+            [
                 'name' => 'Dr. Sarah Johnson',
                 'email' => 'ceo@gerayehealthcare.com',
                 'password' => 'CEO123!',
@@ -40,7 +53,7 @@ class TestUsersSeeder extends Seeder
                     'last_name' => 'Johnson',
                     'position' => 'Chief Executive Officer',
                     'department' => 'Executive',
-                    'phone' => '+251911000002',
+                    'phone' => '+251911000003',
                 ],
             ],
             [
@@ -53,7 +66,7 @@ class TestUsersSeeder extends Seeder
                     'last_name' => 'Chen',
                     'position' => 'Chief Operating Officer',
                     'department' => 'Operations',
-                    'phone' => '+251911000003',
+                    'phone' => '+251911000004',
                 ],
             ],
             [
@@ -66,7 +79,7 @@ class TestUsersSeeder extends Seeder
                     'last_name' => 'Rodriguez',
                     'position' => 'System Administrator',
                     'department' => 'Administration',
-                    'phone' => '+251911000004',
+                    'phone' => '+251911000005',
                 ],
             ],
             [
@@ -79,7 +92,7 @@ class TestUsersSeeder extends Seeder
                     'last_name' => 'Wilson',
                     'position' => 'Senior Doctor',
                     'department' => 'Cardiology',
-                    'phone' => '+251911000005',
+                    'phone' => '+251911000007',
                 ],
             ],
             [

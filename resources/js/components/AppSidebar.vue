@@ -67,6 +67,8 @@ const hasRole = (role: string): boolean => {
 }
 
 const isSuperAdmin = computed(() => userRoles.value.includes('super-admin'))
+const isCEO = computed(() => userRoles.value.includes('ceo'))
+const isCOO = computed(() => userRoles.value.includes('coo'))
 const isAdmin = computed(() => userRoles.value.includes('admin'))
 const isStaff = computed(() => userRoles.value.includes('staff'))
 
@@ -117,10 +119,11 @@ const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
     items: [
-        { title: 'Messages', routeName: 'dashboard', icon: MessageCircle }, // This will open the chat modal
-        { title: 'Notifications', routeName: 'dashboard', icon: Bell },
-    ],
+        { title: 'Messages', routeName: 'admin.messages', icon: MessageCircle },
+    ]
 };
+
+// Notifications are handled by the NotificationBell component in the header
 
 const allAdminNavItems: SidebarNavGroup[] = [
   {
@@ -241,6 +244,50 @@ const allAdminNavItems: SidebarNavGroup[] = [
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (isSuperAdmin.value) {
         return allAdminNavItems;
+    }
+    if (isCEO.value) {
+        // CEO gets executive-level access with focus on analytics and oversight
+        return [
+            {
+                group: 'Executive Dashboard',
+                icon: LayoutGrid,
+                items: [
+                    { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
+                    { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
+                ]
+            },
+            {
+                group: 'Patient Management',
+                icon: UserPlus,
+                items: [
+                    { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
+                    { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visit services' },
+                    { title: 'Medical Documents', routeName: 'admin.medical-documents.index', icon: Folder, permission: 'view medical documents' },
+                ]
+            },
+            {
+                group: 'Staff Oversight',
+                icon: UserCog,
+                items: [
+                    { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
+                    { title: 'Staff Schedules', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff schedules' },
+                ]
+            },
+            {
+                group: 'Reports & Analytics',
+                icon: BarChart,
+                items: [
+                    { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList },
+                    { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign },
+                    { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart },
+                ]
+            },
+            communicationNavGroup,
+        ];
+    }
+    if (isCOO.value) {
+        // COO gets operational management access
+        return allAdminNavItems.filter(group => !group.superAdminOnly);
     }
     if (isAdmin.value) {
         return allAdminNavItems.filter(group => !group.superAdminOnly);

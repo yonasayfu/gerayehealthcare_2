@@ -10,23 +10,23 @@ class MessagePolicy
 {
     public function communicate(User $authUser, User $other): bool
     {
-        if ($authUser->id === $other->id) return false;
+        if ($authUser->id === $other->id) {
+            return false;
+        }
 
         $authIsStaff = (bool) $authUser->staff;
-        $otherIsStaff = (bool) $other->staff;
 
-        if ($authIsStaff && $otherIsStaff) return true;
+        if ($authIsStaff) {
+            return true;
+        }
+
+        $otherIsStaff = (bool) $other->staff;
 
         $authPatient = Patient::where('user_id', $authUser->id)->first();
         $otherPatient = Patient::where('user_id', $other->id)->first();
 
-        if ($authPatient && $otherPatient) return false;
-
-        if ($authIsStaff && $otherPatient) {
-            return CaregiverAssignment::where('patient_id', $otherPatient->id)
-                ->where('staff_id', optional($authUser->staff)->id)
-                ->where('status', 'Assigned')
-                ->exists();
+        if ($authPatient && $otherPatient) {
+            return false;
         }
 
         if ($otherIsStaff && $authPatient) {
@@ -39,4 +39,3 @@ class MessagePolicy
         return false;
     }
 }
-

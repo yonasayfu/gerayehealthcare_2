@@ -12,10 +12,10 @@ use App\Http\Controllers\Admin\EventRecommendationController;
 use App\Http\Controllers\Admin\EventStaffAssignmentController;
 use App\Http\Controllers\Admin\GlobalSearchController;
 use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\MedicalDocumentController;
-use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
+use App\Http\Controllers\Admin\MedicalDocumentController;
 use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\ReferralDocumentController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\ServiceController;
@@ -26,23 +26,22 @@ use App\Http\Controllers\Admin\StaffPayoutController;
 use App\Http\Controllers\Admin\TaskDelegationController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VisitServiceController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GroupMessageController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\MessageController as WebMessageController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 // Staff Controllers
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
 use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestController;
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
 use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\GroupMessageController;
-use Illuminate\Support\Facades\Auth;
-// Common Controllers
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+// Common Controllers
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 /*
@@ -82,13 +81,13 @@ Route::get('/performance-test', function (Request $request) {
         DB::connection()->getPdo();
         $results['database_connection'] = [
             'status' => 'success',
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
         ];
     } catch (Exception $e) {
         $results['database_connection'] = [
             'status' => 'error',
             'error' => $e->getMessage(),
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
         ];
     }
 
@@ -99,13 +98,13 @@ Route::get('/performance-test', function (Request $request) {
         $results['basic_query'] = [
             'status' => 'success',
             'result' => "Found {$patientCount} patients",
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
         ];
     } catch (Exception $e) {
         $results['basic_query'] = [
             'status' => 'error',
             'error' => $e->getMessage(),
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms'
+            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
         ];
     }
 
@@ -113,13 +112,13 @@ Route::get('/performance-test', function (Request $request) {
 
     $recommendations = [];
     if ($totalTime > 0.1) {
-        $recommendations[] = "Total execution time is " . round($totalTime * 1000, 2) . "ms. Consider optimizing slow operations.";
+        $recommendations[] = 'Total execution time is ' . round($totalTime * 1000, 2) . 'ms. Consider optimizing slow operations.';
     }
     if ($queryCount > 10) {
         $recommendations[] = "High query count ({$queryCount}). Consider using eager loading or caching.";
     }
     if (empty($recommendations)) {
-        $recommendations[] = "Backend performance looks good. Check frontend optimization and network conditions.";
+        $recommendations[] = 'Backend performance looks good. Check frontend optimization and network conditions.';
     }
 
     return response()->json([
@@ -131,7 +130,7 @@ Route::get('/performance-test', function (Request $request) {
         'laravel_version' => app()->version(),
         'environment' => app()->environment(),
         'tests' => $results,
-        'recommendations' => $recommendations
+        'recommendations' => $recommendations,
     ]);
 })->name('performance.test');
 
@@ -178,6 +177,7 @@ Route::middleware(['auth'])->group(function () {
             ->where('id', '!=', Auth::id())
             ->orderBy('name')
             ->get();
+
         return response()->json(['data' => $users]);
     })->name('users.for-groups');
 
@@ -185,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/inventory-alerts/count', function () {
         try {
             $count = \App\Models\InventoryAlert::count();
+
             return response()->json(['count' => $count]);
         } catch (\Exception $e) {
             return response()->json(['count' => 0]);
@@ -217,6 +218,7 @@ Route::get('/api-docs', function () {
 Route::get('/api-docs/spec', function () {
     $path = base_path('docs/openapi-v1.yaml');
     abort_unless(file_exists($path), 404);
+
     return response()->file($path, [
         'Content-Type' => 'application/yaml',
         'Cache-Control' => 'no-cache',
@@ -224,7 +226,7 @@ Route::get('/api-docs/spec', function () {
 })->name('api.docs.spec');
 
 // Admin & Super Admin
-Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value])
+Route::middleware(['auth', 'verified'])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
@@ -233,28 +235,36 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('overview-series', [AdminDashboardController::class, 'overviewSeries'])->name('overview-series');
 
         // Patients
-        Route::get('patients/export', [PatientController::class, 'export'])->name('patients.export');
+        Route::middleware('can:view patients')->group(function () {
+            Route::get('patients/export', [PatientController::class, 'export'])->name('patients.export');
+            Route::get('patients/print-all', [PatientController::class, 'printAll'])->name('patients.printAll');
+            Route::get('patients/print-current', [PatientController::class, 'printCurrent'])->name('patients.printCurrent');
+            Route::get('patients/{patient}/print', [PatientController::class, 'printSingle'])->name('patients.printSingle');
+        });
+        Route::resource('patients', PatientController::class)->middleware([
+            'can:view patients', // For index and create actions
+        ])->only(['index', 'create', 'store']);
 
-        // CORRECTED print-all route:
-        // - URI: 'patients/print-all' (combined with group prefix 'dashboard' -> /dashboard/patients/print-all)
-        // - Name: 'patients.printAll' (combined with group name 'admin.' -> admin.patients.printAll)
-        Route::get('patients/print-all', [PatientController::class, 'printAll'])->name('patients.printAll');
-        Route::get('patients/print-current', [PatientController::class, 'printCurrent'])->name('patients.printCurrent');
-
-        // printSingle route (already correctly defined relative to the group)
-        Route::get('patients/{patient}/print', [PatientController::class, 'printSingle'])->name('patients.printSingle');
-
-        // Resource route (already correctly defined relative to the group)
-        Route::resource('patients', PatientController::class);
+        Route::resource('patients', PatientController::class)->middleware([
+            'can:view patients,patient', // For specific patient actions
+        ])->only(['show', 'edit', 'update', 'destroy']);
 
         // Optimized Patient Controller for performance testing
         Route::prefix('optimized')->name('optimized.')->group(function () {
-            Route::get('patients/export', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'export'])->name('patients.export');
-            Route::get('patients/print-all', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printAll'])->name('patients.printAll');
-            Route::get('patients/print-current', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printCurrent'])->name('patients.printCurrent');
-            Route::get('patients/{patient}/print', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printSingle'])->name('patients.printSingle');
-            Route::get('patients/quick-search', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'quickSearch'])->name('patients.quickSearch');
-            Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class);
+            Route::middleware('can:view patients')->group(function () {
+                Route::get('patients/export', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'export'])->name('patients.export');
+                Route::get('patients/print-all', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printAll'])->name('patients.printAll');
+                Route::get('patients/print-current', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printCurrent'])->name('patients.printCurrent');
+                Route::get('patients/{patient}/print', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'printSingle'])->name('patients.printSingle');
+                Route::get('patients/quick-search', [\App\Http\Controllers\Admin\OptimizedPatientController::class, 'quickSearch'])->name('patients.quickSearch');
+            });
+            Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class)->middleware([
+                'can:view patients', // For index and create actions
+            ])->only(['index', 'create', 'store']);
+
+            Route::resource('patients', \App\Http\Controllers\Admin\OptimizedPatientController::class)->middleware([
+                'can:view patients,patient', // For specific patient actions
+            ])->only(['show', 'edit', 'update', 'destroy']);
 
             // Optimized Staff Controller
             Route::get('staff/export', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'export'])->name('staff.export');
@@ -264,7 +274,12 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
             Route::get('staff/quick-search', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'quickSearch'])->name('staff.quickSearch');
             Route::get('staff/available', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'availableStaff'])->name('staff.available');
             Route::post('staff/bulk-update', [\App\Http\Controllers\Admin\OptimizedStaffController::class, 'bulkUpdate'])->name('staff.bulkUpdate');
-            Route::resource('staff', \App\Http\Controllers\Admin\OptimizedStaffController::class);
+            Route::resource('staff', \App\Http\Controllers\Admin\OptimizedStaffController::class)->middleware([
+                'can:view staff,staff',
+                'can:create staff',
+                'can:edit staff,staff',
+                'can:delete staff,staff',
+            ]);
 
             // Optimized Inventory Controller
             Route::get('inventory-items/export', [\App\Http\Controllers\Admin\OptimizedInventoryItemController::class, 'export'])->name('inventory-items.export');
@@ -281,242 +296,475 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         });
 
         // Caregiver Assignments
-        Route::get('assignments/export', [CaregiverAssignmentController::class, 'export'])->name('assignments.export');
-        Route::get('assignments/print-all', [CaregiverAssignmentController::class, 'printAll'])->name('assignments.printAll');
-        Route::get('assignments/print-current', [CaregiverAssignmentController::class, 'printCurrent'])->name('assignments.printCurrent');
-        Route::get('assignments/{assignment}/print', [CaregiverAssignmentController::class, 'printSingle'])->name('assignments.print');
-        Route::resource('assignments', CaregiverAssignmentController::class);
+        Route::middleware('can:view assignments')->group(function () {
+            Route::get('assignments/export', [CaregiverAssignmentController::class, 'export'])->name('assignments.export');
+            Route::get('assignments/print-all', [CaregiverAssignmentController::class, 'printAll'])->name('assignments.printAll');
+            Route::get('assignments/print-current', [CaregiverAssignmentController::class, 'printCurrent'])->name('assignments.printCurrent');
+            Route::get('assignments/{assignment}/print', [CaregiverAssignmentController::class, 'printSingle'])->name('assignments.print');
+        });
+        Route::resource('assignments', CaregiverAssignmentController::class)->middleware([
+            'can:view assignments,assignment',
+            'can:create assignments',
+            'can:edit assignments,assignment',
+            'can:delete assignments,assignment',
+        ]);
 
         // Visit Services
-        Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
-        Route::get('visit-services/print-all', [VisitServiceController::class, 'printAll'])->name('visit-services.printAll');
-        Route::get('visit-services/print-current', [VisitServiceController::class, 'printCurrent'])->name('visit-services.printCurrent');
-        Route::get('visit-services/{visit_service}/print', [VisitServiceController::class, 'printSingle'])->name('visit-services.print');
-        Route::resource('visit-services', VisitServiceController::class);
+        Route::middleware('can:view visit services')->group(function () {
+            Route::get('visit-services/export', [VisitServiceController::class, 'export'])->name('visit-services.export');
+            Route::get('visit-services/print-all', [VisitServiceController::class, 'printAll'])->name('visit-services.printAll');
+            Route::get('visit-services/print-current', [VisitServiceController::class, 'printCurrent'])->name('visit-services.printCurrent');
+            Route::get('visit-services/{visit_service}/print', [VisitServiceController::class, 'printSingle'])->name('visit-services.print');
+        });
+        Route::resource('visit-services', VisitServiceController::class)->middleware([
+            'can:view visit services,visit_service',
+            'can:create visit services',
+            'can:edit visit services,visit_service',
+            'can:delete visit services,visit_service',
+        ]);
 
         // Medical Documents
-        Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
-        Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
-        Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
-        Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
-        Route::resource('medical-documents', MedicalDocumentController::class);
+        Route::middleware('can:view medical documents')->group(function () {
+            Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
+            Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
+            Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
+            Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
+        });
+        Route::resource('medical-documents', MedicalDocumentController::class)->middleware([
+            'can:view medical documents,medical_document',
+            'can:create medical documents',
+            'can:edit medical documents,medical_document',
+            'can:delete medical documents,medical_document',
+        ]);
 
         // Prescriptions
-        Route::get('prescriptions/export', [PrescriptionController::class, 'export'])->name('prescriptions.export');
-        Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
-        Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
-        Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
-        Route::resource('prescriptions', PrescriptionController::class);
+        Route::middleware('can:view prescriptions')->group(function () {
+            Route::get('prescriptions/export', [PrescriptionController::class, 'export'])->name('prescriptions.export');
+            Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
+            Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
+            Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
+        });
+        Route::resource('prescriptions', PrescriptionController::class)->middleware([
+            'can:view prescriptions,prescription',
+            'can:create prescriptions',
+            'can:edit prescriptions,prescription',
+            'can:delete prescriptions,prescription',
+        ]);
 
         // Medical Records (alias for medical-documents for backward compatibility)
-        Route::get('medical-records', [MedicalDocumentController::class, 'index'])->name('medical-records.index');
+        Route::get('medical-records', [MedicalDocumentController::class, 'index'])->name('medical-records.index')->middleware('can:view medical documents');
 
         // Appointments (placeholder route - implement AppointmentController if needed)
         Route::get('appointments', function () {
             return redirect()->route('admin.visit-services.index');
-        })->name('appointments.index');
+        })->name('appointments.index')->middleware('can:view visit services');
 
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
-        Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
-        Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');
-        Route::resource('suppliers', App\Http\Controllers\Admin\SupplierController::class);
-        Route::get('inventory-items/export', [App\Http\Controllers\Admin\InventoryItemController::class, 'export'])->name('inventory-items.export');
-        Route::get('inventory-items/print-all', [App\Http\Controllers\Admin\InventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
-        Route::get('inventory-items/{inventory_item}/print', [App\Http\Controllers\Admin\InventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
-        Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class);
+        Route::middleware('can:view suppliers')->group(function () {
+            Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
+            Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');
+        });
+        Route::resource('suppliers', App\Http\Controllers\Admin\SupplierController::class)->middleware([
+            'can:view suppliers,supplier',
+            'can:create suppliers',
+            'can:edit suppliers,supplier',
+            'can:delete suppliers,supplier',
+        ]);
 
-        Route::get('inventory-requests/{inventory_request}/print', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printSingle'])->name('inventory-requests.printSingle');
-        Route::resource('inventory-requests', App\Http\Controllers\Admin\InventoryRequestController::class);
+        Route::middleware('can:view inventory items')->group(function () {
+            Route::get('inventory-items/export', [App\Http\Controllers\Admin\InventoryItemController::class, 'export'])->name('inventory-items.export');
+            Route::get('inventory-items/print-all', [App\Http\Controllers\Admin\InventoryItemController::class, 'printAll'])->name('inventory-items.printAll');
+            Route::get('inventory-items/{inventory_item}/print', [App\Http\Controllers\Admin\InventoryItemController::class, 'printSingle'])->name('inventory-items.printSingle');
+        });
+        Route::resource('inventory-items', App\Http\Controllers\Admin\InventoryItemController::class)->middleware([
+            'can:view inventory items,inventory_item',
+            'can:create inventory items',
+            'can:edit inventory items,inventory_item',
+            'can:delete inventory items,inventory_item',
+        ]);
 
-        Route::get('inventory-transactions/export', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'export'])->name('inventory-transactions.export');
-        Route::get('inventory-transactions/print-all', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printAll'])->name('inventory-transactions.printAll');
+        Route::middleware('can:view inventory requests')->group(function () {
+            Route::get('inventory-requests/{inventory_request}/print', [App\Http\Controllers\Admin\InventoryRequestController::class, 'printSingle'])->name('inventory-requests.printSingle');
+        });
+        Route::resource('inventory-requests', App\Http\Controllers\Admin\InventoryRequestController::class)->middleware([
+            'can:view inventory requests,inventory_request',
+            'can:create inventory requests',
+            'can:edit inventory requests,inventory_request',
+            'can:delete inventory requests,inventory_request',
+        ]);
 
-        Route::get('inventory-transactions/{inventory_transaction}/print', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printSingle'])->name('inventory-transactions.printSingle');
-        Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class);
+        Route::middleware('can:view inventory transactions')->group(function () {
+            Route::get('inventory-transactions/export', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'export'])->name('inventory-transactions.export');
+            Route::get('inventory-transactions/print-all', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printAll'])->name('inventory-transactions.printAll');
+            Route::get('inventory-transactions/{inventory_transaction}/print', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printSingle'])->name('inventory-transactions.printSingle');
+        });
+        Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class)->middleware([
+            'can:view inventory transactions,inventory_transaction',
+            'can:create inventory transactions',
+            'can:edit inventory transactions,inventory_transaction',
+            'can:delete inventory transactions,inventory_transaction',
+        ]);
 
-        Route::get('inventory-maintenance-records/export', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'export'])->name('inventory-maintenance-records.export');
-        Route::get('inventory-maintenance-records/print-all', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printAll'])->name('inventory-maintenance-records.printAll');
-        Route::get('inventory-maintenance-records/print-current', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printCurrent'])->name('inventory-maintenance-records.printCurrent');
-        Route::get('inventory-maintenance-records/{inventory_maintenance_record}/print', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printSingle'])->name('inventory-maintenance-records.printSingle');
-        Route::resource('inventory-maintenance-records', App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class);
+        Route::middleware('can:view inventory maintenance records')->group(function () {
+            Route::get('inventory-maintenance-records/export', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'export'])->name('inventory-maintenance-records.export');
+            Route::get('inventory-maintenance-records/print-all', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printAll'])->name('inventory-maintenance-records.printAll');
+            Route::get('inventory-maintenance-records/print-current', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printCurrent'])->name('inventory-maintenance-records.printCurrent');
+            Route::get('inventory-maintenance-records/{inventory_maintenance_record}/print', [App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class, 'printSingle'])->name('inventory-maintenance-records.printSingle');
+        });
+        Route::resource('inventory-maintenance-records', App\Http\Controllers\Admin\InventoryMaintenanceRecordController::class)->middleware([
+            'can:view inventory maintenance records,inventory_maintenance_record',
+            'can:create inventory maintenance records',
+            'can:edit inventory maintenance records,inventory_maintenance_record',
+            'can:delete inventory maintenance records,inventory_maintenance_record',
+        ]);
 
-        Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');
-        Route::get('inventory-alerts/print-current', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printCurrent'])->name('inventory-alerts.printCurrent');
-        Route::get('inventory-alerts/{inventory_alert}/print', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printSingle'])->name('inventory-alerts.printSingle');
-        Route::get('inventory-alerts/count', [App\Http\Controllers\Admin\InventoryAlertController::class, 'count'])->name('inventory-alerts.count');
-        Route::resource('inventory-alerts', App\Http\Controllers\Admin\InventoryAlertController::class);
+        Route::middleware('can:view inventory alerts')->group(function () {
+            Route::get('inventory-alerts/print-all', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printAll'])->name('inventory-alerts.printAll');
+            Route::get('inventory-alerts/print-current', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printCurrent'])->name('inventory-alerts.printCurrent');
+            Route::get('inventory-alerts/{inventory_alert}/print', [App\Http\Controllers\Admin\InventoryAlertController::class, 'printSingle'])->name('inventory-alerts.printSingle');
+            Route::get('inventory-alerts/count', [App\Http\Controllers\Admin\InventoryAlertController::class, 'count'])->name('inventory-alerts.count');
+        });
+        Route::resource('inventory-alerts', App\Http\Controllers\Admin\InventoryAlertController::class)->middleware([
+            'can:view inventory alerts,inventory_alert',
+            'can:create inventory alerts',
+            'can:edit inventory alerts,inventory_alert',
+            'can:delete inventory alerts,inventory_alert',
+        ]);
 
         // Staff
-        Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export');
-        Route::get('staff/print-all', [StaffController::class, 'printAll'])->name('staff.printAll');
-        Route::get('staff/print-current', [StaffController::class, 'printCurrent'])->name('staff.printCurrent');
-        Route::get('staff/{staff}/print', [StaffController::class, 'printSingle'])->name('staff.print');
-        Route::resource('staff', StaffController::class);
+        Route::middleware('can:view staff')->group(function () {
+            Route::get('staff/export', [StaffController::class, 'export'])->name('staff.export');
+            Route::get('staff/print-all', [StaffController::class, 'printAll'])->name('staff.printAll');
+            Route::get('staff/print-current', [StaffController::class, 'printCurrent'])->name('staff.printCurrent');
+            Route::get('staff/{staff}/print', [StaffController::class, 'printSingle'])->name('staff.print');
+        });
+        Route::resource('staff', StaffController::class)->middleware([
+            'can:view staff,staff',
+            'can:create staff',
+            'can:edit staff,staff',
+            'can:delete staff,staff',
+        ]);
 
         // Partners
-        Route::get('partners/export', [\App\Http\Controllers\Admin\PartnerController::class, 'export'])->name('partners.export');
-        Route::get('partners/print-all', [\App\Http\Controllers\Admin\PartnerController::class, 'printAll'])->name('partners.printAll');
-        Route::get('partners/print-current', [\App\Http\Controllers\Admin\PartnerController::class, 'printCurrent'])->name('partners.printCurrent');
-        Route::get('partners/{partner}/print', [\App\Http\Controllers\Admin\PartnerController::class, 'printSingle'])->name('partners.printSingle');
-        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class);
+        Route::middleware('can:view partners')->group(function () {
+            Route::get('partners/export', [\App\Http\Controllers\Admin\PartnerController::class, 'export'])->name('partners.export');
+            Route::get('partners/print-all', [\App\Http\Controllers\Admin\PartnerController::class, 'printAll'])->name('partners.printAll');
+            Route::get('partners/print-current', [\App\Http\Controllers\Admin\PartnerController::class, 'printCurrent'])->name('partners.printCurrent');
+            Route::get('partners/{partner}/print', [\App\Http\Controllers\Admin\PartnerController::class, 'printSingle'])->name('partners.printSingle');
+        });
+        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class)->middleware([
+            'can:view partners,partner',
+            'can:create partners',
+            'can:edit partners,partner',
+            'can:delete partners,partner',
+        ]);
 
         // Partner Agreements
-        Route::get('partner-agreements/export', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'export'])->name('partner-agreements.export');
-        Route::get('partner-agreements/print-all', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printAll'])->name('partner-agreements.printAll');
-        Route::get('partner-agreements/print-current', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printCurrent'])->name('partner-agreements.printCurrent');
-        Route::get('partner-agreements/{partner_agreement}/print', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printSingle'])->name('partner-agreements.printSingle');
-        Route::resource('partner-agreements', \App\Http\Controllers\Admin\PartnerAgreementController::class);
+        Route::middleware('can:view partner agreements')->group(function () {
+            Route::get('partner-agreements/export', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'export'])->name('partner-agreements.export');
+            Route::get('partner-agreements/print-all', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printAll'])->name('partner-agreements.printAll');
+            Route::get('partner-agreements/print-current', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printCurrent'])->name('partner-agreements.printCurrent');
+            Route::get('partner-agreements/{partner_agreement}/print', [\App\Http\Controllers\Admin\PartnerAgreementController::class, 'printSingle'])->name('partner-agreements.printSingle');
+        });
+        Route::resource('partner-agreements', \App\Http\Controllers\Admin\PartnerAgreementController::class)->middleware([
+            'can:view partner agreements,partner_agreement',
+            'can:create partner agreements',
+            'can:edit partner agreements,partner_agreement',
+            'can:delete partner agreements,partner_agreement',
+        ]);
 
         // Referrals
-        Route::get('referrals/export', [\App\Http\Controllers\Admin\ReferralController::class, 'export'])->name('referrals.export');
-        Route::get('referrals/print-current', [\App\Http\Controllers\Admin\ReferralController::class, 'printCurrent'])->name('referrals.printCurrent');
-        Route::get('referrals/{referral}/print', [\App\Http\Controllers\Admin\ReferralController::class, 'printSingle'])->name('referrals.printSingle');
-        Route::resource('referrals', \App\Http\Controllers\Admin\ReferralController::class);
+        Route::middleware('can:view referrals')->group(function () {
+            Route::get('referrals/export', [\App\Http\Controllers\Admin\ReferralController::class, 'export'])->name('referrals.export');
+            Route::get('referrals/print-current', [\App\Http\Controllers\Admin\ReferralController::class, 'printCurrent'])->name('referrals.printCurrent');
+            Route::get('referrals/{referral}/print', [\App\Http\Controllers\Admin\ReferralController::class, 'printSingle'])->name('referrals.printSingle');
+        });
+        Route::resource('referrals', \App\Http\Controllers\Admin\ReferralController::class)->middleware([
+            'can:view referrals,referral',
+            'can:create referrals',
+            'can:edit referrals,referral',
+            'can:delete referrals,referral',
+        ]);
 
         // Partner Commissions
-        Route::get('partner-commissions/export', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'export'])->name('partner-commissions.export');
-        Route::get('partner-commissions/print-current', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printCurrent'])->name('partner-commissions.printCurrent');
-        Route::get('partner-commissions/{partner_commission}/print', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printSingle'])->name('partner-commissions.printSingle');
-        Route::resource('partner-commissions', \App\Http\Controllers\Admin\PartnerCommissionController::class);
+        Route::middleware('can:view partner commissions')->group(function () {
+            Route::get('partner-commissions/export', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'export'])->name('partner-commissions.export');
+            Route::get('partner-commissions/print-current', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printCurrent'])->name('partner-commissions.printCurrent');
+            Route::get('partner-commissions/{partner_commission}/print', [\App\Http\Controllers\Admin\PartnerCommissionController::class, 'printSingle'])->name('partner-commissions.printSingle');
+        });
+        Route::resource('partner-commissions', \App\Http\Controllers\Admin\PartnerCommissionController::class)->middleware([
+            'can:view partner commissions,partner_commission',
+            'can:create partner commissions',
+            'can:edit partner commissions,partner_commission',
+            'can:delete partner commissions,partner_commission',
+        ]);
 
         // Partner Engagements
-        Route::get('partner-engagements/export', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'export'])->name('partner-engagements.export');
-        Route::get('partner-engagements/print-all', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printAll'])->name('partner-engagements.printAll');
-        Route::get('partner-engagements/print-current', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printCurrent'])->name('partner-engagements.printCurrent');
-        Route::get('partner-engagements/{partner_engagement}/print', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printSingle'])->name('partner-engagements.printSingle');
-        Route::resource('partner-engagements', \App\Http\Controllers\Admin\PartnerEngagementController::class);
+        Route::middleware('can:view partner engagements')->group(function () {
+            Route::get('partner-engagements/export', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'export'])->name('partner-engagements.export');
+            Route::get('partner-engagements/print-all', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printAll'])->name('partner-engagements.printAll');
+            Route::get('partner-engagements/print-current', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printCurrent'])->name('partner-engagements.printCurrent');
+            Route::get('partner-engagements/{partner_engagement}/print', [\App\Http\Controllers\Admin\PartnerEngagementController::class, 'printSingle'])->name('partner-engagements.printSingle');
+        });
+        Route::resource('partner-engagements', \App\Http\Controllers\Admin\PartnerEngagementController::class)->middleware([
+            'can:view partner engagements,partner_engagement',
+            'can:create partner engagements',
+            'can:edit partner engagements,partner_engagement',
+            'can:delete partner engagements,partner_engagement',
+        ]);
 
         // Partner Integrations - Referral Documents (place specific routes before resource)
-        Route::get('referral-documents/export', [ReferralDocumentController::class, 'export'])->name('referral-documents.export');
-        Route::get('referral-documents/print-all', [ReferralDocumentController::class, 'printAll'])->name('referral-documents.printAll');
-        Route::get('referral-documents/print-current', [ReferralDocumentController::class, 'printCurrent'])->name('referral-documents.printCurrent');
-        Route::get('referral-documents/{referral_document}/print', [ReferralDocumentController::class, 'printSingle'])->name('referral-documents.printSingle');
-        Route::resource('referral-documents', ReferralDocumentController::class);
-        Route::get('shared-invoices/export', [SharedInvoiceController::class, 'export'])->name('shared-invoices.export');
-        Route::get('shared-invoices/print-all', [SharedInvoiceController::class, 'printAll'])->name('shared-invoices.printAll');
-        Route::get('shared-invoices/print-current', [SharedInvoiceController::class, 'printCurrent'])->name('shared-invoices.printCurrent');
-        Route::get('shared-invoices/{shared_invoice}/print', [SharedInvoiceController::class, 'printSingle'])->name('shared-invoices.printSingle');
-        Route::resource('shared-invoices', SharedInvoiceController::class);
+        Route::middleware('can:view referral documents')->group(function () {
+            Route::get('referral-documents/export', [ReferralDocumentController::class, 'export'])->name('referral-documents.export');
+            Route::get('referral-documents/print-all', [ReferralDocumentController::class, 'printAll'])->name('referral-documents.printAll');
+            Route::get('referral-documents/print-current', [ReferralDocumentController::class, 'printCurrent'])->name('referral-documents.printCurrent');
+            Route::get('referral-documents/{referral_document}/print', [ReferralDocumentController::class, 'printSingle'])->name('referral-documents.printSingle');
+        });
+        Route::resource('referral-documents', ReferralDocumentController::class)->middleware([
+            'can:view referral documents,referral_document',
+            'can:create referral documents',
+            'can:edit referral documents,referral_document',
+            'can:delete referral documents,referral_document',
+        ]);
+
+        Route::middleware('can:view shared invoices')->group(function () {
+            Route::get('shared-invoices/export', [SharedInvoiceController::class, 'export'])->name('shared-invoices.export');
+            Route::get('shared-invoices/print-all', [SharedInvoiceController::class, 'printAll'])->name('shared-invoices.printAll');
+            Route::get('shared-invoices/print-current', [SharedInvoiceController::class, 'printCurrent'])->name('shared-invoices.printCurrent');
+            Route::get('shared-invoices/{shared_invoice}/print', [SharedInvoiceController::class, 'printSingle'])->name('shared-invoices.printSingle');
+        });
+        Route::resource('shared-invoices', SharedInvoiceController::class)->middleware([
+            'can:view shared invoices,shared_invoice',
+            'can:create shared invoices',
+            'can:edit shared invoices,shared_invoice',
+            'can:delete shared invoices,shared_invoice',
+        ]);
 
         // Staff Availabilities
-        Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])
-            ->name('staff-availabilities.events');
-        Route::get('staff-availabilities/available-staff', [StaffAvailabilityController::class, 'availableStaff'])
-            ->name('staff-availabilities.availableStaff');
+        Route::middleware('can:view staff availabilities')->group(function () {
+            Route::get('staff-availabilities/events', [StaffAvailabilityController::class, 'getCalendarEvents'])
+                ->name('staff-availabilities.events');
+            Route::get('staff-availabilities/available-staff', [StaffAvailabilityController::class, 'availableStaff'])
+                ->name('staff-availabilities.availableStaff');
+        });
         Route::resource('staff-availabilities', StaffAvailabilityController::class)
-            ->only(['index', 'store', 'update', 'destroy']);
+            ->only(['index', 'store', 'update', 'destroy'])
+            ->middleware([
+                'can:view staff availabilities,staff_availability',
+                'can:create staff availabilities',
+                'can:edit staff availabilities,staff_availability',
+                'can:delete staff availabilities,staff_availability',
+            ]);
 
         // Staff Payouts
-        Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
-        Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
-        Route::get('staff-payouts/print-all', [StaffPayoutController::class, 'printAll'])->name('staff-payouts.printAll');
+        Route::middleware('can:view staff payouts')->group(function () {
+            Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
+            Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
+            Route::get('staff-payouts/print-all', [StaffPayoutController::class, 'printAll'])->name('staff-payouts.printAll');
+        });
 
         // Invoices
-        Route::get('invoices/export', [InvoiceController::class, 'export'])->name('invoices.export');
-        Route::get('invoices/print-all', [InvoiceController::class, 'printAll'])->name('invoices.printAll');
-        Route::get('invoices/print-current', [InvoiceController::class, 'printCurrent'])->name('invoices.printCurrent');
-        Route::get('invoices/{invoice}/print', [InvoiceController::class, 'printSingle'])->name('invoices.print');
-        Route::get('invoices/{invoice}/share-link', [InvoiceController::class, 'shareLink'])->name('invoices.shareLink');
-        // Incoming Invoices queue
-        Route::get('invoices/incoming', [InvoiceController::class, 'incoming'])->name('invoices.incoming');
-        Route::post('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate');
-        Route::post('invoices/{invoice}/approve', [InvoiceController::class, 'approve'])->name('invoices.approve');
+        Route::middleware('can:view invoices')->group(function () {
+            Route::get('invoices/export', [InvoiceController::class, 'export'])->name('invoices.export');
+            Route::get('invoices/print-all', [InvoiceController::class, 'printAll'])->name('invoices.printAll');
+            Route::get('invoices/print-current', [InvoiceController::class, 'printCurrent'])->name('invoices.printCurrent');
+            Route::get('invoices/{invoice}/print', [InvoiceController::class, 'printSingle'])->name('invoices.print');
+            Route::get('invoices/{invoice}/share-link', [InvoiceController::class, 'shareLink'])->name('invoices.shareLink');
+            Route::get('invoices/incoming', [InvoiceController::class, 'incoming'])->name('invoices.incoming');
+            Route::post('invoices/generate', [InvoiceController::class, 'generate'])->name('invoices.generate');
+            Route::post('invoices/{invoice}/approve', [InvoiceController::class, 'approve'])->name('invoices.approve');
+        });
         Route::resource('invoices', InvoiceController::class)
-            ->except(['edit', 'update', 'destroy']);
+            ->except(['edit', 'update', 'destroy'])
+            ->middleware([
+                'can:view invoices,invoice',
+                'can:create invoices',
+                'can:edit invoices,invoice',
+                'can:delete invoices,invoice',
+            ]);
 
         // Services
-        Route::resource('services', ServiceController::class);
+        Route::middleware('can:view services')->group(function () {
+            Route::resource('services', ServiceController::class);
+        });
 
         // Insurance
-        Route::get('insurance-companies/export', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'export'])->name('insurance-companies.export');
-        Route::get('insurance-companies/print-all', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printAll'])->name('insurance-companies.printAll');
-        Route::get('insurance-companies/print-current', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printCurrent'])->name('insurance-companies.printCurrent');
-        Route::get('insurance-companies/{insurance_company}/print', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printSingle'])->name('insurance-companies.print');
-        Route::resource('insurance-companies', App\Http\Controllers\Insurance\InsuranceCompanyController::class);
-        Route::get('corporate-clients/print-current', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printCurrent'])->name('corporate-clients.printCurrent');
-        Route::get('corporate-clients/{corporate_client}/print', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printSingle'])->name('corporate-clients.print');
-        Route::resource('corporate-clients', App\Http\Controllers\Insurance\CorporateClientController::class);
-        Route::get('insurance-policies/export', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'export'])->name('insurance-policies.export');
-        Route::get('insurance-policies/print-current', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printCurrent'])->name('insurance-policies.printCurrent');
-        Route::get('insurance-policies/{insurance_policy}/print', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printSingle'])->name('insurance-policies.print');
-        Route::resource('insurance-policies', App\Http\Controllers\Insurance\InsurancePolicyController::class);
-        Route::get('employee-insurance-records/export', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'export'])->name('employee-insurance-records.export');
-        Route::get('employee-insurance-records/print-all', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printAll'])->name('employee-insurance-records.printAll');
-        Route::get('employee-insurance-records/print-current', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printCurrent'])->name('employee-insurance-records.printCurrent');
-        Route::get('employee-insurance-records/{employee_insurance_record}/print', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printSingle'])->name('employee-insurance-records.print');
-        Route::resource('employee-insurance-records', App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class);
-        Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
-        Route::post('insurance-claims/{insurance_claim}/process-payment', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'processPayment'])->name('insurance-claims.process-payment');
-        Route::post('insurance-claims/{insurance_claim}/update-status', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'updateStatus'])->name('insurance-claims.update-status');
-        Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
-        Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
-        Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
+        Route::middleware('can:view insurance companies')->group(function () {
+            Route::get('insurance-companies/export', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'export'])->name('insurance-companies.export');
+            Route::get('insurance-companies/print-all', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printAll'])->name('insurance-companies.printAll');
+            Route::get('insurance-companies/print-current', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'printCurrent'])->name('insurance-companies.printCurrent');
+            Route::get('insurance-companies/{insurance_company}/print', [App\Http\Controllers\Insurance\InsuranceCompanyController::class, 'print'])->name('insurance-companies.print');
+        });
+        Route::resource('insurance-companies', App\Http\Controllers\Insurance\InsuranceCompanyController::class)->middleware([
+            'can:view insurance companies,insurance_company',
+            'can:create insurance companies',
+            'can:edit insurance companies,insurance_company',
+            'can:delete insurance companies,insurance_company',
+        ]);
+
+        Route::middleware('can:view corporate clients')->group(function () {
+            Route::get('corporate-clients/print-current', [App\Http\Controllers\Insurance\CorporateClientController::class, 'printCurrent'])->name('corporate-clients.printCurrent');
+            Route::get('corporate-clients/{corporate_client}/print', [App\Http\Controllers\Insurance\CorporateClientController::class, 'print'])->name('corporate-clients.print');
+        });
+        Route::resource('corporate-clients', App\Http\Controllers\Insurance\CorporateClientController::class)->middleware([
+            'can:view corporate clients,corporate_client',
+            'can:create corporate clients',
+            'can:edit corporate clients,corporate_client',
+            'can:delete corporate clients,corporate_client',
+        ]);
+
+        Route::middleware('can:view insurance policies')->group(function () {
+            Route::get('insurance-policies/export', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'export'])->name('insurance-policies.export');
+            Route::get('insurance-policies/print-current', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'printCurrent'])->name('insurance-policies.printCurrent');
+            Route::get('insurance-policies/{insurance_policy}/print', [App\Http\Controllers\Insurance\InsurancePolicyController::class, 'print'])->name('insurance-policies.print');
+        });
+        Route::resource('insurance-policies', App\Http\Controllers\Insurance\InsurancePolicyController::class)->middleware([
+            'can:view insurance policies,insurance_policy',
+            'can:create insurance policies',
+            'can:edit insurance policies,insurance_policy',
+            'can:delete insurance policies,insurance_policy',
+        ]);
+
+        Route::middleware('can:view employee insurance records')->group(function () {
+            Route::get('employee-insurance-records/export', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'export'])->name('employee-insurance-records.export');
+            Route::get('employee-insurance-records/print-all', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printAll'])->name('employee-insurance-records.printAll');
+            Route::get('employee-insurance-records/print-current', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'printCurrent'])->name('employee-insurance-records.printCurrent');
+            Route::get('employee-insurance-records/{employee_insurance_record}/print', [App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class, 'print'])->name('employee-insurance-records.print');
+        });
+        Route::resource('employee-insurance-records', App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class)->middleware([
+            'can:view employee insurance records,employee_insurance_record',
+            'can:create employee insurance records',
+            'can:edit employee insurance records,employee_insurance_record',
+            'can:delete employee insurance records,employee_insurance_record',
+        ]);
+
+        Route::middleware('can:view insurance claims')->group(function () {
+            Route::resource('insurance-claims', App\Http\Controllers\Insurance\InsuranceClaimController::class);
+            Route::post('insurance-claims/{insurance_claim}/process-payment', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'processPayment'])->name('insurance-claims.process-payment');
+            Route::post('insurance-claims/{insurance_claim}/update-status', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'updateStatus'])->name('insurance-claims.update-status');
+            Route::get('insurance-claims/{insurance_claim}/print', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printSingle'])->name('insurance-claims.print');
+            Route::get('insurance-claims/print-current', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'printCurrent'])->name('insurance-claims.printCurrent');
+            Route::post('insurance-claims/{insurance_claim}/send-email', [App\Http\Controllers\Insurance\InsuranceClaimController::class, 'sendClaimEmail'])->name('insurance-claims.send-email');
+        });
+
         // Exchange Rates feature removed
-        Route::get('ethiopian-calendar-days/export', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'export'])->name('ethiopian-calendar-days.export');
-        Route::get('ethiopian-calendar-days/print-all', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printAll'])->name('ethiopian-calendar-days.printAll');
-        Route::get('ethiopian-calendar-days/print-current', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printCurrent'])->name('ethiopian-calendar-days.printCurrent');
-        Route::get('ethiopian-calendar-days/{ethiopian_calendar_day}/print', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printSingle'])->name('ethiopian-calendar-days.print');
-        Route::resource('ethiopian-calendar-days', App\Http\Controllers\Insurance\EthiopianCalendarDayController::class);
+        Route::middleware('can:view ethiopian calendar days')->group(function () {
+            Route::get('ethiopian-calendar-days/export', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'export'])->name('ethiopian-calendar-days.export');
+            Route::get('ethiopian-calendar-days/print-all', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printAll'])->name('ethiopian-calendar-days.printAll');
+            Route::get('ethiopian-calendar-days/print-current', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'printCurrent'])->name('ethiopian-calendar-days.printCurrent');
+            Route::get('ethiopian-calendar-days/{ethiopian_calendar_day}/print', [App\Http\Controllers\Insurance\EthiopianCalendarDayController::class, 'print'])->name('ethiopian-calendar-days.print');
+        });
+        Route::resource('ethiopian-calendar-days', App\Http\Controllers\Insurance\EthiopianCalendarDayController::class)->middleware([
+            'can:view ethiopian calendar days,ethiopian_calendar_day',
+            'can:create ethiopian calendar days',
+            'can:edit ethiopian calendar days,ethiopian_calendar_day',
+            'can:delete ethiopian calendar days,ethiopian_calendar_day',
+        ]);
 
         // Events
-        Route::get('events/export', [EventController::class, 'export'])->name('events.export');
-        Route::get('events/print-current', [EventController::class, 'printCurrent'])->name('events.printCurrent');
-        Route::get('events/{event}/print', [EventController::class, 'printSingle'])->name('events.print');
-        Route::resource('events', EventController::class);
+        Route::middleware('can:view events')->group(function () {
+            Route::get('events/export', [EventController::class, 'export'])->name('events.export');
+            Route::get('events/print-current', [EventController::class, 'printCurrent'])->name('events.printCurrent');
+            Route::get('events/{event}/print', [EventController::class, 'printSingle'])->name('events.print');
+        });
+        Route::resource('events', EventController::class)->middleware([
+            'can:view events,event',
+            'can:create events',
+            'can:edit events,event',
+            'can:delete events,event',
+        ]);
 
         // Eligibility Criteria (place specific routes BEFORE resource to avoid show route capturing them)
-        Route::get('eligibility-criteria/export', [EligibilityCriteriaController::class, 'export'])->name('eligibility-criteria.export');
-        Route::get('eligibility-criteria/print-current', [EligibilityCriteriaController::class, 'printCurrent'])->name('eligibility-criteria.printCurrent');
-        Route::get('eligibility-criteria/{eligibility_criterion}/print', [EligibilityCriteriaController::class, 'printSingle'])->name('eligibility-criteria.print');
-        Route::resource('eligibility-criteria', EligibilityCriteriaController::class);
+        Route::middleware('can:view eligibility criteria')->group(function () {
+            Route::get('eligibility-criteria/export', [EligibilityCriteriaController::class, 'export'])->name('eligibility-criteria.export');
+            Route::get('eligibility-criteria/print-current', [EligibilityCriteriaController::class, 'printCurrent'])->name('eligibility-criteria.printCurrent');
+            Route::get('eligibility-criteria/{eligibility_criterion}/print', [EligibilityCriteriaController::class, 'printSingle'])->name('eligibility-criteria.print');
+        });
+        Route::resource('eligibility-criteria', EligibilityCriteriaController::class)->middleware([
+            'can:view eligibility criteria,eligibility_criterion',
+            'can:create eligibility criteria',
+            'can:edit eligibility criteria,eligibility_criterion',
+            'can:delete eligibility criteria,eligibility_criterion',
+        ]);
 
         // Place specific routes before resource to avoid show route capturing them
-        Route::get('event-recommendations/export', [EventRecommendationController::class, 'export'])->name('event-recommendations.export');
-        Route::get('event-recommendations/print-current', [EventRecommendationController::class, 'printCurrent'])->name('event-recommendations.printCurrent');
-        Route::get('event-recommendations/{event_recommendation}/print', [EventRecommendationController::class, 'printSingle'])->name('event-recommendations.print');
-        Route::resource('event-recommendations', EventRecommendationController::class);
+        Route::middleware('can:view event recommendations')->group(function () {
+            Route::get('event-recommendations/export', [EventRecommendationController::class, 'export'])->name('event-recommendations.export');
+            Route::get('event-recommendations/print-current', [EventRecommendationController::class, 'printCurrent'])->name('event-recommendations.printCurrent');
+            Route::get('event-recommendations/{event_recommendation}/print', [EventRecommendationController::class, 'printSingle'])->name('event-recommendations.print');
+        });
+        Route::resource('event-recommendations', EventRecommendationController::class)->middleware([
+            'can:view event recommendations,event_recommendation',
+            'can:create event recommendations',
+            'can:edit event recommendations,event_recommendation',
+            'can:delete event recommendations,event_recommendation',
+        ]);
 
         // Event Participants
-        Route::resource('event-participants', EventParticipantController::class);
-        Route::get('event-participants/export', [EventParticipantController::class, 'export'])->name('event-participants.export');
-        Route::get('event-participants/print-all', [EventParticipantController::class, 'printAll'])->name('event-participants.printAll');
-        Route::get('event-participants/print-current', [EventParticipantController::class, 'printCurrent'])->name('event-participants.printCurrent');
-        Route::get('event-participants/{event_participant}/print', [EventParticipantController::class, 'printSingle'])->name('event-participants.print');
+        Route::middleware('can:view event participants')->group(function () {
+            Route::resource('event-participants', EventParticipantController::class);
+            Route::get('event-participants/export', [EventParticipantController::class, 'export'])->name('event-participants.export');
+            Route::get('event-participants/print-all', [EventParticipantController::class, 'printAll'])->name('event-participants.printAll');
+            Route::get('event-participants/print-current', [EventParticipantController::class, 'printCurrent'])->name('event-participants.printCurrent');
+            Route::get('event-participants/{event_participant}/print', [EventParticipantController::class, 'print'])->name('event-participants.print');
+        });
 
         // Event Staff Assignments
-        Route::resource('event-staff-assignments', EventStaffAssignmentController::class);
-        Route::get('event-staff-assignments/export', [EventStaffAssignmentController::class, 'export'])->name('event-staff-assignments.export');
-        Route::get('event-staff-assignments/print-all', [EventStaffAssignmentController::class, 'printAll'])->name('event-staff-assignments.printAll');
-        Route::get('event-staff-assignments/print-current', [EventStaffAssignmentController::class, 'printCurrent'])->name('event-staff-assignments.printCurrent');
-        Route::get('event-staff-assignments/{event_staff_assignment}/print', [EventStaffAssignmentController::class, 'printSingle'])->name('event-staff-assignments.print');
+        Route::middleware('can:view event staff assignments')->group(function () {
+            Route::resource('event-staff-assignments', EventStaffAssignmentController::class);
+            Route::get('event-staff-assignments/export', [EventStaffAssignmentController::class, 'export'])->name('event-staff-assignments.export');
+            Route::get('event-staff-assignments/print-all', [EventStaffAssignmentController::class, 'printAll'])->name('event-staff-assignments.printAll');
+            Route::get('event-staff-assignments/print-current', [EventStaffAssignmentController::class, 'printCurrent'])->name('event-staff-assignments.printCurrent');
+            Route::get('event-staff-assignments/{event_staff_assignment}/print', [EventStaffAssignmentController::class, 'print'])->name('event-staff-assignments.print');
+        });
 
         // Event Broadcasts (keep only print-current)
         // Define specific routes before resource to avoid parameter capture
-        Route::get('event-broadcasts/print-current', [EventBroadcastController::class, 'printCurrent'])->name('event-broadcasts.printCurrent');
-        Route::resource('event-broadcasts', EventBroadcastController::class);
+        Route::middleware('can:view event broadcasts')->group(function () {
+            Route::get('event-broadcasts/print-current', [EventBroadcastController::class, 'printCurrent'])->name('event-broadcasts.printCurrent');
+        });
+        Route::resource('event-broadcasts', EventBroadcastController::class)->middleware([
+            'can:view event broadcasts,event_broadcast',
+            'can:create event broadcasts',
+            'can:edit event broadcasts,event_broadcast',
+            'can:delete event broadcasts,event_broadcast',
+        ]);
 
         // Admin Leave Requests
-        Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
+        Route::middleware('can:view leave requests')->group(function () {
+            Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
+        });
         Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
             ->parameters(['admin-leave-requests' => 'leave_request'])
             ->names('leave-requests')
-            ->only(['update']);
+            ->only(['update'])
+            ->middleware([
+                'can:edit leave requests,leave_request',
+            ]);
 
         // Global Search
-        Route::get('global-search', [GlobalSearchController::class, 'search'])->name('global-search');
+        Route::get('global-search', [GlobalSearchController::class, 'search'])->name('global-search')->middleware('can:perform global search');
 
         // Task Delegations (Admin)
         Route::resource('task-delegations', AdminTaskController::class)
-            ->parameters(['task-delegations' => 'task_delegation']);
+            ->parameters(['task-delegations' => 'task_delegation'])
+            ->middleware([
+                'can:view task delegations,task_delegation',
+                'can:create task delegations',
+                'can:edit task delegations,task_delegation',
+                'can:delete task delegations,task_delegation',
+            ]);
 
         // System Management (Super Admin only)
-        Route::middleware('role:' . RoleEnum::SUPER_ADMIN->value)->group(function () {
+        Route::middleware('can:manage roles')->group(function () {
             Route::resource('roles', RoleController::class);
+        });
+        Route::middleware('can:manage users')->group(function () {
             Route::resource('users', UserController::class);
         });
 
         // Reports (Admin & Super Admin)
-        Route::prefix('reports')->name('reports.')->group(function () {
+        Route::prefix('reports')->name('reports.')->middleware('can:view reports')->group(function () {
             Route::get('service-volume', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'index'])
                 ->name('service-volume');
             Route::get('service-volume/data', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'data'])
@@ -539,7 +787,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
     });
 
 // Accountant/Payment Reconciliation
-Route::prefix('reconciliation')->name('reconciliation.')->group(function () {
+Route::prefix('reconciliation')->name('reconciliation.')->middleware('can:reconcile payments')->group(function () {
     Route::get('/', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'index'])->name('index');
     Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
 });
@@ -602,7 +850,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('test/flash-message', function () {
         return redirect()->route('test.ui')->with([
             'banner' => 'This is a test toast notification! Your UI implementations are working correctly.',
-            'bannerStyle' => 'success'
+            'bannerStyle' => 'success',
         ]);
     })->name('test.flash-message');
 });
