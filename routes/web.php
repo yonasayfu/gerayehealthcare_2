@@ -308,6 +308,14 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::SUPER_ADMIN->value . 
         Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
         Route::resource('prescriptions', PrescriptionController::class);
 
+        // Medical Records (alias for medical-documents for backward compatibility)
+        Route::get('medical-records', [MedicalDocumentController::class, 'index'])->name('medical-records.index');
+
+        // Appointments (placeholder route - implement AppointmentController if needed)
+        Route::get('appointments', function () {
+            return redirect()->route('admin.visit-services.index');
+        })->name('appointments.index');
+
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
         Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
         Route::get('suppliers/{supplier}/print', [App\Http\Controllers\Admin\SupplierController::class, 'printSingle'])->name('suppliers.printSingle');

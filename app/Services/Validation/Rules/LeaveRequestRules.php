@@ -6,9 +6,11 @@ class LeaveRequestRules extends BaseResourceRules
 {
     public static function store(): array
     {
-        // Leave requests are typically created by staff, not admin.
-        // If admin creation is needed, define rules here.
-        return [];
+        return [
+            'start_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'reason' => 'required|string|max:1000',
+        ];
     }
 
     public static function update($item): array

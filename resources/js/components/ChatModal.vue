@@ -501,7 +501,7 @@ const submit = async () => {
     } finally {
       isSending.value = false;
       nextTick(() => messageInput.value?.focus());
-      if (messageInput.value) {
+      if (messageInput.value && messageInput.value.style) {
         messageInput.value.style.height = 'auto';
       }
     }
@@ -564,7 +564,7 @@ const submit = async () => {
     } finally {
       isSending.value = false
       nextTick(() => messageInput.value?.focus())
-      if (messageInput.value) {
+      if (messageInput.value && messageInput.value.style) {
         messageInput.value.style.height = 'auto'
       }
     }
@@ -1145,7 +1145,7 @@ const handleGroupCreated = async (newGroup: Group) => {
                   placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
                   class="w-full flex-grow resize-none rounded-xl border border-input px-4 py-2.5 text-sm leading-5 shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 min-h-[44px] max-h-[140px] overflow-y-auto"
                   rows="1"
-                  @input="(event) => { sendTyping(); const target = event.target as HTMLTextAreaElement; if (target) { target.style.height = 'auto'; target.style.height = Math.min(target.scrollHeight, 140) + 'px'; } }"
+                  @input="(event) => { sendTyping(); const target = event.target as HTMLTextAreaElement; if (target && target.style) { target.style.height = 'auto'; target.style.height = Math.min(target.scrollHeight, 140) + 'px'; } }"
                   @keydown.enter.prevent="!$event.shiftKey ? submit() : null"
                 />
                 

@@ -55,6 +55,12 @@ const alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue 
             <div v-if="form.errors.threshold_value" class="text-red-500 text-sm mt-1">{{ form.errors.threshold_value }}</div>
           </div>
 
+          <div class="sm:col-span-3">
+            <label for="triggered_at" class="block text-sm font-medium text-gray-900 dark:text-white">Triggered At (Optional)</label>
+            <input type="datetime-local" id="triggered_at" v-model="form.triggered_at" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+            <div v-if="form.errors.triggered_at" class="text-red-500 text-sm mt-1">{{ form.errors.triggered_at }}</div>
+          </div>
+
           <div class="sm:col-span-3 flex items-center">
             <input type="checkbox" id="is_active" v-model="form.is_active" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
             <label for="is_active" class="ml-2 block text-sm font-medium text-gray-900 dark:text-white">Is Active</label>

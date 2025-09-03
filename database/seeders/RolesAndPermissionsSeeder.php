@@ -127,14 +127,21 @@ class RolesAndPermissionsSeeder extends Seeder
             // High-level Staff Management
             'view staff', 'view staff schedules',
 
-            // Patient Overview
-            'view patients', 'export patients',
+            // Patient Management (Full Access)
+            'view patients', 'create patients', 'edit patients', 'export patients',
+
+            // Medical & Clinical Access
+            'view medical records', 'view prescriptions', 'view appointments',
+            'view visit services', 'view medical documents', 'download medical documents',
 
             // Marketing Analytics
             'view marketing analytics', 'export marketing reports',
 
             // System Health Monitoring
             'view system health', 'view system logs',
+
+            // Communication
+            'view messages', 'send messages', 'view notifications',
 
             // Personal
             'view own profile', 'edit own profile', 'change own password',

@@ -50,13 +50,17 @@ async function destroy(id: number) {
   })
 }
 
+function exportData(type: 'csv' | 'pdf') {
+  // Open export in a new tab for Staff
+  window.open(route('admin.staff.export', { type }), '_blank');
+}
+
 function exportCsv() {
-  // Open CSV export in a new tab for Staff
-  window.open(route('admin.staff.export', { type: 'csv' }), '_blank');
+  exportData('csv');
 }
 
 function exportPdf() {
-  window.open(route('admin.staff.export', { type: 'pdf' }), '_blank');
+  exportData('pdf');
 }
 
 function printCurrentView() {

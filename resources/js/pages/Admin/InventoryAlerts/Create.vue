@@ -15,6 +15,7 @@ const form = useForm({
   threshold_value: null,
   message: null,
   is_active: true,
+  triggered_at: null,
 });
 
 function submit() {

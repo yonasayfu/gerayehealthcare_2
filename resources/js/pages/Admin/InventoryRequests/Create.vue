@@ -20,6 +20,7 @@ const form = useForm({
   quantity_requested: 1,
   reason: null,
   priority: 'Normal',
+  status: 'Pending',
   needed_by_date: null,
 });
 
