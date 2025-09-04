@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             TestUsersSeeder::class,
             StaffSeeder::class,
             PatientSeeder::class,
+            DashboardDataSeeder::class,
+            MarketingDemoSeeder::class,
         ]);
 
         // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---

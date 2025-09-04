@@ -233,6 +233,9 @@ Route::middleware(['auth', 'verified'])
         // Dashboard overview data (Super Admin KPIs)
         Route::get('overview-data', [AdminDashboardController::class, 'overviewData'])->name('overview-data');
         Route::get('overview-series', [AdminDashboardController::class, 'overviewSeries'])->name('overview-series');
+        Route::get('recent-appointments', [AdminDashboardController::class, 'recentAppointments'])->name('recent-appointments');
+        Route::get('upcoming-visits', [AdminDashboardController::class, 'upcomingVisits'])->name('upcoming-visits');
+        Route::get('top-services', [AdminDashboardController::class, 'topServices'])->name('top-services');
 
         // Patients
         Route::middleware('can:view patients')->group(function () {

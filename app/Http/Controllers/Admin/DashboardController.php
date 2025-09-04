@@ -54,35 +54,51 @@ class DashboardController extends Controller
      */
     public function overviewData(): JsonResponse
     {
-        $data = Cache::remember('dashboard_overview_kpis', 60, function () {
-            $now = Carbon::now();
-            $startOfMonth = $now->copy()->startOfMonth();
+        $noCache = request()->boolean('noCache');
+        $startParam = request('start');
+        $endParam = request('end');
+        $now = Carbon::now();
+        $start = $startParam ? Carbon::parse($startParam) : $now->copy()->startOfMonth();
+        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
 
+        $cacheKey = 'dashboard_overview_kpis_' . $start->toDateString() . '_' . $end->toDateString();
+
+        $compute = function () use ($start, $end, $now) {
+            
             $totalPatients = Patient::count();
-            $newPatientsThisMonth = Patient::whereBetween('created_at', [$startOfMonth, $now])->count();
+            $patientsInRange = Patient::whereBetween('created_at', [$start->copy()->startOfDay(), $end])->count();
 
-            $visitsToday = VisitService::whereDate('scheduled_at', $now->toDateString())->count();
-            $serviceVolumeThisMonth = VisitService::whereBetween('scheduled_at', [$startOfMonth, $now])->count();
+            $visitsToday = VisitService::whereBetween('scheduled_at', [$now->copy()->startOfDay(), $now->copy()->endOfDay()])->count();
+            $serviceVolumeThisMonth = VisitService::whereBetween('scheduled_at', [$start, $end])->count();
 
             // Revenue and AR from invoices (prefer grand_total, fallback to amount)
-            $sumGrandPaid = Invoice::whereNotNull('paid_at')->sum('grand_total');
-            $sumAmountPaid = Invoice::whereNotNull('paid_at')->sum('amount');
+            $sumGrandPaid = Invoice::whereNotNull('paid_at')->whereBetween('created_at', [$start, $end])->sum('grand_total');
+            $sumAmountPaid = Invoice::whereNotNull('paid_at')->whereBetween('created_at', [$start, $end])->sum('amount');
             $totalRevenue = $sumGrandPaid ?: $sumAmountPaid;
 
-            $sumGrandUnpaid = Invoice::whereNull('paid_at')->sum('grand_total');
-            $sumAmountUnpaid = Invoice::whereNull('paid_at')->sum('amount');
+            $sumGrandUnpaid = Invoice::whereNull('paid_at')->whereBetween('created_at', [$start, $end])->sum('grand_total');
+            $sumAmountUnpaid = Invoice::whereNull('paid_at')->whereBetween('created_at', [$start, $end])->sum('amount');
             $accountsReceivable = $sumGrandUnpaid ?: $sumAmountUnpaid;
 
             // Claims pending: consider claims without payment received as pending
-            $claimsPending = InsuranceClaim::whereNull('payment_received_at')->count();
+            $claimsPending = InsuranceClaim::whereNull('payment_received_at')->whereBetween('created_at', [$start, $end])->count();
 
             $activeStaff = Staff::count();
             $lowStockAlerts = InventoryAlert::where('is_active', true)->count();
             $openTasks = TaskDelegation::where('status', '!=', 'Completed')->count();
 
+            // Simple AR aging buckets by invoice created_at age (0–30, 31–60, 61+)
+            $ar0to30 = Invoice::whereNull('paid_at')->where('created_at', '>=', now()->subDays(30))->count();
+            $ar31to60 = Invoice::whereNull('paid_at')->whereBetween('created_at', [now()->subDays(60), now()->subDays(31)])->count();
+            $ar61plus = Invoice::whereNull('paid_at')->where('created_at', '<', now()->subDays(60))->count();
+
+            // Upcoming visits count (next 24h) for quick action
+            $upcomingVisitsCount = VisitService::whereBetween('scheduled_at', [$now->copy(), $now->copy()->addDay()->endOfDay()])->count();
+
             return [
                 'totalPatients' => $totalPatients,
-                'newPatientsThisMonth' => $newPatientsThisMonth,
+                'newPatientsThisMonth' => $patientsInRange, // keep key for backward compatibility
+                'patientsInRange' => $patientsInRange,
                 'visitsToday' => $visitsToday,
                 'serviceVolumeThisMonth' => $serviceVolumeThisMonth,
                 'totalRevenue' => (float) number_format((float) $totalRevenue, 2, '.', ''),
@@ -91,8 +107,16 @@ class DashboardController extends Controller
                 'activeStaff' => $activeStaff,
                 'lowStockAlerts' => $lowStockAlerts,
                 'openTasks' => $openTasks,
+                'upcomingVisitsCount' => $upcomingVisitsCount,
+                'arAging' => [
+                    '0_30' => $ar0to30,
+                    '31_60' => $ar31to60,
+                    '61_plus' => $ar61plus,
+                ],
             ];
-        });
+        };
+
+        $data = $noCache ? $compute() : Cache::remember($cacheKey, 60, $compute);
 
         return response()->json($data);
     }
@@ -102,37 +126,44 @@ class DashboardController extends Controller
      */
     public function overviewSeries(): JsonResponse
     {
-        $data = Cache::remember('dashboard_overview_series', 60, function () {
-            $now = Carbon::now();
-            $startOfMonth = $now->copy()->startOfMonth();
-            $daysInMonth = $now->daysInMonth;
+        $noCache = request()->boolean('noCache');
+        $startParam = request('start');
+        $endParam = request('end');
+        $now = Carbon::now();
+        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : $now->copy()->startOfMonth();
+        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
+        $days = $start->diffInDays($end) + 1;
+
+        $cacheKey = 'dashboard_overview_series_' . $start->toDateString() . '_' . $end->toDateString();
+
+        $compute = function () use ($start, $end, $days) {
 
             $labels = [];
-            $registrations = array_fill(0, $daysInMonth, 0);
-            $visits = array_fill(0, $daysInMonth, 0);
+            $registrations = array_fill(0, $days, 0);
+            $visits = array_fill(0, $days, 0);
 
             // Aggregate patients by day
-            Patient::whereBetween('created_at', [$startOfMonth, $now])
+            Patient::whereBetween('created_at', [$start, $end])
                 ->get(['created_at'])
-                ->each(function ($p) use (&$registrations, $startOfMonth) {
-                    $index = $p->created_at->diffInDays($startOfMonth);
+                ->each(function ($p) use (&$registrations, $start) {
+                    $index = $p->created_at->diffInDays($start);
                     if (isset($registrations[$index])) {
                         $registrations[$index] += 1;
                     }
                 });
 
             // Aggregate visits by day
-            VisitService::whereBetween('scheduled_at', [$startOfMonth, $now])
+            VisitService::whereBetween('scheduled_at', [$start, $end])
                 ->get(['scheduled_at'])
-                ->each(function ($v) use (&$visits, $startOfMonth) {
-                    $index = $v->scheduled_at->diffInDays($startOfMonth);
+                ->each(function ($v) use (&$visits, $start) {
+                    $index = $v->scheduled_at->diffInDays($start);
                     if (isset($visits[$index])) {
                         $visits[$index] += 1;
                     }
                 });
 
-            for ($d = 1; $d <= $daysInMonth; $d++) {
-                $labels[] = $startOfMonth->copy()->addDays($d - 1)->format('M d');
+            for ($d = 1; $d <= $days; $d++) {
+                $labels[] = $start->copy()->addDays($d - 1)->format('M d');
             }
 
             return [
@@ -150,8 +181,117 @@ class DashboardController extends Controller
                     ],
                 ],
             ];
-        });
+        };
+
+        $data = $noCache ? $compute() : Cache::remember($cacheKey, 60, $compute);
 
         return response()->json($data);
+    }
+
+    /**
+     * Return recent appointments (visit services) as JSON for the dashboard table.
+     */
+    public function recentAppointments(): JsonResponse
+    {
+        $startParam = request('start');
+        $endParam = request('end');
+        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : null;
+        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : null;
+
+        $rows = VisitService::query()
+            ->leftJoin('patients', 'visit_services.patient_id', '=', 'patients.id')
+            ->leftJoin('staff', 'visit_services.staff_id', '=', 'staff.id')
+            ->leftJoin('services', 'visit_services.service_id', '=', 'services.id')
+            ->when($start && $end, fn($q) => $q->whereBetween('visit_services.scheduled_at', [$start, $end]))
+            ->orderByDesc('visit_services.scheduled_at')
+            ->limit(8)
+            ->get([
+                \DB::raw("NULLIF(TRIM(CONCAT(COALESCE(NULLIF(patients.first_name,''), ''), ' ', COALESCE(NULLIF(patients.last_name,''), ''))), '') as name_parts"),
+                'patients.full_name',
+                'visit_services.scheduled_at',
+                'visit_services.status',
+                'staff.first_name as staff_first',
+                'staff.last_name as staff_last',
+                'services.name as service_name',
+            ]);
+
+        $payload = $rows->map(function ($row) {
+            $name = $row->name_parts ?: ($row->full_name ?: 'N/A');
+            $dt = \Carbon\Carbon::parse($row->scheduled_at);
+            return [
+                'patient' => $name,
+                'date' => $dt->format('Y-m-d'),
+                'time' => $dt->format('h:i A'),
+                'status' => $row->status,
+                'staff' => trim(($row->staff_first ?? '') . ' ' . ($row->staff_last ?? '')) ?: null,
+                'service' => $row->service_name ?? null,
+            ];
+        });
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Upcoming visits within next 24 hours for empty-today fallback.
+     */
+    public function upcomingVisits(): JsonResponse
+    {
+        $now = Carbon::now();
+        $next = $now->copy()->addDay()->endOfDay();
+
+        $rows = VisitService::query()
+            ->leftJoin('patients', 'visit_services.patient_id', '=', 'patients.id')
+            ->leftJoin('staff', 'visit_services.staff_id', '=', 'staff.id')
+            ->leftJoin('services', 'visit_services.service_id', '=', 'services.id')
+            ->whereBetween('visit_services.scheduled_at', [$now, $next])
+            ->orderBy('visit_services.scheduled_at')
+            ->limit(8)
+            ->get([
+                \DB::raw("NULLIF(TRIM(CONCAT(COALESCE(NULLIF(patients.first_name,''), ''), ' ', COALESCE(NULLIF(patients.last_name,''), ''))), '') as name_parts"),
+                'patients.full_name',
+                'visit_services.scheduled_at',
+                'visit_services.status',
+                'staff.first_name as staff_first',
+                'staff.last_name as staff_last',
+                'services.name as service_name',
+            ]);
+
+        $payload = $rows->map(function ($row) {
+            $name = $row->name_parts ?: ($row->full_name ?: 'N/A');
+            $dt = \Carbon\Carbon::parse($row->scheduled_at);
+            return [
+                'patient' => $name,
+                'date' => $dt->format('Y-m-d'),
+                'time' => $dt->format('h:i A'),
+                'status' => $row->status,
+                'staff' => trim(($row->staff_first ?? '') . ' ' . ($row->staff_last ?? '')) ?: null,
+                'service' => $row->service_name ?? null,
+            ];
+        });
+
+        return response()->json($payload);
+    }
+
+    /**
+     * Top services by volume and revenue within selected range.
+     */
+    public function topServices(): JsonResponse
+    {
+        $startParam = request('start');
+        $endParam = request('end');
+        $now = Carbon::now();
+        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : $now->copy()->startOfMonth();
+        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
+
+        $rows = \DB::table('visit_services as v')
+            ->join('services as s', 'v.service_id', '=', 's.id')
+            ->whereBetween('v.scheduled_at', [$start, $end])
+            ->select('s.id', 's.name', \DB::raw('COUNT(v.id) as volume'), \DB::raw('COALESCE(SUM(v.cost),0) as revenue'))
+            ->groupBy('s.id', 's.name')
+            ->orderByDesc('volume')
+            ->limit(5)
+            ->get();
+
+        return response()->json($rows);
     }
 }
