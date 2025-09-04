@@ -25,10 +25,12 @@ class MarketingAnalyticsService
     public function getDashboardData(Request $request): array
     {
         // Totals (optionally filtered by campaign, platform, and date range)
-        $totalLeads = MarketingLead::count();
+        // Apply range and filters consistently
+        $filteredLeadsQuery = $this->getFilteredLeadsQuery($request);
+        $totalLeads = (int) (clone $filteredLeadsQuery)->count();
 
         // True conversions: leads linked to patients
-        $convertedLeadsByPatientLink = MarketingLead::whereNotNull('converted_patient_id')->count();
+        $convertedLeadsByPatientLink = (int) (clone $filteredLeadsQuery)->whereNotNull('converted_patient_id')->count();
         $conversionRate = $totalLeads > 0 ? round(($convertedLeadsByPatientLink / $totalLeads) * 100, 2) : 0;
 
         // Build filtered queries for cross-module consistency
@@ -72,10 +74,10 @@ class MarketingAnalyticsService
 
         // Funnel counts by status (apply filters)
         $filteredLeads = $this->getFilteredLeadsQuery($request);
-        $newLeads = (clone $filteredLeads)->where('status', 'New')->count();
-        $contactedLeads = (clone $filteredLeads)->where('status', 'Contacted')->count();
-        $qualifiedLeads = (clone $filteredLeads)->where('status', 'Qualified')->count();
-        $convertedLeadsByStatus = (clone $filteredLeads)->where('status', 'Converted')->count();
+        $newLeads = (int) (clone $filteredLeads)->where('status', 'New')->count();
+        $contactedLeads = (int) (clone $filteredLeads)->where('status', 'Contacted')->count();
+        $qualifiedLeads = (int) (clone $filteredLeads)->where('status', 'Qualified')->count();
+        $convertedLeadsByStatus = (int) (clone $filteredLeads)->where('status', 'Converted')->count();
 
         $conversionFunnelData = [
             'New' => $newLeads,
@@ -179,19 +181,21 @@ class MarketingAnalyticsService
                      ->withQueryString();
     }
 
-    public function getTrafficSourceDistribution(): array
+    public function getTrafficSourceDistribution(Request $request): array
     {
-        return MarketingLead::selectRaw('utm_source, COUNT(*) as lead_count')
-                           ->groupBy('utm_source')
-                           ->get()->toArray();
+        return $this->getFilteredLeadsQuery($request)
+            ->selectRaw('utm_source, COUNT(*) as lead_count')
+            ->groupBy('utm_source')
+            ->get()->toArray();
     }
 
-    public function getConversionFunnel(): array
+    public function getConversionFunnel(Request $request): array
     {
-        $newLeads = MarketingLead::where('status', 'New')->count();
-        $contactedLeads = MarketingLead::where('status', 'Contacted')->count();
-        $qualifiedLeads = MarketingLead::where('status', 'Qualified')->count();
-        $convertedLeads = MarketingLead::where('status', 'Converted')->count();
+        $q = $this->getFilteredLeadsQuery($request);
+        $newLeads = (int) (clone $q)->where('status', 'New')->count();
+        $contactedLeads = (int) (clone $q)->where('status', 'Contacted')->count();
+        $qualifiedLeads = (int) (clone $q)->where('status', 'Qualified')->count();
+        $convertedLeads = (int) (clone $q)->where('status', 'Converted')->count();
 
         return [
             'New' => $newLeads,

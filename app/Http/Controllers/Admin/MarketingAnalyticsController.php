@@ -33,15 +33,15 @@ class MarketingAnalyticsController extends Controller
         return response()->json($performanceData);
     }
 
-    public function trafficSourceDistribution()
+    public function trafficSourceDistribution(Request $request)
     {
-        $sourceData = $this->marketingAnalyticsService->getTrafficSourceDistribution();
+        $sourceData = $this->marketingAnalyticsService->getTrafficSourceDistribution($request);
         return response()->json($sourceData);
     }
 
-    public function conversionFunnel()
+    public function conversionFunnel(Request $request)
     {
-        $funnelData = $this->marketingAnalyticsService->getConversionFunnel();
+        $funnelData = $this->marketingAnalyticsService->getConversionFunnel($request);
         return response()->json($funnelData);
     }
 

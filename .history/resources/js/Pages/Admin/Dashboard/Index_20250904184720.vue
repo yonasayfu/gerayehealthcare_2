@@ -161,10 +161,6 @@ const campaignPerformanceData = ref([]);
 const trafficSourceData = ref([]);
 const conversionFunnelData = ref({});
 const analyticsLoading = ref(false);
-
-// Reports charts state
-const reportServiceChart = ref<{ labels: string[]; datasets: any[] }>({ labels: [], datasets: [] });
-const reportRevenueArChart = ref<{ labels: string[]; datasets: any[] }>({ labels: [], datasets: [] });
 const topServices = ref<any[]>([]);
 const topServicesChartData = computed(() => ({
   labels: topServices.value.map((s: any) => s.name),
@@ -229,9 +225,16 @@ const dashboardStats = ref({
 });
 
 const fetchDashboardData = async () => {
-  const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
-  const response = await axios.get(route('admin.marketing-analytics.dashboard-data'), { params });
-  dashboardStats.value = response.data;
+  try {
+    analyticsLoading.value = true;
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
+    const response = await axios.get(route('admin.marketing-analytics.dashboard-data'), { params });
+    dashboardStats.value = response.data;
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+  } finally {
+    analyticsLoading.value = false;
+  }
 };
 
 // Overview tab data loader
@@ -323,23 +326,6 @@ const fetchConversionFunnel = async () => {
   }
 };
 
-// Batch analytics fetch to reduce flicker
-const fetchAnalyticsAll = async () => {
-  analyticsLoading.value = true;
-  try {
-    await Promise.all([
-      fetchDashboardData(),
-      fetchCampaignPerformance(),
-      fetchTrafficSourceDistribution(),
-      fetchConversionFunnel(),
-    ]);
-  } catch (e) {
-    console.error('Error fetching analytics data:', e);
-  } finally {
-    analyticsLoading.value = false;
-  }
-};
-
 const fetchTopServices = async () => {
   try {
     const params = { start: rangeStart.value, end: rangeEnd.value } as any;
@@ -353,13 +339,12 @@ const fetchTopServices = async () => {
 // Reports data loaders
 const fetchReportsData = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
     const [svc, rev] = await Promise.all([
-      axios.get(route('admin.reports.service-volume.data'), { params }),
-      axios.get(route('admin.reports.revenue-ar.data'), { params }),
+      axios.get(route('admin.reports.service-volume.data')),
+      axios.get(route('admin.reports.revenue-ar.data')),
     ]);
-    reportServiceChart.value = svc.data || { labels: [], datasets: [] };
-    reportRevenueArChart.value = rev.data || { labels: [], datasets: [] };
+    reportsServiceVolume.value = Array.isArray(svc.data?.data) ? svc.data.data : [];
+    reportsRevenueAR.value = Array.isArray(rev.data?.data) ? rev.data.data : [];
   } catch (error) {
     console.error('Error fetching reports data:', error);
   }
@@ -378,7 +363,10 @@ const fetchNotifications = async () => {
 
 watch(currentTab, (newTab) => {
   if (newTab === 'Analytics') {
-    fetchAnalyticsAll();
+    fetchDashboardData();
+    fetchCampaignPerformance();
+    fetchTrafficSourceDistribution();
+    fetchConversionFunnel();
   }
   if (newTab === 'Overview') {
     refreshOverview();
@@ -391,15 +379,11 @@ watch(currentTab, (newTab) => {
   }
 }, { immediate: true }); // Fetch data immediately if the initial tab is 'Analytics' or 'Overview'
 
-// React to date range changes (debounced to reduce flicker)
-let rangeTimer: any = null;
+// React to date range changes
 watch([rangeStart, rangeEnd], () => {
-  if (rangeTimer) clearTimeout(rangeTimer);
-  rangeTimer = setTimeout(() => {
-    if (currentTab.value === 'Overview') refreshOverview();
-    if (currentTab.value === 'Analytics') fetchAnalyticsAll();
-    if (currentTab.value === 'Reports') fetchReportsData();
-  }, 200);
+  if (currentTab.value === 'Overview') {
+    refreshOverview();
+  }
 });
 </script>
 
@@ -526,12 +510,12 @@ watch([rangeStart, rangeEnd], () => {
               <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('patient')">Patient <span v-if="sortKey==='patient'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('date')">Date <span v-if="sortKey==='date'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('time')">Time <span v-if="sortKey==='time'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('status')">Status <span v-if="sortKey==='status'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('staff')">Staff <span v-if="sortKey==='staff'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('service')">Service <span v-if="sortKey==='service'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('patient')">Patient</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('date')">Date</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('time')">Time</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('status')">Status</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('staff')">Staff</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer" @click="setSort('service')">Service</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -549,19 +533,7 @@ watch([rangeStart, rangeEnd], () => {
                       <span v-else>{{ appointment.date }}</span>
                     </td>
                     <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.time }}</td>
-                    <td class="py-2 px-4 text-sm">
-                      <span
-                        class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        :class="{
-                          'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200': (appointment.status || '').toLowerCase() === 'confirmed',
-                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200': (appointment.status || '').toLowerCase() === 'pending',
-                          'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200': ['cancelled','canceled'].includes((appointment.status || '').toLowerCase()),
-                          'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200': ['completed','done','finished','checked-in'].includes((appointment.status || '').toLowerCase()),
-                        }"
-                      >
-                        {{ appointment.status || '—' }}
-                      </span>
-                    </td>
+                    <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ appointment.status }}</td>
                     <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ (appointment as any).staff || '—' }}</td>
                     <td class="py-2 px-4 text-sm text-gray-800 dark:text-gray-200">{{ (appointment as any).service || '—' }}</td>
                   </tr>
@@ -655,25 +627,33 @@ watch([rangeStart, rangeEnd], () => {
 
       <div v-else-if="currentTab === 'Reports'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
         <h3 class="text-xl font-semibold mb-2">Operational Reports</h3>
-        <p class="text-muted-foreground mb-4">Range: {{ rangeStart }} → {{ rangeEnd }}</p>
+        <p class="text-muted-foreground mb-4">Generate and view detailed reports for various operational aspects.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Revenue vs AR -->
-          <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-            <h4 class="text-lg font-medium mb-2">Revenue vs Accounts Receivable</h4>
-            <div class="relative h-[300px]">
-              <Bar :data="reportRevenueArChart" :options="barChartOptions" />
-              <div v-if="!(reportRevenueArChart?.datasets?.length && reportRevenueArChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500">No data for selected range</div>
-            </div>
+          <!-- Revenue & AR -->
+          <div>
+            <h4 class="text-lg font-medium mb-2">Revenue & Accounts Receivable</h4>
+            <template v-if="reportsRevenueAR.length">
+              <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
+                <li>Total Billed: {{ money(reportsRevenueAR.reduce((s, r) => s + Number(r.total_billed || 0), 0)) }}</li>
+                <li>Total Received: {{ money(reportsRevenueAR.reduce((s, r) => s + Number(r.total_received || 0), 0)) }}</li>
+                <li>AR Outstanding: {{ money(reportsRevenueAR.reduce((s, r) => s + Number(r.ar_outstanding || 0), 0)) }}</li>
+                <li>Invoices: {{ reportsRevenueAR.reduce((s, r) => s + Number(r.invoices_count || 0), 0).toLocaleString() }} (Paid: {{ reportsRevenueAR.reduce((s, r) => s + Number(r.paid_invoices || 0), 0).toLocaleString() }}, Unpaid: {{ reportsRevenueAR.reduce((s, r) => s + Number(r.unpaid_invoices || 0), 0).toLocaleString() }})</li>
+              </ul>
+            </template>
+            <p v-else class="text-sm text-muted-foreground">No data loaded yet.</p>
           </div>
 
           <!-- Service Volume -->
-          <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-            <h4 class="text-lg font-medium mb-2">Service Volume (Visits)</h4>
-            <div class="relative h-[300px]">
-              <Bar :data="reportServiceChart" :options="barChartOptions" />
-              <div v-if="!(reportServiceChart?.datasets?.length && reportServiceChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500">No data for selected range</div>
-            </div>
+          <div>
+            <h4 class="text-lg font-medium mb-2">Service Volume</h4>
+            <template vπ-if="reportsServiceVolume.length">
+              <ul class="list-disc list-inside space-y-1 text-gray-800 dark:text-gray-200">
+                <li>Total Visits: {{ reportsServiceVolume.reduce((s, r) => s + Number(r.total_visits || 0), 0).toLocaleString() }}</li>
+                <li>Unique Patients: {{ reportsServiceVolume.reduce((s, r) => s + Number(r.unique_patients || 0), 0).toLocaleString() }}</li>
+              </ul>
+            </template>
+            <p v-else class="text-sm text-muted-foreground">No data loaded yet.</p>
           </div>
         </div>
       </div>

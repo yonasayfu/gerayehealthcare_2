@@ -210,6 +210,7 @@ class DashboardController extends Controller
         \Illuminate\Support\Facades\Log::info('Recent Appointments Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
 
         $rows = $query->get([
+                \DB::raw("NULLIF(TRIM(CONCAT(COALESCE(NULLIF(patients.first_name,''), ''), ' ', COALESCE(NULLIF(patients.last_name,''), ''))), '') as name_parts"),
                 'patients.full_name',
                 'visit_services.scheduled_at',
                 'visit_services.status',
@@ -219,7 +220,7 @@ class DashboardController extends Controller
             ]);
 
         $payload = $rows->map(function ($row) {
-            $name = $row->full_name ?: 'N/A';
+            $name = $row->name_parts ?: ($row->full_name ?: 'N/A');
             $dt = \Carbon\Carbon::parse($row->scheduled_at);
             return [
                 'patient' => $name,
@@ -250,6 +251,7 @@ class DashboardController extends Controller
             ->orderBy('visit_services.scheduled_at')
             ->limit(8)
             ->get([
+                \DB::raw("NULLIF(TRIM(CONCAT(COALESCE(NULLIF(patients.first_name,''), ''), ' ', COALESCE(NULLIF(patients.last_name,''), ''))), '') as name_parts"),
                 'patients.full_name',
                 'visit_services.scheduled_at',
                 'visit_services.status',
@@ -259,7 +261,7 @@ class DashboardController extends Controller
             ]);
 
         $payload = $rows->map(function ($row) {
-            $name = $row->full_name ?: 'N/A';
+            $name = $row->name_parts ?: ($row->full_name ?: 'N/A');
             $dt = \Carbon\Carbon::parse($row->scheduled_at);
             return [
                 'patient' => $name,
@@ -272,91 +274,6 @@ class DashboardController extends Controller
         });
 
         return response()->json($payload);
-    }
-
-    /**
-     * Reports: Service Volume time series within range (visits per day).
-     */
-    public function reportServiceVolume(): JsonResponse
-    {
-        $startParam = request('start');
-        $endParam = request('end');
-        $now = Carbon::now();
-        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : $now->copy()->startOfMonth();
-        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
-
-        $days = $start->diffInDays($end) + 1;
-        $labels = [];
-        $series = array_fill(0, $days, 0);
-
-        VisitService::whereBetween('scheduled_at', [$start, $end])
-            ->get(['scheduled_at'])
-            ->each(function ($v) use (&$series, $start) {
-                $index = $v->scheduled_at->diffInDays($start);
-                if (isset($series[$index])) $series[$index]++;
-            });
-
-        for ($d = 1; $d <= $days; $d++) {
-            $labels[] = $start->copy()->addDays($d - 1)->format('M d');
-        }
-
-        return response()->json([
-            'labels' => $labels,
-            'datasets' => [[
-                'label' => 'Visits',
-                'backgroundColor' => '#3b82f6',
-                'data' => $series,
-            ]],
-        ]);
-    }
-
-    /**
-     * Reports: Revenue vs AR time series within range (sum by day).
-     */
-    public function reportRevenueAr(): JsonResponse
-    {
-        $startParam = request('start');
-        $endParam = request('end');
-        $now = Carbon::now();
-        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : $now->copy()->startOfMonth();
-        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
-
-        $days = $start->diffInDays($end) + 1;
-        $labels = [];
-        $rev = array_fill(0, $days, 0.0);
-        $ar = array_fill(0, $days, 0.0);
-
-        // Revenue (paid invoices)
-        Invoice::whereNotNull('paid_at')
-            ->whereBetween('created_at', [$start, $end])
-            ->get(['created_at', 'grand_total', 'amount'])
-            ->each(function ($row) use (&$rev, $start) {
-                $index = $row->created_at->diffInDays($start);
-                $val = (float) ($row->grand_total ?: $row->amount ?: 0);
-                if (isset($rev[$index])) $rev[$index] += $val;
-            });
-
-        // AR (unpaid invoices)
-        Invoice::whereNull('paid_at')
-            ->whereBetween('created_at', [$start, $end])
-            ->get(['created_at', 'grand_total', 'amount'])
-            ->each(function ($row) use (&$ar, $start) {
-                $index = $row->created_at->diffInDays($start);
-                $val = (float) ($row->grand_total ?: $row->amount ?: 0);
-                if (isset($ar[$index])) $ar[$index] += $val;
-            });
-
-        for ($d = 1; $d <= $days; $d++) {
-            $labels[] = $start->copy()->addDays($d - 1)->format('M d');
-        }
-
-        return response()->json([
-            'labels' => $labels,
-            'datasets' => [
-                [ 'label' => 'Revenue', 'backgroundColor' => '#10b981', 'data' => $rev ],
-                [ 'label' => 'Accounts Receivable', 'backgroundColor' => '#f59e0b', 'data' => $ar ],
-            ],
-        ]);
     }
 
     /**

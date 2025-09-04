@@ -41,25 +41,16 @@ const fetchNotifications = async () => {
 
 const fetchInventoryAlertCount = async () => {
   try {
-    // Try the new public route first
-    try {
-      const response = await axios.get(route('inventory-alerts.count.public'));
-      inventoryAlertCount.value = response.data.count;
-      return;
-    } catch (routeError) {
-      // If route doesn't exist, try the original route
-      try {
-        const response = await axios.get('/dashboard/inventory-alerts/count.public');
-        inventoryAlertCount.value = response.data.count;
-        return;
-      } catch (fallbackError) {
-        // If both fail, just set to 0
-        inventoryAlertCount.value = 0;
-      }
-    }
+    const response = await axios.get(route('inventory-alerts.count.public'));
+    inventoryAlertCount.value = response.data.count ?? 0;
   } catch (error) {
-    console.warn('Inventory alerts not available:', error);
-    inventoryAlertCount.value = 0;
+    try {
+      const response = await axios.get('/dashboard/inventory-alerts/count');
+      inventoryAlertCount.value = response.data.count ?? 0;
+    } catch (e) {
+      console.warn('Inventory alerts not available:', e);
+      inventoryAlertCount.value = 0;
+    }
   }
 };
 
