@@ -30,6 +30,22 @@ class RoleController extends BaseController
     {
         $data = $this->service->getAll($request, ['permissions']); // Eager load permissions
 
+        // Transform the data to ensure permissions are properly formatted
+        if (isset($data['data'])) {
+            $data['data'] = collect($data['data'])->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->map(function ($permission) {
+                        return [
+                            'id' => $permission->id,
+                            'name' => $permission->name,
+                        ];
+                    }),
+                ];
+            });
+        }
+
         return Inertia::render($this->viewName.'/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only([
@@ -59,10 +75,17 @@ class RoleController extends BaseController
     public function edit($id)
     {
         $role = $this->service->getById($id);
+        $role->load('permissions'); // Ensure permissions are loaded
         $allPermissions = Permission::pluck('name')->toArray();
 
         return Inertia::render($this->viewName.'/Edit', [
-            'role' => $role,
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->map(function ($permission) {
+                    return ['name' => $permission->name];
+                }),
+            ],
             'allPermissions' => $allPermissions,
         ]);
     }

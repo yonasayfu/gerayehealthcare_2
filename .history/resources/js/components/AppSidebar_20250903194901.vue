@@ -127,7 +127,7 @@ const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
     items: [
-        { title: 'Messages', routeName: 'admin.messages', icon: MessageCircle, permission: 'view messages' },
+        { title: 'Messages', routeName: 'admin.messages', icon: MessageCircle },
     ]
 };
 
@@ -210,7 +210,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList, permission: 'view system reports' },
       { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign, permission: 'view financial reports' },
       { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart, permission: 'view marketing analytics' },
-      { title: 'Performance Metrics', routeName: 'admin.analytics.dashboard', icon: BarChart, permission: 'view analytics dashboard' },
+      { title: 'Performance Metrics', routeName: 'admin.analytics.dashboard', icon: BarChart, permission: 'view performance metrics' },
     ],
   },
   {
@@ -543,6 +543,11 @@ onMounted(() => {
 .sidebar[data-state="collapsed"] .flex.items-center.gap-2 {
   justify-content: center;
 }
+
+.sidebar[data-state="collapsed"] .min-w-0 {
+  min-width: auto;
+}
+</style>
 
 .sidebar[data-state="collapsed"] .min-w-0 {
   min-width: auto;

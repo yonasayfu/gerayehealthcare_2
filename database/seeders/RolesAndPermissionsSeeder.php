@@ -56,9 +56,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records', 'delete inventory maintenance records',
             'export inventory reports', 'manage inventory suppliers',
 
-            // Financial Management
+            // Financial Management (Comprehensive)
             'view invoices', 'create invoices', 'edit invoices', 'delete invoices', 'export invoices',
             'view financial reports', 'export financial reports', 'manage budgets',
+            'view staff payouts', 'create staff payouts', 'edit staff payouts', 'delete staff payouts', 'export staff payouts',
+            'view financial analytics', 'view revenue reports', 'view expense reports',
+            'manage financial settings', 'approve financial transactions', 'view audit logs',
+            'manage payment methods', 'view cash flow', 'manage financial accounts',
             'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
 
             // Calendar & Events

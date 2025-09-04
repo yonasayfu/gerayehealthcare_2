@@ -359,6 +359,16 @@ Route::middleware(['auth', 'verified'])
             return redirect()->route('admin.visit-services.index');
         })->name('appointments.index')->middleware('can:view visit services');
 
+        // Analytics Dashboard
+        Route::get('analytics/dashboard', function () {
+            return redirect()->route('dashboard');
+        })->name('analytics.dashboard')->middleware('can:view analytics dashboard');
+
+        // Messages (placeholder route)
+        Route::get('messages', function () {
+            return redirect()->route('dashboard');
+        })->name('messages')->middleware('can:view messages');
+
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
         Route::middleware('can:view suppliers')->group(function () {
             Route::get('suppliers/print-all', [App\Http\Controllers\Admin\SupplierController::class, 'printAll'])->name('suppliers.printAll');
