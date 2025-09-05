@@ -5,10 +5,9 @@ import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import { DollarSign, Users, CreditCard, Activity } from 'lucide-vue-next';
 import StatCard from '@/components/StatCard.vue';
 import Tooltip from '@/components/Tooltip.vue';
-import { Bar, Pie, Chart } from 'vue-chartjs';
+import { Bar, Pie } from 'vue-chartjs';
 import { Chart as ChartJS, Title, Tooltip as ChartTooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement } from 'chart.js';
-import axios, { AxiosResponse } from 'axios';
-import { ChartData, ChartDataset } from 'chart.js';
+import axios from 'axios';
 
 ChartJS.register(Title, ChartTooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement, LineElement, PointElement);
 
@@ -16,7 +15,7 @@ interface DashboardStats {
   totalLeads: number;
   convertedLeads: number;
   conversionRate: number;
-  totalMarketingSpend: number; // Changed to number
+  totalMarketingSpend: number;
   patientsAcquired: number;
   cpa: number;
   revenueGenerated: number;
@@ -45,12 +44,13 @@ interface ConversionFunnelData {
 }
 
 const props = defineProps<{
-  dashboardStats: DashboardStats;
   campaignPerformanceData: CampaignPerformanceItem[];
   trafficSourceData: TrafficSourceItem[];
   conversionFunnelData: ConversionFunnelData;
-  loading: boolean; // Added loading prop
 }>();
+
+// New analytics state
+const dashboardStats = ref<DashboardStats | null>(null);
 
 // Tabs
 const currentTab = ref<'Overview' | 'Budget' | 'Staff' | 'SLA'>('Overview');
@@ -60,8 +60,6 @@ type RangePreset = 'TODAY' | 'MTD' | 'LAST_30' | 'YTD';
 const rangePreset = ref<RangePreset>('MTD');
 const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
-
-// This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,16 +76,14 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
-  fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
+  fetchAnalyticsData();
 }
 
-// New analytics state (these are fetched internally by this component)
+// New analytics state
 const budgetPacing = ref<{ range: { start: string; end: string }; monthly: any[]; totals: any } | null>(null);
 const staffPerformance = ref<Array<any>>([]);
 const taskSla = ref<any>(null);
 // Staff sorting + paging
-type StaffSortKey = 'name' | 'leads' | 'contact' | 'conversion' | 'tasks' | 'ontime' | 'overdue';
-const staffSortKey = ref<StaffSortKey>('name');
 const staffSortDir = ref<'asc'|'desc'>('asc');
 const staffPage = ref(1);
 const staffPageSize = ref(8);
@@ -161,7 +157,7 @@ onMounted(() => {
   animateValue('total-leads-counter', 0, props.dashboardStats.totalLeads, 2000);
   animateValue('converted-leads-counter', 0, props.dashboardStats.convertedLeads, 1500);
   animateValue('conversion-rate-counter', 0, props.dashboardStats.conversionRate, 1000);
-  animateValue('total-marketing-spend-counter', 0, props.dashboardStats.totalMarketingSpend, 2000, '$');
+  animateValue('total-marketing-spend-counter', 0, parseFloat(props.dashboardStats.totalMarketingSpend), 2000, '$');
   animateValue('patients-acquired-counter', 0, props.dashboardStats.patientsAcquired, 1500);
   animateValue('cpa-counter', 0, props.dashboardStats.cpa, 1000, '$');
   animateValue('revenue-generated-counter', 0, props.dashboardStats.revenueGenerated, 2000, '$');
@@ -184,39 +180,16 @@ onMounted(() => {
   applyRange('MTD');
 });
 
-watch(() => props.dashboardStats, (newStats: DashboardStats) => {
-  if (newStats) {
-    animateValue('total-leads-counter', 0, newStats.totalLeads, 2000);
-    animateValue('converted-leads-counter', 0, newStats.convertedLeads, 1500);
-    animateValue('conversion-rate-counter', 0, newStats.conversionRate, 1000);
-    animateValue('total-marketing-spend-counter', 0, newStats.totalMarketingSpend, 2000, '$');
-    animateValue('patients-acquired-counter', 0, newStats.patientsAcquired, 1500);
-    animateValue('cpa-counter', 0, newStats.cpa, 1000, '$');
-    animateValue('revenue-generated-counter', 0, newStats.revenueGenerated, 2000, '$');
-    animateValue('roi-counter', 0, newStats.roi, 1500);
-  }
-}, { deep: true });
-
-watch(currentTab, () => {
-  fetchAnalyticsExtras();
-});
-
 function fetchAnalyticsExtras() {
   const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
-
-  // Fetch budget pacing
   axios.get(route('admin.marketing-analytics.budget-pacing'), { params })
-    .then((res: AxiosResponse<any>) => budgetPacing.value = res.data)
+    .then(res => budgetPacing.value = res.data)
     .catch(() => budgetPacing.value = null);
-
-  // Fetch staff performance
   axios.get(route('admin.marketing-analytics.staffPerformance'), { params })
-    .then((res: AxiosResponse<any[]>) => staffPerformance.value = res.data || [])
+    .then(res => staffPerformance.value = res.data || [])
     .catch(() => staffPerformance.value = []);
-
-  // Fetch task SLA
   axios.get(route('admin.marketing-analytics.taskSla'), { params })
-    .then((res: AxiosResponse<any>) => taskSla.value = res.data)
+    .then(res => taskSla.value = res.data)
     .catch(() => taskSla.value = { total: 0, completed: 0, on_time: 0, overdue_open: 0, overdue_completed: 0, on_time_rate: 0 });
 }
 
@@ -254,12 +227,12 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
 // Budget pacing chart (stacked bars + projected line)
-const budgetPacingChartData = computed<ChartData<'bar' | 'line'>>(() => {
+const budgetPacingChartData = computed(() => {
   const months = budgetPacing.value?.monthly?.map((m: any) => m.month) || [];
   const allocated = budgetPacing.value?.monthly?.map((m: any) => m.allocated) || [];
   const spent = budgetPacing.value?.monthly?.map((m: any) => m.spent) || [];
@@ -267,9 +240,9 @@ const budgetPacingChartData = computed<ChartData<'bar' | 'line'>>(() => {
   return {
     labels: months,
     datasets: [
-      { type: 'bar', label: 'Allocated', backgroundColor: '#e5e7eb', data: allocated, stack: 'budget' } as ChartDataset<'bar'>,
-      { type: 'bar', label: 'Spent', backgroundColor: '#60a5fa', data: spent, stack: 'budget' } as ChartDataset<'bar'>,
-      { type: 'line', label: 'Projected Spend', borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', data: projected, yAxisID: 'y' } as ChartDataset<'line'>,
+      { type: 'bar' as const, label: 'Allocated', backgroundColor: '#e5e7eb', data: allocated, stack: 'budget' },
+      { type: 'bar' as const, label: 'Spent', backgroundColor: '#60a5fa', data: spent, stack: 'budget' },
+      { type: 'line' as const, label: 'Projected Spend', borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', data: projected, yAxisID: 'y' },
     ],
   };
 });
@@ -277,11 +250,7 @@ const budgetPacingChartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: { legend: { position: 'top' as const } },
-  scales: {
-    x: { stacked: true },
-    y: { stacked: true, beginAtZero: true, position: 'left' as const, id: 'y-bar' }, // For bars
-    y1: { beginAtZero: true, position: 'right' as const, id: 'y-line', grid: { drawOnChartArea: false } }, // For line
-  },
+  scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
 };
 </script>
 
@@ -470,7 +439,7 @@ const budgetPacingChartOptions = {
           <div v-if="budgetPacing?.range" class="text-sm text-gray-500">{{ budgetPacing.range.start }} → {{ budgetPacing.range.end }}</div>
         </div>
         <div class="h-[360px]">
-          <Chart v-if="budgetPacing" :data="budgetPacingChartData" :options="budgetPacingChartOptions" :type="'bar'" />
+          <Bar v-if="budgetPacing" :data="budgetPacingChartData" :options="budgetPacingChartOptions" />
           <div v-else class="text-gray-400 text-sm">Loading budget pacing...</div>
         </div>
         <div v-if="budgetPacing" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -526,7 +495,7 @@ const budgetPacingChartOptions = {
       <!-- SLA Widget -->
       <div v-if="currentTab==='SLA'" class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8 transform transition duration-500 hover:scale-[1.01] card-hover animate-fadeIn" style="animation-delay: 1.45s">
         <h3 class="text-lg font-medium text-gray-700 mb-4">SLA Summary</h3>
-        <div v-if="taskSla && taskSla.total > 0" class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
+        <div v-if="taskSla" class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm">
           <div class="p-3 bg-gray-50 rounded">
             <div class="text-gray-500">Total Tasks</div>
             <div class="font-semibold">{{ taskSla.total }}</div>
@@ -548,7 +517,7 @@ const budgetPacingChartOptions = {
             <div class="font-semibold" :class="taskSla.overdue_open > 0 ? 'text-red-600' : ''">{{ taskSla.overdue_open }}</div>
           </div>
         </div>
-        <div v-else class="py-4 text-center text-gray-400">No data</div>
+        <div v-else class="text-gray-400 text-sm">Loading SLA...</div>
       </div>
     </div>
   </AppLayout>

@@ -16,7 +16,7 @@ interface DashboardStats {
   totalLeads: number;
   convertedLeads: number;
   conversionRate: number;
-  totalMarketingSpend: number; // Changed to number
+  totalMarketingSpend: number;
   patientsAcquired: number;
   cpa: number;
   revenueGenerated: number;
@@ -45,12 +45,13 @@ interface ConversionFunnelData {
 }
 
 const props = defineProps<{
-  dashboardStats: DashboardStats;
   campaignPerformanceData: CampaignPerformanceItem[];
   trafficSourceData: TrafficSourceItem[];
   conversionFunnelData: ConversionFunnelData;
-  loading: boolean; // Added loading prop
 }>();
+
+// New analytics state
+const dashboardStats = ref<DashboardStats | null>(null);
 
 // Tabs
 const currentTab = ref<'Overview' | 'Budget' | 'Staff' | 'SLA'>('Overview');
@@ -60,8 +61,6 @@ type RangePreset = 'TODAY' | 'MTD' | 'LAST_30' | 'YTD';
 const rangePreset = ref<RangePreset>('MTD');
 const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
-
-// This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,10 +77,10 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
-  fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
+  fetchAnalyticsData();
 }
 
-// New analytics state (these are fetched internally by this component)
+// New analytics state
 const budgetPacing = ref<{ range: { start: string; end: string }; monthly: any[]; totals: any } | null>(null);
 const staffPerformance = ref<Array<any>>([]);
 const taskSla = ref<any>(null);
@@ -157,16 +156,6 @@ function animateProgressBars() {
 }
 
 onMounted(() => {
-  // Animate counters
-  animateValue('total-leads-counter', 0, props.dashboardStats.totalLeads, 2000);
-  animateValue('converted-leads-counter', 0, props.dashboardStats.convertedLeads, 1500);
-  animateValue('conversion-rate-counter', 0, props.dashboardStats.conversionRate, 1000);
-  animateValue('total-marketing-spend-counter', 0, props.dashboardStats.totalMarketingSpend, 2000, '$');
-  animateValue('patients-acquired-counter', 0, props.dashboardStats.patientsAcquired, 1500);
-  animateValue('cpa-counter', 0, props.dashboardStats.cpa, 1000, '$');
-  animateValue('revenue-generated-counter', 0, props.dashboardStats.revenueGenerated, 2000, '$');
-  animateValue('roi-counter', 0, props.dashboardStats.roi, 1500);
-
   // Animate progress bars (only if any are left)
   setTimeout(animateProgressBars, 500);
 
@@ -184,7 +173,7 @@ onMounted(() => {
   applyRange('MTD');
 });
 
-watch(() => props.dashboardStats, (newStats: DashboardStats) => {
+watch(dashboardStats, (newStats: DashboardStats | null) => {
   if (newStats) {
     animateValue('total-leads-counter', 0, newStats.totalLeads, 2000);
     animateValue('converted-leads-counter', 0, newStats.convertedLeads, 1500);
@@ -195,14 +184,19 @@ watch(() => props.dashboardStats, (newStats: DashboardStats) => {
     animateValue('revenue-generated-counter', 0, newStats.revenueGenerated, 2000, '$');
     animateValue('roi-counter', 0, newStats.roi, 1500);
   }
-}, { deep: true });
-
-watch(currentTab, () => {
-  fetchAnalyticsExtras();
 });
 
-function fetchAnalyticsExtras() {
+watch(currentTab, () => {
+  fetchAnalyticsData();
+});
+
+function fetchAnalyticsData() {
   const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
+
+  // Fetch dashboard stats
+  axios.get(route('admin.marketing-analytics.dashboardStats'), { params })
+    .then((res: AxiosResponse<DashboardStats>) => dashboardStats.value = res.data)
+    .catch(() => dashboardStats.value = null);
 
   // Fetch budget pacing
   axios.get(route('admin.marketing-analytics.budget-pacing'), { params })
@@ -254,7 +248,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -292,13 +286,6 @@ const budgetPacingChartOptions = {
     <div class="container mx-auto p-4 md:p-6">
       <header class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4 animate-fadeIn" style="animation-delay: 0.1s">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Marketing Analytics</h1>
-        <div class="flex items-center gap-2">
-          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='TODAY' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('TODAY')">Today</button>
-          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='MTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('MTD')">MTD</button>
-          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='LAST_30' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('LAST_30')">Last 30</button>
-          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='YTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('YTD')">YTD</button>
-          <span class="ml-2 text-sm text-gray-500">Range: {{ rangeStart }} → {{ rangeEnd }}</span>
-        </div>
       </header>
 
       <!-- Tabs -->
@@ -309,31 +296,42 @@ const budgetPacingChartOptions = {
         <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='SLA' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='SLA'">SLA</button>
       </div>
 
-      <div v-if="currentTab==='Overview'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-        <Tooltip text="Total marketing leads in the selected range">
-          <StatCard title="Total Leads" :value="props.dashboardStats.totalLeads.toLocaleString()" change="" :icon="Users" color="bg-blue-100" />
-        </Tooltip>
-        <Tooltip text="Leads turned into patients">
-          <StatCard title="Converted Leads" :value="props.dashboardStats.convertedLeads.toLocaleString()" change="" :icon="Activity" color="bg-green-100" />
-        </Tooltip>
-        <Tooltip text="Lead to patient conversion rate">
-          <StatCard title="Conversion Rate" :value="`${props.dashboardStats.conversionRate.toFixed?.(2) ?? props.dashboardStats.conversionRate}%`" change="" :icon="CreditCard" color="bg-yellow-100" />
-        </Tooltip>
-        <Tooltip text="Total marketing spend">
-          <StatCard title="Total Spend" :value="`$${Number(props.dashboardStats.totalMarketingSpend || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-orange-100" />
-        </Tooltip>
-        <Tooltip text="Patients acquired via marketing">
-          <StatCard title="Patients Acquired" :value="props.dashboardStats.patientsAcquired.toLocaleString()" change="" :icon="Users" color="bg-indigo-100" />
-        </Tooltip>
-        <Tooltip text="Cost per acquisition">
-          <StatCard title="CPA" :value="`$${Number(props.dashboardStats.cpa || 0).toLocaleString()}`" change="" :icon="DollarSign" color="bg-purple-100" />
-        </Tooltip>
-        <Tooltip text="Revenue attributed to marketing">
-          <StatCard title="Revenue Generated" :value="`$${Number(props.dashboardStats.revenueGenerated || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-teal-100" />
-        </Tooltip>
-        <Tooltip text="Return on investment">
-          <StatCard title="ROI" :value="`${props.dashboardStats.roi.toFixed?.(2) ?? props.dashboardStats.roi}%`" change="" :icon="Activity" color="bg-pink-100" />
-        </Tooltip>
+      <div v-if="currentTab==='Overview'">
+        <div class="flex items-center gap-2 mb-4">
+          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='TODAY' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('TODAY')">Today</button>
+          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='MTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('MTD')">MTD</button>
+          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='LAST_30' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('LAST_30')">Last 30</button>
+          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='YTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('YTD')">YTD</button>
+          <span class="ml-2 text-sm text-gray-500">Range: {{ rangeStart }} → {{ rangeEnd }}</span>
+        </div>
+
+        <div v-if="dashboardStats" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+          <Tooltip text="Total marketing leads in the selected range">
+            <StatCard title="Total Leads" :value="dashboardStats.totalLeads.toLocaleString()" change="" :icon="Users" color="bg-blue-100" />
+          </Tooltip>
+          <Tooltip text="Leads turned into patients">
+            <StatCard title="Converted Leads" :value="dashboardStats.convertedLeads.toLocaleString()" change="" :icon="Activity" color="bg-green-100" />
+          </Tooltip>
+          <Tooltip text="Lead to patient conversion rate">
+            <StatCard title="Conversion Rate" :value="`${dashboardStats.conversionRate.toFixed?.(2) ?? dashboardStats.conversionRate}%`" change="" :icon="CreditCard" color="bg-yellow-100" />
+          </Tooltip>
+          <Tooltip text="Total marketing spend">
+            <StatCard title="Total Spend" :value="`$${Number(dashboardStats.totalMarketingSpend || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-orange-100" />
+          </Tooltip>
+          <Tooltip text="Patients acquired via marketing">
+            <StatCard title="Patients Acquired" :value="dashboardStats.patientsAcquired.toLocaleString()" change="" :icon="Users" color="bg-indigo-100" />
+          </Tooltip>
+          <Tooltip text="Cost per acquisition">
+            <StatCard title="CPA" :value="`$${Number(dashboardStats.cpa || 0).toLocaleString()}`" change="" :icon="DollarSign" color="bg-purple-100" />
+          </Tooltip>
+          <Tooltip text="Revenue attributed to marketing">
+            <StatCard title="Revenue Generated" :value="`$${Number(dashboardStats.revenueGenerated || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-teal-100" />
+          </Tooltip>
+          <Tooltip text="Return on investment">
+            <StatCard title="ROI" :value="`${dashboardStats.roi.toFixed?.(2) ?? dashboardStats.roi}%`" change="" :icon="Activity" color="bg-pink-100" />
+          </Tooltip>
+        </div>
+        <div v-else class="text-gray-400 text-sm mb-6">Loading dashboard stats...</div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

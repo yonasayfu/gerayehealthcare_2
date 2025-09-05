@@ -8,23 +8,38 @@ window.Pusher = Pusher;
 // Read CSRF token from meta for Echo auth requests
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || undefined;
 
-window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT,
-    wssPort: import.meta.env.VITE_REVERB_PORT,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    authEndpoint: '/broadcasting/auth',
-    withCredentials: true,
-    auth: {
-        headers: {
-            'X-CSRF-TOKEN': csrfToken ?? '',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-    },
-});
+// Feature flag so you can disable realtime in dev/mobile testing
+const ENABLE_ECHO = (import.meta.env.VITE_ENABLE_ECHO ?? 'true') === 'true';
+if (ENABLE_ECHO) {
+    try {
+        const scheme = (import.meta.env.VITE_REVERB_SCHEME ?? 'http').toString();
+        const host = (import.meta.env.VITE_REVERB_HOST ?? window.location.hostname).toString();
+        const port = Number(import.meta.env.VITE_REVERB_PORT ?? 6001);
+        const useTLS = scheme === 'https';
+
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: import.meta.env.VITE_REVERB_APP_KEY,
+            wsHost: host,
+            wsPort: port,
+            wssPort: port,
+            forceTLS: useTLS,
+            enabledTransports: useTLS ? ['ws', 'wss'] : ['ws'],
+            authEndpoint: '/broadcasting/auth',
+            withCredentials: true,
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken ?? '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            },
+        });
+    } catch (e) {
+        console.warn('Echo initialization failed (disabled for this session):', e);
+    }
+} else {
+    console.info('Realtime (Echo) disabled via VITE_ENABLE_ECHO=false');
+}
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

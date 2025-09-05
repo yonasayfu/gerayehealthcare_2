@@ -62,6 +62,7 @@ const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
 // This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,6 +79,7 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
   fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
 }
 
@@ -254,7 +256,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -320,9 +322,6 @@ const budgetPacingChartOptions = {
           <StatCard title="Conversion Rate" :value="`${props.dashboardStats.conversionRate.toFixed?.(2) ?? props.dashboardStats.conversionRate}%`" change="" :icon="CreditCard" color="bg-yellow-100" />
         </Tooltip>
         <Tooltip text="Total marketing spend">
-          <StatCard title="Total Spend" :value="`$${Number(props.dashboardStats.totalMarketingSpend || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-orange-100" />
-        </Tooltip>
-        <Tooltip text="Patients acquired via marketing">
           <StatCard title="Patients Acquired" :value="props.dashboardStats.patientsAcquired.toLocaleString()" change="" :icon="Users" color="bg-indigo-100" />
         </Tooltip>
         <Tooltip text="Cost per acquisition">

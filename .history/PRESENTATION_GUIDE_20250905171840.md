@@ -140,9 +140,9 @@ ROLE-BASED DASHBOARDS
 
 CLINICAL MOBILITY
 ✅ Bedside patient care documentation
-✅ Mobile prescription writing
+✅ Mobile prescription writin9g
 ✅ Photo capture & documentation
-✅ Voice-to-text note taking (Not Implmented)
+✅ Voice-to-text note taking 
 
 PATIENT ENGAGEMENT
 ✅ Guest appointment booking
@@ -194,7 +194,7 @@ MIDDLEWARE PROTECTION
 ✅ Frontend component guards
 ✅ Automatic super admin bypass
 
-AUDIT & COMPLIANCE (Not Implmented)
+AUDIT & COMPLIANCE
 ✅ User activity logging
 ✅ Permission change tracking
 ✅ Access attempt monitoring

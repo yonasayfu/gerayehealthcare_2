@@ -62,6 +62,7 @@ const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
 // This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,6 +79,7 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
   fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
 }
 
@@ -254,7 +256,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -374,9 +376,6 @@ const budgetPacingChartOptions = {
                     <span class="font-medium text-gray-700">Instagram</span>
                 </div>
                 <div class="text-right">
-                    <p class="text-green-500 font-medium">+7/10 30.1K</p>
-                    <p class="text-xs text-gray-500">Reach: 45.3K</p>
-                </div>
             </div>
 
             <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg transform transition duration-300 hover:scale-[1.01] hover:shadow">

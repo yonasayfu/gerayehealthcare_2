@@ -352,16 +352,23 @@ const fetchTopServices = async () => {
 
 // Reports data loaders
 const fetchReportsData = async () => {
+  const params = { start: rangeStart.value, end: rangeEnd.value } as any;
+  const getUrl = (name: string, fallback: string) => {
+    try { return route(name); } catch { return fallback; }
+  };
+  const svcUrl = getUrl('admin.reports.service-volume.data', '/dashboard/reports/service-volume/data');
+  const revUrl = getUrl('admin.reports.revenue-ar.data', '/dashboard/reports/revenue-ar/data');
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
     const [svc, rev] = await Promise.all([
-      axios.get(route('admin.reports.service-volume.data'), { params }),
-      axios.get(route('admin.reports.revenue-ar.data'), { params }),
+      axios.get(svcUrl, { params }),
+      axios.get(revUrl, { params }),
     ]);
-    reportServiceChart.value = svc.data || { labels: [], datasets: [] };
-    reportRevenueArChart.value = rev.data || { labels: [], datasets: [] };
+    reportServiceChart.value = (svc.data && svc.data.labels) ? svc.data : { labels: [], datasets: [] };
+    reportRevenueArChart.value = (rev.data && rev.data.labels) ? rev.data : { labels: [], datasets: [] };
   } catch (error) {
     console.error('Error fetching reports data:', error);
+    reportServiceChart.value = { labels: [], datasets: [] };
+    reportRevenueArChart.value = { labels: [], datasets: [] };
   }
 };
 

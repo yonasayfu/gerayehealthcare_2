@@ -254,7 +254,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 

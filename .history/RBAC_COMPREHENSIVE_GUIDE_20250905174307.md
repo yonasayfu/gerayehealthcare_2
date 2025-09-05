@@ -246,6 +246,99 @@ const allAdminNavItems: SidebarNavGroup[] = [
 3. Specify `permission` property for access control
 4. Ensure route exists in `routes/web.php`
 
+---
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues & Solutions**
+
+#### **1. Ziggy Route Errors**
+```
+Error: route 'admin.analytics.dashboard' is not in the route list
+```
+**Solution:** Add missing routes to `routes/web.php`
+```php
+Route::get('analytics/dashboard', function () {
+    return redirect()->route('dashboard');
+})->name('analytics.dashboard');
+```
+
+#### **2. Permission Not Working**
+**Check:**
+- Permission exists in database
+- User has role with permission
+- Route has correct middleware
+- Cache is cleared
+
+**Commands:**
+```bash
+php artisan permission:cache-reset
+php artisan route:cache
+```
+
+#### **3. Navigation Not Showing**
+**Check:**
+- User has required permission
+- Route exists and is named correctly
+- Navigation item has correct `permission` property
+
+#### **4. Role Creation Fails**
+**Check:**
+- Permissions exist in database
+- User has `manage roles` permission
+- Form validation passes
+
+---
+
+## 🛠️ **Manual Fixes**
+
+### **Files to Master for Manual RBAC Fixes**
+
+#### **1. AppSidebar.vue (MOST IMPORTANT)**
+```
+resources/js/components/AppSidebar.vue
+```
+**What to fix:**
+- Navigation items and permissions
+- Role-based filtering logic
+- Route names and icons
+
+#### **2. RolesAndPermissionsSeeder.php**
+```
+database/seeders/RolesAndPermissionsSeeder.php
+```
+**What to fix:**
+- Add new permissions
+- Create new roles
+- Assign permissions to roles
+
+#### **3. web.php**
+```
+routes/web.php
+```
+**What to fix:**
+- Add missing routes
+- Fix route middleware
+- Ensure route names match navigation
+
+#### **4. RoleController.php**
+```
+app/Http/Controllers/Admin/RoleController.php
+```
+**What to fix:**
+- Permission loading issues
+- Data transformation for frontend
+- Validation rules
+
+#### **5. HandleInertiaRequests.php**
+```
+app/Http/Middleware/HandleInertiaRequests.php
+```
+**What to fix:**
+- User data sharing
+- Permission sharing with frontend
+- Role information
+
 ## 📝 **Best Practices**
 
 ### **1. Permission Naming Convention**

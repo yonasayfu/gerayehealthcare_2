@@ -62,6 +62,7 @@ const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
 // This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,6 +79,7 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
   fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
 }
 
@@ -254,7 +256,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -290,9 +292,6 @@ const budgetPacingChartOptions = {
     <Head title="Marketing Analytics Dashboard" />
 
     <div class="container mx-auto p-4 md:p-6">
-      <header class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4 animate-fadeIn" style="animation-delay: 0.1s">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Marketing Analytics</h1>
-        <div class="flex items-center gap-2">
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='TODAY' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('TODAY')">Today</button>
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='MTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('MTD')">MTD</button>
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='LAST_30' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('LAST_30')">Last 30</button>

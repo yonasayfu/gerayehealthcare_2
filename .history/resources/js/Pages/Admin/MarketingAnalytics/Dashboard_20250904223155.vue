@@ -62,6 +62,7 @@ const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
 // This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,6 +79,7 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
   fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
 }
 
@@ -254,7 +256,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -306,9 +308,6 @@ const budgetPacingChartOptions = {
         <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Overview' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Overview'">Overview</button>
         <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Budget' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Budget'">Budget</button>
         <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Staff' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Staff'">Staff</button>
-        <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='SLA' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='SLA'">SLA</button>
-      </div>
-
       <div v-if="currentTab==='Overview'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
         <Tooltip text="Total marketing leads in the selected range">
           <StatCard title="Total Leads" :value="props.dashboardStats.totalLeads.toLocaleString()" change="" :icon="Users" color="bg-blue-100" />

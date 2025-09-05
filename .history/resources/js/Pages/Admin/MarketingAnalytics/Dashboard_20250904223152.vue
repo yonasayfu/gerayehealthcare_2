@@ -62,6 +62,7 @@ const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
 // This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,6 +79,7 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
   fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
 }
 
@@ -254,16 +256,13 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
 // Budget pacing chart (stacked bars + projected line)
 const budgetPacingChartData = computed<ChartData<'bar' | 'line'>>(() => {
   const months = budgetPacing.value?.monthly?.map((m: any) => m.month) || [];
-  const allocated = budgetPacing.value?.monthly?.map((m: any) => m.allocated) || [];
-  const spent = budgetPacing.value?.monthly?.map((m: any) => m.spent) || [];
-  const projected = budgetPacing.value?.monthly?.map((m: any) => m.projected_spend) || [];
   return {
     labels: months,
     datasets: [

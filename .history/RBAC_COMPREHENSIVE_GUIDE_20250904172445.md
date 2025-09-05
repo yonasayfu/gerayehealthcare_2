@@ -246,6 +246,204 @@ const allAdminNavItems: SidebarNavGroup[] = [
 3. Specify `permission` property for access control
 4. Ensure route exists in `routes/web.php`
 
+---
+
+## 🔧 **Troubleshooting**
+
+### **Common Issues & Solutions**
+
+#### **1. Ziggy Route Errors**
+```
+Error: route 'admin.analytics.dashboard' is not in the route list
+```
+**Solution:** Add missing routes to `routes/web.php`
+```php
+Route::get('analytics/dashboard', function () {
+    return redirect()->route('dashboard');
+})->name('analytics.dashboard');
+```
+
+#### **2. Permission Not Working**
+**Check:**
+- Permission exists in database
+- User has role with permission
+- Route has correct middleware
+- Cache is cleared
+
+**Commands:**
+```bash
+php artisan permission:cache-reset
+php artisan route:cache
+```
+
+#### **3. Navigation Not Showing**
+**Check:**
+- User has required permission
+- Route exists and is named correctly
+- Navigation item has correct `permission` property
+
+#### **4. Role Creation Fails**
+**Check:**
+- Permissions exist in database
+- User has `manage roles` permission
+- Form validation passes
+
+---
+
+## 🛠️ **Manual Fixes**
+
+### **Files to Master for Manual RBAC Fixes**
+
+#### **1. AppSidebar.vue (MOST IMPORTANT)**
+```
+resources/js/components/AppSidebar.vue
+```
+**What to fix:**
+- Navigation items and permissions
+- Role-based filtering logic
+- Route names and icons
+
+#### **2. RolesAndPermissionsSeeder.php**
+```
+database/seeders/RolesAndPermissionsSeeder.php
+```
+**What to fix:**
+- Add new permissions
+- Create new roles
+- Assign permissions to roles
+
+#### **3. web.php**
+```
+routes/web.php
+```
+**What to fix:**
+- Add missing routes
+- Fix route middleware
+- Ensure route names match navigation
+
+#### **4. RoleController.php**
+```
+app/Http/Controllers/Admin/RoleController.php
+```
+**What to fix:**
+- Permission loading issues
+- Data transformation for frontend
+- Validation rules
+
+#### **5. HandleInertiaRequests.php**
+```
+app/Http/Middleware/HandleInertiaRequests.php
+```
+**What to fix:**
+- User data sharing
+- Permission sharing with frontend
+- Role information
+
+### **Quick Fix Commands**
+```bash
+# Clear all caches
+php artisan cache:clear
+php artisan permission:cache-reset
+php artisan route:cache
+
+# Reseed permissions
+php artisan db:seed --class=RolesAndPermissionsSeeder
+
+# Check user permissions
+php artisan tinker
+>>> $user = User::find(1);
+>>> $user->getAllPermissions()->pluck('name');
+```
+
+---
+
+## 📊 **Current Role Structure**
+
+| Role | Key Permissions | Navigation Access |
+|------|----------------|-------------------|
+| **Super Admin** | All permissions | Everything |
+| **CEO** | Executive oversight, patient access | Dashboard, Patients, Staff, Reports |
+| **COO** | Operations management | Staff, Inventory, Operations |
+| **Admin** | Administrative tasks | Most modules except system settings |
+| **Finance** | Financial management | Invoices, Reports, Budgets |
+| **Staff** | Clinical tasks | Patients, Medical records, Personal tools |
+
+---
+
+## 🧪 **Testing RBAC System**
+
+### **Test Credentials**
+
+| Role | Email | Password | Expected Access |
+|------|-------|----------|----------------|
+| **Super Admin** | `superadmin@gerayehealthcare.com` | `SuperAdmin123!` | Everything |
+| **CEO (Yonas)** | `yonas@gerayehealthcare.com` | `CEO123!` | Executive Dashboard + Patients |
+| **Finance** | `finance@gerayehealthcare.com` | `Finance123!` | Financial Management Only |
+| **COO** | `coo@gerayehealthcare.com` | `COO123!` | Operations + Staff |
+| **Staff** | `doctor@gerayehealthcare.com` | `Doctor123!` | Clinical Tools |
+
+### **Testing Checklist**
+
+#### **1. Login & Navigation Test**
+- [ ] Login with each role
+- [ ] Check sidebar shows appropriate navigation items
+- [ ] Verify no Ziggy route errors in console
+- [ ] Test navigation links work correctly
+
+#### **2. Permission Test**
+- [ ] Access allowed pages successfully
+- [ ] Get 403 error on restricted pages
+- [ ] Role-specific features work correctly
+
+#### **3. Role Management Test**
+- [ ] Create new role as Super Admin
+- [ ] Assign permissions to role
+- [ ] Assign role to user
+- [ ] Verify user gets appropriate navigation
+
+### **Debug Commands**
+```bash
+# Check user permissions
+php artisan tinker --execute="
+\$user = \App\Models\User::where('email', 'finance@gerayehealthcare.com')->first();
+echo 'User: ' . \$user->name . PHP_EOL;
+echo 'Roles: ' . \$user->roles->pluck('name')->join(', ') . PHP_EOL;
+echo 'Permissions: ' . \$user->getAllPermissions()->pluck('name')->join(', ') . PHP_EOL;
+"
+
+# List all roles and permissions
+php artisan tinker --execute="
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+echo 'Roles: ' . Role::pluck('name')->join(', ') . PHP_EOL;
+echo 'Permissions count: ' . Permission::count() . PHP_EOL;
+"
+```
+
+---
+
+## 🚨 **Emergency Fixes**
+
+### **If Navigation Completely Broken**
+1. Check browser console for Ziggy errors
+2. Add missing routes to `routes/web.php`
+3. Clear route cache: `php artisan route:cache`
+4. Restart development server
+
+### **If Permissions Not Working**
+1. Clear permission cache: `php artisan permission:cache-reset`
+2. Reseed permissions: `php artisan db:seed --class=RolesAndPermissionsSeeder`
+3. Check middleware in routes
+4. Verify user has correct role assignment
+
+### **If Role Creation Fails**
+1. Check `RoleController.php` for errors
+2. Verify permissions exist in database
+3. Check form validation in Vue components
+4. Clear all caches
+
+---
+
 ## 📝 **Best Practices**
 
 ### **1. Permission Naming Convention**

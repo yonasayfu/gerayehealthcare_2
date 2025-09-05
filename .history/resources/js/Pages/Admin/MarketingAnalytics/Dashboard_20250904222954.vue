@@ -16,7 +16,7 @@ interface DashboardStats {
   totalLeads: number;
   convertedLeads: number;
   conversionRate: number;
-  totalMarketingSpend: number; // Changed to number
+  totalMarketingSpend: number;
   patientsAcquired: number;
   cpa: number;
   revenueGenerated: number;
@@ -45,12 +45,13 @@ interface ConversionFunnelData {
 }
 
 const props = defineProps<{
-  dashboardStats: DashboardStats;
   campaignPerformanceData: CampaignPerformanceItem[];
   trafficSourceData: TrafficSourceItem[];
   conversionFunnelData: ConversionFunnelData;
-  loading: boolean; // Added loading prop
 }>();
+
+// New analytics state
+const dashboardStats = ref<DashboardStats | null>(null);
 
 // Tabs
 const currentTab = ref<'Overview' | 'Budget' | 'Staff' | 'SLA'>('Overview');
@@ -60,8 +61,6 @@ type RangePreset = 'TODAY' | 'MTD' | 'LAST_30' | 'YTD';
 const rangePreset = ref<RangePreset>('MTD');
 const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
-
-// This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,10 +77,10 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
-  fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
+  fetchAnalyticsExtras();
 }
 
-// New analytics state (these are fetched internally by this component)
+// New analytics state
 const budgetPacing = ref<{ range: { start: string; end: string }; monthly: any[]; totals: any } | null>(null);
 const staffPerformance = ref<Array<any>>([]);
 const taskSla = ref<any>(null);
@@ -254,7 +253,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 

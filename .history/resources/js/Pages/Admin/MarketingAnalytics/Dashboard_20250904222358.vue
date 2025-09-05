@@ -16,7 +16,7 @@ interface DashboardStats {
   totalLeads: number;
   convertedLeads: number;
   conversionRate: number;
-  totalMarketingSpend: number; // Changed to number
+  totalMarketingSpend: number;
   patientsAcquired: number;
   cpa: number;
   revenueGenerated: number;
@@ -49,7 +49,6 @@ const props = defineProps<{
   campaignPerformanceData: CampaignPerformanceItem[];
   trafficSourceData: TrafficSourceItem[];
   conversionFunnelData: ConversionFunnelData;
-  loading: boolean; // Added loading prop
 }>();
 
 // Tabs
@@ -61,7 +60,7 @@ const rangePreset = ref<RangePreset>('MTD');
 const rangeStart = ref<string>('');
 const rangeEnd = ref<string>('');
 
-// This component will emit range changes to its parent (Admin/Dashboard/Index.vue)
+const emits = defineEmits(['range-changed']);
 
 function applyRange(preset: RangePreset) {
   const now = new Date();
@@ -78,10 +77,11 @@ function applyRange(preset: RangePreset) {
   rangePreset.value = preset;
   rangeStart.value = start.toISOString().slice(0,10);
   rangeEnd.value = now.toISOString().slice(0,10);
-  fetchAnalyticsExtras(); // This will fetch budget, staff, SLA data
+  emits('range-changed', { start_date: rangeStart.value, end_date: rangeEnd.value });
+  fetchAnalyticsExtras();
 }
 
-// New analytics state (these are fetched internally by this component)
+// New analytics state
 const budgetPacing = ref<{ range: { start: string; end: string }; monthly: any[]; totals: any } | null>(null);
 const staffPerformance = ref<Array<any>>([]);
 const taskSla = ref<any>(null);
@@ -254,7 +254,7 @@ const chartOptions = {
 };
 
 const getConversionFunnelPercentage = (step: keyof ConversionFunnelData) => {
-  const total: number = (Object.values(props.conversionFunnelData) as number[]).reduce((sum: number, value: number) => sum + value, 0);
+  const total: number = Object.values(props.conversionFunnelData).reduce((sum: number, value: number) => sum + value, 0);
   return total > 0 ? (props.conversionFunnelData[step] / total) * 100 : 0;
 };
 
@@ -294,46 +294,44 @@ const budgetPacingChartOptions = {
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Marketing Analytics</h1>
         <div class="flex items-center gap-2">
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='TODAY' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('TODAY')">Today</button>
+      </div>
+
+      <div v-if="currentTab==='Overview'">
+        <div class="flex items-center gap-2 mb-4">
+          <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='TODAY' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('TODAY')">Today</button>
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='MTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('MTD')">MTD</button>
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='LAST_30' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('LAST_30')">Last 30</button>
           <button type="button" class="px-3 py-1 rounded border" :class="rangePreset==='YTD' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="applyRange('YTD')">YTD</button>
           <span class="ml-2 text-sm text-gray-500">Range: {{ rangeStart }} → {{ rangeEnd }}</span>
         </div>
-      </header>
 
-      <!-- Tabs -->
-      <div class="flex flex-wrap gap-2 mb-4">
-        <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Overview' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Overview'">Overview</button>
-        <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Budget' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Budget'">Budget</button>
-        <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='Staff' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='Staff'">Staff</button>
-        <button type="button" class="px-3 py-1 rounded border" :class="currentTab==='SLA' ? 'bg-blue-600 text-white' : 'bg-white'" @click.stop="currentTab='SLA'">SLA</button>
-      </div>
-
-      <div v-if="currentTab==='Overview'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-        <Tooltip text="Total marketing leads in the selected range">
-          <StatCard title="Total Leads" :value="props.dashboardStats.totalLeads.toLocaleString()" change="" :icon="Users" color="bg-blue-100" />
-        </Tooltip>
-        <Tooltip text="Leads turned into patients">
-          <StatCard title="Converted Leads" :value="props.dashboardStats.convertedLeads.toLocaleString()" change="" :icon="Activity" color="bg-green-100" />
-        </Tooltip>
-        <Tooltip text="Lead to patient conversion rate">
-          <StatCard title="Conversion Rate" :value="`${props.dashboardStats.conversionRate.toFixed?.(2) ?? props.dashboardStats.conversionRate}%`" change="" :icon="CreditCard" color="bg-yellow-100" />
-        </Tooltip>
-        <Tooltip text="Total marketing spend">
-          <StatCard title="Total Spend" :value="`$${Number(props.dashboardStats.totalMarketingSpend || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-orange-100" />
-        </Tooltip>
-        <Tooltip text="Patients acquired via marketing">
-          <StatCard title="Patients Acquired" :value="props.dashboardStats.patientsAcquired.toLocaleString()" change="" :icon="Users" color="bg-indigo-100" />
-        </Tooltip>
-        <Tooltip text="Cost per acquisition">
-          <StatCard title="CPA" :value="`$${Number(props.dashboardStats.cpa || 0).toLocaleString()}`" change="" :icon="DollarSign" color="bg-purple-100" />
-        </Tooltip>
-        <Tooltip text="Revenue attributed to marketing">
-          <StatCard title="Revenue Generated" :value="`$${Number(props.dashboardStats.revenueGenerated || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-teal-100" />
-        </Tooltip>
-        <Tooltip text="Return on investment">
-          <StatCard title="ROI" :value="`${props.dashboardStats.roi.toFixed?.(2) ?? props.dashboardStats.roi}%`" change="" :icon="Activity" color="bg-pink-100" />
-        </Tooltip>
+        <div v-if="dashboardStats" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+          <Tooltip text="Total marketing leads in the selected range">
+            <StatCard title="Total Leads" :value="dashboardStats.totalLeads.toLocaleString()" change="" :icon="Users" color="bg-blue-100" />
+          </Tooltip>
+          <Tooltip text="Leads turned into patients">
+            <StatCard title="Converted Leads" :value="dashboardStats.convertedLeads.toLocaleString()" change="" :icon="Activity" color="bg-green-100" />
+          </Tooltip>
+          <Tooltip text="Lead to patient conversion rate">
+            <StatCard title="Conversion Rate" :value="`${dashboardStats.conversionRate.toFixed?.(2) ?? dashboardStats.conversionRate}%`" change="" :icon="CreditCard" color="bg-yellow-100" />
+          </Tooltip>
+          <Tooltip text="Total marketing spend">
+            <StatCard title="Total Spend" :value="`$${Number(dashboardStats.totalMarketingSpend || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-orange-100" />
+          </Tooltip>
+          <Tooltip text="Patients acquired via marketing">
+            <StatCard title="Patients Acquired" :value="dashboardStats.patientsAcquired.toLocaleString()" change="" :icon="Users" color="bg-indigo-100" />
+          </Tooltip>
+          <Tooltip text="Cost per acquisition">
+            <StatCard title="CPA" :value="`$${Number(dashboardStats.cpa || 0).toLocaleString()}`" change="" :icon="DollarSign" color="bg-purple-100" />
+          </Tooltip>
+          <Tooltip text="Revenue attributed to marketing">
+            <StatCard title="Revenue Generated" :value="`$${Number(dashboardStats.revenueGenerated || 0).toLocaleString()}`" change="" :icon="CreditCard" color="bg-teal-100" />
+          </Tooltip>
+          <Tooltip text="Return on investment">
+            <StatCard title="ROI" :value="`${dashboardStats.roi.toFixed?.(2) ?? dashboardStats.roi}%`" change="" :icon="Activity" color="bg-pink-100" />
+          </Tooltip>
+        </div>
+        <div v-else class="text-gray-400 text-sm mb-6">Loading dashboard stats...</div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
