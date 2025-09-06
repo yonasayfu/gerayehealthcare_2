@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceVolumeView extends Model
 {
     protected $table = 'service_volume_view';
+
     public $timestamps = false;
+
     protected $primaryKey = null;
+
     public $incrementing = false;
 
     protected $guarded = [];

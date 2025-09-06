@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\Service; // <-- THIS IS THE FIX
-use App\Models\VisitService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
-use Carbon\Carbon;
-use App\Http\Requests\CheckInVisitRequest;
+use App\Http\Requests\CheckInVisitRequest; // <-- THIS IS THE FIX
 use App\Http\Requests\CheckOutVisitRequest;
 use App\Http\Requests\StoreVisitReportRequest;
+use App\Models\Service;
+use App\Models\VisitService;
 use App\Services\VisitServiceService;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class MyVisitController extends Controller
 {
@@ -30,7 +29,7 @@ class MyVisitController extends Controller
     {
         $staff = Auth::user()->staff;
 
-        if (!$staff) {
+        if (! $staff) {
             return redirect()->route('dashboard')->with('error', 'You do not have a staff profile.');
         }
 
@@ -133,6 +132,7 @@ class MyVisitController extends Controller
                 event_id: $visit->event_id
             );
             $this->visitServiceService->update($visit->id, $dto);
+
             return redirect()->route('staff.my-visits.index')->with('banner', 'Visit report filed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()])->withInput()->with('banner', $e->getMessage())->with('bannerStyle', 'danger');

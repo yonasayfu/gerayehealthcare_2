@@ -17,10 +17,10 @@ class InvoiceResource extends JsonResource
             'status' => $this->status,
             'grand_total' => $this->grand_total,
             'paid_at' => optional($this->paid_at)->toDateTimeString(),
-            'patient' => $this->whenLoaded('patient', fn() => ['id' => $this->patient->id, 'full_name' => $this->patient->full_name]),
-            'insurance_company' => $this->whenLoaded('insuranceCompany', fn() => ['id' => $this->insuranceCompany->id, 'name' => $this->insuranceCompany->name]),
+            'patient' => $this->whenLoaded('patient', fn () => ['id' => $this->patient->id, 'full_name' => $this->patient->full_name]),
+            'insurance_company' => $this->whenLoaded('insuranceCompany', fn () => ['id' => $this->insuranceCompany->id, 'name' => $this->insuranceCompany->name]),
             'items' => $this->whenLoaded('items', function () {
-                return $this->items->map(fn($i) => [
+                return $this->items->map(fn ($i) => [
                     'id' => $i->id,
                     'description' => $i->description ?? null,
                     'quantity' => $i->quantity ?? 1,
@@ -31,4 +31,3 @@ class InvoiceResource extends JsonResource
         ];
     }
 }
-

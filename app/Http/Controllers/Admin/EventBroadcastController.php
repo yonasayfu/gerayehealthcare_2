@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Event;
-use App\Models\Staff;
-use App\Services\Validation\Rules\EventBroadcastRules;
+use App\DTOs\CreateEventBroadcastDTO;
 use App\Enums\RoleEnum;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait;
+use App\Models\Event;
+use App\Models\EventBroadcast;
+use App\Models\Staff;
+use App\Services\EventBroadcastService;
+use App\Services\Validation\Rules\EventBroadcastRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Http\Controllers\Base\BaseController;
-use App\Services\EventBroadcastService;
-use App\Models\EventBroadcast;
-use App\DTOs\CreateEventBroadcastDTO;
-use App\Http\Traits\ExportableTrait;
 
 class EventBroadcastController extends BaseController
 {
     use ExportableTrait;
+
     public function __construct(EventBroadcastService $eventBroadcastService)
     {
         parent::__construct(
@@ -27,7 +28,7 @@ class EventBroadcastController extends BaseController
             EventBroadcast::class,
             CreateEventBroadcastDTO::class
         );
-        $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
+        $this->middleware('role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value);
     }
 
     public function create()
@@ -35,7 +36,7 @@ class EventBroadcastController extends BaseController
         $events = Event::select('id', 'title')->orderBy('title')->get();
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'events' => $events,
             'staff' => $staff,
         ]);
@@ -47,7 +48,7 @@ class EventBroadcastController extends BaseController
         $events = Event::select('id', 'title')->orderBy('title')->get();
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $eventBroadcast,
             'events' => $events,
             'staff' => $staff,
@@ -60,6 +61,7 @@ class EventBroadcastController extends BaseController
     public function printCurrent(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintCurrent($request, EventBroadcast::class, $config);
     }
 

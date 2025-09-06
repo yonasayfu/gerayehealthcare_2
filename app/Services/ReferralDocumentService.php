@@ -45,13 +45,13 @@ class ReferralDocumentService extends BaseService
     public function updateReferralDocument(ReferralDocument $referralDocument, UpdateReferralDocumentDTO $dto): ReferralDocument
     {
         $data = [];
-        if (!is_null($dto->referral_id)) {
+        if (! is_null($dto->referral_id)) {
             $data['referral_id'] = $dto->referral_id;
         }
-        if (!is_null($dto->document_name)) {
+        if (! is_null($dto->document_name)) {
             $data['document_name'] = $dto->document_name;
         }
-        if (!is_null($dto->document_file)) {
+        if (! is_null($dto->document_file)) {
             // Delete old file
             if ($referralDocument->document_path) {
                 Storage::disk('public')->delete($referralDocument->document_path);
@@ -63,10 +63,10 @@ class ReferralDocumentService extends BaseService
             $data['file_size'] = $uploaded->getSize();
             $data['checksum'] = hash_file('sha256', $uploaded->getRealPath());
         }
-        if (!is_null($dto->document_type)) {
+        if (! is_null($dto->document_type)) {
             $data['document_type'] = $dto->document_type;
         }
-        if (!is_null($dto->status)) {
+        if (! is_null($dto->status)) {
             $data['status'] = $dto->status;
         }
 

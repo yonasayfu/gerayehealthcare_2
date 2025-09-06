@@ -14,7 +14,7 @@ class EventRules extends BaseResourceRules
             'broadcast_status' => 'required|string|in:Draft,Published,Archived',
         ];
     }
-    
+
     public static function update($event): array
     {
         return [

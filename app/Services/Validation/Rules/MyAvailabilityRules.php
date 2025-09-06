@@ -14,7 +14,7 @@ class MyAvailabilityRules extends BaseResourceRules
             'notes' => 'nullable|string',
         ];
     }
-    
+
     public static function update($availability): array
     {
         return [

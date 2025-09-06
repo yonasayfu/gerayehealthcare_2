@@ -2,17 +2,18 @@
 
 namespace App\Services;
 
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class OptimizedPatientService extends PerformanceOptimizedBaseService
 {
     use ExportableTrait;
 
     protected $defaultWith = ['visitServices', 'invoices'];
+
     protected $cachePrefix = 'patients';
 
     public function __construct(Patient $patient)
@@ -41,7 +42,7 @@ class OptimizedPatientService extends PerformanceOptimizedBaseService
      */
     public function getRecentPatients(int $limit = 10)
     {
-        return Cache::remember('patients_recent_' . $limit, 300, function () use ($limit) {
+        return Cache::remember('patients_recent_'.$limit, 300, function () use ($limit) {
             return $this->model->with(['visitServices' => function ($query) {
                 $query->latest()->limit(3);
             }, 'invoices' => function ($query) {

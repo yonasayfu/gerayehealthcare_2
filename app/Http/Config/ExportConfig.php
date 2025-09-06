@@ -19,8 +19,6 @@ class ExportConfig
                 'phone_number', 'address', 'gender', 'emergency_contact', 'date_of_birth',
             ],
 
-            
-
             'csv' => [
                 'headers' => [
                     'Full Name', 'Patient Code', 'Fayda ID', 'Email', 'Source',
@@ -147,7 +145,7 @@ class ExportConfig
                     'Age' => [
                         'field' => 'date_of_birth',
                         'transform' => function ($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->age . ' years' : '-';
+                            return $value ? \Carbon\Carbon::parse($value)->age.' years' : '-';
                         },
                     ],
                     'Gender' => ['field' => 'gender', 'default' => '-'],
@@ -157,15 +155,21 @@ class ExportConfig
                     'Emergency Contact' => ['field' => 'emergency_contact', 'default' => '-'],
                     'Source' => ['field' => 'source', 'default' => '-'],
                     'Registered By Staff' => ['field' => 'registeredByStaff.full_name', 'default' => '-'],
-                    'Registered Date' => ['field' => 'created_at', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
-                    'Last Updated' => ['field' => 'updated_at', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
+                    'Registered Date' => ['field' => 'created_at', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Last Updated' => ['field' => 'updated_at', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'full_name', 'label' => 'Full Name'],
                     ['key' => 'patient_code', 'label' => 'Patient Code'],
                     ['key' => 'fayda_id', 'label' => 'Fayda ID'],
                     ['key' => 'date_of_birth', 'label' => 'Date of Birth'],
-                    ['key' => 'age', 'label' => 'Age', 'transform' => function ($value, $model) {return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age . ' years' : '-';}],
+                    ['key' => 'age', 'label' => 'Age', 'transform' => function ($value, $model) {
+                        return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age.' years' : '-';
+                    }],
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'phone_number', 'label' => 'Phone Number'],
                     ['key' => 'email', 'label' => 'Email'],
@@ -173,8 +177,12 @@ class ExportConfig
                     ['key' => 'emergency_contact', 'label' => 'Emergency Contact'],
                     ['key' => 'source', 'label' => 'Source'],
                     ['key' => 'registeredByStaff.full_name', 'label' => 'Registered By Staff'],
-                    ['key' => 'created_at', 'label' => 'Registered Date', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
-                    ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function ($value) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';}],
+                    ['key' => 'created_at', 'label' => 'Registered Date', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                    }],
+                    ['key' => 'updated_at', 'label' => 'Last Updated', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
             ],
         ];
@@ -212,7 +220,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -243,7 +252,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -282,7 +292,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -321,7 +332,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -357,8 +369,12 @@ class ExportConfig
                     'Engagement Status' => 'engagement_status',
                     'Account Manager' => ['field' => 'accountManager.full_name', 'default' => '-'],
                     'Notes' => ['field' => 'notes', 'default' => '-'],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'name', 'label' => 'Name'],
@@ -402,11 +418,15 @@ class ExportConfig
                     'status',
                     [
                         'field' => 'start_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'end_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'priority_service_level',
                     'commission_type',
@@ -423,7 +443,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->signedBy->first_name ?? '';
                             $ln = $model->signedBy->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -444,8 +465,12 @@ class ExportConfig
                     'Title' => 'agreement_title',
                     'Type' => 'agreement_type',
                     'Status' => 'status',
-                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
                     'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
                     'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
@@ -480,8 +505,12 @@ class ExportConfig
                     'Title' => 'agreement_title',
                     'Type' => 'agreement_type',
                     'Status' => 'status',
-                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
                     'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
                     'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
@@ -518,16 +547,24 @@ class ExportConfig
                     'Title' => 'agreement_title',
                     'Type' => 'agreement_type',
                     'Status' => 'status',
-                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
                     'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
                     'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
                     'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
                     'Partner' => ['field' => 'partner.name', 'default' => '-'],
                     'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -557,16 +594,24 @@ class ExportConfig
                     'Title' => 'agreement_title',
                     'Type' => 'agreement_type',
                     'Status' => 'status',
-                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Start Date' => ['field' => 'start_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'End Date' => ['field' => 'end_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Priority Service Level' => ['field' => 'priority_service_level', 'default' => '-'],
                     'Commission Type' => ['field' => 'commission_type', 'default' => '-'],
                     'Commission Rate' => ['field' => 'commission_rate', 'default' => '-'],
                     'Terms Document Path' => ['field' => 'terms_document_path', 'default' => '-'],
                     'Partner' => ['field' => 'partner.name', 'default' => '-'],
                     'Signed By' => ['field' => 'signedBy.full_name', 'default' => '-'],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'agreement_title', 'label' => 'Title'],
@@ -628,11 +673,15 @@ class ExportConfig
                     'commission_amount',
                     [
                         'field' => 'calculation_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'payout_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status',
                 ],
@@ -653,8 +702,12 @@ class ExportConfig
                     'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
                     'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'commission_amount' => 'commission_amount',
-                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -681,8 +734,12 @@ class ExportConfig
                     'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
                     'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'commission_amount' => 'commission_amount',
-                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -711,8 +768,12 @@ class ExportConfig
                     'referral' => ['field' => 'referral.referral_date', 'default' => '-'],
                     'invoice' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'commission_amount' => 'commission_amount',
-                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'calculation_date' => ['field' => 'calculation_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'payout_date' => ['field' => 'payout_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -738,11 +799,19 @@ class ExportConfig
                     'Referral Date' => ['field' => 'referral.referral_date', 'default' => '-'],
                     'Invoice #' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'Amount' => 'commission_amount',
-                    'Calculation Date' => ['field' => 'calculation_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Payout Date' => ['field' => 'payout_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Calculation Date' => ['field' => 'calculation_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Payout Date' => ['field' => 'payout_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Status' => 'status',
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'agreement.agreement_title', 'label' => 'Agreement'],
@@ -758,8 +827,6 @@ class ExportConfig
             ],
         ];
     }
-
-    
 
     /**
      * Get export/print configuration for Referral model
@@ -801,7 +868,9 @@ class ExportConfig
                     ],
                     [
                         'field' => 'referral_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status',
                     'notes',
@@ -822,7 +891,9 @@ class ExportConfig
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
                     'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                     'notes' => ['field' => 'notes', 'default' => '-'],
                 ],
@@ -848,7 +919,9 @@ class ExportConfig
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
                     'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -874,7 +947,9 @@ class ExportConfig
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
                     'agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'referral_date' => ['field' => 'referral_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                     'notes' => ['field' => 'notes', 'default' => '-'],
                 ],
@@ -899,11 +974,17 @@ class ExportConfig
                     'Partner' => ['field' => 'partner.name', 'default' => '-'],
                     'Agreement' => ['field' => 'agreement.agreement_title', 'default' => '-'],
                     'Referred Patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'Referral Date' => ['field' => 'referral_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Referral Date' => ['field' => 'referral_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Status' => 'status',
                     'Notes' => ['field' => 'notes', 'default' => '-'],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'partner.name', 'label' => 'Partner'],
@@ -918,8 +999,6 @@ class ExportConfig
             ],
         ];
     }
-
-    
 
     /**
      * Get export/print configuration for PartnerEngagement model
@@ -952,7 +1031,8 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->staff->first_name ?? '';
                             $ln = $model->staff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
@@ -960,11 +1040,15 @@ class ExportConfig
                     'summary',
                     [
                         'field' => 'engagement_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                     [
                         'field' => 'follow_up_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                 ],
                 'with_relations' => ['partner', 'staff'],
@@ -981,11 +1065,21 @@ class ExportConfig
                 'with_relations' => ['partner', 'staff'],
                 'fields' => [
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
-                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
+                        $fn = $model->staff->first_name ?? '';
+                        $ln = $model->staff->last_name ?? '';
+                        $full = trim($fn.' '.$ln);
+
+                        return $full !== '' ? $full : '-';
+                    }],
                     'engagement_type' => 'engagement_type',
                     'summary' => 'summary',
-                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
-                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'partner.name', 'label' => 'Partner'],
@@ -1007,11 +1101,21 @@ class ExportConfig
                 'with_relations' => ['partner', 'staff'],
                 'fields' => [
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
-                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
+                        $fn = $model->staff->first_name ?? '';
+                        $ln = $model->staff->last_name ?? '';
+                        $full = trim($fn.' '.$ln);
+
+                        return $full !== '' ? $full : '-';
+                    }],
                     'engagement_type' => 'engagement_type',
                     'summary' => 'summary',
-                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
-                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -1035,11 +1139,21 @@ class ExportConfig
                 'with_relations' => ['partner', 'staff'],
                 'fields' => [
                     'partner' => ['field' => 'partner.name', 'default' => '-'],
-                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) { $fn = $model->staff->first_name ?? ''; $ln = $model->staff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : '-'; }],
+                    'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
+                        $fn = $model->staff->first_name ?? '';
+                        $ln = $model->staff->last_name ?? '';
+                        $full = trim($fn.' '.$ln);
+
+                        return $full !== '' ? $full : '-';
+                    }],
                     'engagement_type' => 'engagement_type',
                     'summary' => 'summary',
-                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
-                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'engagement_date' => ['field' => 'engagement_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
+                    'follow_up_date' => ['field' => 'follow_up_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -1063,10 +1177,18 @@ class ExportConfig
                     'Staff' => ['field' => 'staff.full_name', 'default' => '-'],
                     'Type' => 'engagement_type',
                     'Summary' => 'summary',
-                    'Engagement Date' => ['field' => 'engagement_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Follow Up Date' => ['field' => 'follow_up_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Engagement Date' => ['field' => 'engagement_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Follow Up Date' => ['field' => 'follow_up_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'partner.name', 'label' => 'Partner'],
@@ -1081,8 +1203,6 @@ class ExportConfig
             ],
         ];
     }
-
-    
 
     public static function getEventStaffAssignmentConfig(): array
     {
@@ -1166,8 +1286,12 @@ class ExportConfig
                     'Event' => ['field' => 'event.title', 'default' => '-'],
                     'Staff' => ['field' => 'staff.full_name', 'default' => '-'],
                     'Role' => ['field' => 'role', 'default' => '-'],
-                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';}],
-                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';}],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'event.title', 'label' => 'Event'],
@@ -1280,8 +1404,12 @@ class ExportConfig
                     'Patient Phone' => ['field' => 'phone_number', 'default' => '-'],
                     'Notes' => ['field' => 'notes', 'default' => '-'],
                     'Status' => ['field' => 'status', 'default' => '-'],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'patient_name', 'label' => 'Patient Name'],
@@ -1316,11 +1444,15 @@ class ExportConfig
                     'description',
                     [
                         'field' => 'event_date',
-                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; },
+                        'transform' => function ($v) {
+                            return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'is_free_service',
-                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; },
+                        'transform' => function ($v) {
+                            return $v ? 'Yes' : 'No';
+                        },
                     ],
                     'broadcast_status',
                 ],
@@ -1337,8 +1469,12 @@ class ExportConfig
                 'fields' => [
                     'title' => 'title',
                     'description' => ['field' => 'description', 'default' => '-'],
-                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'event_date' => ['field' => 'event_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'is_free_service' => ['field' => 'is_free_service', 'transform' => function ($v) {
+                        return $v ? 'Yes' : 'No';
+                    }],
                     'broadcast_status' => 'broadcast_status',
                 ],
                 'columns' => [
@@ -1360,8 +1496,12 @@ class ExportConfig
                 'fields' => [
                     'title' => 'title',
                     'description' => ['field' => 'description', 'default' => '-'],
-                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'event_date' => ['field' => 'event_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'is_free_service' => ['field' => 'is_free_service', 'transform' => function ($v) {
+                        return $v ? 'Yes' : 'No';
+                    }],
                     'broadcast_status' => 'broadcast_status',
                 ],
                 'columns' => [
@@ -1385,8 +1525,12 @@ class ExportConfig
                 'fields' => [
                     'title' => 'title',
                     'description' => ['field' => 'description', 'default' => '-'],
-                    'event_date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'is_free_service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'event_date' => ['field' => 'event_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'is_free_service' => ['field' => 'is_free_service', 'transform' => function ($v) {
+                        return $v ? 'Yes' : 'No';
+                    }],
                     'broadcast_status' => 'broadcast_status',
                 ],
                 'columns' => [
@@ -1407,11 +1551,19 @@ class ExportConfig
                 'fields' => [
                     'Title' => 'title',
                     'Description' => ['field' => 'description', 'default' => '-'],
-                    'Event Date' => [ 'field' => 'event_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Free Service' => [ 'field' => 'is_free_service', 'transform' => function ($v) { return $v ? 'Yes' : 'No'; } ],
+                    'Event Date' => ['field' => 'event_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Free Service' => ['field' => 'is_free_service', 'transform' => function ($v) {
+                        return $v ? 'Yes' : 'No';
+                    }],
                     'Status' => 'broadcast_status',
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'title', 'label' => 'Title'],
@@ -1448,19 +1600,27 @@ class ExportConfig
                     ['field' => 'platform.name', 'default' => '-'],
                     [
                         'field' => 'allocated_amount',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     [
                         'field' => 'spent_amount',
-                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                        'transform' => function ($value) {
+                            return $value !== null ? number_format((float) $value, 2) : '0.00';
+                        },
                     ],
                     [
                         'field' => 'period_start',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'period_end',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status',
                 ],
@@ -1482,19 +1642,27 @@ class ExportConfig
                     'platform' => ['field' => 'platform.name', 'default' => '-'],
                     'allocated_amount' => [
                         'field' => 'allocated_amount',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     'spent_amount' => [
                         'field' => 'spent_amount',
-                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                        'transform' => function ($value) {
+                            return $value !== null ? number_format((float) $value, 2) : '0.00';
+                        },
                     ],
                     'period_start' => [
                         'field' => 'period_start',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'period_end' => [
                         'field' => 'period_end',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status' => 'status',
                 ],
@@ -1525,19 +1693,27 @@ class ExportConfig
                     'platform' => ['field' => 'platform.name', 'default' => '-'],
                     'allocated_amount' => [
                         'field' => 'allocated_amount',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     'spent_amount' => [
                         'field' => 'spent_amount',
-                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                        'transform' => function ($value) {
+                            return $value !== null ? number_format((float) $value, 2) : '0.00';
+                        },
                     ],
                     'period_start' => [
                         'field' => 'period_start',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'period_end' => [
                         'field' => 'period_end',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status' => 'status',
                 ],
@@ -1564,19 +1740,27 @@ class ExportConfig
                     'Platform' => ['field' => 'platform.name', 'default' => '-'],
                     'Allocated Amount' => [
                         'field' => 'allocated_amount',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     'Spent Amount' => [
                         'field' => 'spent_amount',
-                        'transform' => function ($value) { return $value !== null ? number_format((float)$value, 2) : '0.00'; },
+                        'transform' => function ($value) {
+                            return $value !== null ? number_format((float) $value, 2) : '0.00';
+                        },
                     ],
                     'Period Start' => [
                         'field' => 'period_start',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'Period End' => [
                         'field' => 'period_end',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'Status' => 'status',
                 ],
@@ -1620,12 +1804,16 @@ class ExportConfig
                     'language' => ['field' => 'language', 'default' => '-'],
                     'is_active' => [
                         'field' => 'is_active',
-                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; }
+                        'transform' => function ($v) {
+                            return $v ? 'Yes' : 'No';
+                        },
                     ],
                     'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
                     'created_at' => [
                         'field' => 'created_at',
-                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; },
+                        'transform' => function ($v) {
+                            return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -1656,12 +1844,16 @@ class ExportConfig
                     'language' => ['field' => 'language', 'default' => '-'],
                     'is_active' => [
                         'field' => 'is_active',
-                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; }
+                        'transform' => function ($v) {
+                            return $v ? 'Yes' : 'No';
+                        },
                     ],
                     'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
                     'created_at' => [
                         'field' => 'created_at',
-                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; },
+                        'transform' => function ($v) {
+                            return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -1703,7 +1895,9 @@ class ExportConfig
                 'fields' => [
                     'status' => [
                         'field' => 'is_active',
-                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                        'transform' => function ($value) {
+                            return $value ? 'Active' : 'Resolved';
+                        },
                     ],
                     'item' => ['field' => 'item.name', 'default' => '-'],
                     'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
@@ -1711,7 +1905,9 @@ class ExportConfig
                     'alert_type' => ['field' => 'alert_type', 'default' => '-'],
                     'triggered_at' => [
                         'field' => 'triggered_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                     'message' => ['field' => 'message', 'default' => '-'],
                 ],
@@ -1737,7 +1933,9 @@ class ExportConfig
                 'fields' => [
                     'status' => [
                         'field' => 'is_active',
-                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                        'transform' => function ($value) {
+                            return $value ? 'Active' : 'Resolved';
+                        },
                     ],
                     'item' => ['field' => 'item.name', 'default' => '-'],
                     'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
@@ -1745,7 +1943,9 @@ class ExportConfig
                     'alert_type' => ['field' => 'alert_type', 'default' => '-'],
                     'triggered_at' => [
                         'field' => 'triggered_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                     'message' => ['field' => 'message', 'default' => '-'],
                 ],
@@ -1772,7 +1972,9 @@ class ExportConfig
                 'fields' => [
                     'status' => [
                         'field' => 'is_active',
-                        'transform' => function ($value) { return $value ? 'Active' : 'Resolved'; },
+                        'transform' => function ($value) {
+                            return $value ? 'Active' : 'Resolved';
+                        },
                     ],
                     'item' => ['field' => 'item.name', 'default' => '-'],
                     'qty_on_hand' => ['field' => 'item.quantity_on_hand', 'default' => '-'],
@@ -1780,7 +1982,9 @@ class ExportConfig
                     'alert_type' => ['field' => 'alert_type', 'default' => '-'],
                     'triggered_at' => [
                         'field' => 'triggered_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                     'message' => ['field' => 'message', 'default' => '-'],
                 ],
@@ -1827,13 +2031,16 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
                     [
                         'field' => 'created_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                 ],
                 'with_relations' => ['item', 'performedBy'],
@@ -1859,13 +2066,16 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
                     'created_at' => [
                         'field' => 'created_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -1898,13 +2108,16 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
                     'created_at' => [
                         'field' => 'created_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -1938,13 +2151,16 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
                     'created_at' => [
                         'field' => 'created_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -1973,9 +2189,17 @@ class ExportConfig
                     'To' => ['field' => 'to_location', 'default' => '-'],
                     'Performed By' => [
                         'field' => 'performedBy.first_name',
-                        'transform' => function ($value, $model) { $fn = $model->performedBy->first_name ?? ''; $ln = $model->performedBy->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : 'N/A'; },
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedBy->first_name ?? '';
+                            $ln = $model->performedBy->last_name ?? '';
+                            $full = trim($fn.' '.$ln);
+
+                            return $full !== '' ? $full : 'N/A';
+                        },
                     ],
-                    'Date' => ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-'; }],
+                    'Date' => ['field' => 'created_at', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'item.name', 'label' => 'Item'],
@@ -1989,8 +2213,6 @@ class ExportConfig
             ],
         ];
     }
-
-    
 
     /**
      * Get export configuration for Staff model
@@ -2164,7 +2386,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2203,7 +2425,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2243,7 +2465,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2278,9 +2500,15 @@ class ExportConfig
                 'with_relations' => ['staff', 'patient'],
                 'fields' => [
                     'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
-                    'Staff Member' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');}],
-                    'Shift Start' => ['field' => 'shift_start', 'transform' => function ($value, $model) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';}],
-                    'Shift End' => ['field' => 'shift_end', 'transform' => function ($value, $model) {return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';}],
+                    'Staff Member' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
+                        return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
+                    }],
+                    'Shift Start' => ['field' => 'shift_start', 'transform' => function ($value, $model) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                    }],
+                    'Shift End' => ['field' => 'shift_end', 'transform' => function ($value, $model) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
+                    }],
                     'Status' => 'status',
                 ],
                 'columns' => [
@@ -2332,13 +2560,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$' . number_format($value, 2);
+                            return '$'.number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value . ' minutes';
+                            return $value.' minutes';
                         },
                     ],
                     'is_active' => [
@@ -2372,13 +2600,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$' . number_format($value, 2);
+                            return '$'.number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value . ' min';
+                            return $value.' min';
                         },
                     ],
                     'is_active' => [
@@ -2413,13 +2641,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$' . number_format($value, 2);
+                            return '$'.number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value . ' min';
+                            return $value.' min';
                         },
                     ],
                     'is_active' => [
@@ -2451,13 +2679,13 @@ class ExportConfig
                     'Price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$' . number_format($value, 2);
+                            return '$'.number_format($value, 2);
                         },
                     ],
                     'Duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value . ' minutes';
+                            return $value.' minutes';
                         },
                     ],
                     'Status' => [
@@ -2580,7 +2808,7 @@ class ExportConfig
             'sortable_fields' => ['invoice_number', 'invoice_date', 'due_date', 'grand_total', 'status', 'created_at'],
             'default_sort' => 'created_at',
             'select_fields' => [
-                'invoice_number', 'patient_id', 'invoice_date', 'due_date', 'subtotal', 'tax_amount', 'grand_total', 'status', 'paid_at'
+                'invoice_number', 'patient_id', 'invoice_date', 'due_date', 'subtotal', 'tax_amount', 'grand_total', 'status', 'paid_at',
             ],
 
             'csv' => [
@@ -2593,28 +2821,40 @@ class ExportConfig
                     'patient.full_name',
                     [
                         'field' => 'invoice_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'due_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'subtotal',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     [
                         'field' => 'tax_amount',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     [
                         'field' => 'grand_total',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     'status',
                     [
                         'field' => 'paid_at',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                        },
                     ],
                 ],
                 'with_relations' => ['patient'],
@@ -2632,13 +2872,25 @@ class ExportConfig
                 'fields' => [
                     'invoice_number' => 'invoice_number',
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'subtotal' => [ 'field' => 'subtotal', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
-                    'tax_amount' => [ 'field' => 'tax_amount', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
-                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'invoice_date' => ['field' => 'invoice_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'due_date' => ['field' => 'due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'subtotal' => ['field' => 'subtotal', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
+                    'tax_amount' => ['field' => 'tax_amount', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
+                    'grand_total' => ['field' => 'grand_total', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'status' => 'status',
-                    'paid_at' => [ 'field' => 'paid_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; } ],
+                    'paid_at' => ['field' => 'paid_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'invoice_number', 'label' => 'Invoice #'],
@@ -2664,9 +2916,15 @@ class ExportConfig
                 'fields' => [
                     'invoice_number' => 'invoice_number',
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'invoice_date' => ['field' => 'invoice_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'due_date' => ['field' => 'due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'grand_total' => ['field' => 'grand_total', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -2691,9 +2949,15 @@ class ExportConfig
                 'fields' => [
                     'invoice_number' => 'invoice_number',
                     'patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'invoice_date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'due_date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'grand_total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'invoice_date' => ['field' => 'invoice_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'due_date' => ['field' => 'due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'grand_total' => ['field' => 'grand_total', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -2716,13 +2980,25 @@ class ExportConfig
                 'fields' => [
                     'Invoice #' => 'invoice_number',
                     'Patient' => ['field' => 'patient.full_name', 'default' => '-'],
-                    'Invoice Date' => [ 'field' => 'invoice_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Due Date' => [ 'field' => 'due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Subtotal' => [ 'field' => 'subtotal', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
-                    'Tax' => [ 'field' => 'tax_amount', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
-                    'Grand Total' => [ 'field' => 'grand_total', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Invoice Date' => ['field' => 'invoice_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Due Date' => ['field' => 'due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Subtotal' => ['field' => 'subtotal', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
+                    'Tax' => ['field' => 'tax_amount', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
+                    'Grand Total' => ['field' => 'grand_total', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'Status' => 'status',
-                    'Paid At' => [ 'field' => 'paid_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Paid At' => ['field' => 'paid_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'invoice_number', 'label' => 'Invoice #'],
@@ -2770,17 +3046,22 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
                     'start_date' => [
                         'field' => 'start_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'end_date' => [
                         'field' => 'end_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -2816,17 +3097,22 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
                     'start_date' => [
                         'field' => 'start_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'end_date' => [
                         'field' => 'end_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                 ],
                 'columns' => [
@@ -2860,29 +3146,39 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
                     'Start Date' => [
                         'field' => 'start_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-';
+                        },
                     ],
                     'End Date' => [
                         'field' => 'end_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('F j, Y') : '-';
+                        },
                     ],
                     'Created By' => [
                         'field' => 'createdByStaff.first_name',
                         'transform' => function ($value, $model) {
                             $fn = $model->createdByStaff->first_name ?? '';
                             $ln = $model->createdByStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : '-';
                         },
                     ],
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'campaign_name', 'label' => 'Campaign Name'],
@@ -2924,29 +3220,38 @@ class ExportConfig
                     'item.name',
                     [
                         'field' => 'scheduled_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'actual_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     [
                         'field' => 'performedByStaff.first_name',
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
                     [
                         'field' => 'cost',
-                        'transform' => function ($value) { return number_format((float)$value, 2); },
+                        'transform' => function ($value) {
+                            return number_format((float) $value, 2);
+                        },
                     ],
                     'description',
                     [
                         'field' => 'next_due_date',
-                        'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; },
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
                     ],
                     'status',
                 ],
@@ -2964,20 +3269,29 @@ class ExportConfig
                 'with_relations' => ['item', 'performedByStaff'],
                 'fields' => [
                     'item' => ['field' => 'item.name', 'default' => '-'],
-                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'scheduled_date' => ['field' => 'scheduled_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'actual_date' => ['field' => 'actual_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'performed_by' => [
                         'field' => 'performedByStaff.first_name',
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
-                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'cost' => ['field' => 'cost', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'description' => 'description',
-                    'next_due_date' => [ 'field' => 'next_due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'next_due_date' => ['field' => 'next_due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -3002,18 +3316,25 @@ class ExportConfig
                 'with_relations' => ['item', 'performedByStaff'],
                 'fields' => [
                     'item' => ['field' => 'item.name', 'default' => '-'],
-                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'scheduled_date' => ['field' => 'scheduled_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'actual_date' => ['field' => 'actual_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'performed_by' => [
                         'field' => 'performedByStaff.first_name',
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
-                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'cost' => ['field' => 'cost', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -3037,18 +3358,25 @@ class ExportConfig
                 'with_relations' => ['item', 'performedByStaff'],
                 'fields' => [
                     'item' => ['field' => 'item.name', 'default' => '-'],
-                    'scheduled_date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
-                    'actual_date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; } ],
+                    'scheduled_date' => ['field' => 'scheduled_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
+                    'actual_date' => ['field' => 'actual_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'performed_by' => [
                         'field' => 'performedByStaff.first_name',
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn . ' ' . $ln);
+                            $full = trim($fn.' '.$ln);
+
                             return $full !== '' ? $full : 'N/A';
                         },
                     ],
-                    'cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'cost' => ['field' => 'cost', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'status' => 'status',
                 ],
                 'columns' => [
@@ -3070,18 +3398,36 @@ class ExportConfig
                 'with_relations' => ['item', 'performedByStaff'],
                 'fields' => [
                     'Item' => ['field' => 'item.name', 'default' => '-'],
-                    'Scheduled Date' => [ 'field' => 'scheduled_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
-                    'Actual Date' => [ 'field' => 'actual_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Scheduled Date' => ['field' => 'scheduled_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
+                    'Actual Date' => ['field' => 'actual_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Performed By' => [
                         'field' => 'performedByStaff.first_name',
-                        'transform' => function ($value, $model) { $fn = $model->performedByStaff->first_name ?? ''; $ln = $model->performedByStaff->last_name ?? ''; $full = trim($fn . ' ' . $ln); return $full !== '' ? $full : 'N/A'; },
+                        'transform' => function ($value, $model) {
+                            $fn = $model->performedByStaff->first_name ?? '';
+                            $ln = $model->performedByStaff->last_name ?? '';
+                            $full = trim($fn.' '.$ln);
+
+                            return $full !== '' ? $full : 'N/A';
+                        },
                     ],
-                    'Cost' => [ 'field' => 'cost', 'transform' => function ($v) { return number_format((float)$v, 2); } ],
+                    'Cost' => ['field' => 'cost', 'transform' => function ($v) {
+                        return number_format((float) $v, 2);
+                    }],
                     'Description' => 'description',
-                    'Next Due Date' => [ 'field' => 'next_due_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; } ],
+                    'Next Due Date' => ['field' => 'next_due_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Status' => 'status',
-                    'Created At' => [ 'field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
-                    'Updated At' => [ 'field' => 'updated_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; } ],
+                    'Created At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
+                    'Updated At' => ['field' => 'updated_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'item.name', 'label' => 'Item'],
@@ -3121,7 +3467,9 @@ class ExportConfig
                     'status',
                     ['field' => 'referral.referred_patient_id', 'default' => '-'],
                     ['field' => 'uploadedBy.full_name', 'default' => '-'],
-                    ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; }],
+                    ['field' => 'created_at', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'with_relations' => ['referral', 'uploadedBy'],
                 'filename_prefix' => 'referral-documents',
@@ -3141,7 +3489,9 @@ class ExportConfig
                     'status' => 'status',
                     'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
                     'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
-                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'document_name', 'label' => 'Document Name'],
@@ -3167,7 +3517,9 @@ class ExportConfig
                     'status' => 'status',
                     'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
                     'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
-                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -3195,7 +3547,9 @@ class ExportConfig
                     'status' => 'status',
                     'referral_id' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
                     'uploaded_by' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
-                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'uploaded_at' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -3220,7 +3574,9 @@ class ExportConfig
                     'Status' => 'status',
                     'Referral ID' => ['field' => 'referral.referred_patient_id', 'default' => '-'],
                     'Uploaded By' => ['field' => 'uploadedBy.full_name', 'default' => '-'],
-                    'Uploaded At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; }],
+                    'Uploaded At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'document_name', 'label' => 'Document Name'],
@@ -3253,11 +3609,15 @@ class ExportConfig
                     'index',
                     ['field' => 'invoice.invoice_number', 'default' => '-'],
                     ['field' => 'partner.name', 'default' => '-'],
-                    ['field' => 'share_date', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-'; }],
+                    ['field' => 'share_date', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                    }],
                     'status',
                     'notes',
                     ['field' => 'sharedBy.full_name', 'default' => '-'],
-                    ['field' => 'created_at', 'transform' => function ($value) { return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-'; }],
+                    ['field' => 'created_at', 'transform' => function ($value) {
+                        return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'with_relations' => ['invoice', 'partner', 'sharedBy'],
                 'filename_prefix' => 'shared-invoices',
@@ -3274,11 +3634,15 @@ class ExportConfig
                 'fields' => [
                     'Invoice Number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'Partner Name' => ['field' => 'partner.name', 'default' => '-'],
-                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'Status' => 'status',
                     'Notes' => 'notes',
                     'Shared By' => ['field' => 'sharedBy.full_name', 'default' => '-'],
-                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
@@ -3302,11 +3666,15 @@ class ExportConfig
                 'fields' => [
                     'invoice_number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'partner_name' => ['field' => 'partner.name', 'default' => '-'],
-                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                     'notes' => 'notes',
                     'shared_by' => ['field' => 'sharedBy.full_name', 'default' => '-'],
-                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -3332,11 +3700,15 @@ class ExportConfig
                 'fields' => [
                     'invoice_number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'partner_name' => ['field' => 'partner.name', 'default' => '-'],
-                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-'; }],
+                    'share_date' => ['field' => 'share_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d') : '-';
+                    }],
                     'status' => 'status',
                     'notes' => 'notes',
                     'shared_by' => ['field' => 'sharedBy.full_name', 'default' => '-'],
-                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; }],
+                    'shared_at' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'index', 'label' => '#'],
@@ -3359,11 +3731,15 @@ class ExportConfig
                 'fields' => [
                     'Invoice Number' => ['field' => 'invoice.invoice_number', 'default' => '-'],
                     'Partner Name' => ['field' => 'partner.name', 'default' => '-'],
-                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-'; }],
+                    'Share Date' => ['field' => 'share_date', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y') : '-';
+                    }],
                     'Status' => 'status',
                     'Notes' => 'notes',
                     'Shared By' => ['field' => 'sharedBy.full_name', 'default' => '-'],
-                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-'; }],
+                    'Shared At' => ['field' => 'created_at', 'transform' => function ($v) {
+                        return $v ? \Carbon\Carbon::parse($v)->format('F j, Y, g:i a') : '-';
+                    }],
                 ],
                 'columns' => [
                     ['key' => 'invoice.invoice_number', 'label' => 'Invoice Number'],
@@ -3372,7 +3748,7 @@ class ExportConfig
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'notes', 'label' => 'Notes'],
                     ['key' => 'sharedBy.full_name', 'label' => 'Shared By'],
-                    ['key' => 'created_at', 'label' => 'Shared At']
+                    ['key' => 'created_at', 'label' => 'Shared At'],
                 ],
             ],
         ];

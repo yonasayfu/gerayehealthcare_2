@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateMarketingTaskDTO;
+use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingTask;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 
 class MarketingTaskService extends BaseService
 {
@@ -24,14 +23,15 @@ class MarketingTaskService extends BaseService
         $with = array_unique(array_merge($defaultWith, $with));
         $query = $this->model->newQuery()->with($with);
         $model = $query->findOrFail($id);
+
         return $model;
     }
 
     protected function applySearch($query, $search)
     {
         $query->where('title', 'ilike', "%{$search}%")
-              ->orWhere('description', 'ilike', "%{$search}%")
-              ->orWhere('task_code', 'ilike', "%{$search}%");
+            ->orWhere('description', 'ilike', "%{$search}%")
+            ->orWhere('task_code', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])

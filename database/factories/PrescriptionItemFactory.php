@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\PrescriptionItem;
 use App\Models\Prescription;
+use App\Models\PrescriptionItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,6 +16,7 @@ class PrescriptionItemFactory extends Factory
     public function definition(): array
     {
         $medications = ['Amoxicillin', 'Ibuprofen', 'Paracetamol', 'Metformin', 'Atorvastatin', 'Omeprazole'];
+
         return [
             'prescription_id' => Prescription::inRandomOrder()->value('id') ?? Prescription::factory()->create()->id,
             'medication_name' => $this->faker->randomElement($medications),

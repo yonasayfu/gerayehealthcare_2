@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('staff_availabilities', function (Blueprint $table) {
             // Improve lookup and overlap query performance
-            if (!Schema::hasColumn('staff_availabilities', 'staff_id')) {
+            if (! Schema::hasColumn('staff_availabilities', 'staff_id')) {
                 // safety: in case of divergent schema
                 $table->unsignedBigInteger('staff_id')->index('idx_staff_availabilities_staff_id');
             } else {

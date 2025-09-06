@@ -20,7 +20,7 @@ import { ChevronUp, ChevronDown } from 'lucide-vue-next';
 const props = defineProps<{
   leaveRequests: LeaveRequestsPagination;
   filters: {
-    type: Object,
+    type: object,
     default: () => ({
       search: '',
       sort_by: 'created_at',

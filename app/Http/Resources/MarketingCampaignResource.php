@@ -37,7 +37,7 @@ class MarketingCampaignResource extends JsonResource
             'roi' => $this->when(isset($this->roi), $this->roi),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-            
+
             // Relationships
             'leads' => LeadResource::collection($this->whenLoaded('leads')),
         ];

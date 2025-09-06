@@ -1,27 +1,31 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\PatientController;
+if (! app()->environment('local')) {
+    return;
+}
+
 use App\Http\Controllers\Admin\OptimizedPatientController;
+use App\Http\Controllers\Admin\PatientController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // Performance comparison routes (remove in production)
 Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(function () {
-    
+
     // Test original PatientController
     Route::get('/original-patients', function (Request $request) {
         $start = microtime(true);
-        
+
         try {
             $controller = app(PatientController::class);
             $response = $controller->index($request);
-            
+
             $end = microtime(true);
             $executionTime = ($end - $start) * 1000;
-            
+
             // Get the patient data from the response
             $data = $response->toResponse($request)->getData(true);
-            
+
             return response()->json([
                 'controller' => 'Original PatientController',
                 'execution_time_ms' => round($executionTime, 2),
@@ -30,29 +34,29 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'total_patients' => $data['props']['patients']['total'] ?? 0,
                 'cache_used' => false,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
-                'controller' => 'Original PatientController'
+                'controller' => 'Original PatientController',
             ], 500);
         }
     });
-    
+
     // Test optimized PatientController
     Route::get('/optimized-patients', function (Request $request) {
         $start = microtime(true);
-        
+
         try {
             $controller = app(OptimizedPatientController::class);
             $response = $controller->index($request);
-            
+
             $end = microtime(true);
             $executionTime = ($end - $start) * 1000;
-            
+
             // Get the patient data from the response
             $data = $response->toResponse($request)->getData(true);
-            
+
             return response()->json([
                 'controller' => 'Optimized PatientController',
                 'execution_time_ms' => round($executionTime, 2),
@@ -62,20 +66,20 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'statistics' => $data['props']['statistics'] ?? null,
                 'cache_used' => true,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
-                'controller' => 'Optimized PatientController'
+                'controller' => 'Optimized PatientController',
             ], 500);
         }
     });
-    
+
     // Performance comparison
     Route::get('/compare-patients', function (Request $request) {
         $iterations = $request->get('iterations', 5);
         $results = [];
-        
+
         // Test both controllers multiple times
         for ($i = 0; $i < $iterations; $i++) {
             // Test original
@@ -83,13 +87,13 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
             $originalController = app(PatientController::class);
             $originalResponse = $originalController->index($request);
             $originalTime = (microtime(true) - $start) * 1000;
-            
+
             // Test optimized
             $start = microtime(true);
             $optimizedController = app(OptimizedPatientController::class);
             $optimizedResponse = $optimizedController->index($request);
             $optimizedTime = (microtime(true) - $start) * 1000;
-            
+
             $results[] = [
                 'iteration' => $i + 1,
                 'original_ms' => round($originalTime, 2),
@@ -98,12 +102,12 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'improvement_percent' => round((($originalTime - $optimizedTime) / $originalTime) * 100, 2),
             ];
         }
-        
+
         // Calculate averages
         $avgOriginal = array_sum(array_column($results, 'original_ms')) / $iterations;
         $avgOptimized = array_sum(array_column($results, 'optimized_ms')) / $iterations;
         $avgImprovement = (($avgOriginal - $avgOptimized) / $avgOriginal) * 100;
-        
+
         return response()->json([
             'iterations' => $iterations,
             'results' => $results,
@@ -111,27 +115,27 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'original_ms' => round($avgOriginal, 2),
                 'optimized_ms' => round($avgOptimized, 2),
                 'improvement_percent' => round($avgImprovement, 2),
-                'improvement_description' => $avgImprovement > 0 ? 'Optimized is faster' : 'Original is faster'
+                'improvement_description' => $avgImprovement > 0 ? 'Optimized is faster' : 'Original is faster',
             ],
             'memory_usage_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
             'cache_driver' => config('cache.default'),
         ]);
     });
-    
+
     // Test original StaffController
     Route::get('/original-staff', function (Request $request) {
         $start = microtime(true);
-        
+
         try {
             $controller = app(\App\Http\Controllers\Admin\StaffController::class);
             $response = $controller->index($request);
-            
+
             $end = microtime(true);
             $executionTime = ($end - $start) * 1000;
-            
+
             // Get the staff data from the response
             $data = $response->toResponse($request)->getData(true);
-            
+
             return response()->json([
                 'controller' => 'Original StaffController',
                 'execution_time_ms' => round($executionTime, 2),
@@ -140,29 +144,29 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'total_staff' => $data['props']['staff']['total'] ?? 0,
                 'cache_used' => false,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
-                'controller' => 'Original StaffController'
+                'controller' => 'Original StaffController',
             ], 500);
         }
     });
-    
+
     // Test optimized StaffController
     Route::get('/optimized-staff', function (Request $request) {
         $start = microtime(true);
-        
+
         try {
             $controller = app(\App\Http\Controllers\Admin\OptimizedStaffController::class);
             $response = $controller->index($request);
-            
+
             $end = microtime(true);
             $executionTime = ($end - $start) * 1000;
-            
+
             // Get the staff data from the response
             $data = $response->toResponse($request)->getData(true);
-            
+
             return response()->json([
                 'controller' => 'Optimized StaffController',
                 'execution_time_ms' => round($executionTime, 2),
@@ -172,20 +176,20 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'statistics' => $data['props']['statistics'] ?? null,
                 'cache_used' => true,
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
-                'controller' => 'Optimized StaffController'
+                'controller' => 'Optimized StaffController',
             ], 500);
         }
     });
-    
+
     // Performance comparison for staff
     Route::get('/compare-staff', function (Request $request) {
         $iterations = $request->get('iterations', 5);
         $results = [];
-        
+
         // Test both controllers multiple times
         for ($i = 0; $i < $iterations; $i++) {
             // Test original
@@ -193,13 +197,13 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
             $originalController = app(\App\Http\Controllers\Admin\StaffController::class);
             $originalResponse = $originalController->index($request);
             $originalTime = (microtime(true) - $start) * 1000;
-            
+
             // Test optimized
             $start = microtime(true);
             $optimizedController = app(\App\Http\Controllers\Admin\OptimizedStaffController::class);
             $optimizedResponse = $optimizedController->index($request);
             $optimizedTime = (microtime(true) - $start) * 1000;
-            
+
             $results[] = [
                 'iteration' => $i + 1,
                 'original_ms' => round($originalTime, 2),
@@ -208,12 +212,12 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'improvement_percent' => round((($originalTime - $optimizedTime) / $originalTime) * 100, 2),
             ];
         }
-        
+
         // Calculate averages
         $avgOriginal = array_sum(array_column($results, 'original_ms')) / $iterations;
         $avgOptimized = array_sum(array_column($results, 'optimized_ms')) / $iterations;
         $avgImprovement = (($avgOriginal - $avgOptimized) / $avgOriginal) * 100;
-        
+
         return response()->json([
             'iterations' => $iterations,
             'results' => $results,
@@ -221,7 +225,7 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'original_ms' => round($avgOriginal, 2),
                 'optimized_ms' => round($avgOptimized, 2),
                 'improvement_percent' => round($avgImprovement, 2),
-                'improvement_description' => $avgImprovement > 0 ? 'Optimized is faster' : 'Original is faster'
+                'improvement_description' => $avgImprovement > 0 ? 'Optimized is faster' : 'Original is faster',
             ],
             'memory_usage_mb' => round(memory_get_usage(true) / 1024 / 1024, 2),
             'cache_driver' => config('cache.default'),
@@ -243,7 +247,7 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
             ->name('performance.invoices.create.optimized');
 
         // Financial Dashboard Data
-        Route::get('/dashboard/original', function() {
+        Route::get('/dashboard/original', function () {
             $start = microtime(true);
             $data = [
                 'total_invoices' => \App\Models\Invoice::count(),
@@ -251,9 +255,10 @@ Route::middleware(['auth', 'verified'])->prefix('performance-test')->group(funct
                 'pending_amount' => \App\Models\Invoice::where('status', 'Pending')->sum('amount'),
             ];
             $time = microtime(true) - $start;
+
             return response()->json(['data' => $data, 'execution_time' => $time]);
         })->name('performance.invoices.dashboard.original');
-        
+
         Route::get('/dashboard/optimized', [\App\Http\Controllers\Admin\OptimizedInvoiceController::class, 'dashboardData'])
             ->name('performance.invoices.dashboard.optimized');
 

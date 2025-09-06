@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use App\Models\MarketingPlatform;
 use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
 use App\Models\Staff;
+use Illuminate\Database\Seeder;
 
 class MarketingRelatedSeeder extends Seeder
 {

@@ -9,16 +9,24 @@ use Inertia\Inertia;
 abstract class OptimizedBaseController extends Controller
 {
     protected $service;
+
     protected $validationRules;
+
     protected $viewName;
+
     protected $routeName;
+
     protected $modelClass;
+
     protected $dtoClass;
-    
+
     // Define eager loading relationships for each action
     protected $indexWith = [];
+
     protected $showWith = [];
+
     protected $createWith = [];
+
     protected $editWith = [];
 
     public function __construct($service, $validationRules, $viewName, $routeName, $modelClass, $dtoClass = null)
@@ -35,7 +43,7 @@ abstract class OptimizedBaseController extends Controller
     {
         // Use eager loading to prevent N+1 queries
         $data = $this->service->getAll($request, $this->indexWith);
-        
+
         return Inertia::render($this->viewName.'/Index', [
             lcfirst(class_basename($this->modelClass)).'s' => $data,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
@@ -46,7 +54,7 @@ abstract class OptimizedBaseController extends Controller
     {
         // Use eager loading for show action
         $data = $this->service->getById($id, $this->showWith);
-        
+
         return Inertia::render($this->viewName.'/Show', [
             lcfirst(class_basename($this->modelClass)) => $data,
         ]);
@@ -56,7 +64,7 @@ abstract class OptimizedBaseController extends Controller
     {
         // Load related data only if needed
         $relatedData = $this->loadRelatedDataForCreate();
-        
+
         return Inertia::render($this->viewName.'/Create', $relatedData);
     }
 
@@ -65,7 +73,7 @@ abstract class OptimizedBaseController extends Controller
         // Use eager loading for edit action
         $data = $this->service->getById($id, $this->editWith);
         $relatedData = $this->loadRelatedDataForEdit();
-        
+
         return Inertia::render($this->viewName.'/Edit', array_merge([
             lcfirst(class_basename($this->modelClass)) => $data,
         ], $relatedData));
@@ -74,7 +82,7 @@ abstract class OptimizedBaseController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate($this->validationRules::create());
-        
+
         // Use DTO if defined, otherwise use array
         if ($this->dtoClass) {
             $dto = $this->dtoClass::from($validatedData);
@@ -91,7 +99,7 @@ abstract class OptimizedBaseController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate($this->validationRules::update());
-        
+
         // Use DTO if defined, otherwise use array
         if ($this->dtoClass) {
             $dto = $this->dtoClass::from($validatedData);

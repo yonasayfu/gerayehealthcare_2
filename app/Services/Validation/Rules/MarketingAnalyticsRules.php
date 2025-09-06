@@ -16,7 +16,7 @@ class MarketingAnalyticsRules extends BaseResourceRules
             'spend' => 'required|numeric|min:0',
         ];
     }
-    
+
     public static function update($analytics): array
     {
         return [

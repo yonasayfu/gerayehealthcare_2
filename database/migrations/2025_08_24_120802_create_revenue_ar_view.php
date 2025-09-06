@@ -3,12 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Indexes to support filtering by invoice_date and status
-        DB::statement("CREATE INDEX IF NOT EXISTS idx_invoices_invoice_date ON invoices (invoice_date);");
-        DB::statement("CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices (status);");
+        DB::statement('CREATE INDEX IF NOT EXISTS idx_invoices_invoice_date ON invoices (invoice_date);');
+        DB::statement('CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices (status);');
 
         DB::statement(<<<'SQL'
         CREATE OR REPLACE VIEW revenue_ar_view AS
@@ -29,6 +30,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS revenue_ar_view;");
+        DB::statement('DROP VIEW IF EXISTS revenue_ar_view;');
     }
 };

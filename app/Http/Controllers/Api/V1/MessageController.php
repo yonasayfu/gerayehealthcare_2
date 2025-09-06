@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Requests\Api\V1\SendMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\User;
-use App\Services\Validation\Rules\MessageRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Api\V1\SendMessageRequest;
 
 class MessageController extends BaseApiController
 {
@@ -39,7 +36,9 @@ class MessageController extends BaseApiController
 
         // Last message per counterpart for ordering
         $lastMessages = Message::selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as uid, MAX(created_at) as last_at', [$userId])
-            ->where(function ($q) use ($userId) { $q->where('sender_id', $userId)->orWhere('receiver_id', $userId); })
+            ->where(function ($q) use ($userId) {
+                $q->where('sender_id', $userId)->orWhere('receiver_id', $userId);
+            })
             ->groupBy('uid')
             ->pluck('last_at', 'uid');
 
@@ -48,7 +47,7 @@ class MessageController extends BaseApiController
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,
-                'unread' => (int)($unreadCounts[$u->id] ?? 0),
+                'unread' => (int) ($unreadCounts[$u->id] ?? 0),
                 'last_at' => $lastMessages[$u->id] ?? null,
             ];
         })->sortByDesc('last_at')->values();
@@ -80,11 +79,13 @@ class MessageController extends BaseApiController
     {
         $this->authorize('communicate', $user);
         $validated = $request->validated();
-        if (empty($validated['message']) && !$request->hasFile('attachment')) {
+        if (empty($validated['message']) && ! $request->hasFile('attachment')) {
             return response()->json(['message' => 'Message text or attachment required'], 422);
         }
 
-        $attachmentPath = null; $attachmentFilename = null; $attachmentMimeType = null;
+        $attachmentPath = null;
+        $attachmentFilename = null;
+        $attachmentMimeType = null;
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
             $attachmentFilename = $file->getClientOriginalName();

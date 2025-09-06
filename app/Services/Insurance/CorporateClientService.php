@@ -3,9 +3,7 @@
 namespace App\Services\Insurance;
 
 use App\Models\CorporateClient;
-use App\DTOs\CreateCorporateClientDTO;
 use App\Services\BaseService;
-use Illuminate\Http\Request;
 
 class CorporateClientService extends BaseService
 {
@@ -17,8 +15,7 @@ class CorporateClientService extends BaseService
     public function create(array|object $data): CorporateClient
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
-
-    
 }

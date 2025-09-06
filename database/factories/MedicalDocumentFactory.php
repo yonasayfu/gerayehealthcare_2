@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\MedicalDocument;
+use App\Models\MedicalVisit;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\MedicalVisit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,7 +27,7 @@ class MedicalDocumentFactory extends Factory
             'patient_id' => $patientId,
             'medical_visit_id' => $visitId,
             'document_type' => $docType,
-            'title' => ucfirst($docType) . ' - ' . $this->faker->sentence(3),
+            'title' => ucfirst($docType).' - '.$this->faker->sentence(3),
             'document_date' => $this->faker->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
             'file_path' => $this->faker->optional(0.6)->filePath(),
             'summary' => $this->faker->optional()->paragraph(),

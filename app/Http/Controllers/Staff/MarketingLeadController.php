@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingLeadRequest;
-use App\Http\Requests\UpdateMarketingLeadRequest;
 use App\Models\MarketingLead;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class MarketingLeadController extends Controller
 {
@@ -32,9 +30,9 @@ class MarketingLeadController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
-                  ->orWhere('lead_code', 'ilike', "%{$search}%");
+                ->orWhere('last_name', 'ilike', "%{$search}%")
+                ->orWhere('email', 'ilike', "%{$search}%")
+                ->orWhere('lead_code', 'ilike', "%{$search}%");
         }
 
         // Filtering
@@ -49,21 +47,19 @@ class MarketingLeadController extends Controller
         }
 
         // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
+        if ($request->filled('sort') && ! empty($request->input('sort'))) {
             $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
         } else {
             $query->orderBy('created_at', 'desc');
         }
 
         $marketingLeads = $query->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'])
-                               ->paginate($request->input('per_page', 5))
-                               ->withQueryString();
+            ->paginate($request->input('per_page', 5))
+            ->withQueryString();
 
         return Inertia::render('Staff/MarketingLeads/Index', [
             'marketingLeads' => $marketingLeads,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'status', 'source_campaign_id', 'landing_page_id']),
         ]);
     }
-
-   
 }

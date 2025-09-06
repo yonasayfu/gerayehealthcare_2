@@ -43,7 +43,7 @@ return new class extends Migration
                 'utm_medium',
                 'lead_id',
                 'acquisition_cost',
-                'acquisition_date'
+                'acquisition_date',
             ]);
         });
     }

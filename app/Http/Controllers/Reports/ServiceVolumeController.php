@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Enums\RoleEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ExportableTrait;
 use App\Models\ServiceVolumeView;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 
 class ServiceVolumeController extends Controller
 {
     use ExportableTrait;
+
     public function __construct()
     {
         $this->middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value]);
@@ -31,7 +32,7 @@ class ServiceVolumeController extends Controller
 
     public function data(Request $request)
     {
-        $cacheKey = 'report:service_volume:' . md5(json_encode([
+        $cacheKey = 'report:service_volume:'.md5(json_encode([
             'from' => $request->input('date_from'),
             'to' => $request->input('date_to'),
             'granularity' => $request->input('granularity'),
@@ -42,6 +43,7 @@ class ServiceVolumeController extends Controller
         $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
             $query = ServiceVolumeView::query();
             $this->applyFilters($query, $request);
+
             return $query->orderBy('bucket_date')->get();
         });
 
@@ -76,7 +78,7 @@ class ServiceVolumeController extends Controller
         if ($serviceCategory) {
             $query->where('service_category', $serviceCategory);
         }
-        if (!is_null($isEvent)) {
+        if (! is_null($isEvent)) {
             $query->where('is_event_service', $isEvent);
         }
     }
@@ -96,7 +98,7 @@ class ServiceVolumeController extends Controller
                     'unique_patients',
                     [
                         'field' => 'is_event_service',
-                        'transform' => fn($v) => $v ? 'Yes' : 'No',
+                        'transform' => fn ($v) => $v ? 'Yes' : 'No',
                     ],
                 ],
             ],

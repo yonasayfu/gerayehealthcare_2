@@ -18,12 +18,12 @@ class SupplierRules extends BaseResourceRules
             'tax_id' => 'nullable|string|max:50',
         ];
     }
-    
+
     public static function update($supplier): array
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:suppliers,email,' . $supplier->id,
+            'email' => 'nullable|email|unique:suppliers,email,'.$supplier->id,
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'contact_person' => 'nullable|string|max:255',

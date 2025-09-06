@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
 use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;

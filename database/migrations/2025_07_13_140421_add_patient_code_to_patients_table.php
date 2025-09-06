@@ -14,17 +14,17 @@ return new class extends Migration
         Schema::table('patients', function (Blueprint $table) {
             $table->string('patient_code')->nullable()->after('id');
         });
-        
+
         // Update existing records with unique patient codes
         $patients = \App\Models\Patient::whereNull('patient_code')->get();
         foreach ($patients as $patient) {
             do {
-                $code = 'P' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                $code = 'P'.str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
             } while (\App\Models\Patient::where('patient_code', $code)->exists());
-            
+
             $patient->update(['patient_code' => $code]);
         }
-        
+
         // Make the column not nullable and unique
         Schema::table('patients', function (Blueprint $table) {
             $table->string('patient_code')->nullable(false)->unique()->change();

@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Base\BaseController;
+use App\Http\Requests\GetEventsRequest;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
+use App\Services\StaffAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\GetEventsRequest;
-use App\Http\Requests\StoreMyAvailabilityRequest;
-use App\Http\Requests\UpdateMyAvailabilityRequest;
-use App\Services\StaffAvailabilityService;
 
 class MyAvailabilityController extends BaseController
 {
@@ -77,9 +75,10 @@ class MyAvailabilityController extends BaseController
         $visitEvents = $visits->map(function ($visit) {
             $startTime = Carbon::parse($visit->scheduled_at, 'UTC')->setTimezone(config('app.timezone'));
             $endTime = $startTime->copy()->addHour();
+
             return [
-                'id' => 'visit_' . $visit->id,
-                'title' => 'Visit: ' . $visit->patient->full_name,
+                'id' => 'visit_'.$visit->id,
+                'title' => 'Visit: '.$visit->patient->full_name,
                 'start' => $startTime->format('Y-m-d H:i:s'),
                 'end' => $endTime->format('Y-m-d H:i:s'),
                 'backgroundColor' => '#0284c7',

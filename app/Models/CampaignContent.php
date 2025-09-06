@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingCampaign;
-use App\Models\MarketingPlatform;
 
 class CampaignContent extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'campaign_id',
         'platform_id',

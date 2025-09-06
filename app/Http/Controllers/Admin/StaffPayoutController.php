@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateStaffPayoutDTO;
 use App\Http\Controllers\Controller;
+use App\Models\StaffPayout;
 use App\Services\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
-use App\DTOs\CreateStaffPayoutDTO;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Carbon;
-use App\Models\StaffPayout;
+use Inertia\Inertia;
 
 class StaffPayoutController extends Controller
 {
@@ -23,6 +23,7 @@ class StaffPayoutController extends Controller
     public function index(Request $request)
     {
         $data = $this->staffPayoutService->getStaffEarningsData($request);
+
         return Inertia::render('Admin/StaffPayouts/Index', $data);
     }
 
@@ -39,6 +40,7 @@ class StaffPayoutController extends Controller
                 notes: 'Manual Payout'
             );
             $this->staffPayoutService->processPayout($dto);
+
             return back()->with('banner', 'Payout processed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
             return back()->with('banner', $e->getMessage())->with('bannerStyle', 'danger');
@@ -51,6 +53,7 @@ class StaffPayoutController extends Controller
             ->orderByDesc('payout_date')
             ->limit(500)
             ->get();
+
         return Inertia::render('Admin/StaffPayouts/PrintAll', [
             'payouts' => $payouts,
         ]);

@@ -30,8 +30,13 @@ class VisitServicePolicy
     public function create(User $user, ?int $patientId = null): bool
     {
         // Staff can create for any patient; patients can create only for themselves
-        if ($user->staff) return true;
-        if ($patientId === null) return false;
+        if ($user->staff) {
+            return true;
+        }
+        if ($patientId === null) {
+            return false;
+        }
+
         return optional($user)->email === optional(\App\Models\Patient::find($patientId))->email;
     }
 
@@ -45,6 +50,7 @@ class VisitServicePolicy
         if ($user->staff && $visit->staff_id === $user->staff->id) {
             return true;
         }
+
         // If user is a patient, match by email
         return optional($visit->patient)->email === $user->email;
     }

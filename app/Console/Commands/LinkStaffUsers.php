@@ -24,6 +24,7 @@ class LinkStaffUsers extends Command
 
         if ($unlinkedStaff->isEmpty() || $usersWithoutStaff->isEmpty()) {
             $this->info('Nothing to link. Exiting.');
+
             return self::SUCCESS;
         }
 
@@ -31,21 +32,24 @@ class LinkStaffUsers extends Command
 
         $linked = 0;
         foreach ($unlinkedStaff as $staff) {
-            if (!$staff->email) {
+            if (! $staff->email) {
                 $this->warn("Skipping staff ID {$staff->id} (no email)");
+
                 continue;
             }
 
             $user = $usersWithoutStaff->firstWhere('email', $staff->email);
-            if (!$user) {
+            if (! $user) {
                 $this->line("No user email match for staff ID {$staff->id} <{$staff->email}>");
+
                 continue;
             }
 
-            if (!$auto) {
+            if (! $auto) {
                 $confirm = $this->confirm("Link staff #{$staff->id} ({$staff->first_name} {$staff->last_name} <{$staff->email}>) to user #{$user->id} ({$user->name} <{$user->email}>)?", true);
-                if (!$confirm) {
+                if (! $confirm) {
                     $this->line('Skipped.');
+
                     continue;
                 }
             }
@@ -59,6 +63,7 @@ class LinkStaffUsers extends Command
         }
 
         $this->info("Completed. Linked {$linked} staff records.");
+
         return self::SUCCESS;
     }
 }

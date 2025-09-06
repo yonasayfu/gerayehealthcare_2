@@ -2,44 +2,45 @@
 
 namespace App\Services;
 
-use App\Models\MarketingLead;
-use App\Models\MarketingCampaign;
+use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
 use App\Models\CampaignMetric;
 use App\Models\MarketingBudget;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingLead;
+use App\Models\MarketingTask;
 use App\Models\Patient;
-use App\Models\LeadSource;
-use Illuminate\Http\Request;
+use App\Models\Staff;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use App\Models\MarketingTask;
-use App\Models\Staff;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class OptimizedMarketingAnalyticsService extends OptimizedBaseService
 {
     use ExportableTrait;
-    
+
     protected $cacheTtl = 1800; // 30 minutes for analytics data
+
     protected $shortCacheTtl = 600; // 10 minutes for real-time metrics
+
     protected $chunkSize = 1000; // Process large datasets in chunks
 
     public function __construct()
     {
         // Set base model for cache key generation
-        $this->model = new MarketingLead();
+        $this->model = new MarketingLead;
     }
 
     public function getDashboardData(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('dashboard', $request->all());
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             // Use DB transactions for consistency and optimize queries
             return DB::transaction(function () use ($request) {
-                
+
                 // Parallel query execution for independent metrics
                 $totalsData = $this->calculateTotalsWithChunking($request);
                 $filteredMetrics = $this->getFilteredCampaignMetricsOptimized($request);
@@ -70,8 +71,8 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
 
         // Process leads in chunks to avoid memory issues
         MarketingLead::when($request->filled('start_date'), function ($query) use ($request) {
-                return $query->whereDate('created_at', '>=', $request->input('start_date'));
-            })
+            return $query->whereDate('created_at', '>=', $request->input('start_date'));
+        })
             ->when($request->filled('end_date'), function ($query) use ($request) {
                 return $query->whereDate('created_at', '<=', $request->input('end_date'));
             })
@@ -119,20 +120,20 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function calculateMarketingSpendOptimized(Request $request, array $filteredCampaignIds): array
     {
         $query = MarketingBudget::query();
-        
-        if (!empty($filteredCampaignIds)) {
+
+        if (! empty($filteredCampaignIds)) {
             $query->whereIn('campaign_id', $filteredCampaignIds);
         }
-        
+
         if ($request->filled('platform_id')) {
             $query->where('platform_id', $request->input('platform_id'));
         }
-        
+
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $start = $request->input('start_date');
             $end = $request->input('end_date');
             $query->whereDate('period_start', '<=', $end)
-                  ->whereDate('period_end', '>=', $start);
+                ->whereDate('period_end', '>=', $start);
         }
 
         return [
@@ -147,15 +148,15 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function calculatePatientsAcquiredOptimized(Request $request, array $filteredCampaignIds): array
     {
         $query = Patient::whereNotNull('marketing_campaign_id');
-        
-        if (!empty($filteredCampaignIds)) {
+
+        if (! empty($filteredCampaignIds)) {
             $query->whereIn('marketing_campaign_id', $filteredCampaignIds);
         }
-        
+
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('acquisition_date', [
                 $request->input('start_date'),
-                $request->input('end_date')
+                $request->input('end_date'),
             ]);
         }
 
@@ -171,7 +172,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function calculateRevenueOptimized(Request $request): array
     {
         $query = $this->getFilteredCampaignMetricsOptimized($request);
-        
+
         return [
             'total_revenue' => (float) $query->sum('revenue_generated'),
             'avg_revenue_per_metric' => (float) $query->avg('revenue_generated'),
@@ -184,7 +185,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function getCampaignPerformanceOptimized(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('campaign_performance', $request->only(['campaign_id', 'platform_id', 'start_date', 'end_date']));
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($request) {
             return $this->getFilteredCampaignMetricsOptimized($request)
                 ->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
@@ -201,7 +202,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function getTrafficSourceDistributionOptimized(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('traffic_sources', $request->only(['campaign_id', 'platform_id', 'start_date', 'end_date']));
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             return $this->getFilteredLeadsQuery($request)
                 ->selectRaw('utm_source, COUNT(*) as lead_count')
@@ -218,7 +219,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function getConversionFunnelOptimized(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('conversion_funnel', $request->only(['campaign_id', 'platform_id', 'start_date', 'end_date']));
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($request) {
             $results = $this->getFilteredLeadsQuery($request)
                 ->selectRaw('status, COUNT(*) as count')
@@ -239,27 +240,27 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     public function getCampaignPerformance(Request $request)
     {
         $cacheKey = $this->generateCacheKey('campaign_performance_paginated', $request->all());
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($request) {
             $query = $this->getFilteredCampaignMetricsOptimized($request);
 
-            if ($request->filled('sort') && !empty($request->input('sort'))) {
+            if ($request->filled('sort') && ! empty($request->input('sort'))) {
                 $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
             } else {
                 $query->orderBy('date', 'asc');
             }
 
             return $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
-                         ->groupBy('date')
-                         ->paginate($request->input('per_page', 5))
-                         ->withQueryString();
+                ->groupBy('date')
+                ->paginate($request->input('per_page', 5))
+                ->withQueryString();
         });
     }
 
     public function getBudgetPacing(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('budget_pacing', $request->all());
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             // Resolve date window
             $start = $request->input('start_date') ? Carbon::parse($request->input('start_date'))->startOfDay() : Carbon::now()->startOfMonth();
@@ -268,7 +269,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
             // Optimized budget query with single database hit
             $campaignIds = $this->getFilteredCampaignIds($request);
             $budgets = MarketingBudget::query()
-                ->when(!empty($campaignIds), function ($query) use ($campaignIds) {
+                ->when(! empty($campaignIds), function ($query) use ($campaignIds) {
                     return $query->whereIn('campaign_id', $campaignIds);
                 })
                 ->when($request->filled('platform_id'), function ($query) use ($request) {
@@ -289,17 +290,17 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function processBudgetPacing($budgets, Carbon $start, Carbon $end): array
     {
         $byMonth = [];
-        
+
         foreach ($budgets as $row) {
             $pStart = Carbon::parse($row->period_start);
             $pEnd = Carbon::parse($row->period_end);
             $clipStart = $pStart->greaterThan($start) ? $pStart : $start;
             $clipEnd = $pEnd->lessThan($end) ? $pEnd : $end;
-            
+
             $cursor = (clone $clipStart)->startOfMonth();
             while ($cursor <= $clipEnd) {
                 $key = $cursor->format('Y-m');
-                if (!isset($byMonth[$key])) {
+                if (! isset($byMonth[$key])) {
                     $byMonth[$key] = [
                         'month' => $key,
                         'allocated' => 0.0,
@@ -309,7 +310,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
                         'pacing' => 0.0,
                     ];
                 }
-                
+
                 $byMonth[$key]['allocated'] += (float) $row->allocated_amount;
                 $byMonth[$key]['spent'] += (float) $row->spent_amount;
                 $cursor->addMonth();
@@ -319,11 +320,11 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
         // Calculate pacing metrics
         foreach ($byMonth as $key => &$m) {
             [$y, $mNum] = explode('-', $key);
-            $monthStart = Carbon::createFromDate((int)$y, (int)$mNum, 1)->startOfDay();
+            $monthStart = Carbon::createFromDate((int) $y, (int) $mNum, 1)->startOfDay();
             $monthEnd = (clone $monthStart)->endOfMonth();
             $clipStart = $monthStart->greaterThan($start) ? $monthStart : $start;
             $clipEnd = $monthEnd->lessThan($end) ? $monthEnd : $end;
-            
+
             $daysInWindow = $clipStart->diffInDays($clipEnd) + 1;
             $daysElapsed = $clipStart->isFuture() ? 0 : min($daysInWindow, $clipStart->diffInDays(min(Carbon::now()->endOfDay(), $clipEnd)) + 1);
 
@@ -336,7 +337,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
             $m['pacing'] = $m['allocated'] > 0 ? round($m['projected_spend'] / $m['allocated'], 2) : 0.0;
             $m['overrun'] = $m['projected_spend'] > $m['allocated'];
         }
-        
+
         ksort($byMonth);
 
         // Calculate totals
@@ -361,12 +362,12 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     public function getStaffPerformance(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('staff_performance', $request->all());
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             // Optimized staff performance with single queries
             $leadData = $this->getStaffLeadPerformance($request);
             $taskData = $this->getStaffTaskPerformance($request);
-            
+
             return $this->mergeStaffPerformanceData($leadData, $taskData);
         });
     }
@@ -415,11 +416,11 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
                         SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as tasks_on_time,
                         SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as tasks_overdue_open,
                         SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as tasks_overdue_completed',
-                        [$now])
-                        ->groupBy('assigned_to_staff_id')
-                        ->get()
-                        ->keyBy('staff_id')
-                        ->toArray();
+            [$now])
+            ->groupBy('assigned_to_staff_id')
+            ->get()
+            ->keyBy('staff_id')
+            ->toArray();
     }
 
     /**
@@ -428,37 +429,38 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     protected function mergeStaffPerformanceData(array $leadData, array $taskData): array
     {
         $staffIds = array_unique(array_merge(array_keys($leadData), array_keys($taskData)));
-        
+
         // Get staff names in single query
         $staffNames = Staff::whereIn('id', $staffIds)
             ->select('id', 'first_name', 'last_name')
             ->get()
             ->mapWithKeys(function ($staff) {
-                $fullName = trim(($staff->first_name ?? '') . ' ' . ($staff->last_name ?? ''));
+                $fullName = trim(($staff->first_name ?? '').' '.($staff->last_name ?? ''));
+
                 return [$staff->id => $fullName ?: "Staff #{$staff->id}"];
             })
             ->toArray();
 
         $result = [];
-        
+
         foreach ($staffIds as $staffId) {
             $leadStats = $leadData[$staffId] ?? [];
             $taskStats = $taskData[$staffId] ?? [];
-            
+
             $total = $leadStats['total'] ?? 0;
             $contacted = $leadStats['contacted'] ?? 0;
             $qualified = $leadStats['qualified'] ?? 0;
             $converted = $leadStats['converted'] ?? 0;
-            
+
             $tasksTotal = $taskStats['tasks_total'] ?? 0;
             $tasksCompleted = $taskStats['tasks_completed'] ?? 0;
             $tasksOnTime = $taskStats['tasks_on_time'] ?? 0;
-            
+
             $result[] = [
                 'staff_id' => $staffId,
                 'staff' => [
                     'id' => $staffId,
-                    'name' => $staffNames[$staffId] ?? ($staffId ? "Staff #{$staffId}" : 'Unassigned')
+                    'name' => $staffNames[$staffId] ?? ($staffId ? "Staff #{$staffId}" : 'Unassigned'),
                 ],
                 'leads' => [
                     'total' => (int) $total,
@@ -486,10 +488,10 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
     public function getTaskSla(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('task_sla', $request->all());
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($request) {
             $now = Carbon::now();
-            
+
             $totals = MarketingTask::query()
                 ->when($request->filled('campaign_id'), function ($q) use ($request) {
                     return $q->where('campaign_id', $request->input('campaign_id'));
@@ -510,7 +512,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
                         SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as on_time,
                         SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as overdue_open,
                         SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as overdue_completed',
-                        [$now])
+                    [$now])
                 ->first();
 
             return [
@@ -612,10 +614,10 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
         if ($reportType === 'monthly_performance') {
             // Use chunking for large campaign datasets
             $campaigns = MarketingCampaign::with(['platform'])
-                ->with(['campaignMetrics' => function($query) use ($startDate, $endDate) {
+                ->with(['campaignMetrics' => function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('date', [$startDate, $endDate]);
                 }])
-                ->chunk(100, function ($campaignChunk) use ($startDate, $endDate) {
+                ->chunk(100, function ($campaignChunk) {
                     // Process campaigns in chunks for memory efficiency
                     return $campaignChunk;
                 });
@@ -626,7 +628,7 @@ class OptimizedMarketingAnalyticsService extends OptimizedBaseService
                 'endDate' => $endDate,
             ])->setPaper('a4', 'landscape');
 
-            return $pdf->download('monthly_marketing_performance_' . $startDate . '_' . $endDate . '.pdf');
+            return $pdf->download('monthly_marketing_performance_'.$startDate.'_'.$endDate.'.pdf');
         }
 
         return response()->json(['message' => 'Report generation initiated.', 'report_type' => $reportType]);

@@ -23,4 +23,3 @@ class StoreMedicalDocumentRequest extends FormRequest
         ];
     }
 }
-

@@ -29,7 +29,7 @@ class ReferralDocumentController extends Controller
     public function index(Request $request)
     {
         $perPage = (int) $request->input('per_page', 5);
-        $perPage = in_array($perPage, [5,10,25,50,100]) ? $perPage : 5;
+        $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 5;
         $search = (string) $request->input('search', '');
         $sort = (string) $request->input('sort', '');
         $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
@@ -92,7 +92,7 @@ class ReferralDocumentController extends Controller
 
             // Ensure we have a Staff id for the uploader. If missing, auto-provision a lightweight Staff linked to the user.
             $staffId = Staff::where('user_id', Auth::id())->value('id');
-            if (!$staffId) {
+            if (! $staffId) {
                 $user = Auth::user();
                 $staff = Staff::create([
                     'first_name' => $user->name ?? 'System',

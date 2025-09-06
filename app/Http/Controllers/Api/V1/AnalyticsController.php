@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
-use App\Models\Patient;
-use App\Models\VisitService;
-use App\Models\Staff;
-use App\Models\MarketingCampaign;
-use App\Models\Lead;
 use App\Models\InsuranceClaim;
 use App\Models\InventoryItem;
+use App\Models\Lead;
+use App\Models\MarketingCampaign;
 use App\Models\Message;
-use Illuminate\Http\Request;
+use App\Models\Patient;
+use App\Models\Staff;
+use App\Models\VisitService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class AnalyticsController extends BaseApiController
 {
@@ -310,10 +307,10 @@ class AnalyticsController extends BaseApiController
             END as age_group,
             COUNT(*) as count
         ')
-        ->whereNotNull('date_of_birth')
-        ->groupBy('age_group')
-        ->get()
-        ->toArray();
+            ->whereNotNull('date_of_birth')
+            ->groupBy('age_group')
+            ->get()
+            ->toArray();
     }
 
     private function getPatientTrends($startDate, $endDate): array

@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Services\InventoryMaintenanceRecordService;
-use App\Models\InventoryMaintenanceRecord;
-use App\Services\Validation\Rules\InventoryMaintenanceRecordRules;
 use App\DTOs\CreateInventoryMaintenanceRecordDTO;
-use Illuminate\Http\Request;
-use App\Services\InventoryItemService; // Import InventoryItemService
-use App\Services\StaffService; // Import StaffService
-
+use App\Http\Controllers\Base\BaseController;
 use App\Http\Traits\ExportableTrait;
+use App\Models\InventoryMaintenanceRecord;
+use App\Services\InventoryItemService;
+use App\Services\InventoryMaintenanceRecordService;
+use App\Services\StaffService; // Import InventoryItemService
+use App\Services\Validation\Rules\InventoryMaintenanceRecordRules; // Import StaffService
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class InventoryMaintenanceRecordController extends BaseController
@@ -19,6 +18,7 @@ class InventoryMaintenanceRecordController extends BaseController
     use ExportableTrait;
 
     protected $inventoryItemService;
+
     protected $staffService; // Declare property
 
     public function __construct(InventoryMaintenanceRecordService $inventoryMaintenanceRecordService, InventoryItemService $inventoryItemService, StaffService $staffService)
@@ -38,6 +38,7 @@ class InventoryMaintenanceRecordController extends BaseController
     public function show($id)
     {
         $record = $this->service->getById($id, ['item', 'performedByStaff']); // Eager load 'item' and 'performedByStaff'
+
         return Inertia::render('Admin/InventoryMaintenanceRecords/Show', [
             'maintenanceRecord' => $record,
         ]);
@@ -46,8 +47,9 @@ class InventoryMaintenanceRecordController extends BaseController
     public function edit($id)
     {
         $record = $this->service->getById($id, ['item', 'performedByStaff']); // Eager load 'item' and 'performedByStaff'
-        $inventoryItems = $this->inventoryItemService->getAll(new Request())->toArray();
-        $staffMembers = $this->staffService->getAll(new Request())->toArray(); // Fetch all staff
+        $inventoryItems = $this->inventoryItemService->getAll(new Request)->toArray();
+        $staffMembers = $this->staffService->getAll(new Request)->toArray(); // Fetch all staff
+
         return Inertia::render('Admin/InventoryMaintenanceRecords/Edit', [
             'maintenanceRecord' => $record,
             'inventoryItems' => $inventoryItems['data'],
@@ -57,8 +59,9 @@ class InventoryMaintenanceRecordController extends BaseController
 
     public function create()
     {
-        $inventoryItems = $this->inventoryItemService->getAll(new Request())->toArray();
-        $staffMembers = $this->staffService->getAll(new Request())->toArray(); // Fetch all staff
+        $inventoryItems = $this->inventoryItemService->getAll(new Request)->toArray();
+        $staffMembers = $this->staffService->getAll(new Request)->toArray(); // Fetch all staff
+
         return Inertia::render('Admin/InventoryMaintenanceRecords/Create', [
             'inventoryItems' => $inventoryItems['data'],
             'staffMembers' => $staffMembers['data'], // Pass staff members

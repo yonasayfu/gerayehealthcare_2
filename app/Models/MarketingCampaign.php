@@ -2,32 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingPlatform;
-use App\Models\Staff;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class MarketingCampaign extends Model
 {
     use HasFactory;
+
     protected static function booted()
     {
         static::creating(function ($campaign) {
             if (empty($campaign->campaign_code)) {
                 DB::transaction(function () use ($campaign) {
                     $latestCampaign = static::lockForUpdate()
-                                            ->whereNotNull('campaign_code')
-                                            ->orderBy('id', 'desc')
-                                            ->first();
+                        ->whereNotNull('campaign_code')
+                        ->orderBy('id', 'desc')
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestCampaign && preg_match('/CAM-(\d+)/', $latestCampaign->campaign_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
-                    $campaign->campaign_code = 'CAM-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $campaign->campaign_code = 'CAM-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });

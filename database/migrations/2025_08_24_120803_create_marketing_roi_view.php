@@ -3,12 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Index to support date filtering on campaign metrics
-        DB::statement("CREATE INDEX IF NOT EXISTS idx_campaign_metrics_date ON campaign_metrics (date);");
-        DB::statement("CREATE INDEX IF NOT EXISTS idx_campaign_metrics_campaign_id ON campaign_metrics (campaign_id);");
+        DB::statement('CREATE INDEX IF NOT EXISTS idx_campaign_metrics_date ON campaign_metrics (date);');
+        DB::statement('CREATE INDEX IF NOT EXISTS idx_campaign_metrics_campaign_id ON campaign_metrics (campaign_id);');
 
         DB::statement(<<<'SQL'
         CREATE OR REPLACE VIEW marketing_roi_view AS
@@ -44,6 +45,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS marketing_roi_view;");
+        DB::statement('DROP VIEW IF EXISTS marketing_roi_view;');
     }
 };

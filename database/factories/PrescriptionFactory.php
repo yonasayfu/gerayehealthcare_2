@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Prescription;
-use App\Models\Patient;
-use App\Models\Staff;
 use App\Models\MedicalDocument;
+use App\Models\Patient;
+use App\Models\Prescription;
+use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

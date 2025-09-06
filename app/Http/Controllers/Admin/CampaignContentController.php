@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Base\BaseController;
+use App\Models\CampaignContent;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
+use App\Services\CampaignContentService;
 use App\Services\Validation\Rules\CampaignContentRules;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Http\Controllers\Base\BaseController;
-use App\Services\CampaignContentService;
-use App\Models\CampaignContent;
-use App\DTOs\CreateCampaignContentDTO;
 
 class CampaignContentController extends BaseController
 {
@@ -36,7 +35,7 @@ class CampaignContentController extends BaseController
         $contentTypes = ['text', 'image', 'video'];
         $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'campaigns' => $campaigns,
             'platforms' => $platforms,
             'contentTypes' => $contentTypes,
@@ -52,7 +51,7 @@ class CampaignContentController extends BaseController
         $contentTypes = ['text', 'image', 'video'];
         $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $campaignContent,
             'campaigns' => $campaigns,
             'platforms' => $platforms,
@@ -66,7 +65,8 @@ class CampaignContentController extends BaseController
         $this->authorize('view', CampaignContent::class);
         // Eager-load relations so Show.vue can render names
         $campaignContent = $this->service->getById($id, ['campaign', 'platform']);
-        return Inertia::render($this->viewName . '/Show', [
+
+        return Inertia::render($this->viewName.'/Show', [
             lcfirst(class_basename($this->modelClass)) => $campaignContent,
         ]);
     }
@@ -75,7 +75,8 @@ class CampaignContentController extends BaseController
     {
         $this->authorize('viewAny', CampaignContent::class);
         $data = $this->service->getAll($request);
-        return Inertia::render($this->viewName . '/Index', [
+
+        return Inertia::render($this->viewName.'/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'platform_id', 'content_type', 'status', 'scheduled_post_date_start', 'scheduled_post_date_end']),
             'campaigns' => MarketingCampaign::all(),

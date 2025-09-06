@@ -18,7 +18,7 @@ class EnsureStaffLinked
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -28,9 +28,9 @@ class EnsureStaffLinked
         }
 
         $hasStaff = Staff::where('user_id', $user->id)->exists();
-        if (!$hasStaff) {
+        if (! $hasStaff) {
             return back()->withErrors([
-                'error' => 'Your account is not linked to a staff profile. Please contact an administrator to link your user to a Staff record.'
+                'error' => 'Your account is not linked to a staff profile. Please contact an administrator to link your user to a Staff record.',
             ])->withInput();
         }
 

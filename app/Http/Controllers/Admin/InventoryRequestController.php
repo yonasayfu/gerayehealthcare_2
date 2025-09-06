@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateInventoryRequestDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\InventoryRequestService;
+use App\Http\Traits\ExportableTrait;
+use App\Models\InventoryItem;
 use App\Models\InventoryRequest;
 use App\Models\Staff;
-use App\Models\InventoryItem;
+use App\Services\InventoryRequestService;
 use App\Services\Validation\Rules\InventoryRequestRules;
 use Illuminate\Http\Request;
-use App\DTOs\CreateInventoryRequestDTO;
 use Inertia\Inertia;
-use App\Http\Traits\ExportableTrait;
 
 class InventoryRequestController extends BaseController
 {
     use ExportableTrait;
+
     public function __construct(InventoryRequestService $inventoryRequestService)
     {
         parent::__construct(
@@ -33,7 +34,7 @@ class InventoryRequestController extends BaseController
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
         $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'staffList' => $staff,
             'inventoryItems' => $inventoryItems,
         ]);
@@ -45,13 +46,12 @@ class InventoryRequestController extends BaseController
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
         $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $inventoryRequest,
             'staffList' => $staff,
             'inventoryItems' => $inventoryItems,
         ]);
     }
-
 
     /**
      * Print a single inventory request as PDF.
@@ -60,6 +60,7 @@ class InventoryRequestController extends BaseController
     {
         $model = InventoryRequest::with(['requester', 'approver', 'item'])->findOrFail($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $model, $config);
     }
 
@@ -121,16 +122,19 @@ class InventoryRequestController extends BaseController
     // Ensure ExportableTrait can apply filters/search/sorting
     protected function applySearch($query, $search)
     {
-        if (!$search) return $query;
+        if (! $search) {
+            return $query;
+        }
+
         return $query->where(function ($q) use ($search) {
             $q->whereHas('item', function ($q) use ($search) {
                 $q->where('name', 'ilike', "%{$search}%");
             })
-            ->orWhereHas('requester', function ($q) use ($search) {
-                $q->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%");
-            })
-            ->orWhere('reason', 'ilike', "%{$search}%");
+                ->orWhereHas('requester', function ($q) use ($search) {
+                    $q->where('first_name', 'ilike', "%{$search}%")
+                        ->orWhere('last_name', 'ilike', "%{$search}%");
+                })
+                ->orWhere('reason', 'ilike', "%{$search}%");
         });
     }
 
@@ -142,18 +146,19 @@ class InventoryRequestController extends BaseController
 
             if ($sortField === 'requester_id') {
                 $query->join('staff', 'inventory_requests.requester_id', '=', 'staff.id')
-                      ->orderBy('staff.first_name', $sortDirection)
-                      ->select('inventory_requests.*');
+                    ->orderBy('staff.first_name', $sortDirection)
+                    ->select('inventory_requests.*');
             } elseif ($sortField === 'item_id') {
                 $query->join('inventory_items', 'inventory_requests.item_id', '=', 'inventory_items.id')
-                      ->orderBy('inventory_items.name', $sortDirection)
-                      ->select('inventory_requests.*');
+                    ->orderBy('inventory_items.name', $sortDirection)
+                    ->select('inventory_requests.*');
             } else {
                 $query->orderBy($sortField, $sortDirection);
             }
         } else {
             $query->orderBy('created_at', 'desc');
         }
+
         return $query;
     }
 }

@@ -6,9 +6,9 @@ Instruction to AI Agents
 
 Start by reading the project README.md (root) for overall context and conventions.
 
-Then open phases/README-ISSUE.md to see the phase index and working rules.
+Then open phases/README-ISSUE.md,GERAYE_HEALTHCARE_COMPLETE_USER_GUIDE.md, DOCUMENTATION_INDEX.md, RBAC_AND_UI_CONSISTENCY_GUIDE.md,MODULE_SPECIFIC_SCENARIOS_GUIDE.md  to see the phase index and working rules.
 
-Move to the current phase file phases/phase-N.md (replace N). Work through all tasks in order.
+Move to the current phase file phases/phase-0.md. Work through all tasks in order.
 
 Prefer to complete the entire phase in one go. If that’s not practical, propose a very short sub-roadmap and proceed stepwise.
 

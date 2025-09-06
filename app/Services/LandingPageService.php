@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateLandingPageDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\LandingPage;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class LandingPageService extends BaseService
 {
@@ -20,8 +19,8 @@ class LandingPageService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('page_title', 'ilike', "%{$search}%")
-              ->orWhere('page_url', 'ilike', "%{$search}%")
-              ->orWhere('page_code', 'ilike', "%{$search}%");
+            ->orWhere('page_url', 'ilike', "%{$search}%")
+            ->orWhere('page_code', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])

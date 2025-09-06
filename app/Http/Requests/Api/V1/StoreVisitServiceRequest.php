@@ -20,4 +20,3 @@ class StoreVisitServiceRequest extends FormRequest
         ];
     }
 }
-

@@ -2,17 +2,9 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use App\Models\LeadSource;
-use App\Models\MarketingCampaign;
-use App\Models\MarketingLead;
-use App\Models\EmployeeInsuranceRecord;
-use App\Models\InsuranceClaim;
-use App\Models\VisitService;
-use App\Models\Invoice;
 use Illuminate\Support\Facades\DB; // Import DB facade for transactions
 
 class Patient extends Model
@@ -61,17 +53,17 @@ class Patient extends Model
                 // Use a transaction to ensure atomic generation of sequential patient code
                 DB::transaction(function () use ($patient) {
                     $latestPatient = Patient::lockForUpdate() // Lock the table row for update
-                                            ->whereNotNull('patient_code')
-                                            ->orderBy('id', 'desc') // Order by ID to get the latest
-                                            ->first();
+                        ->whereNotNull('patient_code')
+                        ->orderBy('id', 'desc') // Order by ID to get the latest
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestPatient && preg_match('/PAT-(\d+)/', $latestPatient->patient_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
                     // Format the number with leading zeros, e.g., PAT-00001
-                    $patient->patient_code = 'PAT-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $patient->patient_code = 'PAT-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });
@@ -95,10 +87,10 @@ class Patient extends Model
      */
     public function getAgeAttribute()
     {
-        if (!$this->date_of_birth) {
+        if (! $this->date_of_birth) {
             return null;
         }
-    
+
         // Use Carbon to calculate age from date_of_birth to now
         return Carbon::parse($this->date_of_birth)->age;
     }

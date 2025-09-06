@@ -48,6 +48,7 @@ class PartnerService extends BaseService
     public function printSingle(Request $request, $id)
     {
         $partner = Partner::findOrFail($id);
+
         return $this->handlePrintSingle($request, $partner, $this->getExportConfig());
     }
 }

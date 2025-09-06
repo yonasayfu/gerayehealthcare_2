@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\Supplier;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class SupplierService extends BaseService
 {
@@ -16,10 +14,8 @@ class SupplierService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('name', 'ilike', "%{$search}%")
-              ->orWhere('contact_person', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%")
-              ->orWhere('phone', 'ilike', "%{$search}%");
+            ->orWhere('contact_person', 'ilike', "%{$search}%")
+            ->orWhere('email', 'ilike', "%{$search}%")
+            ->orWhere('phone', 'ilike', "%{$search}%");
     }
-
-    
 }

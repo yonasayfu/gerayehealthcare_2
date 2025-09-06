@@ -2,8 +2,8 @@
 
 namespace App\Services\Validation\Rules;
 
-use Illuminate\Validation\Rules;
 use App\Models\User;
+use Illuminate\Validation\Rules;
 
 class UserRules extends BaseResourceRules
 {
@@ -21,12 +21,12 @@ class UserRules extends BaseResourceRules
             'hire_date' => 'nullable|date',
         ];
     }
-    
+
     public static function update($user): array
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'position' => 'nullable|string|max:255',

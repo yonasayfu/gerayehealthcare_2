@@ -86,7 +86,7 @@ class EventBroadcastControllerTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('admin.event-broadcasts.store'), $payload);
         $response->assertForbidden();
-        $this->assertDatabaseMissing('event_broadcasts', [ 'message' => 'Test broadcast message' ]);
+        $this->assertDatabaseMissing('event_broadcasts', ['message' => 'Test broadcast message']);
     }
 
     public function test_print_current_route_accessible_for_admin(): void

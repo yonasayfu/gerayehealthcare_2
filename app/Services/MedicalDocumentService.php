@@ -40,8 +40,9 @@ class MedicalDocumentService extends BaseService
         $with = array_unique(array_merge($with, ['patient', 'visit', 'createdBy', 'prescription']));
         $model = $this->model->with($with)->find($id);
         if (! $model) {
-            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model) . ' not found.');
+            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model).' not found.');
         }
+
         return $model;
     }
 
@@ -49,8 +50,8 @@ class MedicalDocumentService extends BaseService
     {
         $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
-              ->orWhere('document_type', 'like', "%{$search}%")
-              ->orWhere('summary', 'like', "%{$search}%");
+                ->orWhere('document_type', 'like', "%{$search}%")
+                ->orWhere('summary', 'like', "%{$search}%");
         });
     }
 
@@ -64,6 +65,7 @@ class MedicalDocumentService extends BaseService
             $payload['file_path'] = $payload['file']->store('medical_documents', 'public');
             unset($payload['file']);
         }
+
         return parent::create($payload);
     }
 
@@ -77,7 +79,7 @@ class MedicalDocumentService extends BaseService
 
         if (isset($payload['file']) && $payload['file'] instanceof UploadedFile) {
             // Delete old file if exists
-            if (!empty($model->file_path)) {
+            if (! empty($model->file_path)) {
                 Storage::disk('public')->delete($model->file_path);
             }
             $payload['file_path'] = $payload['file']->store('medical_documents', 'public');
@@ -85,9 +87,10 @@ class MedicalDocumentService extends BaseService
         }
 
         // Avoid overwriting with nulls for missing fields
-        $payload = array_filter($payload, fn($v) => !is_null($v));
+        $payload = array_filter($payload, fn ($v) => ! is_null($v));
 
         $model->update($payload);
+
         return $model;
     }
 
@@ -97,7 +100,7 @@ class MedicalDocumentService extends BaseService
     public function delete(int $id): void
     {
         $model = $this->model->findOrFail($id);
-        if (!empty($model->file_path)) {
+        if (! empty($model->file_path)) {
             Storage::disk('public')->delete($model->file_path);
         }
         $model->delete();

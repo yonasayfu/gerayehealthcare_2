@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\MarketingTask;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MarketingTaskSeeder extends Seeder

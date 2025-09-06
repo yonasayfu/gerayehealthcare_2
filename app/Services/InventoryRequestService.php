@@ -15,6 +15,7 @@ class InventoryRequestService extends BaseService
     public function getById(int $id, array $with = [])
     {
         $with = array_unique(array_merge(['requester', 'item', 'approver'], $with));
+
         return $this->model->with($with)->findOrFail($id);
     }
 
@@ -24,11 +25,11 @@ class InventoryRequestService extends BaseService
             $q->whereHas('item', function ($q) use ($search) {
                 $q->where('name', 'ilike', "%{$search}%");
             })
-            ->orWhereHas('requester', function ($q) use ($search) {
-                $q->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%");
-            })
-            ->orWhere('reason', 'ilike', "%{$search}%");
+                ->orWhereHas('requester', function ($q) use ($search) {
+                    $q->where('first_name', 'ilike', "%{$search}%")
+                        ->orWhere('last_name', 'ilike', "%{$search}%");
+                })
+                ->orWhere('reason', 'ilike', "%{$search}%");
         });
     }
 
@@ -40,18 +41,18 @@ class InventoryRequestService extends BaseService
             $this->applySearch($query, $request->input('search'));
         }
 
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
+        if ($request->filled('sort') && ! empty($request->input('sort'))) {
             $sortField = $request->input('sort');
             $sortDirection = $request->input('direction', 'asc');
 
             if ($sortField === 'requester_id') {
                 $query->join('staff', 'inventory_requests.requester_id', '=', 'staff.id')
-                      ->orderBy('staff.first_name', $sortDirection)
-                      ->select('inventory_requests.*');
+                    ->orderBy('staff.first_name', $sortDirection)
+                    ->select('inventory_requests.*');
             } elseif ($sortField === 'item_id') {
                 $query->join('inventory_items', 'inventory_requests.item_id', '=', 'inventory_items.id')
-                      ->orderBy('inventory_items.name', $sortDirection)
-                      ->select('inventory_requests.*');
+                    ->orderBy('inventory_items.name', $sortDirection)
+                    ->select('inventory_requests.*');
             } else {
                 $query->orderBy($sortField, $sortDirection);
             }

@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\InsuranceClaim;
+use App\Models\Invoice;
 use App\Models\Patient;
+use App\Models\Service;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Models\Service;
-use App\Models\Invoice;
-use App\Models\InsuranceClaim;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 

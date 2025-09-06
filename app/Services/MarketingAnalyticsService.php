@@ -2,20 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\MarketingLead;
-use App\Models\MarketingCampaign;
+use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
 use App\Models\CampaignMetric;
 use App\Models\MarketingBudget;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingLead;
+use App\Models\MarketingRoiView;
+use App\Models\MarketingTask;
 use App\Models\Patient;
-use App\Models\LeadSource;
-use Illuminate\Http\Request;
+use App\Models\Staff;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use App\Models\MarketingTask;
-use App\Models\Staff;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
-use App\Models\MarketingRoiView;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
 class MarketingAnalyticsService
@@ -43,13 +42,13 @@ class MarketingAnalyticsService
 
         // Patients acquired through marketing (filter by campaign and acquisition_date window)
         $patientsQuery = Patient::whereNotNull('marketing_campaign_id');
-        if (!empty($filteredCampaignIds)) {
+        if (! empty($filteredCampaignIds)) {
             $patientsQuery->whereIn('marketing_campaign_id', $filteredCampaignIds);
         }
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $patientsQuery->whereBetween('acquisition_date', [
                 $request->input('start_date'),
-                $request->input('end_date')
+                $request->input('end_date'),
             ]);
         }
         $patientsAcquired = (int) $patientsQuery->count();
@@ -61,16 +60,16 @@ class MarketingAnalyticsService
 
         // Time-series campaign performance
         $campaignPerformanceData = $this->getFilteredCampaignMetricsQuery($request)
-                                        ->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
-                                        ->groupBy('date')
-                                        ->orderBy('date')
-                                        ->get();
+            ->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
         // Leads by traffic source (apply filters)
         $trafficSourceData = $this->getFilteredLeadsQuery($request)
-                                  ->selectRaw('utm_source, COUNT(*) as lead_count')
-                                  ->groupBy('utm_source')
-                                  ->get();
+            ->selectRaw('utm_source, COUNT(*) as lead_count')
+            ->groupBy('utm_source')
+            ->get();
 
         // Funnel counts by status (apply filters)
         $filteredLeads = $this->getFilteredLeadsQuery($request);
@@ -110,7 +109,7 @@ class MarketingAnalyticsService
      */
     public function getRoiSeries(Request $request): array
     {
-        $cacheKey = 'svc:roi:' . md5(json_encode([
+        $cacheKey = 'svc:roi:'.md5(json_encode([
             'from' => $request->input('date_from'),
             'to' => $request->input('date_to'),
             'granularity' => $request->input('granularity'),
@@ -133,6 +132,7 @@ class MarketingAnalyticsService
             if ($request->filled('platform')) {
                 $q->where('platform', $request->input('platform'));
             }
+
             return $q->orderBy('bucket_date')->get();
         });
 
@@ -169,16 +169,16 @@ class MarketingAnalyticsService
             $query->where('date', '<=', $request->input('end_date'));
         }
 
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
+        if ($request->filled('sort') && ! empty($request->input('sort'))) {
             $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
         } else {
             $query->orderBy('date', 'asc');
         }
 
         return $query->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
-                     ->groupBy('date')
-                     ->paginate($request->input('per_page', 5))
-                     ->withQueryString();
+            ->groupBy('date')
+            ->paginate($request->input('per_page', 5))
+            ->withQueryString();
     }
 
     public function getTrafficSourceDistribution(Request $request): array
@@ -212,7 +212,7 @@ class MarketingAnalyticsService
         $endDate = $request->input('end_date');
 
         if ($reportType === 'monthly_performance') {
-            $campaigns = MarketingCampaign::with(['platform', 'campaignMetrics' => function($query) use ($startDate, $endDate) {
+            $campaigns = MarketingCampaign::with(['platform', 'campaignMetrics' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('date', [$startDate, $endDate]);
             }])->get();
 
@@ -222,7 +222,7 @@ class MarketingAnalyticsService
                 'endDate' => $endDate,
             ])->setPaper('a4', 'landscape');
 
-            return $pdf->download('monthly_marketing_performance_' . $startDate . '_' . $endDate . '.pdf');
+            return $pdf->download('monthly_marketing_performance_'.$startDate.'_'.$endDate.'.pdf');
         }
 
         return response()->json(['message' => 'Report generation initiated.', 'report_type' => $reportType]);
@@ -280,6 +280,7 @@ class MarketingAnalyticsService
         if ($request->filled('end_date')) {
             $query->whereDate('created_at', '<=', $request->input('end_date'));
         }
+
         return $query;
     }
 
@@ -292,6 +293,7 @@ class MarketingAnalyticsService
         if ($request->filled('platform_id')) {
             $campaigns->where('platform_id', $request->input('platform_id'));
         }
+
         return $campaigns->pluck('id')->all();
     }
 
@@ -304,7 +306,7 @@ class MarketingAnalyticsService
         // Base budget query filtered by campaign/platform and overlapping the window
         $campaignIds = $this->getFilteredCampaignIds($request);
         $budgets = MarketingBudget::query();
-        if (!empty($campaignIds)) {
+        if (! empty($campaignIds)) {
             $budgets->whereIn('campaign_id', $campaignIds);
         }
         if ($request->filled('platform_id')) {
@@ -312,7 +314,7 @@ class MarketingAnalyticsService
         }
         // Overlap condition: budget period intersects [start, end]
         $budgets->whereDate('period_start', '<=', $end->toDateString())
-                ->whereDate('period_end', '>=', $start->toDateString());
+            ->whereDate('period_end', '>=', $start->toDateString());
 
         $rows = $budgets->get(['allocated_amount', 'spent_amount', 'period_start', 'period_end']);
 
@@ -328,7 +330,7 @@ class MarketingAnalyticsService
             $cursor = (clone $clipStart)->startOfMonth();
             while ($cursor <= $clipEnd) {
                 $key = $cursor->format('Y-m');
-                if (!isset($byMonth[$key])) {
+                if (! isset($byMonth[$key])) {
                     $byMonth[$key] = [
                         'month' => $key,
                         'allocated' => 0.0,
@@ -348,7 +350,7 @@ class MarketingAnalyticsService
         // Compute pacing and projected spend for each month
         foreach ($byMonth as $key => &$m) {
             [$y, $mNum] = explode('-', $key);
-            $monthStart = Carbon::createFromDate((int)$y, (int)$mNum, 1)->startOfDay();
+            $monthStart = Carbon::createFromDate((int) $y, (int) $mNum, 1)->startOfDay();
             $monthEnd = (clone $monthStart)->endOfMonth();
             // Clip month to [start, end]
             $clipStart = $monthStart->greaterThan($start) ? $monthStart : $start;
@@ -394,8 +396,8 @@ class MarketingAnalyticsService
                           SUM(CASE WHEN status in ("Contacted","Qualified","Converted") THEN 1 ELSE 0 END) as contacted,
                           SUM(CASE WHEN status = "Qualified" THEN 1 ELSE 0 END) as qualified,
                           SUM(CASE WHEN status = "Converted" THEN 1 ELSE 0 END) as converted')
-                              ->groupBy('assigned_staff_id')
-                              ->get();
+            ->groupBy('assigned_staff_id')
+            ->get();
 
         // Tasks grouped by assigned staff
         $taskQuery = MarketingTask::query();
@@ -420,9 +422,9 @@ class MarketingAnalyticsService
                             SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as tasks_on_time,
                             SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as tasks_overdue_open,
                             SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as tasks_overdue_completed',
-                            [$now])
-                            ->groupBy('assigned_to_staff_id')
-                            ->get();
+            [$now])
+            ->groupBy('assigned_to_staff_id')
+            ->get();
 
         // Merge by staff_id
         $byStaff = [];
@@ -430,10 +432,10 @@ class MarketingAnalyticsService
             $byStaff[$r->staff_id] = [
                 'staff_id' => $r->staff_id,
                 'leads' => [
-                    'total' => (int)$r->total,
-                    'contacted' => (int)$r->contacted,
-                    'qualified' => (int)$r->qualified,
-                    'converted' => (int)$r->converted,
+                    'total' => (int) $r->total,
+                    'contacted' => (int) $r->contacted,
+                    'qualified' => (int) $r->qualified,
+                    'converted' => (int) $r->converted,
                     'contact_rate' => $r->total > 0 ? round($r->contacted / $r->total, 2) : 0,
                     'qualification_rate' => $r->total > 0 ? round($r->qualified / $r->total, 2) : 0,
                     'conversion_rate' => $r->total > 0 ? round($r->converted / $r->total, 2) : 0,
@@ -449,7 +451,7 @@ class MarketingAnalyticsService
             ];
         }
         foreach ($taskRows as $t) {
-            if (!isset($byStaff[$t->staff_id])) {
+            if (! isset($byStaff[$t->staff_id])) {
                 $byStaff[$t->staff_id] = [
                     'staff_id' => $t->staff_id,
                     'leads' => [
@@ -471,40 +473,40 @@ class MarketingAnalyticsService
                     ],
                 ];
             }
-            $byStaff[$t->staff_id]['tasks']['tasks_total'] = (int)$t->tasks_total;
-            $byStaff[$t->staff_id]['tasks']['tasks_completed'] = (int)$t->tasks_completed;
-            $byStaff[$t->staff_id]['tasks']['tasks_on_time'] = (int)$t->tasks_on_time;
-            $byStaff[$t->staff_id]['tasks']['tasks_overdue_open'] = (int)$t->tasks_overdue_open;
-            $byStaff[$t->staff_id]['tasks']['tasks_overdue_completed'] = (int)$t->tasks_overdue_completed;
+            $byStaff[$t->staff_id]['tasks']['tasks_total'] = (int) $t->tasks_total;
+            $byStaff[$t->staff_id]['tasks']['tasks_completed'] = (int) $t->tasks_completed;
+            $byStaff[$t->staff_id]['tasks']['tasks_on_time'] = (int) $t->tasks_on_time;
+            $byStaff[$t->staff_id]['tasks']['tasks_overdue_open'] = (int) $t->tasks_overdue_open;
+            $byStaff[$t->staff_id]['tasks']['tasks_overdue_completed'] = (int) $t->tasks_overdue_completed;
             $byStaff[$t->staff_id]['tasks']['on_time_rate'] = $t->tasks_completed > 0 ? round($t->tasks_on_time / $t->tasks_completed, 2) : 0;
         }
 
         // Enrich with staff names
         $staffIds = array_values(array_filter(array_keys($byStaff), function ($id) {
-            return !is_null($id);
+            return ! is_null($id);
         }));
         $nameMap = [];
-        if (!empty($staffIds)) {
+        if (! empty($staffIds)) {
             $nameMap = Staff::whereIn('id', $staffIds)->get()->mapWithKeys(function ($s) {
-                return [$s->id => ($s->full_name ?? ($s->first_name . ' ' . $s->last_name))];
+                return [$s->id => ($s->full_name ?? ($s->first_name.' '.$s->last_name))];
             })->toArray();
         }
         foreach ($byStaff as $id => &$row) {
             if (is_null($id)) {
                 $row['staff'] = ['id' => null, 'name' => 'Unassigned'];
             } else {
-                $row['staff'] = ['id' => $id, 'name' => $nameMap[$id] ?? ('Staff #' . $id)];
+                $row['staff'] = ['id' => $id, 'name' => $nameMap[$id] ?? ('Staff #'.$id)];
             }
         }
 
         // Include all staff with zero metrics to ensure table visibility
         $allStaff = Staff::select('id', 'first_name', 'last_name')->get();
         foreach ($allStaff as $s) {
-            if (!isset($byStaff[$s->id])) {
-                $fullName = trim(($s->first_name ?? '') . ' ' . ($s->last_name ?? ''));
+            if (! isset($byStaff[$s->id])) {
+                $fullName = trim(($s->first_name ?? '').' '.($s->last_name ?? ''));
                 $byStaff[$s->id] = [
                     'staff_id' => $s->id,
-                    'staff' => ['id' => $s->id, 'name' => $fullName !== '' ? $fullName : ('Staff #' . $s->id)],
+                    'staff' => ['id' => $s->id, 'name' => $fullName !== '' ? $fullName : ('Staff #'.$s->id)],
                     'leads' => [
                         'total' => 0,
                         'contacted' => 0,
@@ -554,15 +556,15 @@ class MarketingAnalyticsService
                         SUM(CASE WHEN status = "Completed" AND completed_at <= scheduled_at THEN 1 ELSE 0 END) as on_time,
                         SUM(CASE WHEN status <> "Completed" AND scheduled_at < ? THEN 1 ELSE 0 END) as overdue_open,
                         SUM(CASE WHEN status = "Completed" AND completed_at > scheduled_at THEN 1 ELSE 0 END) as overdue_completed',
-                        [$now])
-                        ->first();
+            [$now])
+            ->first();
 
         return [
-            'total' => (int)$totals->total,
-            'completed' => (int)$totals->completed,
-            'on_time' => (int)$totals->on_time,
-            'overdue_open' => (int)$totals->overdue_open,
-            'overdue_completed' => (int)$totals->overdue_completed,
+            'total' => (int) $totals->total,
+            'completed' => (int) $totals->completed,
+            'on_time' => (int) $totals->on_time,
+            'overdue_open' => (int) $totals->overdue_open,
+            'overdue_completed' => (int) $totals->overdue_completed,
             'on_time_rate' => $totals->completed > 0 ? round($totals->on_time / $totals->completed, 2) : 0,
         ];
     }

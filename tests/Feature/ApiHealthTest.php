@@ -2,19 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Patient;
 use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
+use Tests\TestCase;
 
 class ApiHealthTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
     protected User $user;
+
     protected Staff $staff;
 
     protected function setUp(): void
@@ -24,7 +25,7 @@ class ApiHealthTest extends TestCase
         // Create a test user with staff record
         $this->user = User::factory()->create();
         $this->staff = Staff::factory()->create(['user_id' => $this->user->id]);
-        
+
         // Assign role
         $this->user->assignRole('admin');
     }
@@ -53,21 +54,21 @@ class ApiHealthTest extends TestCase
         // Test GET patients
         $response = $this->getJson('/api/v1/patients');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        '*' => ['id', 'full_name', 'email', 'phone_number']
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => ['id', 'full_name', 'email', 'phone_number'],
+                ],
+            ]);
 
         // Test GET specific patient
         $response = $this->getJson("/api/v1/patients/{$patient->id}");
         $response->assertStatus(200)
-                ->assertJson([
-                    'data' => [
-                        'id' => $patient->id,
-                        'full_name' => $patient->full_name
-                    ]
-                ]);
+            ->assertJson([
+                'data' => [
+                    'id' => $patient->id,
+                    'full_name' => $patient->full_name,
+                ],
+            ]);
 
         // Test POST create patient
         $patientData = [
@@ -81,9 +82,9 @@ class ApiHealthTest extends TestCase
 
         $response = $this->postJson('/api/v1/patients', $patientData);
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => ['id', 'full_name', 'email']
-                ]);
+            ->assertJsonStructure([
+                'data' => ['id', 'full_name', 'email'],
+            ]);
     }
 
     /** @test */
@@ -94,12 +95,12 @@ class ApiHealthTest extends TestCase
         // Test GET campaigns
         $response = $this->getJson('/api/v1/marketing/campaigns');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'campaigns',
-                        'pagination'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'campaigns',
+                    'pagination',
+                ],
+            ]);
 
         // Test POST create campaign
         $campaignData = [
@@ -108,16 +109,16 @@ class ApiHealthTest extends TestCase
             'utm_source' => 'test_source',
             'budget' => 1000,
             'start_date' => now()->format('Y-m-d'),
-            'status' => 'active'
+            'status' => 'active',
         ];
 
         $response = $this->postJson('/api/v1/marketing/campaigns', $campaignData);
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => [
-                        'campaign' => ['id', 'name', 'utm_source']
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'campaign' => ['id', 'name', 'utm_source'],
+                ],
+            ]);
 
         // Test GET leads
         $response = $this->getJson('/api/v1/marketing/leads');
@@ -126,14 +127,14 @@ class ApiHealthTest extends TestCase
         // Test GET analytics
         $response = $this->getJson('/api/v1/marketing/analytics');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'campaigns',
-                        'leads',
-                        'top_campaigns',
-                        'lead_sources'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'campaigns',
+                    'leads',
+                    'top_campaigns',
+                    'lead_sources',
+                ],
+            ]);
     }
 
     /** @test */
@@ -144,43 +145,43 @@ class ApiHealthTest extends TestCase
         // Test GET inventory items
         $response = $this->getJson('/api/v1/inventory/items');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'items',
-                        'pagination'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'items',
+                    'pagination',
+                ],
+            ]);
 
         // Test POST create inventory item
         $itemData = [
             'name' => 'Test Item',
-            'sku' => 'TEST-' . rand(1000, 9999),
+            'sku' => 'TEST-'.rand(1000, 9999),
             'category' => 'Medical Supplies',
             'unit_of_measure' => 'pieces',
             'unit_cost' => 10.50,
             'current_stock' => 100,
             'reorder_level' => 10,
-            'status' => 'active'
+            'status' => 'active',
         ];
 
         $response = $this->postJson('/api/v1/inventory/items', $itemData);
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => [
-                        'item' => ['id', 'name', 'sku']
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'item' => ['id', 'name', 'sku'],
+                ],
+            ]);
 
         // Test GET analytics
         $response = $this->getJson('/api/v1/inventory/analytics');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'summary',
-                        'categories',
-                        'low_stock_alerts'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'summary',
+                    'categories',
+                    'low_stock_alerts',
+                ],
+            ]);
     }
 
     /** @test */
@@ -203,13 +204,13 @@ class ApiHealthTest extends TestCase
         // Test GET analytics
         $response = $this->getJson('/api/v1/insurance/analytics');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'summary',
-                        'claims_by_status',
-                        'top_companies'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'summary',
+                    'claims_by_status',
+                    'top_companies',
+                ],
+            ]);
     }
 
     /** @test */
@@ -220,28 +221,28 @@ class ApiHealthTest extends TestCase
         // Test dashboard analytics
         $response = $this->getJson('/api/v1/analytics/dashboard');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'overview',
-                        'patients',
-                        'visits',
-                        'revenue',
-                        'staff',
-                        'marketing'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'overview',
+                    'patients',
+                    'visits',
+                    'revenue',
+                    'staff',
+                    'marketing',
+                ],
+            ]);
 
         // Test patient analytics
         $response = $this->getJson('/api/v1/analytics/patients');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'summary',
-                        'demographics',
-                        'acquisition',
-                        'trends'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'summary',
+                    'demographics',
+                    'acquisition',
+                    'trends',
+                ],
+            ]);
 
         // Test visit analytics
         $response = $this->getJson('/api/v1/analytics/visits');
@@ -268,42 +269,42 @@ class ApiHealthTest extends TestCase
                     'full_name' => 'Test Patient 1',
                     'email' => 'test1@example.com',
                     'phone_number' => '+251911111111',
-                    'gender' => 'male'
+                    'gender' => 'male',
                 ],
                 [
                     'full_name' => 'Test Patient 2',
                     'email' => 'test2@example.com',
                     'phone_number' => '+251911111112',
-                    'gender' => 'female'
-                ]
-            ]
+                    'gender' => 'female',
+                ],
+            ],
         ];
 
         $response = $this->postJson('/api/v1/bulk/patients', $patientsData);
         $response->assertStatus(201)
-                ->assertJsonStructure([
-                    'data' => [
-                        'created_patients',
-                        'success_count',
-                        'error_count'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'created_patients',
+                    'success_count',
+                    'error_count',
+                ],
+            ]);
 
         // Test bulk export
         $exportData = [
             'model' => 'patients',
-            'format' => 'json'
+            'format' => 'json',
         ];
 
         $response = $this->postJson('/api/v1/bulk/export', $exportData);
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [
-                        'data',
-                        'count',
-                        'format'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [
+                    'data',
+                    'count',
+                    'format',
+                ],
+            ]);
     }
 
     /** @test */
@@ -314,7 +315,7 @@ class ApiHealthTest extends TestCase
         // Test invalid patient creation
         $response = $this->postJson('/api/v1/patients', []);
         $response->assertStatus(422)
-                ->assertJsonStructure(['errors']);
+            ->assertJsonStructure(['errors']);
 
         // Test invalid campaign creation
         $response = $this->postJson('/api/v1/marketing/campaigns', [
@@ -359,14 +360,14 @@ class ApiHealthTest extends TestCase
         // Test pagination parameters
         $response = $this->getJson('/api/v1/patients?page=1&per_page=5');
         $response->assertStatus(200)
-                ->assertJsonStructure([
-                    'data' => [],
-                    'pagination' => [
-                        'current_page',
-                        'last_page',
-                        'per_page',
-                        'total'
-                    ]
-                ]);
+            ->assertJsonStructure([
+                'data' => [],
+                'pagination' => [
+                    'current_page',
+                    'last_page',
+                    'per_page',
+                    'total',
+                ],
+            ]);
     }
 }

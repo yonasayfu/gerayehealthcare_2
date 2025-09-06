@@ -28,6 +28,7 @@ class CreateEventRecommendationDTO extends BaseDTO
                 $prop = $ref->getProperty($key);
                 $prop->setAccessible(true);
                 $prop->setValue($dto, $value);
+
                 continue;
             }
 

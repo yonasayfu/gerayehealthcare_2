@@ -18,7 +18,7 @@ class InventoryItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word . ' Item',
+            'name' => $this->faker->word.' Item',
             'description' => $this->faker->sentence,
             'item_category' => $this->faker->randomElement(['Medical Equipment', 'Office Supplies', 'Diagnostic Tools', 'Furniture']),
             'item_type' => $this->faker->word,

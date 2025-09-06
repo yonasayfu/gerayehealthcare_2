@@ -2,22 +2,22 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateEventDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\Event;
+use App\Models\EventBroadcast;
 use App\Models\EventParticipant;
 use App\Models\EventStaffAssignment;
-use App\Models\EventBroadcast;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class OptimizedEventService extends OptimizedBaseService
 {
     use ExportableTrait;
-    
+
     protected $cacheTtl = 1800; // 30 minutes for event data
+
     protected $shortCacheTtl = 300; // 5 minutes for real-time event updates
 
     public function __construct(Event $event)
@@ -28,12 +28,12 @@ class OptimizedEventService extends OptimizedBaseService
     public function getAll(Request $request, array $with = [])
     {
         $cacheKey = $this->generateCacheKey('all', $request->all(), $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request, $with) {
             $query = $this->model->with(array_merge([
                 'createdByStaff:id,first_name,last_name',
                 'participants:id,event_id,patient_id,status',
-                'staffAssignments:id,event_id,staff_id,role'
+                'staffAssignments:id,event_id,staff_id,role',
             ], $with));
 
             if ($request->has('search')) {
@@ -74,16 +74,16 @@ class OptimizedEventService extends OptimizedBaseService
     public function getById(int $id, array $with = [])
     {
         $cacheKey = $this->generateCacheKey('single', ['id' => $id], $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $with) {
             $with = array_unique(array_merge([
                 'createdByStaff',
                 'participants.patient:id,full_name,phone',
                 'staffAssignments.staff:id,first_name,last_name,position',
                 'broadcasts.sentByStaff:id,first_name,last_name',
-                'recommendations.patient:id,full_name'
+                'recommendations.patient:id,full_name',
             ], $with));
-            
+
             return $this->model->with($with)->findOrFail($id);
         });
     }
@@ -96,12 +96,12 @@ class OptimizedEventService extends OptimizedBaseService
             $event = parent::create($data);
 
             // Auto-assign staff if specified
-            if (!empty($data['assigned_staff_ids'])) {
+            if (! empty($data['assigned_staff_ids'])) {
                 $this->bulkAssignStaff($event->id, $data['assigned_staff_ids']);
             }
 
             // Auto-invite participants if specified
-            if (!empty($data['participant_patient_ids'])) {
+            if (! empty($data['participant_patient_ids'])) {
                 $this->bulkInviteParticipants($event->id, $data['participant_patient_ids']);
             }
 
@@ -152,10 +152,10 @@ class OptimizedEventService extends OptimizedBaseService
         })->toArray();
 
         $count = EventStaffAssignment::insert($assignments);
-        
+
         // Clear caches
-        $this->clearCachePattern("event_*");
-        
+        $this->clearCachePattern('event_*');
+
         return $count;
     }
 
@@ -175,10 +175,10 @@ class OptimizedEventService extends OptimizedBaseService
         })->toArray();
 
         $count = EventParticipant::insert($participants);
-        
+
         // Clear caches
-        $this->clearCachePattern("event_*");
-        
+        $this->clearCachePattern('event_*');
+
         return $count;
     }
 
@@ -189,9 +189,9 @@ class OptimizedEventService extends OptimizedBaseService
     {
         // Remove existing assignments
         EventStaffAssignment::where('event_id', $eventId)->delete();
-        
+
         // Add new assignments
-        if (!empty($staffIds)) {
+        if (! empty($staffIds)) {
             $this->bulkAssignStaff($eventId, $staffIds);
         }
     }
@@ -203,9 +203,9 @@ class OptimizedEventService extends OptimizedBaseService
     {
         // Remove existing participants
         EventParticipant::where('event_id', $eventId)->delete();
-        
+
         // Add new participants
-        if (!empty($patientIds)) {
+        if (! empty($patientIds)) {
             $this->bulkInviteParticipants($eventId, $patientIds);
         }
     }
@@ -216,19 +216,19 @@ class OptimizedEventService extends OptimizedBaseService
     public function getEventStatistics(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('statistics', $request->only(['region', 'date_from', 'date_to']));
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             $query = $this->model->newQuery();
-            
+
             // Apply filters
             if ($request->filled('region')) {
                 $query->where('region', $request->input('region'));
             }
-            
+
             if ($request->filled('date_from')) {
                 $query->whereDate('event_date', '>=', $request->input('date_from'));
             }
-            
+
             if ($request->filled('date_to')) {
                 $query->whereDate('event_date', '<=', $request->input('date_to'));
             }
@@ -260,10 +260,10 @@ class OptimizedEventService extends OptimizedBaseService
     public function getParticipationAnalytics(int $eventId): array
     {
         $cacheKey = $this->generateCacheKey('participation_analytics', ['event_id' => $eventId]);
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($eventId) {
             $participantsQuery = EventParticipant::where('event_id', $eventId);
-            
+
             return [
                 'total_participants' => $participantsQuery->count(),
                 'confirmed_participants' => (clone $participantsQuery)->where('status', 'Confirmed')->count(),
@@ -288,7 +288,7 @@ class OptimizedEventService extends OptimizedBaseService
     public function getUpcomingEvents(int $limit = 10): array
     {
         $cacheKey = $this->generateCacheKey('upcoming_events', ['limit' => $limit]);
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($limit) {
             return $this->model
                 ->with(['createdByStaff:id,first_name,last_name'])
@@ -304,8 +304,8 @@ class OptimizedEventService extends OptimizedBaseService
                         'location' => $event->location,
                         'region' => $event->region,
                         'is_free_service' => $event->is_free_service,
-                        'created_by' => $event->createdByStaff ? 
-                            $event->createdByStaff->first_name . ' ' . $event->createdByStaff->last_name : 
+                        'created_by' => $event->createdByStaff ?
+                            $event->createdByStaff->first_name.' '.$event->createdByStaff->last_name :
                             'Unknown',
                         'participant_count' => $event->participants()->count(),
                         'staff_count' => $event->staffAssignments()->count(),
@@ -318,7 +318,7 @@ class OptimizedEventService extends OptimizedBaseService
     /**
      * Send broadcast message to event participants
      */
-    public function broadcastToParticipants(int $eventId, string $message, string $channel = 'SMS', int $sentByStaffId): array
+    public function broadcastToParticipants(int $eventId, string $message, string $channel, int $sentByStaffId): array
     {
         return DB::transaction(function () use ($eventId, $message, $channel, $sentByStaffId) {
             // Get confirmed participants
@@ -338,7 +338,7 @@ class OptimizedEventService extends OptimizedBaseService
             ];
 
             $broadcast = EventBroadcast::create($broadcastData);
-            
+
             // Here you would integrate with SMS/Email service
             $sentCount = 0;
             foreach ($participants as $participant) {
@@ -349,7 +349,7 @@ class OptimizedEventService extends OptimizedBaseService
             }
 
             // Clear related caches
-            $this->clearCachePattern("event_*");
+            $this->clearCachePattern('event_*');
 
             return [
                 'broadcast_id' => $broadcast->id,
@@ -366,11 +366,11 @@ class OptimizedEventService extends OptimizedBaseService
     public function getCalendarEvents(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('calendar', $request->only(['start', 'end', 'region']));
-        
+
         return Cache::remember($cacheKey, $this->shortCacheTtl, function () use ($request) {
             $query = $this->model->select([
-                'id', 'title', 'event_date', 'location', 'region', 
-                'is_free_service', 'broadcast_status'
+                'id', 'title', 'event_date', 'location', 'region',
+                'is_free_service', 'broadcast_status',
             ]);
 
             if ($request->filled('start')) {
@@ -402,9 +402,9 @@ class OptimizedEventService extends OptimizedBaseService
     protected function applySearch($query, $search)
     {
         $query->where('title', 'ilike', "%{$search}%")
-              ->orWhere('description', 'ilike', "%{$search}%")
-              ->orWhere('location', 'ilike', "%{$search}%")
-              ->orWhere('region', 'ilike', "%{$search}%");
+            ->orWhere('description', 'ilike', "%{$search}%")
+            ->orWhere('location', 'ilike', "%{$search}%")
+            ->orWhere('region', 'ilike', "%{$search}%");
     }
 
     /**
@@ -429,6 +429,7 @@ class OptimizedEventService extends OptimizedBaseService
     {
         // Force CSV-only export for Events
         $request->merge(['format' => 'csv']);
+
         return $this->handleExport($request, Event::class, ExportConfig::getEventConfig());
     }
 

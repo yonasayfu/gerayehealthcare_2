@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Optimize Spatie permissions and roles tables for better performance
      */
     public function up(): void
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->index(['name', 'guard_name'], 'idx_roles_name_guard');
         });
 
-        // Optimize permissions table  
+        // Optimize permissions table
         Schema::table('permissions', function (Blueprint $table) {
             $table->index('name', 'idx_permissions_name');
             $table->index('guard_name', 'idx_permissions_guard_name');

@@ -48,7 +48,7 @@ class MedicalDocument extends Model
 
     public function scopeWithList($query)
     {
-        return $query->select(['id','patient_id','document_type','title','document_date','created_by_staff_id'])
+        return $query->select(['id', 'patient_id', 'document_type', 'title', 'document_date', 'created_by_staff_id'])
             ->with([
                 'patient:id,full_name,patient_code',
                 'createdBy:id,first_name,last_name',

@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateEventBroadcastDTO;
-use App\Models\EventBroadcast;
-use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Models\EventBroadcast;
 
 class EventBroadcastService extends BaseService
 {
@@ -20,7 +17,7 @@ class EventBroadcastService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('message', 'ilike', "%{$search}%")
-              ->orWhere('channel', 'ilike', "%{$search}%");
+            ->orWhere('channel', 'ilike', "%{$search}%");
     }
 
     /**
@@ -29,12 +26,14 @@ class EventBroadcastService extends BaseService
     public function getAll(\Illuminate\Http\Request $request, array $with = [])
     {
         $with = ['event:id,title', 'sentByStaff:id,first_name,last_name'];
+
         return parent::getAll($request, $with);
     }
 
     public function getById(int $id, array $with = [])
     {
         $with = ['event:id,title', 'sentByStaff:id,first_name,last_name'];
+
         return parent::getById($id, $with);
     }
 }

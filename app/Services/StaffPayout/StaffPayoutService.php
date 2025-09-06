@@ -4,7 +4,6 @@ namespace App\Services\StaffPayout;
 
 use App\Models\Staff;
 use App\Models\StaffPayout;
-use App\Models\VisitService;
 use App\Services\BaseService;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -18,7 +17,6 @@ class StaffPayoutService extends BaseService
     /**
      * Get payout history and pending visits for a specific staff member.
      *
-     * @param Staff $staff
      * @return array{payoutHistory: LengthAwarePaginator, pendingVisits: LengthAwarePaginator, pendingTotal: float}
      */
     public function getStaffEarnings(Staff $staff): array
@@ -34,7 +32,7 @@ class StaffPayoutService extends BaseService
             ->where('is_paid_to_staff', false)
             ->orderBy('scheduled_at', 'desc')
             ->paginate(10, ['*'], 'pending_visits_page');
-            
+
         // Calculate the total of pending earnings
         $pendingTotal = $staff->visitServices()
             ->where('status', 'Completed')

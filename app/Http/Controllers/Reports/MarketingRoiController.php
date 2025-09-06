@@ -3,16 +3,17 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Enums\RoleEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingRoiView;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 
 class MarketingRoiController extends Controller
 {
     use ExportableTrait;
+
     public function __construct()
     {
         $this->middleware(['auth', 'verified', 'role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value]);
@@ -30,7 +31,7 @@ class MarketingRoiController extends Controller
 
     public function data(Request $request)
     {
-        $cacheKey = 'report:marketing_roi:' . md5(json_encode([
+        $cacheKey = 'report:marketing_roi:'.md5(json_encode([
             'from' => $request->input('date_from'),
             'to' => $request->input('date_to'),
             'granularity' => $request->input('granularity'),
@@ -40,6 +41,7 @@ class MarketingRoiController extends Controller
         $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
             $query = MarketingRoiView::query();
             $this->applyFilters($query, $request);
+
             return $query->orderBy('bucket_date')->get();
         });
 
@@ -87,15 +89,15 @@ class MarketingRoiController extends Controller
                     'conversions',
                     [
                         'field' => 'revenue_generated',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                     [
                         'field' => 'spend',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                     [
                         'field' => 'roi_percentage',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                 ],
             ],

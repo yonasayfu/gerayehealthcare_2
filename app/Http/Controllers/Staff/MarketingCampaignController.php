@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingCampaignRequest;
-use App\Http\Requests\UpdateMarketingCampaignRequest;
 use App\Models\MarketingCampaign;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class MarketingCampaignController extends Controller
 {
@@ -32,8 +30,8 @@ class MarketingCampaignController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('campaign_name', 'ilike', "%{$search}%")
-                  ->orWhere('campaign_code', 'ilike', "%{$search}%")
-                  ->orWhere('utm_campaign', 'ilike', "%{$search}%");
+                ->orWhere('campaign_code', 'ilike', "%{$search}%")
+                ->orWhere('utm_campaign', 'ilike', "%{$search}%");
         }
 
         // Filtering
@@ -54,21 +52,19 @@ class MarketingCampaignController extends Controller
         }
 
         // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
+        if ($request->filled('sort') && ! empty($request->input('sort'))) {
             $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
         } else {
             $query->orderBy('created_at', 'desc');
         }
 
         $marketingCampaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                                    ->paginate($request->input('per_page', 5))
-                                    ->withQueryString();
+            ->paginate($request->input('per_page', 5))
+            ->withQueryString();
 
         return Inertia::render('Staff/MarketingCampaigns/Index', [
             'marketingCampaigns' => $marketingCampaigns,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'platform_id', 'status', 'campaign_type', 'start_date', 'end_date']),
         ]);
     }
-
-    
 }

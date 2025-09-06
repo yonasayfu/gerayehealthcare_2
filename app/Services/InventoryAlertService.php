@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateInventoryAlertDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class InventoryAlertService extends BaseService
 {
@@ -21,8 +20,8 @@ class InventoryAlertService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
+            ->orWhere('message', 'like', "%$search%")
+            ->orWhereHas('item', fn ($q) => $q->where('name', 'like', "%$search%"));
     }
 
     public function getAll(Request $request, array $with = [])
@@ -44,7 +43,7 @@ class InventoryAlertService extends BaseService
         } else {
             // Prioritize active alerts first, then recent
             $query->orderByDesc('is_active')
-                  ->orderBy('created_at', 'desc');
+                ->orderBy('created_at', 'desc');
         }
 
         return $query->paginate($request->input('per_page', 5))->withQueryString();
@@ -70,7 +69,8 @@ class InventoryAlertService extends BaseService
         try {
             return InventoryAlert::where('is_active', true)->count();
         } catch (\Exception $e) {
-            Log::error("Error fetching inventory alert count: " . $e->getMessage());
+            Log::error('Error fetching inventory alert count: '.$e->getMessage());
+
             return 0; // Return 0 or handle the error as appropriate
         }
     }

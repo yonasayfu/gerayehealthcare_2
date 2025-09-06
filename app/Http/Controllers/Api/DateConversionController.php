@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use Andegna\DateTimeFactory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Andegna\DateTimeFactory;
 use Illuminate\Support\Facades\Log; // Import Log facade
 
 class DateConversionController extends Controller
@@ -23,7 +23,8 @@ class DateConversionController extends Controller
                 'ethiopian_date' => $ethiopicDate->format('Y-m-d'),
             ]);
         } catch (\Exception $e) {
-            Log::error("Error converting Gregorian to Ethiopian date: " . $e->getMessage(), ['request_data' => $request->all()]);
+            Log::error('Error converting Gregorian to Ethiopian date: '.$e->getMessage(), ['request_data' => $request->all()]);
+
             return response()->json(['error' => 'Invalid Gregorian date for conversion.'], 400);
         }
     }
@@ -46,7 +47,8 @@ class DateConversionController extends Controller
                 'day' => $ethiopicDate->getDay(),
             ]);
         } catch (\Exception $e) {
-            Log::error("Error converting Gregorian to Ethiopian date (detailed): " . $e->getMessage(), ['request_data' => $request->all()]);
+            Log::error('Error converting Gregorian to Ethiopian date (detailed): '.$e->getMessage(), ['request_data' => $request->all()]);
+
             return response()->json(['error' => 'Invalid Gregorian date for conversion.'], 422);
         }
     }
@@ -96,12 +98,13 @@ class DateConversionController extends Controller
             $gregorianDate = new \DateTime($ethiopicDate->format('Y-m-d H:i:s'));
 
             return response()->json([
-                'year' => (int)$gregorianDate->format('Y'),
-                'month' => (int)$gregorianDate->format('m'),
-                'day' => (int)$gregorianDate->format('d'),
+                'year' => (int) $gregorianDate->format('Y'),
+                'month' => (int) $gregorianDate->format('m'),
+                'day' => (int) $gregorianDate->format('d'),
             ]);
         } catch (\Exception $e) {
-            Log::error("Error converting Ethiopian to Gregorian date: " . $e->getMessage(), ['request_data' => $request->all()]);
+            Log::error('Error converting Ethiopian to Gregorian date: '.$e->getMessage(), ['request_data' => $request->all()]);
+
             return response()->json(['error' => 'Invalid Ethiopian date for conversion.'], 422);
         }
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
 use App\Services\StaffPayout\StaffPayoutService; // Import the new service
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -25,7 +24,7 @@ class MyEarningsController extends Controller
     {
         $staff = Auth::user()->staff;
 
-        if (!$staff) {
+        if (! $staff) {
             return redirect()->route('dashboard')->with('error', 'You do not have a staff profile.');
         }
 

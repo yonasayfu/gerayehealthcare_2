@@ -24,6 +24,7 @@ class CreateEligibilityCriteriaDTO
                 $prop = $ref->getProperty($key);
                 $prop->setAccessible(true);
                 $prop->setValue($dto, $value);
+
                 continue;
             }
 

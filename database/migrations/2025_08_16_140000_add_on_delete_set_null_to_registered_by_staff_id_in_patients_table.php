@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::table('patients', function (Blueprint $table) {
             $table->dropForeign(['registered_by_staff_id']);
             $table->foreign('registered_by_staff_id')
-                  ->references('id')
-                  ->on('staff')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('staff')
+                ->onDelete('set null');
         });
     }
 
@@ -28,8 +28,8 @@ return new class extends Migration
         Schema::table('patients', function (Blueprint $table) {
             $table->dropForeign(['registered_by_staff_id']);
             $table->foreign('registered_by_staff_id')
-                  ->references('id')
-                  ->on('staff');
+                ->references('id')
+                ->on('staff');
         });
     }
 };

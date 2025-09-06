@@ -42,7 +42,7 @@ class AuthenticatedSessionController extends BaseController
             ]);
 
             // Attempt to authenticate
-            if (!Auth::attempt($validated, $request->boolean('remember'))) {
+            if (! Auth::attempt($validated, $request->boolean('remember'))) {
                 return back()->withErrors([
                     'email' => __('auth.failed'),
                 ])->withInput(['email' => $request->input('email')]);

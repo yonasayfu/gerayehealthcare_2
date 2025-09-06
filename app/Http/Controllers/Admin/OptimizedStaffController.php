@@ -16,13 +16,15 @@ class OptimizedStaffController extends OptimizedBaseController
 
     // Define eager loading relationships to prevent N+1 queries
     protected $indexWith = ['user'];
+
     protected $showWith = ['user'];
+
     protected $editWith = ['user'];
 
     public function __construct(OptimizedStaffService $staffService)
     {
         $this->staffService = $staffService;
-        
+
         parent::__construct(
             $staffService,
             StaffRules::class,
@@ -37,10 +39,10 @@ class OptimizedStaffController extends OptimizedBaseController
     {
         // Use optimized service with caching and eager loading
         $staff = $this->staffService->getAll($request, $this->indexWith);
-        
+
         // Get cached statistics for dashboard info
         $statistics = $this->staffService->getStatistics();
-        
+
         return Inertia::render($this->viewName.'/Index', [
             'staff' => $staff,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
@@ -52,7 +54,7 @@ class OptimizedStaffController extends OptimizedBaseController
     {
         // Use optimized service with eager loading
         $staff = $this->staffService->getById($id, $this->showWith);
-        
+
         return Inertia::render($this->viewName.'/Show', [
             'staff' => $staff,
         ]);
@@ -62,7 +64,7 @@ class OptimizedStaffController extends OptimizedBaseController
     {
         // Use cached form data
         $formData = $this->staffService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Create', $formData);
     }
 
@@ -71,7 +73,7 @@ class OptimizedStaffController extends OptimizedBaseController
         // Use optimized service with eager loading
         $staff = $this->staffService->getById($id, $this->editWith);
         $formData = $this->staffService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Edit', array_merge([
             'staff' => $staff,
         ], $formData));
@@ -80,7 +82,7 @@ class OptimizedStaffController extends OptimizedBaseController
     public function store(Request $request)
     {
         $validatedData = $request->validate(StaffRules::create());
-        
+
         // Use DTO for data transfer
         $dto = CreateStaffDTO::from($validatedData);
         $staff = $this->staffService->create($dto);
@@ -93,7 +95,7 @@ class OptimizedStaffController extends OptimizedBaseController
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate(StaffRules::update());
-        
+
         // Use DTO for data transfer
         $dto = CreateStaffDTO::from($validatedData);
         $staff = $this->staffService->update($id, $dto);
@@ -138,7 +140,7 @@ class OptimizedStaffController extends OptimizedBaseController
     {
         $date = $request->input('date');
         $timeSlot = $request->input('time_slot');
-        
+
         $availableStaff = $this->staffService->getAvailableStaff($date, $timeSlot);
 
         return response()->json($availableStaff);
@@ -148,14 +150,14 @@ class OptimizedStaffController extends OptimizedBaseController
     public function quickSearch(Request $request)
     {
         $search = $request->input('q');
-        
+
         if (strlen($search) < 2) {
             return response()->json([]);
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'staff_quick_search_' . md5($search);
-        
+        $cacheKey = 'staff_quick_search_'.md5($search);
+
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return Staff::where('first_name', 'ilike', "%{$search}%")
                 ->orWhere('last_name', 'ilike', "%{$search}%")
@@ -200,7 +202,7 @@ class OptimizedStaffController extends OptimizedBaseController
 
         return response()->json([
             'message' => "Updated {$updatedCount} staff members successfully",
-            'updated_count' => $updatedCount
+            'updated_count' => $updatedCount,
         ]);
     }
 }

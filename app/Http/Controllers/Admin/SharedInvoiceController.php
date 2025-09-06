@@ -25,7 +25,7 @@ class SharedInvoiceController extends Controller
     public function index(Request $request)
     {
         $perPage = (int) $request->input('per_page', 5);
-        $perPage = in_array($perPage, [5,10,25,50,100]) ? $perPage : 5;
+        $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 5;
         $search = (string) $request->input('search', '');
         $sort = (string) $request->input('sort', '');
         $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
@@ -42,17 +42,17 @@ class SharedInvoiceController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('status', 'ilike', "%{$search}%")
-                  ->orWhere('notes', 'ilike', "%{$search}%")
-                  ->orWhere('share_date', 'ilike', "%{$search}%")
-                  ->orWhereHas('invoice', function ($qi) use ($search) {
-                      $qi->where('invoice_number', 'ilike', "%{$search}%");
-                  })
-                  ->orWhereHas('partner', function ($qp) use ($search) {
-                      $qp->where('name', 'ilike', "%{$search}%");
-                  })
-                  ->orWhereHas('sharedBy', function ($qs) use ($search) {
-                      $qs->whereRaw("concat(first_name, ' ', last_name) ilike ?", ["%{$search}%"]);
-                  });
+                    ->orWhere('notes', 'ilike', "%{$search}%")
+                    ->orWhere('share_date', 'ilike', "%{$search}%")
+                    ->orWhereHas('invoice', function ($qi) use ($search) {
+                        $qi->where('invoice_number', 'ilike', "%{$search}%");
+                    })
+                    ->orWhereHas('partner', function ($qp) use ($search) {
+                        $qp->where('name', 'ilike', "%{$search}%");
+                    })
+                    ->orWhereHas('sharedBy', function ($qs) use ($search) {
+                        $qs->whereRaw("concat(first_name, ' ', last_name) ilike ?", ["%{$search}%"]);
+                    });
             });
         }
 

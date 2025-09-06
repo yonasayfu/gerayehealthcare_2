@@ -41,7 +41,7 @@ class MessageController extends Controller
                 }
 
                 // For other roles, show all users
-                return;
+
             });
 
             // Also include any counterparts I already have messages with
@@ -85,7 +85,7 @@ class MessageController extends Controller
             if ($recipient) {
                 $selectedConversationUser = $recipient;
                 // Ensure recipient appears in conversations for UI
-                if (!$conversations->contains('id', $recipient->id)) {
+                if (! $conversations->contains('id', $recipient->id)) {
                     $conversations->push($recipient);
                 }
             } elseif ($conversations->isNotEmpty()) {
@@ -148,7 +148,7 @@ class MessageController extends Controller
     public function store(StoreMessageRequest $request)
     {
         // Debug authentication
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
 
@@ -218,7 +218,7 @@ class MessageController extends Controller
         $user->hasRole(\App\Enums\RoleEnum::ADMIN->value) ||
         $user->can('delete all messages');
 
-        if (!$canDelete) {
+        if (! $canDelete) {
             return response()->json(['error' => 'Unauthorized to delete this message.'], 403);
         }
 
@@ -248,7 +248,7 @@ class MessageController extends Controller
         $user->hasRole(\App\Enums\RoleEnum::ADMIN->value) ||
         $user->can('edit all messages');
 
-        if (!$canEdit) {
+        if (! $canEdit) {
             return response()->json(['error' => 'Unauthorized to edit this message.'], 403);
         }
 
@@ -270,11 +270,11 @@ class MessageController extends Controller
             return response()->json(['error' => 'Unauthorized to download this attachment.'], 403);
         }
 
-        if (!$message->attachment_path || !Storage::disk('public')->exists($message->attachment_path)) {
+        if (! $message->attachment_path || ! Storage::disk('public')->exists($message->attachment_path)) {
             return response()->json(['error' => 'Attachment not found.'], 404);
         }
 
-        return Storage::download(storage_path('app/public/' . $message->attachment_path), $message->attachment_filename);
+        return Storage::download(storage_path('app/public/'.$message->attachment_path), $message->attachment_filename);
     }
 
     /**
@@ -342,7 +342,7 @@ class MessageController extends Controller
         $receiver = User::findOrFail($validated['receiver_id']);
 
         // Simple authorization - users can indicate typing to any user they can message
-        if (!Auth::user()) {
+        if (! Auth::user()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -358,7 +358,7 @@ class MessageController extends Controller
     public function typingStatus(Request $request, User $user)
     {
         // Simple authorization - users can check typing status from any user
-        if (!Auth::user()) {
+        if (! Auth::user()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -375,7 +375,7 @@ class MessageController extends Controller
         $this->authorize('communicate', $user);
         $authId = Auth::id();
 
-        $filename = 'chat_' . $authId . '_' . $user->id . '_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'chat_'.$authId.'_'.$user->id.'_'.now()->format('Ymd_His').'.csv';
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",

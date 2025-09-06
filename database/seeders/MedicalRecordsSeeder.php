@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\MedicalVisit;
 use App\Models\MedicalDocument;
+use App\Models\MedicalVisit;
+use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\PrescriptionItem;
-use App\Models\Patient;
 use App\Models\Staff;
+use Illuminate\Database\Seeder;
 
 class MedicalRecordsSeeder extends Seeder
 {

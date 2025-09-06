@@ -2,25 +2,18 @@
 
 namespace App\Http\Controllers\Insurance;
 
+use App\DTOs\CreateInsuranceClaimDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\InsuranceClaim;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\InsuranceClaimEmail;
-use Inertia\Inertia;
-use App\Http\Requests\StoreInsuranceClaimRequest;
-use App\Http\Requests\UpdateInsuranceClaimRequest;
-use App\Http\Requests\SendClaimEmailRequest;
-use App\Services\Insurance\InsuranceClaimService;
-use App\Models\Patient;
-use App\Models\Invoice;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
+use App\Models\Invoice;
+use App\Models\Patient;
+use App\Services\Insurance\InsuranceClaimService;
 use App\Services\Validation\Rules\InsuranceClaimRules;
-use App\DTOs\CreateInsuranceClaimDTO;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class InsuranceClaimController extends BaseController
 {
@@ -39,7 +32,8 @@ class InsuranceClaimController extends BaseController
     public function show($id)
     {
         $insuranceClaim = InsuranceClaim::with(['invoice.patient'])->findOrFail($id);
-        return Inertia::render($this->viewName . '/Show', [
+
+        return Inertia::render($this->viewName.'/Show', [
             'insuranceClaim' => $insuranceClaim,
         ]);
     }
@@ -58,7 +52,7 @@ class InsuranceClaimController extends BaseController
             ->orderBy('service_type')
             ->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'patients' => $patients,
             'invoices' => $invoices,
             'insuranceCompanies' => $insuranceCompanies,
@@ -81,7 +75,7 @@ class InsuranceClaimController extends BaseController
             ->orderBy('service_type')
             ->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             'insuranceClaim' => $insuranceClaim,
             'patients' => $patients,
             'invoices' => $invoices,
@@ -101,9 +95,10 @@ class InsuranceClaimController extends BaseController
 
         try {
             $claim = $this->service->processPayment($id, $validatedData);
+
             return Redirect::back()->with('banner', 'Payment processed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return Redirect::back()->with('banner', 'Failed to process payment: ' . $e->getMessage())->with('bannerStyle', 'danger');
+            return Redirect::back()->with('banner', 'Failed to process payment: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 
@@ -116,9 +111,10 @@ class InsuranceClaimController extends BaseController
 
         try {
             $claim = $this->service->updateClaimStatus($id, $validatedData['status'], $validatedData['denial_reason'] ?? null);
+
             return Redirect::back()->with('banner', 'Claim status updated successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return Redirect::back()->with('banner', 'Failed to update claim status: ' . $e->getMessage())->with('bannerStyle', 'danger');
+            return Redirect::back()->with('banner', 'Failed to update claim status: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 }

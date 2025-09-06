@@ -16,6 +16,7 @@ use Inertia\Inertia;
 class PatientController extends BaseController
 {
     use ExportableTrait;
+
     public function __construct(PatientService $patientService)
     {
         parent::__construct(

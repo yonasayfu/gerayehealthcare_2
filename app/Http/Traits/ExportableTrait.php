@@ -2,8 +2,8 @@
 
 namespace App\Http\Traits;
 
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 trait ExportableTrait
@@ -44,11 +44,11 @@ trait ExportableTrait
 
         if ($type === 'csv') {
             $csvConfig = $config['csv'];
-            if (!isset($csvConfig['headers']) || !isset($csvConfig['fields'])) {
+            if (! isset($csvConfig['headers']) || ! isset($csvConfig['fields'])) {
                 abort(500, "CSV export configuration must include 'headers' and 'fields'.");
             }
 
-            $filename = ($csvConfig['filename_prefix'] ?? ($config['filename_prefix'] ?? 'export')) . '_' . now()->format('Ymd_His') . '.csv';
+            $filename = ($csvConfig['filename_prefix'] ?? ($config['filename_prefix'] ?? 'export')).'_'.now()->format('Ymd_His').'.csv';
 
             $headers = [
                 'Content-Type' => 'text/csv; charset=UTF-8',
@@ -66,13 +66,15 @@ trait ExportableTrait
                         // 1) Literal index column support
                         if ($field === 'index') {
                             $line[] = $index + 1;
+
                             continue;
                         }
 
                         // 2) Legacy special-case support
                         if ($field === 'staff_full_name') {
                             $staff = $row->staff ?? null;
-                            $line[] = $staff ? trim(($staff->first_name ?? '') . ' ' . ($staff->last_name ?? '')) : 'N/A';
+                            $line[] = $staff ? trim(($staff->first_name ?? '').' '.($staff->last_name ?? '')) : 'N/A';
+
                             continue;
                         }
 
@@ -87,6 +89,7 @@ trait ExportableTrait
                                 $value = $field['default'];
                             }
                             $line[] = $value ?? '';
+
                             continue;
                         }
 
@@ -101,7 +104,7 @@ trait ExportableTrait
             return Response::stream($callback, 200, $headers);
         } elseif ($type === 'pdf') {
             $pdfConfig = $config['pdf'];
-            if (!isset($pdfConfig['view'])) {
+            if (! isset($pdfConfig['view'])) {
                 abort(500, "PDF export configuration is missing the 'view' key.");
             }
 
@@ -119,14 +122,14 @@ trait ExportableTrait
                 'document_title' => $pdfConfig['document_title'],
                 'paper_size' => $paper,
             ];
-            if (!empty($pdfConfig['header_info']) && is_array($pdfConfig['header_info'])) {
+            if (! empty($pdfConfig['header_info']) && is_array($pdfConfig['header_info'])) {
                 $headerInfo = array_merge($headerInfo, $pdfConfig['header_info']);
             }
 
             $footerInfo = [
                 'generated_date' => now()->format('F j, Y, g:i a'),
             ];
-            if (!empty($pdfConfig['footer_info']) && is_array($pdfConfig['footer_info'])) {
+            if (! empty($pdfConfig['footer_info']) && is_array($pdfConfig['footer_info'])) {
                 $footerInfo = array_merge($footerInfo, $pdfConfig['footer_info']);
             }
 
@@ -140,9 +143,9 @@ trait ExportableTrait
             ])->setPaper($paper, $orientation);
 
             if ($request->input('preview')) {
-                return $pdf->stream($pdfConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+                return $pdf->stream($pdfConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
             } else {
-                return $pdf->download($pdfConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+                return $pdf->download($pdfConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
             }
         }
 
@@ -185,6 +188,7 @@ trait ExportableTrait
         if (($allRecordsConfig['include_index'] ?? false) === true) {
             $data = $data->map(function ($item, $key) {
                 $item->index = $key + 1;
+
                 return $item;
             });
         }
@@ -198,14 +202,14 @@ trait ExportableTrait
             'document_title' => $allRecordsConfig['document_title'] ?? 'All Records',
             'paper_size' => $paper,
         ];
-        if (!empty($allRecordsConfig['header_info']) && is_array($allRecordsConfig['header_info'])) {
+        if (! empty($allRecordsConfig['header_info']) && is_array($allRecordsConfig['header_info'])) {
             $headerInfo = array_merge($headerInfo, $allRecordsConfig['header_info']);
         }
 
         $footerInfo = [
             'generated_date' => now()->format('F j, Y, g:i a'),
         ];
-        if (!empty($allRecordsConfig['footer_info']) && is_array($allRecordsConfig['footer_info'])) {
+        if (! empty($allRecordsConfig['footer_info']) && is_array($allRecordsConfig['footer_info'])) {
             $footerInfo = array_merge($footerInfo, $allRecordsConfig['footer_info']);
         }
 
@@ -219,9 +223,9 @@ trait ExportableTrait
         ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
-            return $pdf->stream($allRecordsConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            return $pdf->stream($allRecordsConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
         } else {
-            return $pdf->download($allRecordsConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            return $pdf->download($allRecordsConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
         }
     }
 
@@ -265,14 +269,14 @@ trait ExportableTrait
             'document_title' => $currentPageConfig['document_title'] ?? 'Current View',
             'paper_size' => $paper,
         ];
-        if (!empty($currentPageConfig['header_info']) && is_array($currentPageConfig['header_info'])) {
+        if (! empty($currentPageConfig['header_info']) && is_array($currentPageConfig['header_info'])) {
             $headerInfo = array_merge($headerInfo, $currentPageConfig['header_info']);
         }
 
         $footerInfo = [
             'generated_date' => now()->format('F j, Y, g:i a'),
         ];
-        if (!empty($currentPageConfig['footer_info']) && is_array($currentPageConfig['footer_info'])) {
+        if (! empty($currentPageConfig['footer_info']) && is_array($currentPageConfig['footer_info'])) {
             $footerInfo = array_merge($footerInfo, $currentPageConfig['footer_info']);
         }
 
@@ -286,9 +290,9 @@ trait ExportableTrait
         ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
-            return $pdf->stream($currentPageConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            return $pdf->stream($currentPageConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
         } else {
-            return $pdf->download($currentPageConfig['filename_prefix'] . '_' . now()->format('Ymd_His') . '.pdf');
+            return $pdf->download($currentPageConfig['filename_prefix'].'_'.now()->format('Ymd_His').'.pdf');
         }
     }
 
@@ -317,20 +321,20 @@ trait ExportableTrait
             'document_title' => $singleRecordConfig['document_title'] ?? 'Record Details',
             'paper_size' => $paper,
         ];
-        if (!empty($singleRecordConfig['header_info']) && is_array($singleRecordConfig['header_info'])) {
+        if (! empty($singleRecordConfig['header_info']) && is_array($singleRecordConfig['header_info'])) {
             $headerInfo = array_merge($headerInfo, $singleRecordConfig['header_info']);
         }
 
         $footerInfo = [
             'generated_date' => now()->format('F j, Y, g:i a'),
         ];
-        if (!empty($singleRecordConfig['footer_info']) && is_array($singleRecordConfig['footer_info'])) {
+        if (! empty($singleRecordConfig['footer_info']) && is_array($singleRecordConfig['footer_info'])) {
             $footerInfo = array_merge($footerInfo, $singleRecordConfig['footer_info']);
         }
 
         $pdf = Pdf::loadView($singleRecordConfig['view'], [
-            'data' => $modelInstance, 
-            'title' => $singleRecordConfig['document_title'] ?? 'Record Details', 
+            'data' => $modelInstance,
+            'title' => $singleRecordConfig['document_title'] ?? 'Record Details',
             'columns' => $singleRecordConfig['columns'] ?? [], // Pass columns instead of fields
             'hide_footer' => $singleRecordConfig['hide_footer'] ?? false,
             'headerInfo' => $headerInfo,
@@ -338,9 +342,9 @@ trait ExportableTrait
         ])->setPaper($paper, $orientation);
 
         if ($request->input('preview')) {
-            return $pdf->stream($singleRecordConfig['filename_prefix'] . '_' . $modelInstance->id . '.pdf');
+            return $pdf->stream($singleRecordConfig['filename_prefix'].'_'.$modelInstance->id.'.pdf');
         } else {
-            return $pdf->download($singleRecordConfig['filename_prefix'] . '_' . $modelInstance->id . '.pdf');
+            return $pdf->download($singleRecordConfig['filename_prefix'].'_'.$modelInstance->id.'.pdf');
         }
     }
 

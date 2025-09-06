@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Insurance;
 
+use App\DTOs\CreateEmployeeInsuranceRecordDTO;
+use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Controllers\Base\BaseController;
-use App\Models\Patient;
-use App\Models\InsurancePolicy;
+use App\Http\Traits\ExportableTrait;
 use App\Models\EmployeeInsuranceRecord;
+use App\Models\InsurancePolicy;
+use App\Models\Patient;
 use App\Services\Insurance\EmployeeInsuranceRecordService;
 use App\Services\Validation\Rules\EmployeeInsuranceRecordRules;
-use App\DTOs\CreateEmployeeInsuranceRecordDTO;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class EmployeeInsuranceRecordController extends BaseController
 {
     use ExportableTrait;
+
     public function __construct(EmployeeInsuranceRecordService $employeeInsuranceRecordService)
     {
         parent::__construct(
@@ -34,7 +35,7 @@ class EmployeeInsuranceRecordController extends BaseController
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
         $insurancePolicies = InsurancePolicy::select('id', 'service_type')->orderBy('service_type')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'patients' => $patients,
             'insurancePolicies' => $insurancePolicies,
         ]);
@@ -46,7 +47,7 @@ class EmployeeInsuranceRecordController extends BaseController
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
         $insurancePolicies = InsurancePolicy::select('id', 'service_type')->orderBy('service_type')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $employeeInsuranceRecord,
             'patients' => $patients,
             'insurancePolicies' => $insurancePolicies,
@@ -59,7 +60,7 @@ class EmployeeInsuranceRecordController extends BaseController
         $employeeInsuranceRecord = $this->service->getById($id, ['patient', 'policy']);
 
         // Ensure the prop name matches the frontend's expectation
-        return Inertia::render($this->viewName . '/Show', [
+        return Inertia::render($this->viewName.'/Show', [
             'employeeInsuranceRecord' => $employeeInsuranceRecord,
         ]);
     }
@@ -74,6 +75,7 @@ class EmployeeInsuranceRecordController extends BaseController
             abort(404, 'Only CSV export is supported for Employee Insurance Records.');
         }
         $config = $this->buildExportConfig();
+
         return $this->handleExport($request, EmployeeInsuranceRecord::class, $config);
     }
 

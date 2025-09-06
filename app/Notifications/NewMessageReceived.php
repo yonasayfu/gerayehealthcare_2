@@ -4,9 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Message;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class NewMessageReceived extends Notification
 {
@@ -14,8 +12,6 @@ class NewMessageReceived extends Notification
 
     /**
      * The incoming message instance.
-     *
-     * @var \App\Models\Message
      */
     public Message $message;
 

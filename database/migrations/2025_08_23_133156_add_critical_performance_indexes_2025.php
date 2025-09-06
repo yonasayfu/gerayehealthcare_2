@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * This migration adds critical performance indexes for the most
      * frequently queried columns to improve application performance.
      */

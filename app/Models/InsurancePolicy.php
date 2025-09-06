@@ -4,10 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\InsuranceCompany;
-use App\Models\CorporateClient;
-use App\Models\EmployeeInsuranceRecord;
-use App\Models\InsuranceClaim;
 
 class InsurancePolicy extends Model
 {

@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
 use App\Http\Resources\InventoryItemResource;
 use App\Http\Resources\InventoryRequestResource;
-use App\Http\Resources\InventoryTransactionResource;
 use App\Models\InventoryItem;
 use App\Models\InventoryRequest;
 use App\Models\InventoryTransaction;
 use App\Models\Supplier;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class InventoryController extends BaseApiController
 {
@@ -31,8 +29,8 @@ class InventoryController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ILIKE', "%{$search}%")
-                      ->orWhere('description', 'ILIKE', "%{$search}%")
-                      ->orWhere('sku', 'ILIKE', "%{$search}%");
+                        ->orWhere('description', 'ILIKE', "%{$search}%")
+                        ->orWhere('sku', 'ILIKE', "%{$search}%");
                 });
             }
 
@@ -73,7 +71,7 @@ class InventoryController extends BaseApiController
                     'per_page' => $items->perPage(),
                     'total' => $items->total(),
                     'has_more' => $items->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch inventory items', 500);
@@ -117,7 +115,7 @@ class InventoryController extends BaseApiController
                     'quantity' => $item->current_stock,
                     'unit_cost' => $item->unit_cost,
                     'total_cost' => $item->current_stock * $item->unit_cost,
-                    'reference_number' => 'INITIAL-' . $item->id,
+                    'reference_number' => 'INITIAL-'.$item->id,
                     'notes' => 'Initial stock entry',
                     'created_by' => Auth::id(),
                 ]);
@@ -125,7 +123,7 @@ class InventoryController extends BaseApiController
 
             return $this->successResponse([
                 'item' => new InventoryItemResource($item->load('supplier')),
-                'message' => 'Inventory item created successfully'
+                'message' => 'Inventory item created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create inventory item', 500);
@@ -141,7 +139,7 @@ class InventoryController extends BaseApiController
             $validator = Validator::make($request->all(), [
                 'name' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
-                'sku' => 'sometimes|required|string|max:100|unique:inventory_items,sku,' . $item->id,
+                'sku' => 'sometimes|required|string|max:100|unique:inventory_items,sku,'.$item->id,
                 'category' => 'sometimes|required|string|max:100',
                 'unit_of_measure' => 'sometimes|required|string|max:50',
                 'unit_cost' => 'sometimes|required|numeric|min:0',
@@ -162,7 +160,7 @@ class InventoryController extends BaseApiController
 
             return $this->successResponse([
                 'item' => new InventoryItemResource($item->load('supplier')),
-                'message' => 'Inventory item updated successfully'
+                'message' => 'Inventory item updated successfully',
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to update inventory item', 500);
@@ -180,6 +178,7 @@ class InventoryController extends BaseApiController
             }
 
             $item->delete();
+
             return $this->successResponse(['message' => 'Inventory item deleted successfully']);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to delete inventory item', 500);
@@ -232,8 +231,8 @@ class InventoryController extends BaseApiController
                 'quantity' => $quantity,
                 'unit_cost' => $item->unit_cost,
                 'total_cost' => $quantity * $item->unit_cost,
-                'reference_number' => $data['reference_number'] ?? 'ADJ-' . time(),
-                'notes' => $data['reason'] . ($data['notes'] ? ' - ' . $data['notes'] : ''),
+                'reference_number' => $data['reference_number'] ?? 'ADJ-'.time(),
+                'notes' => $data['reason'].($data['notes'] ? ' - '.$data['notes'] : ''),
                 'created_by' => Auth::id(),
             ]);
 
@@ -243,10 +242,11 @@ class InventoryController extends BaseApiController
                 'item' => new InventoryItemResource($item->fresh()),
                 'old_stock' => $oldStock,
                 'new_stock' => $newStock,
-                'message' => 'Stock adjusted successfully'
+                'message' => 'Stock adjusted successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to adjust stock', 500);
         }
     }
@@ -278,8 +278,8 @@ class InventoryController extends BaseApiController
             }
 
             $requests = $query->with(['requester', 'approver', 'items.inventoryItem'])
-                             ->orderBy('created_at', 'desc')
-                             ->paginate($request->get('per_page', 15));
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'requests' => InventoryRequestResource::collection($requests->items()),
@@ -289,7 +289,7 @@ class InventoryController extends BaseApiController
                     'per_page' => $requests->perPage(),
                     'total' => $requests->total(),
                     'has_more' => $requests->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch inventory requests', 500);
@@ -336,10 +336,11 @@ class InventoryController extends BaseApiController
 
             return $this->successResponse([
                 'request' => new InventoryRequestResource($inventoryRequest->load(['requester', 'items.inventoryItem'])),
-                'message' => 'Inventory request created successfully'
+                'message' => 'Inventory request created successfully',
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to create inventory request', 500);
         }
     }

@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Models\Event;
-use App\Models\Staff;
-use App\Models\EventStaffAssignment;
-use App\Services\EventStaffAssignmentService;
-use App\Services\Validation\Rules\EventStaffAssignmentRules;
 use App\DTOs\CreateEventStaffAssignmentDTO;
 use App\Enums\RoleEnum;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Base\BaseController;
+use App\Models\Event;
+use App\Models\EventStaffAssignment;
+use App\Models\Staff;
+use App\Services\EventStaffAssignmentService;
+use App\Services\Validation\Rules\EventStaffAssignmentRules;
 use Inertia\Inertia;
 
 class EventStaffAssignmentController extends BaseController
@@ -25,7 +24,7 @@ class EventStaffAssignmentController extends BaseController
             EventStaffAssignment::class,
             CreateEventStaffAssignmentDTO::class
         );
-        $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
+        $this->middleware('role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value);
     }
 
     public function create()
@@ -33,7 +32,7 @@ class EventStaffAssignmentController extends BaseController
         $events = Event::select('id', 'title')->orderBy('title')->get();
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'events' => $events,
             'staff' => $staff,
         ]);
@@ -45,7 +44,7 @@ class EventStaffAssignmentController extends BaseController
         $events = Event::select('id', 'title')->orderBy('title')->get();
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $eventStaffAssignment,
             'events' => $events,
             'staff' => $staff,

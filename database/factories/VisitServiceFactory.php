@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Patient;
-use App\Models\Staff;
-use App\Models\Service;
 use App\Models\Event;
+use App\Models\Patient;
+use App\Models\Service;
+use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +24,7 @@ class VisitServiceFactory extends Factory
         $checkIn = $this->faker->optional(0.7)->dateTimeBetween($scheduled, (clone $scheduled)->modify('+30 minutes'));
 
         $serviceId = Service::query()->inRandomOrder()->value('id');
-        if (!$serviceId) {
+        if (! $serviceId) {
             $service = Service::query()->create([
                 'name' => 'General Care',
                 'description' => 'Auto-created service for seeding',

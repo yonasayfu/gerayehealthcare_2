@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use App\Exceptions\ResourceNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class OptimizedBaseService
 {
     protected $model;
+
     protected $cachePrefix;
+
     protected $cacheTtl = 300; // 5 minutes
 
     public function __construct($model)
@@ -23,7 +24,7 @@ class OptimizedBaseService
     {
         // Create cache key based on request parameters
         $cacheKey = $this->generateCacheKey('all', $request->all(), $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request, $with) {
             $query = $this->model->query()->with($with);
 
@@ -43,13 +44,14 @@ class OptimizedBaseService
     public function getById(int $id, array $with = [])
     {
         $cacheKey = $this->generateCacheKey('single', ['id' => $id], $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $with) {
             $query = $this->model->query()->with($with);
             $model = $query->find($id);
-            if (!$model) {
-                throw new ResourceNotFoundException(class_basename($this->model) . ' not found.');
+            if (! $model) {
+                throw new ResourceNotFoundException(class_basename($this->model).' not found.');
             }
+
             return $model;
         });
     }
@@ -57,12 +59,12 @@ class OptimizedBaseService
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         $model = $this->model->create($data);
-        
+
         // Clear related caches
         $this->clearCaches();
-        
+
         return $model;
     }
 
@@ -71,17 +73,17 @@ class OptimizedBaseService
         $data = is_object($data) ? (array) $data : $data;
         $model = $this->model->findOrFail($id);
         $model->update($data);
-        
+
         // Clear related caches
         $this->clearCaches();
-        
+
         return $model;
     }
 
     public function delete(int $id): void
     {
         $this->model->findOrFail($id)->delete();
-        
+
         // Clear related caches
         $this->clearCaches();
     }
@@ -97,10 +99,10 @@ class OptimizedBaseService
             'prefix' => $this->cachePrefix,
             'operation' => $operation,
             'params' => $params,
-            'with' => $with
+            'with' => $with,
         ];
-        
-        return 'service_' . md5(serialize($keyData));
+
+        return 'service_'.md5(serialize($keyData));
     }
 
     protected function clearCaches(): void

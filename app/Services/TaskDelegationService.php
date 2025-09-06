@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateTaskDelegationDTO;
-use App\Models\TaskDelegation;
 use App\Models\Staff;
+use App\Models\TaskDelegation;
 use App\Notifications\TaskDelegationAssigned;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -46,9 +45,10 @@ class TaskDelegationService extends BaseService
     {
         $with = array_unique(array_merge(['assignee'], $with));
         $model = $this->model->with($with)->find($id);
-        if (!$model) {
-            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model) . ' not found.');
+        if (! $model) {
+            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model).' not found.');
         }
+
         return $model;
     }
 
@@ -84,7 +84,7 @@ class TaskDelegationService extends BaseService
         $model->update($data);
 
         // If newly created assignment or assignee changed, notify new assignee
-        if (array_key_exists('assigned_to', $data) && (int)$data['assigned_to'] !== (int)$originalAssignee) {
+        if (array_key_exists('assigned_to', $data) && (int) $data['assigned_to'] !== (int) $originalAssignee) {
             try {
                 $this->notifyAssignee($model);
             } catch (\Throwable $e) {

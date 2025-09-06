@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Enums\RoleEnum;
+use App\Http\Controllers\Controller;
 use App\Http\Traits\ExportableTrait;
 use App\Models\RevenueArView;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
-use App\Http\Controllers\Controller;
 
 class RevenueARController extends Controller
 {
@@ -31,7 +31,7 @@ class RevenueARController extends Controller
 
     public function data(Request $request)
     {
-        $cacheKey = 'report:revenue_ar:' . md5(json_encode([
+        $cacheKey = 'report:revenue_ar:'.md5(json_encode([
             'from' => $request->input('date_from'),
             'to' => $request->input('date_to'),
             'granularity' => $request->input('granularity'),
@@ -40,6 +40,7 @@ class RevenueARController extends Controller
         $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($request) {
             $query = RevenueArView::query();
             $this->applyFilters($query, $request);
+
             return $query->orderBy('bucket_date')->get();
         });
 
@@ -80,15 +81,15 @@ class RevenueARController extends Controller
                     'invoices_count',
                     [
                         'field' => 'total_billed',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                     [
                         'field' => 'total_received',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                     [
                         'field' => 'ar_outstanding',
-                        'transform' => fn($v) => number_format((float)$v, 2),
+                        'transform' => fn ($v) => number_format((float) $v, 2),
                     ],
                     'paid_invoices',
                     'unpaid_invoices',

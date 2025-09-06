@@ -2,9 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use App\Exceptions\ResourceNotFoundException;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class BaseService
 {
@@ -34,7 +33,7 @@ class BaseService
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         return $this->model->create($data);
     }
 
@@ -42,9 +41,10 @@ class BaseService
     {
         $query = $this->model->query()->with($with);
         $model = $query->find($id);
-        if (!$model) {
-            throw new ResourceNotFoundException(class_basename($this->model) . ' not found.');
+        if (! $model) {
+            throw new ResourceNotFoundException(class_basename($this->model).' not found.');
         }
+
         return $model;
     }
 
@@ -53,6 +53,7 @@ class BaseService
         $data = is_object($data) ? (array) $data : $data;
         $model = $this->model->findOrFail($id);
         $model->update($data);
+
         return $model;
     }
 

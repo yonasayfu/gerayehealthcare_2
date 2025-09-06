@@ -17,13 +17,13 @@ class ServiceController extends Controller
             $s = $request->input('search');
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'ilike', "%{$s}%")
-                  ->orWhere('description', 'ilike', "%{$s}%")
-                  ->orWhere('category', 'ilike', "%{$s}%");
+                    ->orWhere('description', 'ilike', "%{$s}%")
+                    ->orWhere('category', 'ilike', "%{$s}%");
             });
         }
 
         $services = $query->orderBy('name')->paginate($request->integer('per_page', 20));
+
         return ServiceResource::collection($services);
     }
 }
-

@@ -2,12 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\MarketingCampaign;
-use App\Models\Staff;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
+use App\Models\MarketingCampaign;
+use Illuminate\Http\Request;
 
 class MarketingCampaignService extends BaseService
 {
@@ -21,8 +19,8 @@ class MarketingCampaignService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('campaign_name', 'ilike', "%{$search}%")
-              ->orWhere('campaign_code', 'ilike', "%{$search}%")
-              ->orWhere('utm_campaign', 'ilike', "%{$search}%");
+            ->orWhere('campaign_code', 'ilike', "%{$search}%")
+            ->orWhere('utm_campaign', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -62,12 +60,14 @@ class MarketingCampaignService extends BaseService
     public function create(array|object $data): MarketingCampaign
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
 
     public function getById(int $id, array $with = []): MarketingCampaign
     {
         $with = array_unique(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
+
         return $this->model->with($with)->findOrFail($id);
     }
 

@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class StaffAvailabilitySeeder extends Seeder
 {

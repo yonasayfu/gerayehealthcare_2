@@ -23,6 +23,7 @@ class MarketingAnalyticsController extends Controller
         if ($request->header('X-Inertia')) {
             return Inertia::render('Admin/MarketingAnalytics/Dashboard', $data);
         }
+
         // Otherwise, return JSON for axios usage in the dashboard page
         return response()->json($data['dashboardStats']);
     }
@@ -30,36 +31,42 @@ class MarketingAnalyticsController extends Controller
     public function campaignPerformance(Request $request)
     {
         $performanceData = $this->marketingAnalyticsService->getCampaignPerformance($request);
+
         return response()->json($performanceData);
     }
 
     public function trafficSourceDistribution(Request $request)
     {
         $sourceData = $this->marketingAnalyticsService->getTrafficSourceDistribution($request);
+
         return response()->json($sourceData);
     }
 
     public function conversionFunnel(Request $request)
     {
         $funnelData = $this->marketingAnalyticsService->getConversionFunnel($request);
+
         return response()->json($funnelData);
     }
 
     public function budgetPacing(Request $request)
     {
         $data = $this->marketingAnalyticsService->getBudgetPacing($request);
+
         return response()->json($data);
     }
 
     public function staffPerformance(Request $request)
     {
         $data = $this->marketingAnalyticsService->getStaffPerformance($request);
+
         return response()->json($data);
     }
 
     public function taskSla(Request $request)
     {
         $data = $this->marketingAnalyticsService->getTaskSla($request);
+
         return response()->json($data);
     }
 }

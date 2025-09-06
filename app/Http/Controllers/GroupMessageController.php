@@ -19,7 +19,7 @@ class GroupMessageController extends Controller
         $userId = Auth::id();
         $cacheKey = "user_groups_{$userId}";
 
-        $groups = Cache::remember($cacheKey, 300, function () use ($userId) {
+        $groups = Cache::remember($cacheKey, 300, function () {
             return Auth::user()->groups()
                 ->withCount('members')
                 ->with(['latestMessage' => function ($query) {
@@ -72,7 +72,7 @@ class GroupMessageController extends Controller
                 'per_page' => $messages->perPage(),
                 'total' => $messages->total(),
                 'has_more' => $messages->hasMorePages(),
-            ]
+            ],
         ]);
     }
 
@@ -84,7 +84,7 @@ class GroupMessageController extends Controller
 
         // Validate message content
         $contentErrors = MessageRules::validateMessageContent($data);
-        if (!empty($contentErrors)) {
+        if (! empty($contentErrors)) {
             return response()->json(['errors' => $contentErrors], 422);
         }
 
@@ -125,6 +125,7 @@ class GroupMessageController extends Controller
             return response()->json(['data' => $msg->load('sender')], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['error' => 'Failed to send message'], 500);
         }
     }
@@ -132,7 +133,7 @@ class GroupMessageController extends Controller
     protected function clearGroupCaches($groupId)
     {
         // Clear group-related caches
-        Cache::forget("group_member_{$groupId}_" . Auth::id());
+        Cache::forget("group_member_{$groupId}_".Auth::id());
 
         // Clear user groups cache for all group members
         $memberIds = GroupMember::where('group_id', $groupId)->pluck('user_id');

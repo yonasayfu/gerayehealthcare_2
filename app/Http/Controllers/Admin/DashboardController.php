@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Patient;
-use App\Models\Staff;
-use App\Models\VisitService;
-use App\Models\Invoice;
 use App\Models\InsuranceClaim;
 use App\Models\InventoryAlert;
+use App\Models\Invoice;
+use App\Models\Patient;
+use App\Models\Staff;
 use App\Models\TaskDelegation;
+use App\Models\VisitService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -61,10 +61,10 @@ class DashboardController extends Controller
         $start = $startParam ? Carbon::parse($startParam) : $now->copy()->startOfMonth();
         $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
 
-        $cacheKey = 'dashboard_overview_kpis_' . $start->toDateString() . '_' . $end->toDateString();
+        $cacheKey = 'dashboard_overview_kpis_'.$start->toDateString().'_'.$end->toDateString();
 
         $compute = function () use ($start, $end, $now) {
-            
+
             $totalPatients = Patient::count();
             $patientsInRange = Patient::whereBetween('created_at', [$start->copy()->startOfDay(), $end])->count();
 
@@ -134,7 +134,7 @@ class DashboardController extends Controller
         $end = $endParam ? Carbon::parse($endParam)->endOfDay() : $now->copy()->endOfDay();
         $days = $start->diffInDays($end) + 1;
 
-        $cacheKey = 'dashboard_overview_series_' . $start->toDateString() . '_' . $end->toDateString();
+        $cacheKey = 'dashboard_overview_series_'.$start->toDateString().'_'.$end->toDateString();
 
         $compute = function () use ($start, $end, $days) {
 
@@ -202,7 +202,7 @@ class DashboardController extends Controller
             ->leftJoin('patients', 'visit_services.patient_id', '=', 'patients.id')
             ->leftJoin('staff', 'visit_services.staff_id', '=', 'staff.id')
             ->leftJoin('services', 'visit_services.service_id', '=', 'services.id')
-            ->when($start && $end, fn($q) => $q->whereBetween('visit_services.scheduled_at', [$start, $end]))
+            ->when($start && $end, fn ($q) => $q->whereBetween('visit_services.scheduled_at', [$start, $end]))
             ->orderByDesc('visit_services.scheduled_at')
             ->limit(8);
 
@@ -210,23 +210,24 @@ class DashboardController extends Controller
         \Illuminate\Support\Facades\Log::info('Recent Appointments Query:', ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
 
         $rows = $query->get([
-                'patients.full_name',
-                'visit_services.scheduled_at',
-                'visit_services.status',
-                'staff.first_name as staff_first',
-                'staff.last_name as staff_last',
-                'services.name as service_name',
-            ]);
+            'patients.full_name',
+            'visit_services.scheduled_at',
+            'visit_services.status',
+            'staff.first_name as staff_first',
+            'staff.last_name as staff_last',
+            'services.name as service_name',
+        ]);
 
         $payload = $rows->map(function ($row) {
             $name = $row->full_name ?: 'N/A';
             $dt = \Carbon\Carbon::parse($row->scheduled_at);
+
             return [
                 'patient' => $name,
                 'date' => $dt->format('Y-m-d'),
                 'time' => $dt->format('h:i A'),
                 'status' => $row->status,
-                'staff' => trim(($row->staff_first ?? '') . ' ' . ($row->staff_last ?? '')) ?: null,
+                'staff' => trim(($row->staff_first ?? '').' '.($row->staff_last ?? '')) ?: null,
                 'service' => $row->service_name ?? null,
             ];
         });
@@ -261,12 +262,13 @@ class DashboardController extends Controller
         $payload = $rows->map(function ($row) {
             $name = $row->full_name ?: 'N/A';
             $dt = \Carbon\Carbon::parse($row->scheduled_at);
+
             return [
                 'patient' => $name,
                 'date' => $dt->format('Y-m-d'),
                 'time' => $dt->format('h:i A'),
                 'status' => $row->status,
-                'staff' => trim(($row->staff_first ?? '') . ' ' . ($row->staff_last ?? '')) ?: null,
+                'staff' => trim(($row->staff_first ?? '').' '.($row->staff_last ?? '')) ?: null,
                 'service' => $row->service_name ?? null,
             ];
         });
@@ -293,7 +295,9 @@ class DashboardController extends Controller
             ->get(['scheduled_at'])
             ->each(function ($v) use (&$series, $start) {
                 $index = $v->scheduled_at->diffInDays($start);
-                if (isset($series[$index])) $series[$index]++;
+                if (isset($series[$index])) {
+                    $series[$index]++;
+                }
             });
 
         for ($d = 1; $d <= $days; $d++) {
@@ -333,7 +337,9 @@ class DashboardController extends Controller
             ->each(function ($row) use (&$rev, $start) {
                 $index = $row->created_at->diffInDays($start);
                 $val = (float) ($row->grand_total ?: $row->amount ?: 0);
-                if (isset($rev[$index])) $rev[$index] += $val;
+                if (isset($rev[$index])) {
+                    $rev[$index] += $val;
+                }
             });
 
         // AR (unpaid invoices)
@@ -343,7 +349,9 @@ class DashboardController extends Controller
             ->each(function ($row) use (&$ar, $start) {
                 $index = $row->created_at->diffInDays($start);
                 $val = (float) ($row->grand_total ?: $row->amount ?: 0);
-                if (isset($ar[$index])) $ar[$index] += $val;
+                if (isset($ar[$index])) {
+                    $ar[$index] += $val;
+                }
             });
 
         for ($d = 1; $d <= $days; $d++) {
@@ -353,8 +361,8 @@ class DashboardController extends Controller
         return response()->json([
             'labels' => $labels,
             'datasets' => [
-                [ 'label' => 'Revenue', 'backgroundColor' => '#10b981', 'data' => $rev ],
-                [ 'label' => 'Accounts Receivable', 'backgroundColor' => '#f59e0b', 'data' => $ar ],
+                ['label' => 'Revenue', 'backgroundColor' => '#10b981', 'data' => $rev],
+                ['label' => 'Accounts Receivable', 'backgroundColor' => '#f59e0b', 'data' => $ar],
             ],
         ]);
     }

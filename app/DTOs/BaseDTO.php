@@ -25,17 +25,15 @@ abstract class BaseDTO
 
     /**
      * Create a new DTO instance or reuse from pool
-     *
-     * @param array $data
-     * @return static
      */
     public static function create(array $data = []): static
     {
         // Check if we have a reusable instance in the pool
         $className = static::class;
-        if (!empty(self::$instancePool[$className])) {
+        if (! empty(self::$instancePool[$className])) {
             $instance = array_pop(self::$instancePool[$className]);
             $instance->populate($data);
+
             return $instance;
         }
 
@@ -54,25 +52,22 @@ abstract class BaseDTO
     /**
      * Create DTO with validation
      *
-     * @param array $data
-     * @return static
      * @throws ValidationException
      */
     public static function createValidated(array $data): static
     {
         $validatedData = static::validate($data);
+
         return static::create($validatedData);
     }
 
     /**
      * Return instance to pool for reuse
-     *
-     * @return void
      */
     public function release(): void
     {
         $className = static::class;
-        if (!isset(self::$instancePool[$className])) {
+        if (! isset(self::$instancePool[$className])) {
             self::$instancePool[$className] = [];
         }
 
@@ -87,26 +82,21 @@ abstract class BaseDTO
 
     /**
      * Constructor
-     *
-     * @param array $data
      */
     public function __construct(array $data = [])
     {
-        if (!empty($data)) {
+        if (! empty($data)) {
             $this->populate($data);
         }
     }
 
     /**
      * Populate DTO with data
-     *
-     * @param array $data
-     * @return void
      */
     public function populate(array $data): void
     {
         foreach ($data as $key => $value) {
-            $method = 'set' . ucfirst($key);
+            $method = 'set'.ucfirst($key);
             if (method_exists($this, $method)) {
                 $this->$method($value);
             } elseif (property_exists($this, $key)) {
@@ -117,8 +107,6 @@ abstract class BaseDTO
 
     /**
      * Reset DTO to default state
-     *
-     * @return void
      */
     public function reset(): void
     {
@@ -126,7 +114,7 @@ abstract class BaseDTO
         $properties = $reflection->getProperties();
 
         foreach ($properties as $property) {
-            if (!$property->isStatic()) {
+            if (! $property->isStatic()) {
                 $property->setAccessible(true);
                 $property->setValue($this, null);
             }
@@ -135,8 +123,6 @@ abstract class BaseDTO
 
     /**
      * Convert DTO to array
-     *
-     * @return array
      */
     public function toArray(): array
     {
@@ -145,7 +131,7 @@ abstract class BaseDTO
 
         $data = [];
         foreach ($properties as $property) {
-            if (!$property->isStatic()) {
+            if (! $property->isStatic()) {
                 $property->setAccessible(true);
                 $value = $property->getValue($this);
                 if ($value !== null) {
@@ -159,8 +145,6 @@ abstract class BaseDTO
 
     /**
      * Get validation rules for this DTO
-     *
-     * @return array
      */
     public static function rules(): array
     {
@@ -170,8 +154,6 @@ abstract class BaseDTO
     /**
      * Validate DTO data
      *
-     * @param array $data
-     * @return array
      * @throws ValidationException
      */
     public static function validate(array $data): array
@@ -192,8 +174,6 @@ abstract class BaseDTO
 
     /**
      * Get custom validation messages
-     *
-     * @return array
      */
     public static function messages(): array
     {
@@ -202,9 +182,6 @@ abstract class BaseDTO
 
     /**
      * Create DTO from request data
-     *
-     * @param Request $request
-     * @return static
      */
     public static function fromRequest(Request $request): static
     {
@@ -213,8 +190,6 @@ abstract class BaseDTO
 
     /**
      * Clear all instance pools and legacy cache
-     *
-     * @return void
      */
     public static function clearCache(): void
     {
@@ -224,8 +199,6 @@ abstract class BaseDTO
 
     /**
      * Get pool statistics
-     *
-     * @return array
      */
     public static function getPoolStats(): array
     {
@@ -233,13 +206,12 @@ abstract class BaseDTO
         foreach (self::$instancePool as $className => $pool) {
             $stats[$className] = count($pool);
         }
+
         return $stats;
     }
 
     /**
      * Convert to JSON
-     *
-     * @return string
      */
     public function toJson(): string
     {
@@ -248,13 +220,12 @@ abstract class BaseDTO
 
     /**
      * Check if DTO has valid data
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
         try {
             static::validate($this->toArray());
+
             return true;
         } catch (ValidationException $e) {
             return false;

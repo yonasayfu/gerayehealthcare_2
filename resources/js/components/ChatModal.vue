@@ -282,7 +282,7 @@ const fetchMessages = async (recipientId: number | null = null, searchQuery: str
   loading.value = true;
   try {
     const response = await axios.get(route('messages.data', { recipient: recipientId, search: searchQuery }));
-    let fetchedConversations: Conversation[] = response.data.conversations || [];
+    const fetchedConversations: Conversation[] = response.data.conversations || [];
 
     conversations.value = fetchedConversations;
 

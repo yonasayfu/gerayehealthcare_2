@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
 use App\Models\VisitService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -41,15 +40,15 @@ class DashboardController extends Controller
             ->where('is_paid_to_staff', false)
             ->whereNotNull(['check_in_time', 'check_out_time'])
             ->get();
-        
+
         $unpaidEarnings = $unpaidVisits->reduce(function ($carry, $visit) {
             $startTime = new \DateTime($visit->check_in_time);
             $endTime = new \DateTime($visit->check_out_time);
             $durationInHours = ($endTime->getTimestamp() - $startTime->getTimestamp()) / 3600;
             $earningsForVisit = $durationInHours * Auth::user()->staff->hourly_rate;
+
             return $carry + $earningsForVisit;
         }, 0);
-
 
         // 3. Return the Inertia view with the data
         return Inertia::render('Dashboard', [

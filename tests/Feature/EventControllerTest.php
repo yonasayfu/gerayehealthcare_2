@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Enums\RoleEnum;
 use App\Models\Event;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Inertia;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EventControllerTest extends TestCase
 {

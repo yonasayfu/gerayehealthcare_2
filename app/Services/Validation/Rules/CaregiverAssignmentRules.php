@@ -16,7 +16,7 @@ class CaregiverAssignmentRules extends BaseResourceRules
             'shift_start' => [
                 'required',
                 'date',
-                new StaffIsAvailableForShift(request()->staff_id, request()->shift_end)
+                new StaffIsAvailableForShift(request()->staff_id, request()->shift_end),
             ],
         ];
     }
@@ -31,7 +31,7 @@ class CaregiverAssignmentRules extends BaseResourceRules
             'shift_start' => [
                 'required',
                 'date',
-                new StaffIsAvailableForShift(request()->staff_id, request()->shift_end, $item->id)
+                new StaffIsAvailableForShift(request()->staff_id, request()->shift_end, $item->id),
             ],
         ];
     }

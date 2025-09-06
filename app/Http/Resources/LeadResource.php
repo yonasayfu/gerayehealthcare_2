@@ -29,7 +29,7 @@ class LeadResource extends JsonResource
             'converted_at' => $this->converted_at?->format('Y-m-d H:i:s'),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-            
+
             // Relationships
             'marketing_campaign' => new MarketingCampaignResource($this->whenLoaded('marketingCampaign')),
             'patient' => new PatientResource($this->whenLoaded('patient')),

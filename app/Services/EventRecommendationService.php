@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\EventParticipantRegistered;
+use App\Events\PatientCreatedFromRecommendation;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\EventRecommendation;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
-use App\Http\Config\ExportConfig;
-use App\Events\PatientCreatedFromRecommendation;
-use App\Events\EventParticipantRegistered;
 
 class EventRecommendationService extends BaseService
 {
@@ -22,7 +21,7 @@ class EventRecommendationService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('patient_name', 'ilike', "%{$search}%")
-              ->orWhere('source_channel', 'ilike', "%{$search}%");
+            ->orWhere('source_channel', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -40,7 +39,7 @@ class EventRecommendationService extends BaseService
                 'notes',
                 'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ]);
 
         if ($request->has('search')) {
@@ -91,6 +90,4 @@ class EventRecommendationService extends BaseService
 
         return $eventRecommendation;
     }
-
-    
 }

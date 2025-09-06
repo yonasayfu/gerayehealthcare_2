@@ -2,16 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Staff;
-use App\Models\Patient;
-use App\Models\VisitService;
-use App\Models\StaffPayout;
 use App\DTOs\CreateStaffPayoutDTO;
+use App\Models\Patient;
+use App\Models\Staff;
+use App\Models\StaffPayout;
+use App\Models\VisitService;
 use App\Services\StaffPayoutService as AdminStaffPayoutService;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Seeder;
 
 class StaffPayoutSampleSeeder extends Seeder
 {

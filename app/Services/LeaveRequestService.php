@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateLeaveRequestDTO;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,12 +16,12 @@ class LeaveRequestService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where(function ($q) use ($search) {
-            $q->where('reason', 'ilike', '%' . $search . '%')
-              ->orWhere('status', 'ilike', '%' . $search . '%')
-              ->orWhereHas('staff', function ($sq) use ($search) {
-                  $sq->where('first_name', 'ilike', '%' . $search . '%')
-                     ->orWhere('last_name', 'ilike', '%' . $search . '%');
-              });
+            $q->where('reason', 'ilike', '%'.$search.'%')
+                ->orWhere('status', 'ilike', '%'.$search.'%')
+                ->orWhereHas('staff', function ($sq) use ($search) {
+                    $sq->where('first_name', 'ilike', '%'.$search.'%')
+                        ->orWhere('last_name', 'ilike', '%'.$search.'%');
+                });
         });
     }
 
@@ -40,8 +39,8 @@ class LeaveRequestService extends BaseService
 
         if ($sortBy === 'staff_first_name') {
             $query->join('staff', 'leave_requests.staff_id', '=', 'staff.id')
-                  ->orderBy('staff.first_name', $sortOrder)
-                  ->select('leave_requests.*');
+                ->orderBy('staff.first_name', $sortOrder)
+                ->select('leave_requests.*');
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -51,7 +50,7 @@ class LeaveRequestService extends BaseService
         // Ensure pagination links preserve current filters
         $paginator = $query->paginate($perPage);
         $paginator->appends($request->only([
-            'search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order'
+            'search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order',
         ]));
 
         return $paginator;
@@ -80,7 +79,7 @@ class LeaveRequestService extends BaseService
             Log::error('LeaveRequest Update Service: Failed to retrieve fresh instance after update!', [
                 'leaveRequestId' => $leaveRequest->id,
                 'data_attempted' => $data,
-                'message' => 'This means the record was possibly deleted or not saved correctly. Check database and model fillable.'
+                'message' => 'This means the record was possibly deleted or not saved correctly. Check database and model fillable.',
             ]);
             throw new \Exception('Failed to confirm leave request update.');
         }

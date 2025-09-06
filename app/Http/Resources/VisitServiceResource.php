@@ -33,4 +33,3 @@ class VisitServiceResource extends JsonResource
         ];
     }
 }
-

@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
-use App\Models\LeadSource;
-use App\Models\MarketingCampaign;
-use App\Models\MarketingBudget;
 use App\Models\CampaignMetric;
+use App\Models\LeadSource;
+use App\Models\MarketingBudget;
+use App\Models\MarketingCampaign;
 use App\Models\MarketingLead;
 use App\Models\MarketingPlatform;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class MarketingDemoSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class MarketingDemoSeeder extends Seeder
 
         // Platforms
         $platformMap = [];
-        foreach (['TikTok','Facebook','Website'] as $pname) {
+        foreach (['TikTok', 'Facebook', 'Website'] as $pname) {
             $platformMap[$pname] = MarketingPlatform::firstOrCreate(['name' => $pname])->id;
         }
 
@@ -79,12 +79,12 @@ class MarketingDemoSeeder extends Seeder
                     'conversions' => $conversions,
                     'cost_per_click' => $cpc,
                     'cost_per_conversion' => $cpa,
-                    'roi_percentage' => round(rand(50, 250) + rand(0,99)/100, 2),
+                    'roi_percentage' => round(rand(50, 250) + rand(0, 99) / 100, 2),
                     'leads_generated' => $leads,
                     'patients_acquired' => $patients,
                     'revenue_generated' => $revenue,
                     'engagement_rate' => round(rand(10, 500) / 10, 2), // 1.0–50.0%
-                    'reach' => $impr - rand(0, (int)($impr * 0.2)),
+                    'reach' => $impr - rand(0, (int) ($impr * 0.2)),
                 ]);
             }
         }
@@ -95,7 +95,7 @@ class MarketingDemoSeeder extends Seeder
             $platformName = MarketingPlatform::find($campaign->platform_id)?->name ?? 'Website';
             MarketingLead::factory()->create([
                 'source_campaign_id' => $campaign->id,
-                'status' => rand(0,1) ? 'Converted' : 'New',
+                'status' => rand(0, 1) ? 'Converted' : 'New',
                 'utm_source' => strtolower($platformName),
                 'utm_campaign' => $campaign->campaign_name,
                 'utm_medium' => 'cpc',

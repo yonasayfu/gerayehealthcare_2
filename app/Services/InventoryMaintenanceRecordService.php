@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateInventoryMaintenanceRecordDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryMaintenanceRecord;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class InventoryMaintenanceRecordService extends BaseService
 {
@@ -20,8 +19,8 @@ class InventoryMaintenanceRecordService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->where('description', 'ilike', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'ilike', "%$search%"))
-                  ->orWhereHas('performedByStaff', fn($q) => $q->where('first_name', 'ilike', "%$search%")->orWhere('last_name', 'ilike', "%$search%"));
+            ->orWhereHas('item', fn ($q) => $q->where('name', 'ilike', "%$search%"))
+            ->orWhereHas('performedByStaff', fn ($q) => $q->where('first_name', 'ilike', "%$search%")->orWhere('last_name', 'ilike', "%$search%"));
     }
 
     public function getAll(Request $request, array $with = [])

@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class MarketingRoiView extends Model
 {
     protected $table = 'marketing_roi_view';
+
     public $timestamps = false;
+
     protected $primaryKey = null;
+
     public $incrementing = false;
 
     protected $guarded = [];

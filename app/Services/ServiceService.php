@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateServiceDTO;
-use App\Models\Service;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class ServiceService extends BaseService
@@ -31,7 +30,7 @@ class ServiceService extends BaseService
     {
         $service = $this->getById($id);
         $config = ExportConfig::getServiceConfig();
-        
+
         return $this->handlePrintSingle($request, $service, $config);
     }
 

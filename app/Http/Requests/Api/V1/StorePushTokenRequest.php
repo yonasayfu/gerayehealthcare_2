@@ -20,4 +20,3 @@ class StorePushTokenRequest extends FormRequest
         ];
     }
 }
-

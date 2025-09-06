@@ -10,8 +10,11 @@ class MedicalDocumentPolicy
 {
     public function view(User $user, MedicalDocument $doc): bool
     {
-        if ($user->staff && $doc->created_by_staff_id === $user->staff->id) return true;
+        if ($user->staff && $doc->created_by_staff_id === $user->staff->id) {
+            return true;
+        }
         $patient = Patient::where('user_id', $user->id)->first();
+
         return $patient && $doc->patient_id === $patient->id;
     }
 

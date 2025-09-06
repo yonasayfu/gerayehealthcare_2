@@ -82,7 +82,7 @@ class MessageRules
      */
     public static function validateMessageOrAttachment(array $data): bool
     {
-        return !empty($data['message']) || !empty($data['attachment']);
+        return ! empty($data['message']) || ! empty($data['attachment']);
     }
 
     /**
@@ -163,13 +163,13 @@ class MessageRules
     {
         // Remove potentially harmful content
         $message = strip_tags($message);
-        
+
         // Trim whitespace
         $message = trim($message);
-        
+
         // Remove excessive line breaks
         $message = preg_replace('/\n{3,}/', "\n\n", $message);
-        
+
         return $message;
     }
 

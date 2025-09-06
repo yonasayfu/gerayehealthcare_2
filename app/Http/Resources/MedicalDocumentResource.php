@@ -15,13 +15,12 @@ class MedicalDocumentResource extends JsonResource
             'document_type' => $this->document_type,
             'document_date' => optional($this->document_date)->toDateString(),
             'patient' => $this->whenLoaded('patient', function () {
-                return [ 'id' => $this->patient->id, 'full_name' => $this->patient->full_name ];
+                return ['id' => $this->patient->id, 'full_name' => $this->patient->full_name];
             }),
             'created_by' => $this->whenLoaded('createdBy', function () {
-                return [ 'id' => $this->createdBy->id, 'full_name' => $this->createdBy->full_name ];
+                return ['id' => $this->createdBy->id, 'full_name' => $this->createdBy->full_name];
             }),
             'summary' => $this->summary,
         ];
     }
 }
-

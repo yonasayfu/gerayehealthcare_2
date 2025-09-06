@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Staff;
 use App\Models\InventoryItem;
 use App\Models\InventoryRequest;
+use App\Models\Staff;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class InventoryRequestSeeder extends Seeder
 {

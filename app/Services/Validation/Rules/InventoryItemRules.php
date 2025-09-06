@@ -27,7 +27,7 @@ class InventoryItemRules extends BaseResourceRules
             'reorder_level' => 'nullable|integer|min:0',
         ];
     }
-    
+
     public static function update($item): array
     {
         return [

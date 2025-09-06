@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Models\Invoice;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -60,6 +60,7 @@ class OptimizedDashboardController extends Controller
         $chartData = Cache::remember('admin_dashboard_charts', 600, function () {
             $last30Days = collect(range(29, 0))->map(function ($daysAgo) {
                 $date = now()->subDays($daysAgo);
+
                 return [
                     'date' => $date->format('Y-m-d'),
                     'patients' => Patient::whereDate('created_at', $date)->count(),

@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\ReferralDocument;
+use Illuminate\Database\Seeder;
 
 class ReferralDocumentSeeder extends Seeder
 {

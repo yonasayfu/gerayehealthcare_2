@@ -21,7 +21,7 @@ class PartnerEngagementService extends BaseService
         return $query->where(function ($q) use ($search) {
             // Base fields
             $q->where('engagement_type', 'ilike', "%{$search}%")
-              ->orWhere('summary', 'ilike', "%{$search}%");
+                ->orWhere('summary', 'ilike', "%{$search}%");
 
             // Related Partner name
             $q->orWhereHas('partner', function ($qp) use ($search) {
@@ -31,7 +31,7 @@ class PartnerEngagementService extends BaseService
             // Related Staff first/last name
             $q->orWhereHas('staff', function ($qs) use ($search) {
                 $qs->where('first_name', 'ilike', "%{$search}%")
-                   ->orWhere('last_name', 'ilike', "%{$search}%");
+                    ->orWhere('last_name', 'ilike', "%{$search}%");
             });
         });
     }

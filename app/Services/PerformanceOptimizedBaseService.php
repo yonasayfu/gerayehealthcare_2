@@ -2,21 +2,22 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use App\Exceptions\ResourceNotFoundException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
 class PerformanceOptimizedBaseService extends BaseService
 {
     protected $defaultWith = [];
+
     protected $cachePrefix = '';
+
     protected $cacheTtl = 300; // 5 minutes
 
     public function getAll(Request $request, array $with = [])
     {
         // Use default relationships if none specified
-        $relationships = !empty($with) ? $with : $this->defaultWith;
+        $relationships = ! empty($with) ? $with : $this->defaultWith;
 
         $query = $this->model->query()->with($relationships);
 
@@ -35,7 +36,7 @@ class PerformanceOptimizedBaseService extends BaseService
 
     public function getForSelect(string $displayField = 'name', string $valueField = 'id', int $limit = 1000)
     {
-        $cacheKey = $this->cachePrefix . '_select_options';
+        $cacheKey = $this->cachePrefix.'_select_options';
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($displayField, $valueField, $limit) {
             return $this->model->select([$valueField, $displayField])
@@ -47,15 +48,16 @@ class PerformanceOptimizedBaseService extends BaseService
 
     public function getById(int $id, array $with = [])
     {
-        $relationships = !empty($with) ? $with : $this->defaultWith;
-        $cacheKey = $this->cachePrefix . '_single_' . $id;
+        $relationships = ! empty($with) ? $with : $this->defaultWith;
+        $cacheKey = $this->cachePrefix.'_single_'.$id;
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $relationships) {
             $query = $this->model->query()->with($relationships);
             $model = $query->find($id);
-            if (!$model) {
-                throw new ResourceNotFoundException(class_basename($this->model) . ' not found.');
+            if (! $model) {
+                throw new ResourceNotFoundException(class_basename($this->model).' not found.');
             }
+
             return $model;
         });
     }
@@ -97,7 +99,7 @@ class PerformanceOptimizedBaseService extends BaseService
      */
     public function getDashboardStats(): array
     {
-        $cacheKey = $this->cachePrefix . '_dashboard_stats';
+        $cacheKey = $this->cachePrefix.'_dashboard_stats';
 
         return Cache::remember($cacheKey, 600, function () { // 10 minutes for stats
             return [
@@ -113,7 +115,7 @@ class PerformanceOptimizedBaseService extends BaseService
      */
     protected function clearCache(): void
     {
-        $pattern = $this->cachePrefix . '_*';
+        $pattern = $this->cachePrefix.'_*';
         // In production, you might want to use Redis for pattern-based deletion
         Cache::flush(); // For now, simple approach
     }

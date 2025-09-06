@@ -42,6 +42,7 @@ class ReferralService extends BaseService
     public function printSingle(Request $request, $id)
     {
         $referral = Referral::findOrFail($id);
+
         return $this->handlePrintSingle($request, $referral, $this->getExportConfig());
     }
 }

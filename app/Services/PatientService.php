@@ -2,13 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Patient;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
-use App\Services\Insurance\EmployeeInsuranceRecordService;
+use App\Models\Patient;
 use App\Models\Staff;
+use App\Services\Insurance\EmployeeInsuranceRecordService;
+use Illuminate\Support\Facades\Auth;
 
 class PatientService extends BaseService
 {
@@ -25,7 +23,7 @@ class PatientService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('full_name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%");
+            ->orWhere('email', 'ilike', "%{$search}%");
     }
 
     public function create(array|object $data): Patient
@@ -36,9 +34,9 @@ class PatientService extends BaseService
             $user = Auth::user();
             $staffMember = Staff::where('user_id', $user->id)->first();
 
-            if (!$staffMember) {
+            if (! $staffMember) {
                 // Auto-provision a minimal Staff record for non-staff users (e.g., Super Admin) to track registrars
-                $fullName = trim((string)($user->name ?? ''));
+                $fullName = trim((string) ($user->name ?? ''));
                 $parts = preg_split('/\s+/', $fullName, -1, PREG_SPLIT_NO_EMPTY) ?: [];
                 $firstName = $parts[0] ?? ($user->first_name ?? 'Admin');
                 $lastName = $parts[1] ?? ($user->last_name ?? 'User');
@@ -78,8 +76,8 @@ class PatientService extends BaseService
         if (isset($data['corporate_client_id']) && isset($data['policy_id'])) {
             // Check if an existing record needs to be updated or a new one created
             $existingRecord = $patient->employeeInsuranceRecords()
-                                      ->where('policy_id', $data['policy_id'])
-                                      ->first();
+                ->where('policy_id', $data['policy_id'])
+                ->first();
 
             if ($existingRecord) {
                 $this->employeeInsuranceRecordService->update($existingRecord->id, [
@@ -104,8 +102,7 @@ class PatientService extends BaseService
             'registeredByStaff',
             'employeeInsuranceRecords.policy.corporateClient',
         ], $with));
+
         return $this->model->with($with)->findOrFail($id);
     }
-
-    
 }

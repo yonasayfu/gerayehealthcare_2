@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Services\SupplierService;
-use App\Models\Supplier;
-use App\Services\Validation\Rules\SupplierRules;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
+use App\Models\Supplier;
+use App\Services\SupplierService;
+use App\Services\Validation\Rules\SupplierRules;
+use Illuminate\Http\Request;
 
 class SupplierController extends BaseController
 {
@@ -32,6 +31,7 @@ class SupplierController extends BaseController
     public function printAll(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintAll($request, Supplier::class, $config);
     }
 
@@ -42,6 +42,7 @@ class SupplierController extends BaseController
     {
         $model = Supplier::findOrFail($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $model, $config);
     }
 

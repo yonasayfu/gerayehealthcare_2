@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 
 class RoleService extends BaseService
 {
@@ -15,6 +14,7 @@ class RoleService extends BaseService
     public function create(array|object $data): Role
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
 
@@ -24,6 +24,7 @@ class RoleService extends BaseService
         $role = $this->getById($id);
         $role->update(['name' => $data['name']]);
         $role->syncPermissions($data['permissions'] ?? []);
+
         return $role;
     }
 

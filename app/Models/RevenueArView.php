@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class RevenueArView extends Model
 {
     protected $table = 'revenue_ar_view';
+
     public $timestamps = false;
+
     protected $primaryKey = null;
+
     public $incrementing = false;
 
     protected $guarded = [];

@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CaregiverAssignmentResource;
+use App\Http\Resources\PatientBriefResource;
 use App\Models\CaregiverAssignment;
 use Illuminate\Http\Request;
-use App\Http\Resources\PatientBriefResource;
 
 class CaregiverAssignmentController extends Controller
 {

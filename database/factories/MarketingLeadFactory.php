@@ -36,11 +36,12 @@ class MarketingLeadFactory extends Factory
                 if ($attributes['status'] === 'Converted') {
                     return \App\Models\Patient::updateOrCreate([
                         'email' => $attributes['email']], [
-                        'full_name' => $attributes['first_name'] . ' ' . $attributes['last_name'],
-                        'phone_number' => $attributes['phone'],
-                        'patient_code' => 'PAT-' . str_pad(\App\Models\Patient::count() + 1, 5, '0', STR_PAD_LEFT),
-                    ])->id;
+                            'full_name' => $attributes['first_name'].' '.$attributes['last_name'],
+                            'phone_number' => $attributes['phone'],
+                            'patient_code' => 'PAT-'.str_pad(\App\Models\Patient::count() + 1, 5, '0', STR_PAD_LEFT),
+                        ])->id;
                 }
+
                 return null;
             },
             'conversion_date' => function (array $attributes) {

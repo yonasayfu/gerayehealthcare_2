@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreatePartnerEngagementDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\PartnerEngagement;
-use App\Services\PartnerEngagement\PartnerEngagementService;
 use App\Services\CachedDropdownService;
+use App\Services\PartnerEngagement\PartnerEngagementService;
 use App\Services\Validation\Rules\PartnerEngagementRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,7 +29,7 @@ class PartnerEngagementController extends BaseController
     {
         $data = $this->service->getAll($request, ['partner', 'staff']);
 
-        return Inertia::render($this->viewName . '/Index', [
+        return Inertia::render($this->viewName.'/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only([
                 'search',
@@ -55,7 +55,7 @@ class PartnerEngagementController extends BaseController
         // Ensure related Partner and Staff are loaded for the Show view
         $partnerEngagement = $this->service->getById($id, ['partner', 'staff']);
 
-        return Inertia::render($this->viewName . '/Show', [
+        return Inertia::render($this->viewName.'/Show', [
             'partnerEngagement' => $partnerEngagement,
         ]);
     }
@@ -76,7 +76,7 @@ class PartnerEngagementController extends BaseController
             'staff' => $staff->map(function ($staffMember) {
                 return [
                     'id' => $staffMember->id,
-                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
+                    'name' => $staffMember->first_name.' '.$staffMember->last_name,
                 ];
             }),
         ]);
@@ -101,7 +101,7 @@ class PartnerEngagementController extends BaseController
             'staff' => $staff->map(function ($staffMember) {
                 return [
                     'id' => $staffMember->id,
-                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
+                    'name' => $staffMember->first_name.' '.$staffMember->last_name,
                 ];
             }),
         ]);

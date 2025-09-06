@@ -2,15 +2,13 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\GroupMessage;
+use App\Models\Message;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Message;
-use App\Models\GroupMessage;
 
 class NewMessage implements ShouldBroadcast
 {
@@ -35,11 +33,11 @@ class NewMessage implements ShouldBroadcast
     {
         if ($this->message instanceof Message) {
             return [
-                new PrivateChannel('users.' . $this->message->receiver_id),
+                new PrivateChannel('users.'.$this->message->receiver_id),
             ];
         } elseif ($this->message instanceof GroupMessage) {
             return [
-                new PrivateChannel('groups.' . $this->message->group_id),
+                new PrivateChannel('groups.'.$this->message->group_id),
             ];
         }
 

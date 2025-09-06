@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\MarketingCampaign;
 use App\Models\CampaignMetric;
 use App\Models\Invoice;
+use App\Models\MarketingCampaign;
 use App\Models\VisitService;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class QuarterlyReportsDemoSeeder extends Seeder
 {

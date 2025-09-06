@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateCampaignContentDTO;
 use App\Models\CampaignContent;
 use Illuminate\Http\Request;
 
@@ -16,7 +15,7 @@ class CampaignContentService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('title', 'ilike', "%{$search}%")
-              ->orWhere('description', 'ilike', "%{$search}%");
+            ->orWhere('description', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -30,7 +29,7 @@ class CampaignContentService extends BaseService
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
+                    ->orWhere('description', 'ilike', "%{$search}%");
             });
         }
 
@@ -61,6 +60,4 @@ class CampaignContentService extends BaseService
         // Preserve current query string so pagination maintains filters/sort
         return $query->paginate($request->input('per_page', 5))->withQueryString();
     }
-
-    
 }

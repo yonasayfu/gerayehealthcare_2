@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateServiceDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\ServiceService;
 use App\Models\Service;
+use App\Services\ServiceService;
 use App\Services\Validation\Rules\ServiceRules;
 
 class ServiceController extends BaseController

@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\PatientCreatedFromRecommendation;
 use App\Models\Patient;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class CreatePatientFromRecommendation
 {
@@ -33,7 +31,7 @@ class CreatePatientFromRecommendation
                 'emergency_contact' => null,
                 'source' => 'Event Recommendation',
                 'geolocation' => null,
-                'patient_code' => 'PAT-' . str_pad(Patient::count() + 1, 5, '0', STR_PAD_LEFT),
+                'patient_code' => 'PAT-'.str_pad(Patient::count() + 1, 5, '0', STR_PAD_LEFT),
             ]
         );
 

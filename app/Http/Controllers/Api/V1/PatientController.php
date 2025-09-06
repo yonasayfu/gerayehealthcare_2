@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\UpdateSelfPatientRequest;
 use App\Http\Resources\PatientResource;
 use App\Models\Patient;
 use App\Services\PatientService;
 use Illuminate\Http\Request;
-use App\Http\Requests\Api\V1\UpdateSelfPatientRequest;
 
 class PatientController extends Controller
 {
@@ -21,6 +21,7 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         $patients = $this->patientService->getAll($request);
+
         return PatientResource::collection($patients);
     }
 
@@ -35,7 +36,7 @@ class PatientController extends Controller
         $user = $request->user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             return response()->json(['message' => 'Patient record not found for this user'], 404);
         }
 
@@ -48,7 +49,7 @@ class PatientController extends Controller
         $user = $request->user();
         $patient = Patient::where('user_id', $user->id)->first();
 
-        if (!$patient) {
+        if (! $patient) {
             return response()->json(['message' => 'Patient record not found for this user'], 404);
         }
 

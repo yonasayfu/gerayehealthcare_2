@@ -3,7 +3,6 @@
 namespace App\Services\Insurance;
 
 use App\Models\InsuranceClaim;
-use App\DTOs\CreateInsuranceClaimDTO;
 use App\Services\BaseService;
 use Illuminate\Support\Facades\Log;
 
@@ -17,6 +16,7 @@ class InsuranceClaimService extends BaseService
     public function create(array|object $data): InsuranceClaim
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
 
@@ -26,7 +26,7 @@ class InsuranceClaimService extends BaseService
     public function processPayment(int $claimId, array $paymentData): InsuranceClaim
     {
         $claim = $this->getById($claimId);
-        
+
         $updateData = [
             'paid_amount' => $paymentData['paid_amount'],
             'payment_received_at' => $paymentData['payment_received_at'] ?? now(),

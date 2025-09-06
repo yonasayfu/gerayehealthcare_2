@@ -16,13 +16,15 @@ class OptimizedPatientController extends OptimizedBaseController
 
     // Define eager loading relationships to prevent N+1 queries
     protected $indexWith = ['corporateClient', 'insurancePolicy'];
+
     protected $showWith = ['corporateClient', 'insurancePolicy', 'visitServices'];
+
     protected $editWith = ['corporateClient', 'insurancePolicy'];
 
     public function __construct(OptimizedPatientService $patientService)
     {
         $this->patientService = $patientService;
-        
+
         parent::__construct(
             $patientService,
             PatientRules::class,
@@ -37,10 +39,10 @@ class OptimizedPatientController extends OptimizedBaseController
     {
         // Use optimized service with caching and eager loading
         $patients = $this->patientService->getAll($request, $this->indexWith);
-        
+
         // Get cached statistics for the dashboard info
         $statistics = $this->patientService->getStatistics();
-        
+
         return Inertia::render($this->viewName.'/Index', [
             'patients' => $patients,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
@@ -52,7 +54,7 @@ class OptimizedPatientController extends OptimizedBaseController
     {
         // Use optimized service with eager loading
         $patient = $this->patientService->getById($id, $this->showWith);
-        
+
         return Inertia::render($this->viewName.'/Show', [
             'patient' => $patient,
         ]);
@@ -62,7 +64,7 @@ class OptimizedPatientController extends OptimizedBaseController
     {
         // Use cached form data
         $formData = $this->patientService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Create', $formData);
     }
 
@@ -71,7 +73,7 @@ class OptimizedPatientController extends OptimizedBaseController
         // Use optimized service with eager loading
         $patient = $this->patientService->getById($id, $this->editWith);
         $formData = $this->patientService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Edit', array_merge([
             'patient' => $patient,
         ], $formData));
@@ -80,7 +82,7 @@ class OptimizedPatientController extends OptimizedBaseController
     public function store(Request $request)
     {
         $validatedData = $request->validate(PatientRules::create());
-        
+
         // Use DTO for data transfer
         $dto = CreatePatientDTO::from($validatedData);
         $patient = $this->patientService->create($dto);
@@ -93,7 +95,7 @@ class OptimizedPatientController extends OptimizedBaseController
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate(PatientRules::update());
-        
+
         // Use DTO for data transfer
         $dto = CreatePatientDTO::from($validatedData);
         $patient = $this->patientService->update($id, $dto);
@@ -137,14 +139,14 @@ class OptimizedPatientController extends OptimizedBaseController
     public function quickSearch(Request $request)
     {
         $search = $request->input('q');
-        
+
         if (strlen($search) < 2) {
             return response()->json([]);
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'patient_quick_search_' . md5($search);
-        
+        $cacheKey = 'patient_quick_search_'.md5($search);
+
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return Patient::where('full_name', 'ilike', "%{$search}%")
                 ->orWhere('patient_code', 'ilike', "%{$search}%")

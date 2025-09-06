@@ -2,34 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingCampaign;
-use App\Models\LandingPage;
-use App\Models\Staff;
-use App\Models\Patient;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class MarketingLead extends Model
 {
     use HasFactory;
+
     protected static function booted()
     {
         static::creating(function ($lead) {
             if (empty($lead->lead_code)) {
                 DB::transaction(function () use ($lead) {
                     $latestLead = static::lockForUpdate()
-                                            ->whereNotNull('lead_code')
-                                            ->orderBy('id', 'desc')
-                                            ->first();
+                        ->whereNotNull('lead_code')
+                        ->orderBy('id', 'desc')
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestLead && preg_match('/LEAD-(\d+)/', $latestLead->lead_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
-                    $lead->lead_code = 'LEAD-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $lead->lead_code = 'LEAD-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });

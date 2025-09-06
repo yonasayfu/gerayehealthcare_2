@@ -51,7 +51,7 @@ use Inertia\Inertia;
  */
 
 // Public & General
-Route::get('/', fn() => Inertia::render('Welcome'))->name('home');
+Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 
 // Backward-compatible redirect: /admin -> /dashboard
 Route::get('/admin', function () {
@@ -63,76 +63,78 @@ Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPd
     ->middleware('signed')
     ->name('invoices.public_pdf');
 
-// Performance testing route
-Route::get('/performance-test', function (Request $request) {
-    $startTime = microtime(true);
-    $queryCount = 0;
+if (app()->environment('local')) {
+    // Performance testing route
+    Route::get('/performance-test', function (Request $request) {
+        $startTime = microtime(true);
+        $queryCount = 0;
 
-    // Listen to queries
-    DB::listen(function ($query) use (&$queryCount) {
-        $queryCount++;
-    });
+        // Listen to queries
+        DB::listen(function ($query) use (&$queryCount) {
+            $queryCount++;
+        });
 
-    $results = [];
+        $results = [];
 
-    // Test 1: Simple database connection
-    $testStart = microtime(true);
-    try {
-        DB::connection()->getPdo();
-        $results['database_connection'] = [
-            'status' => 'success',
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
-        ];
-    } catch (Exception $e) {
-        $results['database_connection'] = [
-            'status' => 'error',
-            'error' => $e->getMessage(),
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
-        ];
-    }
+        // Test 1: Simple database connection
+        $testStart = microtime(true);
+        try {
+            DB::connection()->getPdo();
+            $results['database_connection'] = [
+                'status' => 'success',
+                'time' => round((microtime(true) - $testStart) * 1000, 2).' ms',
+            ];
+        } catch (Exception $e) {
+            $results['database_connection'] = [
+                'status' => 'error',
+                'error' => $e->getMessage(),
+                'time' => round((microtime(true) - $testStart) * 1000, 2).' ms',
+            ];
+        }
 
-    // Test 2: Basic model query
-    $testStart = microtime(true);
-    try {
-        $patientCount = \App\Models\Patient::count();
-        $results['basic_query'] = [
-            'status' => 'success',
-            'result' => "Found {$patientCount} patients",
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
-        ];
-    } catch (Exception $e) {
-        $results['basic_query'] = [
-            'status' => 'error',
-            'error' => $e->getMessage(),
-            'time' => round((microtime(true) - $testStart) * 1000, 2) . ' ms',
-        ];
-    }
+        // Test 2: Basic model query
+        $testStart = microtime(true);
+        try {
+            $patientCount = \App\Models\Patient::count();
+            $results['basic_query'] = [
+                'status' => 'success',
+                'result' => "Found {$patientCount} patients",
+                'time' => round((microtime(true) - $testStart) * 1000, 2).' ms',
+            ];
+        } catch (Exception $e) {
+            $results['basic_query'] = [
+                'status' => 'error',
+                'error' => $e->getMessage(),
+                'time' => round((microtime(true) - $testStart) * 1000, 2).' ms',
+            ];
+        }
 
-    $totalTime = microtime(true) - $startTime;
+        $totalTime = microtime(true) - $startTime;
 
-    $recommendations = [];
-    if ($totalTime > 0.1) {
-        $recommendations[] = 'Total execution time is ' . round($totalTime * 1000, 2) . 'ms. Consider optimizing slow operations.';
-    }
-    if ($queryCount > 10) {
-        $recommendations[] = "High query count ({$queryCount}). Consider using eager loading or caching.";
-    }
-    if (empty($recommendations)) {
-        $recommendations[] = 'Backend performance looks good. Check frontend optimization and network conditions.';
-    }
+        $recommendations = [];
+        if ($totalTime > 0.1) {
+            $recommendations[] = 'Total execution time is '.round($totalTime * 1000, 2).'ms. Consider optimizing slow operations.';
+        }
+        if ($queryCount > 10) {
+            $recommendations[] = "High query count ({$queryCount}). Consider using eager loading or caching.";
+        }
+        if (empty($recommendations)) {
+            $recommendations[] = 'Backend performance looks good. Check frontend optimization and network conditions.';
+        }
 
-    return response()->json([
-        'total_execution_time' => round($totalTime * 1000, 2) . ' ms',
-        'total_queries' => $queryCount,
-        'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB',
-        'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB',
-        'php_version' => PHP_VERSION,
-        'laravel_version' => app()->version(),
-        'environment' => app()->environment(),
-        'tests' => $results,
-        'recommendations' => $recommendations,
-    ]);
-})->name('performance.test');
+        return response()->json([
+            'total_execution_time' => round($totalTime * 1000, 2).' ms',
+            'total_queries' => $queryCount,
+            'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2).' MB',
+            'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2).' MB',
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+            'environment' => app()->environment(),
+            'tests' => $results,
+            'recommendations' => $recommendations,
+        ]);
+    })->name('performance.test');
+}
 
 // Shared Dashboard
 Route::get('dashboard', function () {
@@ -145,8 +147,6 @@ Route::get('dashboard', function () {
 
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-
 
 // Messaging & Notifications
 Route::middleware(['auth'])->group(function () {
@@ -808,7 +808,7 @@ Route::prefix('reconciliation')->name('reconciliation.')->middleware('can:reconc
 });
 
 // Staff-Specific
-Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
+Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
@@ -852,9 +852,9 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
     });
 
 // Auth & Settings
-require __DIR__ . '/auth.php';
-require __DIR__ . '/settings.php';
-require __DIR__ . '/marketing.php';
+require __DIR__.'/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/marketing.php';
 
 // Test Routes (remove in production)
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -870,8 +870,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('test.flash-message');
 });
 
-// Cache Performance Test Routes (remove in production)
-require __DIR__ . '/cache-test.php';
+if (app()->environment('local')) {
+    // Cache Performance Test Routes (local only)
+    require __DIR__.'/cache-test.php';
 
-// Performance Comparison Test Routes (remove in production)
-require __DIR__ . '/performance-test.php';
+    // Performance Comparison Test Routes (local only)
+    require __DIR__.'/performance-test.php';
+}

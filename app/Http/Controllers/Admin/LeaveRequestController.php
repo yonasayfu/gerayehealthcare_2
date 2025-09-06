@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Services\LeaveRequestService;
 use App\Models\LeaveRequest;
+use App\Services\LeaveRequestService;
 use App\Services\Validation\Rules\LeaveRequestRules;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class LeaveRequestController extends BaseController
 {
@@ -22,6 +20,4 @@ class LeaveRequestController extends BaseController
             'App\\DTOs\\UpdateLeaveRequestDTO'
         );
     }
-
-    
 }

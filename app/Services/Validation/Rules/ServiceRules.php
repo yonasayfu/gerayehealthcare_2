@@ -15,7 +15,7 @@ class ServiceRules extends BaseResourceRules
             'is_active' => 'boolean',
         ];
     }
-    
+
     public static function update($service): array
     {
         return [

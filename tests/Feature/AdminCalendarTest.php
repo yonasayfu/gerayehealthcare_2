@@ -43,7 +43,7 @@ class AdminCalendarTest extends TestCase
             'end_time' => '2025-08-15 11:00:00',
             'status' => 'Available',
         ]);
-        
+
         // Expect the time to be the same as what we stored (local time)
         $expectedLocalTime = '2025-08-15 10:00:00';
 

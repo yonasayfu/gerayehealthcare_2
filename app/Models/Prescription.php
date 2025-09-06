@@ -44,7 +44,7 @@ class Prescription extends Model
 
     public function scopeWithList($query)
     {
-        return $query->select(['id','patient_id','prescribed_date','status'])
+        return $query->select(['id', 'patient_id', 'prescribed_date', 'status'])
             ->with([
                 'patient:id,full_name,patient_code',
             ]);

@@ -11,8 +11,8 @@ class MessageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'sender' => [ 'id' => $this->sender_id, 'name' => optional($this->sender)->name ],
-            'receiver' => [ 'id' => $this->receiver_id, 'name' => optional($this->receiver)->name ],
+            'sender' => ['id' => $this->sender_id, 'name' => optional($this->sender)->name],
+            'receiver' => ['id' => $this->receiver_id, 'name' => optional($this->receiver)->name],
             'message' => $this->message,
             'attachment_url' => $this->attachment_url,
             'attachment_filename' => $this->attachment_filename,
@@ -21,4 +21,3 @@ class MessageResource extends JsonResource
         ];
     }
 }
-

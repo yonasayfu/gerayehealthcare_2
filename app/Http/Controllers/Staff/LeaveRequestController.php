@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Staff;
 
 use App\DTOs\CreateLeaveRequestDTO;
-use App\Services\LeaveRequestService;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreStaffLeaveRequest;
 use App\Models\LeaveRequest;
+use App\Services\LeaveRequestService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use App\Http\Requests\StoreStaffLeaveRequest;
 
 class LeaveRequestController extends Controller
 {

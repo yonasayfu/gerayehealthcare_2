@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateMarketingLeadDTO;
 use App\DTOs\UpdateMarketingLeadDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\MarketingLeadService;
-use App\Models\MarketingLead;
-use App\Models\MarketingCampaign;
 use App\Models\LandingPage;
-use App\Models\Staff;
+use App\Models\MarketingCampaign;
+use App\Models\MarketingLead;
 use App\Models\Patient;
+use App\Models\Staff;
+use App\Services\MarketingLeadService;
 use App\Services\Validation\Rules\MarketingLeadRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -38,17 +38,17 @@ class MarketingLeadController extends BaseController
             ->get()
             ->map(fn ($s) => [
                 'id' => $s->id,
-                'full_name' => trim(($s->first_name ?? '') . ' ' . ($s->last_name ?? '')),
+                'full_name' => trim(($s->first_name ?? '').' '.($s->last_name ?? '')),
             ]);
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
 
         $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
         $countries = [
             'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
-            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark'
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark',
         ];
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'campaigns' => $campaigns,
             'landingPages' => $landingPages,
             'staffMembers' => $staffMembers,
@@ -68,17 +68,17 @@ class MarketingLeadController extends BaseController
             ->get()
             ->map(fn ($s) => [
                 'id' => $s->id,
-                'full_name' => trim(($s->first_name ?? '') . ' ' . ($s->last_name ?? '')),
+                'full_name' => trim(($s->first_name ?? '').' '.($s->last_name ?? '')),
             ]);
         $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
 
         $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
         $countries = [
             'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
-            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark'
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark',
         ];
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $marketingLead,
             'campaigns' => $campaigns,
             'landingPages' => $landingPages,

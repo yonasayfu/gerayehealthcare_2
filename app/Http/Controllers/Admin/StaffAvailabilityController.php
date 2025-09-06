@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Services\StaffAvailabilityService;
-use App\Models\StaffAvailability;
-use App\Models\Staff;
 use App\DTOs\CreateStaffAvailabilityDTO;
+use App\Http\Controllers\Base\BaseController;
+use App\Models\Staff;
+use App\Models\StaffAvailability;
+use App\Services\StaffAvailabilityService;
 use App\Services\Validation\Rules\StaffAvailabilityRules;
-use App\Services\Validation\Rules\GetCalendarEventsRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -51,6 +50,7 @@ class StaffAvailabilityController extends BaseController
         ]);
 
         $available = $this->service->getAvailableStaff($request->input('start_time'), $request->input('end_time'));
+
         return response()->json($available);
     }
 }

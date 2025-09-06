@@ -2,14 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\CaregiverAssignment;
-use App\Models\Staff;
-use Illuminate\Http\Request;
-use App\Notifications\NewCaregiverAssignment;
-use Illuminate\Support\Facades\Notification;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 use App\Events\CaregiverAssigned;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
+use App\Models\CaregiverAssignment;
+use Illuminate\Http\Request;
 
 class CaregiverAssignmentService extends BaseService
 {
@@ -22,8 +19,8 @@ class CaregiverAssignmentService extends BaseService
 
     protected function applySearch($query, $search)
     {
-        $query->whereHas('patient', fn($q) => $q->where('full_name', 'ilike', "%{$search}%"))
-              ->orWhereHas('staff', fn($q) => $q->where('first_name', 'ilike', "%{$search}%"));
+        $query->whereHas('patient', fn ($q) => $q->where('full_name', 'ilike', "%{$search}%"))
+            ->orWhereHas('staff', fn ($q) => $q->where('first_name', 'ilike', "%{$search}%"));
     }
 
     public function getAll(Request $request, array $with = [])
@@ -82,12 +79,10 @@ class CaregiverAssignmentService extends BaseService
         $assignment->load(['staff', 'patient']);
 
         $config = ExportConfig::getCaregiverAssignmentConfig()['single_record'];
-        $config['title'] = 'Assignment Record - #' . $assignment->id;
+        $config['title'] = 'Assignment Record - #'.$assignment->id;
         $config['document_title'] = 'Caregiver Assignment Record';
         $config['filename'] = "assignment-{$assignment->id}.pdf";
-        
+
         return $this->handlePrintSingle($assignment, $config);
     }
-
-   
 }

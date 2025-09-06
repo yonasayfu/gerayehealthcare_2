@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\StaffAvailability;
 use App\Models\Staff;
+use App\Models\StaffAvailability;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -32,15 +32,15 @@ class StaffAvailabilityService extends BaseService
         return $availabilities->map(function ($availability) {
             return [
                 'id' => $availability->id,
-                'title' => $availability->staff->first_name . ' (' . $availability->status . ')',
+                'title' => $availability->staff->first_name.' ('.$availability->status.')',
                 'start' => $availability->start_time->format('Y-m-d H:i:s'),
                 'end' => $availability->end_time->format('Y-m-d H:i:s'),
                 'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
                 'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
                 'extendedProps' => [
-                    'staff_name' => $availability->staff->first_name . ' ' . $availability->staff->last_name,
+                    'staff_name' => $availability->staff->first_name.' '.$availability->staff->last_name,
                     'status' => $availability->status,
-                ]
+                ],
             ];
         })->toArray();
     }
@@ -76,6 +76,7 @@ class StaffAvailabilityService extends BaseService
         $data = is_object($data) ? (array) $data : $data;
         // Prevent overlapping slot on create as well
         $this->checkOverlap($data, null);
+
         return parent::create($data);
     }
 
@@ -83,6 +84,7 @@ class StaffAvailabilityService extends BaseService
     {
         $data = is_object($data) ? (array) $data : $data;
         $this->checkOverlap($data, $id);
+
         return parent::update($id, $data);
     }
 
@@ -103,7 +105,7 @@ class StaffAvailabilityService extends BaseService
 
         if ($overlap->exists()) {
             throw ValidationException::withMessages([
-                'error' => 'Conflict: Overlapping availability slot exists for this staff within the selected time range.'
+                'error' => 'Conflict: Overlapping availability slot exists for this staff within the selected time range.',
             ]);
         }
     }
@@ -121,7 +123,7 @@ class StaffAvailabilityService extends BaseService
             ->all();
 
         return Staff::select('id', 'first_name', 'last_name')
-            ->when(!empty($conflictingStaffIds), function ($q) use ($conflictingStaffIds) {
+            ->when(! empty($conflictingStaffIds), function ($q) use ($conflictingStaffIds) {
                 $q->whereNotIn('id', $conflictingStaffIds);
             })
             ->orderBy('first_name')

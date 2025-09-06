@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::table('inventory_requests', function (Blueprint $table) {
             $table->dropForeign(['item_id']);
             $table->foreign('item_id')
-                  ->references('id')
-                  ->on('inventory_items')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('inventory_items')
+                ->onDelete('cascade');
         });
     }
 
@@ -28,8 +28,8 @@ return new class extends Migration
         Schema::table('inventory_requests', function (Blueprint $table) {
             $table->dropForeign(['item_id']);
             $table->foreign('item_id')
-                  ->references('id')
-                  ->on('inventory_items');
+                ->references('id')
+                ->on('inventory_items');
         });
     }
 };

@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateMarketingLeadDTO;
 use App\Models\MarketingLead;
 use Illuminate\Http\Request;
 
@@ -16,9 +15,9 @@ class MarketingLeadService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
-                  ->orWhere('lead_code', 'ilike', "%{$search}%");
+            ->orWhere('last_name', 'ilike', "%{$search}%")
+            ->orWhere('email', 'ilike', "%{$search}%")
+            ->orWhere('lead_code', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -70,7 +69,7 @@ class MarketingLeadService extends BaseService
     public function getById(int $id, array $with = [])
     {
         $relations = array_merge(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'], $with);
+
         return parent::getById($id, $relations);
     }
-    
 }

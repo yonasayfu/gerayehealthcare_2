@@ -2,21 +2,11 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Services\Validation\Rules\CorporateClientRules;
 use App\DTOs\CreateCorporateClientDTO;
-
 use App\Http\Controllers\Base\BaseController;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
 use App\Models\CorporateClient;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
-use Inertia\Inertia;
-use App\Http\Requests\StoreCorporateClientRequest;
-use App\Http\Requests\UpdateCorporateClientRequest;
 use App\Services\Insurance\CorporateClientService;
+use App\Services\Validation\Rules\CorporateClientRules;
 
 class CorporateClientController extends BaseController
 {
@@ -31,5 +21,4 @@ class CorporateClientController extends BaseController
             CreateCorporateClientDTO::class
         );
     }
-
 }

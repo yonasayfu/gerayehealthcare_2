@@ -6,8 +6,8 @@ use App\DTOs\CreatePartnerDTO;
 use App\DTOs\UpdatePartnerDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Partner;
-use App\Services\Partner\PartnerService;
 use App\Services\CachedDropdownService;
+use App\Services\Partner\PartnerService;
 use App\Services\Validation\Rules\PartnerRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -35,7 +35,7 @@ class PartnerController extends BaseController
             'staff' => $staff->map(function ($staffMember) {
                 return [
                     'id' => $staffMember->id,
-                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
+                    'name' => $staffMember->first_name.' '.$staffMember->last_name,
                 ];
             }),
         ]);
@@ -53,7 +53,7 @@ class PartnerController extends BaseController
             'staff' => $staff->map(function ($staffMember) {
                 return [
                     'id' => $staffMember->id,
-                    'name' => $staffMember->first_name . ' ' . $staffMember->last_name,
+                    'name' => $staffMember->first_name.' '.$staffMember->last_name,
                 ];
             }),
         ]);
@@ -91,7 +91,7 @@ class PartnerController extends BaseController
 
         // Do not overwrite existing DB values with nulls
         $payload = array_filter($payload, function ($value) {
-            return !is_null($value);
+            return ! is_null($value);
         });
 
         $this->service->update($id, $payload);

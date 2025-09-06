@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateEventStaffAssignmentDTO;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\EventStaffAssignment;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class EventStaffAssignmentService extends BaseService
 {
@@ -45,6 +44,7 @@ class EventStaffAssignmentService extends BaseService
     public function getById(int $id, array $with = []): EventStaffAssignment
     {
         $with = array_unique(array_merge(['event', 'staff'], $with));
+
         return $this->model->with($with)->findOrFail($id);
     }
 

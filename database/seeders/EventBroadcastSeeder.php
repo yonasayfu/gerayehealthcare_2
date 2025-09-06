@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\Staff;
 use App\Models\EventBroadcast;
+use App\Models\Staff;
 use Illuminate\Database\Seeder;
 
 class EventBroadcastSeeder extends Seeder

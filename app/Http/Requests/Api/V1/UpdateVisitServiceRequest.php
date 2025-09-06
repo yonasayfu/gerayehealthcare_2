@@ -19,4 +19,3 @@ class UpdateVisitServiceRequest extends FormRequest
         ];
     }
 }
-

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::table('marketing_tasks', function (Blueprint $table) {
             $table->dropForeign(['assigned_to_staff_id']);
             $table->foreign('assigned_to_staff_id')
-                  ->references('id')
-                  ->on('staff')
-                  ->onDelete('set null');
+                ->references('id')
+                ->on('staff')
+                ->onDelete('set null');
         });
     }
 
@@ -28,9 +28,9 @@ return new class extends Migration
         Schema::table('marketing_tasks', function (Blueprint $table) {
             $table->dropForeign(['assigned_to_staff_id']);
             $table->foreign('assigned_to_staff_id')
-                  ->references('id')
-                  ->on('staff')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('staff')
+                ->onDelete('cascade');
         });
     }
 };

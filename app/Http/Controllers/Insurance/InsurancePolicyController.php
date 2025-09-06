@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers\Insurance;
 
+use App\DTOs\CreateInsurancePolicyDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Models\InsuranceCompany;
+use App\Http\Traits\ExportableTrait;
 use App\Models\CorporateClient;
+use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
 use App\Services\Insurance\InsurancePolicyService;
 use App\Services\Validation\Rules\InsurancePolicyRules;
-use App\DTOs\CreateInsurancePolicyDTO;
-use App\Http\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class InsurancePolicyController extends BaseController
 {
     use ExportableTrait;
+
     public function __construct(InsurancePolicyService $insurancePolicyService)
     {
         parent::__construct(
@@ -33,7 +34,7 @@ class InsurancePolicyController extends BaseController
         $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
         $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'insuranceCompanies' => $insuranceCompanies,
             'corporateClients' => $corporateClients,
         ]);
@@ -45,7 +46,7 @@ class InsurancePolicyController extends BaseController
         $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
         $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $insurancePolicy,
             'insuranceCompanies' => $insuranceCompanies,
             'corporateClients' => $corporateClients,
@@ -57,10 +58,10 @@ class InsurancePolicyController extends BaseController
         // Eager-load related company and client so Show.vue has the data
         $insurancePolicy = InsurancePolicy::with([
             'insuranceCompany:id,name',
-            'corporateClient:id,organization_name'
+            'corporateClient:id,organization_name',
         ])->findOrFail($id);
 
-        return Inertia::render($this->viewName . '/Show', [
+        return Inertia::render($this->viewName.'/Show', [
             lcfirst(class_basename($this->modelClass)) => $insurancePolicy,
         ]);
     }
@@ -72,6 +73,7 @@ class InsurancePolicyController extends BaseController
     public function export(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handleExport($request, InsurancePolicy::class, $config);
     }
 
@@ -81,6 +83,7 @@ class InsurancePolicyController extends BaseController
     public function printCurrent(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintCurrent($request, InsurancePolicy::class, $config);
     }
 
@@ -91,6 +94,7 @@ class InsurancePolicyController extends BaseController
     {
         $model = InsurancePolicy::with(['insuranceCompany:id,name', 'corporateClient:id,organization_name'])->findOrFail($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $model, $config);
     }
 

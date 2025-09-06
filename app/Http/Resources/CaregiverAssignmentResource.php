@@ -29,4 +29,3 @@ class CaregiverAssignmentResource extends JsonResource
         ];
     }
 }
-

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Models\Staff;
-use App\Models\Event;
-use App\Services\EventService;
-use App\Services\Validation\Rules\EventRules;
 use App\DTOs\CreateEventDTO;
 use App\Enums\RoleEnum;
-use Inertia\Inertia;
+use App\Http\Controllers\Base\BaseController;
+use App\Models\Event;
+use App\Models\Staff;
+use App\Services\EventService;
+use App\Services\Validation\Rules\EventRules;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class EventController extends BaseController
 {
@@ -24,7 +24,7 @@ class EventController extends BaseController
             Event::class,
             CreateEventDTO::class
         );
-        $this->middleware('role:' . RoleEnum::SUPER_ADMIN->value . '|' . RoleEnum::ADMIN->value);
+        $this->middleware('role:'.RoleEnum::SUPER_ADMIN->value.'|'.RoleEnum::ADMIN->value);
     }
 
     public function export(Request $request)
@@ -46,7 +46,7 @@ class EventController extends BaseController
     {
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'staff' => $staff,
         ]);
     }
@@ -56,10 +56,9 @@ class EventController extends BaseController
         $event = $this->service->getById($id);
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $event,
             'staff' => $staff,
         ]);
     }
 }
-

@@ -24,9 +24,9 @@ class NormalizeRoleNames extends Command
         // Ensure canonical roles exist
         $canonical = RoleEnum::values();
         foreach ($canonical as $name) {
-            if (!Role::where('name', $name)->exists()) {
+            if (! Role::where('name', $name)->exists()) {
                 $this->line("Ensuring role exists: {$name}");
-                if (!$dry) {
+                if (! $dry) {
                     Role::findOrCreate($name, 'web');
                 }
             }
@@ -62,7 +62,7 @@ class NormalizeRoleNames extends Command
             $existing = Role::where('name', $target)->first();
             if ($existing) {
                 // Merge assignments into existing role
-                if (!$dry) {
+                if (! $dry) {
                     DB::table('model_has_roles')
                         ->where('role_id', $role->id)
                         ->update(['role_id' => $existing->id]);
@@ -71,7 +71,7 @@ class NormalizeRoleNames extends Command
                 $this->line("  Merged into existing '{$target}'");
             } else {
                 // Rename role directly
-                if (!$dry) {
+                if (! $dry) {
                     $role->name = $target;
                     $role->save();
                 }
@@ -81,12 +81,12 @@ class NormalizeRoleNames extends Command
             $changes++;
         }
 
-        if (!$dry) {
+        if (! $dry) {
             app(PermissionRegistrar::class)->forgetCachedPermissions();
         }
 
-        $this->info("Done. Changes: {$changes}. Cache cleared: " . ($dry ? 'no (dry-run)' : 'yes'));
+        $this->info("Done. Changes: {$changes}. Cache cleared: ".($dry ? 'no (dry-run)' : 'yes'));
+
         return self::SUCCESS;
     }
 }
-

@@ -26,7 +26,7 @@ class PatientRules extends BaseResourceRules
             'policy_id' => 'nullable|integer|exists:insurance_policies,id',
         ];
     }
-    
+
     public static function update($patient): array
     {
         return [

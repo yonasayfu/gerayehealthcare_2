@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Staff;
 use App\Models\StaffPayout;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class StaffPayoutDemoSeeder extends Seeder
 {

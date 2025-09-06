@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateInventoryItemDTO;
 use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +17,7 @@ class InventoryItemService extends BaseService
     {
         // Ensure supplier relation is always available for listings
         $with = array_unique(array_merge($with, ['supplier']));
+
         return parent::getAll($request, $with);
     }
 
@@ -26,16 +26,17 @@ class InventoryItemService extends BaseService
         // Ensure supplier is always available for Show view and merge any additional relations
         $with = array_unique(array_merge(['supplier'], $with));
         $model = $this->model->with($with)->find($id);
-        if (!$model) {
-            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model) . ' not found.');
+        if (! $model) {
+            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model).' not found.');
         }
+
         return $model;
     }
 
     protected function applySearch($query, $search)
     {
         $query->where('name', 'like', "%{$search}%")
-              ->orWhere('serial_number', 'like', "%{$search}%");
+            ->orWhere('serial_number', 'like', "%{$search}%");
     }
 
     public function delete(int $id): void

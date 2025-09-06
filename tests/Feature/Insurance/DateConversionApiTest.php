@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Insurance;
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Http\Controllers\Api\DateConversionController; // Assuming this controller handles the conversions
+use Tests\TestCase;
+
+// Assuming this controller handles the conversions
 
 class DateConversionApiTest extends TestCase
 {
@@ -22,11 +23,11 @@ class DateConversionApiTest extends TestCase
         $response = $this->postJson('/api/v1/convert-gregorian-to-ethiopian', $gregorianDate);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'year' => 2017,
-                     'month' => 1,
-                     'day' => 1,
-                 ]);
+            ->assertJson([
+                'year' => 2017,
+                'month' => 1,
+                'day' => 1,
+            ]);
     }
 
     /** @test */
@@ -41,11 +42,11 @@ class DateConversionApiTest extends TestCase
         $response = $this->postJson('/api/v1/convert-ethiopian-to-gregorian', $ethiopianDate);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'year' => 2024,
-                     'month' => 9,
-                     'day' => 11,
-                 ]);
+            ->assertJson([
+                'year' => 2024,
+                'month' => 9,
+                'day' => 11,
+            ]);
     }
 
     /** @test */
@@ -56,9 +57,9 @@ class DateConversionApiTest extends TestCase
         $response = $this->postJson('/api/v1/convert-to-ethiopian', ['date' => $gregorianDateString]);
 
         $response->assertStatus(200)
-                 ->assertJson([
-                     'ethiopian_date' => '2017-01-01',
-                 ]);
+            ->assertJson([
+                'ethiopian_date' => '2017-01-01',
+            ]);
     }
 
     /** @test */
@@ -69,7 +70,7 @@ class DateConversionApiTest extends TestCase
         $response = $this->postJson('/api/v1/convert-to-ethiopian', ['date' => $invalidDateString]);
 
         $response->assertStatus(422) // Unprocessable Entity for validation errors
-                 ->assertJsonValidationErrors(['date']);
+            ->assertJsonValidationErrors(['date']);
     }
 
     /** @test */
@@ -84,6 +85,6 @@ class DateConversionApiTest extends TestCase
         $response = $this->postJson('/api/v1/convert-ethiopian-to-gregorian', $invalidEthiopianDate);
 
         $response->assertStatus(422) // Unprocessable Entity for validation errors
-                 ->assertJsonValidationErrors(['month']);
+            ->assertJsonValidationErrors(['month']);
     }
 }

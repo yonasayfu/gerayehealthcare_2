@@ -17,7 +17,7 @@ class MyVisitRules extends BaseResourceRules
             'notes' => 'nullable|string',
         ];
     }
-    
+
     public static function update($visit): array
     {
         return [

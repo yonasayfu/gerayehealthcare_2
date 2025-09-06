@@ -22,8 +22,8 @@ class StaffSeeder extends Seeder
         ];
 
         foreach ($samples as $s) {
-            $email = strtoupper(substr($s['first'], 0, 1)) . preg_replace('/\s+/', '', $s['last']) . '@example.com';
-            $fullName = $s['first'] . ' ' . $s['last'];
+            $email = strtoupper(substr($s['first'], 0, 1)).preg_replace('/\s+/', '', $s['last']).'@example.com';
+            $fullName = $s['first'].' '.$s['last'];
 
             $user = User::updateOrCreate(
                 ['email' => $email],
@@ -39,7 +39,7 @@ class StaffSeeder extends Seeder
                 [
                     'first_name' => $s['first'],
                     'last_name' => $s['last'],
-                    'phone' => '+2519' . rand(10000000, 99999999),
+                    'phone' => '+2519'.rand(10000000, 99999999),
                     'position' => $s['position'],
                     'department' => 'Medical',
                     'role' => $s['position'],

@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateInvoiceDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\InvoiceService;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\VisitService;
+use App\Services\InvoiceService;
 use App\Services\Validation\Rules\InvoiceRules;
-use Illuminate\Http\Request;
-use App\DTOs\CreateInvoiceDTO;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class InvoiceController extends BaseController
 {
@@ -43,7 +43,7 @@ class InvoiceController extends BaseController
                 ->get();
         }
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'patients' => $patients,
             'selectedPatientId' => $selectedPatientId,
             'billableVisits' => $billableVisits,
@@ -81,6 +81,7 @@ class InvoiceController extends BaseController
     {
         $expiresAt = now()->addDays(3);
         $signedUrl = URL::signedRoute('invoices.public_pdf', ['invoice' => $invoice->id], $expiresAt);
+
         return response()->json([
             'url' => $signedUrl,
             'expires_at' => $expiresAt->toIso8601String(),
@@ -103,6 +104,7 @@ class InvoiceController extends BaseController
         $groups = $raw->groupBy('patient_id')->map(function ($items, $patientId) {
             $total = $items->sum('cost');
             $dates = $items->pluck('scheduled_at')->filter();
+
             return [
                 'patient_id' => $patientId,
                 'patient_name' => optional($items->first()->patient)->full_name,
@@ -114,7 +116,7 @@ class InvoiceController extends BaseController
             ];
         })->values();
 
-        return Inertia::render($this->viewName . '/Incoming', [
+        return Inertia::render($this->viewName.'/Incoming', [
             'groups' => $groups,
         ]);
     }
@@ -152,6 +154,7 @@ class InvoiceController extends BaseController
     public function approve(Invoice $invoice)
     {
         $invoice->update(['status' => 'Approved']);
+
         return redirect()->back()->with('banner', 'Invoice approved')->with('bannerStyle', 'success');
     }
 }

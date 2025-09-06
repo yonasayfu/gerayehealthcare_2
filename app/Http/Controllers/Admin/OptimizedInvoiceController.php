@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateInvoiceDTO;
 use App\Http\Controllers\Base\OptimizedBaseController;
-use App\Services\OptimizedInvoiceService;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\VisitService;
+use App\Services\OptimizedInvoiceService;
 use App\Services\Validation\Rules\InvoiceRules;
-use Illuminate\Http\Request;
-use App\DTOs\CreateInvoiceDTO;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
+use Inertia\Inertia;
 
 class OptimizedInvoiceController extends OptimizedBaseController
 {
@@ -22,7 +22,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
         'index' => ['patient:id,full_name', 'insuranceCompany:id,name'],
         'show' => ['patient', 'items.visitService.staff', 'insuranceCompany'],
         'create' => [],
-        'edit' => ['patient', 'items.visitService']
+        'edit' => ['patient', 'items.visitService'],
     ];
 
     public function __construct(OptimizedInvoiceService $invoiceService)
@@ -60,7 +60,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
             });
         }
 
-        return Inertia::render($this->viewName . '/Create', array_merge($formData, [
+        return Inertia::render($this->viewName.'/Create', array_merge($formData, [
             'selectedPatientId' => $selectedPatientId,
             'billableVisits' => $billableVisits,
         ]));
@@ -97,6 +97,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
     {
         $expiresAt = now()->addDays(3);
         $signedUrl = URL::signedRoute('invoices.public_pdf', ['invoice' => $invoice->id], $expiresAt);
+
         return response()->json([
             'url' => $signedUrl,
             'expires_at' => $expiresAt->toIso8601String(),
@@ -110,7 +111,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
     {
         $groups = $this->service->getPendingBillables();
 
-        return Inertia::render($this->viewName . '/Incoming', [
+        return Inertia::render($this->viewName.'/Incoming', [
             'groups' => $groups,
         ]);
     }
@@ -151,11 +152,11 @@ class OptimizedInvoiceController extends OptimizedBaseController
             'status' => 'Approved',
             'approved_at' => now(),
         ]);
-        
+
         // Clear related caches
         Cache::forget("invoice_single_{$invoice->id}");
         Cache::flush(); // Clear pattern-based caches
-        
+
         return redirect()->back()
             ->with('banner', 'Invoice approved')
             ->with('bannerStyle', 'success');
@@ -190,7 +191,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
     public function dashboardData(Request $request): JsonResponse
     {
         $stats = $this->service->getFinancialStats($request);
-        
+
         return response()->json([
             'success' => true,
             'data' => $stats,
@@ -203,20 +204,20 @@ class OptimizedInvoiceController extends OptimizedBaseController
     public function quickSearch(Request $request): JsonResponse
     {
         $query = $request->input('query', '');
-        
+
         if (empty($query)) {
             return response()->json(['data' => []]);
         }
 
-        $cacheKey = "invoice_search_" . md5($query);
-        
+        $cacheKey = 'invoice_search_'.md5($query);
+
         $results = Cache::remember($cacheKey, 300, function () use ($query) {
             return Invoice::with(['patient:id,full_name'])
                 ->where(function ($q) use ($query) {
                     $q->where('invoice_number', 'ilike', "%{$query}%")
-                      ->orWhereHas('patient', function ($subQ) use ($query) {
-                          $subQ->where('full_name', 'ilike', "%{$query}%");
-                      });
+                        ->orWhereHas('patient', function ($subQ) use ($query) {
+                            $subQ->where('full_name', 'ilike', "%{$query}%");
+                        });
                 })
                 ->select('id', 'invoice_number', 'patient_id', 'grand_total', 'status', 'invoice_date')
                 ->limit(10)
@@ -232,7 +233,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
     public function overdueInvoices(): JsonResponse
     {
         $cacheKey = 'overdue_invoices';
-        
+
         $overdueInvoices = Cache::remember($cacheKey, 900, function () {
             return Invoice::with(['patient:id,full_name'])
                 ->where('due_date', '<', now())
@@ -256,7 +257,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
     {
         $year = $request->input('year', now()->year);
         $cacheKey = "monthly_revenue_{$year}";
-        
+
         $monthlyData = Cache::remember($cacheKey, 3600, function () use ($year) {
             return Invoice::selectRaw('
                     EXTRACT(MONTH FROM invoice_date) as month,

@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Http\Resources\InsuranceClaimResource;
 use App\Http\Resources\InsuranceCompanyResource;
 use App\Http\Resources\InsurancePolicyResource;
-use App\Http\Resources\InsuranceClaimResource;
+use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\InsuranceClaim;
 use App\Models\Patient;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class InsuranceController extends BaseApiController
 {
@@ -31,8 +29,8 @@ class InsuranceController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ILIKE', "%{$search}%")
-                      ->orWhere('contact_person', 'ILIKE', "%{$search}%")
-                      ->orWhere('email', 'ILIKE', "%{$search}%");
+                        ->orWhere('contact_person', 'ILIKE', "%{$search}%")
+                        ->orWhere('email', 'ILIKE', "%{$search}%");
                 });
             }
 
@@ -42,8 +40,8 @@ class InsuranceController extends BaseApiController
             }
 
             $companies = $query->withCount(['policies', 'claims'])
-                              ->orderBy('name')
-                              ->paginate($request->get('per_page', 15));
+                ->orderBy('name')
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'companies' => InsuranceCompanyResource::collection($companies->items()),
@@ -53,7 +51,7 @@ class InsuranceController extends BaseApiController
                     'per_page' => $companies->perPage(),
                     'total' => $companies->total(),
                     'has_more' => $companies->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch insurance companies', 500);
@@ -88,7 +86,7 @@ class InsuranceController extends BaseApiController
 
             return $this->successResponse([
                 'company' => new InsuranceCompanyResource($company),
-                'message' => 'Insurance company created successfully'
+                'message' => 'Insurance company created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create insurance company', 500);
@@ -108,9 +106,9 @@ class InsuranceController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('policy_number', 'ILIKE', "%{$search}%")
-                      ->orWhereHas('patient', function ($pq) use ($search) {
-                          $pq->where('full_name', 'ILIKE', "%{$search}%");
-                      });
+                        ->orWhereHas('patient', function ($pq) use ($search) {
+                            $pq->where('full_name', 'ILIKE', "%{$search}%");
+                        });
                 });
             }
 
@@ -132,12 +130,12 @@ class InsuranceController extends BaseApiController
             // Filter by expiry
             if ($request->boolean('expiring_soon')) {
                 $query->where('end_date', '<=', now()->addDays(30))
-                      ->where('end_date', '>=', now());
+                    ->where('end_date', '>=', now());
             }
 
             $policies = $query->with(['patient', 'insuranceCompany', 'claims'])
-                             ->orderBy('created_at', 'desc')
-                             ->paginate($request->get('per_page', 15));
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'policies' => InsurancePolicyResource::collection($policies->items()),
@@ -147,7 +145,7 @@ class InsuranceController extends BaseApiController
                     'per_page' => $policies->perPage(),
                     'total' => $policies->total(),
                     'has_more' => $policies->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch insurance policies', 500);
@@ -184,7 +182,7 @@ class InsuranceController extends BaseApiController
 
             return $this->successResponse([
                 'policy' => new InsurancePolicyResource($policy->load(['patient', 'insuranceCompany'])),
-                'message' => 'Insurance policy created successfully'
+                'message' => 'Insurance policy created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create insurance policy', 500);
@@ -204,9 +202,9 @@ class InsuranceController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('claim_number', 'ILIKE', "%{$search}%")
-                      ->orWhereHas('patient', function ($pq) use ($search) {
-                          $pq->where('full_name', 'ILIKE', "%{$search}%");
-                      });
+                        ->orWhereHas('patient', function ($pq) use ($search) {
+                            $pq->where('full_name', 'ILIKE', "%{$search}%");
+                        });
                 });
             }
 
@@ -234,8 +232,8 @@ class InsuranceController extends BaseApiController
             }
 
             $claims = $query->with(['patient', 'insurancePolicy.insuranceCompany', 'visitService'])
-                           ->orderBy('created_at', 'desc')
-                           ->paginate($request->get('per_page', 15));
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'claims' => InsuranceClaimResource::collection($claims->items()),
@@ -245,7 +243,7 @@ class InsuranceController extends BaseApiController
                     'per_page' => $claims->perPage(),
                     'total' => $claims->total(),
                     'has_more' => $claims->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch insurance claims', 500);
@@ -288,7 +286,7 @@ class InsuranceController extends BaseApiController
 
             return $this->successResponse([
                 'claim' => new InsuranceClaimResource($claim->load(['patient', 'insurancePolicy.insuranceCompany'])),
-                'message' => 'Insurance claim created successfully'
+                'message' => 'Insurance claim created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create insurance claim', 500);
@@ -320,7 +318,7 @@ class InsuranceController extends BaseApiController
 
             return $this->successResponse([
                 'claim' => new InsuranceClaimResource($claim->fresh(['patient', 'insurancePolicy.insuranceCompany'])),
-                'message' => 'Claim status updated successfully'
+                'message' => 'Claim status updated successfully',
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to update claim status', 500);
@@ -348,8 +346,8 @@ class InsuranceController extends BaseApiController
                     ->groupBy('status')
                     ->get(),
                 'top_companies' => InsuranceCompany::withCount(['claims' => function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('created_at', [$startDate, $endDate]);
-                    }])
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                }])
                     ->orderBy('claims_count', 'desc')
                     ->limit(5)
                     ->get(),

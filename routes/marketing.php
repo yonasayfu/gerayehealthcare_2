@@ -1,19 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CampaignContentController as AdminCampaignContentController;
+use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
+use App\Http\Controllers\Admin\LeadSourceController as AdminLeadSourceController;
+use App\Http\Controllers\Admin\MarketingAnalyticsController as AdminMarketingAnalyticsController;
+use App\Http\Controllers\Admin\MarketingBudgetController as AdminMarketingBudgetController;
 use App\Http\Controllers\Admin\MarketingCampaignController as AdminMarketingCampaignController;
 use App\Http\Controllers\Admin\MarketingLeadController as AdminMarketingLeadController;
-use App\Http\Controllers\Admin\MarketingAnalyticsController as AdminMarketingAnalyticsController;
-use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
 use App\Http\Controllers\Admin\MarketingPlatformController as AdminMarketingPlatformController;
-use App\Http\Controllers\Admin\LeadSourceController as AdminLeadSourceController;
-use App\Http\Controllers\Admin\MarketingBudgetController as AdminMarketingBudgetController;
-use App\Http\Controllers\Admin\CampaignContentController as AdminCampaignContentController;
 use App\Http\Controllers\Admin\MarketingTaskController as AdminMarketingTaskController;
 use App\Http\Controllers\Staff\MarketingCampaignController as StaffMarketingCampaignController;
 use App\Http\Controllers\Staff\MarketingLeadController as StaffMarketingLeadController;
 use App\Http\Controllers\Staff\MarketingTaskController as StaffMarketingTaskController;
-
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Routes

@@ -12,9 +12,7 @@ class TaskDelegationAssigned extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public TaskDelegation $task)
-    {
-    }
+    public function __construct(public TaskDelegation $task) {}
 
     public function via(object $notifiable): array
     {
@@ -28,10 +26,7 @@ class TaskDelegationAssigned extends Notification implements ShouldQueue
         return [
             'sender_name' => 'Task Assignment',
             'message_preview' => sprintf(
-                'New task: %s (Due: %s, Status: %s)'
-                , $this->task->title
-                , $this->task->due_date
-                , $this->task->status
+                'New task: %s (Due: %s, Status: %s)', $this->task->title, $this->task->due_date, $this->task->status
             ),
             // Staff users receive these; send to staff tasks index for a safe landing
             'url' => route('staff.task-delegations.index'),
@@ -49,9 +44,9 @@ class TaskDelegationAssigned extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('New Task Assigned')
-            ->greeting('Hello ' . ($notifiable->name ?? ''))
-            ->line('You have been assigned a new task: ' . $this->task->title)
-            ->line('Due: ' . ($this->task->due_date))
+            ->greeting('Hello '.($notifiable->name ?? ''))
+            ->line('You have been assigned a new task: '.$this->task->title)
+            ->line('Due: '.($this->task->due_date))
             ->action('View Task', url(route('admin.task-delegations.show', ['task_delegation' => $this->task->id])))
             ->line('Thank you.');
     }

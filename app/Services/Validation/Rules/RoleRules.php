@@ -14,7 +14,7 @@ class RoleRules extends BaseResourceRules
             'permissions.*' => 'string|exists:permissions,name',
         ];
     }
-    
+
     public static function update($role): array
     {
         return [

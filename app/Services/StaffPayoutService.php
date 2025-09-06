@@ -6,10 +6,9 @@ use App\DTOs\CreateStaffPayoutDTO;
 use App\Models\Staff;
 use App\Models\StaffPayout;
 use App\Models\VisitService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
-use App\Services\BaseService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StaffPayoutService extends BaseService
 {
@@ -22,32 +21,32 @@ class StaffPayoutService extends BaseService
                 $search = $request->input('search');
                 $q->where(function ($w) use ($search) {
                     $w->where('first_name', 'like', "%$search%")
-                      ->orWhere('last_name', 'like', "%$search%");
+                        ->orWhere('last_name', 'like', "%$search%");
                 });
             })
             ->withCount([
                 'visitServices as unpaid_visits_count' => function ($q) {
                     $q->where('status', 'Completed')
-                      ->where(function ($r) {
-                          $r->where('is_paid_to_staff', false)
-                            ->orWhereNull('is_paid_to_staff');
-                      });
+                        ->where(function ($r) {
+                            $r->where('is_paid_to_staff', false)
+                                ->orWhereNull('is_paid_to_staff');
+                        });
                 },
                 'visitServices as unique_patients_count' => function ($q) {
                     $q->where('status', 'Completed')
-                      ->where(function ($r) {
-                          $r->where('is_paid_to_staff', false)
-                            ->orWhereNull('is_paid_to_staff');
-                      })
-                      ->select(DB::raw('count(distinct(patient_id))'));
+                        ->where(function ($r) {
+                            $r->where('is_paid_to_staff', false)
+                                ->orWhereNull('is_paid_to_staff');
+                        })
+                        ->select(DB::raw('count(distinct(patient_id))'));
                 },
             ])
             ->withSum(['visitServices as total_unpaid_cost' => function ($q) {
                 $q->where('status', 'Completed')
-                  ->where(function ($r) {
-                      $r->where('is_paid_to_staff', false)
-                        ->orWhereNull('is_paid_to_staff');
-                  });
+                    ->where(function ($r) {
+                        $r->where('is_paid_to_staff', false)
+                            ->orWhereNull('is_paid_to_staff');
+                    });
             }], 'cost')
             ->orderBy('first_name');
 
@@ -55,6 +54,7 @@ class StaffPayoutService extends BaseService
             ->paginate($perPage)
             ->through(function ($staff) {
                 $staff->total_hours_logged = $staff->unpaid_visits_count;
+
                 return $staff;
             });
 

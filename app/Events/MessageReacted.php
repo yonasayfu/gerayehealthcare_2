@@ -2,16 +2,14 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\GroupMessage;
+use App\Models\Message;
+use App\Models\Reaction;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Reaction;
-use App\Models\Message;
-use App\Models\GroupMessage;
 
 class MessageReacted implements ShouldBroadcast
 {
@@ -38,12 +36,12 @@ class MessageReacted implements ShouldBroadcast
 
         if ($reactable instanceof Message) {
             return [
-                new PrivateChannel('users.' . $reactable->receiver_id),
-                new PrivateChannel('users.' . $reactable->sender_id),
+                new PrivateChannel('users.'.$reactable->receiver_id),
+                new PrivateChannel('users.'.$reactable->sender_id),
             ];
         } elseif ($reactable instanceof GroupMessage) {
             return [
-                new PrivateChannel('groups.' . $reactable->group_id),
+                new PrivateChannel('groups.'.$reactable->group_id),
             ];
         }
 

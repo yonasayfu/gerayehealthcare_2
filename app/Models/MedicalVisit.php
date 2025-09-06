@@ -41,7 +41,7 @@ class MedicalVisit extends Model
     // Lightweight listing eager-load
     public function scopeWithList($query)
     {
-        return $query->select(['id','patient_id','visit_date','visit_type','doctor_id','status'])
+        return $query->select(['id', 'patient_id', 'visit_date', 'visit_type', 'doctor_id', 'status'])
             ->with([
                 'patient:id,full_name,patient_code',
                 'doctor:id,first_name,last_name',

@@ -3,11 +3,12 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // Base index to support date filtering (noop if already exists in another migration)
-        DB::statement("CREATE INDEX IF NOT EXISTS idx_visit_services_scheduled_at ON visit_services (scheduled_at);");
+        DB::statement('CREATE INDEX IF NOT EXISTS idx_visit_services_scheduled_at ON visit_services (scheduled_at);');
 
         DB::statement(<<<'SQL'
         CREATE OR REPLACE VIEW service_volume_view AS
@@ -28,6 +29,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        DB::statement("DROP VIEW IF EXISTS service_volume_view;");
+        DB::statement('DROP VIEW IF EXISTS service_volume_view;');
     }
 };

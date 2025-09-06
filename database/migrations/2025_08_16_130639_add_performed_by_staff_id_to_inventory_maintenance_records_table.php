@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('inventory_maintenance_records', function (Blueprint $table) {
             // Add the new foreign key column
             $table->foreignId('performed_by_staff_id')->nullable()->constrained('staff')->onDelete('set null')->after('description');
-            
+
             // Drop the old string column
             $table->dropColumn('performed_by');
         });

@@ -16,10 +16,10 @@ return new class extends Migration
             // It's nullable() because a visit might be a one-off task without a long-term assignment.
             // onDelete('set null') means if the master assignment is deleted, this visit record is kept.
             $table->foreignId('assignment_id')
-                  ->nullable()
-                  ->after('staff_id')
-                  ->constrained('caregiver_assignments')
-                  ->onDelete('set null');
+                ->nullable()
+                ->after('staff_id')
+                ->constrained('caregiver_assignments')
+                ->onDelete('set null');
         });
     }
 

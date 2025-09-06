@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\DTOs\BaseDTO;
-use App\Services\CachedDropdownService;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
+use App\Services\CachedDropdownService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -84,23 +84,25 @@ class TestSystemHealthCommand extends Command
         try {
             $connection = DB::connection();
             $pdo = $connection->getPdo();
-            
+
             if ($pdo) {
                 $this->line('  ✅ Database connection successful');
-                
+
                 // Test basic query
                 $result = DB::select('SELECT 1 as test');
                 if ($result && $result[0]->test == 1) {
                     $this->line('  ✅ Database query execution successful');
                 } else {
                     $this->line('  ❌ Database query execution failed');
+
                     return false;
                 }
-                
+
                 return true;
             }
         } catch (\Exception $e) {
-            $this->line('  ❌ Database connection failed: ' . $e->getMessage());
+            $this->line('  ❌ Database connection failed: '.$e->getMessage());
+
             return false;
         }
 
@@ -113,8 +115,8 @@ class TestSystemHealthCommand extends Command
 
         try {
             // Test basic cache operations
-            $testKey = 'health_check_' . time();
-            $testValue = 'test_value_' . rand(1000, 9999);
+            $testKey = 'health_check_'.time();
+            $testValue = 'test_value_'.rand(1000, 9999);
 
             Cache::put($testKey, $testValue, 60);
             $retrieved = Cache::get($testKey);
@@ -124,6 +126,7 @@ class TestSystemHealthCommand extends Command
                 Cache::forget($testKey);
             } else {
                 $this->line('  ❌ Cache write/read failed');
+
                 return false;
             }
 
@@ -137,7 +140,8 @@ class TestSystemHealthCommand extends Command
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ Cache system failed: ' . $e->getMessage());
+            $this->line('  ❌ Cache system failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -150,28 +154,29 @@ class TestSystemHealthCommand extends Command
             // Test DTO pool statistics
             $poolStats = BaseDTO::getPoolStats();
             $this->line('  ✅ DTO pool system operational');
-            
+
             if ($this->option('detailed')) {
-                $this->line('    Pool stats: ' . json_encode($poolStats));
+                $this->line('    Pool stats: '.json_encode($poolStats));
             }
 
             // Test memory optimization
             $memoryBefore = memory_get_usage();
-            
+
             // Create and release multiple DTOs to test pooling
             for ($i = 0; $i < 10; $i++) {
-                $dto = BaseDTO::create(['test' => 'data_' . $i]);
+                $dto = BaseDTO::create(['test' => 'data_'.$i]);
                 $dto->release();
             }
-            
+
             $memoryAfter = memory_get_usage();
             $memoryDiff = $memoryAfter - $memoryBefore;
-            
-            $this->line('  ✅ DTO memory optimization working (diff: ' . $this->formatBytes($memoryDiff) . ')');
+
+            $this->line('  ✅ DTO memory optimization working (diff: '.$this->formatBytes($memoryDiff).')');
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ DTO system failed: ' . $e->getMessage());
+            $this->line('  ❌ DTO system failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -193,16 +198,17 @@ class TestSystemHealthCommand extends Command
 
             // Test memory statistics
             $memoryStats = CachedDropdownService::getMemoryStats();
-            $this->line('  ✅ Memory usage: ' . $this->formatBytes($memoryStats['memory_usage']));
-            $this->line('  ✅ Peak memory: ' . $this->formatBytes($memoryStats['memory_peak']));
+            $this->line('  ✅ Memory usage: '.$this->formatBytes($memoryStats['memory_usage']));
+            $this->line('  ✅ Peak memory: '.$this->formatBytes($memoryStats['memory_peak']));
 
             // Test specific dropdown
             $patients = CachedDropdownService::getPatients();
-            $this->line('  ✅ Patient dropdown loaded (' . count($patients) . ' patients)');
+            $this->line('  ✅ Patient dropdown loaded ('.count($patients).' patients)');
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ Cached dropdown service failed: ' . $e->getMessage());
+            $this->line('  ❌ Cached dropdown service failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -232,7 +238,8 @@ class TestSystemHealthCommand extends Command
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ Core models failed: ' . $e->getMessage());
+            $this->line('  ❌ Core models failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -246,15 +253,15 @@ class TestSystemHealthCommand extends Command
             $start = microtime(true);
             Patient::limit(100)->get();
             $dbTime = microtime(true) - $start;
-            
-            $this->line('  ✅ Database query time: ' . round($dbTime * 1000, 2) . 'ms');
+
+            $this->line('  ✅ Database query time: '.round($dbTime * 1000, 2).'ms');
 
             // Test cache performance
             $start = microtime(true);
             CachedDropdownService::getPatients();
             $cacheTime = microtime(true) - $start;
-            
-            $this->line('  ✅ Cache retrieval time: ' . round($cacheTime * 1000, 2) . 'ms');
+
+            $this->line('  ✅ Cache retrieval time: '.round($cacheTime * 1000, 2).'ms');
 
             // Performance warnings
             if ($dbTime > 0.5) {
@@ -267,7 +274,8 @@ class TestSystemHealthCommand extends Command
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ Performance test failed: ' . $e->getMessage());
+            $this->line('  ❌ Performance test failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -280,7 +288,7 @@ class TestSystemHealthCommand extends Command
             // Test API routes are registered
             $routes = app('router')->getRoutes();
             $apiRoutes = 0;
-            
+
             foreach ($routes as $route) {
                 if (str_starts_with($route->uri(), 'api/')) {
                     $apiRoutes++;
@@ -297,7 +305,8 @@ class TestSystemHealthCommand extends Command
 
             return true;
         } catch (\Exception $e) {
-            $this->line('  ❌ API health check failed: ' . $e->getMessage());
+            $this->line('  ❌ API health check failed: '.$e->getMessage());
+
             return false;
         }
     }
@@ -311,6 +320,6 @@ class TestSystemHealthCommand extends Command
 
         $bytes /= pow(1024, $pow);
 
-        return round($bytes, 2) . ' ' . $units[$pow];
+        return round($bytes, 2).' '.$units[$pow];
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Patient;
+use App\Models\Staff;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use App\Models\Staff;
-use App\Models\Patient;
 
 class AppServiceProvider extends ServiceProvider
 {

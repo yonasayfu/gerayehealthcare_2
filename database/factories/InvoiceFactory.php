@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Patient;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Invoice>
  */
@@ -19,7 +18,7 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         $invoiceDate = $this->faker->dateTimeBetween('-12 months', 'now');
-        $dueDate = (clone $invoiceDate)->modify('+'. $this->faker->numberBetween(7, 45) .' days');
+        $dueDate = (clone $invoiceDate)->modify('+'.$this->faker->numberBetween(7, 45).' days');
         $subtotal = $this->faker->randomFloat(2, 100, 2000);
         $tax = round($subtotal * $this->faker->randomFloat(3, 0.00, 0.15), 2);
         $grandTotal = $subtotal + $tax;

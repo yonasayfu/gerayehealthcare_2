@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\EventBroadcast;
 use App\Models\Event;
+use App\Models\EventBroadcast;
 use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

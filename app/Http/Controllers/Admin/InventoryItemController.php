@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Base\BaseController;
-use App\Services\InventoryItemService;
-use App\Models\InventoryItem;
-use App\Services\Validation\Rules\InventoryItemRules;
-use App\Models\Supplier;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait;
+use App\Models\InventoryItem;
+use App\Models\Supplier;
+use App\Services\InventoryItemService;
+use App\Services\Validation\Rules\InventoryItemRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -38,6 +38,7 @@ class InventoryItemController extends BaseController
     {
         $data = $this->service->getById($id);
         $propName = lcfirst(class_basename($this->modelClass));
+
         return Inertia::render('Admin/InventoryItems/Edit', [
             $propName => $data,
             'suppliers' => Supplier::query()->select('id', 'name')->orderBy('name')->get(),
@@ -50,6 +51,7 @@ class InventoryItemController extends BaseController
     public function export(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handleExport($request, InventoryItem::class, $config);
     }
 
@@ -59,6 +61,7 @@ class InventoryItemController extends BaseController
     public function printAll(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintAll($request, InventoryItem::class, $config);
     }
 
@@ -68,6 +71,7 @@ class InventoryItemController extends BaseController
     public function printCurrent(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintCurrent($request, InventoryItem::class, $config);
     }
 
@@ -78,6 +82,7 @@ class InventoryItemController extends BaseController
     {
         $model = InventoryItem::findOrFail($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $model, $config);
     }
 
@@ -94,7 +99,9 @@ class InventoryItemController extends BaseController
         $csvFields = [];
         foreach ($csvHeaders as $label) {
             $spec = $csvFieldsMap[$label] ?? null;
-            if ($spec === null) continue;
+            if ($spec === null) {
+                continue;
+            }
             // Support string path or array spec with field/transform/default
             $csvFields[] = $spec;
         }
@@ -147,4 +154,3 @@ class InventoryItemController extends BaseController
         ];
     }
 }
-

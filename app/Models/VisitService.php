@@ -8,9 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Carbon;
-use App\Models\CaregiverAssignment;
-use App\Models\InvoiceItem;
 
 class VisitService extends Model
 {
@@ -95,27 +92,25 @@ class VisitService extends Model
 
     /**
      * Get the URL for the prescription file.
-     *
-     * @return string|null
      */
     public function getPrescriptionFileUrlAttribute(): ?string
     {
         if ($this->prescription_file) {
             return Storage::url($this->prescription_file);
         }
+
         return null;
     }
 
     /**
      * Get the URL for the vitals file.
-     *
-     * @return string|null
      */
     public function getVitalsFileUrlAttribute(): ?string
     {
         if ($this->vitals_file) {
             return Storage::url($this->vitals_file);
         }
+
         return null;
     }
 }

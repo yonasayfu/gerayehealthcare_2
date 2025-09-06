@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Patient;
-use App\Models\User;
 use App\Models\CorporateClient;
 use App\Models\InsurancePolicy;
-use App\Models\EmployeeInsuranceRecord;
+use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;

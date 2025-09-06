@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Services\TaskDelegationService;
-use App\Models\TaskDelegation;
 use App\Models\Staff;
+use App\Models\TaskDelegation;
+use App\Services\TaskDelegationService;
 use App\Services\Validation\Rules\TaskDelegationRules;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TaskDelegationController extends BaseController
@@ -45,6 +44,7 @@ class TaskDelegationController extends BaseController
     public function edit($id)
     {
         $taskDelegation = $this->service->getById($id);
+
         return Inertia::render('Admin/TaskDelegations/Edit', [
             'taskDelegation' => $taskDelegation,
             'staff' => Staff::all(['id', 'first_name', 'last_name']),
@@ -80,7 +80,7 @@ class TaskDelegationController extends BaseController
             return redirect()->to($returnTo)->with('banner', 'Task delegation created and linked successfully.')->with('bannerStyle', 'success');
         }
 
-        return redirect()->route('admin.' . $this->getRouteName() . '.index')
-            ->with('banner', ucfirst($this->dataVariableName) . ' created successfully.')->with('bannerStyle', 'success');
+        return redirect()->route('admin.'.$this->getRouteName().'.index')
+            ->with('banner', ucfirst($this->dataVariableName).' created successfully.')->with('bannerStyle', 'success');
     }
 }

@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateStaffDTO;
-use App\Models\Staff;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
+use App\Models\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -65,11 +64,11 @@ class OptimizedStaffService extends OptimizedBaseService
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $with) {
             $staff = $this->model->query()->with($with)->find($id);
-            
-            if (!$staff) {
+
+            if (! $staff) {
                 throw new \App\Exceptions\ResourceNotFoundException('Staff member not found.');
             }
-            
+
             return $staff;
         });
     }
@@ -82,7 +81,7 @@ class OptimizedStaffService extends OptimizedBaseService
         try {
             // Optimize file handling
             $data = $this->handleFileUpload($data);
-            
+
             // Normalize hourly_rate if provided
             if (array_key_exists('hourly_rate', $data)) {
                 if ($data['hourly_rate'] === '' || $data['hourly_rate'] === null) {
@@ -93,16 +92,17 @@ class OptimizedStaffService extends OptimizedBaseService
             }
 
             // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
-            $data = array_filter($data, fn($v) => !is_null($v));
+            $data = array_filter($data, fn ($v) => ! is_null($v));
 
             $staff = $this->model->create($data);
-            
+
             // Clear related caches
             $this->clearCaches();
-            
+
             DB::commit();
+
             return $staff;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -112,7 +112,7 @@ class OptimizedStaffService extends OptimizedBaseService
     public function update(int $id, array|object $data): Staff
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         DB::beginTransaction();
         try {
             $staff = $this->getById($id);
@@ -138,16 +138,17 @@ class OptimizedStaffService extends OptimizedBaseService
             }
 
             // Avoid sending nulls that can overwrite NOT NULL columns
-            $data = array_filter($data, fn($v) => $v !== null);
+            $data = array_filter($data, fn ($v) => $v !== null);
 
             $staff->update($data);
-            
+
             // Clear related caches
             $this->clearCaches();
-            
+
             DB::commit();
+
             return $staff;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -159,11 +160,11 @@ class OptimizedStaffService extends OptimizedBaseService
         // Optimized search with full-text search capabilities
         $query->where(function ($q) use ($search) {
             $q->where('first_name', 'ilike', "%{$search}%")
-              ->orWhere('last_name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%")
-              ->orWhere('phone', 'ilike', "%{$search}%")
-              ->orWhere('position', 'ilike', "%{$search}%")
-              ->orWhere('department', 'ilike', "%{$search}%");
+                ->orWhere('last_name', 'ilike', "%{$search}%")
+                ->orWhere('email', 'ilike', "%{$search}%")
+                ->orWhere('phone', 'ilike', "%{$search}%")
+                ->orWhere('position', 'ilike', "%{$search}%")
+                ->orWhere('department', 'ilike', "%{$search}%");
         });
     }
 
@@ -195,19 +196,19 @@ class OptimizedStaffService extends OptimizedBaseService
     }
 
     // Get available staff for assignments (cached)
-    public function getAvailableStaff(string $date = null, string $timeSlot = null)
+    public function getAvailableStaff(?string $date = null, ?string $timeSlot = null)
     {
-        $cacheKey = 'available_staff_' . md5(($date ?? 'today') . '_' . ($timeSlot ?? 'all'));
-        
+        $cacheKey = 'available_staff_'.md5(($date ?? 'today').'_'.($timeSlot ?? 'all'));
+
         return Cache::remember($cacheKey, 600, function () use ($date, $timeSlot) { // 10 minutes
             $query = $this->model->where('status', 'active');
-            
+
             // Add availability logic here if needed
             if ($date && $timeSlot) {
                 // This would check against staff availability tables
                 // Implementation depends on your availability system
             }
-            
+
             return $query->select('id', 'first_name', 'last_name', 'position')
                 ->orderBy('first_name')
                 ->get();
@@ -218,12 +219,12 @@ class OptimizedStaffService extends OptimizedBaseService
     {
         if (isset($data['photo']) && $data['photo']) {
             // Optimize file storage with better naming
-            $filename = 'staff_' . time() . '_' . uniqid() . '.' . $data['photo']->getClientOriginalExtension();
+            $filename = 'staff_'.time().'_'.uniqid().'.'.$data['photo']->getClientOriginalExtension();
             $data['photo'] = $data['photo']->storeAs('images/staff', $filename, 'public');
         } else {
             unset($data['photo']);
         }
-        
+
         return $data;
     }
 
@@ -246,6 +247,7 @@ class OptimizedStaffService extends OptimizedBaseService
     public function printSingle($id, Request $request)
     {
         $staff = $this->getById($id);
+
         return $this->handlePrintSingle($request, $staff, ExportConfig::getStaffConfig());
     }
 
@@ -254,7 +256,7 @@ class OptimizedStaffService extends OptimizedBaseService
         // Clear specific staff caches
         Cache::forget('staff_form_data');
         Cache::forget('staff_statistics');
-        
+
         // Clear availability caches (pattern matching would be better with Redis)
         $patterns = ['staff_all_*', 'staff_single_*', 'available_staff_*'];
         foreach ($patterns as $pattern) {

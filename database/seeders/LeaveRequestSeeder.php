@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Staff;
 use App\Models\LeaveRequest;
+use App\Models\Staff;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class LeaveRequestSeeder extends Seeder
 {

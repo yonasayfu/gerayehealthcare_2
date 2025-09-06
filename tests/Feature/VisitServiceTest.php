@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Role;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Enums\RoleEnum;
 use App\Models\CaregiverAssignment;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\User;
-use App\Enums\RoleEnum;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class VisitServiceTest extends TestCase
 {

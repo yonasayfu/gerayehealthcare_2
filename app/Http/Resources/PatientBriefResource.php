@@ -15,4 +15,3 @@ class PatientBriefResource extends JsonResource
         ];
     }
 }
-

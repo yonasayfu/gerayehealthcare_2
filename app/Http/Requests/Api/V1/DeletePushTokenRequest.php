@@ -18,4 +18,3 @@ class DeletePushTokenRequest extends FormRequest
         ];
     }
 }
-

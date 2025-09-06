@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\TaskDelegation;
+use Illuminate\Database\Seeder;
 
 class TaskDelegationSeeder extends Seeder
 {

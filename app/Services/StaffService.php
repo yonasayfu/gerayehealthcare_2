@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Staff;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
+use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class StaffService extends BaseService
 {
@@ -20,8 +20,8 @@ class StaffService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('first_name', 'ilike', "%{$search}%")
-              ->orWhere('last_name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%");
+            ->orWhere('last_name', 'ilike', "%{$search}%")
+            ->orWhere('email', 'ilike', "%{$search}%");
     }
 
     public function create(array|object $data): Staff
@@ -44,7 +44,7 @@ class StaffService extends BaseService
         }
 
         // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
-        $data = array_filter($data, fn($v) => !is_null($v));
+        $data = array_filter($data, fn ($v) => ! is_null($v));
 
         return parent::create($data);
     }
@@ -52,7 +52,7 @@ class StaffService extends BaseService
     public function update(int $id, array|object $data): Staff
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         $staff = $this->getById($id);
 
         // Normalize hourly_rate if present in payload
@@ -75,7 +75,7 @@ class StaffService extends BaseService
         }
 
         // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
-        $data = array_filter($data, fn($v) => $v !== null);
+        $data = array_filter($data, fn ($v) => $v !== null);
 
         return parent::update($id, $data);
     }

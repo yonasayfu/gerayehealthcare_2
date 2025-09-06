@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingTaskRequest;
-use App\Http\Requests\UpdateMarketingTaskRequest;
 use App\Models\MarketingTask;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class MarketingTaskController extends Controller
 {
@@ -26,7 +24,7 @@ class MarketingTaskController extends Controller
             if ($staffMember) {
                 $query->where(function ($q) use ($staffMember) {
                     $q->where('assigned_to_staff_id', $staffMember->id)
-                      ->orWhere('doctor_id', $staffMember->id);
+                        ->orWhere('doctor_id', $staffMember->id);
                 });
             }
         }
@@ -35,8 +33,8 @@ class MarketingTaskController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%")
-                  ->orWhere('task_code', 'ilike', "%{$search}%");
+                ->orWhere('description', 'ilike', "%{$search}%")
+                ->orWhere('task_code', 'ilike', "%{$search}%");
         }
 
         // Filtering
@@ -57,21 +55,19 @@ class MarketingTaskController extends Controller
         }
 
         // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
+        if ($request->filled('sort') && ! empty($request->input('sort'))) {
             $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
         } else {
             $query->orderBy('scheduled_at', 'asc');
         }
 
         $marketingTasks = $query->with(['campaign', 'assignedToStaff', 'relatedContent', 'doctor'])
-                                 ->paginate($request->input('per_page', 5))
-                                 ->withQueryString();
+            ->paginate($request->input('per_page', 5))
+            ->withQueryString();
 
         return Inertia::render('Staff/MarketingTasks/Index', [
             'marketingTasks' => $marketingTasks,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'task_type', 'status', 'scheduled_at_start', 'scheduled_at_end']),
         ]);
     }
-
-    
 }

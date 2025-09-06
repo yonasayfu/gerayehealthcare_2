@@ -16,13 +16,15 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
     // Define eager loading relationships to prevent N+1 queries
     protected $indexWith = ['supplier'];
+
     protected $showWith = ['supplier', 'alerts', 'maintenanceRecords', 'transactions'];
+
     protected $editWith = ['supplier'];
 
     public function __construct(OptimizedInventoryItemService $inventoryService)
     {
         $this->inventoryService = $inventoryService;
-        
+
         parent::__construct(
             $inventoryService,
             InventoryItemRules::class,
@@ -37,12 +39,12 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     {
         // Use optimized service with caching and eager loading
         $items = $this->inventoryService->getAll($request, $this->indexWith);
-        
+
         // Get cached statistics and alerts for dashboard
         $statistics = $this->inventoryService->getStatistics();
         $lowStockItems = $this->inventoryService->getLowStockItems(5);
         $maintenanceDue = $this->inventoryService->getMaintenanceDueItems(7, 5);
-        
+
         return Inertia::render($this->viewName.'/Index', [
             'inventoryItems' => $items,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'status', 'category']),
@@ -56,7 +58,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     {
         // Use optimized service with eager loading
         $item = $this->inventoryService->getById($id, $this->showWith);
-        
+
         return Inertia::render($this->viewName.'/Show', [
             'inventoryItem' => $item,
         ]);
@@ -66,7 +68,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     {
         // Use cached form data
         $formData = $this->inventoryService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Create', $formData);
     }
 
@@ -75,7 +77,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         // Use optimized service with eager loading
         $item = $this->inventoryService->getById($id, $this->editWith);
         $formData = $this->inventoryService->getFormData();
-        
+
         return Inertia::render($this->viewName.'/Edit', array_merge([
             'inventoryItem' => $item,
         ], $formData));
@@ -84,7 +86,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     public function store(Request $request)
     {
         $validatedData = $request->validate(InventoryItemRules::create());
-        
+
         // Use DTO for data transfer
         $dto = CreateInventoryItemDTO::from($validatedData);
         $item = $this->inventoryService->create($dto);
@@ -97,7 +99,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate(InventoryItemRules::update());
-        
+
         // Use DTO for data transfer
         $dto = CreateInventoryItemDTO::from($validatedData);
         $item = $this->inventoryService->update($id, $dto);
@@ -151,7 +153,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     {
         $days = $request->input('days', 7);
         $limit = $request->input('limit', 10);
-        
+
         $maintenanceItems = $this->inventoryService->getMaintenanceDueItems($days, $limit);
 
         return response()->json($maintenanceItems);
@@ -170,7 +172,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
         return response()->json([
             'message' => "Updated quantities for {$updatedCount} items successfully",
-            'updated_count' => $updatedCount
+            'updated_count' => $updatedCount,
         ]);
     }
 
@@ -178,14 +180,14 @@ class OptimizedInventoryItemController extends OptimizedBaseController
     public function quickSearch(Request $request)
     {
         $search = $request->input('q');
-        
+
         if (strlen($search) < 2) {
             return response()->json([]);
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'inventory_quick_search_' . md5($search);
-        
+        $cacheKey = 'inventory_quick_search_'.md5($search);
+
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return InventoryItem::with('supplier:id,name')
                 ->where('name', 'ilike', "%{$search}%")
@@ -209,7 +211,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
         $item = $this->inventoryService->getById($id);
         $oldQuantity = $item->quantity_on_hand;
-        
+
         switch ($validated['type']) {
             case 'set':
                 $newQuantity = $validated['quantity'];
@@ -224,8 +226,8 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
         $this->inventoryService->update($id, [
             'quantity_on_hand' => $newQuantity,
-            'notes' => ($item->notes ?? '') . "\n" . now()->format('Y-m-d H:i') . ': ' . 
-                      ($validated['reason'] ?? "Stock adjusted from {$oldQuantity} to {$newQuantity}")
+            'notes' => ($item->notes ?? '')."\n".now()->format('Y-m-d H:i').': '.
+                      ($validated['reason'] ?? "Stock adjusted from {$oldQuantity} to {$newQuantity}"),
         ]);
 
         return response()->json([

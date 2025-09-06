@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateLeadSourceDTO;
 use App\Models\LeadSource;
 use Illuminate\Http\Request;
 
@@ -16,7 +15,7 @@ class LeadSourceService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('name', 'ilike', "%{$search}%")
-              ->orWhere('category', 'ilike', "%{$search}%");
+            ->orWhere('category', 'ilike', "%{$search}%");
     }
 
     public function getAll(Request $request, array $with = [])
@@ -44,10 +43,9 @@ class LeadSourceService extends BaseService
     public function toggleStatus(int $id): LeadSource
     {
         $leadSource = $this->getById($id);
-        $leadSource->is_active = !$leadSource->is_active;
+        $leadSource->is_active = ! $leadSource->is_active;
         $leadSource->save();
+
         return $leadSource;
     }
-
-    
 }

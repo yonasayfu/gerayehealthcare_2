@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateEventParticipantDTO;
-use App\Models\EventParticipant;
-use Illuminate\Http\Request;
 use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Models\EventParticipant;
 
 class EventParticipantService extends BaseService
 {
@@ -21,6 +18,4 @@ class EventParticipantService extends BaseService
     {
         $query->where('status', 'ilike', "%{$search}%");
     }
-
-    
 }

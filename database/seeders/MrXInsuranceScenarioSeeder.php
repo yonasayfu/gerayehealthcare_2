@@ -2,18 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Patient;
 use App\Models\CorporateClient;
+use App\Models\EmployeeInsuranceRecord;
+use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\EmployeeInsuranceRecord;
+use App\Models\Invoice;
+use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Models\Invoice;
-use App\Models\InsuranceClaim;
-use App\Models\InvoiceItem;
+use Illuminate\Database\Seeder;
 
 class MrXInsuranceScenarioSeeder extends Seeder
 {
@@ -138,7 +137,7 @@ class MrXInsuranceScenarioSeeder extends Seeder
         );
 
         // Ensure an invoice item exists for the visit service
-        if (!$invoice->items()->where('visit_service_id', $visitService->id)->exists()) {
+        if (! $invoice->items()->where('visit_service_id', $visitService->id)->exists()) {
             $invoice->items()->create([
                 'visit_service_id' => $visitService->id,
                 'description' => $visitService->service_description ?? 'Service',

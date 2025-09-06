@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingBudget;
 use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class MarketingBudgetService extends BaseService
 {
     use ExportableTrait;
+
     public function __construct(MarketingBudget $marketingBudget)
     {
         parent::__construct($marketingBudget);
@@ -19,6 +20,7 @@ class MarketingBudgetService extends BaseService
     {
         // Ensure campaign and platform are always loaded for detail views
         $with = array_merge(['campaign', 'platform'], $with);
+
         return parent::getById($id, $with);
     }
 

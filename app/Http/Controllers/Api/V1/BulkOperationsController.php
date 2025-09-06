@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
+use App\Models\InventoryItem;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Models\VisitService;
-use App\Models\InventoryItem;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\VisitService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 
 class BulkOperationsController extends BaseApiController
 {
@@ -56,10 +54,11 @@ class BulkOperationsController extends BaseApiController
             foreach ($request->patients as $index => $patientData) {
                 try {
                     // Check for duplicate email or phone
-                    if (!empty($patientData['email'])) {
+                    if (! empty($patientData['email'])) {
                         $existingPatient = Patient::where('email', $patientData['email'])->first();
                         if ($existingPatient) {
                             $errors[] = "Row {$index}: Email already exists for patient: {$existingPatient->full_name}";
+
                             continue;
                         }
                     }
@@ -72,7 +71,7 @@ class BulkOperationsController extends BaseApiController
                     $patients[] = $patient;
                     $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Row {$index}: " . $e->getMessage();
+                    $errors[] = "Row {$index}: ".$e->getMessage();
                 }
             }
 
@@ -83,10 +82,11 @@ class BulkOperationsController extends BaseApiController
                 'success_count' => $successCount,
                 'error_count' => count($errors),
                 'errors' => $errors,
-                'message' => "Successfully created {$successCount} patients"
+                'message' => "Successfully created {$successCount} patients",
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to create patients in bulk', 500);
         }
     }
@@ -120,15 +120,15 @@ class BulkOperationsController extends BaseApiController
             foreach ($request->updates as $index => $updateData) {
                 try {
                     $patient = Patient::findOrFail($updateData['id']);
-                    
+
                     // Remove id from update data
                     unset($updateData['id']);
-                    
+
                     $patient->update($updateData);
                     $updatedPatients[] = $patient;
                     $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Row {$index}: " . $e->getMessage();
+                    $errors[] = "Row {$index}: ".$e->getMessage();
                 }
             }
 
@@ -139,10 +139,11 @@ class BulkOperationsController extends BaseApiController
                 'success_count' => $successCount,
                 'error_count' => count($errors),
                 'errors' => $errors,
-                'message' => "Successfully updated {$successCount} patients"
+                'message' => "Successfully updated {$successCount} patients",
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to update patients in bulk', 500);
         }
     }
@@ -204,7 +205,7 @@ class BulkOperationsController extends BaseApiController
                     $createdStaff[] = $staff->load('user');
                     $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Row {$index}: " . $e->getMessage();
+                    $errors[] = "Row {$index}: ".$e->getMessage();
                 }
             }
 
@@ -215,10 +216,11 @@ class BulkOperationsController extends BaseApiController
                 'success_count' => $successCount,
                 'error_count' => count($errors),
                 'errors' => $errors,
-                'message' => "Successfully created {$successCount} staff members. Default password: password123"
+                'message' => "Successfully created {$successCount} staff members. Default password: password123",
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to create staff in bulk', 500);
         }
     }
@@ -260,7 +262,7 @@ class BulkOperationsController extends BaseApiController
                     $createdItems[] = $item;
                     $successCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "Row {$index}: " . $e->getMessage();
+                    $errors[] = "Row {$index}: ".$e->getMessage();
                 }
             }
 
@@ -271,10 +273,11 @@ class BulkOperationsController extends BaseApiController
                 'success_count' => $successCount,
                 'error_count' => count($errors),
                 'errors' => $errors,
-                'message' => "Successfully created {$successCount} inventory items"
+                'message' => "Successfully created {$successCount} inventory items",
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to create inventory items in bulk', 500);
         }
     }
@@ -298,7 +301,7 @@ class BulkOperationsController extends BaseApiController
 
             $model = $this->getModelClass($request->model);
             $force = $request->boolean('force', false);
-            
+
             $deletedCount = 0;
             $errors = [];
 
@@ -307,17 +310,18 @@ class BulkOperationsController extends BaseApiController
             foreach ($request->ids as $id) {
                 try {
                     $record = $model::findOrFail($id);
-                    
+
                     // Check for dependencies before deletion
-                    if (!$force && $this->hasDependencies($record, $request->model)) {
+                    if (! $force && $this->hasDependencies($record, $request->model)) {
                         $errors[] = "ID {$id}: Cannot delete due to existing dependencies";
+
                         continue;
                     }
 
                     $record->delete();
                     $deletedCount++;
                 } catch (\Exception $e) {
-                    $errors[] = "ID {$id}: " . $e->getMessage();
+                    $errors[] = "ID {$id}: ".$e->getMessage();
                 }
             }
 
@@ -327,10 +331,11 @@ class BulkOperationsController extends BaseApiController
                 'deleted_count' => $deletedCount,
                 'error_count' => count($errors),
                 'errors' => $errors,
-                'message' => "Successfully deleted {$deletedCount} records"
+                'message' => "Successfully deleted {$deletedCount} records",
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to delete records in bulk', 500);
         }
     }
@@ -372,7 +377,7 @@ class BulkOperationsController extends BaseApiController
                 'count' => $data->count(),
                 'format' => $request->format,
                 'exported_at' => now()->toISOString(),
-                'message' => "Successfully exported {$data->count()} records"
+                'message' => "Successfully exported {$data->count()} records",
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to export data', 500);
@@ -391,7 +396,7 @@ class BulkOperationsController extends BaseApiController
                 'operation_id' => $operationId,
                 'status' => 'completed',
                 'progress' => 100,
-                'message' => 'Operation completed successfully'
+                'message' => 'Operation completed successfully',
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to get operation status', 500);

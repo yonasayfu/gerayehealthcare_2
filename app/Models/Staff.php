@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\MarketingTask;
 use Illuminate\Support\Facades\Storage;
 
 class Staff extends Model
@@ -39,8 +38,6 @@ class Staff extends Model
 
     /**
      * Get the staff's full name.
-     *
-     * @return string
      */
     public function getFullNameAttribute(): string
     {
@@ -86,6 +83,7 @@ class Staff extends Model
     {
         return $this->hasMany(StaffPayout::class);
     }
+
     /**
      * Get the leave requests for the staff member.
      */
@@ -104,9 +102,10 @@ class Staff extends Model
      */
     public function getPhotoUrlAttribute(): ?string
     {
-        if (!$this->photo) {
+        if (! $this->photo) {
             return null;
         }
+
         // Use the 'public' disk so this works regardless of APP_URL changes
         return Storage::disk('public')->url($this->photo);
     }

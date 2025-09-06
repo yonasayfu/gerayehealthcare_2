@@ -60,7 +60,7 @@ return new class extends Migration
                 'campaign_code', 'platform_id', 'campaign_type',
                 'target_audience', 'budget_allocated', 'budget_spent',
                 'status', 'utm_campaign', 'utm_source', 'utm_medium',
-                'assigned_staff_id', 'created_by_staff_id', 'goals'
+                'assigned_staff_id', 'created_by_staff_id', 'goals',
             ]);
         });
     }

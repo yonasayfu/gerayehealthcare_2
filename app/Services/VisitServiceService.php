@@ -2,19 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\VisitService;
+use App\Events\StaffAssignedToEvent;
+use App\Http\Traits\ExportableTrait;
+use App\Models\CaregiverAssignment;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
-use App\Models\CaregiverAssignment;
-use App\Models\EventStaffAssignment;
-use App\Events\StaffAssignedToEvent;
-use App\Services\InvoiceService;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\AdditionalExportConfigs;
+use App\Models\VisitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class VisitServiceService extends BaseService
 {
@@ -31,8 +28,8 @@ class VisitServiceService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where(function ($q) use ($search) {
-            $q->whereHas('patient', fn($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
-                ->orWhereHas('staff', fn($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
+            $q->whereHas('patient', fn ($pq) => $pq->where('full_name', 'ilike', "%{$search}%"))
+                ->orWhereHas('staff', fn ($sq) => $sq->where('first_name', 'ilike', "%{$search}%")->orWhere('last_name', 'ilike', "%{$search}%"));
         });
     }
 
@@ -65,13 +62,13 @@ class VisitServiceService extends BaseService
 
         // Find or create caregiver assignment
         $assignment = CaregiverAssignment::where('patient_id', $data['patient_id'])
-                                           ->where('staff_id', $data['staff_id'])
-                                           ->where('status', 'Assigned')
-                                           ->latest('id')
-                                           ->first();
-        
+            ->where('staff_id', $data['staff_id'])
+            ->where('status', 'Assigned')
+            ->latest('id')
+            ->first();
+
         // If no assignment exists, create one
-        if (!$assignment) {
+        if (! $assignment) {
             $assignment = CaregiverAssignment::create([
                 'patient_id' => $data['patient_id'],
                 'staff_id' => $data['staff_id'],
@@ -79,7 +76,7 @@ class VisitServiceService extends BaseService
                 'assignment_date' => now(),
             ]);
         }
-        
+
         $data['assignment_id'] = $assignment->id;
 
         $staff = Staff::find($data['staff_id']);
@@ -90,7 +87,7 @@ class VisitServiceService extends BaseService
         } else {
             unset($data['prescription_file']);
         }
-        
+
         if (isset($data['vitals_file']) && $data['vitals_file'] && is_object($data['vitals_file']) && method_exists($data['vitals_file'], 'store')) {
             $data['vitals_file'] = $data['vitals_file']->store('visits/vitals', 'public');
         } else {
@@ -98,7 +95,7 @@ class VisitServiceService extends BaseService
         }
 
         // Ensure boolean defaults to avoid DB null constraint issues
-        if (!array_key_exists('is_paid_to_staff', $data)) {
+        if (! array_key_exists('is_paid_to_staff', $data)) {
             $data['is_paid_to_staff'] = false;
         }
 
@@ -108,6 +105,7 @@ class VisitServiceService extends BaseService
         if (isset($data['event_id']) && isset($data['staff_id'])) {
             event(new StaffAssignedToEvent($data['event_id'], $data['staff_id']));
         }
+
         return $visitService;
     }
 
@@ -128,9 +126,9 @@ class VisitServiceService extends BaseService
                 ->where('status', 'Assigned')
                 ->latest('id')
                 ->first();
-            
+
             // If no assignment exists, create one
-            if (!$assignment) {
+            if (! $assignment) {
                 $assignment = CaregiverAssignment::create([
                     'patient_id' => $data['patient_id'],
                     'staff_id' => $data['staff_id'],
@@ -138,7 +136,7 @@ class VisitServiceService extends BaseService
                     'assignment_date' => now(),
                 ]);
             }
-            
+
             $data['assignment_id'] = $assignment->id;
 
             $staff = Staff::find($data['staff_id']);
@@ -163,7 +161,7 @@ class VisitServiceService extends BaseService
             unset($data['vitals_file']);
         }
 
-        if (!array_key_exists('is_paid_to_staff', $data) && $visitService->is_paid_to_staff === null) {
+        if (! array_key_exists('is_paid_to_staff', $data) && $visitService->is_paid_to_staff === null) {
             $data['is_paid_to_staff'] = false;
         }
 
@@ -185,11 +183,11 @@ class VisitServiceService extends BaseService
             try {
                 // Create invoice automatically
                 $invoice = $this->invoiceService->createFromVisitService($updatedVisit);
-                
+
                 Log::info("Invoice {$invoice->invoice_number} created for completed visit {$updatedVisit->id}");
-                
+
             } catch (\Exception $e) {
-                Log::error("Failed to create invoice for visit {$updatedVisit->id}: " . $e->getMessage());
+                Log::error("Failed to create invoice for visit {$updatedVisit->id}: ".$e->getMessage());
                 // Don't throw exception to avoid breaking visit update
             }
         }
@@ -207,8 +205,6 @@ class VisitServiceService extends BaseService
         parent::delete($id);
     }
 
-    
-
     /**
      * Validate staff availability for the scheduled time
      */
@@ -222,7 +218,7 @@ class VisitServiceService extends BaseService
             ->where('status', 'Unavailable')
             ->where(function ($query) use ($scheduledDateTime, $visitEndTime) {
                 $query->where('start_time', '<', $visitEndTime)
-                      ->where('end_time', '>', $scheduledDateTime);
+                    ->where('end_time', '>', $scheduledDateTime);
             })
             ->exists();
 
@@ -235,7 +231,7 @@ class VisitServiceService extends BaseService
             ->where('status', '!=', 'Cancelled')
             ->where(function ($query) use ($scheduledDateTime, $visitEndTime) {
                 $query->where('scheduled_at', '<', $visitEndTime)
-                      ->where('scheduled_at', '>', $scheduledDateTime->copy()->subHour());
+                    ->where('scheduled_at', '>', $scheduledDateTime->copy()->subHour());
             })
             ->when($excludeVisitId, function ($query) use ($excludeVisitId) {
                 return $query->where('id', '!=', $excludeVisitId);
@@ -253,7 +249,7 @@ class VisitServiceService extends BaseService
             ->where(function ($query) use ($scheduledDateTime) {
                 $query->whereBetween('scheduled_at', [
                     $scheduledDateTime->copy()->subHours(2),
-                    $scheduledDateTime->copy()->addHours(2)
+                    $scheduledDateTime->copy()->addHours(2),
                 ]);
             })
             ->when($excludeVisitId, function ($query) use ($excludeVisitId) {
@@ -272,10 +268,7 @@ class VisitServiceService extends BaseService
             'patient',
             'staff',
         ], $with));
+
         return $this->model->with($with)->findOrFail($id);
     }
-
-    
-
-
 }

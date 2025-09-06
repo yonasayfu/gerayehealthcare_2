@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTOs\CreateLandingPageDTO;
+use App\DTOs\UpdateLandingPageDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\LandingPageService;
 use App\Models\LandingPage;
 use App\Models\MarketingCampaign;
+use App\Services\LandingPageService;
 use App\Services\Validation\Rules\LandingPageRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\DTOs\CreateLandingPageDTO;
-use App\DTOs\UpdateLandingPageDTO;
-use Illuminate\Support\Facades\App;
 
 class LandingPageController extends BaseController
 {
@@ -32,7 +31,7 @@ class LandingPageController extends BaseController
     {
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'campaigns' => $campaigns,
         ]);
     }
@@ -52,7 +51,7 @@ class LandingPageController extends BaseController
         $landingPage = $this->service->getById($id);
         $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $landingPage,
             'campaigns' => $campaigns,
         ]);

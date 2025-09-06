@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use App\Models\Patient;
-use App\Models\VisitService;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\Patient;
+use App\Models\VisitService;
 use App\Services\InvoiceService;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class IncomingInvoicesDemoSeeder extends Seeder
 {

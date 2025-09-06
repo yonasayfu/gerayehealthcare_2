@@ -2,23 +2,23 @@
 
 namespace App\Services;
 
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\VisitService;
-use App\Models\InsuranceClaim;
-use App\Models\EmployeeInsuranceRecord;
 use App\Services\Insurance\InsuranceClaimService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 
 class OptimizedInvoiceService extends OptimizedBaseService
 {
     use ExportableTrait;
+
     protected $insuranceClaimService;
+
     protected $cacheTtl = 900; // 15 minutes for financial data
 
     public function __construct(Invoice $invoice, InsuranceClaimService $insuranceClaimService)
@@ -30,21 +30,21 @@ class OptimizedInvoiceService extends OptimizedBaseService
     protected function applySearch($query, $search)
     {
         $query->where('invoice_number', 'ilike', "%{$search}%")
-              ->orWhere('status', 'ilike', "%{$search}%")
-              ->orWhereHas('patient', function ($q) use ($search) {
-                  $q->where('full_name', 'ilike', "%{$search}%");
-              });
+            ->orWhere('status', 'ilike', "%{$search}%")
+            ->orWhereHas('patient', function ($q) use ($search) {
+                $q->where('full_name', 'ilike', "%{$search}%");
+            });
     }
 
     public function getAll(Request $request, array $with = [])
     {
         $cacheKey = $this->generateCacheKey('all', $request->all(), $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request, $with) {
             $query = $this->model->with(array_merge(['patient:id,full_name'], $with));
 
             // Hide Pending invoices by default (Incoming items will be handled in a separate queue)
-            if (!$request->boolean('include_pending', false)) {
+            if (! $request->boolean('include_pending', false)) {
                 $query->whereNotIn('status', ['Pending']);
             }
 
@@ -66,9 +66,10 @@ class OptimizedInvoiceService extends OptimizedBaseService
     public function getById(int $id, array $with = []): Invoice
     {
         $cacheKey = $this->generateCacheKey('single', ['id' => $id], $with);
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $with) {
             $with = array_unique(array_merge(['patient', 'items.visitService.staff', 'insuranceCompany'], $with));
+
             return $this->model->with($with)->findOrFail($id);
         });
     }
@@ -89,7 +90,7 @@ class OptimizedInvoiceService extends OptimizedBaseService
             $subtotal = $visits->sum(function ($v) {
                 return (float) $v->cost;
             });
-            
+
             // Tax calculation with configurable rate
             if (array_key_exists('tax_amount', $data)) {
                 $taxAmount = (float) $data['tax_amount'];
@@ -101,14 +102,14 @@ class OptimizedInvoiceService extends OptimizedBaseService
 
             // Prepare invoice payload
             $invoicePayload = [
-                'patient_id'   => $data['patient_id'],
+                'patient_id' => $data['patient_id'],
                 'invoice_date' => $data['invoice_date'] ?? now()->toDateString(),
-                'due_date'     => $data['due_date'] ?? now()->addDays(30)->toDateString(),
-                'subtotal'     => $subtotal,
-                'tax_amount'   => $taxAmount,
-                'grand_total'  => $grandTotal,
-                'amount'       => $grandTotal, // amount due at creation
-                'status'       => $data['status'] ?? 'Issued',
+                'due_date' => $data['due_date'] ?? now()->addDays(30)->toDateString(),
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'grand_total' => $grandTotal,
+                'amount' => $grandTotal, // amount due at creation
+                'status' => $data['status'] ?? 'Issued',
             ];
 
             // Create invoice
@@ -119,10 +120,10 @@ class OptimizedInvoiceService extends OptimizedBaseService
                 $items = $visits->map(function ($visit) {
                     return [
                         'visit_service_id' => $visit->id,
-                        'description'      => $visit->service_description,
-                        'cost'             => $visit->cost,
-                        'created_at'       => now(),
-                        'updated_at'       => now(),
+                        'description' => $visit->service_description,
+                        'cost' => $visit->cost,
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 })->all();
                 $invoice->items()->insert($items);
@@ -154,7 +155,7 @@ class OptimizedInvoiceService extends OptimizedBaseService
 
             // Clear cache for updated invoices
             $this->clearCachePattern('invoice_*');
-            
+
             return $count;
         });
 
@@ -167,10 +168,10 @@ class OptimizedInvoiceService extends OptimizedBaseService
     public function getFinancialStats(Request $request): array
     {
         $cacheKey = $this->generateCacheKey('financial_stats', $request->only(['date_from', 'date_to']));
-        
+
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($request) {
             $query = $this->model->newQuery();
-            
+
             if ($request->has('date_from')) {
                 $query->where('invoice_date', '>=', $request->input('date_from'));
             }
@@ -195,7 +196,7 @@ class OptimizedInvoiceService extends OptimizedBaseService
     public function getPendingBillables(): array
     {
         $cacheKey = $this->generateCacheKey('pending_billables');
-        
+
         return Cache::remember($cacheKey, 300, function () { // 5 minutes for real-time data
             $raw = VisitService::with(['patient:id,full_name'])
                 ->where('status', 'Completed')
@@ -208,6 +209,7 @@ class OptimizedInvoiceService extends OptimizedBaseService
             return $raw->groupBy('patient_id')->map(function ($items, $patientId) {
                 $total = $items->sum('cost');
                 $dates = $items->pluck('scheduled_at')->filter();
+
                 return [
                     'patient_id' => $patientId,
                     'patient_name' => optional($items->first()->patient)->full_name,
@@ -228,7 +230,7 @@ class OptimizedInvoiceService extends OptimizedBaseService
     {
         try {
             $patient = $invoice->patient;
-            if (!$patient) {
+            if (! $patient) {
                 return;
             }
 
@@ -242,16 +244,18 @@ class OptimizedInvoiceService extends OptimizedBaseService
                     ->first();
             });
 
-            if (!$insuranceRecord || !$insuranceRecord->policy) {
+            if (! $insuranceRecord || ! $insuranceRecord->policy) {
                 Log::info("No active insurance found for patient {$patient->id}");
+
                 return;
             }
 
             $policy = $insuranceRecord->policy;
-            
+
             // Check if policy is active and covers the service type
-            if (!$policy->is_active) {
+            if (! $policy->is_active) {
                 Log::info("Insurance policy {$policy->id} is not active");
+
                 return;
             }
 
@@ -273,14 +277,14 @@ class OptimizedInvoiceService extends OptimizedBaseService
             ];
 
             $this->insuranceClaimService->create($claimData);
-            
+
             // Update invoice with insurance company reference
             $invoice->update(['insurance_company_id' => $policy->insurance_company_id]);
 
             Log::info("Insurance claim created for invoice {$invoice->id}, coverage: {$coverageAmount} ETB");
 
         } catch (\Exception $e) {
-            Log::error("Failed to create insurance claim for invoice {$invoice->id}: " . $e->getMessage());
+            Log::error("Failed to create insurance claim for invoice {$invoice->id}: ".$e->getMessage());
             // Don't throw exception to avoid breaking invoice creation
         }
     }
@@ -291,12 +295,12 @@ class OptimizedInvoiceService extends OptimizedBaseService
     public function createFromVisitService(VisitService $visitService): Invoice
     {
         $invoiceData = [
-            'patient_id'   => $visitService->patient_id,
+            'patient_id' => $visitService->patient_id,
             'invoice_date' => now()->toDateString(),
-            'due_date'     => now()->addDays(30)->toDateString(),
-            'tax_amount'   => 0,
-            'status'       => 'Pending',
-            'visit_ids'    => [$visitService->id],
+            'due_date' => now()->addDays(30)->toDateString(),
+            'tax_amount' => 0,
+            'status' => 'Pending',
+            'visit_ids' => [$visitService->id],
         ];
 
         return $this->create($invoiceData);

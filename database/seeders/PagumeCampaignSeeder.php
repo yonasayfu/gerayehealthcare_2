@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\EligibilityCriteria;
 use App\Models\Event;
 use App\Models\EventRecommendation;
-use App\Models\EligibilityCriteria;
 use App\Models\EventStaffAssignment;
+use Illuminate\Database\Seeder;
 
 class PagumeCampaignSeeder extends Seeder
 {

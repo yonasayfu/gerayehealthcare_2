@@ -3,7 +3,6 @@
 namespace App\Services\Insurance;
 
 use App\Models\InsurancePolicy;
-use App\DTOs\CreateInsurancePolicyDTO;
 use App\Services\BaseService;
 
 class InsurancePolicyService extends BaseService
@@ -16,6 +15,7 @@ class InsurancePolicyService extends BaseService
     public function create(array|object $data): InsurancePolicy
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
 }

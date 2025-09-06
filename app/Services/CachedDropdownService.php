@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
-use App\Models\Patient;
-use App\Models\Staff;
+use App\Models\Event;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
+use App\Models\Patient;
 use App\Models\Service;
-use App\Models\Event;
+use App\Models\Staff;
+use Illuminate\Support\Facades\Cache;
 
 class CachedDropdownService
 {
@@ -233,32 +233,25 @@ class CachedDropdownService
     /**
      * Get custom dropdown data with caching
      *
-     * @param string $key
-     * @param callable $callback
-     * @param int $ttl
      * @return mixed
      */
     public static function getCustom(string $key, callable $callback, int $ttl = 300)
     {
-        $cacheKey = 'dropdown_custom_' . $key;
+        $cacheKey = 'dropdown_custom_'.$key;
+
         return Cache::remember($cacheKey, $ttl, $callback);
     }
 
     /**
      * Forget custom dropdown data
-     *
-     * @param string $key
-     * @return bool
      */
     public static function forgetCustom(string $key): bool
     {
-        return Cache::forget('dropdown_custom_' . $key);
+        return Cache::forget('dropdown_custom_'.$key);
     }
 
     /**
      * Get cache statistics
-     *
-     * @return array
      */
     public static function getCacheStats(): array
     {
@@ -266,7 +259,7 @@ class CachedDropdownService
             'dropdown_active_staff', 'dropdown_patients', 'dropdown_insurance_companies',
             'dropdown_services', 'dropdown_events', 'dropdown_marketing_campaigns',
             'dropdown_campaign_content', 'dropdown_staff_with_users', 'dropdown_partners',
-            'dropdown_partner_agreements', 'dropdown_referrals', 'dropdown_invoices'
+            'dropdown_partner_agreements', 'dropdown_referrals', 'dropdown_invoices',
         ];
 
         $stats = [];
@@ -279,16 +272,13 @@ class CachedDropdownService
 
     /**
      * Refresh specific cache
-     *
-     * @param string $type
-     * @return void
      */
     public static function refresh(string $type): void
     {
-        $cacheKey = 'dropdown_' . strtolower($type);
+        $cacheKey = 'dropdown_'.strtolower($type);
         Cache::forget($cacheKey);
 
-        $method = 'get' . ucfirst($type);
+        $method = 'get'.ucfirst($type);
         if (method_exists(self::class, $method)) {
             self::$method();
         }
@@ -296,8 +286,6 @@ class CachedDropdownService
 
     /**
      * Get memory usage statistics
-     *
-     * @return array
      */
     public static function getMemoryStats(): array
     {

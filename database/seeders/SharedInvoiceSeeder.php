@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\SharedInvoice;
+use Illuminate\Database\Seeder;
 
 class SharedInvoiceSeeder extends Seeder
 {

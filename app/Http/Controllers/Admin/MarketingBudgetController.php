@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Services\MarketingBudgetService;
 use App\Models\MarketingBudget;
+use App\Models\MarketingBudget as MarketingBudgetModel;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
+use App\Services\MarketingBudgetService;
 use App\Services\Validation\Rules\MarketingBudgetRules;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 // Using direct validated arrays for create/update (no DTO)
-use App\Models\MarketingBudget as MarketingBudgetModel;
+use Inertia\Inertia;
 
 class MarketingBudgetController extends BaseController
 {
@@ -32,7 +32,7 @@ class MarketingBudgetController extends BaseController
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
         $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'campaigns' => $campaigns,
             'platforms' => $platforms,
             'statuses' => $statuses,
@@ -46,7 +46,7 @@ class MarketingBudgetController extends BaseController
         $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
         $statuses = ['Planned', 'Active', 'Completed', 'On Hold', 'Cancelled'];
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             lcfirst(class_basename($this->modelClass)) => $marketingBudget,
             'campaigns' => $campaigns,
             'platforms' => $platforms,

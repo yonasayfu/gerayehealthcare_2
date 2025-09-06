@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Services\Validation\Rules\InsuranceCompanyRules;
-use App\Http\Controllers\Base\BaseController;
-use App\Models\InsuranceCompany;
-use App\Services\Insurance\InsuranceCompanyService; // Corrected namespace
 use App\DTOs\CreateInsuranceCompanyDTO;
 use App\DTOs\UpdateInsuranceCompanyDTO;
-use App\Http\Traits\ExportableTrait;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait; // Corrected namespace
+use App\Models\InsuranceCompany;
+use App\Services\Insurance\InsuranceCompanyService;
+use App\Services\Validation\Rules\InsuranceCompanyRules;
 use Illuminate\Http\Request;
 
 class InsuranceCompanyController extends BaseController
@@ -34,6 +34,7 @@ class InsuranceCompanyController extends BaseController
     public function export(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handleExport($request, InsuranceCompany::class, $config);
     }
 
@@ -43,6 +44,7 @@ class InsuranceCompanyController extends BaseController
     public function printAll(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintAll($request, InsuranceCompany::class, $config);
     }
 
@@ -52,6 +54,7 @@ class InsuranceCompanyController extends BaseController
     public function printCurrent(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintCurrent($request, InsuranceCompany::class, $config);
     }
 
@@ -62,6 +65,7 @@ class InsuranceCompanyController extends BaseController
     {
         $model = InsuranceCompany::findOrFail($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $model, $config);
     }
 

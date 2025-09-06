@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\StoreMedicalDocumentRequest;
 use App\Http\Resources\MedicalDocumentResource;
 use App\Models\MedicalDocument;
 use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\Api\V1\StoreMedicalDocumentRequest;
 
 class DocumentController extends Controller
 {
@@ -23,13 +23,14 @@ class DocumentController extends Controller
             $query->where('created_by_staff_id', $user->staff->id);
         } else {
             $patient = Patient::where('email', $user->email)->first();
-            if (!$patient) {
+            if (! $patient) {
                 return response()->json(['data' => []]);
             }
             $query->where('patient_id', $patient->id);
         }
 
         $docs = $query->paginate($request->integer('per_page', 20));
+
         return MedicalDocumentResource::collection($docs);
     }
 
@@ -38,9 +39,10 @@ class DocumentController extends Controller
     {
         $this->authorize('view', $document);
 
-        if (!$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
+        if (! $document->file_path || ! Storage::disk('public')->exists($document->file_path)) {
             return response()->json(['message' => 'File not found'], 404);
         }
+
         return Storage::disk('public')->download($document->file_path, $document->title ?: 'document.pdf');
     }
 

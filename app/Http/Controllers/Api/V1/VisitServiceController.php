@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\StoreVisitServiceRequest;
+use App\Http\Requests\Api\V1\UpdateVisitServiceRequest;
 use App\Http\Requests\VisitService\CheckInRequest;
 use App\Http\Requests\VisitService\CheckOutRequest;
 use App\Http\Resources\VisitServiceResource;
-use App\Models\VisitService;
 use App\Models\Patient;
-use Illuminate\Support\Facades\Gate;
+use App\Models\VisitService;
 use Illuminate\Http\Request;
-use App\Http\Requests\Api\V1\StoreVisitServiceRequest;
-use App\Http\Requests\Api\V1\UpdateVisitServiceRequest;
+use Illuminate\Support\Facades\Gate;
 
 class VisitServiceController extends Controller
 {
@@ -19,11 +19,11 @@ class VisitServiceController extends Controller
     {
         // Determine patient_id: if not provided, infer from user email
         $patientId = $request->validated()['patient_id'] ?? null;
-        if (!$patientId) {
+        if (! $patientId) {
             $patientId = optional(Patient::where('email', $request->user()->email)->first())->id;
         }
 
-        if (!Gate::forUser($request->user())->allows('create', [VisitService::class, $patientId])) {
+        if (! Gate::forUser($request->user())->allows('create', [VisitService::class, $patientId])) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -43,6 +43,7 @@ class VisitServiceController extends Controller
         $this->authorize('update', $visitService);
 
         $visitService->update($request->validated());
+
         return new VisitServiceResource($visitService->fresh(['patient', 'staff']));
     }
 
@@ -50,8 +51,10 @@ class VisitServiceController extends Controller
     {
         $this->authorize('cancel', $visitService);
         $visitService->update(['status' => 'Cancelled']);
+
         return response()->noContent();
     }
+
     public function mySchedule(Request $request)
     {
         $user = $request->user();
@@ -72,6 +75,7 @@ class VisitServiceController extends Controller
         }
 
         $visits = $query->orderBy('scheduled_at', 'asc')->paginate($request->integer('per_page', 10));
+
         return VisitServiceResource::collection($visits);
     }
 

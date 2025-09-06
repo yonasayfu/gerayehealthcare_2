@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('groups', function (Blueprint $table) {
@@ -21,7 +22,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id');
             $table->string('role')->default('member'); // owner, admin, member
             $table->timestamps();
-            $table->unique(['group_id','user_id']);
+            $table->unique(['group_id', 'user_id']);
             $table->foreign('group_id')->references('id')->on('groups')->cascadeOnDelete();
             $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
         });
@@ -51,4 +52,3 @@ return new class extends Migration {
         Schema::dropIfExists('groups');
     }
 };
-

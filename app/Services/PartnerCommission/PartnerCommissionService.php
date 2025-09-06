@@ -46,6 +46,7 @@ class PartnerCommissionService extends BaseService
     public function printSingle(Request $request, $id)
     {
         $model = PartnerCommission::findOrFail($id);
+
         return $this->handlePrintSingle($request, $model, $this->getExportConfig());
     }
 }

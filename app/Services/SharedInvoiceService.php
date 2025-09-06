@@ -33,19 +33,19 @@ class SharedInvoiceService extends BaseService
     public function updateSharedInvoice(SharedInvoice $sharedInvoice, UpdateSharedInvoiceDTO $dto): SharedInvoice
     {
         $data = [];
-        if (!is_null($dto->invoice_id)) {
+        if (! is_null($dto->invoice_id)) {
             $data['invoice_id'] = $dto->invoice_id;
         }
-        if (!is_null($dto->partner_id)) {
+        if (! is_null($dto->partner_id)) {
             $data['partner_id'] = $dto->partner_id;
         }
-        if (!is_null($dto->share_date)) {
+        if (! is_null($dto->share_date)) {
             $data['share_date'] = $dto->share_date;
         }
-        if (!is_null($dto->status)) {
+        if (! is_null($dto->status)) {
             $data['status'] = $dto->status;
         }
-        if (!is_null($dto->notes)) {
+        if (! is_null($dto->notes)) {
             $data['notes'] = $dto->notes;
         }
 

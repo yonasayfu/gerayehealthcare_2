@@ -26,7 +26,8 @@ class LandingPageRules extends BaseResourceRules
     {
         $rules = self::store();
         // Adjust unique rule to ignore current record on update
-        $rules['page_url'] = ['required', 'url', 'max:255', 'unique:landing_pages,page_url,' . ($item?->id ?? 'NULL')];
+        $rules['page_url'] = ['required', 'url', 'max:255', 'unique:landing_pages,page_url,'.($item?->id ?? 'NULL')];
+
         return $rules;
     }
 }

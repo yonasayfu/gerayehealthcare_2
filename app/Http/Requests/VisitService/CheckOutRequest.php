@@ -9,6 +9,7 @@ class CheckOutRequest extends FormRequest
     public function authorize(): bool
     {
         $visit = $this->route('visitService');
+
         return $this->user() && $this->user()->can('checkOut', $visit);
     }
 

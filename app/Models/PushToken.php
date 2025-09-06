@@ -11,7 +11,7 @@ class PushToken extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'token', 'platform', 'device_name'
+        'user_id', 'token', 'platform', 'device_name',
     ];
 
     public function user(): BelongsTo
@@ -19,4 +19,3 @@ class PushToken extends Model
         return $this->belongsTo(User::class);
     }
 }
-

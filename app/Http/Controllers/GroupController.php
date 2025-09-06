@@ -13,9 +13,10 @@ class GroupController extends Controller
     {
         $userId = Auth::id();
         $groups = Group::with(['members.user:id,name'])
-            ->whereHas('members', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('members', fn ($q) => $q->where('user_id', $userId))
             ->orderBy('name')
             ->get();
+
         return response()->json(['data' => $groups]);
     }
 
@@ -32,24 +33,26 @@ class GroupController extends Controller
         $group = Group::create([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
         ]);
 
         // Add the creator as owner
         GroupMember::create([
             'group_id' => $group->id,
             'user_id' => Auth::id(),
-            'role' => 'owner'
+            'role' => 'owner',
         ]);
 
         // Add selected members
         foreach (($data['members'] ?? []) as $uid) {
-            if ($uid === Auth::id()) continue; // Skip creator
+            if ($uid === Auth::id()) {
+                continue;
+            } // Skip creator
             GroupMember::firstOrCreate([
                 'group_id' => $group->id,
-                'user_id' => $uid
+                'user_id' => $uid,
             ], [
-                'role' => 'member'
+                'role' => 'member',
             ]);
         }
 
@@ -61,7 +64,7 @@ class GroupController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Group created successfully!',
-                'data' => $group
+                'data' => $group,
             ], 201);
         }
 
@@ -69,4 +72,3 @@ class GroupController extends Controller
         return back()->with('success', 'Group created successfully!')->with('group', $group);
     }
 }
-

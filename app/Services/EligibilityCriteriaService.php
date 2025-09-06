@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\EligibilityCriteria;
-use App\DTOs\CreateEligibilityCriteriaDTO;
-use Illuminate\Http\Request;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
+use App\Models\EligibilityCriteria;
+use Illuminate\Http\Request;
 
 class EligibilityCriteriaService extends BaseService
 {
     use ExportableTrait;
+
     public function __construct(EligibilityCriteria $eligibilityCriteria)
     {
         parent::__construct($eligibilityCriteria);
@@ -19,6 +19,7 @@ class EligibilityCriteriaService extends BaseService
     public function create(array|object $data): EligibilityCriteria
     {
         $data = is_object($data) ? (array) $data : $data;
+
         return parent::create($data);
     }
 
@@ -27,6 +28,7 @@ class EligibilityCriteriaService extends BaseService
     {
         // Force CSV export only
         $request->merge(['type' => 'csv']);
+
         return $this->handleExport($request, EligibilityCriteria::class, AdditionalExportConfigs::getEligibilityCriteriaConfig());
     }
 
@@ -44,8 +46,8 @@ class EligibilityCriteriaService extends BaseService
     {
         $query->where(function ($q) use ($search) {
             $q->where('criteria_title', 'ILIKE', "%{$search}%")
-              ->orWhere('operator', 'ILIKE', "%{$search}%")
-              ->orWhere('value', 'ILIKE', "%{$search}%");
+                ->orWhere('operator', 'ILIKE', "%{$search}%")
+                ->orWhere('value', 'ILIKE', "%{$search}%");
         });
     }
 }

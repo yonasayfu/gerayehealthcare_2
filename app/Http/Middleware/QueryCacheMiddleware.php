@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 class QueryCacheMiddleware
 {
     protected $cacheTtl = 600; // 10 minutes default cache
+
     protected $cacheableRoutes = [
         'admin.patients.index',
         'admin.staff.index',
@@ -26,29 +27,29 @@ class QueryCacheMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Only cache GET requests for specific routes
-        if (!$request->isMethod('GET') || !$this->shouldCache($request)) {
+        if (! $request->isMethod('GET') || ! $this->shouldCache($request)) {
             return $next($request);
         }
 
         $cacheKey = $this->generateCacheKey($request);
-        
+
         // Check if response is cached
         if (Cache::has($cacheKey)) {
             $cachedResponse = Cache::get($cacheKey);
-            
+
             // Add cache headers
             $response = response($cachedResponse['content'], $cachedResponse['status'])
                 ->withHeaders($cachedResponse['headers']);
             $response->headers->set('X-Cache-Status', 'HIT');
-            
+
             return $response;
         }
 
         // Enable query log to track database queries
         DB::enableQueryLog();
-        
+
         $response = $next($request);
-        
+
         // Get executed queries
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
@@ -71,7 +72,7 @@ class QueryCacheMiddleware
     protected function shouldCache(Request $request): bool
     {
         $routeName = $request->route()->getName();
-        
+
         // Cache specific routes
         if (in_array($routeName, $this->cacheableRoutes)) {
             return true;
@@ -97,17 +98,17 @@ class QueryCacheMiddleware
     {
         $routeName = $request->route()->getName();
         $parameters = $request->query();
-        
+
         // Sort parameters for consistent cache keys
         ksort($parameters);
-        
+
         $keyData = [
             'route' => $routeName,
             'params' => $parameters,
             'user_id' => $request->user()?->id,
         ];
 
-        return 'query_cache_' . md5(serialize($keyData));
+        return 'query_cache_'.md5(serialize($keyData));
     }
 
     /**
@@ -117,7 +118,7 @@ class QueryCacheMiddleware
     {
         // Adjust cache TTL based on query complexity
         $ttl = $this->calculateCacheTtl($queryCount);
-        
+
         $cacheData = [
             'content' => $response->getContent(),
             'status' => $response->getStatusCode(),

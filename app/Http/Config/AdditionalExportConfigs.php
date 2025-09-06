@@ -14,7 +14,7 @@ class AdditionalExportConfigs
             'sortable_fields' => ['campaign_name', 'status', 'start_date', 'created_at'],
             'default_sort' => 'created_at',
             'with_relations' => ['platform', 'assignedStaff', 'createdByStaff'],
-            
+
             'csv' => [
                 'headers' => ['Campaign Code', 'Campaign Name', 'Platform', 'Status', 'Start Date', 'Budget'],
                 'fields' => [
@@ -23,11 +23,11 @@ class AdditionalExportConfigs
                     ['field' => 'platform.name', 'default' => '-'],
                     'status',
                     'start_date',
-                    ['field' => 'budget_allocated', 'default' => '0']
+                    ['field' => 'budget_allocated', 'default' => '0'],
                 ],
-                'filename' => 'marketing_campaigns.csv'
+                'filename' => 'marketing_campaigns.csv',
             ],
-            
+
             'pdf' => [
                 'title' => 'Marketing Campaigns List',
                 'document_title' => 'Marketing Campaigns List',
@@ -42,9 +42,9 @@ class AdditionalExportConfigs
                     'start_date' => ['field' => 'start_date', 'default' => '-'],
                     'budget_allocated' => [
                         'field' => 'budget_allocated',
-                        'transform' => function($value, $model) {
+                        'transform' => function ($value, $model) {
                             return number_format($value ?? 0, 2);
-                        }
+                        },
                     ],
                 ],
                 'columns' => [
@@ -54,9 +54,9 @@ class AdditionalExportConfigs
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'start_date', 'label' => 'Start Date'],
                     ['key' => 'budget_allocated', 'label' => 'Budget'],
-                ]
+                ],
             ],
-            
+
             'print_current' => [
                 'title' => 'Marketing Campaigns (Current View)',
                 'document_title' => 'Marketing Campaigns (Current View)',
@@ -75,9 +75,9 @@ class AdditionalExportConfigs
                     ['key' => 'platform_name', 'label' => 'Platform'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'start_date', 'label' => 'Start Date'],
-                ]
+                ],
             ],
-            
+
             'print_all' => [
                 'title' => 'All Marketing Campaigns',
                 'document_title' => 'All Marketing Campaigns',
@@ -97,9 +97,9 @@ class AdditionalExportConfigs
                     ['key' => 'platform_name', 'label' => 'Platform'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'start_date', 'label' => 'Start Date'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'fields' => [
                     'Campaign Code' => ['field' => 'campaign_code', 'default' => '-'],
@@ -110,12 +110,12 @@ class AdditionalExportConfigs
                     'End Date' => ['field' => 'end_date', 'default' => '-'],
                     'Budget Allocated' => [
                         'field' => 'budget_allocated',
-                        'transform' => function($value, $model) {
-                            return '$' . number_format($value ?? 0, 2);
-                        }
+                        'transform' => function ($value, $model) {
+                            return '$'.number_format($value ?? 0, 2);
+                        },
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -221,9 +221,6 @@ class AdditionalExportConfigs
             ],
         ];
     }
-    
-
-    
 
     /**
      * Get export configuration for MarketingTask model
@@ -235,7 +232,7 @@ class AdditionalExportConfigs
             'sortable_fields' => ['task_name', 'priority', 'due_date', 'status', 'created_at'],
             'default_sort' => 'created_at',
             'with_relations' => ['assignedStaff', 'campaign'],
-            
+
             'current_page' => [
                 'title' => 'Marketing Tasks (Current View)',
                 'document_title' => 'Marketing Tasks (Current View)',
@@ -256,9 +253,9 @@ class AdditionalExportConfigs
                     ['key' => 'priority', 'label' => 'Priority'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'due_date', 'label' => 'Due Date'],
-                ]
+                ],
             ],
-            
+
             'all_records' => [
                 'title' => 'All Marketing Tasks',
                 'document_title' => 'All Marketing Tasks',
@@ -280,9 +277,9 @@ class AdditionalExportConfigs
                     ['key' => 'priority', 'label' => 'Priority'],
                     ['key' => 'status', 'label' => 'Status'],
                     ['key' => 'due_date', 'label' => 'Due Date'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'fields' => [
                     'Task Name' => 'task_name',
@@ -293,18 +290,14 @@ class AdditionalExportConfigs
                     'Priority' => 'priority',
                     'Status' => 'status',
                     'Due Date' => ['field' => 'due_date', 'default' => '-'],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
     /**
      * Get export configuration for LeadSource model
      */
-    
-
-    
-
     public static function getInventoryItemConfig(): array
     {
         return [
@@ -321,17 +314,17 @@ class AdditionalExportConfigs
                 'Serial Number' => ['field' => 'serial_number', 'default' => '-'],
                 'Purchase Date' => [
                     'field' => 'purchase_date',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                    },
                 ],
                 'Warranty Expiry' => [
                     'field' => 'warranty_expiry',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                    },
                 ],
-                'Status' => 'status'
+                'Status' => 'status',
             ],
             'pdf_columns' => [
                 ['key' => 'name', 'label' => 'Name'],
@@ -340,7 +333,7 @@ class AdditionalExportConfigs
                 ['key' => 'serial_number', 'label' => 'Serial Number'],
                 ['key' => 'status', 'label' => 'Status'],
                 ['key' => 'purchase_date', 'label' => 'Purchase Date'],
-                ['key' => 'warranty_expiry', 'label' => 'Warranty Expiry']
+                ['key' => 'warranty_expiry', 'label' => 'Warranty Expiry'],
             ],
             'pdf_fields' => [
                 'name' => 'name',
@@ -350,28 +343,28 @@ class AdditionalExportConfigs
                 'status' => 'status',
                 'purchase_date' => [
                     'field' => 'purchase_date',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                    },
                 ],
                 'warranty_expiry' => [
                     'field' => 'warranty_expiry',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
-                ]
+                    },
+                ],
             ],
             'print_all_config' => [
                 'title' => 'Inventory Items List',
                 'filename' => 'inventory-items.pdf',
                 'paper' => 'a4',
-                'orientation' => 'landscape'
+                'orientation' => 'landscape',
             ],
             'print_current_config' => [
                 'title' => 'Inventory Items List (Current View)',
                 'filename' => 'inventory-items-current.pdf',
                 'paper' => 'a4',
-                'orientation' => 'landscape'
+                'orientation' => 'landscape',
             ],
             'print_single_config' => [
                 'title' => 'Inventory Item Details',
@@ -386,44 +379,34 @@ class AdditionalExportConfigs
                     'Serial Number' => ['field' => 'serial_number', 'default' => '-'],
                     'Purchase Date' => [
                         'field' => 'purchase_date',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Warranty Expiry' => [
                         'field' => 'warranty_expiry',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Status' => 'status',
                     'Last Maintenance' => [
                         'field' => 'last_maintenance_date',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Next Maintenance Due' => [
                         'field' => 'next_maintenance_due',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
-                    'Notes' => ['field' => 'notes', 'default' => '-']
-                ]
-            ]
+                    'Notes' => ['field' => 'notes', 'default' => '-'],
+                ],
+            ],
         ];
     }
-
-    
-
-    
-
-    
-
-    
-
-    
 
     public static function getInsuranceClaimConfig(): array
     {
@@ -436,41 +419,41 @@ class AdditionalExportConfigs
             'csv_fields' => [
                 'Patient' => [
                     'field' => 'patient.full_name',
-                    'default' => 'N/A'
+                    'default' => 'N/A',
                 ],
                 'Claim Status' => 'claim_status',
                 'Coverage Amount' => [
                     'field' => 'coverage_amount',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? number_format($value, 2) : '0.00';
-                    }
+                    },
                 ],
                 'Paid Amount' => [
                     'field' => 'paid_amount',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? number_format($value, 2) : '0.00';
-                    }
+                    },
                 ],
                 'Receipt Number' => ['field' => 'receipt_number', 'default' => '-'],
                 'Submitted Date' => [
                     'field' => 'submitted_at',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                    },
                 ],
                 'Processed Date' => [
                     'field' => 'processed_at',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
-                    }
+                    },
                 ],
                 'Payment Method' => ['field' => 'payment_method', 'default' => '-'],
                 'Pre-Authorized' => [
                     'field' => 'is_pre_authorized',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? 'Yes' : 'No';
-                    }
-                ]
+                    },
+                ],
             ],
             'pdf_columns' => [
                 ['key' => 'patient_name', 'label' => 'Patient'],
@@ -479,51 +462,51 @@ class AdditionalExportConfigs
                 ['key' => 'paid_amount', 'label' => 'Paid'],
                 ['key' => 'receipt_number', 'label' => 'Receipt #'],
                 ['key' => 'submitted_at', 'label' => 'Submitted'],
-                ['key' => 'processed_at', 'label' => 'Processed']
+                ['key' => 'processed_at', 'label' => 'Processed'],
             ],
             'pdf_fields' => [
                 'patient_name' => [
                     'field' => 'patient.full_name',
-                    'default' => 'N/A'
+                    'default' => 'N/A',
                 ],
                 'claim_status' => 'claim_status',
                 'coverage_amount' => [
                     'field' => 'coverage_amount',
-                    'transform' => function($value) {
-                        return $value ? '$' . number_format($value, 2) : '$0.00';
-                    }
+                    'transform' => function ($value) {
+                        return $value ? '$'.number_format($value, 2) : '$0.00';
+                    },
                 ],
                 'paid_amount' => [
                     'field' => 'paid_amount',
-                    'transform' => function($value) {
-                        return $value ? '$' . number_format($value, 2) : '$0.00';
-                    }
+                    'transform' => function ($value) {
+                        return $value ? '$'.number_format($value, 2) : '$0.00';
+                    },
                 ],
                 'receipt_number' => ['field' => 'receipt_number', 'default' => '-'],
                 'submitted_at' => [
                     'field' => 'submitted_at',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                    }
+                    },
                 ],
                 'processed_at' => [
                     'field' => 'processed_at',
-                    'transform' => function($value) {
+                    'transform' => function ($value) {
                         return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                    }
-                ]
+                    },
+                ],
             ],
             'print_all_config' => [
                 'title' => 'Insurance Claims List',
                 'filename' => 'insurance-claims.pdf',
                 'paper' => 'a4',
-                'orientation' => 'landscape'
+                'orientation' => 'landscape',
             ],
             'print_current_config' => [
                 'title' => 'Insurance Claims List (Current View)',
                 'filename' => 'insurance-claims-current.pdf',
                 'paper' => 'a4',
-                'orientation' => 'landscape'
+                'orientation' => 'landscape',
             ],
             'print_single_config' => [
                 'title' => 'Insurance Claim Details',
@@ -533,66 +516,65 @@ class AdditionalExportConfigs
                 'fields' => [
                     'Patient' => [
                         'field' => 'patient.full_name',
-                        'default' => 'N/A'
+                        'default' => 'N/A',
                     ],
                     'Claim Status' => 'claim_status',
                     'Coverage Amount' => [
                         'field' => 'coverage_amount',
-                        'transform' => function($value) {
-                            return $value ? '$' . number_format($value, 2) : '$0.00';
-                        }
+                        'transform' => function ($value) {
+                            return $value ? '$'.number_format($value, 2) : '$0.00';
+                        },
                     ],
                     'Paid Amount' => [
                         'field' => 'paid_amount',
-                        'transform' => function($value) {
-                            return $value ? '$' . number_format($value, 2) : '$0.00';
-                        }
+                        'transform' => function ($value) {
+                            return $value ? '$'.number_format($value, 2) : '$0.00';
+                        },
                     ],
                     'Receipt Number' => ['field' => 'receipt_number', 'default' => '-'],
                     'Payment Method' => ['field' => 'payment_method', 'default' => '-'],
                     'Pre-Authorized' => [
                         'field' => 'is_pre_authorized',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'Pre-Authorization Code' => ['field' => 'pre_authorization_code', 'default' => '-'],
                     'Reimbursement Required' => [
                         'field' => 'reimbursement_required',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? 'Yes' : 'No';
-                        }
+                        },
                     ],
                     'Submitted Date' => [
                         'field' => 'submitted_at',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Processed Date' => [
                         'field' => 'processed_at',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Payment Due Date' => [
                         'field' => 'payment_due_date',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
                     'Payment Received Date' => [
                         'field' => 'payment_received_at',
-                        'transform' => function($value) {
+                        'transform' => function ($value) {
                             return $value ? \Carbon\Carbon::parse($value)->format('M d, Y') : '-';
-                        }
+                        },
                     ],
-                    'Denial Reason' => ['field' => 'denial_reason', 'default' => '-']
-                ]
-            ]
+                    'Denial Reason' => ['field' => 'denial_reason', 'default' => '-'],
+                ],
+            ],
         ];
     }
-
 
     // Exchange Rates module removed: config intentionally deleted.
 
@@ -614,8 +596,8 @@ class AdditionalExportConfigs
                     ['key' => 'region', 'label' => 'Region', 'printWidth' => '15%'],
                 ],
                 'field_transformations' => [
-                    'gregorian_date' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A',
-                    'is_holiday' => fn($value) => $value ? 'Yes' : 'No',
+                    'gregorian_date' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A',
+                    'is_holiday' => fn ($value) => $value ? 'Yes' : 'No',
                 ],
                 'print_layout' => [
                     'title' => 'Ethiopian Calendar Days List',
@@ -631,12 +613,12 @@ class AdditionalExportConfigs
                     'orientation' => 'portrait',
                     'filename_prefix' => 'ethiopian_calendar_day',
                     'fields' => [
-                        ['label' => 'Gregorian Date', 'key' => 'gregorian_date', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A'],
+                        ['label' => 'Gregorian Date', 'key' => 'gregorian_date', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : 'N/A'],
                         ['label' => 'Ethiopian Date', 'key' => 'ethiopian_date'],
                         ['label' => 'Description', 'key' => 'description'],
-                        ['label' => 'Is Holiday', 'key' => 'is_holiday', 'transform' => fn($value) => $value ? 'Yes' : 'No'],
+                        ['label' => 'Is Holiday', 'key' => 'is_holiday', 'transform' => fn ($value) => $value ? 'Yes' : 'No'],
                         ['label' => 'Region', 'key' => 'region'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
                 'relationships' => [],
@@ -647,10 +629,6 @@ class AdditionalExportConfigs
 
         return self::$ethiopianCalendarDayConfig;
     }
-
-    
-
-    
 
     private static $corporateClientConfig = null;
 
@@ -671,12 +649,12 @@ class AdditionalExportConfigs
                     ['key' => 'trade_license_number', 'label' => 'Trade License Number', 'printWidth' => '15%'],
                 ],
                 'field_transformations' => [
-                    'contact_person' => fn($value) => $value ?: '-',
-                    'contact_email' => fn($value) => $value ?: '-',
-                    'contact_phone' => fn($value) => $value ?: '-',
-                    'tin_number' => fn($value) => $value ?: '-',
-                    'trade_license_number' => fn($value) => $value ?: '-',
-                    'address' => fn($value) => $value ?: '-',
+                    'contact_person' => fn ($value) => $value ?: '-',
+                    'contact_email' => fn ($value) => $value ?: '-',
+                    'contact_phone' => fn ($value) => $value ?: '-',
+                    'tin_number' => fn ($value) => $value ?: '-',
+                    'trade_license_number' => fn ($value) => $value ?: '-',
+                    'address' => fn ($value) => $value ?: '-',
                 ],
                 'print_layout' => [
                     'title' => 'Corporate Clients List',
@@ -699,7 +677,7 @@ class AdditionalExportConfigs
                         ['label' => 'TIN Number', 'key' => 'tin_number'],
                         ['label' => 'Trade License Number', 'key' => 'trade_license_number'],
                         ['label' => 'Address', 'key' => 'address'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
                 'relationships' => [],
@@ -712,12 +690,6 @@ class AdditionalExportConfigs
     }
 
     private static $inventoryAlertConfig = null;
-
-    
-
-    
-
-
 
     private static $eligibilityCriteriaConfig = null;
 
@@ -733,7 +705,7 @@ class AdditionalExportConfigs
                     ['field' => 'event.title', 'default' => '-'],
                     'criteria_title',
                     'operator',
-                    'value'
+                    'value',
                 ],
                 'pdf_columns' => [
                     ['key' => 'event_title', 'label' => 'Event', 'printWidth' => '30%'],
@@ -742,10 +714,10 @@ class AdditionalExportConfigs
                     ['key' => 'value', 'label' => 'Value', 'printWidth' => '20%'],
                 ],
                 'field_transformations' => [
-                    'event_title' => fn($value) => $value ?: '-',
-                    'criteria_title' => fn($value) => $value ?: '-',
-                    'operator' => fn($value) => $value ?: '-',
-                    'value' => fn($value) => $value ?: '-',
+                    'event_title' => fn ($value) => $value ?: '-',
+                    'criteria_title' => fn ($value) => $value ?: '-',
+                    'operator' => fn ($value) => $value ?: '-',
+                    'value' => fn ($value) => $value ?: '-',
                 ],
                 'print_layout' => [
                     'title' => 'Eligibility Criteria List',
@@ -765,8 +737,8 @@ class AdditionalExportConfigs
                         ['label' => 'Criteria Title', 'key' => 'criteria_title'],
                         ['label' => 'Operator', 'key' => 'operator'],
                         ['label' => 'Value', 'key' => 'value'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
-                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
                 'with_relations' => ['event'],
@@ -807,18 +779,6 @@ class AdditionalExportConfigs
         return self::$eligibilityCriteriaConfig;
     }
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
     private static $insurancePolicyConfig = null;
 
     public static function getInsurancePolicyConfig(): array
@@ -838,14 +798,14 @@ class AdditionalExportConfigs
                     ['key' => 'corporate_client_name', 'label' => 'Corporate Client', 'printWidth' => '23%'],
                 ],
                 'field_transformations' => [
-                    'service_type' => fn($value) => $value ?: '-',
-                    'service_type_amharic' => fn($value) => $value ?: '-',
-                    'coverage_percentage' => fn($value) => $value ? $value . '%' : '0%',
-                    'coverage_type' => fn($value) => $value ?: '-',
-                    'is_active_text' => fn($value) => $value ? 'Active' : 'Inactive',
-                    'insurance_company_name' => fn($value) => $value ?: '-',
-                    'corporate_client_name' => fn($value) => $value ?: '-',
-                    'notes' => fn($value) => $value ? (strlen($value) > 100 ? substr($value, 0, 100) . '...' : $value) : '-',
+                    'service_type' => fn ($value) => $value ?: '-',
+                    'service_type_amharic' => fn ($value) => $value ?: '-',
+                    'coverage_percentage' => fn ($value) => $value ? $value.'%' : '0%',
+                    'coverage_type' => fn ($value) => $value ?: '-',
+                    'is_active_text' => fn ($value) => $value ? 'Active' : 'Inactive',
+                    'insurance_company_name' => fn ($value) => $value ?: '-',
+                    'corporate_client_name' => fn ($value) => $value ?: '-',
+                    'notes' => fn ($value) => $value ? (strlen($value) > 100 ? substr($value, 0, 100).'...' : $value) : '-',
                 ],
                 'print_layout' => [
                     'title' => 'Insurance Policies List',
@@ -863,14 +823,14 @@ class AdditionalExportConfigs
                     'fields' => [
                         ['label' => 'Service Type', 'key' => 'service_type'],
                         ['label' => 'Service Type (Amharic)', 'key' => 'service_type_amharic'],
-                        ['label' => 'Coverage Percentage', 'key' => 'coverage_percentage', 'transform' => fn($value) => $value ? $value . '%' : '0%'],
+                        ['label' => 'Coverage Percentage', 'key' => 'coverage_percentage', 'transform' => fn ($value) => $value ? $value.'%' : '0%'],
                         ['label' => 'Coverage Type', 'key' => 'coverage_type'],
-                        ['label' => 'Status', 'key' => 'is_active', 'transform' => fn($value) => $value ? 'Active' : 'Inactive'],
+                        ['label' => 'Status', 'key' => 'is_active', 'transform' => fn ($value) => $value ? 'Active' : 'Inactive'],
                         ['label' => 'Insurance Company', 'key' => 'insurance_company_name'],
                         ['label' => 'Corporate Client', 'key' => 'corporate_client_name'],
                         ['label' => 'Notes', 'key' => 'notes'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
-                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
                 'relationships' => ['insuranceCompany', 'corporateClient'],
@@ -960,25 +920,25 @@ class AdditionalExportConfigs
                         ['label' => 'Federal ID', 'key' => 'federal_id'],
                         ['label' => 'Ministry Department', 'key' => 'ministry_department'],
                         ['label' => 'Employee ID Number', 'key' => 'employee_id_number'],
-                        ['label' => 'Verified', 'key' => 'verified', 'transform' => fn($value) => $value ? 'Yes' : 'No'],
-                        ['label' => 'Verified At', 'key' => 'verified_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'Not verified'],
-                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
-                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Verified', 'key' => 'verified', 'transform' => fn ($value) => $value ? 'Yes' : 'No'],
+                        ['label' => 'Verified At', 'key' => 'verified_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'Not verified'],
+                        ['label' => 'Created At', 'key' => 'created_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
+                        ['label' => 'Updated At', 'key' => 'updated_at', 'transform' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : 'N/A'],
                     ],
                 ],
 
                 // Field transformations used across exports/prints
                 'field_transformations' => [
-                    'patient_name' => fn($value) => $value ?: '-',
-                    'policy_service_type' => fn($value) => $value ?: '-',
-                    'kebele_id' => fn($value) => $value ?: '-',
-                    'woreda' => fn($value) => $value ?: '-',
-                    'region' => fn($value) => $value ?: '-',
-                    'federal_id' => fn($value) => $value ?: '-',
-                    'ministry_department' => fn($value) => $value ? (strlen($value) > 30 ? substr($value, 0, 30) . '...' : $value) : '-',
-                    'employee_id_number' => fn($value) => $value ?: '-',
-                    'verified_text' => fn($value) => $value ? 'Yes' : 'No',
-                    'verified_at' => fn($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-',
+                    'patient_name' => fn ($value) => $value ?: '-',
+                    'policy_service_type' => fn ($value) => $value ?: '-',
+                    'kebele_id' => fn ($value) => $value ?: '-',
+                    'woreda' => fn ($value) => $value ?: '-',
+                    'region' => fn ($value) => $value ?: '-',
+                    'federal_id' => fn ($value) => $value ?: '-',
+                    'ministry_department' => fn ($value) => $value ? (strlen($value) > 30 ? substr($value, 0, 30).'...' : $value) : '-',
+                    'employee_id_number' => fn ($value) => $value ?: '-',
+                    'verified_text' => fn ($value) => $value ? 'Yes' : 'No',
+                    'verified_at' => fn ($value) => $value ? \Carbon\Carbon::parse($value)->format('Y-m-d H:i') : '-',
                 ],
 
                 'relationships' => ['patient', 'policy'],
@@ -997,7 +957,7 @@ class AdditionalExportConfigs
             'sortable_fields' => ['transaction_type', 'quantity', 'created_at'],
             'default_sort' => 'created_at',
             'with_relations' => ['item', 'performedBy'],
-            
+
             'csv' => [
                 'headers' => ['Item', 'Transaction Type', 'Quantity', 'Performed By', 'Date'],
                 'fields' => [
@@ -1007,9 +967,9 @@ class AdditionalExportConfigs
                     ['field' => 'performedBy.first_name', 'default' => '-'],
                     'created_at',
                 ],
-                'filename' => 'inventory_transactions.csv'
+                'filename' => 'inventory_transactions.csv',
             ],
-            
+
             'pdf' => [
                 'title' => 'Inventory Transactions List',
                 'document_title' => 'Inventory Transactions List',
@@ -1029,9 +989,9 @@ class AdditionalExportConfigs
                     ['key' => 'quantity', 'label' => 'Quantity'],
                     ['key' => 'performed_by', 'label' => 'Performed By'],
                     ['key' => 'created_at', 'label' => 'Date'],
-                ]
+                ],
             ],
-            
+
             'print_current' => [
                 'title' => 'Inventory Transactions (Current View)',
                 'document_title' => 'Inventory Transactions (Current View)',
@@ -1052,9 +1012,9 @@ class AdditionalExportConfigs
                     ['key' => 'quantity', 'label' => 'Quantity'],
                     ['key' => 'performed_by', 'label' => 'Performed By'],
                     ['key' => 'created_at', 'label' => 'Date'],
-                ]
+                ],
             ],
-            
+
             'print_all' => [
                 'view' => 'pdf-layout',
                 'title' => 'All Inventory Transactions',
@@ -1077,9 +1037,9 @@ class AdditionalExportConfigs
                     ['key' => 'quantity', 'label' => 'Quantity'],
                     ['key' => 'performed_by', 'label' => 'Performed By'],
                     ['key' => 'created_at', 'label' => 'Date'],
-                ]
+                ],
             ],
-            
+
             'single_record' => [
                 'fields' => [
                     'Item' => ['field' => 'item.name', 'default' => '-'],
@@ -1087,8 +1047,8 @@ class AdditionalExportConfigs
                     'Quantity' => 'quantity',
                     'Performed By' => ['field' => 'performedBy.first_name', 'default' => '-'],
                     'Date' => 'created_at',
-                ]
-            ]
+                ],
+            ],
         ];
     }
 
@@ -1113,7 +1073,7 @@ class AdditionalExportConfigs
                     ['field' => 'document_date', 'default' => '-'],
                     [
                         'field' => 'is_printed',
-                        'transform' => fn($v) => $v ? 'Yes' : 'No',
+                        'transform' => fn ($v) => $v ? 'Yes' : 'No',
                     ],
                     ['field' => 'createdBy.full_name', 'default' => '-'],
                 ],
@@ -1180,7 +1140,7 @@ class AdditionalExportConfigs
                     'Date' => ['field' => 'document_date', 'default' => '-'],
                     'Printed' => [
                         'field' => 'is_printed',
-                        'transform' => fn($v) => $v ? 'Yes' : 'No',
+                        'transform' => fn ($v) => $v ? 'Yes' : 'No',
                     ],
                     'Created By' => ['field' => 'createdBy.full_name', 'default' => '-'],
                 ],
@@ -1208,7 +1168,7 @@ class AdditionalExportConfigs
                     ['field' => 'patient.full_name', 'default' => '-'],
                     ['field' => 'prescribed_date', 'default' => '-'],
                     'status',
-                    ['field' => 'items_count', 'transform' => fn($v, $m) => isset($m['items']) ? count($m['items']) : ($m->items()->count() ?? 0)],
+                    ['field' => 'items_count', 'transform' => fn ($v, $m) => isset($m['items']) ? count($m['items']) : ($m->items()->count() ?? 0)],
                 ],
                 'filename_prefix' => 'prescriptions',
             ],

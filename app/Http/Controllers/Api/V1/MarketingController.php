@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\BaseApiController;
-use App\Http\Resources\MarketingCampaignResource;
 use App\Http\Resources\LeadResource;
-use App\Models\MarketingCampaign;
+use App\Http\Resources\MarketingCampaignResource;
 use App\Models\Lead;
+use App\Models\MarketingCampaign;
 use App\Models\Patient;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class MarketingController extends BaseApiController
 {
@@ -28,8 +27,8 @@ class MarketingController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ILIKE', "%{$search}%")
-                      ->orWhere('description', 'ILIKE', "%{$search}%")
-                      ->orWhere('utm_source', 'ILIKE', "%{$search}%");
+                        ->orWhere('description', 'ILIKE', "%{$search}%")
+                        ->orWhere('utm_source', 'ILIKE', "%{$search}%");
                 });
             }
 
@@ -61,7 +60,7 @@ class MarketingController extends BaseApiController
                     'per_page' => $campaigns->perPage(),
                     'total' => $campaigns->total(),
                     'has_more' => $campaigns->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch campaigns', 500);
@@ -98,7 +97,7 @@ class MarketingController extends BaseApiController
 
             return $this->successResponse([
                 'campaign' => new MarketingCampaignResource($campaign),
-                'message' => 'Campaign created successfully'
+                'message' => 'Campaign created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create campaign', 500);
@@ -135,7 +134,7 @@ class MarketingController extends BaseApiController
 
             return $this->successResponse([
                 'campaign' => new MarketingCampaignResource($campaign),
-                'message' => 'Campaign updated successfully'
+                'message' => 'Campaign updated successfully',
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to update campaign', 500);
@@ -149,6 +148,7 @@ class MarketingController extends BaseApiController
     {
         try {
             $campaign->delete();
+
             return $this->successResponse(['message' => 'Campaign deleted successfully']);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to delete campaign', 500);
@@ -174,7 +174,7 @@ class MarketingController extends BaseApiController
             }
 
             $leads = $query->with(['patient', 'assignedTo'])
-                          ->paginate($request->get('per_page', 15));
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'leads' => LeadResource::collection($leads->items()),
@@ -184,7 +184,7 @@ class MarketingController extends BaseApiController
                     'per_page' => $leads->perPage(),
                     'total' => $leads->total(),
                     'has_more' => $leads->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch campaign leads', 500);
@@ -204,8 +204,8 @@ class MarketingController extends BaseApiController
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ILIKE', "%{$search}%")
-                      ->orWhere('email', 'ILIKE', "%{$search}%")
-                      ->orWhere('phone', 'ILIKE', "%{$search}%");
+                        ->orWhere('email', 'ILIKE', "%{$search}%")
+                        ->orWhere('phone', 'ILIKE', "%{$search}%");
                 });
             }
 
@@ -225,8 +225,8 @@ class MarketingController extends BaseApiController
             }
 
             $leads = $query->with(['marketingCampaign', 'patient', 'assignedTo'])
-                          ->orderBy('created_at', 'desc')
-                          ->paginate($request->get('per_page', 15));
+                ->orderBy('created_at', 'desc')
+                ->paginate($request->get('per_page', 15));
 
             return $this->successResponse([
                 'leads' => LeadResource::collection($leads->items()),
@@ -236,7 +236,7 @@ class MarketingController extends BaseApiController
                     'per_page' => $leads->perPage(),
                     'total' => $leads->total(),
                     'has_more' => $leads->hasMorePages(),
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to fetch leads', 500);
@@ -271,7 +271,7 @@ class MarketingController extends BaseApiController
 
             return $this->successResponse([
                 'lead' => new LeadResource($lead->load(['marketingCampaign', 'assignedTo'])),
-                'message' => 'Lead created successfully'
+                'message' => 'Lead created successfully',
             ], 201);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to create lead', 500);
@@ -314,10 +314,11 @@ class MarketingController extends BaseApiController
             return $this->successResponse([
                 'lead' => new LeadResource($lead->load(['patient', 'marketingCampaign'])),
                 'patient' => $patient,
-                'message' => 'Lead converted to patient successfully'
+                'message' => 'Lead converted to patient successfully',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('Failed to convert lead', 500);
         }
     }
@@ -358,8 +359,8 @@ class MarketingController extends BaseApiController
     {
         $totalLeads = Lead::whereBetween('created_at', [$startDate, $endDate])->count();
         $convertedLeads = Lead::where('converted_to_patient', true)
-                             ->whereBetween('created_at', [$startDate, $endDate])
-                             ->count();
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
 
         return $totalLeads > 0 ? round(($convertedLeads / $totalLeads) * 100, 2) : 0;
     }
@@ -367,8 +368,8 @@ class MarketingController extends BaseApiController
     private function getTopCampaigns($startDate, $endDate): array
     {
         return MarketingCampaign::withCount(['leads' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }])
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }])
             ->orderBy('leads_count', 'desc')
             ->limit(5)
             ->get(['id', 'name', 'utm_source'])

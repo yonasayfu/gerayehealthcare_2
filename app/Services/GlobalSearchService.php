@@ -32,10 +32,10 @@ class GlobalSearchService
     {
         $patients = Patient::select('id', 'full_name', 'patient_code', 'phone_number', 'email')
             ->where(function ($q) use ($query) {
-                $q->where('full_name', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('patient_code', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('phone_number', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('email', 'ILIKE', '%' . $query . '%');
+                $q->where('full_name', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('patient_code', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('phone_number', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('email', 'ILIKE', '%'.$query.'%');
             })
             ->limit(5)
             ->get();
@@ -45,10 +45,10 @@ class GlobalSearchService
                 'type' => 'Patient',
                 'category' => 'Healthcare',
                 'title' => $patient->full_name,
-                'description' => 'Code: ' . ($patient->patient_code ?? 'N/A') . ' • ' . ($patient->phone_number ?? 'No phone'),
+                'description' => 'Code: '.($patient->patient_code ?? 'N/A').' • '.($patient->phone_number ?? 'No phone'),
                 'url' => route('admin.patients.show', $patient->id),
                 'relevance' => 100,
-                'icon' => 'user'
+                'icon' => 'user',
             ];
         });
     }
@@ -57,24 +57,25 @@ class GlobalSearchService
     {
         $staff = Staff::select('id', 'first_name', 'last_name', 'email', 'position', 'role')
             ->where(function ($q) use ($query) {
-                $q->where('first_name', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('last_name', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('email', 'ILIKE', '%' . $query . '%')
-                    ->orWhere('position', 'ILIKE', '%' . $query . '%');
+                $q->where('first_name', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('last_name', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('email', 'ILIKE', '%'.$query.'%')
+                    ->orWhere('position', 'ILIKE', '%'.$query.'%');
             })
             ->limit(5)
             ->get();
 
         return $staff->map(function ($s) {
-            $fullName = trim($s->first_name . ' ' . $s->last_name);
+            $fullName = trim($s->first_name.' '.$s->last_name);
+
             return [
                 'type' => 'Staff',
                 'category' => 'Healthcare',
                 'title' => $fullName ?: 'Staff Member',
-                'description' => ($s->position ?? $s->role ?? 'Staff') . ' • ' . ($s->email ?? 'No email'),
+                'description' => ($s->position ?? $s->role ?? 'Staff').' • '.($s->email ?? 'No email'),
                 'url' => route('admin.staff.show', $s->id),
                 'relevance' => 90,
-                'icon' => 'user-check'
+                'icon' => 'user-check',
             ];
         });
     }

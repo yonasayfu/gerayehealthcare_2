@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Enums\RoleEnum;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
-use App\Enums\RoleEnum;
-use Illuminate\Http\Request;
 
 class UserService extends BaseService
 {
@@ -19,17 +19,17 @@ class UserService extends BaseService
     protected function applySearch($query, $search)
     {
         $query->where('name', 'ilike', "%{$search}%")
-              ->orWhere('email', 'ilike', "%{$search}%")
-              ->orWhereHas('staff', function ($q) use ($search) {
-                  $q->where('first_name', 'ilike', "%{$search}%")
+            ->orWhere('email', 'ilike', "%{$search}%")
+            ->orWhereHas('staff', function ($q) use ($search) {
+                $q->where('first_name', 'ilike', "%{$search}%")
                     ->orWhere('last_name', 'ilike', "%{$search}%");
-              });
+            });
     }
 
     public function getAll(Request $request, array $with = [])
     {
         $query = $this->model->with('roles');
-        
+
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
         }
@@ -45,7 +45,7 @@ class UserService extends BaseService
     public function create(array|object $data): User
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         return DB::transaction(function () use ($data) {
             $user = parent::create([
                 'name' => $data['name'],
@@ -73,9 +73,10 @@ class UserService extends BaseService
     public function update(int $id, array|object $data): User
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         $user = $this->getById($id);
         $user->syncRoles([$data['role']]);
+
         return $user;
     }
 

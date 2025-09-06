@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\DTOs\CreateInventoryItemDTO;
-use App\Models\InventoryItem;
-use App\Http\Traits\ExportableTrait;
 use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Traits\ExportableTrait;
+use App\Models\InventoryItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -76,11 +75,11 @@ class OptimizedInventoryItemService extends OptimizedBaseService
 
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($id, $with) {
             $item = $this->model->query()->with($with)->find($id);
-            
-            if (!$item) {
+
+            if (! $item) {
                 throw new \App\Exceptions\ResourceNotFoundException('Inventory item not found.');
             }
-            
+
             return $item;
         });
     }
@@ -88,20 +87,21 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         DB::beginTransaction();
         try {
             $item = $this->model->create($data);
-            
+
             // Automatically create alert if quantity is below reorder level
             $this->checkAndCreateReorderAlert($item);
-            
+
             // Clear related caches
             $this->clearCaches();
-            
+
             DB::commit();
+
             return $item;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -111,26 +111,27 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     public function update(int $id, array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
-        
+
         DB::beginTransaction();
         try {
             $item = $this->model->findOrFail($id);
             $oldQuantity = $item->quantity_on_hand;
-            
+
             $item->update($data);
-            
+
             // Check if quantity changed and create alerts if needed
             if (isset($data['quantity_on_hand']) && $data['quantity_on_hand'] != $oldQuantity) {
                 $this->checkAndCreateReorderAlert($item);
                 $this->logInventoryTransaction($item, $oldQuantity, $data['quantity_on_hand']);
             }
-            
+
             // Clear related caches
             $this->clearCaches();
-            
+
             DB::commit();
+
             return $item;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -150,12 +151,12 @@ class OptimizedInventoryItemService extends OptimizedBaseService
             $item->transactions()->delete();
 
             $item->delete();
-            
+
             // Clear related caches
             $this->clearCaches();
-            
+
             DB::commit();
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -167,12 +168,12 @@ class OptimizedInventoryItemService extends OptimizedBaseService
         // Optimized search with multiple fields
         $query->where(function ($q) use ($search) {
             $q->where('name', 'ilike', "%{$search}%")
-              ->orWhere('serial_number', 'ilike', "%{$search}%")
-              ->orWhere('item_category', 'ilike', "%{$search}%")
-              ->orWhere('item_type', 'ilike', "%{$search}%")
-              ->orWhereHas('supplier', function ($sq) use ($search) {
-                  $sq->where('name', 'ilike', "%{$search}%");
-              });
+                ->orWhere('serial_number', 'ilike', "%{$search}%")
+                ->orWhere('item_category', 'ilike', "%{$search}%")
+                ->orWhere('item_type', 'ilike', "%{$search}%")
+                ->orWhereHas('supplier', function ($sq) use ($search) {
+                    $sq->where('name', 'ilike', "%{$search}%");
+                });
         });
     }
 
@@ -235,7 +236,7 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     public function getMaintenanceDueItems($days = 7, $limit = 10)
     {
         $cacheKey = "maintenance_due_{$days}days_{$limit}";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($days, $limit) {
             return $this->model->with('supplier')
                 ->where('next_maintenance_due', '<=', now()->addDays($days))
@@ -251,25 +252,25 @@ class OptimizedInventoryItemService extends OptimizedBaseService
         DB::beginTransaction();
         try {
             $updatedCount = 0;
-            
+
             foreach ($updates as $update) {
                 $item = $this->model->find($update['id']);
                 if ($item) {
                     $oldQuantity = $item->quantity_on_hand;
                     $item->update(['quantity_on_hand' => $update['quantity']]);
-                    
+
                     $this->checkAndCreateReorderAlert($item);
                     $this->logInventoryTransaction($item, $oldQuantity, $update['quantity']);
-                    
+
                     $updatedCount++;
                 }
             }
-            
+
             $this->clearCaches();
             DB::commit();
-            
+
             return $updatedCount;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -297,7 +298,7 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     private function logInventoryTransaction($item, $oldQuantity, $newQuantity)
     {
         $difference = $newQuantity - $oldQuantity;
-        
+
         \App\Models\InventoryTransaction::create([
             'inventory_item_id' => $item->id,
             'transaction_type' => $difference > 0 ? 'in' : 'out',
@@ -311,18 +312,21 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     public function export(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handleExport($request, InventoryItem::class, $config);
     }
 
     public function printAll(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintAll($request, InventoryItem::class, $config);
     }
 
     public function printCurrent(Request $request)
     {
         $config = $this->buildExportConfig();
+
         return $this->handlePrintCurrent($request, InventoryItem::class, $config);
     }
 
@@ -330,6 +334,7 @@ class OptimizedInventoryItemService extends OptimizedBaseService
     {
         $item = $this->getById($id);
         $config = $this->buildExportConfig();
+
         return $this->handlePrintSingle($request, $item, $config);
     }
 
@@ -343,7 +348,9 @@ class OptimizedInventoryItemService extends OptimizedBaseService
         $csvFields = [];
         foreach ($csvHeaders as $label) {
             $spec = $csvFieldsMap[$label] ?? null;
-            if ($spec === null) continue;
+            if ($spec === null) {
+                continue;
+            }
             $csvFields[] = $spec;
         }
 
@@ -400,7 +407,7 @@ class OptimizedInventoryItemService extends OptimizedBaseService
         Cache::forget('inventory_form_data');
         Cache::forget('inventory_statistics');
         Cache::forget('low_stock_items');
-        
+
         // Clear maintenance cache patterns
         $patterns = ['maintenance_due_*', 'inventory_items_all_*', 'inventory_items_single_*'];
         foreach ($patterns as $pattern) {

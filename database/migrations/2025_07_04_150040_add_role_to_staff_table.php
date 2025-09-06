@@ -9,13 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    
-public function up(): void
+    public function up(): void
     {
         Schema::table('staff', function (Blueprint $table) {
             $table->string('role')->default('Caregiver')->after('department');
         });
     }
+
     /**
      * Reverse the migrations.
      */

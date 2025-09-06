@@ -10,9 +10,9 @@ return new class extends Migration
     {
         Schema::table('inventory_alerts', function (Blueprint $table) {
             $table->foreignId('delegated_task_id')
-                  ->nullable()
-                  ->constrained('task_delegations')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('task_delegations')
+                ->nullOnDelete();
         });
     }
 

@@ -15,9 +15,8 @@ class InsurancePolicyResource extends JsonResource
             'coverage_percentage' => $this->coverage_percentage,
             'coverage_type' => $this->coverage_type,
             'is_active' => (bool) $this->is_active,
-            'insurance_company' => $this->whenLoaded('insuranceCompany', fn() => ['id' => $this->insuranceCompany->id, 'name' => $this->insuranceCompany->name]),
-            'corporate_client' => $this->whenLoaded('corporateClient', fn() => ['id' => $this->corporateClient->id, 'organization_name' => $this->corporateClient->organization_name]),
+            'insurance_company' => $this->whenLoaded('insuranceCompany', fn () => ['id' => $this->insuranceCompany->id, 'name' => $this->insuranceCompany->name]),
+            'corporate_client' => $this->whenLoaded('corporateClient', fn () => ['id' => $this->corporateClient->id, 'organization_name' => $this->corporateClient->organization_name]),
         ];
     }
 }
-

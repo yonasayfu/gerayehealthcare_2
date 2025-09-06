@@ -11,6 +11,7 @@ use Inertia\Inertia;
 class PaymentReconciliationController extends Controller
 {
     protected $insuranceClaimService;
+
     protected $invoiceService;
 
     public function __construct(InsuranceClaimService $insuranceClaimService, InvoiceService $invoiceService)
@@ -41,9 +42,10 @@ class PaymentReconciliationController extends Controller
 
         try {
             $claim = $this->insuranceClaimService->processPayment($claimId, $request->all());
+
             return back()->with('banner', 'Claim payment processed successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            return back()->with('banner', 'Failed to process claim payment: ' . $e->getMessage())->with('bannerStyle', 'danger');
+            return back()->with('banner', 'Failed to process claim payment: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
     }
 

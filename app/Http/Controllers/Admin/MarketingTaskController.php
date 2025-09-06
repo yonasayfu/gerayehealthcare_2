@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateMarketingTaskDTO;
 use App\Http\Controllers\Base\BaseController;
-use App\Services\MarketingTaskService;
 use App\Models\MarketingTask;
 use App\Services\CachedDropdownService;
+use App\Services\MarketingTaskService;
 use App\Services\Validation\Rules\MarketingTaskRules;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MarketingTaskController extends BaseController
 {
@@ -57,7 +57,7 @@ class MarketingTaskController extends BaseController
             'task_type',
         ]);
 
-        return Inertia::render($this->viewName . '/Index', [
+        return Inertia::render($this->viewName.'/Index', [
             $this->dataVariableName => $data,
             'campaigns' => $campaigns,
             'staffs' => $staffs,
@@ -85,7 +85,7 @@ class MarketingTaskController extends BaseController
         ];
         $statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
 
-        return Inertia::render($this->viewName . '/Create', [
+        return Inertia::render($this->viewName.'/Create', [
             'campaigns' => $campaigns,
             'staffMembers' => $staffMembers,
             'contents' => $contents,
@@ -115,7 +115,7 @@ class MarketingTaskController extends BaseController
         ];
         $statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
 
-        return Inertia::render($this->viewName . '/Edit', [
+        return Inertia::render($this->viewName.'/Edit', [
             'marketingTask' => $data,
             'campaigns' => $campaigns,
             'staffs' => $staffs,

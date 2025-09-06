@@ -35,8 +35,9 @@ class PrescriptionService extends BaseService
         $with = array_unique(array_merge($with, ['patient', 'document', 'items', 'createdBy']));
         $model = $this->model->with($with)->find($id);
         if (! $model) {
-            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model) . ' not found.');
+            throw new \App\Exceptions\ResourceNotFoundException(class_basename($this->model).' not found.');
         }
+
         return $model;
     }
 
@@ -44,10 +45,10 @@ class PrescriptionService extends BaseService
     {
         $query->where(function ($q) use ($search) {
             $q->where('status', 'like', "%{$search}%")
-              ->orWhere('instructions', 'like', "%{$search}%")
-              ->orWhereHas('items', function ($iq) use ($search) {
-                  $iq->where('medication_name', 'like', "%{$search}%");
-              });
+                ->orWhere('instructions', 'like', "%{$search}%")
+                ->orWhereHas('items', function ($iq) use ($search) {
+                    $iq->where('medication_name', 'like', "%{$search}%");
+                });
         });
     }
 }

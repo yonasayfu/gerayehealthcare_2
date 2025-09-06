@@ -4,7 +4,7 @@ This phase hardens the foundation: branch strategy + CI, and removal of dev-only
 
 ---
 
-- [ ] **Create baseline branch & CI checks** (prio:P1) (type:chore)  
+- [x] **Create baseline branch & CI checks** (prio:P1) (type:chore)  
   *Task:* Create a dedicated branch and wire CI linters/tests for PHP/TS.  
   *Why:* Guarantees code quality and reproducibility for all following phases.  
   *Definition of Done (DoD):*  
@@ -19,7 +19,7 @@ This phase hardens the foundation: branch strategy + CI, and removal of dev-only
 
 ---
 
-- [ ] **Remove dev-only performance/test routes & files** (prio:P1) (area:route|cleanup) (type:cleanup)  
+- [x] **Remove dev-only performance/test routes & files** (prio:P1) (area:route|cleanup) (type:cleanup)  
   *Task:* Delete or guard test/perf artifacts.  
   *Why:* Prevents accidental exposure in production and reduces noise.  
   *Definition of Done (DoD):*  
@@ -29,7 +29,7 @@ This phase hardens the foundation: branch strategy + CI, and removal of dev-only
       - `public/performance-test.html`  
     - Any perf blocks in `routes/web.php` are guarded or removed.  
   *Ref:*  
-    - `/Users/yonassayfu/VSProject/gerayehealthcare/routes/web.php`  
+    - `/Users/yonassayfu/VSProject/gerayehealthcare/routes/  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/routes/performance.php`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/routes/performance-test.php`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/public/performance-test.html`
