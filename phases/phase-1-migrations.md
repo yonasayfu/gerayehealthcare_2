@@ -4,7 +4,7 @@ Fix the database foundation: relationships, constraints, factories/seeders reali
 
 ---
 
-- [ ] **Audit all migration classes & foreign keys** (prio:P1) (area:db) (type:refactor)  
+- [x] **Audit all migration classes & foreign keys** (prio:P1) (area:db) (type:refactor)  
   *Task:* Verify FK directions, cascade/restrict, indexes, pivot naming, soft deletes.  
   *Why:* Prevents orphan data, integrity errors, and inconsistent joins.  
   *Definition of Done (DoD):*  
@@ -13,7 +13,7 @@ Fix the database foundation: relationships, constraints, factories/seeders reali
     - No FK or index warnings.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/database/migrations`
 
-- [ ] **Factories & Seeders aligned with relationships** (prio:P1) (area:db) (type:refactor)  
+- [x] **Factories & Seeders aligned with relationships** (prio:P1) (area:db) (type:refactor)  
   *Task:* Seed realistic relational data (no arbitrary 7/10 items).  
   *Why:* Enables reliable E2E testing and demo data.  
   *Definition of Done (DoD):*  
@@ -36,5 +36,5 @@ Fix the database foundation: relationships, constraints, factories/seeders reali
 1. `git checkout -b fix/phase-1-migrations`  
 2. Commit: `refactor(db): fix FKs, align factories/seeders, sync DTOs`  
 3. `git push origin fix/phase-1-migrations`
-
+**NOTE** FOR this task let take phase-0 repo as a main and after you push each phase compilation let merge with phase-0, and don't delete each created branch.
 **Reminder:** Attach ERD (image or md) to the PR; paste seeding sample outputs for quick review.

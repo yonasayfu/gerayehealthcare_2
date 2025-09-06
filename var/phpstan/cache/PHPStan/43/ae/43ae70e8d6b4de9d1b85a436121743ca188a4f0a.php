@@ -1,7 +1,9 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 // variadic-method-App\Services\Validation\Rules\InventoryItemRules-update-/Users/yonassayfu/VSProject/gerayehealthcare/app/Services/Validation/Rules/InventoryItemRules.php
-return \PHPStan\Cache\CacheItem::__set_state(array(
-   'variableKey' => '1757175098-v4',
-   'data' => false,
-));
+return \PHPStan\Cache\CacheItem::__set_state([
+    'variableKey' => '1757175098-v4',
+    'data' => false,
+]);
