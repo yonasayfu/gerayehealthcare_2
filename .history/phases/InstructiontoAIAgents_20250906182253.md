@@ -22,6 +22,7 @@ Before committing, run:
 
 npm run lint (ESLint/TS/Vue lint)
 
+plus project tests/build (php artisan test, npm run build)
 
 After finishing the phase:
 
