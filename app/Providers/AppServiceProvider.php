@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\GroupMessage;
+use App\Models\Message;
 use App\Models\Patient;
 use App\Models\Staff;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -31,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'staff' => Staff::class,
             'patient' => Patient::class,
+            'message' => Message::class,
+            'group_message' => GroupMessage::class,
         ]);
     }
 }

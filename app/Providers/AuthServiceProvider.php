@@ -17,11 +17,21 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\CampaignContent::class => \App\Policies\CampaignContentPolicy::class,
         \App\Models\MarketingTask::class => \App\Policies\MarketingTaskPolicy::class,
         \App\Models\ReferralDocument::class => \App\Policies\ReferralDocumentPolicy::class,
+        \App\Models\Referral::class => \App\Policies\ReferralPolicy::class,
         \App\Models\VisitService::class => \App\Policies\VisitServicePolicy::class,
         \App\Models\MedicalDocument::class => \App\Policies\MedicalDocumentPolicy::class,
         \App\Models\Invoice::class => \App\Policies\InvoicePolicy::class,
         \App\Models\InsuranceClaim::class => \App\Policies\InsuranceClaimPolicy::class,
-        \App\Models\User::class => \App\Policies\MessagePolicy::class,
+        \App\Models\Message::class => \App\Policies\MessagePolicy::class,
+        \App\Models\Patient::class => \App\Policies\PatientPolicy::class,
+        \App\Models\User::class => \App\Policies\UserPolicy::class,
+        \App\Models\InventoryItem::class => \App\Policies\InventoryItemPolicy::class,
+        \App\Models\InventoryRequest::class => \App\Policies\InventoryRequestPolicy::class,
+        \App\Models\InventoryTransaction::class => \App\Policies\InventoryTransactionPolicy::class,
+        \App\Models\InventoryMaintenanceRecord::class => \App\Policies\InventoryMaintenanceRecordPolicy::class,
+        \App\Models\InventoryAlert::class => \App\Policies\InventoryAlertPolicy::class,
+        \App\Models\Supplier::class => \App\Policies\SupplierPolicy::class,
+        \Spatie\Permission\Models\Role::class => \App\Policies\RolePolicy::class,
     ];
 
     /**

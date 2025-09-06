@@ -4,14 +4,14 @@ Align models, morph maps, and authorization policies with the real data model.
 
 ---
 
-- [ ] **Polymorphic map completeness** (prio:P1) (area:model) (type:refactor)  
+- [x] **Polymorphic map completeness** (prio:P1) (area:model) (type:refactor)  
   *Task:* Expand `Relation::morphMap`.  
   *Why:* Currently includes only `staff` and `patient`; other morphables (e.g., messages, documents, invoices) must be resolvable.  
   *Definition of Done (DoD):*  
     - All morphable entities added; unit tests for morph resolution.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AppServiceProvider.php`
 
-- [ ] **Policies coverage & summary doc** (prio:P1) (area:model|policy) (type:docs)  
+- [x] **Policies coverage & summary doc** (prio:P1) (area:model|policy) (type:docs)  
   *Task:* Ensure policies exist for sensitive modules and register them.  
   *Why:* Enforces least-privilege (esp. Patients, Invoices, Users, Roles, Messages, Referrals, MedicalDocuments, Inventory*).  
   *Definition of Done (DoD):*  
@@ -20,7 +20,7 @@ Align models, morph maps, and authorization policies with the real data model.
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Policies`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AuthServiceProvider.php`
 
-- [ ] **`config/hr.php` usage audit** (prio:P2) (area:model|config) (type:docs)  
+- [x] **`config/hr.php` usage audit** (prio:P2) (area:model|config) (type:docs)  
   *Task:* Identify exact consumers and standardize access via `config()`.  
   *Why:* Prevents silent regressions when keys change; improves consistency.  
   *Definition of Done (DoD):*  
