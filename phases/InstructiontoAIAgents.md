@@ -6,7 +6,7 @@ Instruction to AI Agents
 
 Start by reading the project README.md (root) for overall context and conventions.
 
-Then open phases/README.md to see the phase index and working rules.
+Then open phases/README-ISSUE.md to see the phase index and working rules.
 
 Move to the current phase file phases/phase-N.md (replace N). Work through all tasks in order.
 
@@ -31,4 +31,4 @@ Provide a summary of changes and testing steps I can follow.
 
 Commit and push to origin using the branch name suggested in the phase file, and share the PR link.
 
-Do not skip or jump phases. When a phase is merged, return to phases/README.md to identify the next phase.
+Do not skip or jump phases. When a phase is merged, return to phases/README-ISSUE.md to identify the next phase.

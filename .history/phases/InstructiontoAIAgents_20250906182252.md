@@ -1,4 +1,0 @@
-Refer to the corresponding Markdown file for the current phase (e.g., phases/phase-N-frontend.md). Work through all items in sequence. Prefer to complete the entire phase in one go. When finished, provide a summary of changes and testing steps. If doing the whole phase at once isn’t practical, propose a short sub-roadmap and proceed step by step. Do not skip or jump between phases. After completing the phase, commit your changes and push to origin, then return with the PR link and summary.
-
-
-
