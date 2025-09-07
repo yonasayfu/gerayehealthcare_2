@@ -1,5 +1,7 @@
 # Phase 8 — Storage & Assets
 
+> Architecture alignment: storage strategy per module, retention rules, and local assets for resilience.
+
 Define storage strategy, remove cruft, and localize critical assets.
 
 ---
@@ -23,6 +25,14 @@ Define storage strategy, remove cruft, and localize critical assets.
     `/Users/yonassayfu/VSProject/gerayehealthcare/resources/views/app.blade.php`
 
 ---
+
+### Clean Architecture Alignment
+- Services define where files live; controllers never access filesystem directly beyond download responses.
+
+### OriginalIssue Traceability
+- storage/framework & debugbar: item 9
+- storage/app/public organization and public/storage cleanup: items 10, 86
+- fonts and local asset strategy: items 17, 87
 
 ## Commit & Push
 1. `git checkout -b fix/phase-8-storage-assets`  

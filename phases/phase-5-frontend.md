@@ -1,5 +1,7 @@
 # Phase 5 — Frontend (Vue 3 + Inertia)
 
+> Architecture alignment: UI consumes Resource-based APIs and Inertia props; centralized print/export; avoid ad-hoc axios where server-rendered patterns exist.
+
 Unify UI/UX, centralize print/export, fix search+pagination, and complete module UIs.
 
 ---
@@ -153,6 +155,20 @@ Unify UI/UX, centralize print/export, fix search+pagination, and complete module
   *Ref:* All list views affected.
 
 ---
+
+### Clean Architecture Alignment
+- Keep page components dumb; move domain logic to services; use composables for UI state.
+- Use typed TS interfaces for props/responses; centralize pagination/search patterns.
+
+### OriginalIssue Traceability
+- CSS and print stylesheet: items 3, 5, 7, 83, 84
+- Localizing assets in app.blade.php: item 17
+- TS types consolidation: item 19
+- Welcome/Dashboard views: items 20, 21
+- Search + pagination bug: item 32 (and many list pages)
+- ChatModal polish: item 81
+- GlobalSearch partial coverage: item 80
+- Numerous module UIs: items 33, 35–37, 39–47, 49–61, 62–71, 73–76, 79, 82, 85–89, 91–100, 102–106, 114–121, 124–148, 150
 
 ## Commit & Push
 1. `git checkout -b fix/phase-5-frontend`  

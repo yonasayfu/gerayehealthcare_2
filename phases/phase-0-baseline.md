@@ -1,5 +1,8 @@
 # Phase 0 — Baseline & Housekeeping
 
+> Architecture alignment: Follow the Clean Architecture (Onion) guide in Phase 3.
+> See: phases/phase-3-controllers.md (Clean Architecture Guide section).
+
 This phase hardens the foundation: branch strategy + CI, and removal of dev-only artifacts.
 
 ---
@@ -35,6 +38,17 @@ This phase hardens the foundation: branch strategy + CI, and removal of dev-only
     - `/Users/yonassayfu/VSProject/gerayehealthcare/public/performance-test.html`
 
 ---
+
+### Clean Architecture Alignment
+- No controller/service changes here except guarding/removing dev artifacts.
+- Ensure CI runs do not enforce PHPStan baseline adjustments per phase (we will re-enable fully after Phase 10).
+
+### OriginalIssue Traceability
+- routes/web.php structure and perf blocks: items 11, 13 (guard/remove test and performance routes)
+- performance-test artifacts: item 85 (public/performance-test.html)
+- separate marketing route file rationale: item 15 (not mandatory at Phase 0; addressed in Phase 4)
+- storage/framework and storage/debugbar meaning: item 9 (document-only note here; details in Phase 8)
+- public storage strategy: items 10, 86 (plan; implement in Phase 8)
 
 ## Commit & Push
 1. `git checkout -b fix/phase-0-baseline`  

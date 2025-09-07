@@ -1,5 +1,7 @@
 # Phase 1 — Migrations & Database Relationships (Top Priority)
 
+> Architecture alignment: migrate schema first, then align DTOs and models per Clean Architecture guide (Phase 3 doc).
+
 Fix the database foundation: relationships, constraints, factories/seeders realism, DTO parity.
 
 ---
@@ -31,6 +33,15 @@ Fix the database foundation: relationships, constraints, factories/seeders reali
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/DTOs`
 
 ---
+
+### Clean Architecture Alignment
+- Keep migrations authoritative; then align Model casts and DTO fields to avoid drift.
+- Prefer FormRequests to validate DTO shapes after migrations are stable.
+
+### OriginalIssue Traceability
+- Comprehensive relationship audit and seed realism: item 4
+- Employee Insurance Records relationships: item 31
+- DTO mismatches (e.g., missing status in CreateInventoryRequestDTO): item 65
 
 ## Commit & Push
 1. `git checkout -b fix/phase-1-migrations`  

@@ -1,5 +1,7 @@
 # Phase 6 — Exports, Print, Reports
 
+> Architecture alignment: one print/export pipeline per module; no per-module view clones; keep export logic in services or centralized trait configs.
+
 Centralize export/print paths and standardize views.
 
 ---
@@ -20,6 +22,15 @@ Centralize export/print paths and standardize views.
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Config/AdditionalExportConfigs.php`
 
 ---
+
+### Clean Architecture Alignment
+- Controllers call trait handlers or a single service method; no manual CSV/PDF buildup in controllers.
+- Keep module configs co-located and tested.
+
+### OriginalIssue Traceability
+- Centralize ExportableTrait usage: item 6
+- Consolidate print pages across modules: items 30, 57, 58, 61, 64, 66, 68, 71
+- AdditionalExportConfigs standardization: item 18
 
 ## Commit & Push
 1. `git checkout -b fix/phase-6-exports-print`  

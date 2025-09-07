@@ -1,5 +1,7 @@
 # Phase 2 — Models, Policies & Morphs
 
+> Architecture alignment: models act as domain entities; policies enforce RBAC; morph maps must be exhaustive. Reference Clean Architecture guide (Phase 3).
+
 Align models, morph maps, and authorization policies with the real data model.
 
 ---
@@ -28,6 +30,15 @@ Align models, morph maps, and authorization policies with the real data model.
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/config/hr.php`
 
 ---
+
+### Clean Architecture Alignment
+- Controllers must never encode authorization logic; always call authorize() or rely on policy middleware.
+- Services should not bypass policies—controllers remain the authorization boundary.
+
+### OriginalIssue Traceability
+- Morph map minimality (only staff/patient): item 93
+- Missing/partial policies: item 94
+- config('hr') consumers and standardization: item 88
 
 ## Commit & Push
 1. `git checkout -b fix/phase-2-models-policies`  
