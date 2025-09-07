@@ -241,7 +241,7 @@ paths:
   /messages/threads/{userId}/messages:
     post:
       security: [{ bearerAuth: [] }]
-      summary: Send a message
+      summary: Send a direct message
       parameters:
         - in: path
           name: userId
@@ -258,6 +258,153 @@ paths:
                 attachment: { type: string, format: binary }
       responses:
         '200': { description: Sent }
+
+  /messages/{messageId}:
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete a direct message (sender or admin)
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '403': { description: Forbidden }
+
+  /messages/{messageId}/download:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Download a direct message attachment (sender/receiver/admin)
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+
+  /groups:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my groups
+      responses:
+        '200': { description: OK }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create group with initial members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                members:
+                  type: array
+                  items: { type: integer }
+              required: [name, members]
+      responses:
+        '201': { description: Created }
+
+  /groups/{groupId}/messages:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List group messages
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: per_page
+          schema: { type: integer, default: 50 }
+      responses:
+        '200': { description: OK }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Send a group message
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+                attachment: { type: string, format: binary }
+      responses:
+        '201': { description: Created }
+
+  /groups/{groupId}/messages/{messageId}:
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Update my group message
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+              required: [message]
+      responses:
+        '200': { description: Updated }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete a group message (sender or group admin/owner)
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '403': { description: Forbidden }
+
+  /groups/{groupId}/messages/{messageId}/attachment:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Download a group message attachment (group member)
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
 
   /notifications:
     get:

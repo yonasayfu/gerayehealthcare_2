@@ -152,8 +152,8 @@ Route::get('dashboard', function () {
 Route::middleware(['auth'])->group(function () {
     // Basic messaging - available to all authenticated users
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
-    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
-    Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+    Route::post('/messages', [MessageController::class, 'store'])->middleware('throttle:60,1')->name('messages.store');
+    Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->middleware('throttle:60,1')->name('messages.destroy');
     Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
     Route::patch('/messages/{message}', [MessageController::class, 'update'])->name('messages.update');
     Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
@@ -168,7 +168,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
-    Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->name('groups.messages.store');
+    Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->middleware('throttle:60,1')->name('groups.messages.store');
     Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('groups.messages.react');
 
     // Users for group creation - available to all authenticated users
@@ -230,6 +230,11 @@ Route::middleware(['auth', 'verified'])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
+        // Messaging aliases for Admin pages (keep frontend stable)
+        Route::post('messages', [MessageController::class, 'store'])->name('messages.store');
+        Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+        Route::get('messages/{message}/download', [MessageController::class, 'downloadAttachment'])->name('messages.download');
+
         // Dashboard overview data (Super Admin KPIs)
         Route::get('overview-data', [AdminDashboardController::class, 'overviewData'])->name('overview-data');
         Route::get('overview-series', [AdminDashboardController::class, 'overviewSeries'])->name('overview-series');

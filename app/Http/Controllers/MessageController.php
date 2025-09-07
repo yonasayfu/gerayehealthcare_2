@@ -7,11 +7,11 @@ use App\Http\Requests\StoreMessageRequest;
 use App\Models\Message;
 use App\Models\User;
 use App\Notifications\NewMessageReceived;
+use App\Services\Messaging\MessageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
@@ -153,55 +153,19 @@ class MessageController extends Controller
         }
 
         $validated = $request->validated();
-
-        $messageContent = $validated['message'] ?? null;
-        $attachmentPath = null;
-        $attachmentFilename = null;
-        $attachmentMimeType = null;
-
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $originalFilename = $file->getClientOriginalName();
-            $mimeType = $file->getClientMimeType();
-
-            $filePath = $file->store('messages/attachments', 'public');
-
-            $attachmentPath = $filePath;
-            $attachmentFilename = $originalFilename;
-            $attachmentMimeType = $mimeType;
-        }
-
-        if (empty($messageContent) && empty($attachmentPath)) {
-            return response()->json(['error' => 'Message content or an attachment is required.'], 422);
-        }
-
-        // Authorization: ensure sender may message receiver
         $recipient = User::findOrFail($validated['receiver_id']);
         $this->authorize('communicate', $recipient);
 
-        $message = Message::create([
-            'sender_id' => Auth::id(),
-            'receiver_id' => $validated['receiver_id'],
-            'message' => $messageContent,
-            'reply_to_id' => $validated['reply_to_id'] ?? null,
-            'attachment_path' => $attachmentPath,
-            'attachment_filename' => $attachmentFilename,
-            'attachment_mime_type' => $attachmentMimeType,
+        $message = app(MessageService::class)->sendDirectMessage($recipient, [
+            'message' => $validated['message'] ?? null,
+            'attachment' => $request->file('attachment'),
         ]);
 
-        // Dispatch the notification to the recipient (assuming NewMessageReceived notification is correctly set up)
-        if ($recipient) {
-            // Note: If you need to pass the newly created message to the notification,
-            // you'd retrieve it before this point. For now, assuming basic notification.
-            // Example: $recipient->notify(new NewMessageReceived(Message::latest()->first())); // Not ideal, but illustrative
-            // Best practice is to pass the $message object from the create() call if needed.
-            // But since the current notification only uses properties from the message, and not the object itself, it's fine.
-            $recipient->notify(new NewMessageReceived($message->load('sender')));
-        }
+        // Dispatch the notification to the recipient
+        $recipient->notify(new NewMessageReceived($message->load('sender')));
 
         broadcast(new \App\Events\NewMessage($message));
 
-        // IMPORTANT CHANGE: Return no content for Inertia AJAX requests
         return response()->noContent();
     }
 
@@ -213,24 +177,19 @@ class MessageController extends Controller
         $user = Auth::user();
 
         // Check if user can delete this message
-        $canDelete = $message->sender_id === $user->id ||
-        $user->hasRole(\App\Enums\RoleEnum::SUPER_ADMIN->value) ||
-        $user->hasRole(\App\Enums\RoleEnum::ADMIN->value) ||
-        $user->can('delete all messages');
+        $canDelete = $message->sender_id === $user->id
+            || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+            || $user->hasRole(RoleEnum::ADMIN->value)
+            || $user->can('delete all messages');
 
         if (! $canDelete) {
             return response()->json(['error' => 'Unauthorized to delete this message.'], 403);
         }
 
-        // Delete the attachment file from storage if exists
-        if ($message->attachment_path) {
-            Storage::disk('public')->delete($message->attachment_path);
-        }
+        app(MessageService::class)->deleteMessage($message);
 
         // Broadcast the deletion event
         broadcast(new \App\Events\MessageDeleted($message));
-
-        $message->delete();
 
         return response()->noContent();
     }
@@ -243,10 +202,10 @@ class MessageController extends Controller
         $user = Auth::user();
 
         // Check if user can edit this message
-        $canEdit = $message->sender_id === $user->id ||
-        $user->hasRole(\App\Enums\RoleEnum::SUPER_ADMIN->value) ||
-        $user->hasRole(\App\Enums\RoleEnum::ADMIN->value) ||
-        $user->can('edit all messages');
+        $canEdit = $message->sender_id === $user->id
+            || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+            || $user->hasRole(RoleEnum::ADMIN->value)
+            || $user->can('edit all messages');
 
         if (! $canEdit) {
             return response()->json(['error' => 'Unauthorized to edit this message.'], 403);
@@ -261,20 +220,25 @@ class MessageController extends Controller
     }
 
     /**
-     * Download an attachment.
+     * Secure download for direct message attachments (only sender, receiver, or admin).
      */
     public function downloadAttachment(Message $message)
     {
-        // Ensure the authenticated user is part of the conversation
-        if ($message->sender_id !== Auth::id() && $message->receiver_id !== Auth::id()) {
-            return response()->json(['error' => 'Unauthorized to download this attachment.'], 403);
-        }
+        $user = Auth::user();
+        abort_unless(
+            $message->sender_id === $user->id
+            || $message->receiver_id === $user->id
+            || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+            || $user->hasRole(RoleEnum::ADMIN->value),
+            403
+        );
 
-        if (! $message->attachment_path || ! Storage::disk('public')->exists($message->attachment_path)) {
+        if (! $message->attachment_path) {
             return response()->json(['error' => 'Attachment not found.'], 404);
         }
+        $dl = app(MessageService::class)->prepareDownload($message);
 
-        return Storage::download(storage_path('app/public/'.$message->attachment_path), $message->attachment_filename);
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($dl['path'], $dl['name'], $dl['headers']);
     }
 
     /**

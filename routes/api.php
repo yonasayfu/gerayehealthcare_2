@@ -57,6 +57,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/messages/threads', [ApiMessageController::class, 'threads'])->middleware('throttle:60,1');
         Route::get('/messages/threads/{user}', [ApiMessageController::class, 'thread'])->middleware('throttle:60,1');
         Route::post('/messages/threads/{user}/messages', [ApiMessageController::class, 'send'])->middleware('throttle:30,1');
+        Route::delete('/messages/{message}', [ApiMessageController::class, 'destroy'])->middleware('throttle:60,1');
+        Route::get('/messages/{message}/download', [ApiMessageController::class, 'downloadAttachment'])->middleware('throttle:120,1');
 
         // Group Messaging (API)
         Route::post('/groups', [GroupMessageController::class, 'createGroup'])->name('api.groups.create');
@@ -66,6 +68,7 @@ Route::prefix('v1')->group(function () {
         Route::patch('/groups/{group}/messages/{message}', [GroupMessageController::class, 'update'])->name('api.groups.messages.update');
         Route::delete('/groups/{group}/messages/{message}', [GroupMessageController::class, 'destroy'])->name('api.groups.messages.destroy');
         Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('api.groups.messages.react');
+        Route::get('/groups/{group}/messages/{message}/attachment', [GroupMessageController::class, 'downloadAttachment'])->name('api.groups.messages.attachment');
 
         // Notifications
         Route::get('/notifications', [ApiNotificationController::class, 'index']);

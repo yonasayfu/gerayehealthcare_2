@@ -6,29 +6,18 @@ use App\Models\Group;
 use App\Models\GroupMember;
 use App\Models\GroupMessage;
 use App\Models\Reaction;
+use App\Services\Messaging\GroupMessageService;
 use App\Services\Validation\Rules\MessageRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class GroupMessageController extends Controller
 {
     public function getGroups(Request $request)
     {
-        $userId = Auth::id();
-        $cacheKey = "user_groups_{$userId}";
-
-        $groups = Cache::remember($cacheKey, 300, function () {
-            return Auth::user()->groups()
-                ->withCount('members')
-                ->with(['latestMessage' => function ($query) {
-                    $query->with('sender:id,name')->latest();
-                }])
-                ->orderBy('updated_at', 'desc')
-                ->get();
-        });
-
+        $groups = app(GroupMessageService::class)->getUserGroups();
+        return response()->json(['data' => \App\Http\Resources\GroupResource::collection($groups)]);
         return response()->json(['data' => $groups]);
     }
 
@@ -50,19 +39,9 @@ class GroupMessageController extends Controller
     {
         $this->ensureMember($group);
 
-        $page = $request->get('page', 1);
-        $perPage = min($request->get('per_page', 50), 100); // Limit max per page
-
-        $messages = GroupMessage::with([
-            'sender:id,name',
-            'replyTo:id,message,sender_id,created_at',
-            'reactions' => function ($query) {
-                $query->select('id', 'group_message_id', 'user_id', 'emoji');
-            },
-        ])
-            ->where('group_id', $group->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
+        $page = (int) $request->get('page', 1);
+        $perPage = min((int) $request->get('per_page', 50), 100);
+        $messages = app(GroupMessageService::class)->listGroupMessages($group, $page, $perPage);
 
         return response()->json([
             'data' => $messages->items(),
@@ -81,53 +60,12 @@ class GroupMessageController extends Controller
         $this->ensureMember($group);
 
         $data = $request->validate(MessageRules::groupMessageRules(), MessageRules::messages());
+        $data['attachment'] = $request->file('attachment');
 
-        // Validate message content
-        $contentErrors = MessageRules::validateMessageContent($data);
-        if (! empty($contentErrors)) {
-            return response()->json(['errors' => $contentErrors], 422);
-        }
+        $msg = app(GroupMessageService::class)->storeMessage($group, $data);
+        broadcast(new \App\Events\NewMessage($msg->load('sender')));
 
-        DB::beginTransaction();
-        try {
-            $path = null;
-            $filename = null;
-            $mime = null;
-            if ($request->hasFile('attachment')) {
-                $file = $request->file('attachment');
-                $path = $file->store('group-messages/attachments', 'public');
-                $filename = $file->getClientOriginalName();
-                $mime = $file->getClientMimeType();
-            }
-
-            $msg = GroupMessage::create([
-                'group_id' => $group->id,
-                'sender_id' => Auth::id(),
-                'message' => isset($data['message']) ? MessageRules::sanitizeMessage($data['message']) : null,
-                'reply_to_id' => $data['reply_to_id'] ?? null,
-                'attachment_path' => $path,
-                'attachment_filename' => $filename,
-                'attachment_mime_type' => $mime,
-                'priority' => $data['priority'] ?? 'normal',
-                'message_type' => $data['message_type'] ?? ($path ? 'file' : 'text'),
-            ]);
-
-            // Update group's last activity
-            $group->touch();
-
-            // Clear relevant caches
-            $this->clearGroupCaches($group->id);
-
-            broadcast(new \App\Events\NewMessage($msg->load('sender')));
-
-            DB::commit();
-
-            return response()->json(['data' => $msg->load('sender')], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json(['error' => 'Failed to send message'], 500);
-        }
+        return response()->json(['data' => $msg->load('sender')], 201);
     }
 
     protected function clearGroupCaches($groupId)
@@ -169,11 +107,10 @@ class GroupMessageController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        $message->update($data);
+        $updated = app(GroupMessageService::class)->updateMessage($group, $message, $data);
+        broadcast(new \App\Events\MessageUpdated($updated));
 
-        broadcast(new \App\Events\MessageUpdated($message));
-
-        return response()->json(['data' => $message]);
+        return response()->json(['data' => $updated]);
     }
 
     public function destroy(Request $request, Group $group, GroupMessage $message)
@@ -181,37 +118,46 @@ class GroupMessageController extends Controller
         $this->ensureMember($group);
         abort_unless($message->group_id === $group->id, 404);
 
-        // TODO: Allow group admins/owners to delete messages
-        abort_unless($message->sender_id === Auth::id(), 403);
+        // Allow sender or group owner/admin to delete
+        $userId = Auth::id();
+        $role = GroupMember::where('group_id', $group->id)->where('user_id', $userId)->value('role');
+        abort_unless($message->sender_id === $userId || in_array($role, ['owner', 'admin']), 403);
 
         broadcast(new \App\Events\MessageDeleted($message));
 
-        $message->delete();
+        app(GroupMessageService::class)->deleteMessage($group, $message);
 
         return response()->noContent();
+    }
+
+    /**
+     * Secure download for group message attachments (members only).
+     */
+    public function downloadAttachment(Request $request, Group $group, GroupMessage $message)
+    {
+        $this->ensureMember($group);
+        abort_unless($message->group_id === $group->id, 404);
+
+        if (! $message->attachment_path) {
+            return response()->json(['error' => 'No attachment for this message'], 404);
+        }
+
+        $dl = app(GroupMessageService::class)->prepareDownload($group, $message);
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($dl['path'], $dl['name'], $dl['headers']);
     }
 
     public function createGroup(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:groups,name'],
+            'description' => ['nullable', 'string', 'max:500'],
             'members' => ['required', 'array', 'min:1'],
             'members.*' => ['integer', 'exists:users,id'],
         ]);
 
-        $group = Group::create([
-            'name' => $validated['name'],
-            'created_by' => Auth::id(),
-        ]);
+        $group = app(GroupMessageService::class)->createGroup($validated);
 
-        // Attach members with 'member' role
-        foreach ($validated['members'] as $memberId) {
-            $group->users()->attach($memberId, ['role' => 'member']);
-        }
-
-        // Attach the creator as 'owner'
-        $group->users()->attach(Auth::id(), ['role' => 'owner']);
-
-        return response()->json(['data' => $group->load('users')], 201);
+        return response()->json(['data' => new \App\Http\Resources\GroupResource($group)], 201);
     }
 }

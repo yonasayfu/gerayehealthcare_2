@@ -6,8 +6,8 @@ use App\Http\Requests\Api\V1\SendMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\User;
+use App\Services\Messaging\MessageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class MessageController extends BaseApiController
 {
@@ -78,30 +78,39 @@ class MessageController extends BaseApiController
     public function send(SendMessageRequest $request, User $user)
     {
         $this->authorize('communicate', $user);
-        $validated = $request->validated();
-        if (empty($validated['message']) && ! $request->hasFile('attachment')) {
-            return response()->json(['message' => 'Message text or attachment required'], 422);
-        }
-
-        $attachmentPath = null;
-        $attachmentFilename = null;
-        $attachmentMimeType = null;
-        if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $attachmentFilename = $file->getClientOriginalName();
-            $attachmentMimeType = $file->getClientMimeType();
-            $attachmentPath = $file->store('messages/attachments', 'public');
-        }
-
-        $message = Message::create([
-            'sender_id' => Auth::id(),
-            'receiver_id' => $user->id,
-            'message' => $validated['message'] ?? null,
-            'attachment_path' => $attachmentPath,
-            'attachment_filename' => $attachmentFilename,
-            'attachment_mime_type' => $attachmentMimeType,
-        ]);
+        $data = [
+            'message' => $request->validated()['message'] ?? null,
+            'attachment' => $request->file('attachment'),
+        ];
+        $message = app(MessageService::class)->sendDirectMessage($user, $data);
 
         return new MessageResource($message->load(['sender', 'receiver']));
+    }
+
+    public function destroy(Message $message)
+    {
+        $user = request()->user();
+        $canDelete = $message->sender_id === $user->id
+            || $user->hasRole('super-admin')
+            || $user->hasRole('admin')
+            || $user->can('delete all messages');
+        if (! $canDelete) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        app(MessageService::class)->deleteMessage($message);
+
+        return response()->noContent();
+    }
+
+    public function downloadAttachment(Message $message)
+    {
+        $user = request()->user();
+        if ($message->sender_id !== $user->id && $message->receiver_id !== $user->id && ! $user->hasAnyRole(['admin', 'super-admin'])) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+        $dl = app(MessageService::class)->prepareDownload($message);
+
+        return \Illuminate\Support\Facades\Storage::disk('public')->download($dl['path'], $dl['name'], $dl['headers']);
     }
 }

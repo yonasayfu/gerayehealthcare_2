@@ -2,16 +2,21 @@
 
 Make controllers thin, move logic to services, fix requests, and normalize API responses.
 
+
+**NOTE**
+THIS PAth is the orginal issue before i enance with the Ai agent so it helps you clarify my aim/goal, it is unorder but each issue mentioned in phasee-0 up to phase 10 are mentioned here /Users/yonassayfu/VSProject/gerayehealthcare/phases/OrginalIssue.md
+
+**NOTE** END
 ---
 
-- [ ] **Thin controllers** (prio:P1) (area:controller) (type:refactor)  
+- [x] **Thin controllers** (prio:P1) (area:controller) (type:refactor)
   *Task:* Keep only `__construct`, `index`, `store`, `show`, `update`, `destroy`; shift logic to services.  
   *Why:* Improves testability and maintainability.  
   *Definition of Done (DoD):*  
     - Controllers <200 lines; services cover business logic.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Controllers/*`
 
-- [ ] **Service layer consistency** (prio:P1) (area:service) (type:refactor)  
+- [x] **Service layer consistency** (prio:P1) (area:service) (type:refactor)
   *Task:* Normalize `app/Services` layout; keep `App\Rules` separate but used by services; document high-logic flows (VisitService, Inventory, Invoices).  
   *Why:* Reduces duplication; promotes reuse.  
   *Definition of Done (DoD):*  
@@ -20,7 +25,7 @@ Make controllers thin, move logic to services, fix requests, and normalize API r
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Services`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Rules`
 
-- [ ] **Message & Group messaging fixes** (prio:P1) (area:controller|feature)  
+- [x] **Message & Group messaging fixes** (prio:P1) (area:controller|feature)
   *Task:* Allow users to delete their own messages; persistent groups; open group creation to authorized roles; ensure secure file download for recipients.  
   *Why:* Current behavior limits usability and loses groups on reload.  
   *Definition of Done (DoD):*  
@@ -30,7 +35,7 @@ Make controllers thin, move logic to services, fix requests, and normalize API r
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Controllers/GroupMessageController.php`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Controllers/GroupController.php`
 
-- [ ] **Insurance controllers consolidation** (prio:P2) (area:controller) (type:refactor)  
+- [ ] **Insurance controllers consolidation** (prio:P2) (area:controller) (type:refactor)  (if we can let put inside in admin controller and make sure it not break the over all code and the cascade moduels)
   *Task:* Merge `Controllers/Insurance` into standard module pattern or justify separation.  
   *Why:* Inconsistent architecture makes routing/policies harder.  
   *Definition of Done (DoD):*  
@@ -62,7 +67,7 @@ Make controllers thin, move logic to services, fix requests, and normalize API r
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Requests/Auth/LoginRequest.php`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Controllers/Auth/RegisteredUserController.php`
 
-- [ ] **API surface audit (V1)** (prio:P1) (area:api)  
+- [x] **API surface audit (V1)** (prio:P1) (area:api)
   *Task:* Ensure mobile-required modules are exposed; normalize return types to Resources (avoid mixing `response()->json` with `*Resource`).  
   *Why:* Consistency for Flutter/mobile clients.  
   *DoD:* Resource-based responses; basic OpenAPI sketch.  
@@ -70,7 +75,7 @@ Make controllers thin, move logic to services, fix requests, and normalize API r
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Controllers/Api/V1/*`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Requests/Api/*`
 
-- [ ] **Middleware review** (prio:P2) (area:middleware)  
+- [x] **Middleware review** (prio:P2) (area:middleware)
   *Task:* Scope `QueryCacheMiddleware`, `CacheExpensiveQueries`, `PermissionMiddleware` to heavy routes; add invalidation strategy.  
   *Why:* Performance without stale data.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Middleware/*`

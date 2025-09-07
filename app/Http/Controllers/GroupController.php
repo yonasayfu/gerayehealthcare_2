@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleEnum;
+
 use App\Models\Group;
 use App\Models\GroupMember;
 use Illuminate\Http\Request;
@@ -22,6 +24,9 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
+        // Authorization: allow any authenticated user to create groups (per OriginalIssue.md)
+        abort_unless(Auth::check(), 403);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:500'],
