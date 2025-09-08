@@ -1,6 +1,12 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import Form from './Form.vue'
+
+const props = defineProps({
+    events: { type: Array, default: () => [] },
+    patients: { type: Array, default: () => [] },
+});
 
 const form = useForm({
     event_id: '',
@@ -39,7 +45,7 @@ const breadcrumbs = [
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :events="props.events" :patients="props.patients" />
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.event-participants.index')" class="btn-glass btn-glass-sm">Cancel</Link>
