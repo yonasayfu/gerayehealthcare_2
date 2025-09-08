@@ -15,12 +15,44 @@ class DatabaseSeeder extends Seeder
     {
         // Comprehensive seed for full RBAC system with test users
         $this->call([
+            // Core auth & RBAC
             RolesAndPermissionsSeeder::class,
             TestUsersSeeder::class,
+
+            // People & org
             StaffSeeder::class,
             PatientSeeder::class,
-            DashboardDataSeeder::class,
+
+            // Clinical & prescriptions
+            MedicalRecordsSeeder::class,
+
+            // Services
+            ServiceSeeder::class,
+
+            // Inventory domain
+            InventorySeeder::class,
+            InventoryAlertSeeder::class,
+            InventoryRequestSeeder::class,
+            StaffAvailabilitySeeder::class,
+
+            // Partners & referrals
+            PartnerSeeder::class,
+            PartnerAgreementSeeder::class,
+            PartnerCommissionSeeder::class,
+            PartnerEngagementSeeder::class,
+            ReferralSeeder::class,
+            ReferralDocumentSeeder::class,
+
+            // Finance
+            IncomingInvoicesDemoSeeder::class,
+            SharedInvoiceSeeder::class,
+            StaffPayoutSeeder::class,
+
+            // Marketing
             MarketingDemoSeeder::class,
+
+            // Messaging / Dashboard samples
+            DashboardDataSeeder::class,
         ]);
 
         // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---

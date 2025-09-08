@@ -88,7 +88,9 @@ axios.get('/sanctum/csrf-cookie').then(() => {
         setup({ el, App, props, plugin }) {
             const app = createApp({ render: () => h(App, props) })
                 .use(plugin)
-                .use(ZiggyVue)
+                // Ensure Ziggy uses the server-provided route list (@routes)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .use(ZiggyVue, (window as any).Ziggy)
                 .component('AppLayout', AppLayout);
                 
             // Global error handling
