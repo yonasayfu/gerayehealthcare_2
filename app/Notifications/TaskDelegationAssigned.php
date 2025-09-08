@@ -16,8 +16,8 @@ class TaskDelegationAssigned extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        // Database channel for in-app notifications; add 'mail' if email is desired
-        return ['database'];
+        // Deliver to in-app bell and email for parity
+        return ['database', 'mail'];
     }
 
     public function toArray(object $notifiable): array

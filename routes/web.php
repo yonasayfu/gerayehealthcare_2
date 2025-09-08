@@ -858,6 +858,9 @@ Route::middleware(['auth', 'verified'])
                 ->name('marketing-roi.data');
             Route::get('marketing-roi/export', [\App\Http\Controllers\Reports\MarketingRoiController::class, 'export'])
                 ->name('marketing-roi.export');
+
+            // Audit log viewer (tail of laravel.log with filters)
+            Route::get('audit', [\App\Http\Controllers\Admin\AuditController::class, 'index'])->name('audit');
         });
 
     });
