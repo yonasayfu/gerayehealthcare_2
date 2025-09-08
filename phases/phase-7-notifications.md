@@ -6,7 +6,7 @@ Ensure robust notifications and an auditable log UI for Super Admin.
 
 ---
 
-- [ ] **System logging & audit UI** (prio:P2)  
+- [x] **System logging & audit UI** (prio:P2)  
   *Task:* Confirm logging channel; build admin audit page to filter who/what/when.  
   *Ref:* (UI path to be created), Laravel `config/logging.php`
 
@@ -16,7 +16,7 @@ Ensure robust notifications and an auditable log UI for Super Admin.
     `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/auth/*`  
     `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Requests/Settings`  
 
-- [ ] **In-app vs email parity** (prio:P2)  
+- [x] **In-app vs email parity** (prio:P2)  
   *Task:* Mirror critical events to bell + email with user preferences.  
   *Ref:*  
     `/Users/yonassayfu/VSProject/gerayehealthcare/app/Notifications/*`  

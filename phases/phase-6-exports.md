@@ -6,12 +6,12 @@ Centralize export/print paths and standardize views.
 
 ---
 
-- [ ] **ExportableTrait audit** (prio:P1)  
+- [x] **ExportableTrait audit** (prio:P1)  
   *Task:* Ensure all modules use centralized export trait. Add missing modules.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Traits/ExportableTrait.php`  
   `/Users/yonassayfu/VSProject/gerayehealthcare/app/Exports/*`
 
-- [ ] **Blade layouts for PDF/Print** (prio:P1)  
+- [x] **Blade layouts for PDF/Print** (prio:P1)  
   *Task:* Enforce central layouts; delete per-module clones.  
   *Ref:*  
   `/Users/yonassayfu/VSProject/gerayehealthcare/resources/views/pdf-layout.blade.php`  

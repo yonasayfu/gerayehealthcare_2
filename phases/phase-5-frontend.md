@@ -150,7 +150,7 @@ Unify UI/UX, centralize print/export, fix search+pagination, and complete module
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Dashboard/Index.vue`
 
 ## Search & Pagination
-- [ ] **Fix pagination state with filters** (prio:P1)  
+- [x] **Fix pagination state with filters** (prio:P1)  
   *Task:* Keep query params in route, server returns filtered `links`.  
   *Ref:* All list views affected.
 
