@@ -7,10 +7,10 @@ Unify UI/UX, centralize print/export, fix search+pagination, and complete module
 ---
 
 ## Global & Layouts
-- [ ] **AppLayout inventory alert code** (prio:P2)  
+- [x] **AppLayout inventory alert code** (prio:P2)  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AppLayout.vue`
 
-- [ ] **Auth layout (Liquid Glass)** (prio:P2)  
+- [x] **Auth layout (Liquid Glass)** (prio:P2)  
   *Task:* Combine `AuthCardLayout` and `AuthSplitLayout`.  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AuthLayout.vue`  
   `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/auth/*`
@@ -27,13 +27,13 @@ Unify UI/UX, centralize print/export, fix search+pagination, and complete module
 - [ ] **Clean `app.css`** (prio:P2)  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/css/app.css`
 
-- [ ] **Central print stylesheet** (prio:P1)  
+- [x] **Central print stylesheet** (prio:P1)  
   *Task:* Use single `print.css`; remove per-module `printCurrent.vue` / `printAll.vue`.  
   *Ref:*  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/resources/css/print.css`  
     - `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/print/*`
 
-- [ ] **`responsive-fixes.css` purpose** (prio:P3)  
+- [x] **`responsive-fixes.css` purpose** (prio:P3)  
   *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/css/responsive-fixes.css`
 
 ## Public & Welcome

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Edit3, Trash2, Shield, Eye } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { confirmDialog } from '@/lib/confirm';
-import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
+import { useTableFilters } from '@/composables/useTableFilters'
 
 const props = defineProps<{
   users: {
@@ -28,18 +28,13 @@ const breadcrumbs = [
   { title: 'User Management', href: route('admin.users.index') },
 ];
 
-const search = ref(props.filters.search || '');
-const perPage = ref(props.filters.per_page || '5');
-
-watch([search, perPage], debounce((newValues) => {
-    router.get(route('admin.users.index'), {
-        search: newValues[0],
-        per_page: newValues[1],
-    }, {
-        preserveState: true,
-        replace: true,
-    });
-}, 300));
+const { search, perPage } = useTableFilters({
+  routeName: 'admin.users.index',
+  initial: {
+    search: props.filters?.search,
+    per_page: Number(props.filters?.per_page ?? 5),
+  }
+})
 
 async function destroy(id: number) {
   const ok = await confirmDialog({
@@ -49,9 +44,7 @@ async function destroy(id: number) {
     cancelText: 'Cancel',
   })
   if (!ok) return
-  router.delete(route('admin.users.destroy', id), {
-    preserveScroll: true,
-  });
+  router.delete(route('admin.users.destroy', id));
 }
 </script>
 

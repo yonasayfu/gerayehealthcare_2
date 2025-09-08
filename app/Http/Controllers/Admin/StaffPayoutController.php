@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateStaffPayoutDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ExportableTrait;
+use App\Http\Config\ExportConfig;
 use App\Models\StaffPayout;
 use App\Services\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
@@ -13,6 +15,7 @@ use Inertia\Inertia;
 
 class StaffPayoutController extends Controller
 {
+    use ExportableTrait;
     protected $staffPayoutService;
 
     public function __construct(StaffPayoutService $staffPayoutService)
@@ -47,15 +50,9 @@ class StaffPayoutController extends Controller
         }
     }
 
-    public function printAll()
+    public function printAll(Request $request)
     {
-        $payouts = StaffPayout::with('staff')
-            ->orderByDesc('payout_date')
-            ->limit(500)
-            ->get();
-
-        return Inertia::render('Admin/StaffPayouts/PrintAll', [
-            'payouts' => $payouts,
-        ]);
+        // Centralized PDF using ExportableTrait + ExportConfig
+        return $this->handlePrintAll($request, StaffPayout::class, ExportConfig::getStaffPayoutConfig());
     }
 }

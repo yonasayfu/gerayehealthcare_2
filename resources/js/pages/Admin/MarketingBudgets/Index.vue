@@ -86,10 +86,16 @@ watch([search, sortField, sortDirection, perPage, campaignId, platformId, status
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing budget?')) {
-    router.delete(route('admin.marketing-budgets.destroy', id))
-  }
+import { confirmDialog } from '@/lib/confirm'
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Budget',
+    message: 'Are you sure you want to delete this marketing budget?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-budgets.destroy', id))
 }
 
 import { useExport } from '@/composables/useExport';

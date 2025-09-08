@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, Plus } from 'lucide-vue-next';
-import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
 import { format } from 'date-fns';
 import type { InventoryItemPagination } from '@/types';
 import { confirmDialog } from '@/lib/confirm';
+import { useTableFilters } from '@/composables/useTableFilters'
 
 interface InventoryItemFilters {
   search?: string;
@@ -26,34 +26,21 @@ const props = defineProps<{
   filters: InventoryItemFilters;
 }>();
 
-const search = ref(props.filters.search || '');
-const sortField = ref(props.filters.sort || '');
-const sortDirection = ref(props.filters.direction || 'asc');
-const perPage = ref(props.filters.per_page || 5);
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.inventory-items.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.inventoryItems?.per_page ?? 5,
+  },
+})
 
 // Create a computed property for the formatted date string
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p'); // Use the imported format function here
 });
 
-// Trigger search, sort, pagination
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  };
-
-  // Only add sort parameter if sortField.value is not an empty string
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-
-  router.get(route('admin.inventory-items.index'), params, {
-    preserveState: true,
-    replace: true,
-  });
-}, 500));
 
 const destroy = async (id: number) => {
   const ok = await confirmDialog({
@@ -63,23 +50,12 @@ const destroy = async (id: number) => {
     cancelText: 'Cancel',
   })
   if (!ok) return
-  router.delete(route('admin.inventory-items.destroy', id), {
-    preserveScroll: true,
-  });
+  // preserveScroll remains default behavior; no state change
+  router.delete(route('admin.inventory-items.destroy', id))
 };
 
 import { useExport } from '@/composables/useExport';
-
 const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-items', filters: props.filters });
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortField.value = field;
-    sortDirection.value = 'asc';
-  }
-}
 
 </script>
 

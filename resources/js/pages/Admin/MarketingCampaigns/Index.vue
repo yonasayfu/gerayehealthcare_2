@@ -90,10 +90,16 @@ watch([search, sortField, sortDirection, perPage, platformId, status, campaignTy
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing campaign?')) {
-    router.delete(route('admin.marketing-campaigns.destroy', id))
-  }
+import { confirmDialog } from '@/lib/confirm'
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Campaign',
+    message: 'Are you sure you want to delete this marketing campaign?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-campaigns.destroy', id))
 }
 
 import { useExport } from '@/composables/useExport';
@@ -261,4 +267,3 @@ function toggleSort(field: string) {
     </div>
   </AppLayout>
 </template>
-

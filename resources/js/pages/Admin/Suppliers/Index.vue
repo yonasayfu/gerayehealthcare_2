@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { confirmDialog } from '@/lib/confirm'
 
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next';
-import debounce from 'lodash/debounce';
 import Pagination from '@/components/Pagination.vue';
 import { format } from 'date-fns';
 import type { SupplierPagination } from '@/types';
+import { useTableFilters } from '@/composables/useTableFilters'
 
 interface SupplierFilters {
   search?: string;
@@ -27,27 +27,21 @@ const props = defineProps<{
   filters: SupplierFilters;
 }>();
 
-const search = ref(props.filters.search || '');
-const sortField = ref(props.filters.sort || 'name');
-const sortDirection = ref(props.filters.direction || 'asc');
-const perPage = ref(props.filters.per_page || 5);
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.suppliers.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort ?? 'name',
+    direction: props.filters?.direction ?? 'asc',
+    per_page: props.filters?.per_page ?? props.suppliers?.per_page ?? 5,
+  }
+})
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    sort: sortField.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  };
-  router.get(route('admin.suppliers.index'), params, {
-    preserveState: true,
-    replace: true,
-  });
-}, 500));
+// URL updates handled by composable
 
 async function destroy(id: number) {
   const ok = await confirmDialog({
@@ -69,14 +63,7 @@ const printAllSuppliers = () => {
     window.open(url, '_blank');
 };
 
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortField.value = field;
-    sortDirection.value = 'asc';
-  }
-}
+function onToggleSort(field: string) { toggleSort(field) }
 </script>
 
 <template>
@@ -145,16 +132,16 @@ function toggleSort(field: string) {
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
             <tr>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('name')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('name')">
                 Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('contact_person')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('contact_person')">
                 Contact Person <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('email')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('email')">
                 Email <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('phone')">
                 Phone <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>

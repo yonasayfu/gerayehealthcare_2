@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { useTableFilters } from '@/composables/useTableFilters'
+import { useExport } from '@/composables/useExport'
 
 const props = defineProps<{ referrals: any; filters: any }>()
 
@@ -15,26 +16,21 @@ const breadcrumbs = [
   { title: 'Referrals', href: '/dashboard/referrals' },
 ]
 
-const search = ref(props.filters.search || '')
-const sortField = ref(props.filters.sort || '')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 5)
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.referrals.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.referrals?.per_page ?? 5,
+  }
+})
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  router.get('/dashboard/referrals', {
-    search: search.value,
-    sort: sortField.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  }, {
-    preserveState: true,
-    replace: true,
-  })
-}, 500))
+// URL updates handled by composable
 
 async function destroy(id: number) {
   const ok = await confirmDialog({
@@ -50,29 +46,17 @@ async function destroy(id: number) {
 }
 
 function exportCsv() {
-  window.open(route('admin.referrals.export', { type: 'csv' }), '_blank');
+  exportData('csv')
 }
 
 function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  printCurrentViewExport()
 }
 
+const { exportData, printCurrentView: printCurrentViewExport } = useExport({ routeName: 'admin.referrals', filters: props.filters || {} })
 
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+
+function onToggleSort(field: string) { toggleSort(field) }
 </script>
 
 <template>
@@ -150,10 +134,10 @@ function toggleSort(field: string) {
               <th class="px-6 py-3">Partner</th>
               <th class="px-6 py-3">Agreement</th>
               <th class="px-6 py-3">Referred Patient</th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('referral_date')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('referral_date')">
                 Referral Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('status')">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>

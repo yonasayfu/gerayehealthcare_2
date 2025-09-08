@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 import { confirmDialog } from '@/lib/confirm'
+import { useTableFilters } from '@/composables/useTableFilters'
+import { useExport } from '@/composables/useExport'
 
 const props = defineProps<{ partners: any; filters: any }>()
 
@@ -15,26 +16,21 @@ const breadcrumbs = [
   { title: 'Partners', href: '/dashboard/partners' },
 ]
 
-const search = ref(props.filters.search || '')
-const sortField = ref(props.filters.sort || '')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 5)
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.partners.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.partners?.per_page ?? 5,
+  }
+})
 
 const formattedGeneratedDate = computed(() => {
   return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  router.get('/dashboard/partners', {
-    search: search.value,
-    sort: sortField.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  }, {
-    preserveState: true,
-    replace: true,
-  })
-}, 500))
+// URL updates handled by composable
 
 async function destroy(id: number) {
   const ok = await confirmDialog({
@@ -49,33 +45,9 @@ async function destroy(id: number) {
   })
 }
 
-function exportCsv() {
-  window.open(route('partners.export', { type: 'csv' }), '_blank');
-}
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.partners', filters: props.filters || {} })
 
-function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100); // Small delay for reliability
-}
-
-const printAllPartners = () => {
-  window.open(route('partners.printAll', { preview: true }), '_blank');
-};
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+function onToggleSort(field: string) { toggleSort(field) }
 </script>
 
 <template>
@@ -102,7 +74,7 @@ function toggleSort(field: string) {
             <Link :href="route('admin.partners.create')" class="btn-glass">
               <span>Add Partner</span>
             </Link>
-            <button @click="exportCsv()" class="btn-glass btn-glass-sm">
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </button>
@@ -151,16 +123,16 @@ function toggleSort(field: string) {
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
             <tr>
               <th class="px-6 py-3">#</th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('name')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('name')">
                 Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('type')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('type')">
                 Type <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3">Contact Person</th>
               <th class="px-6 py-3">Email</th>
               <th class="px-6 py-3">Phone</th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('engagement_status')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('engagement_status')">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>

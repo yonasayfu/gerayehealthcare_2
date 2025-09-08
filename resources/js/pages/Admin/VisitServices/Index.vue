@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Plus, Paperclip, MapPin, Search } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { useTableFilters } from '@/composables/useTableFilters'
+import { useExport } from '@/composables/useExport'
 
 const props = defineProps<{
   visitServices: {
@@ -31,11 +32,16 @@ const breadcrumbs = [
   { title: 'Visit Services', href: route('admin.visit-services.index') },
 ]
 
-// Fix: Use optional chaining and provide defaults
-const search = ref(props.filters?.search || '')
-const sortField = ref(props.filters?.sort || '')
-const sortDirection = ref(props.filters?.direction || 'asc')
-const perPage = ref(props.filters?.per_page || 5)
+// Centralized filters with URL sync
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.visit-services.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.visitServices?.per_page ?? 5,
+  },
+})
 
 // Create a computed property for the formatted date string
 const formattedGeneratedDate = computed(() => {
@@ -51,24 +57,6 @@ const currentIndex = computed(() => {
   return (props.visitServices.current_page - 1) * props.visitServices.per_page;
 });
 
-// Trigger search, sort, pagination
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  };
-
-  // Only add sort parameter if sortField.value is not an empty string
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-
-  router.get(route('admin.visit-services.index'), params, {
-    preserveState: true,
-    replace: true,
-  })
-}, 500))
 
 async function destroy(id: number) {
   const ok = await confirmDialog({
@@ -81,27 +69,15 @@ async function destroy(id: number) {
   router.delete(route('admin.visit-services.destroy', id))
 }
 
-function exportCsv() {
-  window.open(route('admin.visit-services.export', { type: 'csv' }), '_blank');
-}
+const { exportData, printCurrentView } = useExport({ routeName: 'admin.visit-services', filters: props.filters || {} })
 
-function printCurrentView() {
-  // Trigger browser print of the current index view
-  setTimeout(() => window.print(), 50);
-}
+// printCurrentView provided by useExport
 
 const printAllVisitServices = () => {
   window.open(route('admin.visit-services.printAll', { preview: true }), '_blank');
 };
 
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+function onToggleSort(field: string) { toggleSort(field) }
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -187,8 +163,8 @@ const formatDate = (dateString: string | null) => {
               <th class="px-6 py-3">#</th>
               <th class="px-6 py-3">Patient</th>
               <th class="px-6 py-3">Assigned Staff</th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('scheduled_at')">Scheduled At <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">Status <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('scheduled_at')">Scheduled At <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('status')">Status <ArrowUpDown class="inline w-4 h-4 ml-1" /></th>
               <th class="px-6 py-3 print:hidden">Documents</th>
               <th class="px-6 py-3 print:hidden">Location</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>

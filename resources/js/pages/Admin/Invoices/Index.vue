@@ -3,11 +3,14 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus, Printer, Download, Check, Eye } from 'lucide-vue-next';
+import { Plus, Printer, Download, Check, Eye, Search } from 'lucide-vue-next';
 import { computed } from 'vue';
+import Pagination from '@/components/Pagination.vue'
+import { useTableFilters } from '@/composables/useTableFilters'
 
-defineProps<{
+const props = defineProps<{
   invoices: any;
+  filters?: { search?: string; sort?: string; direction?: 'asc'|'desc'; per_page?: number }
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -25,6 +28,17 @@ const formatDate = (dateString: string) => {
 };
 
 const formattedGeneratedDate = computed(() => format(new Date(), 'PPP p'));
+
+// Search + pagination (non-breaking; URL params preserved)
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.invoices.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.invoices?.per_page ?? 10,
+  }
+})
 
 function printCurrentView() {
   setTimeout(() => window.print(), 30);
@@ -76,6 +90,28 @@ function approveInvoice(id: number) {
               <span>Incoming</span>
             </Link>
           </div>
+        </div>
+      </div>
+
+      <!-- Search / per page -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+        <div class="search-glass relative w-full md:w-1/3">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search invoices..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
+          />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
+        </div>
+        <div>
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
         </div>
       </div>
 
@@ -144,6 +180,7 @@ function approveInvoice(id: number) {
           </tbody>
         </table>
       </div>
+      <Pagination :links="invoices.links" class="print:hidden" />
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
         <p>Document Generated: {{ formattedGeneratedDate }}</p>
       </div>

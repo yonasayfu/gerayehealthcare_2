@@ -48,9 +48,12 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+| Note: Grouped by domain for clarity and performance. No URL/name changes.
  */
 
+// =====================
 // Public & General
+// =====================
 Route::get('/', fn () => Inertia::render('Welcome'))->name('home');
 
 // Backward-compatible redirect: /admin -> /dashboard
@@ -63,6 +66,9 @@ Route::get('public/invoices/{invoice}/pdf', [InvoiceController::class, 'publicPd
     ->middleware('signed')
     ->name('invoices.public_pdf');
 
+// =====================
+// Dev-only diagnostics
+// =====================
 if (app()->environment('local')) {
     // Performance testing route
     Route::get('/performance-test', function (Request $request) {
@@ -136,7 +142,9 @@ if (app()->environment('local')) {
     })->name('performance.test');
 }
 
+// =====================
 // Shared Dashboard
+// =====================
 Route::get('dashboard', function () {
     $user = Auth::user();
     if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::ADMIN->value])) {
@@ -148,7 +156,9 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Messaging & Notifications
+// =====================
+// Authenticated: Messaging & Notifications
+// =====================
 Route::middleware(['auth'])->group(function () {
     // Basic messaging - available to all authenticated users
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
@@ -210,7 +220,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('notifications.markAllRead');
 });
 
+// =====================
 // API Docs (Swagger UI)
+// =====================
 Route::get('/api-docs', function () {
     return view('swagger');
 })->name('api.docs');
@@ -225,7 +237,14 @@ Route::get('/api-docs/spec', function () {
     ]);
 })->name('api.docs.spec');
 
-// Admin & Super Admin
+// =====================
+// Staff (dashboard base prefix) — Marketing
+// =====================
+// Consolidated in the main Staff-Specific group below to avoid duplicates.
+
+// =====================
+// Admin & Super Admin (dashboard base prefix)
+// =====================
 Route::middleware(['auth', 'verified'])
     ->prefix('dashboard')
     ->name('admin.')
@@ -243,6 +262,42 @@ Route::middleware(['auth', 'verified'])
         Route::get('top-services', [AdminDashboardController::class, 'topServices'])->name('top-services');
         Route::get('reports/service-volume/data', [AdminDashboardController::class, 'reportServiceVolume'])->name('reports.service-volume.data');
         Route::get('reports/revenue-ar/data', [AdminDashboardController::class, 'reportRevenueAr'])->name('reports.revenue-ar.data');
+
+        // --- Marketing (migrated from routes/marketing.php; names/paths preserved) ---
+        Route::get('marketing-campaigns/export', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'export'])->name('marketing-campaigns.export');
+        Route::get('marketing-campaigns/print-all', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printAll'])->name('marketing-campaigns.printAll');
+        Route::get('marketing-campaigns/print-current', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printCurrent'])->name('marketing-campaigns.printCurrent');
+        Route::get('marketing-campaigns/{marketing_campaign}/print', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printSingle'])->name('marketing-campaigns.printSingle');
+        Route::resource('marketing-campaigns', \App\Http\Controllers\Admin\MarketingCampaignController::class);
+        Route::resource('marketing-leads', \App\Http\Controllers\Admin\MarketingLeadController::class);
+        Route::get('landing-pages/export/{type}', [\App\Http\Controllers\Admin\LandingPageController::class, 'export'])->name('landing-pages.export');
+        Route::get('landing-pages/print-all', [\App\Http\Controllers\Admin\LandingPageController::class, 'printAll'])->name('landing-pages.printAll');
+        Route::get('landing-pages/print-current', [\App\Http\Controllers\Admin\LandingPageController::class, 'printCurrent'])->name('landing-pages.printCurrent');
+        Route::resource('landing-pages', \App\Http\Controllers\Admin\LandingPageController::class);
+        Route::get('marketing-platforms/print-current', [\App\Http\Controllers\Admin\MarketingPlatformController::class, 'printCurrent'])->name('marketing-platforms.printCurrent');
+        Route::resource('marketing-platforms', \App\Http\Controllers\Admin\MarketingPlatformController::class);
+        Route::resource('lead-sources', \App\Http\Controllers\Admin\LeadSourceController::class);
+        Route::get('marketing-budgets/export/{type}', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'export'])->name('marketing-budgets.export');
+        Route::get('marketing-budgets/print-all', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printAll'])->name('marketing-budgets.printAll');
+        Route::get('marketing-budgets/print-current', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printCurrent'])->name('marketing-budgets.printCurrent');
+        Route::get('marketing-budgets/{marketing_budget}/print', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printSingle'])->name('marketing-budgets.printSingle');
+        Route::resource('marketing-budgets', \App\Http\Controllers\Admin\MarketingBudgetController::class);
+        Route::resource('campaign-contents', \App\Http\Controllers\Admin\CampaignContentController::class);
+        Route::get('marketing-tasks/print-all', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printAll'])->name('marketing-tasks.printAll');
+        Route::get('marketing-tasks/print-current', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printCurrent'])->name('marketing-tasks.printCurrent');
+        Route::resource('marketing-tasks', \App\Http\Controllers\Admin\MarketingTaskController::class);
+        Route::prefix('marketing-analytics')->name('marketing-analytics.')->group(function () {
+            Route::get('dashboard-data', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'dashboardData'])->name('dashboard-data');
+            Route::get('campaign-performance', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'campaignPerformance'])->name('campaign-performance');
+            Route::get('traffic-source-distribution', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'trafficSourceDistribution'])->name('traffic-source-distribution');
+            Route::get('conversion-funnel', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'conversionFunnel'])->name('conversion-funnel');
+            Route::get('generate-report', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'generateReport'])->name('generate-report');
+            Route::get('budget-pacing', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'budgetPacing'])->name('budget-pacing');
+            Route::get('staff-performance', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'staffPerformance'])->name('staff-performance');
+            Route::get('task-sla', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'taskSla'])->name('task-sla');
+        });
+        Route::put('marketing-platforms/{marketing_platform}/toggle-status', [\App\Http\Controllers\Admin\MarketingPlatformController::class, 'toggleStatus'])->name('marketing-platforms.toggle-status');
+        Route::put('lead-sources/{lead_source}/toggle-status', [\App\Http\Controllers\Admin\LeadSourceController::class, 'toggleStatus'])->name('lead-sources.toggle-status');
 
         // Patients
         Route::middleware('can:view patients')->group(function () {
@@ -805,47 +860,6 @@ Route::middleware(['auth', 'verified'])
                 ->name('marketing-roi.export');
         });
 
-        // Marketing (Admin)
-        Route::get('marketing-campaigns/export', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'export'])->name('marketing-campaigns.export');
-        Route::get('marketing-campaigns/print-all', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printAll'])->name('marketing-campaigns.printAll');
-        Route::get('marketing-campaigns/print-current', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printCurrent'])->name('marketing-campaigns.printCurrent');
-        Route::get('marketing-campaigns/{marketing_campaign}/print', [\App\Http\Controllers\Admin\MarketingCampaignController::class, 'printSingle'])->name('marketing-campaigns.printSingle');
-        Route::resource('marketing-campaigns', \App\Http\Controllers\Admin\MarketingCampaignController::class);
-        Route::resource('marketing-leads', \App\Http\Controllers\Admin\MarketingLeadController::class);
-        Route::get('landing-pages/export/{type}', [\App\Http\Controllers\Admin\LandingPageController::class, 'export'])->name('landing-pages.export');
-        Route::get('landing-pages/print-all', [\App\Http\Controllers\Admin\LandingPageController::class, 'printAll'])->name('landing-pages.printAll');
-        Route::get('landing-pages/print-current', [\App\Http\Controllers\Admin\LandingPageController::class, 'printCurrent'])->name('landing-pages.printCurrent');
-        Route::resource('landing-pages', \App\Http\Controllers\Admin\LandingPageController::class);
-        Route::get('marketing-platforms/print-current', [\App\Http\Controllers\Admin\MarketingPlatformController::class, 'printCurrent'])->name('marketing-platforms.printCurrent');
-        Route::resource('marketing-platforms', \App\Http\Controllers\Admin\MarketingPlatformController::class);
-        Route::resource('lead-sources', \App\Http\Controllers\Admin\LeadSourceController::class);
-        // Marketing Budgets export/print routes
-        Route::get('marketing-budgets/export/{type}', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'export'])->name('marketing-budgets.export');
-        Route::get('marketing-budgets/print-all', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printAll'])->name('marketing-budgets.printAll');
-        Route::get('marketing-budgets/print-current', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printCurrent'])->name('marketing-budgets.printCurrent');
-        Route::get('marketing-budgets/{marketing_budget}/print', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printSingle'])->name('marketing-budgets.printSingle');
-        Route::resource('marketing-budgets', \App\Http\Controllers\Admin\MarketingBudgetController::class);
-        Route::resource('campaign-contents', \App\Http\Controllers\Admin\CampaignContentController::class);
-        // Marketing Tasks print routes
-        Route::get('marketing-tasks/print-all', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printAll'])->name('marketing-tasks.printAll');
-        Route::get('marketing-tasks/print-current', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printCurrent'])->name('marketing-tasks.printCurrent');
-        Route::resource('marketing-tasks', \App\Http\Controllers\Admin\MarketingTaskController::class);
-
-        // Analytics (Marketing)
-        Route::prefix('marketing-analytics')->name('marketing-analytics.')->group(function () {
-            Route::get('dashboard-data', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'dashboardData'])->name('dashboard-data');
-            Route::get('campaign-performance', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'campaignPerformance'])->name('campaign-performance');
-            Route::get('traffic-source-distribution', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'trafficSourceDistribution'])->name('traffic-source-distribution');
-            Route::get('conversion-funnel', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'conversionFunnel'])->name('conversion-funnel');
-            Route::get('generate-report', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'generateReport'])->name('generate-report');
-            Route::get('budget-pacing', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'budgetPacing'])->name('budget-pacing');
-            Route::get('staff-performance', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'staffPerformance'])->name('staff-performance');
-            Route::get('task-sla', [\App\Http\Controllers\Admin\MarketingAnalyticsController::class, 'taskSla'])->name('task-sla');
-        });
-
-        // Additional Admin actions (Marketing)
-        Route::put('marketing-platforms/{marketing_platform}/toggle-status', [\App\Http\Controllers\Admin\MarketingPlatformController::class, 'toggleStatus'])->name('marketing-platforms.toggle-status');
-        Route::put('lead-sources/{lead_source}/toggle-status', [\App\Http\Controllers\Admin\LeadSourceController::class, 'toggleStatus'])->name('lead-sources.toggle-status');
     });
 
 // Accountant/Payment Reconciliation
@@ -863,7 +877,6 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
         Route::resource('marketing-campaigns', \App\Http\Controllers\Staff\MarketingCampaignController::class)->only(['index', 'show', 'edit', 'update']);
         Route::resource('marketing-leads', \App\Http\Controllers\Staff\MarketingLeadController::class)->only(['index', 'show', 'edit', 'update']);
         Route::resource('marketing-tasks', \App\Http\Controllers\Staff\MarketingTaskController::class)->only(['index', 'show', 'edit', 'update']);
-
         // My Availability
         Route::get('my-availability', [MyAvailabilityController::class, 'index'])
             ->name('my-availability.index');

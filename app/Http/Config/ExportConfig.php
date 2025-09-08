@@ -3753,4 +3753,60 @@ class ExportConfig
             ],
         ];
     }
+
+    /**
+     * Get export configuration for StaffPayout model
+     */
+    public static function getStaffPayoutConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'index', 'label' => '#'],
+            ['key' => 'staff.full_name', 'label' => 'Staff'],
+            ['key' => 'total_amount', 'label' => 'Total Amount'],
+            ['key' => 'payout_date', 'label' => 'Payout Date'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'notes', 'label' => 'Notes'],
+        ];
+
+        return [
+            'csv' => [
+                'headers' => ['Staff', 'Total Amount', 'Payout Date', 'Status', 'Notes'],
+                'fields' => ['staff.full_name', 'total_amount', 'payout_date', 'status', 'notes'],
+                'filename_prefix' => 'staff_payouts',
+                'with_relations' => ['staff'],
+            ],
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Staff Payouts',
+                'filename_prefix' => 'staff_payouts',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+                'with_relations' => ['staff'],
+            ],
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Staff Payouts (All Records)',
+                'filename_prefix' => 'staff_payouts',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'columns' => $pdfColumns,
+                'with_relations' => ['staff'],
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Staff Payouts (Current View)',
+                'filename_prefix' => 'staff_payouts_current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'columns' => $pdfColumns,
+                'with_relations' => ['staff'],
+            ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Staff Payout',
+                'filename_prefix' => 'staff_payout',
+                'with_relations' => ['staff'],
+            ],
+        ];
+    }
 }

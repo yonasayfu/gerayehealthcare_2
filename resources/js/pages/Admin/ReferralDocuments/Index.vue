@@ -130,12 +130,12 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
 import { confirmDialog } from '@/lib/confirm'
-import { ref, watch } from 'vue'
-import debounce from 'lodash/debounce'
+import { ref } from 'vue'
 import { Edit3, Trash2, Eye, Printer, ArrowUpDown } from 'lucide-vue-next'
 import Pagination from '@/components/Pagination.vue'
 import { useExport } from '@/composables/useExport'
 import { useClinicInfo } from '@/composables/useClinicInfo'
+import { useTableFilters } from '@/composables/useTableFilters'
 
 const props = defineProps({
   referralDocuments: Object,
@@ -152,35 +152,16 @@ const { getClinicName, getClinicLogo, getPrintFooterText } = useClinicInfo()
 
 const form = useForm({})
 
-// Filters
-const search = ref(props.filters?.search || '')
-const sortField = ref(props.filters?.sort || '')
-const sortDirection = ref(props.filters?.direction || 'desc')
-const perPage = ref(props.filters?.per_page || 5)
-
-// Watch filters with debounce
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params = {
-    search: search.value,
-    per_page: perPage.value,
-    direction: sortDirection.value,
+// Filters via composable
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.referral-documents.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction ?? 'desc',
+    per_page: props.filters?.per_page ?? 5,
   }
-  if (sortField.value) params.sort = sortField.value
-
-  router.get(route('admin.referral-documents.index'), params, {
-    preserveState: true,
-    replace: true,
-  })
-}, 400))
-
-function toggleSort(field) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+})
 
 const deleteDocument = async (id) => {
   const ok = await confirmDialog({

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue' // Import 'computed'
+import { Head, Link } from '@inertiajs/vue3'
+import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns' // Keep this import
+import { useTableFilters } from '@/composables/useTableFilters'
+import { useExport } from '@/composables/useExport'
 
 import type { PatientPagination } from '@/types/index.d.ts';
 
@@ -24,11 +25,16 @@ const breadcrumbs = [
   { title: 'Patients', href: route('admin.patients.index') },
 ]
 
-// Fix: Use optional chaining and provide defaults
-const search = ref(props.filters?.search || '')
-const sortField = ref(props.filters?.sort || '')
-const sortDirection = ref(props.filters?.direction || 'asc')
-const perPage = ref(props.filters?.per_page || 5)
+// Centralized search/sort/perPage handling with URL param sync
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.patients.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.patients?.per_page ?? 5,
+  },
+})
 
 // Create a computed property for the formatted date string
 const formattedGeneratedDate = computed(() => {
@@ -43,24 +49,6 @@ const currentDate = computed(() => {
 const currentIndex = computed(() => {
   return (props.patients.current_page - 1) * props.patients.per_page;
 });
-// Trigger search, sort, pagination
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  };
-
-  // Only add sort parameter if sortField.value is not an empty string
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-
-  router.get(route('admin.patients.index'), params, {
-    preserveState: true,
-    replace: true,
-  })
-}, 500))
 
 // Delete confirmation modal state
 const showConfirm = ref(false)
@@ -86,31 +74,10 @@ function proceedDelete() {
   })
 }
 
-function exportData(type: 'csv', preview: boolean = false) {
-  const params: Record<string, string | boolean> = { type };
-  if (preview) {
-    params.preview = true;
-  }
-  window.open(route('admin.patients.export', params), '_blank');
-}
+const { exportData, printCurrentView, printAllRecords: printAllPatients } = useExport({ routeName: 'admin.patients', filters: props.filters || {} })
 
-function printCurrentView() {
-  // Use server-side PDF for consistent header/footer
-  window.open(route('admin.patients.printCurrent', { preview: true }), '_blank')
-}
-
-const printAllPatients = () => {
-    window.open(route('admin.patients.printAll', { preview: true }), '_blank');
-};
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+// Expose sort toggler for headers
+function onToggleSort(field: string) { toggleSort(field) }
 
 </script>
 
@@ -195,25 +162,25 @@ function toggleSort(field: string) {
           <thead class="bg-gray-100 dark:bg-gray-700 text-xs uppercase text-gray-600 dark:text-gray-300 print-table-header">
             <tr>
               <th class="px-6 py-3">#</th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('full_name')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('full_name')">
                 Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('patient_code')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('patient_code')">
                 Patient Code <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('fayda_id')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('fayda_id')">
                 Fayda ID <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('date_of_birth')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('date_of_birth')">
                 Age <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gender')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('gender')">
                 Gender <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('phone_number')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('phone_number')">
                 Phone <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('source')">
+              <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('source')">
                 Source <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>

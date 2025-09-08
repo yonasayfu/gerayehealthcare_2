@@ -86,10 +86,16 @@ watch([search, sortField, sortDirection, perPage, campaignId, assignedToStaffId,
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing task?')) {
-    router.delete(route('admin.marketing-tasks.destroy', id))
-  }
+import { confirmDialog } from '@/lib/confirm'
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Task',
+    message: 'Are you sure you want to delete this marketing task?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-tasks.destroy', id))
 }
 
 function printCurrentView() {

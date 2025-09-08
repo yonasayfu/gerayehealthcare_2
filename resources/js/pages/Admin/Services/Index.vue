@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
 import { Plus, Edit3, Trash2, Eye } from 'lucide-vue-next';
 import type { BreadcrumbItemType } from '@/types';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { confirmDialog } from '@/lib/confirm'
-import debounce from 'lodash/debounce';
+import { useTableFilters } from '@/composables/useTableFilters'
 
 const props = defineProps<{
   services: {
@@ -36,16 +36,13 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Services', href: route('admin.services.index') },
 ];
 
-// Fix: Use optional chaining and provide defaults
-const search = ref(props.filters?.search || '');
-const perPage = ref(props.filters?.per_page || props.services?.meta?.per_page || 5);
-
-watch([search, perPage], debounce(([searchValue, perPageValue]) => {
-    router.get(route('admin.services.index'), { search: searchValue, per_page: perPageValue }, {
-        preserveState: true,
-        replace: true,
-    });
-}, 300));
+const { search, perPage } = useTableFilters({
+  routeName: 'admin.services.index',
+  initial: {
+    search: props.filters?.search,
+    per_page: props.filters?.per_page ?? props.services?.meta?.per_page ?? 5,
+  }
+})
 
 const destroy = async (id: number, name: string) => {
   const ok = await confirmDialog({

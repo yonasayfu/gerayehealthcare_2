@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { confirmDialog } from '@/lib/confirm'
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { useTableFilters } from '@/composables/useTableFilters'
+import { useExport } from '@/composables/useExport'
 
 const props = defineProps({
     events: Object,
@@ -18,31 +19,21 @@ const breadcrumbs = [
     { title: 'Events', href: route('admin.events.index') },
 ];
 
-const search = ref(props.filters.search || '');
-const sortField = ref(props.filters.sort || '');
-const sortDirection = ref(props.filters.direction || 'asc');
-const perPage = ref(props.filters.per_page || 5);
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.events.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.events?.per_page ?? 5,
+  },
+})
 
 const formattedGeneratedDate = computed(() => {
     return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-    const params = {
-        search: search.value,
-        direction: sortDirection.value,
-        per_page: perPage.value,
-    };
-
-    if (sortField.value) {
-        params.sort = sortField.value;
-    }
-
-    router.get(route('admin.events.index'), params, {
-        preserveState: true,
-        replace: true,
-    });
-}, 500));
+// URL param sync handled by composable
 
 async function destroy(id) {
     const ok = await confirmDialog({
@@ -55,25 +46,11 @@ async function destroy(id) {
     router.delete(route('admin.events.destroy', id))
 }
 
-function exportData(type) {
-    // Only CSV is supported for Events export
-    if (type !== 'csv') return;
-    window.open(route('admin.events.export', { type: 'csv' }), '_blank');
-}
+const { exportData, printCurrentView } = useExport({ routeName: 'admin.events', filters: props.filters || {} })
 
-function printCurrentView() {
-    // Use browser print to print current view
-    window.print();
-}
+// printCurrentView provided by useExport
 
-function toggleSort(field) {
-    if (sortField.value === field) {
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortField.value = field;
-        sortDirection.value = 'asc';
-    }
-}
+function onToggleSort(field: string) { toggleSort(field) }
 </script>
 
 <template>
@@ -147,19 +124,19 @@ function toggleSort(field) {
                 <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
                     <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
                         <tr>
-                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('title')">
+                            <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('title')">
                                 Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3">
                                 Description
                             </th>
-                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('event_date')">
+                            <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('event_date')">
                                 Event Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3">
                                 Free Service
                             </th>
-                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('broadcast_status')">
+                            <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('broadcast_status')">
                                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 text-right print:hidden">Actions</th>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Printer, ArrowUpDown, Eye, Edit3, Trash2, Search, Plus } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 import { useExport } from '@/composables/useExport'
 import ConfirmModal from '@/components/ConfirmModal.vue'
+import { useTableFilters } from '@/composables/useTableFilters'
 ....
   search?: string
   sort?: string
@@ -40,37 +40,21 @@ const props = defineProps<{
   filters: PrescriptionFilters
 }>()
 
-const search = ref(props.filters.search || '')
-const sortField = ref(props.filters.sort || '')
-const sortDirection = ref(props.filters.direction || 'asc')
-const perPage = ref(props.filters.per_page || 5)
+const { search, perPage, toggleSort } = useTableFilters({
+  routeName: 'admin.prescriptions.index',
+  initial: {
+    search: props.filters?.search,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction,
+    per_page: props.filters?.per_page ?? props.prescriptions?.per_page ?? 5,
+  }
+})
 
 const { exportData } = useExport({ routeName: 'admin.prescriptions', filters: props.filters })
 
 const formattedGeneratedDate = computed(() => format(new Date(), 'PPP p'))
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-  }
-  if (sortField.value) params.sort = sortField.value
-
-  router.get(route('admin.prescriptions.index'), params, {
-    preserveState: true,
-    replace: true,
-  })
-}, 500))
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+// URL updates handled by composable
 
 // Delete confirmation state & handlers
 const showConfirm = ref(false)
