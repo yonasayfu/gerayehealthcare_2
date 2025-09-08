@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import FormActions from '@/components/FormActions.vue'
 
 const props = defineProps({
     events: Array,
@@ -116,13 +117,13 @@ const breadcrumbs = [
             </div>
           </div>
 
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.event-recommendations.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
-              {{ form.processing ? 'Creating...' : 'Create Event Recommendation' }}
-            </button>
-          </div>
+          <!-- Footer actions -->
+          <FormActions
+            :cancel-href="route('admin.event-recommendations.index')"
+            cancel-text="Cancel"
+            submit-text="Create Event Recommendation"
+            :processing="form.processing"
+          />
         </form>
       </div>
     </div>

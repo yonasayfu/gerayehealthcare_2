@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import FormActions from '@/components/FormActions.vue'
 
 const props = defineProps({
     events: Array,
@@ -98,14 +99,12 @@ const breadcrumbs = [
 
           <p v-if="isDuplicate" class="text-amber-600 text-sm">Warning: This staff is already assigned to the selected event.</p>
 
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.event-staff-assignments.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-
-            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
-              {{ form.processing ? 'Creating...' : 'Create Event Staff Assignment' }}
-            </button>
-          </div>
+          <FormActions
+            :cancel-href="route('admin.event-staff-assignments.index')"
+            cancel-text="Cancel"
+            submit-text="Create Event Staff Assignment"
+            :processing="form.processing"
+          />
         </form>
       </div>
     </div>

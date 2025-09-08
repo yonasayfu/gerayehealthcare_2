@@ -1,4 +1,5 @@
 <script setup>
+import FormActions from '@/components/FormActions.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 
@@ -85,13 +86,12 @@ const breadcrumbs = [
             </div>
           </div>
 
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.event-broadcasts.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
-              {{ form.processing ? 'Creating...' : 'Create Event Broadcast' }}
-            </button>
-          </div>
+          <FormActions
+            :cancel-href="route('admin.event-broadcasts.index')"
+            cancel-text="Cancel"
+            submit-text="Create Event Broadcast"
+            :processing="form.processing"
+          />
         </form>
       </div>
     </div>

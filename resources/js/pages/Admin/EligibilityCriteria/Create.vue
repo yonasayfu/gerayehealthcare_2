@@ -1,4 +1,5 @@
 <script setup>
+import FormActions from '@/components/FormActions.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 
@@ -78,13 +79,12 @@ const breadcrumbs = [
             </div>
           </div>
 
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.eligibility-criteria.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-            <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
-              {{ form.processing ? 'Creating...' : 'Create Eligibility Criteria' }}
-            </button>
-          </div>
+          <FormActions
+            :cancel-href="route('admin.eligibility-criteria.index')"
+            cancel-text="Cancel"
+            submit-text="Create Eligibility Criteria"
+            :processing="form.processing"
+          />
         </form>
       </div>
     </div>
