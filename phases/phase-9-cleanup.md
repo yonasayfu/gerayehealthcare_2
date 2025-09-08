@@ -8,7 +8,7 @@ Remove dead code and centralize duplicated components.
 
 - [ ] **Delete unused components** (prio:P2)  
   *Task:* Remove components with no references (e.g., `MarketingAnalyticsDashboard.vue` if unused).  
-  *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/MarketingAnalyticsDashboard.vue`
+  *Ref:* `/Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/MarketingAnalyticsDashboard.vue` if this is not used....
 
 - [ ] **Centralize `/components/print`** (prio:P1)  
   *Task:* Use one print UI; remove per-module `printCurrent.vue` / `printAll.vue`.  

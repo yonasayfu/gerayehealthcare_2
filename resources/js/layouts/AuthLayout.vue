@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import AuthSimpleLayout from '@/layouts/auth/AuthSimpleLayout.vue'
 import AuthCardLayout from '@/layouts/auth/AuthCardLayout.vue'
 import AuthSplitLayout from '@/layouts/auth/AuthSplitLayout.vue'
+import AuthGlassLayout from '@/layouts/auth/AuthGlassLayout.vue'
 
 const props = withDefaults(defineProps<{
   title?: string;
@@ -13,19 +14,21 @@ const props = withDefaults(defineProps<{
    * - 'card'
    * - 'split'
    */
-  variant?: 'simple' | 'card' | 'split'
+  variant?: 'glass' | 'simple' | 'card' | 'split'
 }>(), {
-  variant: 'simple'
+  variant: 'glass'
 })
 
 const ResolvedLayout = computed(() => {
   switch (props.variant) {
+    case 'glass':
+      return AuthGlassLayout
     case 'card':
       return AuthCardLayout
     case 'split':
       return AuthSplitLayout
     default:
-      return AuthSimpleLayout
+      return AuthGlassLayout
   }
 })
 </script>
