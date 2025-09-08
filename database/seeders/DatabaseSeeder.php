@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
 
             // Clinical & prescriptions
             MedicalRecordsSeeder::class,
+            PrescriptionSeeder::class,
 
             // Services
             ServiceSeeder::class,
@@ -33,7 +34,9 @@ class DatabaseSeeder extends Seeder
             InventorySeeder::class,
             InventoryAlertSeeder::class,
             InventoryRequestSeeder::class,
-            StaffAvailabilitySeeder::class,
+            InventoryMaintenanceRecordSeeder::class,
+            InventoryTransactionsSeeder::class,
+            CaregiverAssignmentSeeder::class,
 
             // Partners & referrals
             PartnerSeeder::class,
@@ -50,6 +53,12 @@ class DatabaseSeeder extends Seeder
 
             // Marketing
             MarketingDemoSeeder::class,
+            CampaignContentSeeder::class,
+
+            // Events
+            EventModuleSeeder::class,
+            EventBroadcastSeeder::class,
+            EligibilityCriteriaSeeder::class,
 
             // Messaging / Dashboard samples
             DashboardDataSeeder::class,

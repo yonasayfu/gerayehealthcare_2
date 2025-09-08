@@ -8,7 +8,8 @@ import { format } from 'date-fns'
 import { useExport } from '@/composables/useExport'
 import ConfirmModal from '@/components/ConfirmModal.vue'
 import { useTableFilters } from '@/composables/useTableFilters'
-....
+
+interface PrescriptionFilters {
   search?: string
   sort?: string
   direction?: 'asc' | 'desc'
