@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ShowHeader from '@/components/ShowHeader.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
