@@ -98,7 +98,8 @@ class SharedInvoiceController extends Controller
             $dto = new CreateSharedInvoiceDTO(
                 invoice_id: $request->input('invoice_id'),
                 partner_id: $request->input('partner_id'),
-                shared_by_staff_id: auth()->id(), // Assuming authenticated staff
+                // Use staff id if available; otherwise null
+                shared_by_staff_id: optional(auth()->user()->staff)->id,
                 share_date: $request->input('share_date'),
                 status: $request->input('status'),
                 notes: $request->input('notes')

@@ -31,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure_staff_linked' => \App\Http\Middleware\EnsureStaffLinked::class,
             'custom_role' => \App\Http\Middleware\RoleMiddleware::class,
             'custom_permission' => \App\Http\Middleware\PermissionMiddleware::class,
+            'deny_roles' => \App\Http\Middleware\DenyRoles::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

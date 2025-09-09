@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Base\BaseController;
+use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-class NewPasswordController extends BaseController
+class NewPasswordController extends Controller
 {
     /**
      * Show the password reset page.
@@ -43,12 +44,7 @@ class NewPasswordController extends BaseController
             // will update the password on an actual user model and persist it to the
             // database. Otherwise we will parse the error and return the response.
             $status = Password::reset(
-                [
-                    'email' => $validated['email'],
-                    'password' => $validated['password'],
-                    'password_confirmation' => $validated['password_confirmation'],
-                    'token' => $validated['token'],
-                ],
+                $request->only('email', 'password', 'password_confirmation', 'token'),
                 function ($user) use ($validated) {
                     $user->forceFill([
                         'password' => Hash::make($validated['password']),
@@ -70,6 +66,9 @@ class NewPasswordController extends BaseController
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors());
         } catch (\Exception $e) {
+            Log::error('Password reset failed', [
+                'error' => $e->getMessage(),
+            ]);
             return back()->withErrors(['email' => [__('An unexpected error occurred. Please try again.')]]);
         }
     }

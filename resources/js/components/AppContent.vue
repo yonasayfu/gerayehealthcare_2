@@ -23,7 +23,7 @@ const className = computed(() => props.class);
           This ensures the page content is correctly contained within the responsive
           area provided by SidebarInset, preventing overflow.
         -->
-        <main class="flex-1 flex flex-col overflow-y-auto">
+        <main class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden min-w-0">
             <slot />
         </main>
     </SidebarInset>

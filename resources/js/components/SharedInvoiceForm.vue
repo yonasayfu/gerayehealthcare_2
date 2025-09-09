@@ -8,7 +8,7 @@
                     <select
                         id="invoice_id"
                         v-model="form.invoice_id"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        class="mt-1 block w-full shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5 bg-white dark:bg-gray-800"
                         required
                     >
                         <option value="" disabled>Select an Invoice</option>
@@ -25,7 +25,7 @@
                     <select
                         id="partner_id"
                         v-model="form.partner_id"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        class="mt-1 block w-full shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5 bg-white dark:bg-gray-800"
                         required
                     >
                         <option value="" disabled>Select a Partner</option>
@@ -43,7 +43,7 @@
                         id="share_date"
                         v-model="form.share_date"
                         type="date"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        class="mt-1 block w-full shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5 bg-white dark:bg-gray-800"
                         required
                     />
                     <InputError class="mt-2" :message="form.errors.share_date" />
@@ -55,7 +55,7 @@
                     <select
                         id="status"
                         v-model="form.status"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        class="mt-1 block w-full shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5 bg-white dark:bg-gray-800"
                         required
                     >
                         <option value="Shared">Shared</option>
@@ -71,7 +71,7 @@
                     <textarea
                         id="notes"
                         v-model="form.notes"
-                        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        class="mt-1 block w-full shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5 bg-white dark:bg-gray-800"
                     ></textarea>
                     <InputError class="mt-2" :message="form.errors.notes" />
                 </div>

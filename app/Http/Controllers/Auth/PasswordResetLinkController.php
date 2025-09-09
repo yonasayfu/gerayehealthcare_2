@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Base\BaseController;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
 
-class PasswordResetLinkController extends BaseController
+class PasswordResetLinkController extends Controller
 {
     /**
      * Show the password reset link request page.

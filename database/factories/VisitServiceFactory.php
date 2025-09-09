@@ -7,6 +7,7 @@ use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\VisitService>
@@ -36,6 +37,22 @@ class VisitServiceFactory extends Factory
             $serviceId = $service->id;
         }
 
+        // Optional geolocation within Ethiopia (approx bounds)
+        $lat = $this->faker->optional(0.7)->randomFloat(6, 3.0, 14.0);
+        $lng = $this->faker->optional(0.7)->randomFloat(6, 33.0, 48.0);
+
+        // Optionally create small placeholder files so generated URLs work in dev
+        $prescriptionPath = null;
+        if ($this->faker->boolean(20)) {
+            $prescriptionPath = 'visits/prescriptions/'.$this->faker->uuid.'.txt';
+            try { Storage::disk('public')->put($prescriptionPath, "Sample prescription file for demo."); } catch (\Throwable $e) {}
+        }
+        $vitalsPath = null;
+        if ($this->faker->boolean(20)) {
+            $vitalsPath = 'visits/vitals/'.$this->faker->uuid.'.txt';
+            try { Storage::disk('public')->put($vitalsPath, "Sample vitals file for demo."); } catch (\Throwable $e) {}
+        }
+
         return [
             'patient_id' => Patient::factory(),
             'staff_id' => Staff::factory(),
@@ -53,6 +70,10 @@ class VisitServiceFactory extends Factory
             ]),
             'cost' => $this->faker->randomFloat(2, 200, 2000),
             'status' => $this->faker->randomElement(['Pending', 'Completed', 'Cancelled']),
+            'check_in_latitude' => $lat,
+            'check_in_longitude' => $lng,
+            'prescription_file' => $prescriptionPath,
+            'vitals_file' => $vitalsPath,
         ];
     }
 }

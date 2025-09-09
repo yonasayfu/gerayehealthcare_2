@@ -10,6 +10,10 @@ class UpdateVisitServiceDTO
         public ?string $scheduled_at,
         public ?string $check_in_time,
         public ?string $check_out_time,
+        public ?float $check_in_latitude,
+        public ?float $check_in_longitude,
+        public ?float $check_out_latitude,
+        public ?float $check_out_longitude,
         public ?string $visit_notes,
         public ?string $service_description,
         public ?\Illuminate\Http\UploadedFile $prescription_file,
@@ -20,6 +24,7 @@ class UpdateVisitServiceDTO
         public ?bool $is_invoiced,
         public ?int $service_id,
         public ?int $assignment_id,
-        public ?int $event_id
+        public ?int $event_id,
+        public ?string $time_change_reason = null
     ) {}
 }

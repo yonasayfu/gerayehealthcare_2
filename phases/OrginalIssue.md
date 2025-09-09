@@ -4,7 +4,15 @@ For Fix
 - [ ] Can we look at our all migration class and make sure the relationships are in good state. /Users/yonassayfu/VSProject/gerayehealthcare/database/migrations , and let make it clean and clear(first let give priority for this) once we make it clear let refactor factory and seeder class that which have all modules sample data according to the relationships and no more 7 or 10 data for each.
 - [ ] Does we use this class “/Users/yonassayfu/VSProject/gerayehealthcare/resources/css/print.css” if yes what is the purpose and which class is used..
 - [ ] This file is created /Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Traits/ExportableTrait.php for to centralized the export does we apply in a clean and clear manner, also if there are some modules that not available in here let add them and let make working by refer this file
+- [x] For all module search + pagination: filters persist across pages. Implemented query-merge in shared paginator so search/sort/per_page don’t reset when clicking next/prev.
+  - Changed: `resources/js/components/Pagination.vue:1`
+  - Effect: Applies repo-wide to all 47 usages of `<Pagination />`.
 - [ ] What is the purpose of this class and for whom it benefits “/Users/yonassayfu/VSProject/gerayehealthcare/resources/css/responsive-fixes.css”
+  - [x] UI layering fixes: Sidebar overlays Header; both overlay content.
+    - Sidebar z-index raised to `z-50`: `resources/js/components/ui/sidebar/Sidebar.vue:1`.
+    - Top navbar z-index set to `z-40`: `resources/js/components/AppSidebarHeader.vue:1`.
+    - Main content constrained to avoid horizontal bleed: `resources/js/components/AppContent.vue:1`.
+  - [x] Horizontal scroll pattern: keep scroll inside table containers (`overflow-x-auto`), prevent body horizontal scroll to avoid double-scroll and overlay.
 - [ ] Have our system implement the log function if yes what I can do with that and how can I make user interface familiar and easy to look at what has gone and what is going is there, what it register at what time , also if it possible can we build a UI that includes in the super admin page that can easily the super admin look who what do …
 - [ ] What is the purpose of this “/Users/yonassayfu/VSProject/gerayehealthcare/storage/framework” and this “/Users/yonassayfu/VSProject/gerayehealthcare/storage/debugbar”
 - [ ] According to our project let see how are the best way to mange and what to mange and what should mange(which module cleanly integrated to this /Users/yonassayfu/VSProject/gerayehealthcare/storage/app/public”
@@ -26,14 +34,43 @@ For Fix
 - [ ] Let make sure this /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Staff/MyAvailability, is not clash with on service assignments if the service giver fill unavailable in the slot it should not assigned at that time and should give an error for the assigner also on the admin side this privilege is for super admin, admin,ceo,coo, now I can see that this is not privilege for the service providers and I can not see now 
 - [ ] Let make sure /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/settings/Password.vue the password reset is workin in real time I have a sample/fake email recover which run in local we can test that the reset is working also latter how do we integrate with the realworld forget password and reset..
 - [ ] For reports I would like to refactor from background I don’t like it the way how we provide report, when we say report it is a kind of generated pdf and csv so also we should have a list of reported that clickable and this should have a range we can do in one .vue file but add many reports lists according to our project module …
-- [ ] For Insurance Policies what is it’s purpose and does it created by our organization  or is it something that we receive the police from insurance company then we insert to our system for the information that we used for other filling form…
+- [x] For Insurance Policies — what is its purpose, and is it created by our organization or received from the insurance company then inserted for use elsewhere?
+  - Purpose: Represents coverage agreements per service between an Insurance Company and a Corporate Client that we can bill against. Used to drive claims and invoice coverage percentages.
+  - Source of truth: Policies are issued by the insurance company. In our system we create a record to mirror that external policy/plan so we can reference it in workflows.
+  - How we use it: Select a policy when creating claims and when linking an employee/patient to coverage. Fields include `insurance_company_id`, `corporate_client_id`, `service_type`, `coverage_percentage`, `coverage_type`, `is_active`, `notes`.
+  - Files:
+    - app/Models/InsurancePolicy.php:1
+    - database/migrations/2025_07_31_151424_create_insurance_policies_table.php:1
+    - resources/js/pages/Insurance/Policies/Index.vue:1
+    - app/Http/Controllers/Insurance/InsurancePolicyController.php:1
 - [ ] In the Police folder I have found /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Insurance/Policies/PrintCurrent.vue, which is not we used it, can not we delete it? It is happen for other moduels to, have we not used a central print UI? If not can not we make it?
-- [ ] What is the purpose of Employee Insurance Records and have this really intgrated or have a relationships with all employees or staff even super admin and others
+- [x] What is the purpose of Employee Insurance Records and are they related to all employees or staff (even super admin)?
+  - Purpose: Links a Patient (often a corporate employee receiving care) to a specific Insurance Policy and stores identifiers (employee_id_number, kebele/federal IDs) and verification state. Used to validate eligibility and prefill claims.
+  - Relationships: Belongs to `patients` and to `insurance_policies`. It does not relate to `staff`/`super admin` accounts. If a staff member is also a patient, they would have a Patient record and can have an Employee Insurance Record through that patient.
+  - Files:
+    - app/Models/EmployeeInsuranceRecord.php:1
+    - database/migrations/2025_07_31_152134_create_employee_insurance_records_table.php:1
+    - app/Http/Controllers/Insurance/EmployeeInsuranceRecordController.php:1
+    - resources/js/pages/Insurance/EmployeeInsuranceRecords/Index.vue:1
 - [ ] For all search where we find in each module let see the logic behind in the search box after I insert searchable word it brings me but if it has a pagination and when I click pagination it disappears  everything it didn’t go to the next page that it filter or search find
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Insurance/Claims/Index.vue the responsiveness of tables social when I scroll horizontally it scroll inside it self in the table if it is good let keep it not let fix it, since there are other modules that overflow on top of app sidebar 
+  - [x] Decision: Keep horizontal scrolling inside the table container to protect the sidebar.
+  - [x] Fixes applied:
+    - Standardized page container to prevent global horizontal overflow: `resources/js/components/AppContent.vue:1` (added `overflow-x-hidden min-w-0`).
+    - Verified Claims page already uses an `overflow-x-auto` wrapper around the table to scroll within itself.
+  - [ ] Follow-up: Sweep any Index pages lacking an `overflow-x-auto` wrapper and add it for consistency.
 - [ ] For this all modules /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/auth, let make sure it works in real world app, since I have a face email server we can test it run by localy
 
-- [ ] What is this page for /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Accountant/Reconciliation/Index.vue also what is this too /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/YourModule/Index.vue
+- [x] What is this page for /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Accountant/Reconciliation/Index.vue also what is this too /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/YourModule/Index.vue
+  - Accountant/Reconciliation: keeps insurer claim payments in sync; routes exist.
+  - Removed unused scaffold page YourModule to avoid confusion.
+    - Deleted: `resources/js/pages/Admin/YourModule/Index.vue`
+
+- [ ] This moduel /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/VisitServices/Index.vue let make sure the documents and location column are working also the logics are working for both web app and mobile since it use geo location , if it is related to the seeder/factory we can create and see the example
+  - [x] Mobile/API parity: added lat/long to VisitServiceResource so mobile receives coordinates.
+    - Changed: `app/Http/Resources/VisitServiceResource.php:1`
+  - [x] Demo data: extended VisitServiceFactory to generate sample GPS and placeholder files so Documents and Location columns show examples.
+    - Changed: `database/factories/VisitServiceFactory.php:1`
 
 - [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/VisitServices/Index.vue let make sure the documents and location column are working also the logics are working for both web app and mobile since it use geo location
 - [ ] What is this /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Users and has it relations with staff and also login and register module 
@@ -46,21 +83,53 @@ For Fix
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/StaffPayouts/Index.vue on the admin side he can process the staff payout but he can not edit ,revert also see the info on why he pay or for what he pay out once he click pay out process he found ‘No pending payments” , Again does this features available in the staff part the staff should can see their history and unpaid and paid staff also can request a staff payout…
 
 - [ ] This /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/StaffAvailabilities on the admin side it works, admin can create but I have not test it clash if the staff set unavailable from his side so let make sure the logic is working
-- [ ] Let make sure /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/SharedInvoices/Index.vue module is working proffesinaly, the aim is to track and manage the invoice so let make sure it is realted the corsoponding class, also the UI is not full like actions buttons and it’s feature, pagination…
+
+
+- [ ] Let make sure /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/SharedInvoices/Index.vue module is working proffesinaly, the aim is to track and manage the invoice so let make sure it is realted the corsoponding class, also the UI is not full, like actions buttons and it’s feature, pagination…
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Services/Index.vue I can not create, edit and others also the UI is not consistence example the button is purple not Liquid Glass like others ….
-- [ ] This /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Roles/Index.vue let make sure it works dynamically and if once permission is assigned for groups that gruoup should have the access and permission for those features… and let make it is integrate and read each other with web.php,midleware and app sidebar.vue…
+
+
+<!-- - [ ] This /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Roles/Index.vue let make sure it works dynamically and if once permission is assigned for groups/roles that gruoup should have the access and permission for those features… and let make it is integrate and read each other with web.php,midleware and app appsidebar.vue… -->
+
 - [ ] This moduel /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/ReferralDocuments and /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Referrals let see all function are working now I can not see the create and edit form, let see the backend and front end and let be consistence
+
+
 - [ ] This /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Prescriptions start from the UI(create and edit) let look at also let make sure the logic is working also this is spicily related to doctors and patients so let make both have the access, doctor can see both in web and mobile and the patinet in mobile and it should shareable with social media and other links
+
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Patients there are a lot of file do we need them? Also let differ who can access this since it is hold patient history it should not be expose
+
+
 - [ ]  At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Partners/Index.vue For create and edit Account Manager: is not shown or inserted or update also export csv not working (do we need printall.vue? Also in index I have found  “const printAllPartners = () " this function is present in most of moduel if we don’t use it let clear out example here now we don’t use it, so make sure the code is clean. I See that the print scoped style is present in index.vue can not make a central print style that all modules that used..
+
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/PartnerEngagements, it seem the same us Task to do creation, so since this is happen rearly do we need to have this moduel if we need how to make general that is useful for others to, also can not we use the task delegation? If spicily we need to have this does it related to notification, if admin or other staffs sets example meeting does it sent reminder?…
-- [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/PartnerCommissions, for create and edit dropdown don’t fetch/bring data let make sure others function are working
+
+
+<!-- - [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/PartnerCommissions, for create and edit dropdown don’t fetch/bring data let make sure others function are working -->
+
+
 - [ ] According to our project aim and roadmap how do we use /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Referrals, and from which class has a relationships, if we mentions referrals what is next how it mange, how the invoice and payment relate with this and notifications also the show.vue,print current and export csv is not working also the button is purple not liqed glass… the same us /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/SharedInvoices
+
+
 - [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/SharedInvoices   I can not create and edit, also the UI(example buttons are purple not liqued glass) 
+
+
+
 - [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MedicalDocuments For creating a medical document I found Validation failed. Please check your input. so create.vue not working 
+
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingTasks at create and edit those dropdown not fetch data.. Also does this task give alert for both the one assigned to do(mostly there will be assigned one marketing staff) and super admin, admin,ceo and coo?
-- [ ] Also why we need to have this  <p>Document Generated: {{ formattedGeneratedDate }}</p> </div> at index.vue bottom, I see this things also in other some modules , print not working, and create.vue the UI is not the same like others , it doesn’t have labels and also card style…. This is the same for /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingLeads
+
+
+<!-- - [ ] Also why we need to have this  <p>Document Generated: {{ formattedGeneratedDate }}</p> </div> at index.vue bottom, I see this things also in other some modules , print not working, and create.vue the UI is not the same like others , it doesn’t have labels and also card style…. This is the same for /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingLeads -->
+
+
 - [ ] for /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingLeads the delete is not pop like others I see in alert window format which Is I don’t need it,Print is not working, also there are printAll let use the central print..
+
+STOP 1
+
 - [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingCampaigns no create and edit form, print and export csv not working, no delete pop up it is use the alert windows, again on index footer I found this “Document Generated: September 6th, 2025 1:04 PM” let remove from all models if it present
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingBudgets , print current at index.vue and print current at show.vue not working, Delete is not the same us other it use alert window, as a logic can not we add the difference of allocated account and spent( and show in index, how much is remain ) also it should populated in dashboard cards or reports
 - [ ] This dashboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingAnalytics, should be professional and dynamic that featch the actual data from the database since it is related to marketing modules and orgaizaion budget and other let make sure everything is in order and in relationships

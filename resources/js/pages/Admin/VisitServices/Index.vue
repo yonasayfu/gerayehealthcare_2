@@ -69,13 +69,9 @@ async function destroy(id: number) {
   router.delete(route('admin.visit-services.destroy', id))
 }
 
-const { exportData, printCurrentView } = useExport({ routeName: 'admin.visit-services', filters: props.filters || {} })
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.visit-services', filters: props.filters || {} })
 
-// printCurrentView provided by useExport
-
-const printAllVisitServices = () => {
-  window.open(route('admin.visit-services.printAll', { preview: true }), '_blank');
-};
+// printCurrentView and printAllRecords provided by useExport
 
 function onToggleSort(field: string) { toggleSort(field) }
 
@@ -116,7 +112,7 @@ const formatDate = (dateString: string | null) => {
             <Link :href="route('admin.visit-services.create')" class="btn-glass">
               <span>Add Visit Service</span>
             </Link>
-            <button @click="exportCsv()" class="btn-glass btn-glass-sm">
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </button>
@@ -124,7 +120,7 @@ const formatDate = (dateString: string | null) => {
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
             </button>
-            <button @click="printAllVisitServices" class="btn-glass btn-glass-sm">
+            <button @click="printAllRecords()" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print All</span>
             </button>

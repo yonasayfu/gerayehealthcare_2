@@ -13,6 +13,7 @@ use App\Models\VisitService;
 use App\Services\VisitServiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Carbon;
 
 class VisitServiceController extends Controller
 {
@@ -103,8 +104,24 @@ class VisitServiceController extends Controller
 
     public function checkIn(CheckInRequest $request, VisitService $visitService)
     {
+        // Prefer client-reported timestamp if present and reasonable; otherwise use server time
+        $now = now();
+        $clientTs = $request->input('timestamp');
+        $checkInTime = $now;
+        if ($clientTs) {
+            try {
+                $parsed = Carbon::parse($clientTs);
+                // Reject future > 5 minutes or past > 12 hours to avoid bad clocks
+                if ($parsed->lte($now->copy()->addMinutes(5)) && $parsed->gte($now->copy()->subHours(12))) {
+                    $checkInTime = $parsed;
+                }
+            } catch (\Throwable $e) {
+                // ignore and use server time
+            }
+        }
+
         $visitService->update([
-            'check_in_time' => now(),
+            'check_in_time' => $checkInTime,
             'check_in_latitude' => $request->input('latitude'),
             'check_in_longitude' => $request->input('longitude'),
             'status' => $visitService->status === 'Scheduled' ? 'In Progress' : $visitService->status,
@@ -116,13 +133,30 @@ class VisitServiceController extends Controller
     public function checkOut(CheckOutRequest $request, VisitService $visitService)
     {
         $now = now();
-        $checkIn = $visitService->check_in_time ? \Illuminate\Support\Carbon::parse($visitService->check_in_time) : $now;
-        $durationHours = max(0, $checkIn->floatDiffInRealHours($now));
+        $clientTs = $request->input('timestamp');
+        $outTime = $now;
+        if ($clientTs) {
+            try {
+                $parsed = Carbon::parse($clientTs);
+                if ($parsed->lte($now->copy()->addMinutes(5)) && $parsed->gte($now->copy()->subHours(24))) {
+                    $outTime = $parsed;
+                }
+            } catch (\Throwable $e) {
+                // ignore and use server time
+            }
+        }
+
+        $checkIn = $visitService->check_in_time ? Carbon::parse($visitService->check_in_time) : $outTime;
+        // Ensure non-negative and clamp duration if outTime < checkIn due to user error
+        if ($outTime->lt($checkIn)) {
+            $outTime = $checkIn;
+        }
+        $durationHours = max(0, $checkIn->floatDiffInRealHours($outTime));
         $hourlyRate = optional($visitService->staff)->hourly_rate ?? 0;
         $earned = round($durationHours * (float) $hourlyRate, 2);
 
         $visitService->update([
-            'check_out_time' => $now,
+            'check_out_time' => $outTime,
             'check_out_latitude' => $request->input('latitude'),
             'check_out_longitude' => $request->input('longitude'),
             'status' => 'Completed',

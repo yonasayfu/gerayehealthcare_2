@@ -180,7 +180,7 @@ const breadcrumbs = [
                 <!-- 3. Use assignee relation -->
                 {{ task.assignee.first_name }} {{ task.assignee.last_name }}
               </td>
-              <td class="px-6 py-4">{{ new Date(task.due_date).toLocaleDateString() }}</td>
+              <td class="px-6 py-4" :class="(new Date(task.due_date) < new Date() && task.status !== 'Completed') ? 'text-red-600 font-medium' : ''">{{ new Date(task.due_date).toLocaleDateString() }}</td>
               <td class="px-6 py-4">
                 <span
                   class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"

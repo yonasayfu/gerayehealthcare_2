@@ -19,6 +19,8 @@ withDefaults(defineProps<Props>(), {
 const notifications = ref<any[]>([]);
 const unreadCount = ref(0);
 const inventoryAlertCount = ref(0); // New ref for inventory alerts
+const myTasksCount = ref(0);
+const myTodoCount = ref(0);
 const showNotifications = ref(false);
 
 // Global confirm modal state
@@ -66,9 +68,29 @@ const markAsRead = async (notificationId: string, conversationId: number | null 
   }
 };
 
+const fetchMyTasksCount = async () => {
+  try {
+    const response = await axios.get(route('staff.task-delegations.count'));
+    myTasksCount.value = response.data.count ?? 0;
+  } catch (e) {
+    myTasksCount.value = 0;
+  }
+};
+
+const fetchMyTodoCount = async () => {
+  try {
+    const response = await axios.get(route('staff.my-todo.count'));
+    myTodoCount.value = response.data.count ?? 0;
+  } catch (e) {
+    myTodoCount.value = 0;
+  }
+};
+
 onMounted(() => {
   fetchNotifications();
   fetchInventoryAlertCount();
+  fetchMyTasksCount();
+  fetchMyTodoCount();
   // REMOVED: Continuous polling that was killing performance
   // Only fetch on page load, not continuously
 
@@ -101,7 +123,7 @@ function handleConfirmOk() {
 </script>
 
 <template>
-  <AppSidebarLayout :breadcrumbs="breadcrumbs" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount" :my-tasks-count="myTasksCount" :my-todo-count="myTodoCount">
     <Toast />
     <slot />
     <ConfirmModal

@@ -165,7 +165,29 @@ class VisitServiceService extends BaseService
             $data['is_paid_to_staff'] = false;
         }
 
+        // Capture original times for audit
+        $origIn = $visitService->check_in_time;
+        $origOut = $visitService->check_out_time;
+
         $updatedVisitService = parent::update($id, $data);
+
+        // Audit time changes if any
+        if ((array_key_exists('check_in_time', $data) && $data['check_in_time'] !== $origIn) ||
+            (array_key_exists('check_out_time', $data) && $data['check_out_time'] !== $origOut)) {
+            try {
+                \App\Models\VisitServiceAudit::create([
+                    'visit_service_id' => $updatedVisitService->id,
+                    'changed_by_user_id' => optional(auth()->user())->id,
+                    'from_check_in_time' => $origIn,
+                    'to_check_in_time' => $data['check_in_time'] ?? $origIn,
+                    'from_check_out_time' => $origOut,
+                    'to_check_out_time' => $data['check_out_time'] ?? $origOut,
+                    'reason' => $data['time_change_reason'] ?? 'manual edit',
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Failed to write VisitServiceAudit: '.$e->getMessage());
+            }
+        }
 
         // Auto-generate invoice when visit is completed
         $this->handleVisitCompletion($updatedVisitService, $visitService);

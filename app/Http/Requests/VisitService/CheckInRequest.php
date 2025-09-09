@@ -18,6 +18,8 @@ class CheckInRequest extends FormRequest
         return [
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
+            // Optional client-reported timestamp (ISO/string). Server will validate/clamp.
+            'timestamp' => ['sometimes', 'date'],
         ];
     }
 }

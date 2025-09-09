@@ -19,7 +19,7 @@ import {
   Receipt, ShieldCheck, ClipboardList, ArrowBigRight,
   Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder,
   ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Warehouse, Package, FileText, Wrench, Bell,
-  Minimize2, Maximize2, GitFork, BarChart, Pill, FlaskConical
+  Minimize2, Maximize2, GitFork, BarChart, Pill, FlaskConical, CheckSquare
 } from 'lucide-vue-next'
 
 interface SidebarNavItem {
@@ -41,7 +41,9 @@ interface SidebarNavGroup {
 
 const props = defineProps<{
   unreadCount?: number;
-  inventoryAlertCount?: number; // Add this line
+  inventoryAlertCount?: number;
+  myTasksCount?: number;
+  myTodoCount?: number;
 }>()
 
 const page = usePage();
@@ -123,6 +125,17 @@ watch([openGroups, areAllGroupsExpanded], () => {
   saveSidebarState()
 }, { deep: true })
 
+// Common Tasks group visible to all roles
+const tasksNavGroup: SidebarNavGroup = {
+    group: 'Tasks',
+    icon: ClipboardList,
+    items: [
+        { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
+        { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList },
+        { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
+    ],
+};
+
 const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
@@ -134,6 +147,7 @@ const communicationNavGroup: SidebarNavGroup = {
 // Notifications are handled by the NotificationBell component in the header
 
 const allAdminNavItems: SidebarNavGroup[] = [
+  tasksNavGroup,
   {
     group: 'Patient Management',
     icon: UserPlus,
@@ -263,6 +277,27 @@ const allAdminNavItems: SidebarNavGroup[] = [
 ];
 
 // Dynamic navigation based on permissions, not hardcoded roles
+// Route helpers to avoid Ziggy exceptions and console noise
+function hasRoute(name?: string) {
+  if (!name) return false
+  try {
+    // ziggy-js exposes route().has
+    return (route as any)().has(name)
+  } catch (e) {
+    const z: any = (window as any).Ziggy
+    return !!(z && z.routes && z.routes[name])
+  }
+}
+
+function safeHref(name?: string) {
+  if (!name) return '#'
+  if (hasRoute(name)) {
+    try { return route(name) } catch { return '#' }
+  }
+  // Silent fallback when route list hasn’t loaded this entry yet
+  return '#'
+}
+
 const getFilteredNavItems = (): SidebarNavGroup[] => {
     const filteredGroups: SidebarNavGroup[] = [];
 
@@ -333,6 +368,7 @@ const getStaffNavItems = (): SidebarNavGroup[] => {
                 { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
                 { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
                 { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
+                { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
                 { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
             ]
         },
@@ -478,10 +514,10 @@ onMounted(() => {
                         }">
                         <SidebarMenu class="pl-4 mt-1 space-y-1">
                             <template v-for="item in group.items" :key="item.title">
-                                <SidebarMenuItem v-if="!item.permission || can(item.permission)">
+                                <SidebarMenuItem v-if="(!item.permission || can(item.permission)) && (!item.routeName || hasRoute(item.routeName))">
                                     <SidebarMenuButton as-child>
                                         <Link 
-                                            :href="item.routeName ? route(item.routeName) : '#'" 
+                                            :href="safeHref(item.routeName)" 
                                             class="gap-2 px-2 py-1.5 text-sm hover:bg-muted/30 rounded-md w-full flex items-center"
                                             preserve-scroll 
                                             preserve-state
@@ -489,6 +525,8 @@ onMounted(() => {
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
                                             <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>
+                                            <span v-if="item.title === 'My Tasks' && (myTasksCount || 0) > 0" class="ml-auto text-xs bg-indigo-600 text-white rounded-full px-2">{{ myTasksCount || 0 }}</span>
+                                            <span v-if="item.title === 'My To‑Do' && (myTodoCount || 0) > 0" class="ml-auto text-xs bg-indigo-600 text-white rounded-full px-2">{{ myTodoCount || 0 }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>

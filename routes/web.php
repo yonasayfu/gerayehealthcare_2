@@ -147,13 +147,13 @@ if (app()->environment('local')) {
 // =====================
 Route::get('dashboard', function () {
     $user = Auth::user();
-    if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::ADMIN->value])) {
+    if ($user->hasAnyRole([RoleEnum::SUPER_ADMIN->value, RoleEnum::ADMIN->value, RoleEnum::CEO->value, RoleEnum::COO->value])) {
         return app(AdminDashboardController::class)->index();
     } elseif ($user->hasRole(RoleEnum::STAFF->value)) {
         return app(StaffDashboardController::class)->index();
     }
-
-    return Inertia::render('Dashboard');
+    // Fallback: render a safe dashboard component that exists
+    return Inertia::render('Staff/Dashboard/Index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // =====================
@@ -916,13 +916,41 @@ Route::middleware(['auth', 'verified', 'role:'.RoleEnum::STAFF->value])
         Route::resource('leave-requests', StaffLeaveRequestController::class)
             ->only(['index', 'store']);
 
-        // Staff Task Delegations (now on /dashboard/my-tasks)
-        Route::get('my-tasks', [StaffTaskController::class, 'index'])
-            ->name('task-delegations.index');
-        Route::post('my-tasks', [StaffTaskController::class, 'store'])
-            ->name('task-delegations.store');
-        Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class, 'update'])
-            ->name('task-delegations.update');
+        // (My Tasks and To-Do moved to general auth group)
+    });
+
+// Tasks available to all authenticated users (except guests/patients by role policy elsewhere)
+Route::middleware(['auth', 'verified', 'deny_roles:guest,patient'])
+    ->prefix('dashboard')
+    ->name('staff.')
+    ->group(function () {
+        // My Tasks
+        Route::get('my-tasks', [StaffTaskController::class, 'index'])->name('task-delegations.index');
+        Route::post('my-tasks', [StaffTaskController::class, 'store'])->name('task-delegations.store');
+        Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class, 'update'])->name('task-delegations.update');
+        Route::get('my-tasks/count', function () {
+            $staffId = auth()->user()->staff->id ?? null;
+            if (!$staffId) return response()->json(['count' => 0]);
+            $count = \App\Models\TaskDelegation::where('assigned_to', $staffId)
+                ->where('status', '!=', 'Completed')
+                ->count();
+            return response()->json(['count' => $count]);
+        })->name('task-delegations.count');
+
+        // Personal To-Do
+        Route::resource('my-todo', \App\Http\Controllers\Staff\PersonalTaskController::class)
+            ->only(['index', 'store', 'update', 'destroy'])
+            ->parameters(['my-todo' => 'my_todo'])
+            ->names('my-todo');
+        Route::post('my-todo/{my_todo}/subtasks', [\App\Http\Controllers\Staff\PersonalSubtaskController::class, 'store'])->name('my-todo.subtasks.store');
+        Route::patch('my-todo/{my_todo}/subtasks/{subtask}', [\App\Http\Controllers\Staff\PersonalSubtaskController::class, 'update'])->name('my-todo.subtasks.update');
+        Route::delete('my-todo/{my_todo}/subtasks/{subtask}', [\App\Http\Controllers\Staff\PersonalSubtaskController::class, 'destroy'])->name('my-todo.subtasks.destroy');
+        Route::get('my-todo/count', function () {
+            $count = \App\Models\PersonalTask::where('user_id', auth()->id())
+                ->where('is_completed', false)
+                ->count();
+            return response()->json(['count' => $count]);
+        })->name('my-todo.count');
     });
 
 // Auth & Settings

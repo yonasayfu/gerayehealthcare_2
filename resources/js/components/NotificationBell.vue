@@ -30,11 +30,20 @@ const fetchNotifications = async () => {
 
 const markAsReadAndRedirect = async (notification: Notification) => {
   try {
-    await axios.post(route('notifications.markAsRead', { notification: notification.id }));
+    // Navigate first for better UX; mark as read after navigation succeeds
     isDropdownOpen.value = false;
-    router.visit(notification.data.url);
+    router.visit(notification.data.url, {
+      onSuccess: async () => {
+        try {
+          await axios.post(route('notifications.markAsRead', { notification: notification.id }));
+          await fetchNotifications();
+        } catch (e) {
+          console.error('Failed to mark notification as read after navigation:', e);
+        }
+      },
+    });
   } catch (error) {
-    console.error('Failed to mark notification as read:', error);
+    console.error('Failed handling notification redirect:', error);
   }
 };
 

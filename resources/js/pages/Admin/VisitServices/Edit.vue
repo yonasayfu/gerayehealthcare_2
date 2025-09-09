@@ -30,10 +30,17 @@ const form = useForm({
   patient_id: props.visitService.patient_id,
   staff_id: props.visitService.staff_id,
   scheduled_at: formattedDate,
+  check_in_time: props.visitService.check_in_time ? format(new Date(props.visitService.check_in_time), "yyyy-MM-dd'T'HH:mm") : '',
+  check_out_time: props.visitService.check_out_time ? format(new Date(props.visitService.check_out_time), "yyyy-MM-dd'T'HH:mm") : '',
   status: props.visitService.status,
   visit_notes: props.visitService.visit_notes || '',
   // This line is the fix:
   service_description: props.visitService.service_description || '', 
+  check_in_latitude: props.visitService.check_in_latitude ?? '',
+  check_in_longitude: props.visitService.check_in_longitude ?? '',
+  check_out_latitude: props.visitService.check_out_latitude ?? '',
+  check_out_longitude: props.visitService.check_out_longitude ?? '',
+  time_change_reason: '',
   prescription_file: null,
   vitals_file: null,
 });

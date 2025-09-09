@@ -10,18 +10,22 @@ interface Props {
   breadcrumbs?: BreadcrumbItemType[];
   unreadCount?: number;
   inventoryAlertCount?: number; // New prop
+  myTasksCount?: number;
+  myTodoCount?: number;
 }
 
 withDefaults(defineProps<Props>(), {
   breadcrumbs: () => [],
   unreadCount: 0,
   inventoryAlertCount: 0, // Default value
+  myTasksCount: 0,
+  myTodoCount: 0,
 });
 </script>
 
 <template>
   <AppShell variant="sidebar">
-    <AppSidebar class="print:hidden" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount"/> 
+    <AppSidebar class="print:hidden" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount" :my-tasks-count="myTasksCount" :my-todo-count="myTodoCount"/> 
     
     <AppContent variant="sidebar">
       <AppSidebarHeader :breadcrumbs="breadcrumbs" class="print:hidden" />

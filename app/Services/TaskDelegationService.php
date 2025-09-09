@@ -6,6 +6,7 @@ use App\Models\Staff;
 use App\Models\TaskDelegation;
 use App\Notifications\TaskDelegationAssigned;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class TaskDelegationService extends BaseService
@@ -58,6 +59,10 @@ class TaskDelegationService extends BaseService
     public function create(array|object $data)
     {
         $data = is_object($data) ? (array) $data : $data;
+        // Stamp creator user if available
+        if (!array_key_exists('created_by', $data)) {
+            $data['created_by'] = Auth::id();
+        }
         $created = $this->model->create($data);
 
         try {
@@ -80,6 +85,14 @@ class TaskDelegationService extends BaseService
         $data = is_object($data) ? (array) $data : $data;
         $model = $this->model->findOrFail($id);
         $originalAssignee = $model->assigned_to;
+        $originalStatus = $model->status;
+        $originalAcceptance = $model->acceptance_status ?? null;
+
+        // If acceptance_status provided, stamp responder fields
+        if (array_key_exists('acceptance_status', $data)) {
+            $data['responded_by'] = auth()->id();
+            $data['responded_at'] = now();
+        }
 
         $model->update($data);
 
@@ -89,6 +102,30 @@ class TaskDelegationService extends BaseService
                 $this->notifyAssignee($model);
             } catch (\Throwable $e) {
                 Log::error('Failed to send TaskDelegationAssigned notification on update', [
+                    'task_id' => $model->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // If status transitioned to Completed, notify assignee and super admins
+        if (array_key_exists('status', $data) && $originalStatus !== 'Completed' && $model->status === 'Completed') {
+            try {
+                $this->notifyCompletion($model);
+            } catch (\Throwable $e) {
+                Log::error('Failed to send TaskDelegationCompleted notification on update', [
+                    'task_id' => $model->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // If acceptance status changed, notify creator and admins
+        if (array_key_exists('acceptance_status', $data) && $data['acceptance_status'] !== $originalAcceptance) {
+            try {
+                $this->notifyResponse($model);
+            } catch (\Throwable $e) {
+                Log::error('Failed to send TaskDelegationResponded notification', [
                     'task_id' => $model->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -106,6 +143,38 @@ class TaskDelegationService extends BaseService
         $staff = Staff::with('user')->find($task->assigned_to);
         if ($staff && $staff->user) {
             $staff->user->notify(new TaskDelegationAssigned($task));
+        }
+    }
+
+    protected function notifyCompletion(TaskDelegation $task): void
+    {
+        // Notify the assignee's user
+        $assignee = Staff::with('user')->find($task->assigned_to);
+        if ($assignee && $assignee->user) {
+            $assignee->user->notify(new \App\Notifications\TaskDelegationCompleted($task));
+        }
+
+        // Notify super admins
+        $superAdmins = \App\Models\User::role([\App\Enums\RoleEnum::SUPER_ADMIN->value])->get();
+        foreach ($superAdmins as $admin) {
+            $admin->notify(new \App\Notifications\TaskDelegationCompleted($task));
+        }
+    }
+
+    protected function notifyResponse(TaskDelegation $task): void
+    {
+        $actor = auth()->user();
+        // Notify task creator if exists
+        if ($task->created_by) {
+            $creator = \App\Models\User::find($task->created_by);
+            if ($creator) {
+                $creator->notify(new \App\Notifications\TaskDelegationResponded($task, $actor));
+            }
+        }
+        // Notify admins
+        $admins = \App\Models\User::role([\App\Enums\RoleEnum::SUPER_ADMIN->value, \App\Enums\RoleEnum::ADMIN->value])->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\TaskDelegationResponded($task, $actor));
         }
     }
 }

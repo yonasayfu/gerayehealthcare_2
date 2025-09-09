@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
 
-defineProps<{
+const props = defineProps<{
   form: ReturnType<typeof useForm>
   patients: Array<{ id: number; full_name: string }>
   staff: Array<{ id: number; first_name: string; last_name: string }>
@@ -9,6 +9,25 @@ defineProps<{
 }>()
 
 const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled']
+
+function fillCurrentLocation() {
+  if (!('geolocation' in navigator)) {
+    alert('Geolocation is not supported in this browser.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      props.form.check_in_latitude = Number(latitude.toFixed(6));
+      props.form.check_in_longitude = Number(longitude.toFixed(6));
+    },
+    (err) => {
+      console.warn('Geolocation error:', err);
+      alert('Unable to retrieve your location.');
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
 </script>
 
 <template>
@@ -31,10 +50,21 @@ const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled']
       <div v-if="form.errors.staff_id" class="text-sm text-red-600 mt-1">{{ form.errors.staff_id }}</div>
     </div>
 
-    <div>
+    <div title="Auto-checkout runs after 8 hours if not checked out. Admins may adjust times with a reason; mobile timestamps are accepted within safe limits.">
       <label for="scheduled_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Scheduled At</label>
       <input id="scheduled_at" v-model="form.scheduled_at" type="datetime-local" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" required />
       <div v-if="form.errors.scheduled_at" class="text-sm text-red-600 mt-1">{{ form.errors.scheduled_at }}</div>
+    </div>
+
+    <div>
+      <label for="check_in_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-in Time (optional)</label>
+      <input id="check_in_time" v-model="form.check_in_time" type="datetime-local" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+      <div v-if="form.errors.check_in_time" class="text-sm text-red-600 mt-1">{{ form.errors.check_in_time }}</div>
+    </div>
+    <div>
+      <label for="check_out_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-out Time (optional)</label>
+      <input id="check_out_time" v-model="form.check_out_time" type="datetime-local" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+      <div v-if="form.errors.check_out_time" class="text-sm text-red-600 mt-1">{{ form.errors.check_out_time }}</div>
     </div>
 
     <div>
@@ -55,6 +85,41 @@ const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled']
       <label for="service_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Description (for Invoice)</label>
       <textarea id="service_description" v-model="form.service_description" rows="4" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" placeholder="e.g., Standard 1-hour consultation"></textarea>
       <div v-if="form.errors.service_description" class="text-sm text-red-600 mt-1">{{ form.errors.service_description }}</div>
+    </div>
+
+    <!-- Optional manual geolocation inputs -->
+    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div>
+        <label for="check_in_latitude" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-in Latitude</label>
+        <input id="check_in_latitude" type="number" step="0.000001" v-model.number="form.check_in_latitude" placeholder="e.g., 9.010123" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+        <div v-if="form.errors.check_in_latitude" class="text-sm text-red-600 mt-1">{{ form.errors.check_in_latitude }}</div>
+      </div>
+      <div>
+        <label for="check_in_longitude" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-in Longitude</label>
+        <input id="check_in_longitude" type="number" step="0.000001" v-model.number="form.check_in_longitude" placeholder="e.g., 38.761234" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+        <div v-if="form.errors.check_in_longitude" class="text-sm text-red-600 mt-1">{{ form.errors.check_in_longitude }}</div>
+      </div>
+      <div>
+        <label for="check_out_latitude" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-out Latitude</label>
+        <input id="check_out_latitude" type="number" step="0.000001" v-model.number="form.check_out_latitude" placeholder="e.g., 9.012345" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+        <div v-if="form.errors.check_out_latitude" class="text-sm text-red-600 mt-1">{{ form.errors.check_out_latitude }}</div>
+      </div>
+      <div>
+        <label for="check_out_longitude" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Check-out Longitude</label>
+        <input id="check_out_longitude" type="number" step="0.000001" v-model.number="form.check_out_longitude" placeholder="e.g., 38.762345" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" />
+        <div v-if="form.errors.check_out_longitude" class="text-sm text-red-600 mt-1">{{ form.errors.check_out_longitude }}</div>
+      </div>
+      <div class="md:col-span-4 -mt-3">
+        <button type="button" class="btn-glass btn-glass-sm" @click="fillCurrentLocation">Use Current Location for Check-in</button>
+        <p class="text-xs text-gray-500 mt-1">Optional. Mobile app auto-fills on check-in/out; web admins can set coordinates manually here if needed.</p>
+      </div>
+    </div>
+
+    <div class="md:col-span-2">
+      <label for="time_change_reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Time Change Reason (required when editing times)</label>
+      <textarea id="time_change_reason" v-model="form.time_change_reason" rows="3" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800" placeholder="Explain why you adjusted check-in/out times"></textarea>
+      <div v-if="form.errors.time_change_reason" class="text-sm text-red-600 mt-1">{{ form.errors.time_change_reason }}</div>
+      <p class="text-xs text-gray-500 mt-1">Note: Visits left In Progress auto‑checkout after 8 hours. Mobile check‑in/out can include timestamps; the server accepts them if not far in the future and not too old.</p>
     </div>
     
     <div>
