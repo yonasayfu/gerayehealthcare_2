@@ -41,8 +41,10 @@ For Fix
 
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Suppliers there are a lot of file let look at let clear and clean
 
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Suppliers/ the creat,edit form is not available or not shown let make available also let make sure ui consistence like other and all fiction woking
+- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Suppliers/ the creat, form is not available or not shown let make available also let make sure ui consistence like other and all fiction woking, also for phone let add a validation according to Ethiopian...
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/StaffPayouts/Index.vue on the admin side he can process the staff payout but he can not edit ,revert also see the info on why he pay or for what he pay out once he click pay out process he found ‘No pending payments” , Again does this features available in the staff part the staff should can see their history and unpaid and paid staff also can request a staff payout…
+
 - [ ] This /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/StaffAvailabilities on the admin side it works, admin can create but I have not test it clash if the staff set unavailable from his side so let make sure the logic is working
 - [ ] Let make sure /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/SharedInvoices/Index.vue module is working proffesinaly, the aim is to track and manage the invoice so let make sure it is realted the corsoponding class, also the UI is not full like actions buttons and it’s feature, pagination…
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Services/Index.vue I can not create, edit and others also the UI is not consistence example the button is purple not Liquid Glass like others ….

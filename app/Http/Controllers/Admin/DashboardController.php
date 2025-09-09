@@ -13,6 +13,7 @@ use App\Models\VisitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -233,6 +234,51 @@ class DashboardController extends Controller
         });
 
         return response()->json($payload);
+    }
+
+    /**
+     * Top staff by hours worked within a date range (computed from check-in/out times).
+     */
+    public function topStaffHours(): JsonResponse
+    {
+        $startParam = request('start');
+        $endParam = request('end');
+        $start = $startParam ? Carbon::parse($startParam)->startOfDay() : now()->copy()->startOfMonth();
+        $end = $endParam ? Carbon::parse($endParam)->endOfDay() : now()->copy()->endOfDay();
+
+        $visits = VisitService::with('staff')
+            ->where('status', 'Completed')
+            ->whereNotNull('check_in_time')
+            ->whereNotNull('check_out_time')
+            ->whereBetween('check_in_time', [$start, $end])
+            ->get(['staff_id', 'check_in_time', 'check_out_time']);
+
+        $hoursByStaff = [];
+        foreach ($visits as $v) {
+            $startAt = Carbon::parse($v->check_in_time);
+            $endAt = Carbon::parse($v->check_out_time);
+            $seconds = max(0, $endAt->diffInSeconds($startAt));
+            $sid = $v->staff_id;
+            if (! isset($hoursByStaff[$sid])) {
+                $hoursByStaff[$sid] = [
+                    'staff_id' => $sid,
+                    'first_name' => optional($v->staff)->first_name,
+                    'last_name' => optional($v->staff)->last_name,
+                    'hours' => 0,
+                ];
+            }
+            $hoursByStaff[$sid]['hours'] += $seconds / 3600;
+        }
+
+        $list = array_values($hoursByStaff);
+        usort($list, fn ($a, $b) => $b['hours'] <=> $a['hours']);
+        $top = array_slice(array_map(function ($row) {
+            $row['hours'] = round($row['hours'], 2);
+
+            return $row;
+        }, $list), 0, 5);
+
+        return response()->json($top);
     }
 
     /**

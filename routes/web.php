@@ -260,6 +260,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('recent-appointments', [AdminDashboardController::class, 'recentAppointments'])->name('recent-appointments');
         Route::get('upcoming-visits', [AdminDashboardController::class, 'upcomingVisits'])->name('upcoming-visits');
         Route::get('top-services', [AdminDashboardController::class, 'topServices'])->name('top-services');
+        Route::get('top-staff-hours', [AdminDashboardController::class, 'topStaffHours'])->name('top-staff-hours');
         Route::get('reports/service-volume/data', [AdminDashboardController::class, 'reportServiceVolume'])->name('reports.service-volume.data');
         Route::get('reports/revenue-ar/data', [AdminDashboardController::class, 'reportRevenueAr'])->name('reports.revenue-ar.data');
 

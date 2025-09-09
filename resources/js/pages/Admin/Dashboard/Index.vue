@@ -60,6 +60,7 @@ function refreshOverview() {
   fetchOverviewSeries();
   fetchRecentAppointments();
   fetchTopServices();
+  fetchTopStaffHours();
 }
 
 // Overview series (monthly registrations/visits) for the Overview tab bar chart
@@ -215,6 +216,18 @@ const money = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency
 // Notifications tab data
 const notifications = ref<any[]>([]);
 const unreadCount = ref<number>(0);
+
+// Top Staff by hours (range)
+const topStaff = ref<Array<{ staff_id: number; first_name: string; last_name: string; hours: number }>>([])
+const fetchTopStaffHours = async () => {
+  try {
+    const params = { start: rangeStart.value, end: rangeEnd.value } as any
+    const { data } = await axios.get(route('admin.top-staff-hours'), { params })
+    topStaff.value = data || []
+  } catch (e) {
+    console.error('Error fetching top staff hours:', e)
+  }
+}
 
 // Marketing analytics data loaders (Analytics tab)
 const dashboardStats = ref({
@@ -583,6 +596,34 @@ watch([rangeStart, rangeEnd], () => {
                   <button class="px-3 py-1 rounded border" :disabled="page>=Math.ceil(sortedAppointments.length / pageSize)" @click="page = Math.min(Math.ceil(sortedAppointments.length / pageSize), page+1)">Next</button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Top Staff by Hours -->
+        <div class="grid gap-4 grid-cols-1 mt-6">
+          <div class="col-span-full">
+            <h3 class="text-lg font-medium">Top Staff by Hours ({{ rangeStart }} → {{ rangeEnd }})</h3>
+            <div class="mt-4 overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
+              <table class="min-w-full">
+                <thead class="bg-gray-100 dark:bg-gray-700">
+                  <tr>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">#</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Staff</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Hours</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, idx) in topStaff" :key="row.staff_id" :class="{'bg-gray-50 dark:bg-gray-700': idx % 2 === 0}">
+                    <td class="py-2 px-4 text-sm">{{ idx + 1 }}</td>
+                    <td class="py-2 px-4 text-sm">{{ row.first_name }} {{ row.last_name }}</td>
+                    <td class="py-2 px-4 text-sm font-semibold">{{ row.hours.toFixed(2) }}</td>
+                  </tr>
+                  <tr v-if="!topStaff.length">
+                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">No data for selected range</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
