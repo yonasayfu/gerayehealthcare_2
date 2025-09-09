@@ -3,6 +3,7 @@ import { Head, useForm, Link, router } from '@inertiajs/vue3'
 import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
+import FormActions from '@/components/FormActions.vue'
 import type { BreadcrumbItemType } from '@/types'
 
 const props = defineProps<{
@@ -87,23 +88,7 @@ async function handleDelete() {
         <form @submit.prevent="submit" class="space-y-4">
           <Form :form="form" v-bind="$props" />
 
-          <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link
-              :href="route('admin.referrals.index')"
-              class="btn-glass btn-glass-sm"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
-              {{ form.processing ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
+          <FormActions :cancel-href="route('admin.referrals.index')" submit-text="Save Changes" :processing="form.processing" />
         </form>
       </div>
     </div>
