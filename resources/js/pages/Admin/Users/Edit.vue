@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 const form = useForm({
-  role: (props.user.roles && props.user.roles[0]?.name) || '',
+  roles: (props.user.roles && props.user.roles.map(r => r.name)) || [],
 });
 
 const submit = () => {
@@ -57,12 +57,11 @@ const breadcrumbs = [
               <input type="email" :value="props.user.email" disabled class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg block w-full p-2.5 bg-gray-50 dark:bg-gray-900/50" />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-              <select v-model="form.role" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
-                <option value="">Select a role</option>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Roles</label>
+              <select v-model="form.roles" multiple class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800 min-h-32">
                 <option v-for="r in props.roles" :key="r" :value="r">{{ r }}</option>
               </select>
-              <div v-if="form.errors.role" class="text-red-500 text-sm mt-1">{{ form.errors.role }}</div>
+              <div v-if="form.errors.roles" class="text-red-500 text-sm mt-1">{{ form.errors.roles }}</div>
             </div>
           </div>
 

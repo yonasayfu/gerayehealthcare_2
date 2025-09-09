@@ -1,20 +1,17 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, usePage } from '@inertiajs/vue3'
-import { type BreadcrumbItemType } from '@/types'
+import type { BreadcrumbItemType } from '@/types'
 import { computed } from 'vue'
-
-// Icons (you can change to better match your UI later)
 import { FileText, ClipboardList, CalendarDays } from 'lucide-vue-next'
 
 const breadcrumbs: BreadcrumbItemType[] = [
-  { title: 'Dashboard', href: '/dashboard' },
+  { title: 'Dashboard', href: route('dashboard') },
 ]
 
-const page = usePage();
-// Normalize roles to lowercase for consistent checks
-const userRoles = computed(() => ((page.props as any)?.auth?.user?.roles || []).map((r: string) => r.toLowerCase()));
-const isStaff = computed(() => userRoles.value.includes('staff'));
+const page = usePage()
+const userRoles = computed(() => ((page.props as any)?.auth?.user?.roles || []).map((r: string) => r.toLowerCase()))
+const isStaff = computed(() => userRoles.value.includes('staff'))
 </script>
 
 <template>
@@ -22,9 +19,7 @@ const isStaff = computed(() => userRoles.value.includes('staff'));
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex-1 space-y-4 p-4 md:p-6">
-      <!-- Dashboard Widgets -->
       <div class="grid gap-4 md:grid-cols-3">
-        <!-- Widget 1: Recent Invoices -->
         <div class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -36,7 +31,6 @@ const isStaff = computed(() => userRoles.value.includes('staff'));
           <p class="mt-2 text-xs text-muted-foreground">Last 7 days</p>
         </div>
 
-        <!-- Widget 2: Pending Admin Tasks -->
         <div class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -48,7 +42,6 @@ const isStaff = computed(() => userRoles.value.includes('staff'));
           <p class="mt-2 text-xs text-muted-foreground">Awaiting staff action</p>
         </div>
 
-        <!-- Widget 3: Upcoming Events -->
         <div class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -61,13 +54,12 @@ const isStaff = computed(() => userRoles.value.includes('staff'));
         </div>
       </div>
 
-      <!-- Main Content Placeholder -->
-      <div v-if="!isStaff" class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
-        Welcome to your admin dashboard. Select a section from the sidebar to begin.
-      </div>
-      <div v-else class="rounded-xl border border-border bg-white p-8 text-center text-muted-foreground shadow-sm dark:border-sidebar-border dark:bg-background">
-        Welcome to your staff dashboard. Select a section from the sidebar to begin.
+      <!-- Staff specific section (placeholder) -->
+      <div v-if="isStaff" class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
+        <h2 class="text-sm font-semibold text-gray-800 dark:text-white">My Upcoming Visits</h2>
+        <p class="mt-2 text-xs text-muted-foreground">This section shows your next visits.</p>
       </div>
     </div>
   </AppLayout>
 </template>
+

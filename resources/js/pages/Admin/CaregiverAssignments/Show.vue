@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import type { BreadcrumbItemType } from '@/types'
 import { Calendar, Clock, User, Stethoscope, BadgeCheck } from 'lucide-vue-next'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   assignment: {
@@ -53,15 +54,12 @@ function printSingleAssignment() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
 
-      <!-- Liquid-glass header -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Assignment #{{ assignment.id }}</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">View assignment details and information.</p>
-          </div>
-        </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
+        <ShowHeader title="Assignment Details" :subtitle="`Assignment #${assignment.id}`">
+          <template #actions>
+            <Link :href="route('admin.assignments.index')" class="btn-glass btn-glass-sm">Back</Link>
+          </template>
+        </ShowHeader>
       </div>
 
         <div class="p-6 space-y-6">

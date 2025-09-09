@@ -3,12 +3,12 @@
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <!-- Header -->
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Referral Document</h1>
-          <p class="text-sm text-muted-foreground">Details for {{ referralDocument.document_name }}</p>
-        </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
+        <ShowHeader title="Referral Document" :subtitle="`Details for ${referralDocument.document_name}`">
+          <template #actions>
+            <Link :href="route('admin.referral-documents.index')" class="btn-glass btn-glass-sm">Back</Link>
+          </template>
+        </ShowHeader>
       </div>
 
     
@@ -90,6 +90,7 @@ import { confirmDialog } from '@/lib/confirm'
 import { useClinicInfo } from '@/composables/useClinicInfo'
 import { Printer } from 'lucide-vue-next'
 import { format } from 'date-fns'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps({
   referralDocument: Object,

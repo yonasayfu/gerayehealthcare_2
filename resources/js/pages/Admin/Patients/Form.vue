@@ -2,6 +2,7 @@
 import type { PatientForm, InertiaForm } from '@/types' // Import PatientForm and InertiaForm types
 import { computed, watch, ref, onMounted } from 'vue';
 import { useEthiopianDate } from '@/composables/useEthiopianDate';
+import InputError from '@/components/InputError.vue'
 
 interface LocalErrors {
   source?: string;
@@ -119,9 +120,7 @@ onMounted(() => {
               v-model="form.full_name"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.full_name" class="text-red-500 text-sm mt-1">
-              {{ form.errors.full_name }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.full_name" />
           </div>
         </div>
 
@@ -133,9 +132,7 @@ onMounted(() => {
               v-model="form.fayda_id"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.fayda_id" class="text-red-500 text-sm mt-1">
-              {{ form.errors.fayda_id }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.fayda_id" />
           </div>
         </div>
 
@@ -149,9 +146,7 @@ onMounted(() => {
               <option :value="null">Select source</option>
               <option v-for="s in sources" :key="s" :value="s">{{ s }}</option>
             </select>
-            <div v-if="form.errors.source" class="text-red-500 text-sm mt-1">
-              {{ form.errors.source }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.source" />
           </div>
         </div>
 
@@ -163,12 +158,7 @@ onMounted(() => {
               v-model="form.phone_number"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="props.localErrors?.phone_number" class="text-red-500 text-sm mt-1">
-              {{ props.localErrors.phone_number }}
-            </div>
-            <div v-else-if="form.errors.phone_number" class="text-red-500 text-sm mt-1">
-              {{ form.errors.phone_number }}
-            </div>
+            <InputError class="mt-1" :message="props.localErrors?.phone_number || form.errors.phone_number" />
           </div>
         </div>
 
@@ -180,9 +170,7 @@ onMounted(() => {
               v-model.trim="form.email"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">
-              {{ form.errors.email }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.email" />
           </div>
         </div>
         <div class="sm:col-span-3">
@@ -195,9 +183,7 @@ onMounted(() => {
               <option :value="null">Select gender</option>
               <option v-for="genderOption in genders" :key="genderOption" :value="genderOption">{{ genderOption }}</option>
             </select>
-            <div v-if="form.errors.gender" class="text-red-500 text-sm mt-1">
-              {{ form.errors.gender }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.gender" />
           </div>
         </div>
 
@@ -210,9 +196,7 @@ onMounted(() => {
               required
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.date_of_birth" class="text-red-500 text-sm mt-1">
-              {{ form.errors.date_of_birth }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.date_of_birth" />
           </div>
         </div>
 
@@ -226,9 +210,7 @@ onMounted(() => {
               required
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.ethiopian_date_of_birth" class="text-red-500 text-sm mt-1">
-              {{ form.errors.ethiopian_date_of_birth }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.ethiopian_date_of_birth" />
           </div>
         </div>
 
@@ -240,9 +222,7 @@ onMounted(() => {
               v-model="form.address"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.address" class="text-red-500 text-sm mt-1">
-              {{ form.errors.address }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.address" />
           </div>
         </div>
 
@@ -254,9 +234,7 @@ onMounted(() => {
               v-model="form.emergency_contact"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.emergency_contact" class="text-red-500 text-sm mt-1">
-              {{ form.errors.emergency_contact }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.emergency_contact" />
           </div>
         </div>
 
@@ -269,9 +247,7 @@ onMounted(() => {
               placeholder="e.g., 9.012345,38.765432"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.geolocation" class="text-red-500 text-sm mt-1">
-              {{ form.errors.geolocation }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.geolocation" />
           </div>
         </div>
 
@@ -291,9 +267,7 @@ onMounted(() => {
                 {{ c.name ?? c.organization_name ?? '—' }}
               </option>
             </select>
-            <div v-if="form.errors?.corporate_client_id" class="text-red-500 text-sm mt-1">
-              {{ form.errors.corporate_client_id }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.corporate_client_id" />
           </div>
         </div>
 
@@ -313,9 +287,7 @@ onMounted(() => {
                 {{ p.policy_number ?? p.name ?? p.service_type ?? '—' }}
               </option>
             </select>
-            <div v-if="form.errors?.policy_id" class="text-red-500 text-sm mt-1">
-              {{ form.errors.policy_id }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.policy_id" />
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any;
@@ -63,9 +64,7 @@ const formatDateTimeForInput = (dateString: string): string => {
                 {{ patient.full_name }}
               </option>
             </select>
-            <div v-if="form.errors.patient_id" class="text-red-500 text-sm mt-1">
-              {{ form.errors.patient_id }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.patient_id" />
           </div>
         </div>
 
@@ -82,9 +81,7 @@ const formatDateTimeForInput = (dateString: string): string => {
                 {{ staffMember.fullName }}
               </option>
             </select>
-            <div v-if="form.errors.staff_id" class="text-red-500 text-sm mt-1">
-              {{ form.errors.staff_id }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.staff_id" />
           </div>
         </div>
 
@@ -98,9 +95,7 @@ const formatDateTimeForInput = (dateString: string): string => {
               @input="form.shift_start = $event.target.value"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.shift_start" class="text-red-500 text-sm mt-1">
-              {{ form.errors.shift_start }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.shift_start" />
           </div>
         </div>
 
@@ -114,9 +109,7 @@ const formatDateTimeForInput = (dateString: string): string => {
               @input="form.shift_end = $event.target.value"
               class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
             />
-            <div v-if="form.errors.shift_end" class="text-red-500 text-sm mt-1">
-              {{ form.errors.shift_end }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.shift_end" />
           </div>
         </div>
 
@@ -133,9 +126,7 @@ const formatDateTimeForInput = (dateString: string): string => {
               <option>Completed</option>
               <option>Cancelled</option>
             </select>
-            <div v-if="form.errors.status" class="text-red-500 text-sm mt-1">
-              {{ form.errors.status }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.status" />
           </div>
         </div>
       </div>

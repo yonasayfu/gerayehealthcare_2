@@ -11,6 +11,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'; // Import onMounted and o
 // Define the props passed from the controller
 const props = defineProps<{
   leaveRequests: LeaveRequestsPagination;
+  leavePolicy?: { annual_days: number; used_days: number; remaining_days: number; pending_days: number; year: number };
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -83,6 +84,29 @@ const statusColor = (status: string) => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6">
+      <!-- Leave Balance & Policy -->
+      <div class="rounded-xl border border-border bg-white p-6 shadow-sm dark:border-sidebar-border dark:bg-background">
+        <h2 class="text-lg font-semibold">Leave Balance ({{ props.leavePolicy?.year ?? new Date().getFullYear() }})</h2>
+        <p class="text-sm text-muted-foreground mb-3">Annual allocation: {{ props.leavePolicy?.annual_days ?? 20 }} days</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Used</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.used_days ?? 0 }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Pending</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.pending_days ?? 0 }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Remaining</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.remaining_days ?? (props.leavePolicy?.annual_days || 20) }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Policy</div>
+            <div class="text-xs">Standard policy: {{ props.leavePolicy?.annual_days ?? 20 }} days/year, prorated and subject to approval.</div>
+          </div>
+        </div>
+      </div>
       <div class="rounded-xl border border-border bg-white p-6 shadow-sm dark:border-sidebar-border dark:bg-background">
         <h2 class="text-lg font-semibold">Request Time Off</h2>
         <p class="mt-1 text-sm text-muted-foreground">Fill out the form below to submit a new leave request.</p>

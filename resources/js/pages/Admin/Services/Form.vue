@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watchEffect } from 'vue'
+import InputError from '@/components/InputError.vue'
 
 interface LocalErrors {
   // Add any local validation errors if needed
@@ -56,9 +57,7 @@ watchEffect(() => {
               v-model="form.name"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
-            <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">
-              {{ form.errors.name }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.name" />
           </div>
         </div>
 
@@ -72,9 +71,7 @@ watchEffect(() => {
               <option value="">Select category</option>
               <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
             </select>
-            <div v-if="form.errors.category" class="text-red-500 text-sm mt-1">
-              {{ form.errors.category }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.category" />
           </div>
         </div>
 
@@ -88,9 +85,7 @@ watchEffect(() => {
               v-model="form.price"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
-            <div v-if="form.errors.price" class="text-red-500 text-sm mt-1">
-              {{ form.errors.price }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.price" />
           </div>
         </div>
 
@@ -103,9 +98,7 @@ watchEffect(() => {
               v-model="form.duration"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             />
-            <div v-if="form.errors.duration" class="text-red-500 text-sm mt-1">
-              {{ form.errors.duration }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.duration" />
           </div>
         </div>
 
@@ -117,9 +110,7 @@ watchEffect(() => {
               rows="3"
               class="block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-1.5 text-base text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm"
             ></textarea>
-            <div v-if="form.errors.description" class="text-red-500 text-sm mt-1">
-              {{ form.errors.description }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.description" />
           </div>
         </div>
 
@@ -133,9 +124,7 @@ watchEffect(() => {
               <option :value="true">Active</option>
               <option :value="false">Inactive</option>
             </select>
-            <div v-if="form.errors.is_active" class="text-red-500 text-sm mt-1">
-              {{ form.errors.is_active }}
-            </div>
+            <InputError class="mt-1" :message="form.errors.is_active" />
           </div>
         </div>
       </div>

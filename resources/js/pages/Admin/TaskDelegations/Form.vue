@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any,
@@ -19,7 +20,7 @@ const staffOptions = computed(() => props.staff ?? [])
           type="text"
           class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600"
         />
-        <p v-if="form.errors.title" class="text-red-500 text-xs mt-1">{{ form.errors.title }}</p>
+        <InputError class="mt-1" :message="form.errors.title" />
       </div>
 
       <div>
@@ -33,7 +34,7 @@ const staffOptions = computed(() => props.staff ?? [])
             {{ person.first_name }} {{ person.last_name }}
           </option>
         </select>
-        <p v-if="form.errors.assigned_to" class="text-red-500 text-xs mt-1">{{ form.errors.assigned_to }}</p>
+        <InputError class="mt-1" :message="form.errors.assigned_to" />
       </div>
 
       <div>
@@ -43,7 +44,7 @@ const staffOptions = computed(() => props.staff ?? [])
           type="date"
           class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600"
         />
-        <p v-if="form.errors.due_date" class="text-red-500 text-xs mt-1">{{ form.errors.due_date }}</p>
+        <InputError class="mt-1" :message="form.errors.due_date" />
       </div>
 
       <div>
@@ -56,7 +57,7 @@ const staffOptions = computed(() => props.staff ?? [])
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
         </select>
-        <p v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</p>
+        <InputError class="mt-1" :message="form.errors.status" />
       </div>
     </div>
 
@@ -67,7 +68,7 @@ const staffOptions = computed(() => props.staff ?? [])
         rows="3"
         class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600"
       ></textarea>
-      <p v-if="form.errors.notes" class="text-red-500 text-xs mt-1">{{ form.errors.notes }}</p>
+      <InputError class="mt-1" :message="form.errors.notes" />
     </div>
   </div>
 </template>

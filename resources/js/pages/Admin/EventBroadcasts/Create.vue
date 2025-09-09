@@ -2,6 +2,7 @@
 import FormActions from '@/components/FormActions.vue'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps({
     events: { type: Array, default: () => [] }, // [{id, title}]
@@ -53,7 +54,7 @@ const breadcrumbs = [
                 <option value="">Select Event</option>
                 <option v-for="ev in events" :key="ev.id" :value="ev.id">{{ ev.title ?? ev.name ?? ('Event #' + ev.id) }}</option>
               </select>
-              <span class="text-red-500 text-xs" v-if="form.errors?.event_id">{{ form.errors.event_id }}</span>
+              <InputError class="mt-1" :message="form.errors?.event_id" />
             </div>
 
             <div>
@@ -67,13 +68,13 @@ const breadcrumbs = [
                 <option value="In-App">In-App</option>
                 <option value="Push">Push</option>
               </select>
-              <span class="text-red-500 text-xs" v-if="form.errors?.channel">{{ form.errors.channel }}</span>
+              <InputError class="mt-1" :message="form.errors?.channel" />
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Message</label>
               <textarea v-model="form.message" rows="4" placeholder="Broadcast message..." class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"></textarea>
-              <span class="text-red-500 text-xs" v-if="form.errors?.message">{{ form.errors.message }}</span>
+              <InputError class="mt-1" :message="form.errors?.message" />
             </div>
 
             <div>
@@ -82,7 +83,7 @@ const breadcrumbs = [
                 <option value="">Select Staff</option>
                 <option v-for="s in staff" :key="s.id" :value="s.id">{{ s.full_name ?? s.name ?? ('Staff #' + s.id) }}</option>
               </select>
-              <span class="text-red-500 text-xs" v-if="form.errors?.sent_by_staff_id">{{ form.errors.sent_by_staff_id }}</span>
+              <InputError class="mt-1" :message="form.errors?.sent_by_staff_id" />
             </div>
           </div>
 

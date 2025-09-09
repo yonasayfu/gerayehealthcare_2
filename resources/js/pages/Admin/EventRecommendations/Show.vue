@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3 } from 'lucide-vue-next'
 import { format } from 'date-fns'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   eventRecommendation: any;
@@ -34,17 +35,11 @@ function printPage() {
   <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6">
 
-      <!-- Liquid-glass header -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Recommendation Details: {{ eventRecommendation.patient_name }}
-            </h1>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">View details and information.</p>
-          </div>
-        </div>
-      </div>
+      <ShowHeader title="Event Recommendation Details" :subtitle="eventRecommendation.patient_name">
+        <template #actions>
+          <Link :href="route('admin.event-recommendations.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">

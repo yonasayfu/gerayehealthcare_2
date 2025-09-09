@@ -37,6 +37,35 @@ class StaffAvailabilityController extends BaseController
         ]);
     }
 
+    public function create()
+    {
+        $staffList = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render('Admin/StaffAvailabilities/Create', [
+            'staffList' => $staffList,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $availability = $this->service->getById($id);
+        $staffList = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render('Admin/StaffAvailabilities/Edit', [
+            'staffAvailability' => $availability,
+            'staffList' => $staffList,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $availability = StaffAvailability::with('staff')->findOrFail($id);
+
+        return Inertia::render('Admin/StaffAvailabilities/Show', [
+            'staffAvailability' => $availability,
+        ]);
+    }
+
     public function getCalendarEvents(Request $request)
     {
         return $this->service->getCalendarEvents($request);

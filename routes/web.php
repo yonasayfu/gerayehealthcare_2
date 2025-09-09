@@ -623,7 +623,7 @@ Route::middleware(['auth', 'verified'])
                 ->name('staff-availabilities.availableStaff');
         });
         Route::resource('staff-availabilities', StaffAvailabilityController::class)
-            ->only(['index', 'store', 'update', 'destroy'])
+            ->only(['index', 'store', 'update', 'destroy', 'create', 'edit', 'show'])
             ->middleware([
                 'can:view staff availabilities,staff_availability',
                 'can:create staff availabilities',
@@ -634,8 +634,12 @@ Route::middleware(['auth', 'verified'])
         // Staff Payouts
         Route::middleware('can:view staff payouts')->group(function () {
             Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
+            Route::get('staff-payouts/create', [StaffPayoutController::class, 'create'])->name('staff-payouts.create');
             Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
             Route::get('staff-payouts/print-all', [StaffPayoutController::class, 'printAll'])->name('staff-payouts.printAll');
+            Route::get('staff-payouts/{staff_payout}', [StaffPayoutController::class, 'show'])->name('staff-payouts.show');
+            Route::get('staff-payouts/{staff_payout}/edit', [StaffPayoutController::class, 'edit'])->name('staff-payouts.edit');
+            Route::put('staff-payouts/{staff_payout}', [StaffPayoutController::class, 'update'])->name('staff-payouts.update');
         });
 
         // Invoices
@@ -840,6 +844,7 @@ Route::middleware(['auth', 'verified'])
 
         // Reports (Admin & Super Admin)
         Route::prefix('reports')->name('reports.')->middleware('can:view reports')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ReportsHubController::class, 'index'])->name('index');
             Route::get('service-volume', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'index'])
                 ->name('service-volume');
             Route::get('service-volume/data', [\App\Http\Controllers\Reports\ServiceVolumeController::class, 'data'])

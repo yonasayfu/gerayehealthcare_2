@@ -2,6 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Save, ArrowLeft } from 'lucide-vue-next'
+import InputError from '@/components/InputError.vue'
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -61,7 +62,7 @@ function submit() {
               <div class="md:col-span-2">
                 <label class="form-label">Title</label>
                 <input v-model="form.title" type="text" class="form-input" />
-                <div v-if="form.errors.title" class="form-error">{{ form.errors.title }}</div>
+                <InputError class="mt-1" :message="form.errors.title" />
               </div>
 
               <div>
@@ -73,25 +74,25 @@ function submit() {
                   <option value="prescription">Prescription</option>
                   <option value="other">Other</option>
                 </select>
-                <div v-if="form.errors.document_type" class="form-error">{{ form.errors.document_type }}</div>
+                <InputError class="mt-1" :message="form.errors.document_type" />
               </div>
 
               <div>
                 <label class="form-label">Document Date</label>
                 <input v-model="form.document_date" type="date" class="form-input" />
-                <div v-if="form.errors.document_date" class="form-error">{{ form.errors.document_date }}</div>
+                <InputError class="mt-1" :message="form.errors.document_date" />
               </div>
 
               <div class="md:col-span-2">
                 <label class="form-label">Summary</label>
                 <textarea v-model="form.summary" class="form-input" rows="3"></textarea>
-                <div v-if="form.errors.summary" class="form-error">{{ form.errors.summary }}</div>
+                <InputError class="mt-1" :message="form.errors.summary" />
               </div>
 
               <div class="md:col-span-2">
                 <label class="form-label">File</label>
                 <input @change="onFileChange" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block w-full text-sm" />
-                <div v-if="form.errors.file" class="form-error">{{ form.errors.file }}</div>
+                <InputError class="mt-1" :message="form.errors.file" />
               </div>
             </div>
 

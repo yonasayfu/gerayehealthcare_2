@@ -7,6 +7,8 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\InventoryAlert;
 use App\Services\InventoryAlertService;
 use App\Services\Validation\Rules\InventoryAlertRules;
+use Inertia\Inertia;
+use App\Models\InventoryItem;
 
 class InventoryAlertController extends BaseController
 {
@@ -50,5 +52,35 @@ class InventoryAlertController extends BaseController
     public function printSingle(InventoryAlert $inventory_alert)
     {
         return app(InventoryAlertService::class)->printSingle($inventory_alert, request());
+    }
+
+    /**
+     * Normalize Edit view to include populated selects for items and types.
+     */
+    public function edit($id)
+    {
+        $alert = $this->service->getById($id);
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
+        $alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue Return'];
+
+        return Inertia::render($this->viewName.'/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $alert,
+            'inventoryItems' => $inventoryItems,
+            'alertTypes' => $alertTypes,
+        ]);
+    }
+
+    /**
+     * Provide populated selects for Create view to normalize dropdown data.
+     */
+    public function create()
+    {
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
+        $alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue Return'];
+
+        return Inertia::render($this->viewName.'/Create', [
+            'inventoryItems' => $inventoryItems,
+            'alertTypes' => $alertTypes,
+        ]);
     }
 }

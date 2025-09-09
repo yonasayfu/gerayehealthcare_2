@@ -30,6 +30,15 @@ class StaffPayoutController extends Controller
         return Inertia::render('Admin/StaffPayouts/Index', $data);
     }
 
+    public function create()
+    {
+        $staff = \App\Models\Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render('Admin/StaffPayouts/Create', [
+            'staff' => $staff,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate(StaffPayoutRules::store());
@@ -54,5 +63,33 @@ class StaffPayoutController extends Controller
     {
         // Centralized PDF using ExportableTrait + ExportConfig
         return $this->handlePrintAll($request, StaffPayout::class, ExportConfig::getStaffPayoutConfig());
+    }
+
+    public function show(StaffPayout $staff_payout)
+    {
+        $payout = $staff_payout->load(['staff', 'visitServices']);
+
+        return Inertia::render('Admin/StaffPayouts/Show', [
+            'staffPayout' => $payout,
+        ]);
+    }
+
+    public function edit(StaffPayout $staff_payout)
+    {
+        $payout = $staff_payout->load(['staff']);
+
+        return Inertia::render('Admin/StaffPayouts/Edit', [
+            'staffPayout' => $payout,
+        ]);
+    }
+
+    public function update(Request $request, StaffPayout $staff_payout)
+    {
+        $validated = $request->validate(StaffPayoutRules::update($staff_payout));
+
+        $staff_payout->fill($validated);
+        $staff_payout->save();
+
+        return redirect()->route('admin.staff-payouts.show', $staff_payout)->with('banner', 'Payout updated.')->with('bannerStyle', 'success');
     }
 }

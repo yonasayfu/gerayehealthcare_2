@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3 } from 'lucide-vue-next' // Import icons
 import type { BreadcrumbItemType } from '@/types' // Assuming you have this type defined
 import { format } from 'date-fns' // For date formatting
+import ShowHeader from '@/components/ShowHeader.vue'
 
 
 const props = defineProps<{
@@ -40,17 +41,11 @@ function printPage() {
   <AppLayout :breadcrumbs="breadcrumbs">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Inventory Transaction Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Inventory Transaction: {{ inventoryTransaction.item?.name || inventoryTransaction.id }}</p>
-          </div>
-          <!-- top actions intentionally removed to avoid duplication; see footer -->
-        </div>
-      </div>
+      <ShowHeader title="Inventory Transaction Details" :subtitle="`Inventory Transaction: ${inventoryTransaction.item?.name || inventoryTransaction.id}`">
+        <template #actions>
+          <Link :href="route('admin.inventory-transactions.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
             <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">

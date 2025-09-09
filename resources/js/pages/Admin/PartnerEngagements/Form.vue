@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any,
@@ -24,7 +25,7 @@ const engagementTypes = [
         <option :value="null">Select Partner</option>
         <option v-for="partner in partners" :key="partner.id" :value="partner.id">{{ partner.name }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.partner_id">{{ form.errors.partner_id }}</span>
+      <InputError class="mt-1" :message="form.errors.partner_id" />
     </div>
 
     <!-- Staff -->
@@ -34,7 +35,7 @@ const engagementTypes = [
         <option :value="null">Select Staff</option>
         <option v-for="staffMember in staff" :key="staffMember.id" :value="staffMember.id">{{ staffMember.name }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.staff_id">{{ form.errors.staff_id }}</span>
+      <InputError class="mt-1" :message="form.errors.staff_id" />
     </div>
 
     <!-- Engagement Type -->
@@ -44,7 +45,7 @@ const engagementTypes = [
         <option value="">Select Type</option>
         <option v-for="typeOption in engagementTypes" :key="typeOption" :value="typeOption">{{ typeOption }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.engagement_type">{{ form.errors.engagement_type }}</span>
+      <InputError class="mt-1" :message="form.errors.engagement_type" />
     </div>
 
     <!-- Summary -->
@@ -57,7 +58,7 @@ const engagementTypes = [
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       ></textarea>
-      <span class="text-red-500 text-xs" v-if="form.errors.summary">{{ form.errors.summary }}</span>
+      <InputError class="mt-1" :message="form.errors.summary" />
     </div>
 
     <!-- Engagement Date -->
@@ -69,7 +70,7 @@ const engagementTypes = [
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.engagement_date">{{ form.errors.engagement_date }}</span>
+      <InputError class="mt-1" :message="form.errors.engagement_date" />
     </div>
 
     <!-- Follow Up Date -->
@@ -80,7 +81,7 @@ const engagementTypes = [
         type="date"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.follow_up_date">{{ form.errors.follow_up_date }}</span>
+      <InputError class="mt-1" :message="form.errors.follow_up_date" />
     </div>
   </div>
 </template>

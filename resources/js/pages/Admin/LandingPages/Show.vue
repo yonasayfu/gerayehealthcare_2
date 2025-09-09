@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import ShowHeader from '@/components/ShowHeader.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
@@ -61,17 +62,11 @@ const formatJson = (json: Record<string, any>) => {
   <AppLayout :breadcrumbs="breadcrumbs">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Landing Page Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Landing Page: {{ landingPage.page_title }}</p>
-          </div>
-          <!-- top actions intentionally removed to avoid duplication; see footer -->
-        </div>
-      </div>
+      <ShowHeader title="Landing Page Details" :subtitle="`Landing Page: ${landingPage.page_title}`">
+        <template #actions>
+          <Link :href="route('admin.landing-pages.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">

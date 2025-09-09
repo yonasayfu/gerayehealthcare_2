@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { ArrowLeft, ClipboardList, Edit3, User2, Calendar, Eye } from 'lucide-vue-next';
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   inventoryAlert: any;
@@ -22,27 +23,13 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
   <Head :title="`Alert #${inventoryAlert?.id}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Alert Details</h1>
-          <p class="text-sm text-muted-foreground">Review the alert information and delegation status.</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <Link
-            :href="returnTo || route('admin.inventory-alerts.index')"
-            class="btn-glass btn-glass-sm"
-            title="Back"
-          >
-            <ArrowLeft class="w-4 h-4" /> Back
-          </Link>
-          <Link
-            :href="route('admin.inventory-alerts.edit', inventoryAlert.id)"
-            class="btn-glass btn-glass-sm"
-            title="Edit Alert"
-          >
-            <Edit3 class="w-4 h-4" /> Edit
-          </Link>
-        </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
+        <ShowHeader title="Inventory Alert Details" :subtitle="`Alert #${inventoryAlert?.id}`">
+          <template #actions>
+            <Link :href="returnTo || route('admin.inventory-alerts.index')" class="btn-glass btn-glass-sm">Back</Link>
+            <Link :href="route('admin.inventory-alerts.edit', inventoryAlert.id)" class="btn-glass btn-glass-sm">Edit</Link>
+          </template>
+        </ShowHeader>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

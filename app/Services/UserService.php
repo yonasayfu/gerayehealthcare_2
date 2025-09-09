@@ -75,7 +75,12 @@ class UserService extends BaseService
         $data = is_object($data) ? (array) $data : $data;
 
         $user = $this->getById($id);
-        $user->syncRoles([$data['role']]);
+        if (isset($data['roles']) && is_array($data['roles'])) {
+            $user->syncRoles($data['roles']);
+        } elseif (isset($data['role'])) {
+            // Backward compatibility
+            $user->syncRoles([$data['role']]);
+        }
 
         return $user;
     }

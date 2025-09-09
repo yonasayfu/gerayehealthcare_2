@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
+import ShowHeader from '@/components/ShowHeader.vue'
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
 import { Printer, Share2, Download } from 'lucide-vue-next';
@@ -80,17 +81,11 @@ const printCurrent = () => {
   <Head :title="`Invoice ${invoice.invoice_number}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
-      <!-- compact liquid glass header -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Invoice Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Invoice: {{ invoice.invoice_number }}</p>
-          </div>
-          <!-- top actions removed to avoid duplication; see bottom action bar -->
-        </div>
-      </div>
+      <ShowHeader title="Invoice Details" :subtitle="`Invoice: ${invoice.invoice_number}`">
+        <template #actions>
+          <Link :href="route('admin.invoices.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
       <div class="p-6 space-y-6">
         <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">

@@ -8,6 +8,7 @@ const props = defineProps<{
   payoutHistory: any;
   pendingVisits: any;
   pendingTotal: number;
+  leaveDaysThisMonth?: number;
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -39,6 +40,7 @@ const formatDate = (dateString: string) => {
           <h2 class="text-lg font-semibold mb-2">Pending Payout</h2>
           <p class="text-3xl font-bold text-green-600">{{ formatCurrency(pendingTotal) }}</p>
           <p class="text-sm text-muted-foreground mt-1">This is the total from your completed work that will be on your next payout.</p>
+          <p v-if="props.leaveDaysThisMonth !== undefined" class="text-xs text-muted-foreground mt-1">Approved leave days this month: <strong>{{ props.leaveDaysThisMonth }}</strong></p>
           
           <div v-if="pendingVisits.data.length > 0" class="mt-4 border-t pt-4">
               <h3 class="font-semibold mb-2">Included Visits:</h3>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import ShowHeader from '@/components/ShowHeader.vue'
 import { format } from 'date-fns'
 
 interface MarketingBudget {
@@ -38,9 +39,12 @@ function printCurrent() {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm">
-        <h1 class="text-xl font-semibold text-gray-800 dark:text-white">{{ marketingBudget.budget_name }}</h1>
-        <p class="text-sm text-muted-foreground">Details of the marketing budget.</p>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
+        <ShowHeader title="Marketing Budget Details" :subtitle="marketingBudget.budget_name">
+          <template #actions>
+            <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">Back</Link>
+          </template>
+        </ShowHeader>
       </div>
 
       <div class="print-document bg-card text-card-foreground p-6 rounded-lg shadow print:shadow-none print:rounded-none print:bg-transparent">

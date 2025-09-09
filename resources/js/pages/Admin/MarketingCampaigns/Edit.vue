@@ -6,6 +6,7 @@ import TextInput from '@/components/ui/input/Input.vue'
 import InputError from '@/components/InputError.vue'
 import PrimaryButton from '@/components/ui/button/Button.vue'
 import { format } from 'date-fns'
+import FormActions from '@/components/FormActions.vue'
 
 interface MarketingCampaign {
   id: number;
@@ -89,23 +90,7 @@ const submit = () => {
         <form @submit.prevent="submit" class="space-y-4">
           <Form :form="form" v-bind="$props" />
 
-          <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link
-              :href="route('admin.marketing-campaigns.index')"
-              class="btn-glass btn-glass-sm"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
-              {{ form.processing ? 'Saving...' : 'Save Changes' }}
-            </button>
-          </div>
+          <FormActions :cancel-href="route('admin.marketing-campaigns.index')" submit-text="Save Changes" :processing="form.processing" />
         </form>
       </div>
     </div>

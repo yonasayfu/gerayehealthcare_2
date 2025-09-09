@@ -48,10 +48,11 @@ class UserController extends BaseController
     {
         $user = $this->service->getById($id);
         $validatedData = $request->validate([
-            'role' => 'required|string|exists:roles,name',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'string|exists:roles,name',
         ]);
 
-        $user->syncRoles($validatedData['role']);
+        $user->syncRoles($validatedData['roles']);
 
         return redirect()->route('admin.users.index')->with('banner', 'User role updated successfully.')->with('bannerStyle', 'success');
     }

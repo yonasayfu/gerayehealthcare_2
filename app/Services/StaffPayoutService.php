@@ -53,7 +53,23 @@ class StaffPayoutService extends BaseService
         $staffWithUnpaidEarnings = $staffWithUnpaidEarningsQuery
             ->paginate($perPage)
             ->through(function ($staff) {
-                $staff->total_hours_logged = $staff->unpaid_visits_count;
+                // Compute total hours from check-in/out duration for unpaid completed visits
+                $totalSeconds = VisitService::where('staff_id', $staff->id)
+                    ->where('status', 'Completed')
+                    ->where(function ($r) {
+                        $r->where('is_paid_to_staff', false)
+                          ->orWhereNull('is_paid_to_staff');
+                    })
+                    ->whereNotNull('check_in_time')
+                    ->whereNotNull('check_out_time')
+                    ->get(['check_in_time', 'check_out_time'])
+                    ->reduce(function ($carry, $v) {
+                        $start = \Illuminate\Support\Carbon::parse($v->check_in_time);
+                        $end = \Illuminate\Support\Carbon::parse($v->check_out_time);
+                        return $carry + max(0, $end->diffInSeconds($start));
+                    }, 0);
+
+                $staff->total_hours_logged = round($totalSeconds / 3600, 2);
 
                 return $staff;
             });

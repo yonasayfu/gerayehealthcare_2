@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { ArrowLeft, Printer, Download } from 'lucide-vue-next'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   medicalDocument: {
@@ -27,29 +28,14 @@ const breadcrumbs = [
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
-      <div class="liquidGlass-wrapper">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content p-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Medical Document</h1>
-              <p class="text-sm text-gray-600 dark:text-gray-300">Details and attached file</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <Link :href="route('admin.medical-documents.index')" class="btn-glass btn-glass-sm">
-                <ArrowLeft class="icon" />
-                <span class="hidden sm:inline">Back</span>
-              </Link>
-              <Link :href="route('admin.medical-documents.printSingle', props.medicalDocument.id)" class="btn-glass btn-glass-sm" target="_blank">
-                <Printer class="icon" />
-                <span class="hidden sm:inline">Print</span>
-              </Link>
-              <Link :href="route('admin.medical-documents.export')" class="btn-glass btn-glass-sm" target="_blank">
-                <Download class="icon" />
-                <span class="hidden sm:inline">Export All</span>
-              </Link>
-            </div>
-          </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
+        <ShowHeader title="Medical Document" subtitle="Details and attached file">
+          <template #actions>
+            <Link :href="route('admin.medical-documents.index')" class="btn-glass btn-glass-sm">Back</Link>
+            <Link :href="route('admin.medical-documents.printSingle', props.medicalDocument.id)" class="btn-glass btn-glass-sm" target="_blank">Print</Link>
+            <Link :href="route('admin.medical-documents.export')" class="btn-glass btn-glass-sm" target="_blank">Export All</Link>
+          </template>
+        </ShowHeader>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

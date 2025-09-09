@@ -4,16 +4,11 @@
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-      <!-- Liquid-glass header (no Back button) -->
-      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content flex items-center justify-between p-6">
-          <div class="print:hidden">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Shared Invoice Details</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Record #{{ sharedInvoice.id }}</p>
-          </div>
-        </div>
-      </div>
+      <ShowHeader title="Shared Invoice Details" :subtitle="`Record #${sharedInvoice.id}`">
+        <template #actions>
+          <Link :href="route('admin.shared-invoices.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
       <div class="p-6 space-y-6">
         <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8">
@@ -105,6 +100,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { Printer } from 'lucide-vue-next'
 import { useExport } from '@/composables/useExport'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps({
   sharedInvoice: Object,

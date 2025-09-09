@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Shield } from 'lucide-vue-next';
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   user: {
@@ -23,23 +24,13 @@ const breadcrumbs = [
   <Head :title="`User: ${user.name}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex justify-start mb-4 print:hidden">
-        <Link :href="route('admin.users.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-      </div>
-
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow overflow-hidden">
-        <!-- liquidGlass header -->
-        <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
-          <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-          <div class="liquidGlass-content flex items-center justify-between p-6">
-            <div class="print:hidden">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">User Details</h3>
-              <p class="text-sm text-gray-600 dark:text-gray-300">User: {{ user.name || user.email || user.id }}</p>
-            </div>
-          </div>
-        </div>
+        <ShowHeader title="User Details" :subtitle="`User: ${user.name || user.email || user.id}`">
+          <template #actions>
+            <Link :href="route('admin.users.index')" class="btn-glass btn-glass-sm">Back</Link>
+          </template>
+        </ShowHeader>
 
-        <!-- content -->
         <div class="p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

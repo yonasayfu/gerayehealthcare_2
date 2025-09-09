@@ -16,7 +16,8 @@ See ROUTING.md for naming and grouping conventions.
 
 Exports/Print
 - Centralized via ExportableTrait; configs in ExportConfig/AdditionalExportConfigs.
-- Shared layouts: resources/views/pdf-layout.blade.php, print-layout.blade.php.
+- Shared layouts: resources/views/pdf-layout.blade.php.
+  - Note: print-layout.blade.php was removed as unused; HTML printing is handled by Vue print pages.
 
 Storage
 - See STORAGE.md. Public assets localized; fonts via @font-face.

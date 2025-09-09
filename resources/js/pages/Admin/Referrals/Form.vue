@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any,
@@ -24,7 +25,7 @@ const referralStatuses = [
         <option :value="null">Select Partner</option>
         <option v-for="partner in partners" :key="partner.id" :value="partner.id">{{ partner.name }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.partner_id">{{ form.errors.partner_id }}</span>
+      <InputError class="mt-1" :message="form.errors.partner_id" />
     </div>
 
     <!-- Partner Agreement -->
@@ -34,7 +35,7 @@ const referralStatuses = [
         <option :value="null">Select Agreement</option>
         <option v-for="agreement in partnerAgreements" :key="agreement.id" :value="agreement.id">{{ agreement.title }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.agreement_id">{{ form.errors.agreement_id }}</span>
+      <InputError class="mt-1" :message="form.errors.agreement_id" />
     </div>
 
     <!-- Referred Patient -->
@@ -44,7 +45,7 @@ const referralStatuses = [
         <option :value="null">Select Patient</option>
         <option v-for="patient in patients" :key="patient.id" :value="patient.id">{{ patient.name }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.referred_patient_id">{{ form.errors.referred_patient_id }}</span>
+      <InputError class="mt-1" :message="form.errors.referred_patient_id" />
     </div>
 
     <!-- Referral Date -->
@@ -56,7 +57,7 @@ const referralStatuses = [
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.referral_date">{{ form.errors.referral_date }}</span>
+      <InputError class="mt-1" :message="form.errors.referral_date" />
     </div>
 
     <!-- Status -->
@@ -66,7 +67,7 @@ const referralStatuses = [
         <option value="">Select Status</option>
         <option v-for="statusOption in referralStatuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.status">{{ form.errors.status }}</span>
+      <InputError class="mt-1" :message="form.errors.status" />
     </div>
 
     <!-- Notes -->
@@ -78,7 +79,7 @@ const referralStatuses = [
         rows="5"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       ></textarea>
-      <span class="text-red-500 text-xs" v-if="form.errors.notes">{{ form.errors.notes }}</span>
+      <InputError class="mt-1" :message="form.errors.notes" />
     </div>
   </div>
 </template>

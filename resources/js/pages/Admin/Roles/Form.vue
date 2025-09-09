@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any;
@@ -30,7 +31,7 @@ watch(selectedPermissions, (newVal: string[]) => {
           class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
           placeholder="e.g., Finance Manager"
         />
-        <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
+        <InputError class="mt-1" :message="form.errors.name" />
       </div>
     </div>
 
@@ -52,7 +53,7 @@ watch(selectedPermissions, (newVal: string[]) => {
       <div v-else class="mt-4 p-4 text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-4">
         No permissions available to assign. Please ensure permissions are seeded or fetched correctly.
       </div>
-       <div v-if="form.errors.permissions" class="text-red-500 text-sm mt-1">{{ form.errors.permissions }}</div>
+       <InputError class="mt-1" :message="form.errors.permissions" />
     </div>
   </form>
 </template>

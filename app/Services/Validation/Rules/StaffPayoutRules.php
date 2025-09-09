@@ -18,8 +18,9 @@ class StaffPayoutRules extends BaseResourceRules
 
     public static function update($item): array
     {
-        // Staff payouts are typically not updated via a simple form.
-        // If update functionality is needed, define rules here.
-        return [];
+        return [
+            'status' => 'nullable|string|in:Pending,Completed,Voided',
+            'notes' => 'nullable|string',
+        ];
     }
 }

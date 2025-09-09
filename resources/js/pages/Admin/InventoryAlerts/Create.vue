@@ -2,6 +2,9 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
 import Form from './Form.vue';
+import FormActions from '@/components/FormActions.vue'
+
+const props = defineProps<{ inventoryItems: Array<any>; alertTypes: Array<string> }>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -43,19 +46,8 @@ function submit() {
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.inventory-alerts.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
-              {{ form.processing ? 'Creating...' : 'Create Inventory Alert' }}
-            </button>
-          </div>
+          <Form :form="form" :inventory-items="props.inventoryItems" :alert-types="props.alertTypes" />
+          <FormActions :cancel-href="route('admin.inventory-alerts.index')" submit-text="Create Inventory Alert" :processing="form.processing" />
         </form>
       </div>
     </div>

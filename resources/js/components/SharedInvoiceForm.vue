@@ -78,12 +78,7 @@
             </div>
 
             <div class="flex justify-end gap-2 mt-6">
-                <Link :href="route('admin.shared-invoices.index')" class="btn-glass btn-glass-sm">
-                    Cancel
-                </Link>
-                <button type="submit" :disabled="form.processing" class="btn-glass btn-glass-sm">
-                    {{ form.processing ? (editMode ? 'Saving...' : 'Creating...') : (editMode ? 'Save' : 'Create') }}
-                </button>
+                <FormActions :cancel-href="route('admin.shared-invoices.index')" :submit-text="editMode ? 'Save' : 'Create'" :processing="form.processing" />
             </div>
         </div>
     </form>
@@ -92,6 +87,7 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
+import FormActions from '@/components/FormActions.vue'
 
 const props = defineProps({
     sharedInvoice: {

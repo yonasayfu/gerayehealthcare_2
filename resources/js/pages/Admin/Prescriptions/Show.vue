@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, ArrowLeft, Edit3 } from 'lucide-vue-next'
 import { format } from 'date-fns'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{ prescription: any }>()
 
@@ -28,13 +29,12 @@ function printSingle() {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0">
-      <div class="liquidGlass-wrapper">
-        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
-        <div class="liquidGlass-content p-4">
-          <div class="mb-4">
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Prescription #{{ prescription.id }}</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Patient: {{ prescription.patient?.full_name || prescription.patient?.patient_code || '-' }}</p>
-          </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
+        <ShowHeader title="Prescription Details" :subtitle="`Prescription #${prescription.id}`">
+          <template #actions>
+            <Link :href="route('admin.prescriptions.index')" class="btn-glass btn-glass-sm">Back</Link>
+          </template>
+        </ShowHeader>
 
           <div class="hidden print:block text-center mb-4 print:mb-2">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">

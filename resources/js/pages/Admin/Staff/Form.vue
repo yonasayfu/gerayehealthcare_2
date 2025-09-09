@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Trash2 } from 'lucide-vue-next';
 import { ref, watch, onBeforeUnmount } from 'vue';
+import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any,
@@ -53,7 +54,7 @@ onBeforeUnmount(() => {
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.first_name">{{ form.errors.first_name }}</span>
+      <InputError class="mt-1" :message="form.errors.first_name" />
     </div>
 
     <!-- Last Name -->
@@ -66,7 +67,7 @@ onBeforeUnmount(() => {
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.last_name">{{ form.errors.last_name }}</span>
+      <InputError class="mt-1" :message="form.errors.last_name" />
     </div>
 
     <!-- Email -->
@@ -79,7 +80,7 @@ onBeforeUnmount(() => {
         required
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.email">{{ form.errors.email }}</span>
+      <InputError class="mt-1" :message="form.errors.email" />
     </div>
 
     <!-- Phone -->
@@ -91,7 +92,7 @@ onBeforeUnmount(() => {
         placeholder="Phone"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.phone">{{ form.errors.phone }}</span>
+      <InputError class="mt-1" :message="form.errors.phone" />
     </div>
 
     <!-- Position -->
@@ -101,7 +102,7 @@ onBeforeUnmount(() => {
         <option value="">Select position</option>
         <option v-for="pos in positions" :key="pos" :value="pos">{{ pos }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.position">{{ form.errors.position }}</span>
+      <InputError class="mt-1" :message="form.errors.position" />
     </div>
 
     <!-- Hourly Rate -->
@@ -115,7 +116,7 @@ onBeforeUnmount(() => {
         placeholder="e.g., 50.00"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.hourly_rate">{{ form.errors.hourly_rate }}</span>
+      <InputError class="mt-1" :message="form.errors.hourly_rate" />
     </div>
 
     <!-- Department -->
@@ -125,7 +126,7 @@ onBeforeUnmount(() => {
         <option value="">Select department</option>
         <option v-for="department in departments" :key="department" :value="department">{{ department }}</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.department">{{ form.errors.department }}</span>
+      <InputError class="mt-1" :message="form.errors.department" />
     </div>
 
     <!-- Status -->
@@ -135,7 +136,7 @@ onBeforeUnmount(() => {
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
       </select>
-      <span class="text-red-500 text-xs" v-if="form.errors.status">{{ form.errors.status }}</span>
+      <InputError class="mt-1" :message="form.errors.status" />
     </div>
 
     <!-- Hire Date -->
@@ -146,7 +147,7 @@ onBeforeUnmount(() => {
         type="date"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.hire_date">{{ form.errors.hire_date }}</span>
+      <InputError class="mt-1" :message="form.errors.hire_date" />
     </div>
 
     <!-- Photo Upload -->
@@ -158,7 +159,7 @@ onBeforeUnmount(() => {
         @change="form.photo = ($event.target as HTMLInputElement).files ? ($event.target as HTMLInputElement).files[0] : null"
         class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"
       />
-      <span class="text-red-500 text-xs" v-if="form.errors.photo">{{ form.errors.photo }}</span>
+      <InputError class="mt-1" :message="form.errors.photo" />
 
       <!-- Preview newly selected image -->
       <div v-if="form.photo && previewUrl" class="mt-2">

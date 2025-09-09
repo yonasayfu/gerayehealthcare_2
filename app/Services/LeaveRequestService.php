@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\LeaveRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\LeaveRequestStatusUpdated;
 
 class LeaveRequestService extends BaseService
 {
@@ -73,7 +74,7 @@ class LeaveRequestService extends BaseService
             'update_successful' => $updateResult,
         ]);
 
-        $freshLeaveRequest = $leaveRequest->fresh();
+        $freshLeaveRequest = $leaveRequest->fresh(['staff.user']);
 
         if ($freshLeaveRequest === null) {
             Log::error('LeaveRequest Update Service: Failed to retrieve fresh instance after update!', [
@@ -88,6 +89,18 @@ class LeaveRequestService extends BaseService
             'leaveRequestId' => $freshLeaveRequest->id,
             'new_status_in_db_fresh_instance' => $freshLeaveRequest->status,
         ]);
+
+        // Notify the staff user about status change (if status provided)
+        try {
+            if (isset($data['status']) && $freshLeaveRequest->staff && $freshLeaveRequest->staff->user) {
+                $freshLeaveRequest->staff->user->notify(new LeaveRequestStatusUpdated($freshLeaveRequest));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Failed to send LeaveRequestStatusUpdated notification', [
+                'leaveRequestId' => $freshLeaveRequest->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         return $freshLeaveRequest;
     }

@@ -1,4 +1,6 @@
 import '../css/app.css';
+// Use local Font Awesome (no CDN dependency)
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
@@ -123,3 +125,12 @@ axios.get('/sanctum/csrf-cookie').then(() => {
 
 // Initialize theme after app setup
 initializeTheme();
+
+// Register a simple service worker to cache built assets for offline reloads
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker
+            .register('/sw.js')
+            .catch((err) => console.warn('Service worker registration failed:', err));
+    });
+}

@@ -51,7 +51,7 @@ class DashboardController extends Controller
         }, 0);
 
         // 3. Return the Inertia view with the data
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Staff/Dashboard/Index', [
             'stats' => [
                 'upcomingVisitsCount' => $upcomingVisits->count(),
                 'unpaidVisitsCount' => $unpaidVisitsCount,

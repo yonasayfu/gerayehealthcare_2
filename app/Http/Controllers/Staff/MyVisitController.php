@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CheckInVisitRequest; // <-- THIS IS THE FIX
-use App\Http\Requests\CheckOutVisitRequest;
+use App\Http\Requests\VisitService\CheckInRequest as WebCheckInRequest;
+use App\Http\Requests\VisitService\CheckOutRequest as WebCheckOutRequest;
 use App\Http\Requests\StoreVisitReportRequest;
 use App\Models\Service;
 use App\Models\VisitService;
@@ -46,7 +46,7 @@ class MyVisitController extends Controller
     /**
      * Handle the check-in process for a visit.
      */
-    public function checkIn(CheckInVisitRequest $request, VisitService $visit)
+    public function checkIn(WebCheckInRequest $request, VisitService $visit)
     {
         if ($visit->staff_id !== Auth::user()->staff->id) {
             abort(403);
@@ -67,7 +67,7 @@ class MyVisitController extends Controller
     /**
      * Handle the check-out process for a visit.
      */
-    public function checkOut(CheckOutVisitRequest $request, VisitService $visit)
+    public function checkOut(WebCheckOutRequest $request, VisitService $visit)
     {
         if ($visit->staff_id !== Auth::user()->staff->id) {
             abort(403);
@@ -75,11 +75,19 @@ class MyVisitController extends Controller
 
         $validated = $request->validated();
 
+        $now = Carbon::now();
+        $checkIn = $visit->check_in_time ? Carbon::parse($visit->check_in_time) : $now;
+        $durationHours = max(0, $checkIn->floatDiffInRealHours($now));
+        $hourlyRate = optional(Auth::user()->staff)->hourly_rate ?? 0;
+        $earned = round($durationHours * (float) $hourlyRate, 2);
+
         $visit->update([
-            'check_out_time' => Carbon::now(),
+            'check_out_time' => $now,
             'check_out_latitude' => $validated['latitude'],
             'check_out_longitude' => $validated['longitude'],
             'status' => 'Completed',
+            // Set cost based on actual duration at checkout time
+            'cost' => $earned,
         ]);
 
         return back()->with('banner', 'Checked out successfully.')->with('bannerStyle', 'success');
