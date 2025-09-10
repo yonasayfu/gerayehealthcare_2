@@ -56,6 +56,10 @@ class TaskDelegationController extends BaseController
         // Validate using base rules
         $validatedData = $this->validateRequest($request, 'store');
 
+        if (empty($validatedData['assigned_to'])) {
+            return back()->withErrors(['assigned_to' => 'The assigned to field is required.'])->withInput();
+        }
+
         // Create the task via service
         $created = $this->service->create($validatedData);
 
