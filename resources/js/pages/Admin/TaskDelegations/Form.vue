@@ -29,7 +29,6 @@ const staffOptions = computed(() => props.staff ?? [])
           v-model="form.assigned_to"
           class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600"
         >
-          <option :value="null">Select staff</option>
           <option v-for="person in staffOptions" :key="person.id" :value="person.id">
             {{ person.first_name }} {{ person.last_name }}
           </option>

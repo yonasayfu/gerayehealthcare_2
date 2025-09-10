@@ -12,6 +12,7 @@ class TaskDelegationRules extends BaseResourceRules
             'due_date' => 'required|date',
             'status' => 'required|in:Pending,In Progress,Completed',
             'notes' => 'nullable|string',
+            'priority_level' => 'required|integer|min:1|max:5',
         ];
     }
 

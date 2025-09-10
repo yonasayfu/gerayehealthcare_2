@@ -18,10 +18,11 @@ const props = defineProps<{
 
 const form = useForm({
   title: props.prefill?.title ?? '',
-  assigned_to: props.prefill?.assigned_to ?? null,
+  assigned_to: props.prefill?.assigned_to ?? (props.staff.length > 0 ? props.staff[0].id : null),
   due_date: props.prefill?.due_date ?? '',
   status: props.prefill?.status ?? 'Pending',
   notes: props.prefill?.notes ?? '',
+  priority_level: 3,
   // Extra meta to support linking back to an InventoryAlert
   inventory_alert_id: props.inventoryAlertId ?? null,
   return_to: props.returnTo ?? null,
