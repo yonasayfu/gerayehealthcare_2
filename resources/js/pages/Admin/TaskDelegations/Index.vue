@@ -17,6 +17,8 @@ const { taskDelegations, filters } = defineProps<{
       assignee: { first_name: string; last_name: string }
       due_date: string
       status: string
+      priority_level: number
+      created_by_user: { name: string } | null
     }>
     links: { url: string | null; label: string; active: boolean }[]
     meta: {
@@ -44,7 +46,7 @@ const perPage   = ref(filters.per_page || 5)
 function exportData(format: 'csv') {
   // Client-side CSV export of currently visible rows
   const rows = taskDelegations.data
-  const header = ['Title', 'Assigned To', 'Due Date', 'Status']
+  const header = ['Title', 'Assigned To', 'Due Date', 'Status', 'Priority', 'Created By']
   const csv = [
     header.join(','),
     ...rows.map((t) => [
@@ -52,7 +54,9 @@ function exportData(format: 'csv') {
       '"' + (t.assignee?.first_name + ' ' + t.assignee?.last_name) + '"',
       '"' + new Date(t.due_date).toLocaleDateString() + '"',
       '"' + (t.status ?? '') + '"',
-    ].join(',')),
+      '"' + (t.priority_level <= 1 ? 'Low' : t.priority_level === 2 ? 'Medium' : t.priority_level === 3 ? 'Normal' : t.priority_level === 4 ? 'High' : 'Critical') + '"',
+      '"' + (t.created_by_user?.name ?? 'Unknown') + '"',
+    ].join(',')), 
   ].join('\n')
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -90,8 +94,6 @@ function destroy(id: number) {
     router.delete(route('admin.task-delegations.destroy', { task_delegation: id }))
   }
 }
-
-// Removed CSV/PDF/Print handlers
 
 // Breadcrumbs for layout
 const breadcrumbs = [
@@ -165,7 +167,11 @@ const breadcrumbs = [
               <th @click="toggleSort('due_date')" class="px-6 py-3 cursor-pointer">
                 Due Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
+              <th @click="toggleSort('priority_level')" class="px-6 py-3 cursor-pointer">
+                Priority <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+              </th>
               <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3">Created By</th>
               <th class="px-6 py-3 text-right print:hidden">Actions</th>
             </tr>
           </thead>
@@ -183,6 +189,25 @@ const breadcrumbs = [
               <td class="px-6 py-4" :class="(new Date(task.due_date) < new Date() && task.status !== 'Completed') ? 'text-red-600 font-medium' : ''">{{ new Date(task.due_date).toLocaleDateString() }}</td>
               <td class="px-6 py-4">
                 <span
+                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                    :class="{
+                      'bg-gray-100 text-gray-800': task.priority_level <= 1, // Low
+                      'bg-yellow-100 text-yellow-800': task.priority_level === 2, // Medium
+                      'bg-orange-100 text-orange-800': task.priority_level === 3, // Normal
+                      'bg-red-100 text-red-800': task.priority_level === 4, // High
+                      'bg-purple-100 text-purple-800': task.priority_level === 5, // Critical
+                    }"
+                  >
+                    {{ 
+                      task.priority_level <= 1 ? 'Low' : 
+                      task.priority_level === 2 ? 'Medium' : 
+                      task.priority_level === 3 ? 'Normal' : 
+                      task.priority_level === 4 ? 'High' : 'Critical' 
+                    }}
+                  </span>
+              </td>
+              <td class="px-6 py-4">
+                <span
                   class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
                   :class="{
                     'bg-yellow-100 text-yellow-800': task.status === 'Pending',
@@ -192,6 +217,9 @@ const breadcrumbs = [
                 >
                   {{ task.status }}
                 </span>
+              </td>
+              <td class="px-6 py-4">
+                {{ task.created_by_user?.name || 'Unknown' }}
               </td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
@@ -220,7 +248,7 @@ const breadcrumbs = [
               </td>
             </tr>
             <tr v-if="!taskDelegations.data.length">
-              <td colspan="5" class="py-6 text-center text-muted-foreground">
+              <td colspan="6" class="py-6 text-center text-muted-foreground">
                 No tasks found.
               </td>
             </tr>

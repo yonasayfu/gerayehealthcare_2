@@ -59,6 +59,21 @@ const staffOptions = computed(() => props.staff ?? [])
         </select>
         <InputError class="mt-1" :message="form.errors.status" />
       </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-900 dark:text-white">Priority</label>
+        <select
+          v-model="form.priority_level"
+          class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+        >
+          <option value="1">Low</option>
+          <option value="2">Medium</option>
+          <option value="3">Normal</option>
+          <option value="4">High</option>
+          <option value="5">Critical</option>
+        </select>
+        <InputError class="mt-1" :message="form.errors.priority_level" />
+      </div>
     </div>
 
     <div>
