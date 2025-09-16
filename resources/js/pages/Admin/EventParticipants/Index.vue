@@ -114,10 +114,6 @@ function toggleSort(field: string) { // Explicitly type field
             <Link :href="route('admin.event-participants.create')" class="btn-glass">
               <span>Add Event Participant</span>
             </Link>
-            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
-              <Download class="icon" />
-              <span class="hidden sm:inline">Export CSV</span>
-            </button>
             <button @click="printCurrentView" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
@@ -163,10 +159,10 @@ function toggleSort(field: string) { // Explicitly type field
                     <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
                         <tr>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('event_id')">
-                                Event ID <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                                Event <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('patient_id')">
-                                Patient ID <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                                Patient <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
@@ -176,27 +172,27 @@ function toggleSort(field: string) { // Explicitly type field
                     </thead>
                     <tbody>
                         <tr v-for="participant in participants.data" :key="participant.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-                            <td class="px-6 py-4">{{ participant.event_id }}</td>
-                            <td class="px-6 py-4">{{ participant.patient_id }}</td>
+                            <td class="px-6 py-4">{{ participant.event?.title ?? participant.event_id }}</td>
+                            <td class="px-6 py-4">{{ participant.patient?.full_name ?? participant.patient_id }}</td>
                             <td class="px-6 py-4">{{ participant.status }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
-                    :href="route('admin.event-participants.show', item.id)"
+                    :href="route('admin.event-participants.show', participant.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
-                    :href="route('admin.event-participants.edit', item.id)"
+                    :href="route('admin.event-participants.edit', participant.id)"
                     class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
-                    @click="destroy(item.id)"
+                    @click="destroy(participant.id)"
                     class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
                     title="Delete"
                   >

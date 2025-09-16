@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, ArrowLeft, Edit3 } from 'lucide-vue-next'
+import { Printer, ArrowLeft, Edit3, Share2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import ShowHeader from '@/components/ShowHeader.vue'
 
@@ -21,6 +21,30 @@ const formattedDate = computed(() => {
 
 function printSingle() {
   requestAnimationFrame(() => window.print())
+}
+
+async function copyShareLink() {
+  try {
+    const res = await fetch(route('admin.prescriptions.shareLink', props.prescription.id), { headers: { 'Accept': 'application/json' } })
+    const data = await res.json()
+    await navigator.clipboard.writeText(data.url)
+    alert('Share link copied to clipboard!')
+  } catch (e) { alert('Failed to generate share link.') }
+}
+
+async function share(kind: 'wa'|'tw'|'tg') {
+  try {
+    const res = await fetch(route('admin.prescriptions.shareLink', props.prescription.id), { headers: { 'Accept': 'application/json' } })
+    const data = await res.json()
+    const url = data.url
+    if (kind === 'wa') {
+      window.open(`https://wa.me/?text=${encodeURIComponent('View your prescription: ' + url)}`, '_blank')
+    } else if (kind === 'tw') {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('View your prescription')}&url=${encodeURIComponent(url)}`, '_blank')
+    } else if (kind === 'tg') {
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('View your prescription')}`, '_blank')
+    }
+  } catch (e) { alert('Failed to share link.') }
 }
 </script>
 
@@ -105,6 +129,13 @@ function printSingle() {
               <button @click="printSingle" class="btn-glass btn-glass-sm">
                 <Printer class="icon" />
                 <span class="hidden sm:inline">Print</span>
+              </button>
+              <button @click="() => share('wa')" class="btn-glass btn-glass-sm">WhatsApp</button>
+              <button @click="() => share('tw')" class="btn-glass btn-glass-sm">Twitter</button>
+              <button @click="() => share('tg')" class="btn-glass btn-glass-sm">Telegram</button>
+              <button @click="copyShareLink" class="btn-glass btn-glass-sm">
+                <Share2 class="icon" />
+                <span class="hidden sm:inline">Share Link</span>
               </button>
             </div>
           </div>

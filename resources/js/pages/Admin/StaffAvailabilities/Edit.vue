@@ -35,6 +35,9 @@ function submit() {
         </template>
       </ShowHeader>
       <div class="p-6">
+        <div v-if="form.errors?.error" class="mb-4 rounded-md border border-red-200 bg-red-50 text-red-700 p-3 text-sm">
+          {{ form.errors.error }}
+        </div>
         <form @submit.prevent="submit" class="space-y-4">
           <Form :form="form" :staff-list="props.staffList" />
           <FormActions :cancel-href="route('admin.staff-availabilities.index')" submit-text="Save Changes" :processing="form.processing" />
@@ -43,4 +46,3 @@ function submit() {
     </div>
   </AppLayout>
 </template>
-

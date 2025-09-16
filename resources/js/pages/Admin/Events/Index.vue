@@ -51,6 +51,13 @@ const { exportData, printCurrentView } = useExport({ routeName: 'admin.events', 
 // printCurrentView provided by useExport
 
 function onToggleSort(field: string) { toggleSort(field) }
+
+// Safely format dates to avoid render errors on invalid inputs
+function safeFormat(dateStr: string | null | undefined, fmt = 'PPP') {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? '-' : format(d, fmt)
+}
 </script>
 
 <template>
@@ -147,7 +154,7 @@ function onToggleSort(field: string) { toggleSort(field) }
                         <tr v-if="event" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
                             <td class="px-6 py-4">{{ event.title }}</td>
                             <td class="px-6 py-4">{{ event.description }}</td>
-                            <td class="px-6 py-4">{{ event.event_date ? format(new Date(event.event_date), 'PPP') : '-' }}</td>
+                            <td class="px-6 py-4">{{ safeFormat(event.event_date, 'PPP') }}</td>
                             <td class="px-6 py-4">{{ event.is_free_service ? 'Yes' : 'No' }}</td>
                             <td class="px-6 py-4">{{ event.broadcast_status }}</td>
                             <td class="px-6 py-4 text-right print:hidden">

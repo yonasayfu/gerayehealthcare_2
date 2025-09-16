@@ -37,6 +37,13 @@ async function destroy(id: number) {
   if (!ok) return
   router.delete(route('admin.events.destroy', id))
 }
+
+// Safely format dates to avoid render errors on invalid inputs
+function safeFormat(dateStr: string | null | undefined, fmt = 'PPP') {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  return isNaN(d.getTime()) ? '-' : format(d, fmt)
+}
 </script>
 
 <template>
@@ -70,7 +77,7 @@ async function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Event Date:</p>
-                      <p class="font-medium text-foreground">{{ event.event_date ? format(new Date(event.event_date), 'PPP') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ safeFormat(event.event_date, 'PPP') }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Free Service:</p>
@@ -92,11 +99,11 @@ async function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-foreground">{{ event.created_at ? format(new Date(event.created_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ safeFormat(event.created_at, 'PPP p') }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-foreground">{{ event.updated_at ? format(new Date(event.updated_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ safeFormat(event.updated_at, 'PPP p') }}</p>
                     </div>
                   </div>
                 </div>
@@ -112,7 +119,7 @@ async function destroy(id: number) {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.events.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.events.edit', event.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -127,7 +134,7 @@ async function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

@@ -145,7 +145,7 @@ const statusColor = (status: string) => {
         </div>
         <div class="p-5">
           <div v-if="leaveRequests.data.length > 0" class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm">
+            <table class="min-w-full text-left text-sm print-table">
               <thead>
                 <tr>
                   <th class="p-2">Start Date</th>

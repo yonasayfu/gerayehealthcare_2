@@ -177,9 +177,18 @@ const statusColor = (status: string) => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="rounded-xl bg-white shadow-sm dark:border-sidebar-border dark:bg-background">
-      <div class="border-b p-5">
-        <h2 class="text-lg font-semibold">Staff Leave Requests</h2>
-        <p class="mt-1 text-sm text-muted-foreground">Review and manage all time-off requests from staff.</p>
+      <div class="border-b p-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">Staff Leave Requests</h2>
+          <p class="mt-1 text-sm text-muted-foreground">Review and manage all time-off requests from staff.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <Button as-child variant="secondary" size="sm">
+            <Link :href="route('staff.leave-requests.index')">
+              My Leave Requests
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div class="p-5">
@@ -206,7 +215,7 @@ const statusColor = (status: string) => {
         </div>
 
         <div v-if="leaveRequests.data.length > 0" class="overflow-x-auto">
-          <table class="min-w-full text-left text-sm">
+          <table class="min-w-full text-left text-sm print-table">
             <thead>
               <tr>
                 <th class="p-2 cursor-pointer select-none" @click="sortColumn('staff_member')">

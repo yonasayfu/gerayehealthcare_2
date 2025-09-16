@@ -11,6 +11,7 @@ import { computed } from 'vue';
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 import Pagination from '@/components/Pagination.vue';
+import TextPromptModal from '@/components/TextPromptModal.vue';
 
 const props = defineProps<{
   staffWithEarnings: {
@@ -22,6 +23,7 @@ const props = defineProps<{
       unique_patients_count: number;
       total_hours_logged: number;
       total_unpaid_cost: string | null;
+      pending_payout_requests_count?: number;
     }>;
     links: Array<any>;
     meta: { // Add meta for pagination details
@@ -47,10 +49,13 @@ const breadcrumbs: BreadcrumbItemType[] = [
 
 const perPage = ref(5);
 const searchQuery = ref('');
+const sortField = ref('first_name');
+const sortDirection = ref<'asc'|'desc'>('asc');
 
 const form = useForm({
   staff_id: null as number | null,
   per_page: perPage.value,
+  notes: '' as string,
 });
 
 const processingStaffId = ref<number | null>(null)
@@ -62,35 +67,47 @@ let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, (val) => {
   if (searchTimeout) clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: val }, { preserveState: true, replace: true });
+    router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: val, sort: sortField.value, direction: sortDirection.value }, { preserveState: true, replace: true });
   }, 300);
 });
 
 // Per-page change triggers reload preserving search
 watch(perPage, (value) => {
-  router.get(route('admin.staff-payouts.index'), { per_page: value, search: searchQuery.value }, { preserveState: true, replace: true });
+  router.get(route('admin.staff-payouts.index'), { per_page: value, search: searchQuery.value, sort: sortField.value, direction: sortDirection.value }, { preserveState: true, replace: true });
 });
 
-const processPayout = (staffId: number, staffName: string, amount: unknown) => {
-  if (!confirm(`Process payout of ${formatCurrency(amount)} for ${staffName}?`)) return
+function toggleSort(field: string) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+  router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: searchQuery.value, sort: sortField.value, direction: sortDirection.value }, { preserveState: true, replace: true });
+}
+
+const showProcessModal = ref(false)
+const pendingProcess: any = ref({ staffId: null, staffName: '', amount: 0 })
+function openProcessModal(staffId: number, staffName: string, amount: unknown) {
+  pendingProcess.value = { staffId, staffName, amount }
+  form.notes = ''
+  showProcessModal.value = true
+}
+function confirmProcess(notes: string) {
+  const { staffId, staffName, amount } = pendingProcess.value
   alertMessage.value = null
   alertType.value = null
   processingStaffId.value = staffId
-  form.transform(() => ({ staff_id: staffId }))
+  form.transform(() => ({ staff_id: staffId, notes }))
     .post(route('admin.staff-payouts.store'), {
       preserveScroll: true,
-      onSuccess: () => {
-        alertMessage.value = `Payout processed successfully for ${staffName}.`
-        alertType.value = 'success'
-        // reload current page to refresh unpaid counts while preserving filters
-        router.get(route('admin.staff-payouts.index'), { per_page: perPage.value, search: searchQuery.value }, { preserveState: true, replace: true })
-      },
       onError: (errors) => {
         alertMessage.value = Object.values(errors)[0] as string ?? 'Failed to process payout.'
         alertType.value = 'error'
       },
       onFinish: () => {
         processingStaffId.value = null
+        showProcessModal.value = false
       }
     })
 }
@@ -100,9 +117,7 @@ const formatCurrency = (value: unknown) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 };
 
-const printCurrentView = () => {
-  window.print();
-};
+const printCurrentView = () => { setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100) };
 
 // Updated Chart Data to use performanceData
 const chartData = computed(() => ({
@@ -165,28 +180,35 @@ const chartOptions = {
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
            <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
-              <th class="px-6 py-3">Staff Member</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('first_name')">Staff Member</th>
               <th class="px-6 py-3 text-center">Unpaid Visits</th>
               <th class="px-6 py-3 text-center">Patients Visited</th>
               <th class="px-6 py-3 text-center">Hours Logged</th>
               <th class="px-6 py-3">Total Unpaid Amount</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('pending_payout_requests_count')">Pending Requests</th>
               <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="staff in staffWithEarnings?.data" :key="staff.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <td class="px-6 py-4 font-medium">{{ staff.first_name }} {{ staff.last_name }}</td>
+              <td class="px-6 py-4 font-medium">
+                <div class="flex items-center gap-2">
+                  <span>{{ staff.first_name }} {{ staff.last_name }}</span>
+                  <span v-if="(staff.pending_payout_requests_count ?? 0) > 0" class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Requested</span>
+                </div>
+              </td>
               <td class="px-6 py-4 text-center">{{ staff.unpaid_visits_count }}</td>
               <td class="px-6 py-4 text-center">{{ staff.unique_patients_count }}</td>
               <td class="px-6 py-4 text-center">{{ staff.total_hours_logged }}</td>
               <td class="px-6 py-4 font-semibold text-green-600">{{ formatCurrency(staff.total_unpaid_cost) }}</td>
+              <td class="px-6 py-4 text-center">{{ staff.pending_payout_requests_count ?? 0 }}</td>
               <td class="px-6 py-4 text-right">
                 <button
                   v-if="staff.unpaid_visits_count > 0"
-                  @click="processPayout(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost)"
+                  @click="openProcessModal(staff.id, `${staff.first_name} ${staff.last_name}`, staff.total_unpaid_cost)"
                   :disabled="processingStaffId === staff.id"
                   class="inline-flex items-center gap-2 text-sm px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-md transition disabled:opacity-50"
                 >
@@ -217,4 +239,27 @@ const chartOptions = {
 
     </div>
   </AppLayout>
+  <TextPromptModal
+    :open="showProcessModal"
+    @update:open="(v:boolean)=> showProcessModal = v"
+    title="Process Payout"
+    description="Add notes for this payout (optional)."
+    label="Notes"
+    confirm-text="Process"
+    cancel-text="Cancel"
+    @confirm="confirmProcess"
+  />
 </template>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

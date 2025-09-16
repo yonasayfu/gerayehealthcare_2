@@ -22,6 +22,8 @@ const props = defineProps<{
     updated_at: string
     account_manager?: { first_name: string; last_name: string } | null;
   };
+  engagementsUpcoming?: Array<{ id:number; title:string; assigned_to:number; due_date:string; status:string; assignee?: { first_name:string; last_name:string } }>;
+  engagementsRecent?: Array<{ id:number; title:string; assigned_to:number; due_date:string; status:string; assignee?: { first_name:string; last_name:string } }>;
 }>()
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -113,6 +115,41 @@ function printPage() {
                   </div>
                 </div>
 
+                <div class="border-b pb-4 mb-4 print:hidden">
+                  <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Engagements</h2>
+                    <Link :href="route('admin.task-delegations.create', { task_category: 'Engagement', partner_id: partner.id, return_to: route('admin.partners.show', partner.id) })" class="btn-glass btn-glass-sm">New Engagement</Link>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upcoming</h3>
+                      <ul class="space-y-2">
+                        <li v-for="e in (engagementsUpcoming || [])" :key="e.id" class="flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 p-2">
+                          <div>
+                            <div class="font-medium">{{ e.title }}</div>
+                            <div class="text-xs text-gray-500">Due: {{ e.due_date }} • {{ e.assignee ? (e.assignee.first_name + ' ' + e.assignee.last_name) : '-' }}</div>
+                          </div>
+                          <Link :href="route('admin.task-delegations.show', e.id)" class="text-blue-600 dark:text-blue-400 text-xs">Open</Link>
+                        </li>
+                        <li v-if="!engagementsUpcoming || engagementsUpcoming.length === 0" class="text-sm text-gray-500">No upcoming engagements.</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Recent</h3>
+                      <ul class="space-y-2">
+                        <li v-for="e in (engagementsRecent || [])" :key="e.id" class="flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 p-2">
+                          <div>
+                            <div class="font-medium">{{ e.title }}</div>
+                            <div class="text-xs text-gray-500">Due: {{ e.due_date }} • {{ e.assignee ? (e.assignee.first_name + ' ' + e.assignee.last_name) : '-' }}</div>
+                          </div>
+                          <Link :href="route('admin.task-delegations.show', e.id)" class="text-blue-600 dark:text-blue-400 text-xs">Open</Link>
+                        </li>
+                        <li v-if="!engagementsRecent || engagementsRecent.length === 0" class="text-sm text-gray-500">No recent engagements.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">System Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
@@ -140,7 +177,7 @@ function printPage() {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.partners.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <Link :href="route('admin.task-delegations.create', { task_category: 'Engagement', partner_id: partner.id, return_to: route('admin.partners.show', partner.id) })" class="btn-glass btn-glass-sm">New Engagement</Link>
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.partners.edit', partner.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -154,7 +191,7 @@ function printPage() {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

@@ -129,7 +129,7 @@ async function destroy(id: number) {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.visit-services.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printSingleVisit" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.visit-services.edit', visitService.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -152,7 +152,7 @@ async function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

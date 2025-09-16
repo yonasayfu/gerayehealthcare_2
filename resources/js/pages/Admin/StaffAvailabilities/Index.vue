@@ -269,7 +269,7 @@ const serverError = computed(() => (form.errors as any)?.error)
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('staff_id')">

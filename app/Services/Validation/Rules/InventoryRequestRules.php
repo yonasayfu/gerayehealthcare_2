@@ -11,6 +11,7 @@ class InventoryRequestRules extends BaseResourceRules
             'item_id' => 'required|exists:inventory_items,id',
             'quantity_requested' => 'required|integer|min:1',
             'reason' => 'nullable|string',
+            'status' => 'required|string|in:Pending,Approved,Rejected,Fulfilled,Partially Fulfilled',
             'priority' => 'required|string|in:Low,Normal,High,Urgent',
             'needed_by_date' => 'nullable|date',
         ];

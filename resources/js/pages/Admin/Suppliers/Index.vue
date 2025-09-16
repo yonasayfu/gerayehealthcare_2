@@ -55,7 +55,9 @@ async function destroy(id: number) {
 }
 
 function printCurrentView() {
-  window.print();
+  setTimeout(() => {
+    try { window.print(); } catch (e) { console.error('Print failed', e); }
+  }, 100);
 }
 
 const printAllSuppliers = () => {
@@ -199,6 +201,12 @@ function onToggleSort(field: string) { toggleSort(field) }
 
 <style>
 @media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
   html, body {
     margin: 0 !important;
     padding: 0 !important;

@@ -89,10 +89,7 @@ function exportData(type: 'csv' | 'pdf') {
   window.open(route('admin.insurance-companies.export', { type }), '_blank');
 }
 
-function printCurrentView() {
-  // Use native print of the current page (header/footer are present in template)
-  window.print()
-}
+function printCurrentView() { setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100); }
 
 const printAllCompanies = () => {
     // Use centralized backend handler for printing all records
@@ -249,3 +246,19 @@ function toggleSort(field: string) {
   </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+
+  /* Keep table headers and rows intact across pages */
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+  img { page-break-inside: avoid; }
+}
+</style>

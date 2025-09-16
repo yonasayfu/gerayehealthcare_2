@@ -90,7 +90,7 @@ function destroy(id: number) {
 
 import { useExport } from '@/composables/useExport';
 
-const { printCurrentView, printAllRecords } = useExport({ routeName: 'admin.landing-pages', filters: props.filters });
+const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.landing-pages', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -133,6 +133,10 @@ function toggleSort(field: string) {
             <button @click="printCurrentView" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
+            </button>
+            <button @click="printAllRecords" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print All</span>
             </button>
           </div>
         </div>
@@ -243,4 +247,3 @@ function toggleSort(field: string) {
     </div>
   </AppLayout>
 </template>
-

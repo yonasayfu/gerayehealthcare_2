@@ -86,6 +86,43 @@ function printPage() {
                   </div>
                 </div>
 
+                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Eligibility</h2>
+                  <div class="flex items-center gap-3">
+                    <span
+                      v-if="eventRecommendation.eligibility?.status === 'eligible'"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                    >Eligible</span>
+                    <span
+                      v-else-if="eventRecommendation.eligibility?.status === 'ineligible'"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                    >Ineligible</span>
+                    <span
+                      v-else
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                    >Unknown</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                      Checked {{ eventRecommendation.eligibility?.checked ?? 0 }}/{{ eventRecommendation.eligibility?.total ?? 0 }} rules
+                    </span>
+                  </div>
+
+                  <div v-if="eventRecommendation.eligibility?.failed?.length" class="mt-3">
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">Failed Rules:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+                      <li v-for="fr in eventRecommendation.eligibility.failed" :key="fr.title + fr.operator + fr.expected">
+                        {{ fr.title }} {{ fr.operator }} {{ fr.expected }} (actual: {{ fr.actual ?? '-' }})
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div v-if="eventRecommendation.eligibility?.missing?.length" class="mt-3">
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">Missing Data For:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+                      <li v-for="m in eventRecommendation.eligibility.missing" :key="m">{{ m }}</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
                     <hr class="my-2 border-gray-300">
                     <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
@@ -97,7 +134,7 @@ function printPage() {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.event-recommendations.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.event-recommendations.edit', eventRecommendation.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -112,7 +149,7 @@ function printPage() {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

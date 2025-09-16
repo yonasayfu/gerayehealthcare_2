@@ -31,6 +31,8 @@ class TaskDelegationController extends BaseController
             'due_date' => request()->query('due_date'),
             'status' => request()->query('status'),
             'notes' => request()->query('notes'),
+            'task_category' => request()->query('task_category'),
+            'partner_id' => request()->query('partner_id'),
         ];
 
         return Inertia::render('Admin/TaskDelegations/Create', [
@@ -38,6 +40,7 @@ class TaskDelegationController extends BaseController
             'prefill' => $prefill,
             'returnTo' => request()->query('return_to'),
             'inventoryAlertId' => request()->query('inventory_alert_id'),
+            'partners' => \App\Models\Partner::select('id','name')->orderBy('name')->get(),
         ]);
     }
 
@@ -86,5 +89,18 @@ class TaskDelegationController extends BaseController
 
         return redirect()->route('admin.'.$this->getRouteName().'.index')
             ->with('banner', ucfirst($this->dataVariableName).' created successfully.')->with('bannerStyle', 'success');
+    }
+
+    public function update(\Illuminate\Http\Request $request, $id)
+    {
+        $taskDelegation = $this->service->getById($id);
+        $this->authorize('update', $taskDelegation);
+
+        $validatedData = $this->validateRequest($request, 'update', $taskDelegation);
+
+        $this->service->update($id, $validatedData);
+
+        return redirect()->route('admin.'.$this->getRouteName().'.index')
+            ->with('banner', ucfirst($this->dataVariableName).' updated successfully.')->with('bannerStyle', 'success');
     }
 }

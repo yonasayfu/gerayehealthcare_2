@@ -6,6 +6,7 @@ use App\DTOs\CreateStaffAvailabilityDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
+use App\Models\VisitService;
 use App\Services\StaffAvailabilityService;
 use App\Services\Validation\Rules\StaffAvailabilityRules;
 use Illuminate\Http\Request;
@@ -81,5 +82,24 @@ class StaffAvailabilityController extends BaseController
         $available = $this->service->getAvailableStaff($request->input('start_time'), $request->input('end_time'));
 
         return response()->json($available);
+    }
+
+    public function visitConflicts(Request $request)
+    {
+        $validated = $request->validate([
+            'staff_id' => 'required|exists:staff,id',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+        $count = VisitService::where('staff_id', $validated['staff_id'])
+            ->where('status', '!=', 'Cancelled')
+            ->whereBetween('scheduled_at', [$validated['start_time'], $validated['end_time']])
+            ->count();
+
+        return response()->json([
+            'hasConflicts' => $count > 0,
+            'count' => $count,
+        ]);
     }
 }

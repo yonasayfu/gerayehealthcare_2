@@ -130,23 +130,49 @@ For Fix
 
 STOP 1
 
-- [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingCampaigns no create and edit form, print and export csv not working, no delete pop up it is use the alert windows, again on index footer I found this “Document Generated: September 6th, 2025 1:04 PM” let remove from all models if it present
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingBudgets , print current at index.vue and print current at show.vue not working, Delete is not the same us other it use alert window, as a logic can not we add the difference of allocated account and spent( and show in index, how much is remain ) also it should populated in dashboard cards or reports
-- [ ] This dashboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingAnalytics, should be professional and dynamic that featch the actual data from the database since it is related to marketing modules and orgaizaion budget and other let make sure everything is in order and in relationships
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/LandingPages at show.vue the print is not working, also at the index.vue the print current have not had a good UI,export csv not working at create and edit.vue what is Form Fields: it is in json format how do I mange ..
-- [ ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/LeaveRequests/index, let make sure it is working from all staff side, since the superadmin,ceo,coo and admin are staffs they should have access to fill the form, further they can managed the filled form by others, currently super admin can not do his self request , since the staff side is not implemented I can not see the request leave request
-- [ ] This moduel we should focus and make sure professional implemented, also let differ how it works and the relationships with others models class /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Invoices, print current at show.vue it have not had a good UI,there are a download pdf in show.vue I see this also in some models we don’t need it let remove it. Make sure this invoice related to patients,finace,docters also 3rd party partners, insurances… No pagination indicator on the bottom at index.vue ,also how much this /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Invoices/Incoming.vue is genuine and integrate and have a relationships with others , 
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryTransactions the create transaction classs is not available, Also edit.vue is not working there is a type(like Id mismatch) and other error, There is two file print current and prin all, let make generalized
-- [ ]  Create a new inventory request I found “An unexpected error occurred: Missing required parameter: status for DTO App\DTOs\CreateInventoryRequestDTO” since I can not create make sure this edit ,delete and update also print is working correctly
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryItems, there are print all and print single, also on show.vue print current is not have a good UI
-- [ ]  At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryAlerts After create an alert and assigned delegate the task to someone I found “Vue error: TypeError: Cannot read properties of undefined (reading 'id')  at Show.vue:122:94””
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventStaffAssignments, I can not create and edit, there is a kind of DTO problem, also there are a print current file let make centralized…
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Events, no create and edit form available ..and when I click pagination to next it didn’t work it shows me empty 
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventRecommendations, I can to create recommendations, also make sure this is available in API for mobile, guests can recommend by web or mobile app, so let put in gusts privileges to, all staff ,any one recommand so let make it work, again here also have a print current file let centralized
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventParticipants, I can not create and edit there is no form, also make sure other functions are working. Also once the event is created it should sent a notification for user the one it assigned… let make the print centralized
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventBroadcasts error on dto for crate a borodacase event , let make sure other fuction are working too
-- [ ] Do you think this moduel is mature /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EligibilityCriteria and what about it relationships with others ..
+- [ x] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingCampaigns no create and edit form, print and export csv not working, no delete pop up it is use the alert windows, again on index footer I found this “Document Generated: September 6th, 2025 1:04 PM” let remove from all models if it present
+
+
+- [ x] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingBudgets , print current at index.vue and print current at show.vue not working, Delete is not the same us other it use alert window, as a logic can not we add the difference of allocated account and spent( and show in index, how much is remain ) also it should populated in dashboard cards or reports
+
+- [ x] This dashboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/MarketingAnalytics, should be professional and dynamic that featch the actual data from the database since it is related to marketing modules and orgaizaion budget and other let make sure everything is in order and in relationships
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/LandingPages at show.vue the print is not working, also at the index.vue the print current have not had a good UI make consitnect like caregiver modules,export csv not working. At create and edit.vue what is Form Fields: it is in json format how do I mange ..I mean in some parts I see json formats textarea which is realted to... so is it good to keep it or change to some kind of vissible format for end user.. since end user didn't interact with json format
+
+
+- [x ] At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/LeaveRequests/index, let make sure it is working from all staff side, since the superadmin,ceo,coo and admin are staffs they should have access to fill the form, further they can managed the filled form by others, currently super admin can not do his self request , since the staff side is not implemented I can not see the request leave request
+
+- [ x] This moduel we should focus and make sure professional implemented, also let differ how it works and the relationships with others models class /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Invoices, print current at show.vue it have not had a good UI,there are a download pdf in show.vue I see this also in some models we don’t need it let remove it. Make sure this invoice related to patients,finace,docters also 3rd party partners, insurances… No pagination indicator on the bottom at index.vue ,also how much this /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Invoices/Incoming.vue is genuine and integrate and have a relationships with others , 
+
+
+- [ x] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryTransactions the create transaction classs is not available, Also edit.vue is not working there is a type(like Id mismatch) and other error, There is two file print current and prin all, let make generalized
+
+
+- [ x]  Create a new inventory request I found “An unexpected error occurred: Missing required parameter: status for DTO App\DTOs\CreateInventoryRequestDTO” since I can not create make sure this edit ,delete and update also print is working correctly
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryItems, there are print all and print single, also on show.vue print current is not have a good UI
+
+- [ x]  At /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/InventoryAlerts After create an alert and assigned delegate the task to someone I found “Vue error: TypeError: Cannot read properties of undefined (reading 'id')  at Show.vue:122:94””
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventStaffAssignments, I can not create and edit, there is a kind of DTO problem, also there are a print current file let make centralized…
+
+- [x ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Events, no create and edit form available ..and when I click pagination to next it didn’t work it shows me empty 
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventRecommendations, I can to create recommendations, also make sure this is available in API for mobile, guests can recommend by web or mobile app, so let put in gusts privileges to, all staff ,any one recommand so let make it work, again here also have a print current file let centralized
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventParticipants, I can not create and edit there is no form, also make sure other functions are working. Also once the event is created it should sent a notification for user the one it assigned… let make the print centralized
+
+
+
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EventBroadcasts error on dto for crate a borodacase event , let make sure other fuction are working too
+
+
+- [ x] Do you think this moduel is mature /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EligibilityCriteria and what about it relationships with others ..
+
+
 - [ ] Here in the main dahsboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Dashboard/Index.vue I see that there are some static file is present if it is good let keep or let remove and let make sure the one that needs to be dynamic  let make them, also I see that there are un used code snippets and let remove it, and I see that we are using axios, is this a good approach since we are using inertia which one is best regarding to performance wise, also in the dashboard there are Many tabs like analytics, reports … on the reports the chart is not working and it is an image format
+
+
 - [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/CaregiverAssignments, let make sure it is not clash with the unavlible and available assigned from the staff if he assign it is not available…
 - [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/CampaignContents when I create I found this error “Validation failed. Please check your input.” Also make sure the edit and others are working
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AppLayout.vue I see that many inventory alerted code snippets is it correct is it the place does we used it?

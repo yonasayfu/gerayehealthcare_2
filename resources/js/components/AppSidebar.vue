@@ -39,12 +39,7 @@ interface SidebarNavGroup {
 
 // Removed AppPageProps missing type import to satisfy TS
 
-const props = defineProps<{
-  unreadCount?: number;
-  inventoryAlertCount?: number;
-  myTasksCount?: number;
-  myTodoCount?: number;
-}>()
+// no props currently used in sidebar
 
 const page = usePage();
 const user = computed(() => (page.props as any)?.auth?.user ?? null);
@@ -69,18 +64,7 @@ const hasRole = (role: string): boolean => {
     return userRoles.value?.includes(role.toLowerCase()) || false;
 }
 
-// Permission-based access instead of role-based
-const hasAnyPermission = (permissions: string[]): boolean => {
-    if (!user.value) return false;
-    if (userRoles.value?.some((role: string) => role === 'super-admin')) return true;
-    return permissions.some(permission => user.value.permissions?.includes(permission));
-}
-
-const hasAllPermissions = (permissions: string[]): boolean => {
-    if (!user.value) return false;
-    if (userRoles.value?.some((role: string) => role === 'super-admin')) return true;
-    return permissions.every(permission => user.value.permissions?.includes(permission));
-}
+// Permission-based access helpers removed (unused)
 
 // Track open groups with localStorage persistence
 const SIDEBAR_STORAGE_KEY = 'sidebar-open-groups'
@@ -202,7 +186,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Lead Sources', routeName: 'admin.lead-sources.index', icon: GitFork, permission: 'manage marketing' },
       { title: 'Budgets', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage marketing' },
       { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
-      { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'manage marketing' },
+      { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'view_any_marketing_tasks' },
       { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
     ],
   },
@@ -283,7 +267,7 @@ function hasRoute(name?: string) {
   try {
     // ziggy-js exposes route().has
     return (route as any)().has(name)
-  } catch (e) {
+  } catch {
     const z: any = (window as any).Ziggy
     return !!(z && z.routes && z.routes[name])
   }
@@ -430,13 +414,7 @@ const toggleGroup = (groupName: string, event?: Event) => {
   });
 }
 
-// Function to close a specific group
-const closeGroup = (groupName: string) => {
-  const currentIndex = openGroups.value.indexOf(groupName);
-  if (currentIndex > -1) {
-    openGroups.value.splice(currentIndex, 1);
-  }
-};
+// closeGroup removed (unused)
 
 // Toggle expand/collapse all with single button
 const toggleAllGroups = (event?: Event) => {

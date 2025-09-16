@@ -2,6 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue' // Import the new Form component
+import { useToast } from '@/components/ui/toast/use-toast'
 
 const props = defineProps<{
   campaigns: Array<any>;
@@ -34,7 +35,24 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(route('admin.marketing-tasks.store'));
+  const { toast } = useToast()
+  form.post(route('admin.marketing-tasks.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast({
+        title: 'Marketing task created',
+        description: 'Notifications sent to assignee and leadership.',
+        variant: 'default',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Validation failed',
+        description: 'Please fix the highlighted fields.',
+        variant: 'destructive',
+      })
+    },
+  });
 };
 </script>
 
@@ -58,7 +76,15 @@ const submit = () => {
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <!-- Map backend props to Form expectations -->
+          <Form
+            :form="form"
+            :campaigns="props.campaigns"
+            :staffs="props.staffMembers"
+            :campaign-contents="props.contents"
+            :task-types="props.taskTypes"
+            :statuses="props.statuses"
+          />
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.marketing-tasks.index')" class="btn-glass btn-glass-sm">Cancel</Link>

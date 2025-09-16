@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next';
+import { Printer, Edit3, Download } from 'lucide-vue-next';
 import { format } from 'date-fns';
 import ShowHeader from '@/components/ShowHeader.vue'
 
@@ -16,7 +16,7 @@ const breadcrumbs = [
 ];
 
 function printPage() {
-  window.print();
+  setTimeout(() => window.print(), 30);
 }
 
 // Single supplier print uses in-browser preview for consistency
@@ -81,8 +81,10 @@ function printPage() {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.suppliers.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <button @click="printPage" class="btn-glass btn-glass-sm">
+            <Printer class="icon" />
+            <span class="hidden sm:inline">Print Current</span>
+          </button>
           <Link :href="route('admin.suppliers.edit', supplier.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>

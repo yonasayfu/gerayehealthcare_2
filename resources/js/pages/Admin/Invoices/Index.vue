@@ -41,7 +41,7 @@ const { search, perPage, toggleSort } = useTableFilters({
 })
 
 function printCurrentView() {
-  setTimeout(() => window.print(), 30);
+  setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100);
 }
 
 function approveInvoice(id: number) {
@@ -180,7 +180,14 @@ function approveInvoice(id: number) {
           </tbody>
         </table>
       </div>
-      <Pagination :links="invoices.links" class="print:hidden" />
+      <div class="flex items-center justify-between gap-3 print:hidden">
+        <div class="text-sm text-gray-600 dark:text-gray-300">
+          <span v-if="invoices && (invoices.from !== undefined && invoices.to !== undefined && invoices.total !== undefined)">
+            Showing {{ invoices.from }}–{{ invoices.to }} of {{ invoices.total }}
+          </span>
+        </div>
+        <Pagination :links="invoices.links" />
+      </div>
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
         <p>Document Generated: {{ formattedGeneratedDate }}</p>
       </div>
@@ -189,15 +196,26 @@ function approveInvoice(id: number) {
 </template>
 
 <style>
-@page { size: A4 portrait; margin: 12mm; }
 @media print {
-  html, body { background: #fff !important; }
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
   .print-header-content { page-break-inside: avoid; }
   .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
   .print-clinic-name { font-size: 16px; margin: 0; }
   .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+
+  /* Table */
   .print-table { font-size: 11px; border-collapse: collapse; }
   .print-table th, .print-table td { border: 1px solid #d1d5db; padding: 6px 8px; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
   .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
   hr { display: none !important; }
 }

@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+// no local state here
 import { Search, Bell } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import NavUser from '@/components/NavUser.vue'
-import { usePage } from '@inertiajs/vue3'
-import type { User } from '@/types'
-
-const page = usePage()
-const user = page.props.auth.user as User
+// user not used here
 </script>
 
 <template>

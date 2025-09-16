@@ -2,6 +2,12 @@
   <Head :title="`Ethiopian Calendar Day: ${ethiopianCalendarDay.gregorian_date}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 print-document-title">Ethiopian Calendar Day Details</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
       <div class="flex justify-start mb-4">
         <Link :href="route('admin.ethiopian-calendar-days.index')" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:outline-none focus:border-gray-400 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
           <ArrowLeft class="h-4 w-4" />

@@ -210,12 +210,12 @@ function fetchAnalyticsExtras() {
     .catch(() => budgetPacing.value = null);
 
   // Fetch staff performance
-  axios.get(route('admin.marketing-analytics.staffPerformance'), { params })
+  axios.get(route('admin.marketing-analytics.staff-performance'), { params })
     .then((res: AxiosResponse<any[]>) => staffPerformance.value = res.data || [])
     .catch(() => staffPerformance.value = []);
 
   // Fetch task SLA
-  axios.get(route('admin.marketing-analytics.taskSla'), { params })
+  axios.get(route('admin.marketing-analytics.task-sla'), { params })
     .then((res: AxiosResponse<any>) => taskSla.value = res.data)
     .catch(() => taskSla.value = { total: 0, completed: 0, on_time: 0, overdue_open: 0, overdue_completed: 0, on_time_rate: 0 });
 }

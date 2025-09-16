@@ -4,30 +4,43 @@ import { Head, useForm, Link } from '@inertiajs/vue3'
 import Form from './Form.vue'
 import FormActions from '@/components/FormActions.vue'
 
-const props = defineProps({
-  inventoryTransaction: Object,
-  staffList: Array,
-  inventoryItems: Array,
-})
+interface StaffOption { id: number; first_name: string; last_name: string }
+interface ItemOption { id: number; name: string }
+interface InventoryTransaction {
+  id: number
+  item_id: number | null
+  transaction_type: string | null
+  quantity: number
+  performed_by_id: number | null
+  from_location: string | null
+  to_location: string | null
+  notes: string | null
+}
+
+const props = defineProps<{
+  inventoryTransaction: InventoryTransaction
+  staffList: StaffOption[]
+  inventoryItems: ItemOption[]
+}>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Inventory Transactions', href: route('admin.inventory-transactions.index') },
-  { title: 'Edit', href: route('admin.inventory-transactions.edit', (props as any).inventoryTransaction?.id) },
+  { title: 'Edit', href: route('admin.inventory-transactions.edit', props.inventoryTransaction?.id) },
 ]
 
 const form = useForm({
-  item_id: (props as any).inventoryTransaction?.item_id ?? null,
-  transaction_type: (props as any).inventoryTransaction?.transaction_type ?? null,
-  quantity: (props as any).inventoryTransaction?.quantity ?? 1,
-  performed_by_id: (props as any).inventoryTransaction?.performed_by_id ?? null,
-  from_location: (props as any).inventoryTransaction?.from_location ?? '',
-  to_location: (props as any).inventoryTransaction?.to_location ?? '',
-  notes: (props as any).inventoryTransaction?.notes ?? '',
+  item_id: props.inventoryTransaction?.item_id ?? null,
+  transaction_type: props.inventoryTransaction?.transaction_type ?? null,
+  quantity: Number(props.inventoryTransaction?.quantity ?? 1),
+  performed_by_id: props.inventoryTransaction?.performed_by_id ?? null,
+  from_location: props.inventoryTransaction?.from_location ?? '',
+  to_location: props.inventoryTransaction?.to_location ?? '',
+  notes: props.inventoryTransaction?.notes ?? '',
 })
 
 function submit() {
-  form.put(route('admin.inventory-transactions.update', (props as any).inventoryTransaction.id))
+  form.put(route('admin.inventory-transactions.update', props.inventoryTransaction.id))
 }
 </script>
 

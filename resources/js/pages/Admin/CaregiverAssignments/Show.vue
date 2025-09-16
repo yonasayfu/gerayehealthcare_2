@@ -124,7 +124,7 @@ function printSingleAssignment() {
       <!-- Footer actions -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.assignments.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <Link :href="route('admin.assignments.edit', assignment.id)" class="btn-glass btn-glass-sm">Edit Assignment</Link>
           <button @click="printSingleAssignment" class="btn-glass btn-glass-sm">Print Current</button>
         </div>
@@ -143,7 +143,7 @@ function printSingleAssignment() {
 /* Print styles for Single Assignment */
 @media print {
   @page {
-    size: A4;
+    size: A4 landscape;
     margin: 0.5cm;
   }
 

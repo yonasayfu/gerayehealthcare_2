@@ -543,7 +543,7 @@ watch([rangeStart, rangeEnd], () => {
           <div class="col-span-full lg:col-span-2">
             <h3 class="text-lg font-medium">Recent Appointments</h3>
             <div class="mt-4 overflow-x-auto">
-              <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+              <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden print-table">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
                     <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('patient')">Patient <span v-if="sortKey==='patient'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
@@ -605,7 +605,7 @@ watch([rangeStart, rangeEnd], () => {
           <div class="col-span-full">
             <h3 class="text-lg font-medium">Top Staff by Hours ({{ rangeStart }} → {{ rangeEnd }})</h3>
             <div class="mt-4 overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
-              <table class="min-w-full">
+              <table class="min-w-full print-table">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
                     <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">#</th>
@@ -666,7 +666,7 @@ watch([rangeStart, rangeEnd], () => {
           <h3 class="text-lg font-semibold">Upcoming Visits (Next 24h)</h3>
           <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="min-w-full">
+              <table class="min-w-full print-table">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
                     <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Patient</th>

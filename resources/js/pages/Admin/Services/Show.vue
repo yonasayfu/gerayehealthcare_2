@@ -17,6 +17,10 @@ function formatCurrency(amount: number | string) {
   const n = Number(amount ?? 0)
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 }
+
+function printPage() {
+  setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100)
+}
 </script>
 
 <template>
@@ -29,6 +33,13 @@ function formatCurrency(amount: number | string) {
           <Link :href="route('admin.services.index')" class="btn-glass btn-glass-sm">Back</Link>
         </template>
       </ShowHeader>
+
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Service Details</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
 
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,8 +76,8 @@ function formatCurrency(amount: number | string) {
             <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.services.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="window.print()" class="btn-glass btn-glass-sm">Print Current</button>
+          
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.services.edit', service.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>

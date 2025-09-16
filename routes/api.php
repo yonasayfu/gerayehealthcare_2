@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\NotificationController as ApiNotificationControl
 use App\Http\Controllers\Api\V1\PatientController;
 use App\Http\Controllers\Api\V1\PushTokenController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\PrescriptionController as ApiPrescriptionController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\VisitServiceController as ApiVisitServiceController;
 use App\Http\Controllers\GroupMessageController;
@@ -52,6 +53,10 @@ Route::prefix('v1')->group(function () {
 
         // Services catalog
         Route::get('/services', [ServiceController::class, 'index']);
+
+        // Prescriptions for mobile (doctor/patient self access)
+        Route::get('/prescriptions', [ApiPrescriptionController::class, 'index']);
+        Route::get('/prescriptions/{prescription}', [ApiPrescriptionController::class, 'show']);
 
         // Messaging
         Route::get('/messages/threads', [ApiMessageController::class, 'threads'])->middleware('throttle:60,1');
@@ -159,4 +164,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/convert-to-ethiopian', [DateConversionController::class, 'convertToEthiopian']);
     Route::post('/convert-gregorian-to-ethiopian', [DateConversionController::class, 'convertGregorianToEthiopian']);
     Route::post('/convert-ethiopian-to-gregorian', [DateConversionController::class, 'convertEthiopianToGregorian']);
+
+    // Public: Event Recommendations (guest + staff can submit)
+    Route::post('/event-recommendations', [\App\Http\Controllers\Api\V1\EventRecommendationController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('api.v1.event-recommendations.store');
 });

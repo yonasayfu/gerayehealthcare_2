@@ -67,18 +67,18 @@ const breadcrumbs = [
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Event</label>
-              <select v-model="form.event_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
-                <option value="">Select Event</option>
-                <option v-for="ev in events" :key="ev.id" :value="ev.id">{{ ev.title ?? ev.name ?? ('Event #' + ev.id) }}</option>
+              <select v-model.number="form.event_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option :value="null">Select Event</option>
+                <option v-for="ev in events" :key="ev.id" :value="Number(ev.id)">{{ ev.title ?? ev.name ?? ('Event #' + ev.id) }}</option>
               </select>
               <InputError class="mt-1" :message="form.errors?.event_id" />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Staff</label>
-              <select v-model="form.staff_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
-                <option value="">Select Staff</option>
-                <option v-for="s in staff" :key="s.id" :value="s.id">{{ s.full_name ?? s.name ?? ('Staff #' + s.id) }}</option>
+              <select v-model.number="form.staff_id" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+                <option :value="null">Select Staff</option>
+                <option v-for="s in staff" :key="s.id" :value="Number(s.id)">{{ s.full_name ?? s.name ?? ('Staff #' + s.id) }}</option>
               </select>
               <InputError class="mt-1" :message="form.errors?.staff_id" />
             </div>

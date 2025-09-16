@@ -11,6 +11,8 @@ use App\Models\SharedInvoice;
 use App\Models\Staff;
 use App\Services\SharedInvoiceService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 
 class SharedInvoiceController extends Controller
@@ -29,12 +31,14 @@ class SharedInvoiceController extends Controller
         $search = (string) $request->input('search', '');
         $sort = (string) $request->input('sort', '');
         $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $status = $request->input('status');
 
         $sortable = [
             'id' => 'id',
             'share_date' => 'share_date',
             'status' => 'status',
             'created_at' => 'created_at',
+            'share_views' => 'share_views',
         ];
 
         $query = SharedInvoice::with(['invoice', 'partner', 'sharedBy']);
@@ -56,6 +60,10 @@ class SharedInvoiceController extends Controller
             });
         }
 
+        if ($status && $status !== 'All') {
+            $query->where('status', $status);
+        }
+
         if ($sort && isset($sortable[$sort])) {
             $query->orderBy($sortable[$sort], $direction);
         } else {
@@ -71,6 +79,7 @@ class SharedInvoiceController extends Controller
                 'sort' => $sort,
                 'direction' => $direction,
                 'per_page' => $perPage,
+                'status' => $status,
             ],
         ]);
     }
@@ -180,5 +189,93 @@ class SharedInvoiceController extends Controller
     public function printSingle(SharedInvoice $sharedInvoice, Request $request)
     {
         return $this->sharedInvoiceService->printSingle($sharedInvoice, $request);
+    }
+
+    /**
+     * Generate or return a shareable public link for a shared invoice.
+     */
+    public function shareLink(SharedInvoice $sharedInvoice)
+    {
+        $now = Carbon::now();
+        if (! $sharedInvoice->share_token || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+            $sharedInvoice->share_token = Str::random(48);
+            // Default expiry in 30 days; adjust as needed
+            $sharedInvoice->share_expires_at = $now->copy()->addDays(30);
+            $sharedInvoice->save();
+        }
+
+        $url = route('public.shared-invoices.show', ['token' => $sharedInvoice->share_token]);
+
+        return response()->json(['url' => $url, 'expires_at' => optional($sharedInvoice->share_expires_at)->toIso8601String()]);
+    }
+
+    /**
+     * Public view by token (no auth). Validates expiry.
+     */
+    public function publicShow(string $token)
+    {
+        $sharedInvoice = SharedInvoice::with(['invoice', 'partner', 'sharedBy'])
+            ->where('share_token', $token)
+            ->first();
+
+        if (! $sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+            abort(404);
+        }
+
+        // Optional PIN gate
+        if ($sharedInvoice->share_pin) {
+            $sessionKey = 'shared_invoice_auth_'.$token;
+            if (! session()->has($sessionKey)) {
+                return view('public.shared-invoice-pin', ['token' => $token]);
+            }
+        }
+
+        // Track view
+        $sharedInvoice->increment('share_views');
+        $sharedInvoice->last_viewed_at = now();
+        $sharedInvoice->save();
+
+        return view('public.shared-invoice', [
+            'invoice' => $sharedInvoice,
+        ]);
+    }
+
+    public function publicAuthenticate(Request $request, string $token)
+    {
+        $request->validate(['pin' => 'required|string|max:20']);
+        $sharedInvoice = SharedInvoice::where('share_token', $token)->first();
+        if (! $sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+            abort(404);
+        }
+
+        if (hash_equals((string) $sharedInvoice->share_pin, (string) $request->input('pin'))) {
+            session()->put('shared_invoice_auth_'.$token, true);
+            return redirect()->route('public.shared-invoices.show', ['token' => $token]);
+        }
+
+        return back()->withErrors(['pin' => 'Invalid PIN']);
+    }
+
+    public function rotateShareLink(SharedInvoice $sharedInvoice, Request $request)
+    {
+        $sharedInvoice->share_token = Str::random(48);
+        $sharedInvoice->share_expires_at = Carbon::now()->addDays(30);
+        $sharedInvoice->save();
+        return response()->json(['ok' => true]);
+    }
+
+    public function expireShareLink(SharedInvoice $sharedInvoice)
+    {
+        $sharedInvoice->share_expires_at = Carbon::now();
+        $sharedInvoice->save();
+        return response()->json(['ok' => true]);
+    }
+
+    public function setSharePin(SharedInvoice $sharedInvoice, Request $request)
+    {
+        $request->validate(['pin' => 'nullable|string|max:20']);
+        $sharedInvoice->share_pin = $request->input('pin');
+        $sharedInvoice->save();
+        return response()->json(['ok' => true]);
     }
 }

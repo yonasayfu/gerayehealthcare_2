@@ -31,6 +31,13 @@ const breadcrumbs = [
           </template>
         </ShowHeader>
 
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+          <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+          <p class="text-gray-600 dark:text-gray-400 print-document-title">User Details</p>
+          <hr class="my-3 border-gray-300 print:my-2">
+        </div>
+
         <div class="p-6 space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

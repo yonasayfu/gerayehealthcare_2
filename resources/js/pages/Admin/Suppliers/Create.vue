@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, Link } from '@inertiajs/vue3';
+import Form from './Form.vue'
+import FormActions from '@/components/FormActions.vue'
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -42,18 +44,7 @@ function submit() {
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
           <Form :form="form" v-bind="$props" />
-          <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
-          <div class="flex justify-end gap-2 pt-2">
-            <Link :href="route('admin.suppliers.index')" class="btn-glass btn-glass-sm">Cancel</Link>
-
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="btn-glass btn-glass-sm"
-            >
-              {{ form.processing ? 'Creating...' : 'Create Supplier' }}
-            </button>
-          </div>
+          <FormActions :cancel-href="route('admin.suppliers.index')" submit-text="Create Supplier" :processing="form.processing" />
         </form>
       </div>
     </div>

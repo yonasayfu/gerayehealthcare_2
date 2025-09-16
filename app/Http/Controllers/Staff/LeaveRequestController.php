@@ -30,6 +30,12 @@ class LeaveRequestController extends Controller
     public function index()
     {
         $staff = Auth::user()->staff;
+        if (!$staff) {
+            return redirect()
+                ->route('dashboard')
+                ->with('banner', 'Your account is not linked to a staff profile. Please contact an administrator to set up your staff profile to request leave.')
+                ->with('bannerStyle', 'danger');
+        }
         $leaveRequests = LeaveRequest::where('staff_id', $staff->id)
             ->latest()
             ->paginate(10);
@@ -83,9 +89,17 @@ class LeaveRequestController extends Controller
      */
     public function store(StoreStaffLeaveRequest $request)
     {
+        $staff = Auth::user()->staff;
+        if (!$staff) {
+            return redirect()
+                ->back()
+                ->with('banner', 'Cannot submit leave request: no staff profile linked to your account.')
+                ->with('bannerStyle', 'danger');
+        }
+
         $validated = $request->validated();
         $dto = new CreateLeaveRequestDTO(
-            staff_id: Auth::user()->staff->id,
+            staff_id: $staff->id,
             start_date: $validated['start_date'],
             end_date: $validated['end_date'],
             reason: $validated['reason'],

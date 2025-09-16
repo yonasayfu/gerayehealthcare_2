@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
+import TextPromptModal from '@/components/TextPromptModal.vue'
 import ShowHeader from '@/components/ShowHeader.vue'
 import { format } from 'date-fns'
 
@@ -16,6 +17,15 @@ const formatCurrency = (value: unknown) => {
   const amount = parseFloat(String(value ?? '0'));
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
 };
+
+const showRevertModal = ref(false)
+function revertPayout() {
+  showRevertModal.value = true
+}
+function confirmRevert(reason: string) {
+  router.post(route('admin.staff-payouts.revert', props.staffPayout.id), { reason })
+  showRevertModal.value = false
+}
 </script>
 
 <template>
@@ -27,6 +37,13 @@ const formatCurrency = (value: unknown) => {
           <Link :href="route('admin.staff-payouts.index')" class="btn-glass btn-glass-sm">Back</Link>
         </template>
       </ShowHeader>
+
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Staff Payout Details</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
 
       <div class="p-6 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -55,7 +72,7 @@ const formatCurrency = (value: unknown) => {
         <div v-if="props.staffPayout.visit_services?.length" class="pt-4">
           <h3 class="font-semibold mb-2">Included Visit Services</h3>
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="w-full text-left text-sm print-table">
               <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
                 <tr>
                   <th class="px-4 py-2">ID</th>
@@ -79,11 +96,20 @@ const formatCurrency = (value: unknown) => {
 
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.staff-payouts.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="revertPayout" class="btn-glass btn-glass-sm bg-red-600 hover:bg-red-700 text-white">Revert</button>
           <Link :href="route('admin.staff-payouts.edit', props.staffPayout.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
     </div>
   </AppLayout>
+  <TextPromptModal
+    :open="showRevertModal"
+    @update:open="(v:boolean)=> showRevertModal = v"
+    title="Revert Payout"
+    description="Provide a reason for the reversal (optional)."
+    label="Reason"
+    confirm-text="Revert"
+    cancel-text="Cancel"
+    @confirm="confirmRevert"
+  />
 </template>
-

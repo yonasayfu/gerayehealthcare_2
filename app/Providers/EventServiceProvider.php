@@ -4,12 +4,14 @@ namespace App\Providers;
 
 use App\Events\CaregiverAssigned;
 use App\Events\EventParticipantRegistered;
+use App\Events\StaffAssignedToEvent;
 use App\Events\InventoryRequestSaved;
 use App\Events\PatientCreatedFromRecommendation;
 use App\Listeners\CheckForLowStock;
 use App\Listeners\CreatePatientFromRecommendation;
 use App\Listeners\RegisterEventParticipant;
 use App\Listeners\SendCaregiverAssignmentNotification;
+use App\Listeners\AssignStaffToEvent;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 

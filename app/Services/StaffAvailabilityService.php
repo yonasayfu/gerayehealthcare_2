@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Staff;
 use App\Models\StaffAvailability;
+use App\Models\VisitService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -94,6 +95,7 @@ class StaffAvailabilityService extends BaseService
         $staffId = (int) ($data['staff_id'] ?? 0);
         $start = $data['start_time'] ?? null;
         $end = $data['end_time'] ?? null;
+        $status = (string) ($data['status'] ?? 'Available');
 
         $overlap = StaffAvailability::where('staff_id', $staffId)
             ->where('end_time', '>', $start)
@@ -107,6 +109,20 @@ class StaffAvailabilityService extends BaseService
             throw ValidationException::withMessages([
                 'error' => 'Conflict: Overlapping availability slot exists for this staff within the selected time range.',
             ]);
+        }
+
+        // If marking as Unavailable, ensure no scheduled visits exist in that window
+        if (strcasecmp($status, 'Unavailable') === 0) {
+            $visitConflict = VisitService::where('staff_id', $staffId)
+                ->where('status', '!=', 'Cancelled')
+                ->whereBetween('scheduled_at', [$start, $end])
+                ->exists();
+
+            if ($visitConflict) {
+                throw ValidationException::withMessages([
+                    'error' => 'Conflict: Staff has scheduled visits in the selected time range. Cannot set Unavailable over existing assignments.',
+                ]);
+            }
         }
     }
 

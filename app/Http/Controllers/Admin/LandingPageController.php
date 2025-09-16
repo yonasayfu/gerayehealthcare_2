@@ -36,6 +36,11 @@ class LandingPageController extends BaseController
         ]);
     }
 
+    public function export(Request $request)
+    {
+        return app(LandingPageService::class)->export($request);
+    }
+
     public function printAll(Request $request)
     {
         return app(LandingPageService::class)->printAll($request);

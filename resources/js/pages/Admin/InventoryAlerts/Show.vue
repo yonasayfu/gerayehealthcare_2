@@ -30,6 +30,13 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
             <Link :href="route('admin.inventory-alerts.edit', inventoryAlert.id)" class="btn-glass btn-glass-sm">Edit</Link>
           </template>
         </ShowHeader>
+
+        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+          <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+          <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+          <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Alert Details</p>
+          <hr class="my-3 border-gray-300 print:my-2">
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -106,7 +113,7 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
               </div>
             </div>
             <div class="flex gap-2 pt-2">
-              <Link :href="route('admin.task-delegations.edit', inventoryAlert.delegatedTask.id)" class="btn-glass btn-glass-sm">Edit Task</Link>
+              <Link :href="route('admin.task-delegations.edit', (inventoryAlert?.delegatedTask?.id ?? inventoryAlert?.delegated_task_id))" class="btn-glass btn-glass-sm">Edit Task</Link>
             </div>
           </template>
 

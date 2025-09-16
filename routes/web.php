@@ -395,6 +395,8 @@ Route::middleware(['auth', 'verified'])
             Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
             Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
             Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
+            // Fetch medical visits for a patient (JSON)
+            Route::get('medical-documents/visits-for-patient/{patient}', [MedicalDocumentController::class, 'visitsForPatient'])->name('medical-documents.visitsForPatient');
         });
         Route::resource('medical-documents', MedicalDocumentController::class)->middleware([
             'can:view medical documents,medical_document',
@@ -409,6 +411,10 @@ Route::middleware(['auth', 'verified'])
             Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
             Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
             Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
+            Route::get('prescriptions/{prescription}/share-link', [PrescriptionController::class, 'shareLink'])->name('prescriptions.shareLink');
+            Route::post('prescriptions/{prescription}/rotate-share', [PrescriptionController::class, 'rotateShareLink'])->name('prescriptions.rotateShare');
+            Route::post('prescriptions/{prescription}/expire-share', [PrescriptionController::class, 'expireShareLink'])->name('prescriptions.expireShare');
+            Route::post('prescriptions/{prescription}/set-pin', [PrescriptionController::class, 'setSharePin'])->name('prescriptions.setPin');
         });
         Route::resource('prescriptions', PrescriptionController::class)->middleware([
             'can:view prescriptions,prescription',
@@ -608,6 +614,10 @@ Route::middleware(['auth', 'verified'])
             Route::get('shared-invoices/print-all', [SharedInvoiceController::class, 'printAll'])->name('shared-invoices.printAll');
             Route::get('shared-invoices/print-current', [SharedInvoiceController::class, 'printCurrent'])->name('shared-invoices.printCurrent');
             Route::get('shared-invoices/{shared_invoice}/print', [SharedInvoiceController::class, 'printSingle'])->name('shared-invoices.printSingle');
+            Route::get('shared-invoices/{shared_invoice}/share-link', [SharedInvoiceController::class, 'shareLink'])->name('shared-invoices.shareLink');
+            Route::post('shared-invoices/{shared_invoice}/rotate-share', [SharedInvoiceController::class, 'rotateShareLink'])->name('shared-invoices.rotateShare');
+            Route::post('shared-invoices/{shared_invoice}/expire-share', [SharedInvoiceController::class, 'expireShareLink'])->name('shared-invoices.expireShare');
+            Route::post('shared-invoices/{shared_invoice}/set-pin', [SharedInvoiceController::class, 'setSharePin'])->name('shared-invoices.setPin');
         });
         Route::resource('shared-invoices', SharedInvoiceController::class)->middleware([
             'can:view shared invoices,shared_invoice',
@@ -622,6 +632,8 @@ Route::middleware(['auth', 'verified'])
                 ->name('staff-availabilities.events');
             Route::get('staff-availabilities/available-staff', [StaffAvailabilityController::class, 'availableStaff'])
                 ->name('staff-availabilities.availableStaff');
+            Route::get('staff-availabilities/visit-conflicts', [StaffAvailabilityController::class, 'visitConflicts'])
+                ->name('staff-availabilities.visitConflicts');
         });
         Route::resource('staff-availabilities', StaffAvailabilityController::class)
             ->only(['index', 'store', 'update', 'destroy', 'create', 'edit', 'show'])
@@ -637,6 +649,7 @@ Route::middleware(['auth', 'verified'])
             Route::get('staff-payouts', [StaffPayoutController::class, 'index'])->name('staff-payouts.index');
             Route::get('staff-payouts/create', [StaffPayoutController::class, 'create'])->name('staff-payouts.create');
             Route::post('staff-payouts', [StaffPayoutController::class, 'store'])->name('staff-payouts.store');
+            Route::post('staff-payouts/{staff_payout}/revert', [StaffPayoutController::class, 'revert'])->name('staff-payouts.revert');
             Route::get('staff-payouts/print-all', [StaffPayoutController::class, 'printAll'])->name('staff-payouts.printAll');
             Route::get('staff-payouts/{staff_payout}', [StaffPayoutController::class, 'show'])->name('staff-payouts.show');
             Route::get('staff-payouts/{staff_payout}/edit', [StaffPayoutController::class, 'edit'])->name('staff-payouts.edit');
@@ -891,6 +904,8 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
             ->name('my-availability.index');
         Route::get('my-availability/events', [MyAvailabilityController::class, 'getEvents'])
             ->name('my-availability.events');
+        Route::get('my-availability/visit-conflicts', [MyAvailabilityController::class, 'visitConflicts'])
+            ->name('my-availability.visit-conflicts');
         Route::post('my-availability', [MyAvailabilityController::class, 'store'])
             ->name('my-availability.store');
         Route::put('my-availability/{availability}', [MyAvailabilityController::class, 'update'])
@@ -911,6 +926,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
 
         // My Earnings
         Route::get('my-earnings', [MyEarningsController::class, 'index'])->name('my-earnings.index');
+        Route::post('my-earnings/request-payout', [MyEarningsController::class, 'requestPayout'])->name('my-earnings.request');
 
         // Staff Leave Requests
         Route::resource('leave-requests', StaffLeaveRequestController::class)
@@ -973,3 +989,24 @@ if (app()->environment('local')) {
     // Performance Comparison Test Routes (local only)
     require __DIR__ . '/performance-test.php';
 }
+
+// Public route to view shared invoice by token
+Route::get('public/shared-invoices/{token}', [App\Http\Controllers\Admin\SharedInvoiceController::class, 'publicShow'])
+    ->name('public.shared-invoices.show');
+Route::post('public/shared-invoices/{token}/authenticate', [App\Http\Controllers\Admin\SharedInvoiceController::class, 'publicAuthenticate'])
+    ->name('public.shared-invoices.authenticate');
+// Public prescriptions by token
+Route::get('public/prescriptions/{token}', [App\Http\Controllers\Admin\PrescriptionController::class, 'publicShow'])
+    ->name('public.prescriptions.show');
+Route::post('public/prescriptions/{token}/authenticate', [App\Http\Controllers\Admin\PrescriptionController::class, 'publicAuthenticate'])
+    ->name('public.prescriptions.authenticate');
+Route::get('public/prescriptions/{token}/pdf', [App\Http\Controllers\Admin\PrescriptionController::class, 'publicPdf'])
+    ->name('public.prescriptions.pdf');
+// Public submission: Event Recommendations (guest web forms can post here)
+Route::post('/public/event-recommendations', [\App\Http\Controllers\Api\V1\EventRecommendationController::class, 'store'])
+    ->middleware('throttle:30,1')
+    ->name('public.event-recommendations.store');
+
+// Public form page (Inertia) for Event Recommendations
+Route::get('/recommend-event', [\App\Http\Controllers\Public\EventRecommendationPublicController::class, 'create'])
+    ->name('public.event-recommendations.form');

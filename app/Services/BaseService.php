@@ -27,7 +27,8 @@ class BaseService
             $query->orderBy($request->input('sort'), $direction);
         }
 
-        return $query->paginate($request->input('per_page', 15));
+        // Preserve current query string (search, sort, per_page, etc.) on pagination links
+        return $query->paginate($request->input('per_page', 15))->withQueryString();
     }
 
     public function create(array|object $data)

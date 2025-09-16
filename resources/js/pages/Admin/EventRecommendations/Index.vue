@@ -7,7 +7,7 @@ import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-nex
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-// Removed useExport; using window.print for current page printing
+import { useExport } from '@/composables/useExport'
 
 const props = defineProps({
     recommendations: Object,
@@ -24,9 +24,10 @@ const sortField = ref(props.filters.sort || '');
 const sortDirection = ref(props.filters.direction || 'asc');
 const perPage = ref(props.filters.per_page || 5);
 
-const formattedGeneratedDate = computed(() => {
-    return format(new Date(), 'PPP p');
-});
+const formattedGeneratedDate = computed(() => format(new Date(), 'PPP p'))
+
+// Centralized print via useExport to keep behavior consistent
+const { printCurrentView } = useExport({ routeName: 'admin.event-recommendations', filters: props.filters || {} })
 
 watch([search, sortField, sortDirection, perPage], debounce(() => {
     const params = {
@@ -56,16 +57,7 @@ async function destroy(id) {
     router.delete(route('admin.event-recommendations.destroy', id))
 }
 
-function printPage() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog. Please try again.');
-    }
-  }, 100);
-}
+function printPage() { printCurrentView() }
 
 function toggleSort(field) {
     if (sortField.value === field) {
@@ -156,6 +148,7 @@ function toggleSort(field) {
                             <th class="px-6 py-3">
                                 Patient Phone
                             </th>
+                            <th class="px-6 py-3">Eligibility</th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
@@ -168,6 +161,20 @@ function toggleSort(field) {
                             <td class="px-6 py-4">{{ recommendation.source }}</td>
                             <td class="px-6 py-4">{{ recommendation.recommended_by ?? '-' }}</td>
                             <td class="px-6 py-4">{{ recommendation.patient_phone ?? '-' }}</td>
+                            <td class="px-6 py-4">
+                              <span
+                                v-if="recommendation.eligibility?.status === 'eligible'"
+                                class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                              >Eligible</span>
+                              <span
+                                v-else-if="recommendation.eligibility?.status === 'ineligible'"
+                                class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                              >Ineligible</span>
+                              <span
+                                v-else
+                                class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                              >Unknown</span>
+                            </td>
                             <td class="px-6 py-4">{{ recommendation.status }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
@@ -214,7 +221,20 @@ function toggleSort(field) {
 
 <style>
 @media print {
-  @page { size: A4; margin: 0.5cm; }
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
   body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   /* Hide app chrome during print */
   .app-sidebar-header, .app-sidebar { display: none !important; }

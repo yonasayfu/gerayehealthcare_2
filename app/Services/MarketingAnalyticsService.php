@@ -58,6 +58,24 @@ class MarketingAnalyticsService
         $revenueGenerated = (float) ($roiSeries['totals']['revenue'] ?? 0);
         $roi = (float) ($roiSeries['totals']['roi_percent'] ?? 0);
 
+        // Budget totals and remaining (filtered by campaign/platform/date window when provided)
+        $budgetQuery = MarketingBudget::query();
+        if (! empty($filteredCampaignIds)) {
+            $budgetQuery->whereIn('campaign_id', $filteredCampaignIds);
+        }
+        if ($request->filled('platform_id')) {
+            $budgetQuery->where('platform_id', $request->integer('platform_id'));
+        }
+        if ($request->filled('start_date')) {
+            $budgetQuery->whereDate('period_end', '>=', $request->input('start_date'));
+        }
+        if ($request->filled('end_date')) {
+            $budgetQuery->whereDate('period_start', '<=', $request->input('end_date'));
+        }
+        $budgetAllocated = (float) $budgetQuery->sum('allocated_amount');
+        $budgetSpent = (float) $budgetQuery->sum('spent_amount');
+        $budgetRemaining = max(0.0, $budgetAllocated - $budgetSpent);
+
         // Time-series campaign performance
         $campaignPerformanceData = $this->getFilteredCampaignMetricsQuery($request)
             ->selectRaw('date, SUM(impressions) as impressions, SUM(clicks) as clicks, SUM(conversions) as conversions, SUM(revenue_generated) as revenue_generated, SUM(cost_per_click * clicks) as total_cost')
@@ -96,6 +114,9 @@ class MarketingAnalyticsService
                 'cpa' => $cpa,
                 'revenueGenerated' => $revenueGenerated,
                 'roi' => $roi,
+                'budgetAllocated' => $budgetAllocated,
+                'budgetSpent' => $budgetSpent,
+                'budgetRemaining' => $budgetRemaining,
             ],
             'campaignPerformanceData' => $campaignPerformanceData,
             'trafficSourceData' => $trafficSourceData,

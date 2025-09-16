@@ -16,6 +16,16 @@ class SharedInvoice extends Model
         'share_date',
         'status',
         'notes',
+        'share_token',
+        'share_expires_at',
+        'share_views',
+        'last_viewed_at',
+        'share_pin',
+    ];
+
+    protected $casts = [
+        'share_expires_at' => 'datetime',
+        'last_viewed_at' => 'datetime',
     ];
 
     public function invoice()

@@ -63,9 +63,7 @@ async function destroy(id: number) {
   router.delete(route('admin.insurance-policies.destroy', id))
 }
 
-function printCurrentView() {
-  window.print();
-}
+function printCurrentView() { setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100); }
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -195,7 +193,19 @@ function toggleSort(field: string) {
 </template>
 
 <style>
-@page { size: A4 portrait; margin: 12mm; }
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>
+<style>
+@page { size: A4 landscape; margin: 12mm; }
 @media print {
   html, body { background: #fff !important; }
   .print-header-content { page-break-inside: avoid; }
@@ -207,4 +217,3 @@ function toggleSort(field: string) {
   .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
 }
 </style>
-

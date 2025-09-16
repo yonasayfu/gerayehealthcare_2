@@ -33,7 +33,7 @@ const props = defineProps<{
       <select v-model="form.status" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
         <option value="registered">Registered</option>
         <option value="attended">Attended</option>
-        <option value="cancelled">Cancelled</option>
+        <option value="no-show">No Show</option>
       </select>
       <span class="text-red-500 text-xs" v-if="form.errors?.status">{{ form.errors.status }}</span>
     </div>

@@ -103,7 +103,7 @@ function printSinglePolicy() {
 
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
         <div class="flex items-center justify-end flex-wrap gap-2">
-          <Link :href="route('admin.insurance-policies.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <Link :href="route('admin.insurance-policies.edit', insurancePolicy.id)" class="btn-glass btn-glass-sm">
             <Edit3 class="h-4 w-4" /> Edit Policy
           </Link>
@@ -122,7 +122,7 @@ function printSinglePolicy() {
 </template>
 
 <style>
-@page { size: A4 portrait; margin: 12mm; }
+@page { size: A4 landscape; margin: 12mm; }
 @media print {
   html, body { background: #fff !important; }
   .print-header-content { page-break-inside: avoid; }

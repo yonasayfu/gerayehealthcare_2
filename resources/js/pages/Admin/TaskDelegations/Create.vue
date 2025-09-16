@@ -11,9 +11,12 @@ const props = defineProps<{
     due_date?: string | null,
     status?: string | null,
     notes?: string | null,
+    task_category?: string | null,
+    partner_id?: number | null,
   },
   returnTo?: string | null,
   inventoryAlertId?: number | null,
+  partners?: { id: number; name: string }[] | null,
 }>()
 
 const form = useForm({
@@ -23,6 +26,8 @@ const form = useForm({
   status: props.prefill?.status ?? 'Pending',
   notes: props.prefill?.notes ?? '',
   priority_level: 3,
+  task_category: props.prefill?.task_category ?? 'General',
+  partner_id: props.prefill?.partner_id ?? null,
   // Extra meta to support linking back to an InventoryAlert
   inventory_alert_id: props.inventoryAlertId ?? null,
   return_to: props.returnTo ?? null,

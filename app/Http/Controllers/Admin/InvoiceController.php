@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use App\Models\Partner;
 
 class InvoiceController extends BaseController
 {
@@ -156,5 +157,19 @@ class InvoiceController extends BaseController
         $invoice->update(['status' => 'Approved']);
 
         return redirect()->back()->with('banner', 'Invoice approved')->with('bannerStyle', 'success');
+    }
+
+    /**
+     * Override show to include partner list for quick sharing.
+     */
+    public function show($id)
+    {
+        $invoice = app(InvoiceService::class)->getById((int) $id);
+        $partners = Partner::select('id', 'name')->orderBy('name')->get();
+
+        return Inertia::render('Admin/Invoices/Show', [
+            'invoice' => $invoice,
+            'partners' => $partners,
+        ]);
     }
 }

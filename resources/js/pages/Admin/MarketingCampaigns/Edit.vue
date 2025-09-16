@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import InputLabel from '@/components/ui/label/Label.vue'
-import TextInput from '@/components/ui/input/Input.vue'
-import InputError from '@/components/InputError.vue'
-import PrimaryButton from '@/components/ui/button/Button.vue'
-import { format } from 'date-fns'
+import Form from './Form.vue'
 import FormActions from '@/components/FormActions.vue'
 
 interface MarketingCampaign {
@@ -88,7 +84,7 @@ const submit = () => {
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :platforms="props.platforms" :staff-members="props.staffMembers" :campaign-types="props.campaignTypes" :statuses="props.statuses" />
 
           <FormActions :cancel-href="route('admin.marketing-campaigns.index')" submit-text="Save Changes" :processing="form.processing" />
         </form>

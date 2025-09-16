@@ -92,8 +92,7 @@ function toggleSort(field: string) {
 
 
 function printCurrentView() {
-  // This will trigger a full page reload with print styles
-  window.print();
+  setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100);
 }
 </script>
 
@@ -249,14 +248,26 @@ function printCurrentView() {
 </template>
 
 <style>
-@page { size: A4 portrait; margin: 12mm; }
 @media print {
-  html, body { background: #fff !important; }
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+
   .print-header-content { page-break-inside: avoid; }
   .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
   .print-clinic-name { font-size: 16px; margin: 0; }
   .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
-  table { border-collapse: collapse; }
+
+  /* Keep table headers and rows intact across pages */
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
   hr { display: none !important; }
   .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
 }

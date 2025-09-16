@@ -177,7 +177,13 @@ class InvoiceService extends BaseService
 
     public function getById(int $id, array $with = []): Invoice
     {
-        $with = array_unique(array_merge(['patient', 'items.visitService.staff', 'insuranceCompany'], $with));
+        $with = array_unique(array_merge([
+            'patient',
+            'items.visitService.staff',
+            'insuranceCompany',
+            'sharedInvoices.partner',
+            'sharedInvoices.sharedBy',
+        ], $with));
 
         return $this->model->with($with)->findOrFail($id);
     }

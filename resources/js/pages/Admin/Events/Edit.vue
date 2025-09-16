@@ -4,15 +4,24 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
 import Form from './Form.vue'
 import FormActions from '@/components/FormActions.vue'
+import { format } from 'date-fns'
 
 const props = defineProps({
     event: Object,
 });
 
+const normalizedDate = (() => {
+  try {
+    return props.event?.event_date ? format(new Date(props.event.event_date), 'yyyy-MM-dd') : ''
+  } catch {
+    return ''
+  }
+})()
+
 const form = useForm({
     title: props.event.title,
     description: props.event.description,
-    event_date: props.event.event_date,
+    event_date: normalizedDate,
     is_free_service: props.event.is_free_service,
     broadcast_status: props.event.broadcast_status,
 });

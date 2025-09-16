@@ -78,16 +78,7 @@ function destroy(id: number) {
   }
 }
 
-function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100);
-}
+function printCurrentView() { setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100); }
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -243,3 +234,15 @@ function toggleStatus(id: number) {
   </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

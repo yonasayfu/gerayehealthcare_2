@@ -110,12 +110,10 @@ function onToggleSort(field: string) { toggleSort(field) }
               <Download class="icon" />
               <span class="hidden sm:inline">Export CSV</span>
             </button>
-
             <button @click="printCurrentView" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
             </button>
-
             <button @click="printAllPatients" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print All</span>

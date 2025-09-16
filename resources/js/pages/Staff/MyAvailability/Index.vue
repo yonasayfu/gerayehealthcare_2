@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import FullCalendar from '@fullcalendar/vue3';
@@ -28,6 +28,35 @@ const form = useForm({
   end_time: '',
   status: 'Available',
 });
+
+const conflictLoading = ref(false)
+const visitConflictCount = ref<number | null>(null)
+
+async function checkConflicts() {
+  const start = form.start_time
+  const end = form.end_time
+  if (!start || !end) {
+    visitConflictCount.value = null
+    return
+  }
+  try {
+    conflictLoading.value = true
+    const url = route('staff.my-availability.visit-conflicts', { start_time: start, end_time: end })
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } })
+    if (!res.ok) throw new Error('Failed to check conflicts')
+    const data = await res.json()
+    visitConflictCount.value = data?.count ?? 0
+  } catch (e) {
+    visitConflictCount.value = null
+  } finally {
+    conflictLoading.value = false
+  }
+}
+
+watch(() => [form.start_time, form.end_time, form.status], () => {
+  if ((checkConflicts as any)._t) clearTimeout((checkConflicts as any)._t)
+  ;(checkConflicts as any)._t = setTimeout(() => checkConflicts(), 300)
+})
 
 const formatToDateTimeLocal = (date: Date): string => {
   const year = date.getFullYear();
@@ -169,10 +198,21 @@ const deleteAvailability = () => {
                 <input type="datetime-local" v-model="form.start_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600" required />
                  <div v-if="form.errors.start_time" class="text-red-500 text-sm mt-1">{{ form.errors.start_time }}</div>
             </div>
-             <div>
+            <div>
                 <label class="block text-sm font-medium">End Time</label>
                 <input type="datetime-local" v-model="form.end_time" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm dark:bg-gray-700 dark:border-gray-600" required />
                 <div v-if="form.errors.end_time" class="text-red-500 text-sm mt-1">{{ form.errors.end_time }}</div>
+            </div>
+            <div>
+              <div v-if="conflictLoading" class="text-sm text-gray-500">Checking your visits in this window...</div>
+              <div v-else-if="visitConflictCount !== null" class="text-sm mt-1" :class="visitConflictCount > 0 ? 'text-red-700' : 'text-green-700'">
+                <template v-if="visitConflictCount > 0">
+                  {{ visitConflictCount }} scheduled visit(s) in this window. Saving as "Unavailable" will be blocked.
+                </template>
+                <template v-else>
+                  No scheduled visits in this window.
+                </template>
+              </div>
             </div>
             
             <!-- Error Message -->

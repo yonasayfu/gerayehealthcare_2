@@ -68,7 +68,6 @@
 
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
         <div class="flex items-center justify-end flex-wrap gap-2">
-          <Link :href="route('admin.insurance-companies.index')" class="btn-glass btn-glass-sm">Back to List</Link>
           <button @click="printCurrent" class="btn-glass btn-glass-sm">
             <Printer class="h-4 w-4" /> Print Current
           </button>

@@ -1788,6 +1788,29 @@ class ExportConfig
             'sortable_fields' => ['page_title', 'page_code', 'language', 'is_active', 'campaign_id', 'created_at'],
             'default_sort' => 'created_at',
             'filename_prefix' => 'landing-pages',
+            'csv' => [
+                'headers' => [
+                    '#', 'Page Title', 'Page Code', 'URL', 'Language', 'Active', 'Campaign', 'Created At',
+                ],
+                'fields' => [
+                    'index',
+                    'page_title',
+                    ['field' => 'page_code', 'default' => '-'],
+                    ['field' => 'page_url', 'default' => '-'],
+                    ['field' => 'language', 'default' => '-'],
+                    [
+                        'field' => 'is_active',
+                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; },
+                    ],
+                    ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    [
+                        'field' => 'created_at',
+                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; },
+                    ],
+                ],
+                'with_relations' => ['campaign'],
+                'filename_prefix' => 'landing-pages',
+            ],
 
             'all_records' => [
                 'view' => 'pdf-layout',

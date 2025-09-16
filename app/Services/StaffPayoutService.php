@@ -9,6 +9,7 @@ use App\Models\VisitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class StaffPayoutService extends BaseService
 {
@@ -48,7 +49,23 @@ class StaffPayoutService extends BaseService
                             ->orWhereNull('is_paid_to_staff');
                     });
             }], 'cost')
+            ->withCount(['payouts as pending_payout_requests_count' => function ($q) {
+                $q->where('status', 'Pending');
+            }])
             ->orderBy('first_name');
+
+        // Sorting
+        $sort = $request->input('sort');
+        $direction = $request->input('direction', 'asc');
+        $allowedSorts = [
+            'first_name',
+            'unpaid_visits_count',
+            'total_unpaid_cost',
+            'pending_payout_requests_count',
+        ];
+        if ($sort && in_array($sort, $allowedSorts, true)) {
+            $staffWithUnpaidEarningsQuery->orderBy($sort, $direction === 'desc' ? 'desc' : 'asc');
+        }
 
         $staffWithUnpaidEarnings = $staffWithUnpaidEarningsQuery
             ->paginate($perPage)
@@ -92,7 +109,7 @@ class StaffPayoutService extends BaseService
         parent::__construct($staffPayout);
     }
 
-    public function processPayout(CreateStaffPayoutDTO $dto): void
+    public function processPayout(CreateStaffPayoutDTO $dto): StaffPayout
     {
         $unpaidVisits = VisitService::where('staff_id', $dto->staff_id)
             ->where('is_paid_to_staff', false)
@@ -105,12 +122,15 @@ class StaffPayoutService extends BaseService
 
         $totalAmount = $unpaidVisits->sum('cost');
 
-        DB::transaction(function () use ($dto, $unpaidVisits, $totalAmount) {
+        return DB::transaction(function () use ($dto, $unpaidVisits, $totalAmount) {
             $payout = parent::create([
-                'staff_id' => $dto->staff_id,
-                'total_amount' => $totalAmount,
+                'staff_id'    => $dto->staff_id,
+                'total_amount'=> $totalAmount,
                 'payout_date' => Carbon::today(),
-                'notes' => $dto->notes ?? 'Monthly Payout',
+                'status'      => $dto->status ?? 'Completed',
+                'notes'       => $dto->notes ?? 'Monthly Payout',
+                'processed_by'=> Auth::id(),
+                'processed_notes' => $dto->notes,
             ]);
 
             $payout->visitServices()->attach($unpaidVisits->pluck('id'));
@@ -118,6 +138,8 @@ class StaffPayoutService extends BaseService
             VisitService::whereIn('id', $unpaidVisits->pluck('id'))->update([
                 'is_paid_to_staff' => true,
             ]);
+
+            return $payout;
         });
     }
 }

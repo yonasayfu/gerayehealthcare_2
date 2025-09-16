@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios'
 import { eventBus } from '@/lib/eventBus'
-import { Bell, MessageSquareText, Search, Settings, PanelLeft } from 'lucide-vue-next'
+import { Bell, MessageSquareText } from 'lucide-vue-next'
 import GlobalSearch from '@/components/GlobalSearch.vue'; // Import GlobalSearch
-import { formatDistanceToNow } from 'date-fns'
+// formatDistanceToNow not used here
 
 import ThemeToggler from '@/components/ThemeToggler.vue'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+// Input not used in header
 import {
     Breadcrumb,
     BreadcrumbItem,

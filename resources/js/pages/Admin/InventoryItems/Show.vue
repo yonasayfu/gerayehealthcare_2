@@ -133,7 +133,7 @@ function printItem() {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.inventory-items.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.inventory-items.edit', inventoryItem.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -144,5 +144,68 @@ function printItem() {
 </template>
 
 <style>
-/* Add print styles here if needed */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .app-sidebar-header, .app-sidebar,
+  body > header, body > nav,
+  [role="banner"], [role="navigation"] {
+    display: none !important;
+  }
+
+  .hidden.print\:block { display: block !important; }
+
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .print-clinic-name { font-size: 1.8rem !important; margin-bottom: 0.2rem !important; line-height: 1.2 !important; }
+  .print-document-title { font-size: 0.9rem !important; color: #555 !important; }
+
+  .bg-white.dark\:bg-gray-800.shadow.rounded-lg {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 1cm !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    transform: scale(0.98);
+    transform-origin: top left;
+  }
+
+  .p-6.space-y-6 { padding: 0 !important; margin: 0 !important; }
+
+  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
+  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
+  .text-sm { font-size: 0.8rem !important; }
+  .text-xs { font-size: 0.75rem !important; }
+  .font-medium { font-weight: 600 !important; }
+
+  .border-b { border-bottom: 1px solid #ddd !important; padding-bottom: 0.7rem !important; margin-bottom: 0.7rem !important; }
+}
 </style>

@@ -75,14 +75,7 @@ async function destroy(id: number) {
 }
 
 function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  setTimeout(() => { try { window.print(); } catch (error) { console.error('Print failed:', error); } }, 100);
 }
 
 function toggleSort(field: string) {
@@ -223,3 +216,23 @@ function toggleSort(field: string) {
   </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+
+  /* Table + header/footer behavior */
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
+}
+</style>

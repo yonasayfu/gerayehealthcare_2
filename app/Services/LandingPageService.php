@@ -16,6 +16,12 @@ class LandingPageService extends BaseService
         parent::__construct($landingPage);
     }
 
+    public function export(Request $request)
+    {
+        // Delegate to the shared export handler with LandingPage config
+        return $this->handleExport($request, LandingPage::class, \App\Http\Config\ExportConfig::getLandingPageConfig());
+    }
+
     protected function applySearch($query, $search)
     {
         $query->where('page_title', 'ilike', "%{$search}%")

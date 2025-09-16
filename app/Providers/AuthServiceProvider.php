@@ -32,6 +32,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\InventoryAlert::class => \App\Policies\InventoryAlertPolicy::class,
         \App\Models\Supplier::class => \App\Policies\SupplierPolicy::class,
         \Spatie\Permission\Models\Role::class => \App\Policies\RolePolicy::class,
+        \App\Models\TaskDelegation::class => \App\Policies\TaskDelegationPolicy::class,
     ];
 
     /**

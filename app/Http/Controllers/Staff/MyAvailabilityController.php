@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Http\Requests\GetEventsRequest;
+use Illuminate\Http\Request;
+use App\DTOs\CreateStaffAvailabilityDTO;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
 use App\Services\StaffAvailabilityService;
@@ -38,10 +39,8 @@ class MyAvailabilityController extends BaseController
     /**
      * Handle the request for calendar events.
      */
-    public function getEvents(GetEventsRequest $request)
+    public function getEvents(Request $request)
     {
-        $validated = $request->validated();
-
         $staffId = Auth::user()->staff->id;
 
         // Get personal availability slots
@@ -88,5 +87,28 @@ class MyAvailabilityController extends BaseController
         });
 
         return response()->json($availabilityEvents->concat($visitEvents));
+    }
+
+    /**
+     * Lightweight API to check if the current staff has visits within a window.
+     */
+    public function visitConflicts(Request $request)
+    {
+        $request->validate([
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+        $staffId = Auth::user()->staff->id;
+
+        $count = VisitService::where('staff_id', $staffId)
+            ->where('status', '!=', 'Cancelled')
+            ->whereBetween('scheduled_at', [$request->start_time, $request->end_time])
+            ->count();
+
+        return response()->json([
+            'hasConflicts' => $count > 0,
+            'count' => $count,
+        ]);
     }
 }

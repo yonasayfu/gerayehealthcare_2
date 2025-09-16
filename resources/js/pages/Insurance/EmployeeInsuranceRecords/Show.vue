@@ -80,7 +80,7 @@
 
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.employee-insurance-records.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <Link :href="route('admin.employee-insurance-records.edit', employeeInsuranceRecord.id)" class="btn-glass btn-glass-sm">
             Edit Record
           </Link>
@@ -135,7 +135,7 @@ async function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4;
+    size: A4 landscape;
     margin: 0.5cm;
   }
 

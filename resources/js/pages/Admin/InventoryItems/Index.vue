@@ -198,3 +198,18 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
     </div>
   </AppLayout>
 </template>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+
+  /* Hide App chrome */
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+
+  /* Ensure table prints cleanly */
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

@@ -12,6 +12,7 @@ class TaskDelegation extends Model
     protected $fillable = [
         'title',
         'assigned_to',
+        'partner_id',
         'due_date',
         'status',
         'notes',
@@ -45,6 +46,11 @@ class TaskDelegation extends Model
     public function assignee()
     {
         return $this->belongsTo(Staff::class, 'assigned_to');
+    }
+
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class);
     }
 
     public function creatorUser()

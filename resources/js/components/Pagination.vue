@@ -29,7 +29,7 @@ const mergedLinks = computed(() => {
       const normalized = target.pathname + (target.search ? target.search : '');
       return { ...link, url: normalized };
     });
-  } catch (e) {
+  } catch {
     // Fallback: return original links if URL API fails for any reason
     return props.links;
   }

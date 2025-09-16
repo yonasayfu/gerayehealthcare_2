@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import ShowHeader from '@/components/ShowHeader.vue'
+import { useExport } from '@/composables/useExport'
 
 interface MarketingCampaign {
   id: number;
@@ -41,16 +42,7 @@ const formatJson = (json: Record<string, any>) => {
   return JSON.stringify(json, null, 2);
 };
 
-function printPage() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100);
-}
+const { printCurrentView } = useExport({ routeName: 'admin.marketing-campaigns', filters: {} })
 
 // No server-side PDF or delete per UI template.
 </script>
@@ -190,8 +182,8 @@ function printPage() {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.marketing-campaigns.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          
+          <button @click="printCurrentView" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.marketing-campaigns.edit', marketingCampaign.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
@@ -205,7 +197,7 @@ function printPage() {
 /* Optimized Print Styles for A4 */
  @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

@@ -248,12 +248,20 @@ function toggleStatus(id: number) {
       </div>
 
       <Pagination v-if="marketingLeads.data.length > 0" :links="marketingLeads.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>
-</template>
+ </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

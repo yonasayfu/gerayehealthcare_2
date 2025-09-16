@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Printer, ArrowUpDown, Eye, Edit3, Trash2, Search, Plus } from 'lucide-vue-next'
@@ -17,10 +17,7 @@ interface PrescriptionFilters {
 }
 
 function printWithBrowser() {
-  // Give Vue a tick to render any print-only elements
-  requestAnimationFrame(() => {
-    window.print()
-  })
+  setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100)
 }
 
 const breadcrumbs = [
@@ -41,7 +38,7 @@ const props = defineProps<{
   filters: PrescriptionFilters
 }>()
 
-const { search, perPage, toggleSort } = useTableFilters({
+const { search, perPage, sort, direction, toggleSort } = useTableFilters({
   routeName: 'admin.prescriptions.index',
   initial: {
     search: props.filters?.search,
@@ -49,6 +46,19 @@ const { search, perPage, toggleSort } = useTableFilters({
     direction: props.filters?.direction,
     per_page: props.filters?.per_page ?? props.prescriptions?.per_page ?? 5,
   }
+})
+
+// Status filter similar to other modules
+const statusFilter = ref(props.filters?.status || 'All')
+
+watch([statusFilter, search, perPage, sort, direction], () => {
+  router.get(route('admin.prescriptions.index'), {
+    search: search.value,
+    per_page: perPage.value,
+    sort: sort.value,
+    direction: direction.value,
+    status: statusFilter.value,
+  }, { preserveState: true, replace: true })
 })
 
 const { exportData } = useExport({ routeName: 'admin.prescriptions', filters: props.filters })
@@ -127,7 +137,17 @@ function proceedDelete() {
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
         </div>
 
-        <div>
+        <div class="flex items-center gap-3">
+          <div>
+            <label for="statusFilter" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Status:</label>
+            <select id="statusFilter" v-model="statusFilter" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+              <option>All</option>
+              <option>draft</option>
+              <option>final</option>
+              <option>dispensed</option>
+              <option>cancelled</option>
+            </select>
+          </div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
@@ -150,7 +170,9 @@ function proceedDelete() {
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
-              <th class="px-6 py-3">#</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('id')">
+                # <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+              </th>
               <th class="px-6 py-3">Patient</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('prescribed_date')">
                 Prescribed Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
@@ -220,6 +242,18 @@ function proceedDelete() {
   </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>
 <style>
 /* Professional A5 print layout */
 @page {

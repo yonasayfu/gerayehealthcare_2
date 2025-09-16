@@ -1,9 +1,42 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps<{ form: any; staffList?: Array<{ id: number; first_name: string; last_name: string }> }>()
 
 const statuses = ['Available', 'Unavailable']
+
+const conflictLoading = ref(false)
+const visitConflictCount = ref<number | null>(null)
+
+async function checkConflicts() {
+  const staffId = props.form.staff_id
+  const start = props.form.start_time
+  const end = props.form.end_time
+  if (!staffId || !start || !end) {
+    visitConflictCount.value = null
+    return
+  }
+  try {
+    conflictLoading.value = true
+    const url = route('admin.staff-availabilities.visitConflicts', { staff_id: staffId, start_time: start, end_time: end })
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } })
+    if (!res.ok) throw new Error('Failed to check conflicts')
+    const data = await res.json()
+    visitConflictCount.value = data?.count ?? 0
+  } catch (e) {
+    // Swallow errors for hinting; backend will still validate on submit
+    visitConflictCount.value = null
+  } finally {
+    conflictLoading.value = false
+  }
+}
+
+watch(() => [props.form.staff_id, props.form.start_time, props.form.end_time], () => {
+  // Debounce a bit
+  if ((checkConflicts as any)._t) clearTimeout((checkConflicts as any)._t)
+  ;(checkConflicts as any)._t = setTimeout(() => checkConflicts(), 300)
+})
 </script>
 
 <template>
@@ -36,6 +69,16 @@ const statuses = ['Available', 'Unavailable']
       </select>
       <InputError class="mt-1" :message="props.form.errors?.status" />
     </div>
+    <div class="md:col-span-2">
+      <div v-if="conflictLoading" class="mt-2 text-sm text-gray-500">Checking visits in this window...</div>
+      <div v-else-if="visitConflictCount !== null" class="mt-2 text-sm" :class="visitConflictCount > 0 ? 'text-red-700' : 'text-green-700'">
+        <template v-if="visitConflictCount > 0">
+          {{ visitConflictCount }} scheduled visit(s) in this window. Setting "Unavailable" will be blocked.
+        </template>
+        <template v-else>
+          No scheduled visits in this window.
+        </template>
+      </div>
+    </div>
   </div>
 </template>
-

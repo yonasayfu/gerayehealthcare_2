@@ -84,6 +84,16 @@ function onToggleSort(field: string) { toggleSort(field) }
             </button>
           </div>
         </div>
+
+        <!-- Tabs: Partners | Engagements -->
+        <div class="mt-2 flex gap-2 print:hidden px-4 pb-2">
+          <Link :href="route('admin.partners.index')" class="btn-glass btn-glass-sm">
+            Partners
+          </Link>
+          <Link :href="route('admin.task-delegations.index', { task_category: 'Engagement' })" class="btn-glass btn-glass-sm">
+            Engagements
+          </Link>
+        </div>
       </div>
 
             <!-- Search / per page -->
@@ -132,6 +142,7 @@ function onToggleSort(field: string) { toggleSort(field) }
               <th class="px-6 py-3">Contact Person</th>
               <th class="px-6 py-3">Email</th>
               <th class="px-6 py-3">Phone</th>
+              <th class="px-6 py-3">Account Manager</th>
               <th class="px-6 py-3 cursor-pointer" @click="onToggleSort('engagement_status')">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -146,9 +157,17 @@ function onToggleSort(field: string) { toggleSort(field) }
               <td class="px-6 py-4">{{ partner.contact_person ?? '-' }}</td>
               <td class="px-6 py-4">{{ partner.email ?? '-' }}</td>
               <td class="px-6 py-4">{{ partner.phone ?? '-' }}</td>
+              <td class="px-6 py-4">{{ partner.account_manager ? ((partner.account_manager.first_name || '') + ' ' + (partner.account_manager.last_name || '')) : (partner.accountManager ? ((partner.accountManager.first_name || '') + ' ' + (partner.accountManager.last_name || '')) : '-') }}</td>
               <td class="px-6 py-4">{{ partner.engagement_status }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
+                  <Link
+                    :href="route('admin.task-delegations.create', { task_category: 'Engagement', partner_id: partner.id, return_to: route('admin.partners.index') })"
+                    class="inline-flex items-center p-2 rounded-md text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-gray-700"
+                    title="New Engagement"
+                  >
+                    +
+                  </Link>
                   <Link
                     :href="route('admin.partners.show', partner.id)"
                     class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"

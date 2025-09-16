@@ -71,12 +71,12 @@ async function destroy(id: number) {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Participant Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Event ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.event_id }}</p>
+                      <p class="text-sm text-muted-foreground">Event:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.event?.title ?? ('#' + participant.event_id) }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Patient ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.patient_id }}</p>
+                      <p class="text-sm text-muted-foreground">Patient:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.patient?.full_name ?? ('#' + participant.patient_id) }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
@@ -96,7 +96,7 @@ async function destroy(id: number) {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.event-participants.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.event-participants.edit', participant.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -111,7 +111,7 @@ async function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

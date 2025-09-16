@@ -23,10 +23,18 @@ class TaskDelegationService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(array_merge(['assignee', 'creatorUser'], $with));
+        $query = $this->model->with(array_merge(['assignee', 'creatorUser', 'partner'], $with));
 
         if ($request->has('search')) {
             $this->applySearch($query, $request->input('search'));
+        }
+
+        // Optional filters for consolidation use-cases
+        if ($request->filled('task_category')) {
+            $query->where('task_category', $request->input('task_category'));
+        }
+        if ($request->filled('partner_id')) {
+            $query->where('partner_id', (int) $request->input('partner_id'));
         }
 
         // Handle sorting
@@ -35,7 +43,7 @@ class TaskDelegationService extends BaseService
             $sortOrder = $request->input('sort_order', 'asc');
 
             // Validate sort fields to prevent SQL injection
-            $allowedSortFields = ['title', 'due_date', 'status', 'created_at'];
+            $allowedSortFields = ['title', 'due_date', 'status', 'created_at', 'task_category'];
             if (in_array($sortBy, $allowedSortFields)) {
                 $query->orderBy($sortBy, $sortOrder);
             } else {

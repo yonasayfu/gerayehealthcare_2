@@ -5,6 +5,8 @@ import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
 import ShowHeader from '@/components/ShowHeader.vue'
+import { confirmDialog } from '@/lib/confirm'
+import { useExport } from '@/composables/useExport'
 
 interface MarketingLead {
   id: number;
@@ -39,21 +41,17 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: props.marketingLead.first_name + ' ' + props.marketingLead.last_name, href: route('admin.marketing-leads.show', props.marketingLead.id) },
 ]
 
-function printPage() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100);
-}
+const { printCurrentView } = useExport({ routeName: 'admin.marketing-leads', filters: {} })
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing lead?')) {
-    router.delete(route('admin.marketing-leads.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Lead',
+    message: 'Are you sure you want to delete this marketing lead?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-leads.destroy', id))
 }
 </script>
 
@@ -192,8 +190,8 @@ function destroy(id: number) {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.marketing-leads.index')" class="btn-glass btn-glass-sm">Back to List</Link>
-          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          
+          <button @click="printCurrentView" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.marketing-leads.edit', marketingLead.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
       </div>
@@ -206,7 +204,7 @@ function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

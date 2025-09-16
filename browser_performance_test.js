@@ -36,7 +36,7 @@ try {
         const lcp = entries[entries.length - 1];
         console.log("🎯 Largest Contentful Paint:", Math.round(lcp.startTime) + "ms");
     }).observe({type: 'largest-contentful-paint', buffered: true});
-} catch (e) {
+} catch {
     console.log("LCP not available");
 }
 

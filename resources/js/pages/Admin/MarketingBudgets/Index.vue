@@ -100,12 +100,7 @@ async function destroy(id: number) {
 
 import { useExport } from '@/composables/useExport';
 
-const { exportData } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
-
-function printCurrentView() {
-  // Mirror Patients module: print the current index view with print-only styles
-  setTimeout(() => window.print(), 50);
-}
+const { exportData, printCurrentView } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -204,6 +199,9 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('spent_amount')">
                 Spent <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
+              <th class="px-6 py-3">
+                Remaining
+              </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('period_start')">
                 Start Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -223,6 +221,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ budget.platform?.name ?? '-' }}</td>
               <td class="px-6 py-4">{{ budget.allocated_amount }}</td>
               <td class="px-6 py-4">{{ budget.spent_amount }}</td>
+              <td class="px-6 py-4">{{ (budget.allocated_amount - budget.spent_amount).toFixed(2) }}</td>
               <td class="px-6 py-4">{{ budget.period_start ? format(new Date(budget.period_start), 'PPP') : '-' }}</td>
               <td class="px-6 py-4">{{ budget.period_end ? format(new Date(budget.period_end), 'PPP') : '-' }}</td>
               <td class="px-6 py-4">{{ budget.status }}</td>
@@ -253,18 +252,27 @@ function toggleSort(field: string) {
               </td>
             </tr>
             <tr v-if="marketingBudgets.data.length === 0">
-              <td colspan="9" class="text-center px-6 py-4 text-gray-400">No marketing budgets found.</td>
+              <td colspan="10" class="text-center px-6 py-4 text-gray-400">No marketing budgets found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <Pagination v-if="marketingBudgets.data.length > 0" :links="marketingBudgets.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>
 </template>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

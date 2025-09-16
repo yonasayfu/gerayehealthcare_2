@@ -81,8 +81,11 @@
 
       <!-- Footer actions -->
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-        <div class="flex justify-end gap-2">
-          <Link :href="route('admin.shared-invoices.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+        <div class="flex flex-wrap justify-end gap-2">
+          <button @click="() => share('copy')" class="btn-glass btn-glass-sm">Copy Link</button>
+          <button @click="() => share('wa')" class="btn-glass btn-glass-sm">WhatsApp</button>
+          <button @click="() => share('tw')" class="btn-glass btn-glass-sm">Twitter</button>
+          <button @click="() => share('tg')" class="btn-glass btn-glass-sm">Telegram</button>
           <Link :href="route('admin.shared-invoices.edit', sharedInvoice.id)" class="btn-glass btn-glass-sm">Edit</Link>
           <button @click="printCurrentView" class="btn-glass btn-glass-sm">
             <Printer class="icon" />
@@ -114,12 +117,39 @@ const breadcrumbs = [
 
 // Use useExport for consistent print-current behavior (window.print under the hood)
 const { printCurrentView } = useExport({ routeName: 'admin.shared-invoices', filters: {} })
+
+async function ensureLink() {
+  const res = await fetch(route('admin.shared-invoices.shareLink', props.sharedInvoice.id), { headers: { 'Accept': 'application/json' } })
+  if (!res.ok) throw new Error('Failed to get link')
+  return await res.json()
+}
+
+async function share(kind) {
+  try {
+    const data = await ensureLink()
+    const url = data.url
+    if (kind === 'copy') {
+      await navigator.clipboard.writeText(url)
+      alert('Link copied to clipboard!')
+      return
+    }
+    if (kind === 'wa') {
+      window.open(`https://wa.me/?text=${encodeURIComponent('View your invoice: ' + url)}`, '_blank')
+    } else if (kind === 'tw') {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('View your invoice')}&url=${encodeURIComponent(url)}`, '_blank')
+    } else if (kind === 'tg') {
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('View your invoice')}`, '_blank')
+    }
+  } catch (e) {
+    alert('Failed to prepare share link.')
+  }
+}
 </script>
 
 <style>
 @media print {
   @page {
-    size: A4;
+    size: A4 landscape;
     margin: 0.5cm;
   }
 

@@ -29,13 +29,20 @@ const breadcrumbs = [
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative">
-        <ShowHeader title="Medical Document" subtitle="Details and attached file">
-          <template #actions>
-            <Link :href="route('admin.medical-documents.index')" class="btn-glass btn-glass-sm">Back</Link>
-            <Link :href="route('admin.medical-documents.printSingle', props.medicalDocument.id)" class="btn-glass btn-glass-sm" target="_blank">Print</Link>
-            <Link :href="route('admin.medical-documents.export')" class="btn-glass btn-glass-sm" target="_blank">Export All</Link>
-          </template>
-        </ShowHeader>
+      <ShowHeader title="Medical Document" subtitle="Details and attached file">
+        <template #actions>
+          <Link :href="route('admin.medical-documents.index')" class="btn-glass btn-glass-sm">Back</Link>
+          <Link :href="route('admin.medical-documents.printSingle', props.medicalDocument.id)" class="btn-glass btn-glass-sm" target="_blank">Print</Link>
+          <Link :href="route('admin.medical-documents.export')" class="btn-glass btn-glass-sm" target="_blank">Export All</Link>
+        </template>
+      </ShowHeader>
+
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Medical Document</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

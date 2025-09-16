@@ -128,7 +128,7 @@ function clearFilters() {
 /* Print optimizations for Index "Print Current" */
 @media print {
   @page {
-    size: A4;
+    size: A4 landscape;
     margin: 1cm;
   }
 

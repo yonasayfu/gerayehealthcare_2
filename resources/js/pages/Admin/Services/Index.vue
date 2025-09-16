@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
-import { Plus, Edit3, Trash2, Eye } from 'lucide-vue-next';
+import { Plus, Edit3, Trash2, Eye, ArrowUpDown } from 'lucide-vue-next';
 import type { BreadcrumbItemType } from '@/types';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { confirmDialog } from '@/lib/confirm'
 import { useTableFilters } from '@/composables/useTableFilters'
 
@@ -36,12 +36,27 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Services', href: route('admin.services.index') },
 ];
 
-const { search, perPage } = useTableFilters({
+const { search, perPage, sort, direction, toggleSort } = useTableFilters({
   routeName: 'admin.services.index',
   initial: {
     search: props.filters?.search,
     per_page: props.filters?.per_page ?? props.services?.meta?.per_page ?? 5,
+    sort: props.filters?.sort,
+    direction: props.filters?.direction ?? 'asc',
   }
+})
+
+// Status filter (All/Active/Inactive)
+const statusFilter = ref(props.filters?.status || 'All')
+
+watch([statusFilter, search, perPage, sort, direction], () => {
+  router.get(route('admin.services.index'), {
+    search: search.value,
+    per_page: perPage.value,
+    sort: sort.value,
+    direction: direction.value,
+    status: statusFilter.value,
+  }, { preserveState: true, replace: true })
 })
 
 const destroy = async (id: number, name: string) => {
@@ -70,19 +85,27 @@ const formatCurrency = (value: number | string) => {
           <h1 class="text-xl font-semibold">Services Price List</h1>
           <p class="text-sm text-muted-foreground">Manage the billable services your organization offers.</p>
         </div>
-        <Link :href="route('admin.services.create')" class="btn-glass btn-primary inline-flex items-center gap-2">
+        <Link :href="route('admin.services.create')" class="btn-glass inline-flex items-center gap-2">
           <Plus class="h-4 w-4" />
           <span>Add New Service</span>
         </Link>
       </div>
 
-      <!-- Search Filter -->
+      <!-- Filters -->
        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="relative w-full md:w-1/3">
           <input type="text" v-model="search" placeholder="Search services..." class="form-input w-full rounded-md border border-gray-300 pl-10 pr-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:bg-gray-900 dark:text-gray-100" />
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
         </div>
-        <div>
+        <div class="flex items-center gap-3">
+          <div>
+            <label for="statusFilter" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Status:</label>
+            <select id="statusFilter" v-model="statusFilter" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+              <option>All</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Items per page:</label>
           <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
             <option value="5">5</option>
@@ -95,12 +118,18 @@ const formatCurrency = (value: number | string) => {
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm">
+        <table class="w-full text-left text-sm print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase">
             <tr>
-              <th class="px-6 py-3">Service Name</th>
-              <th class="px-6 py-3">Price</th>
-              <th class="px-6 py-3">Status</th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('name')">
+                Service Name <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('price')">
+                Price <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
+              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('is_active')">
+                Status <ArrowUpDown class="inline w-3.5 h-3.5 ml-1 align-middle print:hidden" />
+              </th>
               <th class="px-6 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -117,21 +146,21 @@ const formatCurrency = (value: number | string) => {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.services.show', service.id)"
-                    class="btn-icon text-indigo-600"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.services.edit', service.id)"
-                    class="btn-icon text-blue-600"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
                   <button
                     @click="destroy(service.id, service.name)"
-                    class="btn-icon text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
+                    class="inline-flex items-center justify-center w-8 h-8 rounded-full text-red-600 hover:bg-red-100 dark:hover:bg-red-900"
                     title="Delete"
                   >
                     <Trash2 class="w-4 h-4" />

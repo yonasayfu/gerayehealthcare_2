@@ -84,7 +84,7 @@
     </form>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useForm, Link } from '@inertiajs/vue3';
 import InputError from '@/components/InputError.vue';
 import FormActions from '@/components/FormActions.vue'

@@ -119,6 +119,8 @@ class TaskDelegationController extends Controller
 
     public function update(Request $request, TaskDelegation $task_delegation)
     {
+        $this->authorize('update', $task_delegation);
+
         $validated = $request->validate([
             'status' => ['nullable', Rule::in(['Pending', 'In Progress', 'Completed'])],
             'assigned_to' => ['nullable', Rule::exists('staff', 'id')],
@@ -137,17 +139,6 @@ class TaskDelegationController extends Controller
         ]);
 
         $originalAssignee = $task_delegation->assigned_to;
-
-        // Restrict transfer: only assignee or creator can reassign; admins override
-        if (array_key_exists('assigned_to', $validated) && (int) $validated['assigned_to'] !== (int) $originalAssignee) {
-            $user = auth()->user();
-            $isAssignee = (int) ($user->staff->id ?? 0) === (int) $originalAssignee;
-            $isCreator = (int) ($task_delegation->created_by ?? 0) === (int) $user->id;
-            $isAdmin = method_exists($user, 'hasRole') && ($user->hasRole(RoleEnum::SUPER_ADMIN->value) || $user->hasRole(RoleEnum::ADMIN->value));
-            if (!$isAssignee && !$isCreator && !$isAdmin) {
-                abort(403, 'You are not allowed to transfer this task.');
-            }
-        }
 
         $updated = $this->taskDelegationService->update($task_delegation->id, $validated);
 

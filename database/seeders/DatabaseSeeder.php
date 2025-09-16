@@ -63,10 +63,13 @@ class DatabaseSeeder extends Seeder
             // Messaging / Dashboard samples
             DashboardDataSeeder::class,
 
-            // Task Management (Enhanced)
-            EnhancedTaskDelegationSeeder::class,
-            EnhancedPersonalTaskSeeder::class,
-            PersonalTaskSubtaskSeeder::class,
+            // Task Management (Scenario-based)
+            TaskScenarioSeeder::class,
+
+            // Task Management (Enhanced) - DISABLED
+            // EnhancedTaskDelegationSeeder::class,
+            // EnhancedPersonalTaskSeeder::class,
+            // PersonalTaskSubtaskSeeder::class,
         ]);
 
         // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import InputLabel from '@/components/ui/label/Label.vue'
-import TextInput from '@/components/ui/input/Input.vue'
-import InputError from '@/components/InputError.vue'
-import PrimaryButton from '@/components/ui/button/Button.vue'
-import { format } from 'date-fns'
+import Form from './Form.vue'
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -34,31 +30,13 @@ const submit = () => {
   form.post(route('admin.marketing-campaigns.store'));
 };
 
-// Dummy data for select options (replace with actual data from props if available)
-const platforms = [
-  { id: 1, name: 'TikTok' },
-  { id: 2, name: 'Meta' },
-  { id: 3, name: 'Google' },
-  { id: 4, name: 'LinkedIn' },
-];
-
-const campaignTypes = [
-  'Awareness',
-  'Lead Gen',
-  'Conversion',
-];
-
-const statuses = [
-  'Draft',
-  'Active',
-  'Paused',
-  'Completed',
-];
-
-const staffMembers = [
-  { id: 1, full_name: 'John Doe' },
-  { id: 2, full_name: 'Jane Smith' },
-];
+// Options provided from controller via props
+const props = defineProps<{ 
+  platforms: { id: number; name: string }[];
+  staffMembers: { id: number; full_name: string }[];
+  campaignTypes: string[];
+  statuses: string[];
+}>()
 
 </script>
 
@@ -82,7 +60,7 @@ const staffMembers = [
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :platforms="props.platforms" :staff-members="props.staffMembers" :campaign-types="props.campaignTypes" :statuses="props.statuses" />
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.marketing-campaigns.index')" class="btn-glass btn-glass-sm">Cancel</Link>

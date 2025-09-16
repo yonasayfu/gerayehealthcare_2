@@ -41,6 +41,12 @@ function printPage() {
           <Link :href="route('admin.task-delegations.index')" class="btn-glass btn-glass-sm">Back</Link>
         </template>
       </ShowHeader>
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Task Delegation Details</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
       <!-- keep content and footer within the same card container -->
 
       <div class="p-6 space-y-4">
@@ -80,7 +86,7 @@ function printPage() {
       <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.task-delegations.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.task-delegations.edit', props.taskDelegation.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>

@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { ref, watch, computed, onMounted } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+// no icon imports needed on this page
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-import CalendarView from '@/components/CalendarView.vue'
 import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
 import { useEthiopianDate } from '@/composables/useEthiopianDate';
 import type { EthiopianCalendarDayPagination } from '@/types';
-import { confirmDialog } from '@/lib/confirm'
 
 const gregorianInput = ref('');
 const ethiopianInput = ref(''); // This will store the Ethiopian date string from the picker
@@ -42,9 +39,7 @@ const sortField = ref(props.filters.sort || '')
 const sortDirection = ref(props.filters.direction || 'asc')
 const perPage = ref(props.filters.per_page || 5)
 
-const formattedGeneratedDate = computed(() => {
-  return format(new Date(), 'PPP p');
-});
+// formatted date not displayed on this page
 
 const currentEthiopianDate = ref('');
 const showEthiopianDate = ref(false); // New ref for toggling visibility
@@ -80,25 +75,7 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-async function destroy(id: number) {
-  const ok = await confirmDialog({
-    title: 'Delete Ethiopian Calendar Day',
-    message: 'Are you sure you want to delete this ethiopian calendar day?',
-    confirmText: 'Delete',
-    variant: 'danger',
-  })
-  if (!ok) return
-  router.delete(route('admin.ethiopian-calendar-days.destroy', id))
-}
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
-  }
-}
+// no table actions on this view; remove unused actions
 
 async function convertDate(type: 'gregorian' | 'ethiopian') {
   conversionError.value = '';

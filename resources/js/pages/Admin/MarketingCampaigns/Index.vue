@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, Download } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -104,7 +104,7 @@ async function destroy(id: number) {
 
 import { useExport } from '@/composables/useExport';
 
-const { printCurrentView, printAllRecords, isProcessing } = useExport({ routeName: 'admin.marketing-campaigns', filters: props.filters });
+const { printCurrentView, isProcessing, exportData } = useExport({ routeName: 'admin.marketing-campaigns', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -259,10 +259,6 @@ function toggleSort(field: string) {
       </div>
 
       <Pagination v-if="marketingCampaigns.data.length > 0" :links="marketingCampaigns.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>

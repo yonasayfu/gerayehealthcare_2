@@ -4,7 +4,8 @@ import InputError from '@/components/InputError.vue'
 
 const props = defineProps<{
   form: any,
-  staff?: { id: number; first_name: string; last_name: string }[]
+  staff?: { id: number; first_name: string; last_name: string }[],
+  partners?: { id: number; name: string }[] | null,
 }>()
 
 const staffOptions = computed(() => props.staff ?? [])
@@ -72,6 +73,25 @@ const staffOptions = computed(() => props.staff ?? [])
           <option value="5">Critical</option>
         </select>
         <InputError class="mt-1" :message="form.errors.priority_level" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-900 dark:text-white">Category</label>
+        <select v-model="form.task_category" class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+          <option value="General">General</option>
+          <option value="Engagement">Engagement</option>
+          <option value="Other">Other</option>
+        </select>
+        <InputError class="mt-1" :message="form.errors.task_category" />
+      </div>
+
+      <div v-if="form.task_category === 'Engagement'">
+        <label class="block text-sm font-medium text-gray-900 dark:text-white">Partner (for Engagement)</label>
+        <select v-model="form.partner_id" class="mt-2 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-600">
+          <option :value="null">Select Partner</option>
+          <option v-for="p in (partners || [])" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
+        <InputError class="mt-1" :message="form.errors.partner_id" />
       </div>
     </div>
 

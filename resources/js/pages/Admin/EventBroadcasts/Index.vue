@@ -7,6 +7,7 @@ import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-nex
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { useExport } from '@/composables/useExport'
 
 interface BroadcastIndexProps {
     broadcasts: any;
@@ -56,16 +57,7 @@ async function destroy(id: number) {
     router.delete(route('admin.event-broadcasts.destroy', id))
 }
 
-function printCurrentView() {
-    setTimeout(() => {
-        try {
-            window.print();
-        } catch (e) {
-            console.error('Print failed', e);
-            alert('Failed to open print dialog.');
-        }
-    }, 100);
-}
+const { printCurrentView } = useExport({ routeName: 'admin.event-broadcasts', filters: props.filters || {} })
 
 function toggleSort(field: string) {
     if (sortField.value === field) {
@@ -204,3 +196,15 @@ function toggleSort(field: string) {
     </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

@@ -27,6 +27,25 @@ class MarketingCampaignController extends BaseController
         );
     }
 
+    public function create()
+    {
+        $platforms = MarketingPlatform::query()->select('id', 'name')->orderBy('name')->get();
+        $staffMembers = Staff::query()->select('id')
+            ->selectRaw("CONCAT(first_name, ' ', last_name) as full_name")
+            ->orderBy('first_name')
+            ->get();
+
+        $campaignTypes = ['Awareness', 'Lead Gen', 'Conversion'];
+        $statuses = ['Draft', 'Active', 'Paused', 'Completed'];
+
+        return Inertia::render('Admin/MarketingCampaigns/Create', [
+            'platforms' => $platforms,
+            'staffMembers' => $staffMembers,
+            'campaignTypes' => $campaignTypes,
+            'statuses' => $statuses,
+        ]);
+    }
+
     public function printAll()
     {
         return app(MarketingCampaignService::class)->printAll(request());

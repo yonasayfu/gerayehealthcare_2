@@ -273,7 +273,7 @@ function updateStatus(id: number, status: string) {
 
       <!-- Task Table -->
       <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white/50 backdrop-blur-sm shadow-sm">
-        <table class="w-full text-left text-sm">
+        <table class="w-full text-left text-sm print-table">
           <thead class="bg-cyan-100/50 text-cyan-900">
             <tr>
               <th @click="toggleSort('title')" class="px-4 py-3 cursor-pointer hover:bg-cyan-200/50 rounded-tl-lg">

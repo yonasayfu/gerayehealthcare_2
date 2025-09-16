@@ -11,6 +11,7 @@ use App\Services\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class StaffPayoutController extends Controller
@@ -46,17 +47,54 @@ class StaffPayoutController extends Controller
         try {
             $dto = new CreateStaffPayoutDTO(
                 staff_id: $validated['staff_id'],
-                total_amount: 0, // This will be calculated in the service
+                total_amount: null,
                 payout_date: Carbon::today()->toDateString(),
                 status: 'Completed',
-                notes: 'Manual Payout'
+                notes: $request->input('notes')
             );
-            $this->staffPayoutService->processPayout($dto);
+            $payout = $this->staffPayoutService->processPayout($dto);
 
-            return back()->with('banner', 'Payout processed successfully.')->with('bannerStyle', 'success');
+            return redirect()
+                ->route('admin.staff-payouts.show', $payout)
+                ->with('banner', 'Payout processed successfully.')
+                ->with('bannerStyle', 'success');
         } catch (\Exception $e) {
             return back()->with('banner', $e->getMessage())->with('bannerStyle', 'danger');
         }
+    }
+
+    public function revert(Request $request, StaffPayout $staff_payout)
+    {
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $payout = $staff_payout->load('visitServices');
+
+        DB::transaction(function () use ($payout, $request) {
+            // Mark related visits as unpaid again
+            if ($payout->visitServices && $payout->visitServices->count() > 0) {
+                \App\Models\VisitService::whereIn('id', $payout->visitServices->pluck('id'))
+                    ->update(['is_paid_to_staff' => false]);
+
+                // Detach visits from this payout to avoid double counting
+                $payout->visitServices()->detach();
+            }
+
+            // Update payout status and notes to reflect reversal
+            $reasonText = trim((string) $request->input('reason'));
+            $payout->status = 'Voided';
+            $payout->notes = trim(($payout->notes ? $payout->notes."\n" : '') . 'Reverted'.($reasonText ? ": {$reasonText}" : ''));
+            $payout->reverted_by = auth()->id();
+            $payout->reverted_reason = $reasonText ?: null;
+            $payout->reverted_at = now();
+            $payout->save();
+        });
+
+        return redirect()
+            ->route('admin.staff-payouts.show', $payout)
+            ->with('banner', 'Payout reverted. Unpaid amounts are now available for processing again.')
+            ->with('bannerStyle', 'success');
     }
 
     public function printAll(Request $request)

@@ -118,6 +118,10 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
             <Printer class="h-4 w-4" />
             <span class="ml-2">Print Current</span>
           </button>
+          <button @click="printAllRecords" class="btn-glass btn-glass-sm" title="Print all records" aria-label="Print all records">
+            <Printer class="h-4 w-4" />
+            <span class="ml-2">Print All</span>
+          </button>
         </div>
       </div>
 
@@ -149,7 +153,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 
         <!-- Inventory Maintenance Table -->
         <div class="overflow-x-auto">
-          <table class="min-w-full text-left text-sm">
+          <table class="min-w-full text-left text-sm print-table">
             <thead>
               <tr>
                 <th class="p-2">#</th>
@@ -200,11 +204,23 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 
 <style>
 @media print {
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
   /* Hide AppLayout chrome while printing */
   .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
   /* Ensure print-only blocks are visible */
   .hidden.print\:block { display: block !important; }
 }
 </style>
-]]>
+ 

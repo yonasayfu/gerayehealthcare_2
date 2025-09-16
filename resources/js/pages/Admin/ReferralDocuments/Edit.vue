@@ -23,6 +23,9 @@
           :staff="props.staff"
           :editMode="true"
         />
+        <div class="mt-4 flex justify-end">
+          <Link :href="route('admin.referral-documents.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+        </div>
       </div>
     </div>
   </AppLayout>

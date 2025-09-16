@@ -3,6 +3,8 @@
 namespace App\Listeners;
 
 use App\Events\StaffAssignedToEvent;
+use App\Models\EventStaffAssignment;
+use Illuminate\Support\Facades\Log;
 
 class AssignStaffToEvent
 {

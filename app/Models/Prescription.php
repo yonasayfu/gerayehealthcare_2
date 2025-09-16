@@ -16,10 +16,17 @@ class Prescription extends Model
         'status',
         'instructions',
         'created_by_staff_id',
+        'share_token',
+        'share_expires_at',
+        'share_views',
+        'last_viewed_at',
+        'share_pin',
     ];
 
     protected $casts = [
         'prescribed_date' => 'date',
+        'share_expires_at' => 'datetime',
+        'last_viewed_at' => 'datetime',
     ];
 
     public function patient()

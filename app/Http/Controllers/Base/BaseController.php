@@ -214,7 +214,7 @@ class BaseController extends Controller
             if (array_key_exists($name, $validatedData)) {
                 $value = $validatedData[$name];
                 // Ensure common FK ids are always integers
-                if (in_array($name, ['staff_id', 'partner_id', 'signed_by_staff_id', 'agreement_id', 'referred_patient_id'], true)) {
+                if (in_array($name, ['event_id', 'staff_id', 'partner_id', 'signed_by_staff_id', 'sent_by_staff_id', 'agreement_id', 'referred_patient_id'], true)) {
                     if (is_array($value)) {
                         // Try to extract a numeric value from the array
                         if (isset($value['id']) && is_numeric($value['id'])) {

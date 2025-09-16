@@ -18,6 +18,9 @@
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <ReferralDocumentForm :referrals="props.referrals" :staff="props.staff" :editMode="false" />
+        <div class="mt-4 flex justify-end">
+          <Link :href="route('admin.referral-documents.index')" class="btn-glass btn-glass-sm">Cancel</Link>
+        </div>
       </div>
     </div>
   </AppLayout>

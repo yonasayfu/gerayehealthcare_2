@@ -87,15 +87,15 @@
             <div class="flex items-center justify-end mt-6">
                 <button type="submit"
                         :disabled="form.processing"
-                        class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md shadow hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {{ editMode ? 'Update' : 'Create' }} Referral Document
+                        class="btn-glass btn-glass-sm disabled:opacity-50">
+                    {{ form.processing ? (editMode ? 'Updating...' : 'Creating...') : (editMode ? 'Update' : 'Create') }} Referral Document
                 </button>
             </div>
         </div>
     </form>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 

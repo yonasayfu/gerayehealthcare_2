@@ -307,3 +307,14 @@ function truncate(str: string | undefined, n = 60): string {
         </div>
     </AppLayout>
 </template>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

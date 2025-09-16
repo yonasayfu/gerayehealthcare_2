@@ -186,4 +186,36 @@ function handleConfirmOk() {
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #4a5568; /* Gray-700 */
 }
+
+/* Global print defaults to standardize all Index/Show prints */
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide application chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
+  /* Header block styling (used by many pages) */
+  .print-header-content { padding-top: 0.5cm !important; padding-bottom: 0.5cm !important; margin-bottom: 0.8cm !important; }
+  .print-logo { max-width: 150px; max-height: 50px; margin: 0 auto 0.5rem auto; display: block; }
+  .print-clinic-name { font-size: 1.8rem !important; margin-bottom: 0.2rem !important; line-height: 1.2 !important; }
+  .print-document-title { font-size: 0.9rem !important; color: #555 !important; }
+
+  /* Table defaults (applies when pages use .print-table) */
+  table.print-table { width: 100% !important; border-collapse: collapse !important; margin: 0 !important; }
+  .print-table th, .print-table td { border: 1px solid #ccc !important; padding: 4px 6px !important; font-size: 10px !important; text-align: left !important; }
+  .print-table thead { background-color: #f3f4f6 !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
 </style>

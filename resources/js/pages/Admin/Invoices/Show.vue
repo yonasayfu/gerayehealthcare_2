@@ -1,14 +1,25 @@
 <script setup lang="ts">
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ShowHeader from '@/components/ShowHeader.vue'
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Printer, Share2, Download } from 'lucide-vue-next';
+import { Printer, Shield, Stethoscope, Eye } from 'lucide-vue-next';
+import { useToast } from '@/components/ui/toast';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const props = defineProps<{
   invoice: any;
+  partners?: Array<{ id: number; name: string }>;
 }>();
 
 const breadcrumbs: BreadcrumbItemType[] = [
@@ -26,55 +37,77 @@ const formatDate = (dateString: string) => {
   return format(new Date(dateString), 'MMM dd, yyyy');
 };
 
-const copyShareLink = async () => {
-  try {
-    await navigator.clipboard.writeText(window.location.href);
-    alert('Link copied to clipboard');
-  } catch (e) {
-    alert('Failed to copy link. You can copy the URL from the address bar.');
-  }
-};
-
-// Fetch a public signed PDF URL from the backend
-const getPublicShareLink = async (invoiceId: number | string): Promise<string> => {
-  const url = route('admin.invoices.shareLink', invoiceId as any) as string;
-  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  if (!res.ok) throw new Error('Failed to generate share link');
-  const data = await res.json();
-  return data.url as string;
-};
-
-const shareViaTelegram = async () => {
-  try {
-    const publicUrl = await getPublicShareLink(props.invoice.id);
-    const text = encodeURIComponent(`Invoice ${props.invoice.invoice_number}`);
-    const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(publicUrl)}&text=${text}`;
-    window.open(tgUrl, '_blank');
-  } catch (e) {
-    alert('Could not open Telegram share.');
-  }
-};
-
-const copyPublicLink = async () => {
-  try {
-    const publicUrl = await getPublicShareLink(props.invoice.id);
-    await navigator.clipboard.writeText(publicUrl);
-    alert('Public link copied to clipboard');
-  } catch (e) {
-    alert('Failed to generate public link');
-  }
-};
-
-const downloadUrl = computed(() => `${route('admin.invoices.print', props.invoice.id)}?download=1`);
-
-// Share dropdown state
-const showShare = ref(false);
-const toggleShare = () => (showShare.value = !showShare.value);
-const closeShare = () => (showShare.value = false);
+// removed unused share/download logic to satisfy linters
 
 const printCurrent = () => {
   setTimeout(() => window.print(), 30);
 };
+
+// Derive providers (doctors) from invoice items' visit service relations (robust to snake/camel case)
+const providerNames = computed(() => {
+  const set = new Set<string>();
+  try {
+    (props.invoice?.items || []).forEach((item: any) => {
+      const vs = item?.visitService || item?.visit_service;
+      const staff = vs?.staff;
+      const name = staff?.full_name || [staff?.first_name, staff?.last_name].filter(Boolean).join(' ');
+      if (name) set.add(name);
+    });
+  } catch {}
+  return Array.from(set);
+});
+
+const sharedList = computed(() => {
+  const rows = (props.invoice?.shared_invoices || props.invoice?.sharedInvoices || []).map((s: any) => {
+    const partner = s?.partner;
+    const sharedBy = s?.shared_by || s?.sharedBy;
+    return {
+      id: s?.id,
+      status: s?.status || '-',
+      partnerName: partner?.name || '—',
+      partnerId: partner?.id || s?.partner_id,
+      shareDate: s?.share_date || s?.created_at,
+      expiresAt: s?.share_expires_at || null,
+      views: s?.share_views ?? 0,
+      sharedByName: sharedBy?.full_name || [sharedBy?.first_name, sharedBy?.last_name].filter(Boolean).join(' ') || '—',
+      sharedById: sharedBy?.id || s?.shared_by_staff_id,
+    };
+  });
+  return rows;
+});
+
+// Quick Share form
+const shareForm = useForm({
+  partner_id: null as number | null,
+  notes: '' as string,
+});
+
+const isShareOpen = ref(false);
+const { toast } = useToast();
+
+function quickShare() {
+  if (!shareForm.partner_id) return;
+  const payload = {
+    invoice_id: props.invoice.id,
+    partner_id: shareForm.partner_id,
+    share_date: format(new Date(), 'yyyy-MM-dd'),
+    status: 'Active',
+    notes: shareForm.notes || undefined,
+  } as any;
+  shareForm.post(route('admin.shared-invoices.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      toast({ title: 'Invoice shared', description: 'Partner has access to this invoice.', variant: 'default' });
+      isShareOpen.value = false;
+      shareForm.reset();
+      router.reload({ only: ['invoice'] });
+    },
+    onError: (errors) => {
+      const message = errors?.partner_id || errors?.invoice_id || 'Failed to share invoice.';
+      toast({ title: 'Share failed', description: String(message), variant: 'destructive' });
+    },
+  });
+}
 </script>
 
 <template>
@@ -83,7 +116,10 @@ const printCurrent = () => {
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
       <ShowHeader title="Invoice Details" :subtitle="`Invoice: ${invoice.invoice_number}`">
         <template #actions>
-          <Link :href="route('admin.invoices.index')" class="btn-glass btn-glass-sm">Back</Link>
+          <Button as-child variant="outline" size="sm" class="mr-2">
+            <Link :href="route('admin.invoices.index')">Back</Link>
+          </Button>
+          <Button size="sm" @click="isShareOpen = true">Share Invoice</Button>
         </template>
       </ShowHeader>
 
@@ -104,23 +140,32 @@ const printCurrent = () => {
               <p>{{ invoice.patient?.email }}</p>
             </div>
           </div>
-          <div class="text-right">
+          <div class="text-right space-y-1">
             <p><span class="font-semibold">Invoice Date:</span> {{ formatDate(invoice.invoice_date) }}</p>
             <p><span class="font-semibold">Due Date:</span> {{ formatDate(invoice.due_date) }}</p>
+            <p v-if="invoice.status"><span class="font-semibold">Status:</span> {{ invoice.status }}</p>
+            <p v-if="invoice.insurance_company">
+              <span class="inline-flex items-center gap-1 font-semibold"><Shield class="h-4 w-4" /> Insurance:</span>
+              <span class="ml-1">{{ invoice.insurance_company.name }}</span>
+            </p>
+            <p v-if="providerNames.length">
+              <span class="inline-flex items-center gap-1 font-semibold"><Stethoscope class="h-4 w-4" /> Provider(s):</span>
+              <span class="ml-1">{{ providerNames.join(', ') }}</span>
+            </p>
           </div>
         </div>
 
-        <table class="w-full mb-8">
+        <table class="w-full mb-8 border-collapse">
           <thead class="bg-gray-100">
             <tr>
-              <th class="p-2 text-left">Service Description</th>
-              <th class="p-2 text-right">Cost</th>
+              <th class="p-2 text-left border">Service Description</th>
+              <th class="p-2 text-right border">Cost</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in invoice.items" :key="item.id" class="border-b">
-              <td class="p-2">{{ item.description }}</td>
-              <td class="p-2 text-right">{{ formatCurrency(item.cost) }}</td>
+              <td class="p-2 border">{{ item.description }}</td>
+              <td class="p-2 text-right border">{{ formatCurrency(item.cost) }}</td>
             </tr>
           </tbody>
         </table>
@@ -145,15 +190,77 @@ const printCurrent = () => {
 
       <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.invoices.index')" class="btn-glass btn-glass-sm">Back to List</Link>
           <button @click="printCurrent" class="btn-glass btn-glass-sm">
             <Printer class="icon" />
             <span class="hidden sm:inline">Print Current</span>
           </button>
-          <a :href="downloadUrl" class="btn-glass btn-glass-sm">
-            <Download class="icon" />
-            <span class="hidden sm:inline">Download PDF</span>
-          </a>
+        </div>
+      </div>
+
+      <!-- Quick Share to Partner -->
+      <Dialog :open="isShareOpen" @update:open="isShareOpen = $event">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Invoice</DialogTitle>
+            <DialogDescription>Select a partner and optionally add a note.</DialogDescription>
+          </DialogHeader>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Partner</label>
+              <select v-model.number="shareForm.partner_id" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800">
+                <option :value="null">Select partner…</option>
+                <option v-for="p in (partners || [])" :key="p.id" :value="p.id">{{ p.name }}</option>
+              </select>
+              <div v-if="shareForm.errors.partner_id" class="text-xs text-red-500 mt-1">{{ shareForm.errors.partner_id }}</div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Notes (optional)</label>
+              <input v-model="shareForm.notes" type="text" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800" placeholder="Add a note" />
+              <div v-if="shareForm.errors.notes" class="text-xs text-red-500 mt-1">{{ shareForm.errors.notes }}</div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" @click="isShareOpen = false" :disabled="shareForm.processing">Cancel</Button>
+            <Button @click="quickShare" :disabled="shareForm.processing || !shareForm.partner_id">Share</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <!-- Partner Shares -->
+      <div v-if="sharedList.length" class="px-6 pb-6 print:hidden">
+        <h3 class="text-md font-semibold mb-3">Partner Shares</h3>
+        <div class="overflow-x-auto bg-white dark:bg-gray-800 border rounded-md">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-100 dark:bg-gray-700 text-xs uppercase text-gray-600 dark:text-gray-300">
+              <tr>
+                <th class="p-2">Partner</th>
+                <th class="p-2">Status</th>
+                <th class="p-2">Shared By</th>
+                <th class="p-2">Share Date</th>
+                <th class="p-2">Expires</th>
+                <th class="p-2">Views</th>
+                <th class="p-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="s in sharedList" :key="s.id" class="border-t">
+                <td class="p-2">
+                  <Link v-if="s.partnerId" :href="route('admin.partners.show', s.partnerId)" class="text-indigo-600 hover:underline">{{ s.partnerName }}</Link>
+                  <span v-else>{{ s.partnerName }}</span>
+                </td>
+                <td class="p-2">{{ s.status }}</td>
+                <td class="p-2">{{ s.sharedByName }}</td>
+                <td class="p-2">{{ s.shareDate ? format(new Date(s.shareDate), 'PPP p') : '—' }}</td>
+                <td class="p-2">{{ s.expiresAt ? format(new Date(s.expiresAt), 'PPP p') : '—' }}</td>
+                <td class="p-2">{{ s.views }}</td>
+                <td class="p-2 text-right">
+                  <Link v-if="s.id" :href="route('admin.shared-invoices.show', s.id)" class="inline-flex items-center gap-1 text-indigo-600">
+                    <Eye class="h-4 w-4" /> View
+                  </Link>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -172,7 +279,8 @@ const printCurrent = () => {
   .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
   .print-clinic-name { font-size: 16px; margin: 0; }
   .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
-  table { border-collapse: collapse; }
+  table { border-collapse: collapse; font-size: 12px; }
+  th, td { border: 1px solid #d1d5db !important; }
   hr { display: none !important; }
   .print-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; box-shadow: none !important; }
 }

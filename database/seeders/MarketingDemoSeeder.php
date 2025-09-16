@@ -8,6 +8,7 @@ use App\Models\MarketingBudget;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingLead;
 use App\Models\MarketingPlatform;
+use App\Models\LandingPage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -15,6 +16,7 @@ class MarketingDemoSeeder extends Seeder
 {
     public function run(): void
     {
+        LandingPage::query()->delete();
         // Lead sources
         $sources = ['Website', 'Referral', 'TikTok', 'Facebook', 'Walk-in'];
         foreach ($sources as $name) {

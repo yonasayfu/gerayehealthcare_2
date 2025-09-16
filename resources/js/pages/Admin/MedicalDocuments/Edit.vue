@@ -3,6 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Save, ArrowLeft, FileText } from 'lucide-vue-next'
 import InputError from '@/components/InputError.vue'
+import axios from 'axios'
 
 const props = defineProps<{
   medicalDocument: {
@@ -12,6 +13,8 @@ const props = defineProps<{
     document_date: string | null
     summary: string | null
     file_path?: string | null
+    patient?: { id: number; full_name: string; patient_code: string }
+    medical_visit_id?: number | null
   }
 }>()
 
@@ -27,6 +30,7 @@ const form = useForm({
   document_date: props.medicalDocument.document_date || '',
   summary: props.medicalDocument.summary || '',
   file: null as File | null,
+  medical_visit_id: (props.medicalDocument as any).medical_visit_id || '',
 })
 
 function onFileChange(e: Event) {
@@ -39,8 +43,31 @@ function onFileChange(e: Event) {
 function submit() {
   form.post(route('admin.medical-documents.update', props.medicalDocument.id), {
     _method: 'put',
+    forceFormData: true,
   })
 }
+
+// Fetch visits for this document's patient for selection
+import { ref, onMounted } from 'vue'
+const visits = ref<Array<{ id: number; visit_date: string; visit_type: string }>>([])
+const loadingVisits = ref(false)
+
+async function fetchVisits(patientId: number | undefined) {
+  if (!patientId) return
+  try {
+    loadingVisits.value = true
+    const { data } = await axios.get(`/dashboard/medical-documents/visits-for-patient/${patientId}`)
+    visits.value = data.visits ?? []
+  } catch (e) {
+    visits.value = []
+  } finally {
+    loadingVisits.value = false
+  }
+}
+
+onMounted(() => {
+  fetchVisits(props.medicalDocument.patient?.id)
+})
 </script>
 
 <template>
@@ -70,6 +97,18 @@ function submit() {
 
           <form @submit.prevent="submit" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Medical Visit (optional)</label>
+                <select v-model="form.medical_visit_id" class="form-input" :disabled="loadingVisits">
+                  <option value="">Select visit</option>
+                  <option v-for="v in visits" :key="v.id" :value="v.id">
+                    {{ new Date(v.visit_date).toLocaleString() }} - {{ v.visit_type || 'Visit' }}
+                  </option>
+                </select>
+                <div v-if="!loadingVisits && visits.length === 0" class="text-xs text-gray-500 mt-1">No visits found for patient.</div>
+                <InputError class="mt-1" :message="form.errors.medical_visit_id" />
+              </div>
+
               <div class="md:col-span-2">
                 <label class="form-label">Title</label>
                 <input v-model="form.title" type="text" class="form-input" />

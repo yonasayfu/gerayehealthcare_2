@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ShowHeader from '@/components/ShowHeader.vue'
 import { format } from 'date-fns'
+import { useExport } from '@/composables/useExport'
 
 interface MarketingBudget {
   id: number;
@@ -29,9 +30,7 @@ const breadcrumbs = [
   { title: props.marketingBudget.budget_name, href: route('admin.marketing-budgets.show', props.marketingBudget.id) },
 ]
 
-function printCurrent() {
-  window.print();
-}
+const { printCurrentView } = useExport({ routeName: 'admin.marketing-budgets', filters: {} })
 </script>
 
 <template>
@@ -76,6 +75,10 @@ function printCurrent() {
             <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ marketingBudget.spent_amount }}</p>
           </div>
           <div>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Remaining Amount:</p>
+            <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ (marketingBudget.allocated_amount - marketingBudget.spent_amount).toFixed(2) }}</p>
+          </div>
+          <div>
             <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Period Start:</p>
             <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ marketingBudget.period_start ? format(new Date(marketingBudget.period_start), 'PPP') : '-' }}</p>
           </div>
@@ -104,9 +107,9 @@ function printCurrent() {
 
         <div class="mt-6 flex flex-wrap gap-2 justify-end print:hidden">
           <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">
-            Back to List
+            
           </Link>
-          <button @click="printCurrent" class="btn-glass btn-glass-sm" title="Print this budget">
+          <button @click="printCurrentView" class="btn-glass btn-glass-sm" title="Print this budget">
             Print Current
           </button>
           <Link :href="route('admin.marketing-budgets.edit', marketingBudget.id)" class="btn-glass btn-glass-sm">

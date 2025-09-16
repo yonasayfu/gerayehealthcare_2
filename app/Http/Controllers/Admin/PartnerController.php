@@ -98,4 +98,33 @@ class PartnerController extends BaseController
 
         return redirect()->route('admin.partners.index')->with('banner', 'Partners updated successfully.')->with('bannerStyle', 'success');
     }
+
+    public function show($id)
+    {
+        $partner = $this->service->getById($id);
+
+        // Scoped Task Delegations used as Engagements
+        $today = now()->toDateString();
+        $engagementsUpcoming = \App\Models\TaskDelegation::with(['assignee'])
+            ->where('task_category', 'Engagement')
+            ->where('partner_id', $partner->id)
+            ->whereDate('due_date', '>=', $today)
+            ->orderBy('due_date', 'asc')
+            ->limit(10)
+            ->get(['id','title','assigned_to','due_date','status','partner_id']);
+
+        $engagementsRecent = \App\Models\TaskDelegation::with(['assignee'])
+            ->where('task_category', 'Engagement')
+            ->where('partner_id', $partner->id)
+            ->whereDate('due_date', '<', $today)
+            ->orderBy('due_date', 'desc')
+            ->limit(10)
+            ->get(['id','title','assigned_to','due_date','status','partner_id']);
+
+        return Inertia::render('Admin/Partners/Show', [
+            'partner' => $partner,
+            'engagementsUpcoming' => $engagementsUpcoming,
+            'engagementsRecent' => $engagementsRecent,
+        ]);
+    }
 }

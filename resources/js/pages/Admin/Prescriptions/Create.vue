@@ -10,10 +10,13 @@ const breadcrumbs = [
   { title: 'Create', href: null },
 ]
 
+const props = defineProps<{ patients: Array<any>; staff: Array<any> }>()
+
 const form = useForm({
   patient_id: '',
+  created_by_staff_id: '',
   prescribed_date: '',
-  status: 'active',
+  status: 'draft',
   instructions: '',
   items: [
     { medication_name: '', dosage: '', frequency: '', duration: '', notes: '' },
@@ -61,9 +64,20 @@ function submit() {
           <form @submit.prevent="submit" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="form-label">Patient ID</label>
-                <input v-model="form.patient_id" type="number" class="form-input" placeholder="e.g. 123" />
+                <label class="form-label">Patient</label>
+                <select v-model.number="form.patient_id" class="form-input">
+                  <option :value="''">Select patient</option>
+                  <option v-for="p in props.patients" :key="p.id" :value="p.id">{{ p.full_name }} ({{ p.patient_code }})</option>
+                </select>
                 <div v-if="form.errors.patient_id" class="form-error">{{ form.errors.patient_id }}</div>
+              </div>
+              <div>
+                <label class="form-label">Prescribing Doctor</label>
+                <select v-model.number="form.created_by_staff_id" class="form-input">
+                  <option :value="''">Select doctor</option>
+                  <option v-for="s in props.staff" :key="s.id" :value="s.id">{{ s.first_name }} {{ s.last_name }}</option>
+                </select>
+                <div v-if="form.errors.created_by_staff_id" class="form-error">{{ form.errors.created_by_staff_id }}</div>
               </div>
               <div>
                 <label class="form-label">Prescribed Date</label>
@@ -73,8 +87,9 @@ function submit() {
               <div>
                 <label class="form-label">Status</label>
                 <select v-model="form.status" class="form-input">
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
+                  <option value="draft">Draft</option>
+                  <option value="final">Final</option>
+                  <option value="dispensed">Dispensed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
                 <div v-if="form.errors.status" class="form-error">{{ form.errors.status }}</div>

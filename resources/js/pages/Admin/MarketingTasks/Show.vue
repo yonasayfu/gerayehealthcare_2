@@ -58,6 +58,9 @@ function destroy(id: number) {
 
       <ShowHeader title="Marketing Task Details" :subtitle="`Marketing Task: ${marketingTask.title || marketingTask.task_code || marketingTask.id}`">
         <template #actions>
+          <span v-if="marketingTask.assigned_to_staff?.user?.name" class="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200 text-xs px-2 py-1">
+            Assigned to: {{ marketingTask.assigned_to_staff.user.name }}
+          </span>
           <Link :href="route('admin.marketing-tasks.index')" class="btn-glass btn-glass-sm">Back</Link>
         </template>
       </ShowHeader>
@@ -144,7 +147,7 @@ function destroy(id: number) {
               <!-- footer actions (single source of actions, right aligned) -->
       <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
         <div class="flex justify-end gap-2">
-          <Link :href="route('admin.marketing-tasks.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          
           <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
           <Link :href="route('admin.marketing-tasks.edit', marketingTask.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
@@ -159,7 +162,7 @@ function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

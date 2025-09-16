@@ -9,6 +9,7 @@ const props = defineProps<{ staff: Array<{ id: number; first_name: string; last_
 
 const form = useForm({
   staff_id: null as number | null,
+  notes: '' as string,
 })
 
 const breadcrumbs = [
@@ -46,6 +47,12 @@ function submit() {
             <InputError class="mt-1" :message="form.errors?.staff_id" />
           </div>
 
+          <div>
+            <label class="block text-sm font-medium text-gray-900 dark:text-white">Notes (optional)</label>
+            <textarea v-model="form.notes" rows="3" class="mt-1 block w-full rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700" />
+            <InputError class="mt-1" :message="form.errors?.notes" />
+          </div>
+
           <FormActions :cancel-href="route('admin.staff-payouts.index')" submit-text="Process Payout" :processing="form.processing" />
         </form>
       </div>
@@ -53,4 +60,3 @@ function submit() {
   </AppLayout>
   
 </template>
-

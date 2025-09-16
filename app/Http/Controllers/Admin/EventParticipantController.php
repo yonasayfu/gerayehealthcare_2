@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\RoleEnum;
 use App\Http\Controllers\Base\BaseController;
+use App\DTOs\CreateEventParticipantDTO;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\Patient;
