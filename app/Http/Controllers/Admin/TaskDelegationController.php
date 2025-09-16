@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Staff;
 use App\Models\TaskDelegation;
-use App\Services\TaskDelegationService;
+use App\Services\TaskDelegation\TaskDelegationService;
 use App\Services\Validation\Rules\TaskDelegationRules;
 use Inertia\Inertia;
 

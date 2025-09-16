@@ -8,7 +8,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\MedicalDocument;
 use App\Models\Patient;
 use App\Models\MedicalVisit;
-use App\Services\MedicalDocumentService;
+use App\Services\MedicalDocument\MedicalDocumentService;
 use App\Services\Validation\Rules\MedicalDocumentRules;
 use Illuminate\Http\Request;
 

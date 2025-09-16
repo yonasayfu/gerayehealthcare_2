@@ -10,7 +10,7 @@ use App\Http\Requests\VisitService\CheckOutRequest;
 use App\Http\Resources\VisitServiceResource;
 use App\Models\Patient;
 use App\Models\VisitService;
-use App\Services\VisitServiceService;
+use App\Services\VisitService\VisitServiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Carbon;

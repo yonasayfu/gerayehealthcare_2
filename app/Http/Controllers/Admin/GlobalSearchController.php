@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\GlobalSearchService;
+use App\Services\GlobalSearch\GlobalSearchService;
 use Illuminate\Http\Request;
 
 class GlobalSearchController extends Controller

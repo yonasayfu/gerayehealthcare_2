@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Traits\ExportableTrait;
 use App\Http\Config\ExportConfig;
 use App\Models\StaffPayout;
-use App\Services\StaffPayoutService;
+use App\Services\StaffPayout\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;

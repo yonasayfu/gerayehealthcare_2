@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateStaffDTO;
 use App\Http\Controllers\Base\OptimizedBaseController;
 use App\Models\Staff;
-use App\Services\OptimizedStaffService;
+use App\Services\Optimized\Staff\StaffService;
 use App\Services\Validation\Rules\StaffRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

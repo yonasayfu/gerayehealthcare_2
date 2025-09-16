@@ -8,7 +8,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\Event;
 use App\Models\EventStaffAssignment;
 use App\Models\Staff;
-use App\Services\EventStaffAssignmentService;
+use App\Services\EventStaffAssignment\EventStaffAssignmentService;
 use App\Services\Validation\Rules\EventStaffAssignmentRules;
 use Inertia\Inertia;
 

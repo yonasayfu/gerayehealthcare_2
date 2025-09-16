@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\DTOs\CreateStaffAvailabilityDTO;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
-use App\Services\StaffAvailabilityService;
+use App\Services\StaffAvailability\StaffAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;

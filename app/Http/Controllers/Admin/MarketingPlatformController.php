@@ -6,7 +6,7 @@ use App\DTOs\CreateMarketingPlatformDTO;
 use App\DTOs\UpdateMarketingPlatformDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\MarketingPlatform;
-use App\Services\MarketingPlatformService;
+use App\Services\MarketingPlatform\MarketingPlatformService;
 use App\Services\Validation\Rules\MarketingPlatformRules;
 
 class MarketingPlatformController extends BaseController

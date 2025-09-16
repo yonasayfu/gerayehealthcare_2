@@ -9,7 +9,7 @@ use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
 use App\Services\Validation\Rules\VisitServiceRules;
-use App\Services\VisitServiceService;
+use App\Services\VisitService\VisitServiceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

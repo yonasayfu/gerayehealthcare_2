@@ -8,7 +8,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\Event;
 use App\Models\EventRecommendation;
 use App\Models\Patient;
-use App\Services\EventRecommendationService;
+use App\Services\EventRecommendation\EventRecommendationService;
 use App\Services\Validation\Rules\EventRecommendationRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

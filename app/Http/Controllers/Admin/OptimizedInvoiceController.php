@@ -7,7 +7,7 @@ use App\Http\Controllers\Base\OptimizedBaseController;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\VisitService;
-use App\Services\OptimizedInvoiceService;
+use App\Services\Optimized\Invoice\InvoiceService;
 use App\Services\Validation\Rules\InvoiceRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateInventoryItemDTO;
 use App\Http\Controllers\Base\OptimizedBaseController;
 use App\Models\InventoryItem;
-use App\Services\OptimizedInventoryItemService;
+use App\Services\Optimized\InventoryItem\InventoryItemService;
 use App\Services\Validation\Rules\InventoryItemRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

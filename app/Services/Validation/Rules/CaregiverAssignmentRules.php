@@ -2,7 +2,7 @@
 
 namespace App\Services\Validation\Rules;
 
-use App\Rules\StaffIsAvailableForShift;
+use App\Services\Validation\Rules\StaffIsAvailableForShift;
 
 class CaregiverAssignmentRules extends BaseResourceRules
 {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import DashboardTabs from '@/components/DashboardTabs.vue';
 import StatCard from '@/components/StatCard.vue';
@@ -8,16 +8,13 @@ import MarketingAnalyticsDashboard from '@/components/MarketingAnalyticsDashboar
 import Tooltip from '@/components/Tooltip.vue';
 import { ref, onMounted, computed, watch } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
-import axios from 'axios';
-
 import { DollarSign, Users, CreditCard, Activity, Bell } from 'lucide-vue-next';
-// Removed RecentSales as it's no longer directly used in the template
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip as ChartTooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 
 ChartJS.register(Title, ChartTooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const currentTab = ref('Overview'); // State for active tab
+const currentTab = ref('Overview');
 
 function handleTabChange(tab: string) {
   currentTab.value = tab;
@@ -73,7 +70,6 @@ const barChartData = computed(() => ({
 const hasChartData = computed(() => {
   const ds = overviewSeries.value.datasets || [];
   if (!ds.length) return false;
-  // any dataset has any non-zero value
   return ds.some((d: any) => Array.isArray(d.data) && d.data.some((n: any) => Number(n) > 0));
 });
 
@@ -90,8 +86,6 @@ const barChartOptions = {
     y: { beginAtZero: true, ticks: { precision: 0 } },
   },
 };
-
-// Pie chart removed from Overview; keep marketing pie usage inside MarketingAnalyticsDashboard component
 
 // Recent appointments: fetched dynamically
 interface Appointment {
@@ -136,13 +130,6 @@ function setSort(key: SortKey) {
   }
   page.value = 1;
 }
-
-const props = defineProps({
-  stats: {
-    type: Object,
-    required: false,
-  },
-});
 
 // Super Admin Overview KPIs
 const superAdminStats = ref({
@@ -205,10 +192,6 @@ const topServicesChartOptions = {
   },
 };
 
-// Reports tab data (arrays)
-const reportsRevenueAR = ref<any[]>([]);
-const reportsServiceVolume = ref<any[]>([]);
-
 // Currency formatter (fallback to USD if not provided via global)
 const appCurrency = (window as any)?.appCurrency || 'USD';
 const money = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency', currency: appCurrency, minimumFractionDigits: 2 }).format(Number(v || 0));
@@ -221,9 +204,15 @@ const unreadCount = ref<number>(0);
 const topStaff = ref<Array<{ staff_id: number; first_name: string; last_name: string; hours: number }>>([])
 const fetchTopStaffHours = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value } as any
-    const { data } = await axios.get(route('admin.top-staff-hours'), { params })
-    topStaff.value = data || []
+    const params = { start: rangeStart.value, end: rangeEnd.value }
+    router.reload({ 
+      only: ['topStaff'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        topStaff.value = page.props.topStaff || []
+      }
+    })
   } catch (e) {
     console.error('Error fetching top staff hours:', e)
   }
@@ -242,17 +231,29 @@ const dashboardStats = ref({
 });
 
 const fetchDashboardData = async () => {
-  const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
-  const response = await axios.get(route('admin.marketing-analytics.dashboard-data'), { params });
-  dashboardStats.value = response.data;
+  const params = { start_date: rangeStart.value, end_date: rangeEnd.value };
+  router.reload({ 
+    only: ['dashboardStats'], 
+    data: params,
+    preserveState: true,
+    onSuccess: (page) => {
+      dashboardStats.value = page.props.dashboardStats || {}
+    }
+  });
 };
 
 // Overview tab data loader
 const fetchOverviewData = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value, noCache: true } as any;
-    const response = await axios.get(route('admin.overview-data'), { params });
-    superAdminStats.value = response.data;
+    const params = { start: rangeStart.value, end: rangeEnd.value }
+    router.reload({ 
+      only: ['superAdminStats'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        superAdminStats.value = page.props.superAdminStats || {}
+      }
+    })
   } catch (error) {
     console.error('Error fetching overview data:', error);
   }
@@ -260,9 +261,15 @@ const fetchOverviewData = async () => {
 
 const fetchOverviewSeries = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value, noCache: true } as any;
-    const response = await axios.get(route('admin.overview-series'), { params });
-    overviewSeries.value = response.data;
+    const params = { start: rangeStart.value, end: rangeEnd.value }
+    router.reload({ 
+      only: ['overviewSeries'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        overviewSeries.value = page.props.overviewSeries || { labels: [], datasets: [] }
+      }
+    })
   } catch (error) {
     console.error('Error fetching overview series:', error);
   }
@@ -282,25 +289,16 @@ const formatDateFriendly = (isoDate: string) => {
 
 const fetchRecentAppointments = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
-    const response = await axios.get(route('admin.recent-appointments'), { params });
-    recentAppointments.value = (response.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
-    // If today has no data, fetch upcoming 24h
-    if (!recentAppointments.value.length) {
-      // fallback 1: upcoming next 24h
-      const up = await axios.get(route('admin.upcoming-visits'));
-      upcomingVisits.value = (up.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
-      // fallback 2: last 30 days if still empty
-      if (!upcomingVisits.value.length) {
-        const today = new Date();
-        const start = new Date(); start.setDate(today.getDate()-29);
-        const params30 = { start: start.toISOString().slice(0,10), end: today.toISOString().slice(0,10) } as any;
-        const last30 = await axios.get(route('admin.recent-appointments'), { params: params30 });
-        recentAppointments.value = (last30.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
+    const params = { start: rangeStart.value, end: rangeEnd.value }
+    router.reload({ 
+      only: ['recentAppointments', 'upcomingVisits'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        recentAppointments.value = (page.props.recentAppointments || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
+        upcomingVisits.value = (page.props.upcomingVisits || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
       }
-    } else {
-      upcomingVisits.value = [];
-    }
+    })
   } catch (error) {
     console.error('Error fetching recent appointments:', error);
   }
@@ -308,9 +306,15 @@ const fetchRecentAppointments = async () => {
 
 const fetchCampaignPerformance = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value, per_page: 6 } as any;
-    const response = await axios.get(route('admin.marketing-analytics.campaign-performance'), { params });
-    campaignPerformanceData.value = response.data.data; // Assuming paginated data
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value, per_page: 6 }
+    router.reload({ 
+      only: ['campaignPerformanceData'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        campaignPerformanceData.value = page.props.campaignPerformanceData || []
+      }
+    })
   } catch (error) {
     console.error('Error fetching campaign performance:', error);
   }
@@ -318,9 +322,15 @@ const fetchCampaignPerformance = async () => {
 
 const fetchTrafficSourceDistribution = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
-    const response = await axios.get(route('admin.marketing-analytics.traffic-source-distribution'), { params });
-    trafficSourceData.value = response.data;
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
+    router.reload({ 
+      only: ['trafficSourceData'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        trafficSourceData.value = page.props.trafficSourceData || []
+      }
+    })
   } catch (error) {
     console.error('Error fetching traffic source distribution:', error);
   }
@@ -328,9 +338,15 @@ const fetchTrafficSourceDistribution = async () => {
 
 const fetchConversionFunnel = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
-    const response = await axios.get(route('admin.marketing-analytics.conversion-funnel'), { params });
-    conversionFunnelData.value = response.data;
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
+    router.reload({ 
+      only: ['conversionFunnelData'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        conversionFunnelData.value = page.props.conversionFunnelData || {}
+      }
+    })
   } catch (error) {
     console.error('Error fetching conversion funnel:', error);
   }
@@ -340,12 +356,18 @@ const fetchConversionFunnel = async () => {
 const fetchAnalyticsAll = async () => {
   analyticsLoading.value = true;
   try {
-    await Promise.all([
-      fetchDashboardData(),
-      fetchCampaignPerformance(),
-      fetchTrafficSourceDistribution(),
-      fetchConversionFunnel(),
-    ]);
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
+    router.reload({ 
+      only: ['dashboardStats', 'campaignPerformanceData', 'trafficSourceData', 'conversionFunnelData'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        dashboardStats.value = page.props.dashboardStats || {}
+        campaignPerformanceData.value = page.props.campaignPerformanceData || []
+        trafficSourceData.value = page.props.trafficSourceData || []
+        conversionFunnelData.value = page.props.conversionFunnelData || {}
+      }
+    })
   } catch (e) {
     console.error('Error fetching analytics data:', e);
   } finally {
@@ -355,9 +377,15 @@ const fetchAnalyticsAll = async () => {
 
 const fetchTopServices = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
-    const res = await axios.get(route('admin.top-services'), { params });
-    topServices.value = res.data || [];
+    const params = { start: rangeStart.value, end: rangeEnd.value }
+    router.reload({ 
+      only: ['topServices'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        topServices.value = page.props.topServices || []
+      }
+    })
   } catch (error) {
     console.error('Error fetching top services:', error);
   }
@@ -365,19 +393,17 @@ const fetchTopServices = async () => {
 
 // Reports data loaders
 const fetchReportsData = async () => {
-  const params = { start: rangeStart.value, end: rangeEnd.value } as any;
-  const getUrl = (name: string, fallback: string) => {
-    try { return route(name); } catch { return fallback; }
-  };
-  const svcUrl = getUrl('admin.reports.service-volume.data', '/dashboard/reports/service-volume/data');
-  const revUrl = getUrl('admin.reports.revenue-ar.data', '/dashboard/reports/revenue-ar/data');
+  const params = { start: rangeStart.value, end: rangeEnd.value }
   try {
-    const [svc, rev] = await Promise.all([
-      axios.get(svcUrl, { params }),
-      axios.get(revUrl, { params }),
-    ]);
-    reportServiceChart.value = (svc.data && svc.data.labels) ? svc.data : { labels: [], datasets: [] };
-    reportRevenueArChart.value = (rev.data && rev.data.labels) ? rev.data : { labels: [], datasets: [] };
+    router.reload({ 
+      only: ['reportServiceChart', 'reportRevenueArChart'], 
+      data: params,
+      preserveState: true,
+      onSuccess: (page) => {
+        reportServiceChart.value = page.props.reportServiceChart || { labels: [], datasets: [] }
+        reportRevenueArChart.value = page.props.reportRevenueArChart || { labels: [], datasets: [] }
+      }
+    })
   } catch (error) {
     console.error('Error fetching reports data:', error);
     reportServiceChart.value = { labels: [], datasets: [] };
@@ -388,9 +414,14 @@ const fetchReportsData = async () => {
 // Notifications loader
 const fetchNotifications = async () => {
   try {
-    const response = await axios.get(route('notifications.index'), { headers: { Accept: 'application/json' } });
-    unreadCount.value = response.data.unread_count ?? 0;
-    notifications.value = response.data.notifications ?? [];
+    router.reload({ 
+      only: ['notifications', 'unreadCount'], 
+      preserveState: true,
+      onSuccess: (page) => {
+        unreadCount.value = page.props.unreadCount ?? 0;
+        notifications.value = page.props.notifications ?? [];
+      }
+    })
   } catch (error) {
     console.error('Error fetching notifications:', error);
   }
@@ -409,7 +440,7 @@ watch(currentTab, (newTab) => {
   if (newTab === 'Notifications') {
     fetchNotifications();
   }
-}, { immediate: true }); // Fetch data immediately if the initial tab is 'Analytics' or 'Overview'
+}, { immediate: true });
 
 // React to date range changes (debounced to reduce flicker)
 let rangeTimer: any = null;
@@ -524,10 +555,9 @@ watch([rangeStart, rangeEnd], () => {
               color="bg-indigo-100"
             />
           </Tooltip>
-          <!-- Removed standalone upcoming visits card (merged above) -->
         </div>
 
-        <!-- Row 2: Bar Chart, Pie Chart, and Table -->
+        <!-- Row 2: Bar Chart, and Table -->
         <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 mt-4">
           <div class="col-span-full lg:col-span-1">
             <h3 class="text-lg font-medium">Monthly Patient Registrations Overview</h3>
@@ -746,7 +776,6 @@ watch([rangeStart, rangeEnd], () => {
         </ul>
         <p v-else class="text-sm text-muted-foreground">No unread notifications.</p>
       </div>
-      </div>
-    
+    </div>
   </AppLayout>
 </template>

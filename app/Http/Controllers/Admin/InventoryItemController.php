@@ -7,7 +7,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryItem;
 use App\Models\Supplier;
-use App\Services\InventoryItemService;
+use App\Services\InventoryItem\InventoryItemService;
 use App\Services\Validation\Rules\InventoryItemRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

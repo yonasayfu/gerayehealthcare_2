@@ -33,6 +33,13 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Supplier::class => \App\Policies\SupplierPolicy::class,
         \Spatie\Permission\Models\Role::class => \App\Policies\RolePolicy::class,
         \App\Models\TaskDelegation::class => \App\Policies\TaskDelegationPolicy::class,
+        // High-priority additions for better security coverage
+        \App\Models\Staff::class => \App\Policies\StaffPolicy::class,
+        \App\Models\Partner::class => \App\Policies\PartnerPolicy::class,
+        \App\Models\MarketingCampaign::class => \App\Policies\MarketingCampaignPolicy::class,
+        \App\Models\InsurancePolicy::class => \App\Policies\InsurancePolicyPolicy::class,
+        \App\Models\Event::class => \App\Policies\EventPolicy::class,
+        \App\Models\Service::class => \App\Policies\ServicePolicy::class,
     ];
 
     /**

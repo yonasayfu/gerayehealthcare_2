@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\UpdateSelfPatientRequest;
 use App\Http\Resources\PatientResource;
 use App\Models\Patient;
-use App\Services\PatientService;
+use App\Services\Patient\PatientService;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller

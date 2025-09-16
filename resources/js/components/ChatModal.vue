@@ -829,13 +829,18 @@ const handleGroupCreated = (newGroup: Group) => {
             >
               Create New Group
             </button>
-            <Search class="absolute left-7 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <input
-              type="text"
-              v-model="search"
-              placeholder="Search conversations..."
-              class="pl-10 pr-4 form-input w-full rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
-            />
+            <div class="relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <input
+                type="text"
+                v-model="search"
+                placeholder="Search conversations..."
+                class="pl-10 pr-10 form-input w-full rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
+              />
+              <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full">
+                <X class="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <div class="flex-grow overflow-y-auto custom-scrollbar">
             <template v-if="!isGroupsTab">
@@ -958,7 +963,7 @@ const handleGroupCreated = (newGroup: Group) => {
                   @touchstart="onTouchStart($event, message)"
                   @touchend="onTouchEnd"
                   @touchcancel="onTouchEnd"
-                  class="group max-w-[75%] rounded-xl px-4 py-2 text-sm shadow relative"
+                  class="group max-w-[75%] rounded-xl px-3 py-2 text-sm shadow relative"
                   :class="{
                     'bg-blue-500 text-white self-end': message.sender_id === authUser.id,
                     'bg-gray-200 text-gray-800 self-start': message.sender_id !== authUser.id,
@@ -1016,14 +1021,14 @@ const handleGroupCreated = (newGroup: Group) => {
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span 
                       class="text-[11px]"
-                      :class="message.sender_id === authUser.id ? 'text-blue-100' : 'text-gray-500'"
+                      :class="message.sender_id === authUser.id ? 'text-blue-200' : 'text-gray-500'"
                     >
                       {{ format(new Date(message.created_at), 'p') }}
                     </span>
                     <template v-if="message.sender_id === authUser.id">
-                      <Clock v-if="message.isOptimistic" class="w-3.5 h-3.5 text-blue-100" />
-                      <CheckCheck v-else-if="message.read_at" class="w-3.5 h-3.5 text-blue-100" title="Read" />
-                      <Check v-else class="w-3.5 h-3.5 text-blue-100" title="Sent" />
+                      <Clock v-if="message.isOptimistic" class="w-3.5 h-3.5 text-blue-200" />
+                      <CheckCheck v-else-if="message.read_at" class="w-3.5 h-3.5 text-blue-200" title="Read" />
+                      <Check v-else class="w-3.5 h-3.5 text-blue-200" title="Sent" />
 </template>
                   </div>
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
-use App\Services\RoleService;
+use App\Services\Role\RoleService;
 use App\Services\Validation\Rules\RoleRules;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;

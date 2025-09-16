@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\UpdateLeadSourceDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\LeadSource;
-use App\Services\LeadSourceService;
+use App\Services\LeadSource\LeadSourceService;
 use App\Services\Validation\Rules\LeadSourceRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

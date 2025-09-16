@@ -6,7 +6,7 @@ use App\DTOs\CreatePartnerDTO;
 use App\DTOs\UpdatePartnerDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Partner;
-use App\Services\CachedDropdownService;
+use App\Services\CachedDropdown\CachedDropdownService;
 use App\Services\Partner\PartnerService;
 use App\Services\Validation\Rules\PartnerRules;
 use Illuminate\Http\Request;

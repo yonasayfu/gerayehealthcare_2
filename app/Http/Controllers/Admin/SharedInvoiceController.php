@@ -9,7 +9,7 @@ use App\Models\Invoice;
 use App\Models\Partner;
 use App\Models\SharedInvoice;
 use App\Models\Staff;
-use App\Services\SharedInvoiceService;
+use App\Services\SharedInvoice\SharedInvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;

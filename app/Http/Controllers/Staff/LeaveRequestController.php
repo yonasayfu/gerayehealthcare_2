@@ -6,7 +6,7 @@ use App\DTOs\CreateLeaveRequestDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffLeaveRequest;
 use App\Models\LeaveRequest;
-use App\Services\LeaveRequestService;
+use App\Services\LeaveRequest\LeaveRequestService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;

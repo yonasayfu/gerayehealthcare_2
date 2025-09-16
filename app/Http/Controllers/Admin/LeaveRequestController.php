@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
 use App\Models\LeaveRequest;
-use App\Services\LeaveRequestService;
+use App\Services\LeaveRequest\LeaveRequestService;
 use App\Services\Validation\Rules\LeaveRequestRules;
 
 class LeaveRequestController extends BaseController

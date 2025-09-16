@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateInventoryAlertDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\InventoryAlert;
-use App\Services\InventoryAlertService;
+use App\Services\InventoryAlert\InventoryAlertService;
 use App\Services\Validation\Rules\InventoryAlertRules;
 use Inertia\Inertia;
 use App\Models\InventoryItem;

@@ -7,7 +7,7 @@ use App\DTOs\UpdateLandingPageDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\LandingPage;
 use App\Models\MarketingCampaign;
-use App\Services\LandingPageService;
+use App\Services\LandingPage\LandingPageService;
 use App\Services\Validation\Rules\LandingPageRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -5,7 +5,7 @@ namespace App\Services\PartnerAgreement;
 use App\Http\Config\ExportConfig;
 use App\Http\Traits\ExportableTrait;
 use App\Models\PartnerAgreement;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 use Illuminate\Http\Request;
 
 class PartnerAgreementService extends BaseService

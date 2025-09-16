@@ -9,7 +9,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\Event;
 use App\Models\EventBroadcast;
 use App\Models\Staff;
-use App\Services\EventBroadcastService;
+use App\Services\EventBroadcast\EventBroadcastService;
 use App\Services\Validation\Rules\EventBroadcastRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

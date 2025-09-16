@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Base\BaseController;
 use App\Models\User;
-use App\Services\UserService;
+use App\Services\User\UserService;
 use App\Services\Validation\Rules\UserRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

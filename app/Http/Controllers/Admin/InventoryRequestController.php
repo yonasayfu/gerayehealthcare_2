@@ -8,7 +8,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryItem;
 use App\Models\InventoryRequest;
 use App\Models\Staff;
-use App\Services\InventoryRequestService;
+use App\Services\InventoryRequest\InventoryRequestService;
 use App\Services\Validation\Rules\InventoryRequestRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

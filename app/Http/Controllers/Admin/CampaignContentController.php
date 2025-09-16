@@ -6,7 +6,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\CampaignContent;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
-use App\Services\CampaignContentService;
+use App\Services\CampaignContent\CampaignContentService;
 use App\Services\Validation\Rules\CampaignContentRules;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;

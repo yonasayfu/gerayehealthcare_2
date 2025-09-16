@@ -3,7 +3,7 @@
 namespace App\Services\Insurance;
 
 use App\Models\CorporateClient;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 
 class CorporateClientService extends BaseService
 {

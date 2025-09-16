@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Referral;
 use App\Models\ReferralDocument;
 use App\Models\Staff;
-use App\Services\ReferralDocumentService;
+use App\Services\ReferralDocument\ReferralDocumentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;

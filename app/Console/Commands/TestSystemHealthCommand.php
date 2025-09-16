@@ -6,7 +6,7 @@ use App\DTOs\BaseDTO;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Services\CachedDropdownService;
+use App\Services\CachedDropdown\CachedDropdownService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;

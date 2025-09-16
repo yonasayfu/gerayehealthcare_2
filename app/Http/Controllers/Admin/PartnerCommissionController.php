@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreatePartnerCommissionDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\PartnerCommission;
-use App\Services\CachedDropdownService;
+use App\Services\CachedDropdown\CachedDropdownService;
 use App\Services\PartnerCommission\PartnerCommissionService;
 use App\Services\Validation\Rules\PartnerCommissionRules;
 use Illuminate\Http\Request;

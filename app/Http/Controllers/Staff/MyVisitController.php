@@ -8,7 +8,7 @@ use App\Http\Requests\VisitService\CheckOutRequest as WebCheckOutRequest;
 use App\Http\Requests\StoreVisitReportRequest;
 use App\Models\Service;
 use App\Models\VisitService;
-use App\Services\VisitServiceService;
+use App\Services\VisitService\VisitServiceService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;

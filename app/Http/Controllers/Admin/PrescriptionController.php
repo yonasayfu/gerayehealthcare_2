@@ -8,7 +8,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\Prescription;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Services\PrescriptionService;
+use App\Services\Prescription\PrescriptionService;
 use App\Services\Validation\Rules\PrescriptionRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;

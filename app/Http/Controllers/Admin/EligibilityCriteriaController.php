@@ -6,7 +6,7 @@ use App\DTOs\CreateEligibilityCriteriaDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\EligibilityCriteria;
 use App\Models\Event;
-use App\Services\EligibilityCriteriaService;
+use App\Services\EligibilityCriteria\EligibilityCriteriaService;
 use App\Services\Validation\Rules\EligibilityCriteriaRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -7,7 +7,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
-use App\Services\StaffAvailabilityService;
+use App\Services\StaffAvailability\StaffAvailabilityService;
 use App\Services\Validation\Rules\StaffAvailabilityRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

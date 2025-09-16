@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Base\BaseController;
 use App\Http\Traits\ExportableTrait;
 use App\Models\Supplier;
-use App\Services\SupplierService;
+use App\Services\Supplier\SupplierService;
 use App\Services\Validation\Rules\SupplierRules;
 use Illuminate\Http\Request;
 

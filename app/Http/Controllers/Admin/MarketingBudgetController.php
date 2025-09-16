@@ -7,7 +7,7 @@ use App\Models\MarketingBudget;
 use App\Models\MarketingBudget as MarketingBudgetModel;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
-use App\Services\MarketingBudgetService;
+use App\Services\MarketingBudget\MarketingBudgetService;
 use App\Services\Validation\Rules\MarketingBudgetRules;
 use Illuminate\Http\Request;
 // Using direct validated arrays for create/update (no DTO)

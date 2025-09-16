@@ -8,7 +8,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\CorporateClient;
 use App\Models\InsurancePolicy;
 use App\Models\Patient;
-use App\Services\PatientService;
+use App\Services\Patient\PatientService;
 use App\Services\Validation\Rules\PatientRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

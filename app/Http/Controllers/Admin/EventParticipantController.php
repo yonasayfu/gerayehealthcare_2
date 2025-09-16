@@ -8,7 +8,7 @@ use App\DTOs\CreateEventParticipantDTO;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\Patient;
-use App\Services\EventParticipantService;
+use App\Services\EventParticipant\EventParticipantService;
 use App\Services\Validation\Rules\EventParticipantRules;
 use Inertia\Inertia;
 

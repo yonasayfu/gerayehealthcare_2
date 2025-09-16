@@ -10,7 +10,7 @@ use App\Models\MarketingCampaign;
 use App\Models\MarketingLead;
 use App\Models\Patient;
 use App\Models\Staff;
-use App\Services\MarketingLeadService;
+use App\Services\MarketingLead\MarketingLeadService;
 use App\Services\Validation\Rules\MarketingLeadRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

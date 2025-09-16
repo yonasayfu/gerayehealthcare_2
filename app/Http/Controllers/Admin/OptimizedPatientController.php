@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreatePatientDTO;
 use App\Http\Controllers\Base\OptimizedBaseController;
 use App\Models\Patient;
-use App\Services\OptimizedPatientService;
+use App\Services\Optimized\Patient\PatientService;
 use App\Services\Validation\Rules\PatientRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

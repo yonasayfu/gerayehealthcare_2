@@ -8,7 +8,7 @@ use App\Http\Controllers\Base\BaseController;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
 use App\Models\Staff;
-use App\Services\MarketingCampaignService;
+use App\Services\MarketingCampaign\MarketingCampaignService;
 use App\Services\Validation\Rules\MarketingCampaignRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

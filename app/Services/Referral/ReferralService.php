@@ -5,7 +5,7 @@ namespace App\Services\Referral;
 use App\Http\Config\ExportConfig;
 use App\Http\Traits\ExportableTrait;
 use App\Models\Referral;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 use Illuminate\Http\Request;
 
 class ReferralService extends BaseService

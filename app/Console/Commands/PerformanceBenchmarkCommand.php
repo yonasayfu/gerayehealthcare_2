@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Services\OptimizedEventService;
-use App\Services\OptimizedInventoryItemService;
-use App\Services\OptimizedInvoiceService;
-use App\Services\OptimizedMarketingAnalyticsService;
-use App\Services\OptimizedPatientService;
-use App\Services\OptimizedStaffService;
+use App\Services\Optimized\EventService;
+use App\Services\Optimized\InventoryItem\InventoryItemService;
+use App\Services\Optimized\Invoice\InvoiceService;
+use App\Services\Optimized\MarketingAnalytics\MarketingAnalyticsService;
+use App\Services\Optimized\Patient\PatientService;
+use App\Services\Optimized\Staff\StaffService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;

@@ -25,7 +25,7 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 const categorizedResults = computed(() => {
   if (!searchResults.value.length) return [];
   
-  const categories = searchResults.value.reduce((acc, result) => {
+  const categories = searchResults.value.reduce((acc: Record<string, any[]>, result: SearchResult) => {
     const category = result.category || 'Other';
     if (!acc[category]) {
       acc[category] = [];
@@ -64,7 +64,7 @@ const fetchResults = debounce(async (query: string) => {
   }
 }, 300);
 
-watch(searchQuery, (newQuery) => {
+watch(searchQuery, (newQuery: string) => {
   fetchResults(newQuery);
 });
 
@@ -223,8 +223,8 @@ onUnmounted(() => {
               <div class="text-gray-400 dark:text-gray-500 mb-3">
                 <Search class="h-12 w-12 mx-auto" />
               </div>
-              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">Search Coming Soon</h3>
-              <p class="text-gray-500 dark:text-gray-400 text-sm">Search functionality will be implemented later</p>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">No Results Found</h3>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">Try adjusting your search query</p>
             </div>
 
             <!-- Search Results -->

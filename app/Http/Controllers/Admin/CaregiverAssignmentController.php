@@ -6,8 +6,8 @@ use App\DTOs\CreateCaregiverAssignmentDTO;
 use App\DTOs\UpdateCaregiverAssignmentDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\CaregiverAssignment;
-use App\Services\CachedDropdownService;
-use App\Services\CaregiverAssignmentService;
+use App\Services\CachedDropdown\CachedDropdownService;
+use App\Services\CaregiverAssignment\CaregiverAssignmentService;
 use App\Services\Validation\Rules\CaregiverAssignmentRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -88,22 +88,22 @@ class CaregiverAssignmentController extends BaseController
     // Export and print endpoints delegating to service implementations
     public function export(Request $request)
     {
-        return app(\App\Services\CaregiverAssignmentService::class)->export($request);
+        return app(\App\Services\CaregiverAssignment\CaregiverAssignmentService::class)->export($request);
     }
 
     public function printAll(Request $request)
     {
-        return app(\App\Services\CaregiverAssignmentService::class)->printAll($request);
+        return app(\App\Services\CaregiverAssignment\CaregiverAssignmentService::class)->printAll($request);
     }
 
     public function printCurrent(Request $request)
     {
-        return app(\App\Services\CaregiverAssignmentService::class)->printCurrent($request);
+        return app(\App\Services\CaregiverAssignment\CaregiverAssignmentService::class)->printCurrent($request);
     }
 
     public function printSingle(Request $request, $assignment)
     {
-        $svc = app(\App\Services\CaregiverAssignmentService::class);
+        $svc = app(\App\Services\CaregiverAssignment\CaregiverAssignmentService::class);
         $model = $svc->getById($assignment, ['patient', 'staff']);
 
         return $this->handlePrintSingle($request, $model, \App\Http\Config\ExportConfig::getCaregiverAssignmentConfig());

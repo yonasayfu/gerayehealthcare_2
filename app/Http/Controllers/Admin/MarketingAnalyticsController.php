@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\MarketingAnalyticsService;
+use App\Services\MarketingAnalytics\MarketingAnalyticsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

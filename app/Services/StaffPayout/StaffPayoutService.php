@@ -2,89 +2,145 @@
 
 namespace App\Services\StaffPayout;
 
+use App\DTOs\CreateStaffPayoutDTO;
 use App\Models\Staff;
 use App\Models\StaffPayout;
-use App\Services\BaseService;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\VisitService;
+use App\Services\Base\BaseService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class StaffPayoutService extends BaseService
 {
-    public function __construct(StaffPayout $model)
+    public function getStaffEarningsData(Request $request): array
     {
-        parent::__construct($model);
-    }
+        $perPage = (int) $request->input('per_page', 10);
 
-    /**
-     * Get payout history and pending visits for a specific staff member.
-     *
-     * @return array{payoutHistory: LengthAwarePaginator, pendingVisits: LengthAwarePaginator, pendingTotal: float}
-     */
-    public function getStaffEarnings(Staff $staff): array
-    {
-        // Fetch the payout history
-        $payoutHistory = $staff->payouts()
-            ->orderBy('payout_date', 'desc')
-            ->paginate(5, ['*'], 'payouts_page');
+        $staffWithUnpaidEarningsQuery = Staff::query()
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->input('search');
+                $q->where(function ($w) use ($search) {
+                    $w->where('first_name', 'like', "%$search%")
+                        ->orWhere('last_name', 'like', "%$search%");
+                });
+            })
+            ->withCount([
+                'visitServices as unpaid_visits_count' => function ($q) {
+                    $q->where('status', 'Completed')
+                        ->where(function ($r) {
+                            $r->where('is_paid_to_staff', false)
+                                ->orWhereNull('is_paid_to_staff');
+                        });
+                },
+                'visitServices as unique_patients_count' => function ($q) {
+                    $q->where('status', 'Completed')
+                        ->where(function ($r) {
+                            $r->where('is_paid_to_staff', false)
+                                ->orWhereNull('is_paid_to_staff');
+                        })
+                        ->select(DB::raw('count(distinct(patient_id))'));
+                },
+            ])
+            ->withSum(['visitServices as total_unpaid_cost' => function ($q) {
+                $q->where('status', 'Completed')
+                    ->where(function ($r) {
+                        $r->where('is_paid_to_staff', false)
+                            ->orWhereNull('is_paid_to_staff');
+                    });
+            }], 'cost')
+            ->withCount(['payouts as pending_payout_requests_count' => function ($q) {
+                $q->where('status', 'Pending');
+            }])
+            ->orderBy('first_name');
 
-        // Fetch current work that has not yet been included in a payout
-        $pendingVisits = $staff->visitServices()
-            ->where('status', 'Completed')
-            ->where('is_paid_to_staff', false)
-            ->orderBy('scheduled_at', 'desc')
-            ->paginate(10, ['*'], 'pending_visits_page');
-
-        // Calculate the total of pending earnings
-        // Prefer duration-based earnings (hourly_rate * actual hours) if times exist; fallback to cost
-        $pendingVisitsForSum = $staff->visitServices()
-            ->where('status', 'Completed')
-            ->where('is_paid_to_staff', false)
-            ->get(['check_in_time', 'check_out_time']);
-
-        $hours = $pendingVisitsForSum->reduce(function ($carry, $v) {
-            if ($v->check_in_time && $v->check_out_time) {
-                $start = \Illuminate\Support\Carbon::parse($v->check_in_time);
-                $end = \Illuminate\Support\Carbon::parse($v->check_out_time);
-                return $carry + max(0, $end->floatDiffInRealHours($start));
-            }
-            return $carry;
-        }, 0.0);
-
-        $pendingTotal = round($hours * ((float) ($staff->hourly_rate ?? 0)), 2);
-
-        // If hours-based sum is zero (e.g., legacy data), fallback to stored cost sum
-        if ($pendingTotal <= 0) {
-            $pendingTotal = $staff->visitServices()
-                ->where('status', 'Completed')
-                ->where('is_paid_to_staff', false)
-                ->sum('cost');
+        // Sorting
+        $sort = $request->input('sort');
+        $direction = $request->input('direction', 'asc');
+        $allowedSorts = [
+            'first_name',
+            'unpaid_visits_count',
+            'total_unpaid_cost',
+            'pending_payout_requests_count',
+        ];
+        if ($sort && in_array($sort, $allowedSorts, true)) {
+            $staffWithUnpaidEarningsQuery->orderBy($sort, $direction === 'desc' ? 'desc' : 'asc');
         }
 
-        // Add optional contextual metric: approved leave days in current month
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
-        $approvedLeaves = $staff->leaveRequests()
-            ->where('status', 'Approved')
-            ->where(function ($q) use ($startOfMonth, $endOfMonth) {
-                $q->whereBetween('start_date', [$startOfMonth, $endOfMonth])
-                  ->orWhereBetween('end_date', [$startOfMonth, $endOfMonth])
-                  ->orWhere(function ($qq) use ($startOfMonth, $endOfMonth) {
-                      $qq->where('start_date', '<=', $startOfMonth)
-                         ->where('end_date', '>=', $endOfMonth);
-                  });
-            })
-            ->get(['start_date', 'end_date']);
+        $staffWithUnpaidEarnings = $staffWithUnpaidEarningsQuery
+            ->paginate($perPage)
+            ->through(function ($staff) {
+                // Compute total hours from check-in/out duration for unpaid completed visits
+                $totalSeconds = VisitService::where('staff_id', $staff->id)
+                    ->where('status', 'Completed')
+                    ->where(function ($r) {
+                        $r->where('is_paid_to_staff', false)
+                          ->orWhereNull('is_paid_to_staff');
+                    })
+                    ->whereNotNull('check_in_time')
+                    ->whereNotNull('check_out_time')
+                    ->get(['check_in_time', 'check_out_time'])
+                    ->reduce(function ($carry, $v) {
+                        $start = \Illuminate\Support\Carbon::parse($v->check_in_time);
+                        $end = \Illuminate\Support\Carbon::parse($v->check_out_time);
+                        return $carry + max(0, $end->diffInSeconds($start));
+                    }, 0);
 
-        $leaveDaysThisMonth = $approvedLeaves->reduce(function ($carry, $lr) use ($startOfMonth, $endOfMonth) {
-            $from = \Illuminate\Support\Carbon::parse($lr->start_date)->max($startOfMonth);
-            $to = \Illuminate\Support\Carbon::parse($lr->end_date)->min($endOfMonth);
-            return $carry + max(0, $to->diffInDays($from) + 1);
-        }, 0);
+                $staff->total_hours_logged = round($totalSeconds / 3600, 2);
+
+                return $staff;
+            });
+
+        // Preserve filters in pagination links
+        $staffWithUnpaidEarnings->appends($request->only(['per_page', 'search']));
+
+        $staffWithTotalPayouts = Staff::has('payouts')
+            ->withSum('payouts', 'total_amount')
+            ->get();
 
         return [
-            'payoutHistory' => $payoutHistory,
-            'pendingVisits' => $pendingVisits,
-            'pendingTotal' => $pendingTotal,
-            'leaveDaysThisMonth' => $leaveDaysThisMonth,
+            'staffWithEarnings' => $staffWithUnpaidEarnings,
+            'performanceData' => $staffWithTotalPayouts,
         ];
+    }
+
+    public function __construct(StaffPayout $staffPayout)
+    {
+        parent::__construct($staffPayout);
+    }
+
+    public function processPayout(CreateStaffPayoutDTO $dto): StaffPayout
+    {
+        $unpaidVisits = VisitService::where('staff_id', $dto->staff_id)
+            ->where('is_paid_to_staff', false)
+            ->where('status', 'Completed')
+            ->get();
+
+        if ($unpaidVisits->isEmpty()) {
+            throw new \Exception('This staff member has no unpaid visits to process.');
+        }
+
+        $totalAmount = $unpaidVisits->sum('cost');
+
+        return DB::transaction(function () use ($dto, $unpaidVisits, $totalAmount) {
+            $payout = parent::create([
+                'staff_id'    => $dto->staff_id,
+                'total_amount'=> $totalAmount,
+                'payout_date' => Carbon::today(),
+                'status'      => $dto->status ?? 'Completed',
+                'notes'       => $dto->notes ?? 'Monthly Payout',
+                'processed_by'=> Auth::id(),
+                'processed_notes' => $dto->notes,
+            ]);
+
+            $payout->visitServices()->attach($unpaidVisits->pluck('id'));
+
+            VisitService::whereIn('id', $unpaidVisits->pluck('id'))->update([
+                'is_paid_to_staff' => true,
+            ]);
+
+            return $payout;
+        });
     }
 }

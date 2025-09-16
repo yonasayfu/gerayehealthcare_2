@@ -170,27 +170,50 @@ STOP 1
 - [ x] Do you think this moduel is mature /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/EligibilityCriteria and what about it relationships with others ..
 
 
-- [ ] Here in the main dahsboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Dashboard/Index.vue I see that there are some static file is present if it is good let keep or let remove and let make sure the one that needs to be dynamic  let make them, also I see that there are un used code snippets and let remove it, and I see that we are using axios, is this a good approach since we are using inertia which one is best regarding to performance wise, also in the dashboard there are Many tabs like analytics, reports … on the reports the chart is not working and it is an image format
+- [ x] Here in the main dahsboard /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/Dashboard/Index.vue I see that there are some static file is present if it is good let keep or let remove and let make sure the one that needs to be dynamic  let make them, also I see that there are un used code snippets and let remove it, and I see that we are using axios, is this a good approach since we are using inertia which one is best regarding to performance wise, also in the dashboard there are Many tabs like analytics, reports … on the reports the chart is not working and it is an image format
 
 
-- [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/CaregiverAssignments, let make sure it is not clash with the unavlible and available assigned from the staff if he assign it is not available…
+- [ x] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/CaregiverAssignments, let make sure it is not clash with the unavlible and available assigned from the staff if he assign it is not available…
+
+
 - [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/pages/Admin/CampaignContents when I create I found this error “Validation failed. Please check your input.” Also make sure the edit and others are working
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AppLayout.vue I see that many inventory alerted code snippets is it correct is it the place does we used it?
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AuthLayout.vue from here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/auth, I would like to use the combination of authcardlayout and authsplitlayout that It use the Liquid Glass css
+
+
+- [ x] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AppLayout.vue I see that many inventory alerted code snippets, is it correct is it the place does we used it?
+
+
+- [ x] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/AuthLayout.vue from here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/layouts/auth, I would like to use the combination of authcardlayout and authsplitlayout that It use the Liquid Glass css
+
+
 - [ ] On components I see that there are many class like /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/MarketingAnalyticsDashboard.vue, let see the relationships  with each classs if there is no have relationships and no harm to delete it let delete
+
+
 - [ ] For /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/GlobalSearch.vue, now the global search is working for patient and staff and for other modules it didn’t work, so let select which moduel should be searchable and let apply global search for those
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/ChatModal.vue, let fix some UI like search and the look of message body…
-- [ ] What is this do we used this class /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/print, if not let clear and let make a centralized
-- [ ] Do we use this centrelized css /Users/yonassayfu/VSProject/gerayehealthcare/resources/css/print.css?
-- [ ] Is this class clear and clean /Users/yonassayfu/VSProject/gerayehealthcare/resources/css/app.css
-- [ ] Do we need this class /Users/yonassayfu/VSProject/gerayehealthcare/public/performance-test.html, if not let clear
-- [ ] Let have a clear and clean storage management for /Users/yonassayfu/VSProject/gerayehealthcare/public/storage, 
-- [ ] Does this class in use /Users/yonassayfu/VSProject/gerayehealthcare/public/fonts
-- [ ] Which class use this feature /Users/yonassayfu/VSProject/gerayehealthcare/config/hr.php, if other need to use for consitecey and If it is best practice let do it
-- [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/app/Services let make sure each service and rules are consistence I see that some are inside in folder and some in out of folder, also like visit service high logic implementation are working good.. also out of the service folder I found this rule /Users/yonassayfu/VSProject/gerayehealthcare/app/Rules, why it out of the service folder can not uintgareet one to another 
+
+
+- [x ] Here /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/ChatModal.vue, let fix some UI like search and the look of message body…
+
+- [x ] What is this do we used this class /Users/yonassayfu/VSProject/gerayehealthcare/resources/js/components/print, if not let clear and let make a centralized
+
+- [ x] Do we use this centrelized css /Users/yonassayfu/VSProject/gerayehealthcare/resources/css/print.css?
+
+- [ x] Is this class clear and clean /Users/yonassayfu/VSProject/gerayehealthcare/resources/css/app.css
+
+- [ x] Do we need this class /Users/yonassayfu/VSProject/gerayehealthcare/public/performance-test.html, if not let clear
+
+- [x ] Let have a clear and clean storage management for /Users/yonassayfu/VSProject/gerayehealthcare/public/storage, 
+
+- [ x] Does this class in use /Users/yonassayfu/VSProject/gerayehealthcare/public/fonts
+- [ x] Which class use this feature /Users/yonassayfu/VSProject/gerayehealthcare/config/hr.php, if other need to use for consitecey and If it is best practice let do it
+
+- [x ] Here /Users/yonassayfu/VSProject/gerayehealthcare/app/Services let make sure each service and rules are consistence I see that some are inside in folder and some in out of folder, also like visit service high logic implementation are working good.. also out of the service folder I found this rule /Users/yonassayfu/VSProject/gerayehealthcare/app/Rules, why it out of the service folder can not uintgareet one to another 
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/RouteServiceProvider.php I see that rateLimiter are set 60 permute is it a good and professional approach? 
+
 - [ ] Let make sure this /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/EventServiceProvider.php is all methods mention here are works, also if we need to add another for consistency let add.
+
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AuthServiceProvider.php why some moduels are only included and is there a spcial for them to be here?
+
 - [ ] Here in the class /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AppServiceProvider.php I see that Relation::morphMap and in the array only staff and patient are exit why? And what it means?
 - [ ] Here also I see that some policy for some class are only present is it enough according to our moduel also let have the summary after you update to know more about the policy where we create and where we used it in .md file /Users/yonassayfu/VSProject/gerayehealthcare/app/Policies
 - [ ] Does this /Users/yonassayfu/VSProject/gerayehealthcare/app/Notifications/NewCaregiverAssignment.php works and related to our moduel? Also I see that a method to use email, Is it real since we have a bell notification and message can not the assigned see there the notification? Also for this I see the email send /Users/yonassayfu/VSProject/gerayehealthcare/app/Notifications/TaskDelegationAssigned.php, by the way if it is good let keep and let make work at real time

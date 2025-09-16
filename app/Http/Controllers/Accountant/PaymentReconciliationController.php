@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Services\Insurance\InsuranceClaimService;
-use App\Services\InvoiceService;
+use App\Services\Invoice\InvoiceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

@@ -2,7 +2,7 @@
 
 namespace App\Services\Validation\Rules;
 
-use App\Rules\StaffIsAvailableForVisit;
+use App\Services\Validation\Rules\StaffIsAvailableForVisit;
 
 class VisitServiceRules extends BaseResourceRules
 {

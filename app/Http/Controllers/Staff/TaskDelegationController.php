@@ -8,7 +8,7 @@ use App\Models\Staff;
 use App\Models\TaskDelegation;
 use App\Models\User;
 use App\Notifications\TaskDelegationTransferred;
-use App\Services\TaskDelegationService;
+use App\Services\TaskDelegation\TaskDelegationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;

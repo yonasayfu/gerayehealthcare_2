@@ -6,9 +6,9 @@ use App\DTOs\CreateInventoryMaintenanceRecordDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryMaintenanceRecord;
-use App\Services\InventoryItemService;
-use App\Services\InventoryMaintenanceRecordService;
-use App\Services\StaffService; // Import InventoryItemService
+use App\Services\InventoryItem\InventoryItemService;
+use App\Services\InventoryMaintenanceRecord\InventoryMaintenanceRecordService;
+use App\Services\Staff\StaffService;
 use App\Services\Validation\Rules\InventoryMaintenanceRecordRules; // Import StaffService
 use Illuminate\Http\Request;
 use Inertia\Inertia;

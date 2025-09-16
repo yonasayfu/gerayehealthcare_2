@@ -3,7 +3,7 @@
 namespace App\Services\Insurance;
 
 use App\Models\EthiopianCalendarDay;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 
 class EthiopianCalendarDayService extends BaseService
 {

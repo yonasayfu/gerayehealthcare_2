@@ -3,7 +3,7 @@
 namespace App\Services\Insurance;
 
 use App\Models\InsuranceClaim;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 use Illuminate\Support\Facades\Log;
 
 class InsuranceClaimService extends BaseService

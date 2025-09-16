@@ -7,7 +7,7 @@ use App\Enums\RoleEnum;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Event;
 use App\Models\Staff;
-use App\Services\EventService;
+use App\Services\Event\EventService;
 use App\Services\Validation\Rules\EventRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

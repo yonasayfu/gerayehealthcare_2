@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateInventoryTransactionDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\InventoryTransaction;
-use App\Services\InventoryTransactionService;
+use App\Services\InventoryTransaction\InventoryTransactionService;
 use App\Services\Validation\Rules\InventoryTransactionRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

@@ -3,7 +3,7 @@
 namespace App\Services\Insurance;
 
 use App\Models\InsurancePolicy;
-use App\Services\BaseService;
+use App\Services\Base\BaseService;
 
 class InsurancePolicyService extends BaseService
 {
