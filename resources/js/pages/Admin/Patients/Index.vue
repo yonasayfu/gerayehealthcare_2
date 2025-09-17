@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3' // Added router
 import { ref, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
@@ -8,7 +8,7 @@ import { format } from 'date-fns' // Keep this import
 import { useTableFilters } from '@/composables/useTableFilters'
 import { useExport } from '@/composables/useExport'
 
-import type { PatientPagination } from '@/types/index.d.ts';
+import type { PatientPagination } from '@/types';
 
 const props = defineProps<{
   patients: PatientPagination;
@@ -246,6 +246,21 @@ function onToggleSort(field: string) { toggleSort(field) }
       <p v-if="patients.total" class="mt-2 text-center text-sm text-gray-600 dark:text-gray-300 print:hidden">
         Showing {{ patients.from || 0 }}–{{ patients.to || 0 }} of {{ patients.total }}
       </p>
+
+      <div class="hidden print:block print-footer-caregiver">
+        <div class="left-content">
+          <p>Document ID: Patient List</p>
+          <p>Caregiver: [Caregiver Name/Signature]</p>
+        </div>
+        <div class="center-content">
+          <p>Geraye Home Care Services</p>
+          <p>Contact: +251-9XX-XXXXXX</p>
+        </div>
+        <div class="right-content">
+          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+          <p>Page <span class="pageNumber"></span> of <span class="totalPages"></span></p>
+        </div>
+      </div>
 
     </div>
   </AppLayout>

@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Staff;
 
-use App\Http\Controllers\Base\BaseController;
-use Illuminate\Http\Request;
-use App\DTOs\CreateStaffAvailabilityDTO;
+use App\Http\Controllers\Controller;
 use App\Models\StaffAvailability;
 use App\Models\VisitService;
 use App\Services\StaffAvailability\StaffAvailabilityService;
@@ -12,20 +10,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
-class MyAvailabilityController extends BaseController
+class MyAvailabilityController extends Controller
 {
     protected $staffAvailabilityService;
 
     public function __construct(StaffAvailabilityService $staffAvailabilityService)
     {
-        parent::__construct(
-            $staffAvailabilityService,
-            null,
-            'Staff/MyAvailability',
-            'myAvailabilities',
-            StaffAvailability::class,
-            CreateStaffAvailabilityDTO::class
-        );
+        $this->staffAvailabilityService = $staffAvailabilityService;
     }
 
     /**
@@ -33,7 +24,7 @@ class MyAvailabilityController extends BaseController
      */
     public function index(Request $request)
     {
-        return parent::index($request);
+        return inertia('Staff/MyAvailability/Index');
     }
 
     /**
@@ -76,8 +67,8 @@ class MyAvailabilityController extends BaseController
             $endTime = $startTime->copy()->addHour();
 
             return [
-                'id' => 'visit_'.$visit->id,
-                'title' => 'Visit: '.$visit->patient->full_name,
+                'id' => 'visit_' . $visit->id,
+                'title' => 'Visit: ' . $visit->patient->full_name,
                 'start' => $startTime->format('Y-m-d H:i:s'),
                 'end' => $endTime->format('Y-m-d H:i:s'),
                 'backgroundColor' => '#0284c7',

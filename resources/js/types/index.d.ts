@@ -91,12 +91,18 @@ interface InsuranceClaimPagination {
     total: number;
 }
 
-export { BreadcrumbItem, Patient, PatientPagination, EthiopianCalendarDay, EthiopianCalendarDayPagination, InsuranceClaim, InsuranceClaimPagination, User, Staff, InertiaForm };
+export { BreadcrumbItem, Patient, PatientPagination, PatientForm, EthiopianCalendarDay, EthiopianCalendarDayPagination, InsuranceClaim, InsuranceClaimPagination, User, Staff, InertiaForm };
 
 // Type aliases for easier importing
 export type BreadcrumbItemType = BreadcrumbItem;
 export type PatientType = Patient;
 export type PatientPaginationType = PatientPagination;
+
+export interface PatientForm extends Patient {
+    corporate_client_id: number | null;
+    policy_id: number | null;
+    // Add any other form-specific fields here that are not directly on the Patient model
+}
 
 export interface Group {
     id: number;

@@ -21,7 +21,20 @@ Enhanced the global search to support all major modules in the application:
    - Insurance Policies
    - Insurance Claims
    - Events
-   - Services
+   - ServicesUnresolvable dependency resolving [Parameter #0 [ <required> $model ]] in class App\Services\Base\BaseService
+GET 127.0.0.1:8001
+PHP 8.4.8 — Laravel 12.25.0
+
+Expand
+vendor frames
+51 vendor frames collapsed
+
+public/index.php
+:20
+require_once
+1 vendor frame collapsed
+public/index.php :20
+
    - Referrals
    - Partners
 

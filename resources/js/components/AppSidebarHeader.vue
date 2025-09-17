@@ -2,9 +2,9 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import axios from 'axios'
 import { eventBus } from '@/lib/eventBus'
-import { Bell, MessageSquareText } from 'lucide-vue-next'
+import { Bell, MessageSquareText, PanelLeft } from 'lucide-vue-next' // Added PanelLeft
 import GlobalSearch from '@/components/GlobalSearch.vue'; // Import GlobalSearch
-// formatDistanceToNow not used here
+import { formatDistanceToNow } from 'date-fns'; // Import formatDistanceToNow
 
 import ThemeToggler from '@/components/ThemeToggler.vue'
 import { Button } from '@/components/ui/button'
@@ -93,6 +93,9 @@ const handleClickOutside = (event: MouseEvent) => {
     }
 };
 
+// Expose formatDistanceToNow to the template
+const formatRelativeTime = (date: string | Date) => formatDistanceToNow(new Date(date), { addSuffix: true });
+
 onMounted(() => {
     fetchNotifications()
     document.addEventListener('click', handleClickOutside)
@@ -122,7 +125,7 @@ onUnmounted(() => {
 <template>
     <header class="relative z-40 bg-background/50 flex h-14 items-center gap-3 px-4 backdrop-blur-xl lg:h-[60px]">
         <div class="flex items-center gap-3 min-w-0 flex-1">
-            <Button variant="ghost" size="icon" class="size-9 flex md:hidden lg:flex shrink-0" @click="toggleSidebar">
+            <Button variant="ghost" size="icon" class="size-9 flex md:flex lg:flex shrink-0" @click="toggleSidebar"> <!-- Changed md:hidden to md:flex -->
                 <PanelLeft />
             </Button>
             <h1 v-if="isDashboardRoute" class="text-3xl font-bold hidden sm:block">Dashboard</h1>

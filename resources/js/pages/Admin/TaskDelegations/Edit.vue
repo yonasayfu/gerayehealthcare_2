@@ -12,8 +12,11 @@ const props = defineProps<{
     due_date: string
     status: 'Pending' | 'In Progress' | 'Completed'
     notes: string | null
+    task_category?: string
+    partner_id?: number | null
   }
   staff: { id: number; first_name: string; last_name: string }[]
+  partners: { id: number; name: string }[]
 }>()
 
 // Initialize the form with the existing values
@@ -23,6 +26,8 @@ const form = useForm({
   due_date:    props.taskDelegation.due_date,
   status:      props.taskDelegation.status,
   notes:       props.taskDelegation.notes || '',
+  task_category: props.taskDelegation.task_category || '',
+  partner_id:  props.taskDelegation.partner_id || null,
 })
 
 function submit() {
@@ -58,7 +63,7 @@ const breadcrumbs = [
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :staff="staff" :partners="partners" />
 
           <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
           <div class="flex justify-end gap-2 pt-2">

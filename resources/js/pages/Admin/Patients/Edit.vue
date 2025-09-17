@@ -4,6 +4,7 @@ import { reactive, watch } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType, Patient, PatientForm } from '@/types'
+import { format } from 'date-fns' // Import format
 
 const props = defineProps<{
   corporateClients: Array<any>;
@@ -15,7 +16,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
   { title: 'Patients', href: route('admin.patients.index') },
   { title: props.patient?.full_name ?? 'Patient', href: route('admin.patients.show', props.patient?.id) },
-  { title: 'Edit' },
+  { title: 'Edit', href: route('admin.patients.edit', props.patient?.id) }, // Added href
 ]
 
 // Helper to coerce possible string IDs to numbers (or null)
@@ -25,8 +26,8 @@ const coerceId = (val: any) => (val === undefined || val === null || val === '' 
 const form = useForm<any>({
   full_name: props.patient?.full_name ?? '',
   fayda_id: props.patient?.fayda_id ?? '',
-  date_of_birth: props.patient?.date_of_birth ?? '',
-  ethiopian_date_of_birth: props.patient?.ethiopian_date_of_birth ?? '',
+  date_of_birth: props.patient?.date_of_birth ? format(new Date(props.patient.date_of_birth), 'yyyy-MM-dd') : '',
+  ethiopian_date_of_birth: props.patient?.ethiopian_date_of_birth ? format(new Date(props.patient.ethiopian_date_of_birth), 'yyyy-MM-dd') : '',
   gender: props.patient?.gender ?? null,
   address: props.patient?.address ?? '',
   phone_number: props.patient?.phone_number ?? '',
@@ -71,7 +72,7 @@ function normalizeEthiopianPhone(input: string): string {
   return digits
 }
 
-watch(() => form.phone_number, (val) => {
+watch(() => form.phone_number, (val: string | null | undefined) => {
   const normalized = normalizeEthiopianPhone(val as string)
   if (normalized && normalized !== val) {
     form.phone_number = normalized

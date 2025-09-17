@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import DashboardTabs from '@/components/DashboardTabs.vue';
 import StatCard from '@/components/StatCard.vue';
@@ -8,13 +8,16 @@ import MarketingAnalyticsDashboard from '@/components/MarketingAnalyticsDashboar
 import Tooltip from '@/components/Tooltip.vue';
 import { ref, onMounted, computed, watch } from 'vue';
 import { formatDistanceToNow } from 'date-fns';
+import axios from 'axios';
+
 import { DollarSign, Users, CreditCard, Activity, Bell } from 'lucide-vue-next';
+// Removed RecentSales as it's no longer directly used in the template
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip as ChartTooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 
 ChartJS.register(Title, ChartTooltip, Legend, BarElement, CategoryScale, LinearScale)
 
-const currentTab = ref('Overview');
+const currentTab = ref('Overview'); // State for active tab
 
 function handleTabChange(tab: string) {
   currentTab.value = tab;
@@ -57,7 +60,6 @@ function refreshOverview() {
   fetchOverviewSeries();
   fetchRecentAppointments();
   fetchTopServices();
-  fetchTopStaffHours();
 }
 
 // Overview series (monthly registrations/visits) for the Overview tab bar chart
@@ -70,6 +72,7 @@ const barChartData = computed(() => ({
 const hasChartData = computed(() => {
   const ds = overviewSeries.value.datasets || [];
   if (!ds.length) return false;
+  // any dataset has any non-zero value
   return ds.some((d: any) => Array.isArray(d.data) && d.data.some((n: any) => Number(n) > 0));
 });
 
@@ -86,6 +89,8 @@ const barChartOptions = {
     y: { beginAtZero: true, ticks: { precision: 0 } },
   },
 };
+
+// Pie chart removed from Overview; keep marketing pie usage inside MarketingAnalyticsDashboard component
 
 // Recent appointments: fetched dynamically
 interface Appointment {
@@ -130,6 +135,13 @@ function setSort(key: SortKey) {
   }
   page.value = 1;
 }
+
+const props = defineProps({
+  stats: {
+    type: Object,
+    required: false,
+  },
+});
 
 // Super Admin Overview KPIs
 const superAdminStats = ref({
@@ -192,6 +204,10 @@ const topServicesChartOptions = {
   },
 };
 
+// Reports tab data (arrays)
+const reportsRevenueAR = ref<any[]>([]);
+const reportsServiceVolume = ref<any[]>([]);
+
 // Currency formatter (fallback to USD if not provided via global)
 const appCurrency = (window as any)?.appCurrency || 'USD';
 const money = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency', currency: appCurrency, minimumFractionDigits: 2 }).format(Number(v || 0));
@@ -199,24 +215,6 @@ const money = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency
 // Notifications tab data
 const notifications = ref<any[]>([]);
 const unreadCount = ref<number>(0);
-
-// Top Staff by hours (range)
-const topStaff = ref<Array<{ staff_id: number; first_name: string; last_name: string; hours: number }>>([])
-const fetchTopStaffHours = async () => {
-  try {
-    const params = { start: rangeStart.value, end: rangeEnd.value }
-    router.reload({ 
-      only: ['topStaff'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        topStaff.value = page.props.topStaff || []
-      }
-    })
-  } catch (e) {
-    console.error('Error fetching top staff hours:', e)
-  }
-}
 
 // Marketing analytics data loaders (Analytics tab)
 const dashboardStats = ref({
@@ -231,29 +229,17 @@ const dashboardStats = ref({
 });
 
 const fetchDashboardData = async () => {
-  const params = { start_date: rangeStart.value, end_date: rangeEnd.value };
-  router.reload({ 
-    only: ['dashboardStats'], 
-    data: params,
-    preserveState: true,
-    onSuccess: (page) => {
-      dashboardStats.value = page.props.dashboardStats || {}
-    }
-  });
+  const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
+  const response = await axios.get(route('admin.marketing-analytics.dashboard-data'), { params });
+  dashboardStats.value = response.data;
 };
 
 // Overview tab data loader
 const fetchOverviewData = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value }
-    router.reload({ 
-      only: ['superAdminStats'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        superAdminStats.value = page.props.superAdminStats || {}
-      }
-    })
+    const params = { start: rangeStart.value, end: rangeEnd.value, noCache: true } as any;
+    const response = await axios.get(route('admin.overview-data'), { params });
+    superAdminStats.value = response.data;
   } catch (error) {
     console.error('Error fetching overview data:', error);
   }
@@ -261,15 +247,9 @@ const fetchOverviewData = async () => {
 
 const fetchOverviewSeries = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value }
-    router.reload({ 
-      only: ['overviewSeries'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        overviewSeries.value = page.props.overviewSeries || { labels: [], datasets: [] }
-      }
-    })
+    const params = { start: rangeStart.value, end: rangeEnd.value, noCache: true } as any;
+    const response = await axios.get(route('admin.overview-series'), { params });
+    overviewSeries.value = response.data;
   } catch (error) {
     console.error('Error fetching overview series:', error);
   }
@@ -289,16 +269,25 @@ const formatDateFriendly = (isoDate: string) => {
 
 const fetchRecentAppointments = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value }
-    router.reload({ 
-      only: ['recentAppointments', 'upcomingVisits'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        recentAppointments.value = (page.props.recentAppointments || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
-        upcomingVisits.value = (page.props.upcomingVisits || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
+    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
+    const response = await axios.get(route('admin.recent-appointments'), { params });
+    recentAppointments.value = (response.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
+    // If today has no data, fetch upcoming 24h
+    if (!recentAppointments.value.length) {
+      // fallback 1: upcoming next 24h
+      const up = await axios.get(route('admin.upcoming-visits'));
+      upcomingVisits.value = (up.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
+      // fallback 2: last 30 days if still empty
+      if (!upcomingVisits.value.length) {
+        const today = new Date();
+        const start = new Date(); start.setDate(today.getDate()-29);
+        const params30 = { start: start.toISOString().slice(0,10), end: today.toISOString().slice(0,10) } as any;
+        const last30 = await axios.get(route('admin.recent-appointments'), { params: params30 });
+        recentAppointments.value = (last30.data || []).map((a: any) => ({ ...a, date_label: formatDateFriendly(a.date) }));
       }
-    })
+    } else {
+      upcomingVisits.value = [];
+    }
   } catch (error) {
     console.error('Error fetching recent appointments:', error);
   }
@@ -306,15 +295,9 @@ const fetchRecentAppointments = async () => {
 
 const fetchCampaignPerformance = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value, per_page: 6 }
-    router.reload({ 
-      only: ['campaignPerformanceData'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        campaignPerformanceData.value = page.props.campaignPerformanceData || []
-      }
-    })
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value, per_page: 6 } as any;
+    const response = await axios.get(route('admin.marketing-analytics.campaign-performance'), { params });
+    campaignPerformanceData.value = response.data.data; // Assuming paginated data
   } catch (error) {
     console.error('Error fetching campaign performance:', error);
   }
@@ -322,15 +305,9 @@ const fetchCampaignPerformance = async () => {
 
 const fetchTrafficSourceDistribution = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
-    router.reload({ 
-      only: ['trafficSourceData'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        trafficSourceData.value = page.props.trafficSourceData || []
-      }
-    })
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
+    const response = await axios.get(route('admin.marketing-analytics.traffic-source-distribution'), { params });
+    trafficSourceData.value = response.data;
   } catch (error) {
     console.error('Error fetching traffic source distribution:', error);
   }
@@ -338,15 +315,9 @@ const fetchTrafficSourceDistribution = async () => {
 
 const fetchConversionFunnel = async () => {
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
-    router.reload({ 
-      only: ['conversionFunnelData'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        conversionFunnelData.value = page.props.conversionFunnelData || {}
-      }
-    })
+    const params = { start_date: rangeStart.value, end_date: rangeEnd.value } as any;
+    const response = await axios.get(route('admin.marketing-analytics.conversion-funnel'), { params });
+    conversionFunnelData.value = response.data;
   } catch (error) {
     console.error('Error fetching conversion funnel:', error);
   }
@@ -356,18 +327,12 @@ const fetchConversionFunnel = async () => {
 const fetchAnalyticsAll = async () => {
   analyticsLoading.value = true;
   try {
-    const params = { start_date: rangeStart.value, end_date: rangeEnd.value }
-    router.reload({ 
-      only: ['dashboardStats', 'campaignPerformanceData', 'trafficSourceData', 'conversionFunnelData'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        dashboardStats.value = page.props.dashboardStats || {}
-        campaignPerformanceData.value = page.props.campaignPerformanceData || []
-        trafficSourceData.value = page.props.trafficSourceData || []
-        conversionFunnelData.value = page.props.conversionFunnelData || {}
-      }
-    })
+    await Promise.all([
+      fetchDashboardData(),
+      fetchCampaignPerformance(),
+      fetchTrafficSourceDistribution(),
+      fetchConversionFunnel(),
+    ]);
   } catch (e) {
     console.error('Error fetching analytics data:', e);
   } finally {
@@ -377,15 +342,9 @@ const fetchAnalyticsAll = async () => {
 
 const fetchTopServices = async () => {
   try {
-    const params = { start: rangeStart.value, end: rangeEnd.value }
-    router.reload({ 
-      only: ['topServices'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        topServices.value = page.props.topServices || []
-      }
-    })
+    const params = { start: rangeStart.value, end: rangeEnd.value } as any;
+    const res = await axios.get(route('admin.top-services'), { params });
+    topServices.value = res.data || [];
   } catch (error) {
     console.error('Error fetching top services:', error);
   }
@@ -393,17 +352,19 @@ const fetchTopServices = async () => {
 
 // Reports data loaders
 const fetchReportsData = async () => {
-  const params = { start: rangeStart.value, end: rangeEnd.value }
+  const params = { start: rangeStart.value, end: rangeEnd.value } as any;
+  const getUrl = (name: string, fallback: string) => {
+    try { return route(name); } catch { return fallback; }
+  };
+  const svcUrl = getUrl('admin.reports.service-volume.data', '/dashboard/reports/service-volume/data');
+  const revUrl = getUrl('admin.reports.revenue-ar.data', '/dashboard/reports/revenue-ar/data');
   try {
-    router.reload({ 
-      only: ['reportServiceChart', 'reportRevenueArChart'], 
-      data: params,
-      preserveState: true,
-      onSuccess: (page) => {
-        reportServiceChart.value = page.props.reportServiceChart || { labels: [], datasets: [] }
-        reportRevenueArChart.value = page.props.reportRevenueArChart || { labels: [], datasets: [] }
-      }
-    })
+    const [svc, rev] = await Promise.all([
+      axios.get(svcUrl, { params }),
+      axios.get(revUrl, { params }),
+    ]);
+    reportServiceChart.value = (svc.data && svc.data.labels) ? svc.data : { labels: [], datasets: [] };
+    reportRevenueArChart.value = (rev.data && rev.data.labels) ? rev.data : { labels: [], datasets: [] };
   } catch (error) {
     console.error('Error fetching reports data:', error);
     reportServiceChart.value = { labels: [], datasets: [] };
@@ -414,14 +375,9 @@ const fetchReportsData = async () => {
 // Notifications loader
 const fetchNotifications = async () => {
   try {
-    router.reload({ 
-      only: ['notifications', 'unreadCount'], 
-      preserveState: true,
-      onSuccess: (page) => {
-        unreadCount.value = page.props.unreadCount ?? 0;
-        notifications.value = page.props.notifications ?? [];
-      }
-    })
+    const response = await axios.get(route('notifications.index'), { headers: { Accept: 'application/json' } });
+    unreadCount.value = response.data.unread_count ?? 0;
+    notifications.value = response.data.notifications ?? [];
   } catch (error) {
     console.error('Error fetching notifications:', error);
   }
@@ -440,7 +396,7 @@ watch(currentTab, (newTab) => {
   if (newTab === 'Notifications') {
     fetchNotifications();
   }
-}, { immediate: true });
+}, { immediate: true }); // Fetch data immediately if the initial tab is 'Analytics' or 'Overview'
 
 // React to date range changes (debounced to reduce flicker)
 let rangeTimer: any = null;
@@ -555,9 +511,10 @@ watch([rangeStart, rangeEnd], () => {
               color="bg-indigo-100"
             />
           </Tooltip>
+          <!-- Removed standalone upcoming visits card (merged above) -->
         </div>
 
-        <!-- Row 2: Bar Chart, and Table -->
+        <!-- Row 2: Bar Chart, Pie Chart, and Table -->
         <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 mt-4">
           <div class="col-span-full lg:col-span-1">
             <h3 class="text-lg font-medium">Monthly Patient Registrations Overview</h3>
@@ -573,7 +530,7 @@ watch([rangeStart, rangeEnd], () => {
           <div class="col-span-full lg:col-span-2">
             <h3 class="text-lg font-medium">Recent Appointments</h3>
             <div class="mt-4 overflow-x-auto">
-              <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden print-table">
+              <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
                     <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300 cursor-pointer select-none" @click="setSort('patient')">Patient <span v-if="sortKey==='patient'">{{ sortDir==='asc' ? '▲' : '▼' }}</span></th>
@@ -630,34 +587,6 @@ watch([rangeStart, rangeEnd], () => {
           </div>
         </div>
 
-        <!-- Row 3: Top Staff by Hours -->
-        <div class="grid gap-4 grid-cols-1 mt-6">
-          <div class="col-span-full">
-            <h3 class="text-lg font-medium">Top Staff by Hours ({{ rangeStart }} → {{ rangeEnd }})</h3>
-            <div class="mt-4 overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
-              <table class="min-w-full print-table">
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                  <tr>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">#</th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Staff</th>
-                    <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Hours</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, idx) in topStaff" :key="row.staff_id" :class="{'bg-gray-50 dark:bg-gray-700': idx % 2 === 0}">
-                    <td class="py-2 px-4 text-sm">{{ idx + 1 }}</td>
-                    <td class="py-2 px-4 text-sm">{{ row.first_name }} {{ row.last_name }}</td>
-                    <td class="py-2 px-4 text-sm font-semibold">{{ row.hours.toFixed(2) }}</td>
-                  </tr>
-                  <tr v-if="!topStaff.length">
-                    <td colspan="3" class="py-4 px-4 text-center text-gray-500">No data for selected range</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
         <!-- Top Services (by volume/revenue) as bar chart -->
         <div class="mt-6">
           <h3 class="text-lg font-semibold">Top Services ({{ rangeStart }} → {{ rangeEnd }})</h3>
@@ -696,7 +625,7 @@ watch([rangeStart, rangeEnd], () => {
           <h3 class="text-lg font-semibold">Upcoming Visits (Next 24h)</h3>
           <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
-              <table class="min-w-full print-table">
+              <table class="min-w-full">
                 <thead class="bg-gray-100 dark:bg-gray-700">
                   <tr>
                     <th class="py-2 px-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Patient</th>
@@ -776,6 +705,7 @@ watch([rangeStart, rangeEnd], () => {
         </ul>
         <p v-else class="text-sm text-muted-foreground">No unread notifications.</p>
       </div>
-    </div>
+      </div>
+    
   </AppLayout>
 </template>

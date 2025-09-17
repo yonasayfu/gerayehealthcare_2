@@ -40,7 +40,7 @@ class TaskDelegationController extends BaseController
             'prefill' => $prefill,
             'returnTo' => request()->query('return_to'),
             'inventoryAlertId' => request()->query('inventory_alert_id'),
-            'partners' => \App\Models\Partner::select('id','name')->orderBy('name')->get(),
+            'partners' => \App\Models\Partner::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
@@ -51,6 +51,7 @@ class TaskDelegationController extends BaseController
         return Inertia::render('Admin/TaskDelegations/Edit', [
             'taskDelegation' => $taskDelegation,
             'staff' => Staff::all(['id', 'first_name', 'last_name']),
+            'partners' => \App\Models\Partner::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
@@ -87,8 +88,8 @@ class TaskDelegationController extends BaseController
             return redirect()->to($returnTo)->with('banner', 'Task delegation created and linked successfully.')->with('bannerStyle', 'success');
         }
 
-        return redirect()->route('admin.'.$this->getRouteName().'.index')
-            ->with('banner', ucfirst($this->dataVariableName).' created successfully.')->with('bannerStyle', 'success');
+        return redirect()->route('admin.' . $this->getRouteName() . '.index')
+            ->with('banner', ucfirst($this->dataVariableName) . ' created successfully.')->with('bannerStyle', 'success');
     }
 
     public function update(\Illuminate\Http\Request $request, $id)
@@ -100,7 +101,7 @@ class TaskDelegationController extends BaseController
 
         $this->service->update($id, $validatedData);
 
-        return redirect()->route('admin.'.$this->getRouteName().'.index')
-            ->with('banner', ucfirst($this->dataVariableName).' updated successfully.')->with('bannerStyle', 'success');
+        return redirect()->route('admin.' . $this->getRouteName() . '.index')
+            ->with('banner', ucfirst($this->dataVariableName) . ' updated successfully.')->with('bannerStyle', 'success');
     }
 }

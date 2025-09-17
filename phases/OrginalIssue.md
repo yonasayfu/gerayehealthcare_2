@@ -215,8 +215,14 @@ STOP 1
 - [ ] Here /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AuthServiceProvider.php why some moduels are only included and is there a spcial for them to be here?
 
 - [ ] Here in the class /Users/yonassayfu/VSProject/gerayehealthcare/app/Providers/AppServiceProvider.php I see that Relation::morphMap and in the array only staff and patient are exit why? And what it means?
+
+
 - [ ] Here also I see that some policy for some class are only present is it enough according to our moduel also let have the summary after you update to know more about the policy where we create and where we used it in .md file /Users/yonassayfu/VSProject/gerayehealthcare/app/Policies
+
+
 - [ ] Does this /Users/yonassayfu/VSProject/gerayehealthcare/app/Notifications/NewCaregiverAssignment.php works and related to our moduel? Also I see that a method to use email, Is it real since we have a bell notification and message can not the assigned see there the notification? Also for this I see the email send /Users/yonassayfu/VSProject/gerayehealthcare/app/Notifications/TaskDelegationAssigned.php, by the way if it is good let keep and let make work at real time
+
+
 - [ ] This file is create to sent a message for the 3rd party company to review the data, so as a realtime does it work?/Users/yonassayfu/VSProject/gerayehealthcare/app/Mail/InsuranceClaimEmail.php 
 - [ ] Let clarify the purpose of this /Users/yonassayfu/VSProject/gerayehealthcare/app/Listeners files were you find here,
 - [ ] Why and what it the purpose of this class /Users/yonassayfu/VSProject/gerayehealthcare/app/Http/Resources, when and where we used it

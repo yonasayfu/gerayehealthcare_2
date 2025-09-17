@@ -36,8 +36,9 @@ class InventoryItemService extends BaseService
 
     protected function applySearch($query, $search)
     {
-        $query->where('name', 'like', "%{$search}%")
-            ->orWhere('serial_number', 'like', "%{$search}%");
+        $query->where('name', 'ilike', "%{$search}%")
+            ->orWhere('serial_number', 'ilike', "%{$search}%")
+            ->orWhere('item_type', 'ilike', "%{$search}%");
     }
 
     public function delete(int $id): void

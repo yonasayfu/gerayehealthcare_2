@@ -28,7 +28,6 @@ async function destroy(id: number) {
     title: 'Delete Patient',
     message: 'Are you sure you want to delete this patient?',
     confirmText: 'Delete',
-    variant: 'danger',
   })
   if (!ok) return
   router.delete(route('admin.patients.destroy', id))
@@ -155,9 +154,19 @@ async function destroy(id: number) {
         </div>
       </div>
 
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
-        <hr class="my-2 border-gray-300 dark:border-gray-600">
-        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+      <div class="hidden print:block print-footer-caregiver">
+        <div class="left-content">
+          <p>Document ID: {{ props.patient.patient_code ?? 'N/A' }}</p>
+          <p>Caregiver: [Caregiver Name/Signature]</p>
+        </div>
+        <div class="center-content">
+          <p>Geraye Home Care Services</p>
+          <p>Contact: +251-9XX-XXXXXX</p>
+        </div>
+        <div class="right-content">
+          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+          <p>Page <span class="pageNumber"></span> of <span class="totalPages"></span></p>
+        </div>
       </div>
 
     </div>
@@ -168,8 +177,8 @@ async function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4 landscape; /* Set page size to A4 */
-    margin: 0.5cm; /* Reduce margins significantly to give more space for content */
+    size: A4 portrait; /* Changed to portrait for better content flow */
+    margin: 1cm; /* Standard margin */
   }
 
   /* Universal print adjustments */
@@ -179,7 +188,7 @@ async function destroy(id: number) {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important; /* Allow overflow for content */
   }
 
   /* Elements to hide during print */
@@ -240,10 +249,11 @@ async function destroy(id: number) {
     margin: 0 !important;
     width: 100% !important;
     height: auto !important;
-    overflow: visible !important;
+    overflow: visible !important; /* Ensure content is visible */
 
-    transform: scale(0.98); /* Less aggressive scaling. Adjust if it goes to 2 pages */
-    transform-origin: top left;
+    /* Removed transform: scale() to prevent content cutting */
+    /* transform: scale(0.98); */
+    /* transform-origin: top left; */
   }
 
   /* Reduce overall top-level padding/margin if the wrapper div adds too much */
@@ -264,7 +274,7 @@ async function destroy(id: number) {
 
   /* TYPOGRAPHY ADJUSTMENTS */
   h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
-  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
+  p { font-size: 0.85rem !important; line-height: 1.4 !important; word-break: break-word; } /* Added word-break */
   .text-sm { font-size: 0.8rem !important; }
   .text-xs { font-size: 0.75rem !important; }
   .font-medium { font-weight: 600 !important; }
@@ -278,8 +288,8 @@ async function destroy(id: number) {
 
   /* GRID LAYOUT FOR DATA FIELDS (Two-column "Label: Value" format) */
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* Force 2 equal columns */
-    gap: 0.8rem 0 !important; /* Vertical gap, horizontal gap is now handled by padding */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; /* More flexible columns */
+    gap: 0.8rem 1.5rem !important; /* Vertical gap, horizontal gap */
     page-break-inside: avoid !important;
   }
 
@@ -292,13 +302,13 @@ async function destroy(id: number) {
     padding: 0.1rem 0 !important;
   }
 
-  /* Add a subtle dashed vertical line between the two columns */
+  /* Remove subtle dashed vertical line between the two columns, as it might not be needed with flexible grid */
   .grid > div:nth-child(odd) { /* Targets items in the left column */
-    border-right: 1px dashed #eee !important; /* Subtle dashed line */
-    padding-right: 1.5rem !important; /* Space between content and line */
+    border-right: none !important;
+    padding-right: 0 !important;
   }
   .grid > div:nth-child(even) { /* Targets items in the right column */
-    padding-left: 1.5rem !important; /* Space between line and content */
+    padding-left: 0 !important;
   }
 
   .grid > div p:first-child { /* The Label */
@@ -313,5 +323,36 @@ async function destroy(id: number) {
     word-break: break-word !important;
     color: #333 !important;
   }
-}
+
+  /* Caregiver Print Footer */
+  .print-footer-caregiver {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding: 1cm;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #555;
+    border-top: 1px solid #eee;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .print-footer-caregiver div {
+    flex: 1;
+    text-align: center;
+  }
+
+  .print-footer-caregiver .left-content {
+    text-align: left;
+  }
+
+  .print-footer-caregiver .right-content {
+    text-align: right;
+  }
+} /* Closing brace for @media print */
 </style>
