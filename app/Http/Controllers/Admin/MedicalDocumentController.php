@@ -11,6 +11,7 @@ use App\Models\MedicalVisit;
 use App\Services\MedicalDocument\MedicalDocumentService;
 use App\Services\Validation\Rules\MedicalDocumentRules;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MedicalDocumentController extends BaseController
 {
@@ -37,8 +38,8 @@ class MedicalDocumentController extends BaseController
 
     public function store(Request $request)
     {
-        if (! $request->filled('created_by_staff_id') && optional(auth()->user())->staff) {
-            $request->merge(['created_by_staff_id' => auth()->user()->staff->id]);
+        if (! $request->filled('created_by_staff_id') && Auth::check() && Auth::user()->staff) {
+            $request->merge(['created_by_staff_id' => Auth::user()->staff->id]);
         }
         return parent::store($request);
     }
@@ -84,5 +85,16 @@ class MedicalDocumentController extends BaseController
         $config = AdditionalExportConfigs::getMedicalDocumentConfig();
 
         return $this->handlePrintSingle($request, $model, $config);
+    }
+
+    public function edit($id)
+    {
+        $medicalDocument = MedicalDocument::with(['patient', 'visit'])->findOrFail($id);
+        $patients = Patient::select('id','full_name','patient_code')->orderBy('full_name')->get();
+
+        return inertia('Admin/MedicalDocuments/Edit', [
+            'medicalDocument' => $medicalDocument,
+            'patients' => $patients,
+        ]);
     }
 }

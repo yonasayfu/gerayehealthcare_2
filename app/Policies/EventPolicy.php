@@ -15,7 +15,7 @@ class EventPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('view events');
     }
 
     /**
@@ -23,7 +23,7 @@ class EventPolicy
      */
     public function view(User $user, Event $event): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('view events');
     }
 
     /**
@@ -31,7 +31,7 @@ class EventPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('create events');
     }
 
     /**
@@ -39,7 +39,7 @@ class EventPolicy
      */
     public function update(User $user, Event $event): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit events');
     }
 
     /**
@@ -47,7 +47,7 @@ class EventPolicy
      */
     public function delete(User $user, Event $event): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('delete events');
     }
 
     /**
@@ -55,7 +55,7 @@ class EventPolicy
      */
     public function restore(User $user, Event $event): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit events');
     }
 
     /**
@@ -63,6 +63,6 @@ class EventPolicy
      */
     public function forceDelete(User $user, Event $event): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete events');
     }
 }

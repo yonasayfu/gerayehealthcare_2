@@ -29,4 +29,34 @@ class PatientFactory extends Factory
             'registered_by_caregiver_id' => null, // Set to null to avoid foreign key violation
         ];
     }
+
+    /**
+     * Indicate that the patient has insurance.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withInsurance()
+    {
+        return $this->afterCreating(function (\App\Models\Patient $patient) {
+            $insurancePolicy = \App\Models\InsurancePolicy::inRandomOrder()->first() ?? \App\Models\InsurancePolicy::factory()->create();
+            \App\Models\EmployeeInsuranceRecord::factory()->create([
+                'patient_id' => $patient->id,
+                'policy_id' => $insurancePolicy->id,
+            ]);
+        });
+    }
+
+    /**
+     * Indicate that the patient was registered by the police.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function registeredByPolice()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'source' => 'Police',
+            ];
+        });
+    }
 }

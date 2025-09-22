@@ -216,7 +216,7 @@ const serverError = computed(() => (form.errors as any)?.error)
             <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Staff Availability Records</h1>
             <p class="text-sm text-muted-foreground">Review and manage all staff availability slots.</p>
         </div>
-        <button @click="openCreateModal" class="btn-glass btn-primary inline-flex items-center gap-2">
+        <button @click="openCreateModal" class="btn-glass inline-flex items-center gap-2">
           <PlusCircle class="h-4 w-4" />
           Add New Slot
         </button>

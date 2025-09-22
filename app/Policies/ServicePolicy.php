@@ -15,7 +15,7 @@ class ServicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('view services');
     }
 
     /**
@@ -23,7 +23,7 @@ class ServicePolicy
      */
     public function view(User $user, Service $service): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('view services');
     }
 
     /**
@@ -31,7 +31,7 @@ class ServicePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('create services');
     }
 
     /**
@@ -39,7 +39,7 @@ class ServicePolicy
      */
     public function update(User $user, Service $service): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit services');
     }
 
     /**
@@ -47,7 +47,7 @@ class ServicePolicy
      */
     public function delete(User $user, Service $service): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('delete services');
     }
 
     /**
@@ -55,7 +55,7 @@ class ServicePolicy
      */
     public function restore(User $user, Service $service): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit services');
     }
 
     /**
@@ -63,6 +63,6 @@ class ServicePolicy
      */
     public function forceDelete(User $user, Service $service): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete services');
     }
 }

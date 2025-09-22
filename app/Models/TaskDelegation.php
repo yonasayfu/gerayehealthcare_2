@@ -43,6 +43,32 @@ class TaskDelegation extends Model
         'estimated_duration_minutes' => 'integer',
     ];
 
+    // Add this to properly serialize dates for Inertia.js
+    protected $appends = ['formatted_due_date'];
+
+    // Accessor to format the due_date for frontend
+    public function getFormattedDueDateAttribute()
+    {
+        return $this->due_date ? $this->due_date->format('Y-m-d') : null;
+    }
+
+    // Ensure proper serialization for Inertia.js
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        // Format dates properly for frontend consumption
+        if ($this->due_date) {
+            $array['due_date'] = $this->due_date->format('Y-m-d');
+        }
+
+        if ($this->task_date) {
+            $array['task_date'] = $this->task_date->format('Y-m-d');
+        }
+
+        return $array;
+    }
+
     public function assignee()
     {
         return $this->belongsTo(Staff::class, 'assigned_to');

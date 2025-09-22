@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
+import Form from './Form.vue';
 
 const props = defineProps<{
   patients: Array<{ id: number; full_name: string }>;
@@ -21,6 +22,7 @@ const form = useForm({
   visit_ids: [],
   invoice_date: new Date().toISOString().split('T')[0],
   due_date: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // Default due date 30 days from now
+  notes: '',
 });
 
 watch(() => form.patient_id, (newPatientId) => {

@@ -72,4 +72,36 @@ class StaffController extends BaseController
 
         return redirect()->route('admin.staff.index')->with('banner', 'Staff updated successfully.')->with('bannerStyle', 'success');
     }
+
+    public function destroy(Request $request, $id)
+    {
+        try {
+            // Check if staff member has related records
+            $staff = Staff::withCount(['medicalDocuments', 'referralDocuments'])->findOrFail($id);
+
+            // If there are related records, we can't delete
+            if ($staff->medical_documents_count > 0 || $staff->referral_documents_count > 0) {
+                $message = "Cannot delete staff member. This staff member has ";
+                if ($staff->medical_documents_count > 0) {
+                    $message .= "{$staff->medical_documents_count} medical documents";
+                }
+                if ($staff->referral_documents_count > 0) {
+                    if ($staff->medical_documents_count > 0) {
+                        $message .= " and ";
+                    }
+                    $message .= "{$staff->referral_documents_count} referral documents";
+                }
+                $message .= " associated with them. Please reassign these documents first.";
+
+                return back()->with('banner', $message)->with('bannerStyle', 'danger');
+            }
+
+            // If no related records, proceed with deletion
+            $this->service->delete($id);
+
+            return redirect()->route('admin.staff.index')->with('banner', 'Staff member deleted successfully.')->with('bannerStyle', 'success');
+        } catch (\Exception $e) {
+            return back()->with('banner', 'An unexpected error occurred during deletion: ' . $e->getMessage())->with('bannerStyle', 'danger');
+        }
+    }
 }

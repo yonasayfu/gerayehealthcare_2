@@ -9,27 +9,42 @@ class VisitServicePolicy
 {
     public function view(User $user, VisitService $visit): bool
     {
+        if ($user->can('view visit services')) {
+            return true;
+        }
         return $this->isRelated($user, $visit);
     }
 
     public function update(User $user, VisitService $visit): bool
     {
+        if ($user->can('edit visit services')) {
+            return true;
+        }
         return $this->isRelated($user, $visit);
     }
 
     public function checkIn(User $user, VisitService $visit): bool
     {
+        if ($user->can('edit visit services')) {
+            return true;
+        }
         return $user->staff && $visit->staff_id === $user->staff->id;
     }
 
     public function checkOut(User $user, VisitService $visit): bool
     {
+        if ($user->can('edit visit services')) {
+            return true;
+        }
         return $user->staff && $visit->staff_id === $user->staff->id;
     }
 
     public function create(User $user, ?int $patientId = null): bool
     {
         // Staff can create for any patient; patients can create only for themselves
+        if ($user->can('create visit services')) {
+            return true;
+        }
         if ($user->staff) {
             return true;
         }
@@ -42,6 +57,9 @@ class VisitServicePolicy
 
     public function cancel(User $user, VisitService $visit): bool
     {
+        if ($user->can('delete visit services')) {
+            return true;
+        }
         return $this->isRelated($user, $visit);
     }
 

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Models\User;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -51,6 +52,11 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->hasRole(\App\Enums\RoleEnum::SUPER_ADMIN->value)) {
                 return true;
             }
+        });
+
+        // All authenticated staff can communicate (DM) with any other user except themselves
+        Gate::define('communicate', function (User $user, User $other) {
+            return $user->id !== $other->id;
         });
     }
 }

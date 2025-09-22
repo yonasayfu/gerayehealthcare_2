@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'roles' => $roles,
                     'permissions' => $permissions,
+                    'profile_photo_url' => $user->profile_photo_url ?? null,
                 ] : null,
             ],
             'ziggy' => [

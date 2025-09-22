@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Models\GroupMessage;
 use App\Models\Message;
+use App\Services\Messaging\TelegramInboxService;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -59,9 +60,18 @@ class MessageDeleted implements ShouldBroadcast
 
     public function broadcastWith()
     {
+        $context = null;
+
+        if ($this->message instanceof Message) {
+            $context = TelegramInboxService::CONTEXT_DIRECT;
+        } elseif ($this->message instanceof GroupMessage) {
+            $context = TelegramInboxService::CONTEXT_CHANNEL;
+        }
+
         return [
             'messageId' => $this->messageId,
             'conversationId' => $this->conversationId,
+            'context' => $context,
         ];
     }
 }

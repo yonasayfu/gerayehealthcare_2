@@ -15,7 +15,7 @@ class InsurancePolicyPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'finance']);
+        return $user->can('view insurance policies');
     }
 
     /**
@@ -23,7 +23,7 @@ class InsurancePolicyPolicy
      */
     public function view(User $user, InsurancePolicy $insurancePolicy): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'finance']);
+        return $user->can('view insurance policies');
     }
 
     /**
@@ -31,7 +31,7 @@ class InsurancePolicyPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'finance']);
+        return $user->can('create insurance policies');
     }
 
     /**
@@ -39,7 +39,7 @@ class InsurancePolicyPolicy
      */
     public function update(User $user, InsurancePolicy $insurancePolicy): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'finance']);
+        return $user->can('edit insurance policies');
     }
 
     /**
@@ -47,7 +47,7 @@ class InsurancePolicyPolicy
      */
     public function delete(User $user, InsurancePolicy $insurancePolicy): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('delete insurance policies');
     }
 
     /**
@@ -55,7 +55,7 @@ class InsurancePolicyPolicy
      */
     public function restore(User $user, InsurancePolicy $insurancePolicy): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit insurance policies');
     }
 
     /**
@@ -63,6 +63,6 @@ class InsurancePolicyPolicy
      */
     public function forceDelete(User $user, InsurancePolicy $insurancePolicy): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete insurance policies');
     }
 }

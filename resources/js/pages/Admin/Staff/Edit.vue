@@ -16,6 +16,7 @@ const props = defineProps<{
     status: 'Active' | 'Inactive'
     hire_date: string | null
     photo: string | null
+    photo_url: string | null
     hourly_rate: string | number | null // Corrected type definition
   },
   departments: string[],
@@ -74,7 +75,7 @@ function submit() {
 
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <Form :form="form" :existing-photo="props.staff.photo" :departments="props.departments" :positions="props.positions" />
 
           <!-- Footer actions: Cancel + Save (right aligned), no logic changes -->
           <div class="flex justify-end gap-2 pt-2">

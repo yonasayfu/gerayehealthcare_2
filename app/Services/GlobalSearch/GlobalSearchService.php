@@ -16,6 +16,7 @@ use App\Models\Service;
 use App\Models\SharedInvoice;
 use App\Models\Staff;
 use App\Models\Supplier;
+use App\Models\MedicalDocument;
 use App\Models\VisitService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -123,6 +124,12 @@ class GlobalSearchService
             $results = $results->merge($this->searchPartners($query));
         } catch (\Exception $e) {
             Log::warning('Global search failed for partners: ' . $e->getMessage());
+        }
+
+        try {
+            $results = $results->merge($this->searchMedicalDocuments($query));
+        } catch (\Exception $e) {
+            Log::warning('Global search failed for medical documents: ' . $e->getMessage());
         }
 
         // Sort by relevance and limit results
@@ -522,6 +529,31 @@ class GlobalSearchService
                 'url' => route('admin.partners.show', $partner->id),
                 'relevance' => 70,
                 'icon' => 'users',
+            ];
+        });
+    }
+
+    private function searchMedicalDocuments(string $query): Collection
+    {
+        $likeOperator = $this->getLikeOperator();
+        $medicalDocuments = MedicalDocument::select('id', 'title', 'document_type', 'document_date', 'summary')
+            ->where(function ($q) use ($query, $likeOperator) {
+                $q->where('title', $likeOperator, '%' . $query . '%')
+                    ->orWhere('document_type', $likeOperator, '%' . $query . '%')
+                    ->orWhere('summary', $likeOperator, '%' . $query . '%');
+            })
+            ->limit(5)
+            ->get();
+
+        return $medicalDocuments->map(function ($document) {
+            return [
+                'type' => 'Medical Document',
+                'category' => 'Healthcare',
+                'title' => $document->title,
+                'description' => 'Type: ' . ($document->document_type ?? 'N/A') . ' • Date: ' . ($document->document_date ? date('M j, Y', strtotime($document->document_date)) : 'N/A'),
+                'url' => route('admin.medical-documents.show', $document->id),
+                'relevance' => 80,
+                'icon' => 'file-medical',
             ];
         });
     }

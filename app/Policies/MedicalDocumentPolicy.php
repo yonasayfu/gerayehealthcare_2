@@ -10,6 +10,9 @@ class MedicalDocumentPolicy
 {
     public function view(User $user, MedicalDocument $doc): bool
     {
+        if ($user->can('view medical documents')) {
+            return true;
+        }
         if ($user->staff && $doc->created_by_staff_id === $user->staff->id) {
             return true;
         }
@@ -20,6 +23,10 @@ class MedicalDocumentPolicy
 
     public function create(User $user): bool
     {
+        if ($user->can('create medical documents')) {
+            return true;
+        }
+
         return (bool) $user->staff;
     }
 }

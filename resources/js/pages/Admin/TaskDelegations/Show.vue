@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import ShowHeader from '@/components/ShowHeader.vue'
+import { format } from 'date-fns'
 
 const props = defineProps<{
   taskDelegation: {
@@ -63,7 +64,7 @@ function cancelDelete() {
         </template>
       </ShowHeader>
       
-      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+      <div class="hidden print:block text-center mb-4 print-header-content">
         <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
         <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
         <p class="text-gray-600 dark:text-gray-400 print-document-title">Task Delegation Details</p>
@@ -159,6 +160,12 @@ function cancelDelete() {
           </button>
         </div>
       </div>
+      
+      <!-- Print Footer -->
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300 dark:border-gray-600">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
     </div>
   </AppLayout>
 
@@ -199,3 +206,85 @@ function cancelDelete() {
     </div>
   </div>
 </template>
+
+<style>
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 1cm;
+  }
+
+  /* Universal print adjustments */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Elements to hide during print */
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  /* HIDE BREADCRUMBS AND TOP NAV */
+  .app-sidebar-header, .app-sidebar {
+    display: none !important;
+  }
+  
+  /* Fallback/more general selectors */
+  body > header,
+  body > nav,
+  [role="banner"],
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  /* Print Header Content */
+  .print-header-content {
+    display: block !important;
+    text-align: center;
+    padding-top: 0.5cm;
+    padding-bottom: 0.5cm;
+    margin-bottom: 0.8cm;
+  }
+  
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .print-clinic-name {
+    font-size: 1.6rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
+    font-weight: bold;
+  }
+  
+  .print-document-title {
+    font-size: 0.85rem !important;
+    color: #555 !important;
+  }
+  
+  /* Status badges */
+  .inline-flex.items-center.px-2.py-1.rounded.text-xs.font-medium {
+    background-color: #f0f0f0 !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border: 1px solid #ddd !important;
+  }
+  
+  /* Divider lines */
+  hr {
+    border-color: #ccc !important;
+  }
+}
+</style>

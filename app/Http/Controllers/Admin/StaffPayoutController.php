@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateStaffPayoutDTO;
+use App\Http\Config\ExportConfig;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ExportableTrait;
-use App\Http\Config\ExportConfig;
 use App\Models\StaffPayout;
 use App\Services\StaffPayout\StaffPayoutService;
 use App\Services\Validation\Rules\StaffPayoutRules;
@@ -84,7 +84,7 @@ class StaffPayoutController extends Controller
             // Update payout status and notes to reflect reversal
             $reasonText = trim((string) $request->input('reason'));
             $payout->status = 'Voided';
-            $payout->notes = trim(($payout->notes ? $payout->notes."\n" : '') . 'Reverted'.($reasonText ? ": {$reasonText}" : ''));
+            $payout->notes = trim(($payout->notes ? $payout->notes . "\n" : '') . 'Reverted' . ($reasonText ? ": {$reasonText}" : ''));
             $payout->reverted_by = auth()->id();
             $payout->reverted_reason = $reasonText ?: null;
             $payout->reverted_at = now();
@@ -92,7 +92,7 @@ class StaffPayoutController extends Controller
         });
 
         return redirect()
-            ->route('admin.staff-payouts.show', $payout)
+            ->route('admin.staff-payouts.index')
             ->with('banner', 'Payout reverted. Unpaid amounts are now available for processing again.')
             ->with('bannerStyle', 'success');
     }
@@ -105,7 +105,11 @@ class StaffPayoutController extends Controller
 
     public function show(StaffPayout $staff_payout)
     {
-        $payout = $staff_payout->load(['staff', 'visitServices']);
+        $payout = $staff_payout->load([
+            'staff',
+            'visitServices.patient',
+            'visitServices.service',
+        ]);
 
         return Inertia::render('Admin/StaffPayouts/Show', [
             'staffPayout' => $payout,
@@ -125,8 +129,27 @@ class StaffPayoutController extends Controller
     {
         $validated = $request->validate(StaffPayoutRules::update($staff_payout));
 
+        $originalStatus = $staff_payout->status;
         $staff_payout->fill($validated);
         $staff_payout->save();
+
+        // If status changed from Completed to Voided or Pending, redirect to index to refresh the data
+        if ($originalStatus === 'Completed' && in_array($staff_payout->status, ['Voided', 'Pending'])) {
+            // Also mark related visits as unpaid again when changing from Completed to Voided/Pending
+            // Load visit services before making changes
+            $payout = $staff_payout->load('visitServices');
+            if ($payout->visitServices && $payout->visitServices->count() > 0) {
+                \App\Models\VisitService::whereIn('id', $payout->visitServices->pluck('id'))
+                    ->update(['is_paid_to_staff' => false]);
+                // Detach visits from this payout to avoid double counting
+                $payout->visitServices()->detach();
+            }
+
+            // Clear any cached queries to ensure data is refreshed
+            // This helps ensure that when we redirect to index, the unpaid_visits_count is correctly calculated
+
+            return redirect()->route('admin.staff-payouts.index')->with('banner', 'Payout updated. Unpaid amounts are now available for processing again.')->with('bannerStyle', 'success');
+        }
 
         return redirect()->route('admin.staff-payouts.show', $staff_payout)->with('banner', 'Payout updated.')->with('bannerStyle', 'success');
     }

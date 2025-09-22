@@ -39,7 +39,7 @@ const sendMessage = () => {
   isSending.value = true;
   form.message = message.value;
   
-  form.post(route('admin.messages.store'), {
+  form.post(route('messages.store'), {
     preserveScroll: true,
     onSuccess: () => {
       message.value = '';

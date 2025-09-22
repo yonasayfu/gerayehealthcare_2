@@ -17,25 +17,19 @@ class TaskDelegationService extends BaseService
         parent::__construct($taskDelegation);
     }
 
-    protected function applySearch($query, $search)
-    {
-        return $query->where('title', 'like', "%{$search}%");
-    }
-
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(array_merge(['assignee', 'creatorUser', 'partner'], $with));
+        $query = $this->model->with(['assignee', 'creatorUser']);
 
-        if ($request->has('search')) {
-            $this->applySearch($query, $request->input('search'));
+        // Apply search filter
+        $search = $request->input('search');
+        if ($search) {
+            $query->where('title', 'like', "%{$search}%");
         }
 
-        // Optional filters for consolidation use-cases
+        // Apply category filter
         if ($request->filled('task_category')) {
             $query->where('task_category', $request->input('task_category'));
-        }
-        if ($request->filled('partner_id')) {
-            $query->where('partner_id', (int) $request->input('partner_id'));
         }
 
         // Handle sorting
@@ -79,7 +73,10 @@ class TaskDelegationService extends BaseService
         $data = is_object($data) ? (array) $data : $data;
         // Stamp creator user if available
         if (!array_key_exists('created_by', $data)) {
-            $data['created_by'] = Auth::id();
+            $user = Auth::user();
+            if ($user) {
+                $data['created_by'] = $user->id;
+            }
         }
         $created = $this->model->create($data);
 
@@ -108,7 +105,10 @@ class TaskDelegationService extends BaseService
 
         // If acceptance_status provided, stamp responder fields
         if (array_key_exists('acceptance_status', $data)) {
-            $data['responded_by'] = auth()->id();
+            $user = Auth::user();
+            if ($user) {
+                $data['responded_by'] = $user->id;
+            }
             $data['responded_at'] = now();
         }
 
@@ -181,7 +181,7 @@ class TaskDelegationService extends BaseService
 
     protected function notifyResponse(TaskDelegation $task): void
     {
-        $actor = auth()->user();
+        $actor = Auth::user();
         // Notify task creator if exists
         if ($task->created_by) {
             $creator = \App\Models\User::find($task->created_by);

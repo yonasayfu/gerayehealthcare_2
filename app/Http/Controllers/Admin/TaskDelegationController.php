@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\TaskDelegation;
 use App\Services\TaskDelegation\TaskDelegationService;
 use App\Services\Validation\Rules\TaskDelegationRules;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class TaskDelegationController extends BaseController
@@ -48,8 +49,11 @@ class TaskDelegationController extends BaseController
     {
         $taskDelegation = $this->service->getById($id);
 
+        // Ensure the due_date is properly formatted for the frontend
+        $taskDelegationArray = $taskDelegation->toArray();
+
         return Inertia::render('Admin/TaskDelegations/Edit', [
-            'taskDelegation' => $taskDelegation,
+            'taskDelegation' => $taskDelegationArray,
             'staff' => Staff::all(['id', 'first_name', 'last_name']),
             'partners' => \App\Models\Partner::select('id', 'name')->orderBy('name')->get(),
         ]);
@@ -74,7 +78,7 @@ class TaskDelegationController extends BaseController
                 \App\Models\InventoryAlert::where('id', $inventoryAlertId)
                     ->update(['delegated_task_id' => $created->id]);
             } catch (\Throwable $e) {
-                \Log::error('Failed to link InventoryAlert to TaskDelegation', [
+                Log::error('Failed to link InventoryAlert to TaskDelegation', [
                     'inventory_alert_id' => $inventoryAlertId,
                     'task_id' => $created->id,
                     'error' => $e->getMessage(),

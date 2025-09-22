@@ -11,8 +11,8 @@ use App\Models\SharedInvoice;
 use App\Models\Staff;
 use App\Services\SharedInvoice\SharedInvoiceService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class SharedInvoiceController extends Controller
@@ -32,6 +32,7 @@ class SharedInvoiceController extends Controller
         $sort = (string) $request->input('sort', '');
         $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
         $status = $request->input('status');
+        $invoiceId = $request->input('invoice_id'); // Add this line
 
         $sortable = [
             'id' => 'id',
@@ -42,6 +43,11 @@ class SharedInvoiceController extends Controller
         ];
 
         $query = SharedInvoice::with(['invoice', 'partner', 'sharedBy']);
+
+        // Add invoice_id filter
+        if ($invoiceId) {
+            $query->where('invoice_id', $invoiceId);
+        }
 
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
@@ -108,7 +114,7 @@ class SharedInvoiceController extends Controller
                 invoice_id: $request->input('invoice_id'),
                 partner_id: $request->input('partner_id'),
                 // Use staff id if available; otherwise null
-                shared_by_staff_id: optional(auth()->user()->staff)->id,
+                shared_by_staff_id: optional(auth()->user()->staff)->id ?? null,
                 share_date: $request->input('share_date'),
                 status: $request->input('status'),
                 notes: $request->input('notes')
@@ -118,7 +124,7 @@ class SharedInvoiceController extends Controller
 
             return redirect()->route('admin.shared-invoices.index')->with('banner', 'Invoice shared successfully.')->with('bannerStyle', 'success');
         } catch (\Exception $e) {
-            file_put_contents(storage_path('logs/shared_invoice_error.log'), $e->getMessage()."\n".$e->getTraceAsString(), FILE_APPEND);
+            file_put_contents(storage_path('logs/shared_invoice_error.log'), $e->getMessage() . "\n" . $e->getTraceAsString(), FILE_APPEND);
 
             return back()->withErrors(['error' => 'An error occurred while sharing the invoice.']);
         }
@@ -197,7 +203,7 @@ class SharedInvoiceController extends Controller
     public function shareLink(SharedInvoice $sharedInvoice)
     {
         $now = Carbon::now();
-        if (! $sharedInvoice->share_token || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+        if (!$sharedInvoice->share_token || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
             $sharedInvoice->share_token = Str::random(48);
             // Default expiry in 30 days; adjust as needed
             $sharedInvoice->share_expires_at = $now->copy()->addDays(30);
@@ -218,14 +224,14 @@ class SharedInvoiceController extends Controller
             ->where('share_token', $token)
             ->first();
 
-        if (! $sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+        if (!$sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
             abort(404);
         }
 
         // Optional PIN gate
         if ($sharedInvoice->share_pin) {
-            $sessionKey = 'shared_invoice_auth_'.$token;
-            if (! session()->has($sessionKey)) {
+            $sessionKey = 'shared_invoice_auth_' . $token;
+            if (!session()->has($sessionKey)) {
                 return view('public.shared-invoice-pin', ['token' => $token]);
             }
         }
@@ -244,12 +250,12 @@ class SharedInvoiceController extends Controller
     {
         $request->validate(['pin' => 'required|string|max:20']);
         $sharedInvoice = SharedInvoice::where('share_token', $token)->first();
-        if (! $sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
+        if (!$sharedInvoice || ($sharedInvoice->share_expires_at && $sharedInvoice->share_expires_at->isPast())) {
             abort(404);
         }
 
         if (hash_equals((string) $sharedInvoice->share_pin, (string) $request->input('pin'))) {
-            session()->put('shared_invoice_auth_'.$token, true);
+            session()->put('shared_invoice_auth_' . $token, true);
             return redirect()->route('public.shared-invoices.show', ['token' => $token]);
         }
 

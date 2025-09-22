@@ -5,6 +5,7 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { Send, X, MessageSquareText, Search, Minus, GripVertical, Paperclip, Smile, File, Image, Check, CheckCheck, Clock } from 'lucide-vue-next';
 import { format } from 'date-fns';
 import axios from 'axios';
+import { confirmDialog } from '@/lib/confirm';
 import type { User, Message, Conversation, AppPageProps } from '@/types';
 import CreateGroupModal from '@/components/CreateGroupModal.vue';
 import EmojiPicker from 'vue3-emoji-picker';
@@ -78,7 +79,7 @@ const showConversationList = ref(true);
 const isCounterpartTyping = ref(false)
 const isGroupsTab = ref(false)
 const showCreateGroupModal = ref(false)
-let typingPollHandle: number | null = null
+// typing poll removed
 let currentGroupChannel: any = null;
 
 // Minimize handling (local, in addition to parent emit)
@@ -103,7 +104,7 @@ const attachmentPreviewUrl = ref<string | null>(null)
 const isSending = ref(false)
 
 // Reply / Edit / Draft state
-const replyTarget = ref<Message | null>(null)
+// Reply feature removed
 const editingMessageId = ref<number | null>(null)
 const editingText = ref<string>('')
 
@@ -141,18 +142,7 @@ onMounted(() => {
           scrollToBottom();
         }
       })
-      .listen('MessageReacted', (e: { reaction: Reaction }) => {
-        const message = messages.value.find(m => m.id === e.reaction.reactable_id);
-        if (message) {
-          if (!message.reactions) message.reactions = [];
-          const existingReactionIndex = message.reactions.findIndex(r => r.id === e.reaction.id);
-          if (existingReactionIndex !== -1) {
-            message.reactions[existingReactionIndex] = e.reaction;
-          } else {
-            message.reactions.push(e.reaction);
-          }
-        }
-      })
+      // Reactions removed
       .listen('MessageUpdated', (e: { message: Message }) => {
         const index = messages.value.findIndex(m => m.id === e.message.id);
         if (index !== -1) {
@@ -174,7 +164,7 @@ onUnmounted(() => {
   try {
     window.Echo.private(`users.${authUser.value.id}`)
       .stopListening('NewMessage')
-      .stopListening('MessageReacted')
+      
       .stopListening('MessageUpdated')
       .stopListening('MessageDeleted');
 
@@ -182,7 +172,7 @@ onUnmounted(() => {
     if (currentGroupChannel) {
       window.Echo.private(`groups.${selectedGroup.value.id}`)
         .stopListening('NewMessage')
-        .stopListening('MessageReacted')
+        
         .stopListening('MessageUpdated')
         .stopListening('MessageDeleted');
     }
@@ -282,13 +272,20 @@ const fetchMessages = async (recipientId: number | null = null, searchQuery: str
   loading.value = true;
   try {
     const response = await axios.get(route('messages.data', { recipient: recipientId, search: searchQuery }));
-    const fetchedConversations: Conversation[] = response.data.conversations || [];
+    const sections = response.data.sections || [];
+    const fetchedConversations: Conversation[] = sections.flatMap((section: any) =>
+      (section.conversations || []).map((c: any) => ({
+        ...c,
+        section_key: section.key,
+        section_label: section.label,
+        type: c.type || section.type,
+      }))
+    );
 
     conversations.value = fetchedConversations;
 
     // Handle selected conversation
     let newSelectedConversation = null as any;
-    // Prefer the recipientId explicitly requested
     if (recipientId) {
       newSelectedConversation = fetchedConversations.find(c => c.id === recipientId) || null;
     } else {
@@ -297,7 +294,6 @@ const fetchMessages = async (recipientId: number | null = null, searchQuery: str
         newSelectedConversation = fetchedConversations.find(c => c.id === props.initialConversationId) || null;
       }
       if (!newSelectedConversation && fetchedConversations.length > 0) {
-        // Do not auto-select current user; pick the first non-self if available
         const userId = authUser.value?.id
         newSelectedConversation = fetchedConversations.find(c => c.id !== userId) || fetchedConversations[0];
       }
@@ -307,7 +303,6 @@ const fetchMessages = async (recipientId: number | null = null, searchQuery: str
       selectedConversation.value = newSelectedConversation;
     }
 
-    // Ensure messages is always a valid array
     messages.value = (response.data.messages || []).filter((msg: any) => 
       msg && typeof msg === 'object' && msg.id && msg.created_at
     );
@@ -448,7 +443,8 @@ watch(selectedGroup, (newGroup, oldGroup) => {
         messages.value.push(e.message);
         scrollToBottom();
       })
-      .listen('MessageReacted', (e: { reaction: Reaction }) => {
+      // reactions removed
+/*
         const message = messages.value.find(m => m.id === e.reaction.reactable_id);
         if (message) {
           if (!message.reactions) message.reactions = [];
@@ -485,18 +481,16 @@ const submit = async () => {
       const formData = new FormData();
       formData.append('message', form.message);
       if (form.attachment) formData.append('attachment', form.attachment);
-      if (replyTarget.value) formData.append('reply_to_id', String(replyTarget.value.id));
+      // reply_to removed
 
-      await axios.post(route('groups.messages.store', { group: selectedGroup.value.id }), formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await axios.post(route('groups.messages.store', { group: selectedGroup.value.id }), formData);
 
       form.message = '';
       form.attachment = null;
       if (attachmentInput.value) attachmentInput.value.value = '';
       if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value);
       attachmentPreviewUrl.value = null;
-      replyTarget.value = null;
+      // reply target removed
 
       fetchGroupMessages(selectedGroup.value.id);
     } catch (error) {
@@ -511,31 +505,43 @@ const submit = async () => {
     }
   } else {
     if (!form.receiver_id || (!form.message.trim() && !form.attachment) || isSending.value) return;
-    
-    form.post(route('messages.store'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            i.value = ""
-            form.reset('message')
-            g() // removeAttachment
-            r({ title: 'Message sent', description: 'Your message has been sent successfully.' })
-            window.location.href = route('admin.messages.index', n.value?.id)
-        },
-        onError: e => {
-            let t = "An unknown error occurred.";
-            e.message ? t = Array.isArray(e.message) ? e.message[0] : e.message : e.attachment ? t = Array.isArray(e.attachment) ? e.attachment[0] : e.attachment : e.receiver_id && (t = "Invalid recipient selected."), r({
-                title: "Failed to send message",
-                description: t,
-                variant: "destructive"
-            })
-        },
-        onFinish: () => {}
-    });
+
+    try {
+      isSending.value = true;
+      const fd = new FormData();
+      fd.append('receiver_id', String(form.receiver_id));
+      fd.append('message', form.message);
+      if (form.attachment) fd.append('attachment', form.attachment);
+      // reply_to removed
+
+      await axios.post(route('messages.store'), fd);
+
+      // Reset local form state
+      form.message = '';
+      form.attachment = null;
+      if (attachmentInput.value) attachmentInput.value.value = '';
+      if (attachmentPreviewUrl.value) URL.revokeObjectURL(attachmentPreviewUrl.value);
+      attachmentPreviewUrl.value = null;
+      // reply target removed
+
+      // Refresh current conversation
+      fetchMessages(selectedConversation.value?.id || null);
+    } catch (e) {
+      console.error('Error sending direct message:', e);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      isSending.value = false;
+      nextTick(() => messageInput.value?.focus());
+      if (messageInput.value && messageInput.value.style) {
+        messageInput.value.style.height = 'auto';
+      }
+    }
   }
 };
 
 // --- Typing indicator ---
-const sendTyping = () => {
+// typing removed
+const sendTyping = () => { return }
   if (!form.receiver_id || isGroupsTab.value) return;
   // Fire-and-forget typing ping
   axios.post(route('messages.typing'), { receiver_id: form.receiver_id }).catch(() => {})
@@ -543,7 +549,8 @@ const sendTyping = () => {
   saveDraft()
 }
 
-const startTypingPoll = () => {
+// typing removed
+const startTypingPoll = () => { return }
   // Temporarily disabled to prevent 403 errors
   return;
 
@@ -560,12 +567,7 @@ const startTypingPoll = () => {
   typingPollHandle = window.setInterval(poll, 2000)
 }
 
-// Actions: reply, edit, delete
-const startReply = (m: Message) => {
-  replyTarget.value = m
-  nextTick(() => messageInput.value?.focus())
-}
-const clearReply = () => { replyTarget.value = null }
+// Actions: edit, delete (reply removed)
 const startEdit = (m: Message) => {
   editingMessageId.value = m.id
   editingText.value = m.message || ''
@@ -590,7 +592,6 @@ const saveEdit = async (m: Message) => {
   }
 }
 const deleteMessage = async (m: Message) => {
-  if (!confirm('Delete this message?')) return
   try {
     if (isGroupsTab.value) {
       await axios.delete(route('groups.messages.destroy', { group: selectedGroup.value.id, message: m.id }))
@@ -600,6 +601,20 @@ const deleteMessage = async (m: Message) => {
     messages.value = messages.value.filter(x => x.id !== m.id)
   } catch (e) {
     alert('Failed to delete message')
+  }
+}
+
+const deleteForMe = async (m: Message) => {
+  if (isGroupsTab.value) {
+    // Not supported for groups with current schema
+    alert('Delete for me is available for direct messages only.');
+    return;
+  }
+  try {
+    await axios.post(route('messages.hide', m.id))
+    messages.value = messages.value.filter(x => x.id !== m.id)
+  } catch (e) {
+    alert('Failed to remove message for you')
   }
 }
 
@@ -739,7 +754,12 @@ const onCtxEdit = () => {
 const onCtxDelete = async () => {
   if (contextMenu.value.msg && contextMenu.value.canDelete) {
     // Show confirmation dialog
-    if (confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+    (await confirmDialog({
+      title: 'Delete message',
+      message: 'Are you sure you want to delete this message for everyone? This cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+    })) {
       try {
         await deleteMessage(contextMenu.value.msg);
       } catch (error) {
@@ -777,6 +797,57 @@ const handleGroupCreated = (newGroup: Group) => {
   showCreateGroupModal.value = false;
   showConversationList.value = false; // Hide conversation list to show chat area
 };
+
+// --- In-thread Search ---
+const showThreadSearch = ref(false)
+const threadSearchText = ref('')
+const threadSearchBusy = ref(false)
+const threadSearchResults = ref<Message[]>([])
+let threadSearchTimer: number | null = null
+
+const openThreadSearch = () => {
+  showThreadSearch.value = !showThreadSearch.value
+  threadSearchText.value = ''
+  threadSearchResults.value = []
+}
+
+const runThreadSearch = async () => {
+  if (isGroupsTab.value && !selectedGroup.value) return
+  if (!isGroupsTab.value && !selectedConversation.value) return
+  if (!threadSearchText.value.trim()) { threadSearchResults.value = []; return }
+  threadSearchBusy.value = true
+  try {
+    if (isGroupsTab.value) {
+      const res = await axios.get(route('groups.messages.search', { group: selectedGroup.value!.id, q: threadSearchText.value.trim() }))
+      threadSearchResults.value = res.data?.results || []
+    } else {
+      const res = await axios.get(route('messages.thread.search', { user: selectedConversation.value!.id, q: threadSearchText.value.trim() }))
+      threadSearchResults.value = res.data?.results || []
+    }
+  } catch (_) {
+    threadSearchResults.value = []
+  } finally {
+    threadSearchBusy.value = false
+  }
+}
+
+watch(threadSearchText, (val) => {
+  if (threadSearchTimer) window.clearTimeout(threadSearchTimer)
+  threadSearchTimer = window.setTimeout(runThreadSearch, 350) as unknown as number
+})
+
+// Jump to message within modal and highlight
+const highlightedId = ref<number|null>(null)
+const jumpToThreadMessage = async (id: number) => {
+  showThreadSearch.value = false
+  await nextTick()
+  const el = document.getElementById(`modal-msg-${id}`)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    highlightedId.value = id
+    window.setTimeout(() => { highlightedId.value = null }, 2000)
+  }
+}
 </script>
 
 <template>
@@ -784,7 +855,7 @@ const handleGroupCreated = (newGroup: Group) => {
        :class="{ 'fixed inset-0 !bottom-0 !right-0 !top-0 !left-0': currentWindowWidth < 768 }" >
     <div
       ref="modalRef"
-      class="relative bg-white/70 dark:bg-gray-900/60 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/50 text-foreground rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ease-in-out"
+      class="relative liquidGlass-wrapper text-foreground rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-200 ease-in-out"
       :style="{
         width: currentWindowWidth < 768 ? '95vw' : (modalWidth + 'px'),
         height: currentWindowWidth < 768 ? '90vh' : (modalHeight + 'px'),
@@ -793,15 +864,15 @@ const handleGroupCreated = (newGroup: Group) => {
       }"
       v-show="!isMinimized"
     >
-      <div class="p-3 border-b border-gray-200/70 dark:border-gray-700/60 flex justify-between items-center bg-transparent">
+      <div class="p-3 border-b border-white/30 dark:border-white/10 flex justify-between items-center bg-transparent liquidGlass-content">
         <h2 class="text-lg font-semibold flex items-center gap-2">
           <MessageSquareText class="w-5 h-5 text-primary" /> GeraChat 
         </h2>
         <div class="flex items-center gap-2">
-          <button @click="toggleMinimize" class="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition">
+          <button @click="toggleMinimize" class="text-foreground/80 hover:text-foreground p-1 rounded-full hover:bg-white/10 dark:hover:bg-white/10 transition">
             <Minus class="w-5 h-5" />
           </button>
-          <button @click="emit('close')" class="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted transition">
+          <button @click="emit('close')" class="text-foreground/80 hover:text-foreground p-1 rounded-full hover:bg-white/10 dark:hover:bg-white/10 transition">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -815,44 +886,44 @@ const handleGroupCreated = (newGroup: Group) => {
 
         <!-- Conversation List -->
         <div v-show="showConversationList || currentWindowWidth >= 768"
-             class="w-full md:w-1/3 flex flex-col bg-background border-r md:border-border overflow-hidden"
+             class="w-full md:w-1/3 flex flex-col bg-transparent border-r md:border-white/10 overflow-hidden liquidGlass-content"
              :class="{ 'border-b': currentWindowWidth < 768 }">
-          <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 relative">
-            <div class="flex border-b border-gray-200/70 dark:border-gray-700/60 mb-4">
-              <button @click="isGroupsTab = false" class="px-4 py-2 text-sm font-medium w-1/2" :class="!isGroupsTab ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'">People</button>
-              <button @click="isGroupsTab = true" class="px-4 py-2 text-sm font-medium w-1/2" :class="isGroupsTab ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'">Groups</button>
+          <div class="p-4 border-b border-white/30 dark:border-white/10 relative">
+            <div class="flex gap-2 mb-4">
+              <button @click="isGroupsTab = false" class="btn-glass btn-glass-sm w-1/2" :class="!isGroupsTab ? 'ring-1 ring-primary/40' : ''">People</button>
+              <button @click="isGroupsTab = true" class="btn-glass btn-glass-sm w-1/2" :class="isGroupsTab ? 'ring-1 ring-primary/40' : ''">Groups</button>
             </div>
             <button
               v-if="isGroupsTab && (hasPermission('create groups') || hasRole('admin') || hasRole('super-admin'))"
               @click="showCreateGroupModal = true"
-              class="w-full mb-4 px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition"
+              class="w-full mb-4 btn-glass"
             >
               Create New Group
             </button>
-            <div class="relative">
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <div class="relative search-glass">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/70 w-5 h-5" />
               <input
                 type="text"
                 v-model="search"
                 placeholder="Search conversations..."
-                class="pl-10 pr-10 form-input w-full rounded-full border border-input px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-background text-foreground placeholder-muted-foreground"
+                class="pl-10 pr-10 form-input w-full rounded-full border border-white/30 dark:border-white/10 px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-primary focus:outline-none bg-white/50 dark:bg-white/5 text-foreground placeholder:text-foreground/60"
               />
-              <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full">
+              <button v-if="search" @click="search = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/70 hover:text-foreground p-1 rounded-full">
                 <X class="w-4 h-4" />
               </button>
             </div>
           </div>
           <div class="flex-grow overflow-y-auto custom-scrollbar">
             <template v-if="!isGroupsTab">
-              <div v-if="loading && conversations.length === 0" class="p-4 text-center text-muted-foreground">Loading conversations...</div>
-              <div v-else-if="conversations.length === 0" class="p-4 text-center text-muted-foreground">No conversations found.</div>
+              <div v-if="loading && conversations.length === 0" class="p-4 text-center text-foreground/70">Loading conversations...</div>
+              <div v-else-if="conversations.length === 0" class="p-4 text-center text-foreground/70">No conversations found.</div>
                 <div
                   v-else
                   v-for="convo in conversations"
                   :key="convo.id"
                   @click="selectConversation(convo.id)"
-                  class="flex items-center gap-3 p-4 border-b border-border hover:bg-muted transition cursor-pointer"
-                  :class="{ 'bg-primary/10': selectedConversation?.id === convo.id }"
+                  class="flex items-center gap-3 p-4 border-b border-white/20 dark:border-white/10 hover:bg-white/10 dark:hover:bg-white/10 transition cursor-pointer"
+                  :class="{ 'bg-white/5 dark:bg-white/5': selectedConversation?.id === convo.id }"
                 >
                   <img 
                     v-if="convo.profile_photo_url" 
@@ -860,12 +931,12 @@ const handleGroupCreated = (newGroup: Group) => {
                     :alt="convo.name" 
                     class="w-10 h-10 rounded-full object-cover flex-shrink-0"
                   >
-                  <div v-else class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium flex-shrink-0">
+                  <div v-else class="w-10 h-10 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                     {{ convo.name.charAt(0).toUpperCase() }}
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="truncate" :class="convo.unread > 0 ? 'font-semibold' : 'font-medium'">{{ convo.name }}</p>
-                    <p class="text-xs text-muted-foreground truncate">{{ convo.staff?.position || 'User' }}</p>
+                    <p class="truncate text-foreground" :class="convo.unread > 0 ? 'font-semibold' : 'font-medium'">{{ convo.name }}</p>
+                    <p class="text-xs text-foreground/70 truncate">{{ convo.staff?.position || 'User' }}</p>
                   </div>
                   <div v-if="convo.unread > 0" class="ml-2 inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-xs px-2 py-0.5">
                     {{ convo.unread }}
@@ -873,22 +944,22 @@ const handleGroupCreated = (newGroup: Group) => {
                 </div>
             </template>
             <template v-else>
-              <div v-if="loading && groups.length === 0" class="p-4 text-center text-muted-foreground">Loading groups...</div>
-              <div v-else-if="groups.length === 0" class="p-4 text-center text-muted-foreground">No groups found.</div>
+              <div v-if="loading && groups.length === 0" class="p-4 text-center text-foreground/70">Loading groups...</div>
+              <div v-else-if="groups.length === 0" class="p-4 text-center text-foreground/70">No groups found.</div>
               <div
                 v-else
                 v-for="group in groups"
                 :key="group.id"
                 @click="selectGroup(group.id)"
-                class="flex items-center gap-3 p-4 border-b border-border hover:bg-muted transition cursor-pointer"
-                :class="{ 'bg-primary/10': selectedGroup?.id === group.id }"
+                class="flex items-center gap-3 p-4 border-b border-white/20 dark:border-white/10 hover:bg-white/10 dark:hover:bg-white/10 transition cursor-pointer"
+                :class="{ 'bg-white/5 dark:bg-white/5': selectedGroup?.id === group.id }"
               >
-                <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-sm font-medium flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-white/20 dark:bg-white/10 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                   {{ group.name.charAt(0).toUpperCase() }}
                 </div>
                 <div class="min-w-0 flex-1">
-                  <p class="truncate font-medium">{{ group.name }}</p>
-                  <p class="text-xs text-muted-foreground truncate">{{ group.members_count }} members</p>
+                  <p class="truncate font-medium text-foreground">{{ group.name }}</p>
+                  <p class="text-xs text-foreground/70 truncate">{{ group.members_count }} members</p>
                 </div>
               </div>
             </template>
@@ -925,9 +996,11 @@ const handleGroupCreated = (newGroup: Group) => {
             <div class="p-4 border-b border-gray-200/70 dark:border-gray-700/60 bg-transparent flex justify-between items-center">
               <h2 v-if="selectedConversation" class="text-lg font-semibold">{{ selectedConversation.name }}</h2>
               <h2 v-if="selectedGroup" class="text-lg font-semibold">{{ selectedGroup.name }}</h2>
-              <div v-if="selectedConversation" class="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
-                <span>{{ selectedConversation.staff?.position || 'User' }}</span>
-                <a :href="route('messages.export', selectedConversation.id)" class="px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-accent">Download Chat</a>
+              <div class="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+                <button @click="openThreadSearch" class="p-2 rounded-md hover:bg-accent/50" title="Search">
+                  <Search class="w-4 h-4" />
+                </button>
+                <a v-if="selectedConversation" :href="route('messages.export', selectedConversation.id)" class="px-2 py-1 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-accent">Download Chat</a>
               </div>
               <button 
                 v-if="currentWindowWidth < 768" 
@@ -937,14 +1010,29 @@ const handleGroupCreated = (newGroup: Group) => {
                 Back
               </button>
             </div>
+
+            <!-- In-thread search panel -->
+            <div v-if="showThreadSearch" class="px-4 pt-2">
+              <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent p-3">
+                <div class="flex items-center gap-2">
+                  <input type="text" v-model="threadSearchText" placeholder="Search this conversation..." class="flex-1 px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700 bg-transparent" />
+                  <button class="px-3 py-2 text-sm rounded-md border border-gray-200 dark:border-gray-700" @click="threadSearchText=''; threadSearchResults=[]">Clear</button>
+                </div>
+                <div v-if="threadSearchBusy" class="mt-2 text-xs text-muted-foreground">Searching…</div>
+                <div v-else class="mt-2 max-h-40 overflow-y-auto">
+                  <div v-if="!threadSearchResults.length && threadSearchText" class="text-xs text-muted-foreground">No matches.</div>
+                  <button v-for="r in threadSearchResults" :key="r.id" class="w-full text-left rounded-md p-2 hover:bg-muted/50" @click="jumpToThreadMessage(r.id)">
+                    <div class="text-xs text-muted-foreground">{{ r.created_at }}</div>
+                    <div class="text-sm truncate" v-if="r.message">{{ r.message }}</div>
+                    <div class="text-sm text-muted-foreground" v-else>Attachment: {{ r.attachment_filename }}</div>
+                  </button>
+                </div>
+              </div>
+            </div>
             
             <!-- Messages Area -->
             <div ref="chatContainer" class="flex-grow p-6 overflow-y-auto space-y-4 custom-scrollbar min-h-0">
-              <div v-if="isCounterpartTyping && !isGroupsTab" class="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                <span class="inline-flex w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span>{{ selectedConversation.name }} is typing...</span>
-              </div>
-              <div v-if="messages.length === 0 && loading" class="text-center text-muted-foreground py-10">Loading messages...</div>
+                            <div v-if="messages.length === 0 && loading" class="text-center text-muted-foreground py-10">Loading messages...</div>
               <div v-else-if="messages.length === 0 && !loading" class="text-center text-muted-foreground py-10">
                 <p v-if="selectedConversation">No messages yet with {{ selectedConversation.name }}.</p>
                 <p v-if="selectedGroup">No messages yet in {{ selectedGroup.name }}.</p>
@@ -973,7 +1061,7 @@ const handleGroupCreated = (newGroup: Group) => {
                   <!-- 3-dot menu button -->
                   <button
                     @click.stop.prevent="openContextMenu($event, message)"
-                    class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
+                    class="absolute top-1 right-1 opacity-100 transition-opacity p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10"
                     :class="{
                       'text-white hover:bg-white/20': message.sender_id === authUser.id,
                       'text-gray-600 hover:bg-gray-300': message.sender_id !== authUser.id
@@ -984,10 +1072,7 @@ const handleGroupCreated = (newGroup: Group) => {
                     </svg>
                   </button>
                   <!-- Reply preview (quoted) -->
-                  <div v-if="message.reply_to_id" class="mb-2 pl-2 border-l-2"
-                    :class="message.sender_id === authUser.id ? 'border-white/50 text-white/80' : 'border-gray-500 text-gray-700'">
-                    <p class="text-xs truncate">Replying to #{{ message.reply_to_id }}</p>
-                  </div>
+                  
 
                   <!-- Edit mode -->
                   <template v-if="editingMessageId === message.id">
@@ -999,7 +1084,7 @@ const handleGroupCreated = (newGroup: Group) => {
 </template>
                   <template v-else>
                   <p class="break-words" v-if="message.message">{{ message.message }}</p>
-                  <div v-if="message.attachment || message.attachment_url" class="mt-2 p-2 bg-white/20 rounded-md">
+              <div v-if="message.attachment || message.attachment_url" class="mt-2 p-2 bg-white/20 rounded-md" :id="`modal-msg-${message.id}`">
                       <a 
                         :href="message.attachment_url || (message.attachment && message.attachment.url)" 
                         target="_blank" 
@@ -1158,16 +1243,7 @@ const handleGroupCreated = (newGroup: Group) => {
          class="context-menu fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl text-sm min-w-[180px] overflow-hidden"
          @click.stop>
       <div class="py-1">
-        <button
-          class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          @click="onCtxReply"
-        >
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
-          </svg>
-          Reply
-        </button>
-        <button
+                <button
           v-if="contextMenu.canEdit"
           class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           @click="onCtxEdit"
@@ -1178,6 +1254,16 @@ const handleGroupCreated = (newGroup: Group) => {
           Edit
         </button>
         <button
+          v-if="!isGroupsTab && (contextMenu.owned || (contextMenu.msg && (contextMenu.msg.sender_id === authUser.id || contextMenu.msg.receiver_id === authUser.id)))"
+          class="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          @click="() => { if (contextMenu.msg) deleteForMe(contextMenu.msg) }"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l6 6m-6-6l6-6"/>
+          </svg>
+          Delete for me
+        </button>
+        <button
           v-if="contextMenu.canDelete"
           class="flex items-center w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors"
           @click="onCtxDelete"
@@ -1185,16 +1271,10 @@ const handleGroupCreated = (newGroup: Group) => {
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
-          Delete
+          Delete for everyone
         </button>
       </div>
-      <div class="border-t border-gray-200 dark:border-gray-700 px-3 py-2">
-        <div class="flex gap-1 flex-wrap">
-          <button class="hover:scale-110" @click="onCtxReact('👍')">👍</button>
-          <button class="hover:scale-110" @click="onCtxReact('❤️')">❤️</button>
-          <button class="hover:scale-110" @click="onCtxReact('😊')">😊</button>
-        </div>
-      </div>
+      
     </div>
   </teleport>
 

@@ -2,6 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Save, ArrowLeft, FileText } from 'lucide-vue-next'
+import Form from './Form.vue'
 import InputError from '@/components/InputError.vue'
 import axios from 'axios'
 
@@ -15,7 +16,8 @@ const props = defineProps<{
     file_path?: string | null
     patient?: { id: number; full_name: string; patient_code: string }
     medical_visit_id?: number | null
-  }
+  },
+  patients: Array<{ id: number; full_name: string; patient_code: string }>
 }>()
 
 const breadcrumbs = [
@@ -25,35 +27,25 @@ const breadcrumbs = [
 ]
 
 const form = useForm({
-  title: props.medicalDocument.title || '',
+  patient_id: props.medicalDocument.patient?.id || '',
+  medical_visit_id: props.medicalDocument.medical_visit_id || '',
   document_type: props.medicalDocument.document_type || 'other',
+  title: props.medicalDocument.title || '',
   document_date: props.medicalDocument.document_date || '',
   summary: props.medicalDocument.summary || '',
   file: null as File | null,
-  medical_visit_id: (props.medicalDocument as any).medical_visit_id || '',
 })
 
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  if (input?.files && input.files[0]) {
-    form.file = input.files[0]
-  }
-}
-
-function submit() {
-  form.post(route('admin.medical-documents.update', props.medicalDocument.id), {
-    _method: 'put',
-    forceFormData: true,
-  })
-}
-
-// Fetch visits for this document's patient for selection
-import { ref, onMounted } from 'vue'
+// Visits selector support
+import { ref, watch, onMounted } from 'vue'
 const visits = ref<Array<{ id: number; visit_date: string; visit_type: string }>>([])
 const loadingVisits = ref(false)
 
-async function fetchVisits(patientId: number | undefined) {
-  if (!patientId) return
+async function fetchVisits(patientId: number | string | undefined) {
+  if (!patientId) {
+    visits.value = []
+    return
+  }
   try {
     loadingVisits.value = true
     const { data } = await axios.get(`/dashboard/medical-documents/visits-for-patient/${patientId}`)
@@ -66,8 +58,20 @@ async function fetchVisits(patientId: number | undefined) {
 }
 
 onMounted(() => {
-  fetchVisits(props.medicalDocument.patient?.id)
+  fetchVisits(form.patient_id)
 })
+
+watch(() => form.patient_id, (val) => {
+  form.medical_visit_id = ''
+  fetchVisits(val as any)
+})
+
+function submit() {
+  form.post(route('admin.medical-documents.update', props.medicalDocument.id), {
+    forceFormData: true,
+    _method: 'put'
+  })
+}
 </script>
 
 <template>
@@ -88,65 +92,19 @@ onMounted(() => {
                 <ArrowLeft class="icon" />
                 <span class="hidden sm:inline">Back</span>
               </Link>
-              <button @click="submit" :disabled="form.processing" class="btn-glass">
-                <Save class="icon" />
-                <span class="hidden sm:inline">Update</span>
-              </button>
             </div>
           </div>
 
           <form @submit.prevent="submit" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="form-label">Medical Visit (optional)</label>
-                <select v-model="form.medical_visit_id" class="form-input" :disabled="loadingVisits">
-                  <option value="">Select visit</option>
-                  <option v-for="v in visits" :key="v.id" :value="v.id">
-                    {{ new Date(v.visit_date).toLocaleString() }} - {{ v.visit_type || 'Visit' }}
-                  </option>
-                </select>
-                <div v-if="!loadingVisits && visits.length === 0" class="text-xs text-gray-500 mt-1">No visits found for patient.</div>
-                <InputError class="mt-1" :message="form.errors.medical_visit_id" />
-              </div>
+            <Form :form="form" :patients="props.patients" :visits="visits" :loadingVisits="loadingVisits" />
 
-              <div class="md:col-span-2">
-                <label class="form-label">Title</label>
-                <input v-model="form.title" type="text" class="form-input" />
-                <InputError class="mt-1" :message="form.errors.title" />
-              </div>
-
-              <div>
-                <label class="form-label">Document Type</label>
-                <select v-model="form.document_type" class="form-input">
-                  <option value="doctor_note">Doctor Note</option>
-                  <option value="lab_request">Lab Request</option>
-                  <option value="lab_result">Lab Result</option>
-                  <option value="prescription">Prescription</option>
-                  <option value="other">Other</option>
-                </select>
-                <InputError class="mt-1" :message="form.errors.document_type" />
-              </div>
-
-              <div>
-                <label class="form-label">Document Date</label>
-                <input v-model="form.document_date" type="date" class="form-input" />
-                <InputError class="mt-1" :message="form.errors.document_date" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="form-label">Summary</label>
-                <textarea v-model="form.summary" class="form-input" rows="3"></textarea>
-                <InputError class="mt-1" :message="form.errors.summary" />
-              </div>
-
-              <div class="md:col-span-2">
-                <label class="form-label">Replace File</label>
-                <input @change="onFileChange" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block w-full text-sm" />
-                <InputError class="mt-1" :message="form.errors.file" />
-                <div v-if="props.medicalDocument.file_path" class="text-sm mt-2">
-                  Current file:
-                  <a :href="`/storage/${props.medicalDocument.file_path}`" target="_blank" class="underline text-primary-600">View</a>
-                </div>
+            <div class="md:col-span-2">
+              <label class="form-label">Replace File</label>
+              <input @change="form.file = ($event.target as HTMLInputElement)?.files?.[0] || null" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="block w-full text-sm" />
+              <InputError class="mt-1" :message="form.errors.file" />
+              <div v-if="props.medicalDocument.file_path" class="text-sm mt-2">
+                Current file:
+                <a :href="`/storage/${props.medicalDocument.file_path}`" target="_blank" class="underline text-primary-600">View</a>
               </div>
             </div>
 

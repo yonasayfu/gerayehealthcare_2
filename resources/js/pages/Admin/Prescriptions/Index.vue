@@ -14,6 +14,7 @@ interface PrescriptionFilters {
   sort?: string
   direction?: 'asc' | 'desc'
   per_page?: number
+  status?: string
 }
 
 function printWithBrowser() {
@@ -189,7 +190,17 @@ function proceedDelete() {
               <td class="px-6 py-4">{{ ((prescriptions.current_page - 1) * prescriptions.per_page) + index + 1 }}</td>
               <td class="px-6 py-4">{{ p.patient?.full_name || p.patient?.patient_code || '-' }}</td>
               <td class="px-6 py-4">{{ p.prescribed_date || '-' }}</td>
-              <td class="px-6 py-4">{{ p.status || '-' }}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
+                  'bg-yellow-100 text-yellow-800': p.status === 'draft',
+                  'bg-blue-100 text-blue-800': p.status === 'final',
+                  'bg-green-100 text-green-800': p.status === 'dispensed',
+                  'bg-red-100 text-red-800': p.status === 'cancelled',
+                  'bg-gray-100 text-gray-800': !p.status
+                }">
+                  {{ p.status || '-' }}
+                </span>
+              </td>
               <td class="px-6 py-4">{{ p.items_count ?? p.items?.length ?? '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
@@ -233,7 +244,7 @@ function proceedDelete() {
         confirm-text="Delete"
         cancel-text="Cancel"
         id-suffix="prescriptions-delete"
-        @update:open="v => (showConfirm = v)"
+        @update:open="(v: boolean) => (showConfirm = v)"
         @confirm="proceedDelete"
         @cancel="cancelDelete"
       />

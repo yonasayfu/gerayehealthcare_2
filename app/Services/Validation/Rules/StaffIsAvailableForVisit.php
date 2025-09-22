@@ -87,7 +87,7 @@ class StaffIsAvailableForVisit implements DataAwareRule, Rule
         if ($hasConflict) {
             $this->message = 'This staff member is already scheduled for another visit at this time.';
 
-            return false;.
+            return false;
         }
 
         return true;

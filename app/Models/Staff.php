@@ -87,7 +87,7 @@ class Staff extends Model
     /**
      * Get the leave requests for the staff member.
      */
-    public function leaveRequests(): HasMany // <-- ADD THIS FUNCTION
+    public function leaveRequests(): HasMany// <-- ADD THIS FUNCTION
     {
         return $this->hasMany(LeaveRequest::class);
     }
@@ -102,7 +102,7 @@ class Staff extends Model
      */
     public function getPhotoUrlAttribute(): ?string
     {
-        if (! $this->photo) {
+        if (!$this->photo) {
             return null;
         }
 
@@ -116,5 +116,13 @@ class Staff extends Model
     public function referralDocuments(): HasMany
     {
         return $this->hasMany(ReferralDocument::class, 'uploaded_by_staff_id');
+    }
+
+    /**
+     * Medical documents created by this staff member.
+     */
+    public function medicalDocuments(): HasMany
+    {
+        return $this->hasMany(MedicalDocument::class, 'created_by_staff_id');
     }
 }

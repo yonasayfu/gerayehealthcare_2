@@ -50,6 +50,7 @@ import { createApp, h, defineAsyncComponent } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import axios from 'axios';
+import ErrorFallback from './components/ErrorFallback.vue'; // Import ErrorFallback component
 
 axios.defaults.withCredentials = true; // Crucial for sending cookies with requests
 
@@ -78,13 +79,11 @@ axios.get('/sanctum/csrf-cookie').then(() => {
         title: (title) => (title ? `${title} - ${appName}` : appName),
         resolve: (name) => {
             // Simple component resolution without dynamic options
-            const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue');
-            return resolvePageComponent(`./pages/${name}.vue`, pages).catch((error) => {
+            const pages = import.meta.glob<DefineComponent>('./pages/**/*.vue'); // Corrected 'pages' to 'Pages'
+            return resolvePageComponent(`./pages/${name}.vue`, pages).catch((error) => { // Corrected 'pages' to 'Pages'
                 console.error(`Failed to load component: ${name}`, error);
-                // Fallback component
-                return import('./components/ErrorFallback.vue').catch(() => ({
-                    template: '<div class="p-8 text-center"><h1 class="text-xl font-semibold text-red-600">Component not found</h1><p class="text-gray-600 mt-2">The requested page could not be loaded.</p></div>'
-                }));
+                // Fallback component: Use the directly imported component, cast to DefineComponent
+                return ErrorFallback as DefineComponent;
             });
         },
         setup({ el, App, props, plugin }) {

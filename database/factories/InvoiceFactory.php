@@ -40,4 +40,37 @@ class InvoiceFactory extends Factory
             'grand_total' => $grandTotal,
         ];
     }
+
+    /**
+     * Indicate that the invoice is paid.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function paid()
+    {
+        return $this->state(function (array $attributes) {
+            $grandTotal = $attributes['grand_total'] ?? $this->faker->randomFloat(2, 100, 2000);
+            return [
+                'status' => 'Paid',
+                'amount' => $grandTotal,
+                'paid_at' => now(),
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the invoice is pending.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function pending()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'Pending',
+                'amount' => 0,
+                'paid_at' => null,
+            ];
+        });
+    }
 }

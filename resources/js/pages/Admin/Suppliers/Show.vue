@@ -95,24 +95,109 @@ function printPage() {
 
 <style>
 @media print {
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
   }
 
-  /* Ensure headers repeat and rows don't split */
-  thead { display: table-header-group; }
-  tfoot { display: table-footer-group; }
-  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 
-  /* Keep readable sizing */
-  .print-header-content h1 { font-size: 18px !important; }
-  .print-document-title { font-size: 12px !important; }
+  .app-sidebar-header, .app-sidebar,
+  body > header, body > nav,
+  [role="banner"], [role="navigation"] {
+    display: none !important;
+  }
 
-  /* Center main card in print */
-  .print\:mx-auto { margin-left: auto !important; margin-right: auto !important; }
-  .print\:w-\[95\%\] { width: 95% !important; }
+  .hidden.print\:block { display: block !important; }
+
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+  }
+
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .print-clinic-name { font-size: 1.8rem !important; margin-bottom: 0.2rem !important; line-height: 1.2 !important; }
+  .print-document-title { font-size: 0.9rem !important; color: #555 !important; }
+
+  .bg-white.dark\:bg-gray-800.shadow.rounded-lg {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 1cm !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .p-6.space-y-6 { padding: 0 !important; margin: 0 !important; }
+
+  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
+  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
+  .text-sm { font-size: 0.8rem !important; }
+  .text-xs { font-size: 0.75rem !important; }
+  .font-medium { font-weight: 600 !important; }
+
+  .border-b { border-bottom: 1px solid #ddd !important; padding-bottom: 0.7rem !important; margin-bottom: 0.7rem !important; }
+  
+  /* Responsive grid for print */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Ensure content doesn't get cut off */
+  .print-document {
+    overflow: visible !important;
+    height: auto !important;
+    padding-bottom: 40px !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Adjust for better readability */
+  .space-y-8 > div {
+    break-inside: avoid !important;
+  }
+  
+  /* Fix footer positioning */
+  .print-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center !important;
+    padding: 10px !important;
+    font-size: 0.8rem !important;
+    color: #666 !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Add page margin for footer */
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+    margin-bottom: 2cm !important;
+  }
+  
+  /* Ensure the main content area doesn't overlap with footer */
+  .print-document > div:not(.print-footer) {
+    margin-bottom: 30px !important;
+  }
 }
 </style>

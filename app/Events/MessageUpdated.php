@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Models\GroupMessage;
 use App\Models\Message;
+use App\Services\Messaging\TelegramInboxService;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -47,6 +48,25 @@ class MessageUpdated implements ShouldBroadcast
 
     public function broadcastWith()
     {
-        return ['message' => $this->message->load('sender', 'reactions', 'replyTo')];
+        $service = app(TelegramInboxService::class);
+
+        if ($this->message instanceof Message) {
+            // Direct messages use the dedicated MessageReaction model
+            $message = $this->message->loadMissing(['sender.staff', 'receiver.staff', 'messageReactions', 'replyTo']);
+
+            return [
+                'message' => $service->transformDirectMessage($message, 0),
+            ];
+        }
+
+        if ($this->message instanceof GroupMessage) {
+            $message = $this->message->loadMissing(['sender.staff', 'reactions', 'replyTo']);
+
+            return [
+                'message' => $service->transformChannelMessage($message, 0),
+            ];
+        }
+
+        return ['message' => null];
     }
 }

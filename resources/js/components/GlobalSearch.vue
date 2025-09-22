@@ -100,7 +100,8 @@ const getIcon = (iconName: string) => {
     'activity': Activity,
     'calendar-days': CalendarDays,
     'target': Target,
-    'megaphone': Megaphone
+    'megaphone': Megaphone,
+    'file-medical': FileText
   };
   return iconMap[iconName] || Search;
 };

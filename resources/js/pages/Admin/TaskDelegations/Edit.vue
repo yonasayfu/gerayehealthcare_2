@@ -14,6 +14,7 @@ const props = defineProps<{
     notes: string | null
     task_category?: string
     partner_id?: number | null
+    priority_level?: number
   }
   staff: { id: number; first_name: string; last_name: string }[]
   partners: { id: number; name: string }[]
@@ -28,6 +29,7 @@ const form = useForm({
   notes:       props.taskDelegation.notes || '',
   task_category: props.taskDelegation.task_category || '',
   partner_id:  props.taskDelegation.partner_id || null,
+  priority_level: props.taskDelegation.priority_level || 3, // Default to Normal (3) if not set
 })
 
 function submit() {

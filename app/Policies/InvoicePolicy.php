@@ -10,6 +10,9 @@ class InvoicePolicy
 {
     public function view(User $user, Invoice $invoice): bool
     {
+        if ($user->can('view invoices')) {
+            return true;
+        }
         $patient = Patient::where('user_id', $user->id)->first();
 
         return $patient && $invoice->patient_id === $patient->id;

@@ -154,19 +154,9 @@ async function destroy(id: number) {
         </div>
       </div>
 
-      <div class="hidden print:block print-footer-caregiver">
-        <div class="left-content">
-          <p>Document ID: {{ props.patient.patient_code ?? 'N/A' }}</p>
-          <p>Caregiver: [Caregiver Name/Signature]</p>
-        </div>
-        <div class="center-content">
-          <p>Geraye Home Care Services</p>
-          <p>Contact: +251-9XX-XXXXXX</p>
-        </div>
-        <div class="right-content">
-          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
-          <p>Page <span class="pageNumber"></span> of <span class="totalPages"></span></p>
-        </div>
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300 dark:border-gray-600">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 
     </div>
@@ -323,36 +313,5 @@ async function destroy(id: number) {
     word-break: break-word !important;
     color: #333 !important;
   }
-
-  /* Caregiver Print Footer */
-  .print-footer-caregiver {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    padding: 1cm;
-    text-align: center;
-    font-size: 0.75rem;
-    color: #555;
-    border-top: 1px solid #eee;
-    background-color: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .print-footer-caregiver div {
-    flex: 1;
-    text-align: center;
-  }
-
-  .print-footer-caregiver .left-content {
-    text-align: left;
-  }
-
-  .print-footer-caregiver .right-content {
-    text-align: right;
-  }
-} /* Closing brace for @media print */
+}
 </style>

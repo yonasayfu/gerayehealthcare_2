@@ -15,7 +15,7 @@ class StaffPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'hr']);
+        return $user->can('view staff');
     }
 
     /**
@@ -23,8 +23,11 @@ class StaffPolicy
      */
     public function view(User $user, Staff $staff): bool
     {
-        // Users can view their own staff record or have appropriate role
-        return $user->hasAnyRole(['admin', 'manager', 'hr']) || $user->staff_id === $staff->id;
+        if ($user->staff_id === $staff->id) {
+            return true;
+        }
+
+        return $user->can('view staff');
     }
 
     /**
@@ -32,7 +35,7 @@ class StaffPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'hr']);
+        return $user->can('create staff');
     }
 
     /**
@@ -40,7 +43,11 @@ class StaffPolicy
      */
     public function update(User $user, Staff $staff): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'hr']) || $user->staff_id === $staff->id;
+        if ($user->staff_id === $staff->id) {
+            return true;
+        }
+
+        return $user->can('edit staff');
     }
 
     /**
@@ -48,7 +55,7 @@ class StaffPolicy
      */
     public function delete(User $user, Staff $staff): bool
     {
-        return $user->hasAnyRole(['admin', 'hr']);
+        return $user->can('delete staff');
     }
 
     /**
@@ -56,7 +63,7 @@ class StaffPolicy
      */
     public function restore(User $user, Staff $staff): bool
     {
-        return $user->hasAnyRole(['admin', 'hr']);
+        return $user->can('edit staff');
     }
 
     /**
@@ -64,6 +71,6 @@ class StaffPolicy
      */
     public function forceDelete(User $user, Staff $staff): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete staff');
     }
 }

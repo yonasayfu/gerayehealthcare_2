@@ -22,6 +22,20 @@ import {
   Minimize2, Maximize2, GitFork, BarChart, Pill, FlaskConical, CheckSquare
 } from 'lucide-vue-next'
 
+interface Props {
+  unreadCount?: number;
+  inventoryAlertCount?: number;
+  myTasksCount?: number;
+  myTodoCount?: number;
+}
+
+withDefaults(defineProps<Props>(), {
+  unreadCount: 0,
+  inventoryAlertCount: 0,
+  myTasksCount: 0,
+  myTodoCount: 0,
+});
+
 interface SidebarNavItem {
   title: string;
   routeName?: string;
@@ -124,7 +138,8 @@ const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
     items: [
-        { title: 'Messages', routeName: 'admin.messages', icon: MessageCircle, permission: 'view messages' },
+        // Make Messages visible to all authenticated users and point to the actual route
+        { title: 'Messages', routeName: 'messages.inbox', icon: MessageCircle },
     ]
 };
 

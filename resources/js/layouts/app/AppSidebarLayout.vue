@@ -3,7 +3,7 @@ import AppContent from '@/components/AppContent.vue'
 import AppShell from '@/components/AppShell.vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue'
-import FloatingChatButton from '@/components/FloatingChatButton.vue'; // Import the new component
+import ChatLauncher from '@/components/ChatLauncher.vue';
 import type { BreadcrumbItemType } from '@/types'
 
 interface Props {
@@ -37,6 +37,6 @@ withDefaults(defineProps<Props>(), {
       <AppSidebarHeader :breadcrumbs="breadcrumbs" class="print:hidden" />
       <slot />
     </AppContent>
-    <FloatingChatButton class="print:hidden" /> <!-- Add the floating chat button here -->
+    <ChatLauncher class="print:hidden" />
   </AppShell>
 </template>

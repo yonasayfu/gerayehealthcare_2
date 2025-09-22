@@ -1,48 +1,47 @@
 <?php
 
 use App\Enums\RoleEnum;
-use App\Http\Controllers\Admin\CaregiverAssignmentController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Admin\EligibilityCriteriaController;
-use App\Http\Controllers\Admin\EventBroadcastController;
-// Admin Controllers
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\EventParticipantController;
-use App\Http\Controllers\Admin\EventRecommendationController;
-use App\Http\Controllers\Admin\EventStaffAssignmentController;
-use App\Http\Controllers\Admin\GlobalSearchController;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
-use App\Http\Controllers\Admin\MedicalDocumentController;
-use App\Http\Controllers\Admin\PatientController;
-use App\Http\Controllers\Admin\PrescriptionController;
-use App\Http\Controllers\Admin\ReferralDocumentController;
-use App\Http\Controllers\Admin\RoleController;
-use App\Http\Controllers\Admin\ServiceController;
-use App\Http\Controllers\Admin\SharedInvoiceController;
-use App\Http\Controllers\Admin\StaffAvailabilityController;
-use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\StaffPayoutController;
-use App\Http\Controllers\Admin\TaskDelegationController as AdminTaskController;
-use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\VisitServiceController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\GroupMessageController;
-use App\Http\Controllers\MessageController;
-// Staff Controllers
-use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestController;
-use App\Http\Controllers\Staff\MyAvailabilityController;
-use App\Http\Controllers\Staff\MyEarningsController;
-use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\Staff\TaskDelegationController as StaffTaskController;
-use Illuminate\Http\Request;
-// Common Controllers
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GroupMessageController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\PatientController;
+use App\Http\Controllers\Admin\CaregiverAssignmentController;
+use App\Http\Controllers\Admin\VisitServiceController;
+use App\Http\Controllers\Admin\MedicalDocumentController;
+use App\Http\Controllers\Admin\PrescriptionController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\ReferralDocumentController;
+use App\Http\Controllers\Admin\SharedInvoiceController;
+use App\Http\Controllers\Admin\StaffAvailabilityController;
+use App\Http\Controllers\Admin\StaffPayoutController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\EligibilityCriteriaController;
+use App\Http\Controllers\Admin\EventRecommendationController;
+use App\Http\Controllers\Admin\EventParticipantController;
+use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\EventBroadcastController;
+use App\Http\Controllers\Admin\AdminLeaveRequestController;
+use App\Http\Controllers\Admin\GlobalSearchController;
+use App\Http\Controllers\Admin\AdminTaskController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Staff\MyAvailabilityController;
+use App\Http\Controllers\Staff\MyVisitController;
+use App\Http\Controllers\Staff\MyEarningsController;
+use App\Http\Controllers\Staff\StaffLeaveRequestController;
+use App\Http\Controllers\Staff\StaffTaskController;
+use App\Http\Controllers\Staff\DailyTaskTrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -164,22 +163,44 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/messages/data/{recipient?}', [MessageController::class, 'getData'])->name('messages.data');
     Route::post('/messages', [MessageController::class, 'store'])->middleware('throttle:60,1')->name('messages.store');
     Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->middleware('throttle:60,1')->name('messages.destroy');
-    Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
+    // Reactions removed from UI; endpoint disabled
     Route::patch('/messages/{message}', [MessageController::class, 'update'])->name('messages.update');
-    Route::post('/messages/typing', [MessageController::class, 'typing'])->name('messages.typing');
-    Route::get('/messages/typing/{user}', [MessageController::class, 'typingStatus'])->name('messages.typingStatus');
+    Route::post('/messages/{message}/read', [MessageController::class, 'markAsRead'])->name('messages.markRead');
+    Route::post('/messages/{message}/unread', [MessageController::class, 'markAsUnread'])->name('messages.markUnread');
+    Route::post('/messages/{message}/hide', [MessageController::class, 'hide'])->name('messages.hide');
+    Route::get('/messages/{message}/download', [MessageController::class, 'downloadAttachment'])->name('messages.download');
+    Route::post('/messages/{message}/pin', [MessageController::class, 'pin'])->name('messages.pin');
+    Route::post('/messages/{message}/unpin', [MessageController::class, 'unpin'])->name('messages.unpin');
+    Route::post('/messages/bulk-delete', [MessageController::class, 'bulkDestroy'])->name('messages.bulkDestroy');
+    // Typing indicators removed from UI; endpoints disabled for now
+
+    // Make inbox available to all authenticated users
+    Route::get('/messages/inbox/{recipient?}', [MessageController::class, 'index'])
+        ->name('messages.inbox');
 
     // Message export - requires permission
     Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])
         ->middleware('custom_permission:export messages')
         ->name('messages.export');
 
+    Route::get('/messages/threads/{user}/search', [MessageController::class, 'searchThread'])
+        ->name('messages.thread.search');
+
     // Groups - available to all authenticated users
+    Route::get('/groups/list', [GroupMessageController::class, 'getGroups'])->name('groups.list');
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
+    // Simple chat-group creation (name + members) for messaging
+    Route::post('/groups/create', [GroupMessageController::class, 'createGroup'])->name('groups.create');
     Route::get('/groups/{group}/messages', [GroupMessageController::class, 'index'])->name('groups.messages.index');
     Route::post('/groups/{group}/messages', [GroupMessageController::class, 'store'])->middleware('throttle:60,1')->name('groups.messages.store');
-    Route::post('/groups/{group}/messages/{message}/react', [GroupMessageController::class, 'react'])->name('groups.messages.react');
+    // Group reactions removed from UI; endpoint disabled
+    Route::patch('/groups/{group}/messages/{message}', [GroupMessageController::class, 'update'])->name('groups.messages.update');
+    Route::delete('/groups/{group}/messages/{message}', [GroupMessageController::class, 'destroy'])->name('groups.messages.destroy');
+    Route::get('/groups/{group}/messages/{message}/attachment', [GroupMessageController::class, 'downloadAttachment'])->name('groups.messages.attachment');
+    Route::post('/groups/{group}/messages/{message}/pin', [GroupMessageController::class, 'pin'])->name('groups.messages.pin');
+    Route::post('/groups/{group}/messages/{message}/unpin', [GroupMessageController::class, 'unpin'])->name('groups.messages.unpin');
+    Route::get('/groups/{group}/messages/search', [GroupMessageController::class, 'search'])->name('groups.messages.search');
 
     // Users for group creation - available to all authenticated users
     Route::get('/users/for-groups', function () {
@@ -411,6 +432,7 @@ Route::middleware(['auth', 'verified'])
             Route::get('prescriptions/print-all', [PrescriptionController::class, 'printAll'])->name('prescriptions.printAll');
             Route::get('prescriptions/print-current', [PrescriptionController::class, 'printCurrent'])->name('prescriptions.printCurrent');
             Route::get('prescriptions/{prescription}/print', [PrescriptionController::class, 'printSingle'])->name('prescriptions.printSingle');
+            Route::post('prescriptions/{prescription}/share-email', [PrescriptionController::class, 'shareViaEmail'])->name('prescriptions.shareEmail');
             Route::get('prescriptions/{prescription}/share-link', [PrescriptionController::class, 'shareLink'])->name('prescriptions.shareLink');
             Route::post('prescriptions/{prescription}/rotate-share', [PrescriptionController::class, 'rotateShareLink'])->name('prescriptions.rotateShare');
             Route::post('prescriptions/{prescription}/expire-share', [PrescriptionController::class, 'expireShareLink'])->name('prescriptions.expireShare');
@@ -435,11 +457,6 @@ Route::middleware(['auth', 'verified'])
         Route::get('analytics/dashboard', function () {
             return redirect()->route('dashboard');
         })->name('analytics.dashboard')->middleware('can:view analytics dashboard');
-
-        // Messages (placeholder route)
-        Route::get('messages', function () {
-            return redirect()->route('dashboard');
-        })->name('messages')->middleware('can:view messages');
 
         // Inventory Management - Suppliers (trimmed: removed export/import/PDF routes)
         Route::middleware('can:view suppliers')->group(function () {
@@ -668,7 +685,6 @@ Route::middleware(['auth', 'verified'])
             Route::post('invoices/{invoice}/approve', [InvoiceController::class, 'approve'])->name('invoices.approve');
         });
         Route::resource('invoices', InvoiceController::class)
-            ->except(['edit', 'update', 'destroy'])
             ->middleware([
                 'can:view invoices,invoice',
                 'can:create invoices',
@@ -928,10 +944,6 @@ Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
         Route::get('my-earnings', [MyEarningsController::class, 'index'])->name('my-earnings.index');
         Route::post('my-earnings/request-payout', [MyEarningsController::class, 'requestPayout'])->name('my-earnings.request');
 
-        // Staff Leave Requests
-        Route::resource('leave-requests', StaffLeaveRequestController::class)
-            ->only(['index', 'store']);
-
         // (My Tasks and To-Do moved to general auth group)
     });
 
@@ -940,12 +952,16 @@ Route::middleware(['auth', 'verified', 'deny_roles:guest,patient'])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {
+        // Leave Requests (accessible to staff and administrators)
+        Route::resource('leave-requests', StaffLeaveRequestController::class)
+            ->only(['index', 'store']);
+
         // My Tasks
         Route::get('my-tasks', [StaffTaskController::class, 'index'])->name('task-delegations.index');
         Route::post('my-tasks', [StaffTaskController::class, 'store'])->name('task-delegations.store');
         Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class, 'update'])->name('task-delegations.update');
         Route::get('my-tasks/count', function () {
-            $staffId = auth()->user()->staff->id ?? null;
+            $staffId = Auth::user()?->staff?->id ?? null;
             if (!$staffId) {
                 return response()->json(['count' => 0]);
             }
@@ -1002,6 +1018,7 @@ Route::post('public/prescriptions/{token}/authenticate', [App\Http\Controllers\A
     ->name('public.prescriptions.authenticate');
 Route::get('public/prescriptions/{token}/pdf', [App\Http\Controllers\Admin\PrescriptionController::class, 'publicPdf'])
     ->name('public.prescriptions.pdf');
+
 // Public submission: Event Recommendations (guest web forms can post here)
 Route::post('/public/event-recommendations', [\App\Http\Controllers\Api\V1\EventRecommendationController::class, 'store'])
     ->middleware('throttle:30,1')
@@ -1010,3 +1027,16 @@ Route::post('/public/event-recommendations', [\App\Http\Controllers\Api\V1\Event
 // Public form page (Inertia) for Event Recommendations
 Route::get('/recommend-event', [\App\Http\Controllers\Public\EventRecommendationPublicController::class, 'create'])
     ->name('public.event-recommendations.form');
+
+// Test email route - temporary for debugging
+Route::get('/test-email', function () {
+    try {
+        Mail::raw('This is a test email from Geraye Healthcare', function ($message) {
+            $message->to('yonasayfu28@gmail.com')
+                ->subject('Test Email Configuration');
+        });
+        return 'Test email sent successfully!';
+    } catch (\Exception $e) {
+        return 'Error sending email: ' . $e->getMessage();
+    }
+});

@@ -13,10 +13,14 @@ class GroupMessage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'group_id', 'sender_id', 'message', 'reply_to_id', 'attachment_path', 'attachment_filename', 'attachment_mime_type',
+        'group_id', 'sender_id', 'message', 'reply_to_id', 'attachment_path', 'attachment_filename', 'attachment_mime_type', 'is_pinned',
     ];
 
     protected $appends = ['attachment_url'];
+
+    protected $casts = [
+        'is_pinned' => 'boolean',
+    ];
 
     public function group(): BelongsTo
     {

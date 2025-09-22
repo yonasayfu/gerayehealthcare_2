@@ -144,18 +144,14 @@ const createGroup = async () => {
       members: form.members
     });
 
-    if (response.data.success) {
-      emit('groupCreated', response.data.data);
-      form.reset();
-      memberSearch.value = '';
-      emit('close');
-
-      // Show success message
-      alert(response.data.message || 'Group created successfully!');
-    }
+    const group = response.data?.data ?? response.data;
+    emit('groupCreated', group);
+    form.reset();
+    memberSearch.value = '';
+    emit('close');
+    alert('Group created successfully!');
   } catch (error) {
     console.error('Error creating group:', error);
-
     if (error.response?.data?.errors) {
       const errorMessage = Object.values(error.response.data.errors).flat().join('\n');
       alert('Error creating group:\n' + errorMessage);

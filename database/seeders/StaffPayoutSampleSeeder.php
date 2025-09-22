@@ -7,7 +7,7 @@ use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\StaffPayout;
 use App\Models\VisitService;
-use App\Services\StaffPayoutService as AdminStaffPayoutService;
+use App\Services\StaffPayout\StaffPayoutService as AdminStaffPayoutService;
 use Carbon\Carbon;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;

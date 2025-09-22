@@ -18,6 +18,8 @@ class MessageResource extends JsonResource
             'attachment_filename' => $this->attachment_filename,
             'read_at' => optional($this->read_at)->toDateTimeString(),
             'created_at' => optional($this->created_at)->toDateTimeString(),
+            'updated_at' => optional($this->updated_at)->toDateTimeString(),
+            'is_pinned' => (bool) $this->is_pinned,
         ];
     }
 }

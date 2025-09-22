@@ -9,21 +9,21 @@ use App\Models\VisitService;
 use App\Services\Base\BaseService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StaffPayoutService extends BaseService
 {
     public function getStaffEarningsData(Request $request): array
     {
-        $perPage = (int) $request->input('per_page', 10);
+        $perPage = (int) $request->input('per_page', 5);
 
         $staffWithUnpaidEarningsQuery = Staff::query()
             ->when($request->filled('search'), function ($q) use ($request) {
                 $search = $request->input('search');
                 $q->where(function ($w) use ($search) {
-                    $w->where('first_name', 'like', "%$search%")
-                        ->orWhere('last_name', 'like', "%$search%");
+                    $w->where('first_name', 'ilike', "%$search%")
+                        ->orWhere('last_name', 'ilike', "%$search%");
                 });
             })
             ->withCount([
@@ -53,6 +53,15 @@ class StaffPayoutService extends BaseService
             ->withCount(['payouts as pending_payout_requests_count' => function ($q) {
                 $q->where('status', 'Pending');
             }])
+            ->with(['payouts' => function ($q) {
+                $q->latest()->limit(1);
+            }])
+            ->addSelect([
+                'latest_payout_id' => \App\Models\StaffPayout::select('id')
+                    ->whereColumn('staff_id', 'staff.id')
+                    ->latest()
+                    ->limit(1),
+            ])
             ->orderBy('first_name');
 
         // Sorting
@@ -76,7 +85,7 @@ class StaffPayoutService extends BaseService
                     ->where('status', 'Completed')
                     ->where(function ($r) {
                         $r->where('is_paid_to_staff', false)
-                          ->orWhereNull('is_paid_to_staff');
+                            ->orWhereNull('is_paid_to_staff');
                     })
                     ->whereNotNull('check_in_time')
                     ->whereNotNull('check_out_time')
@@ -125,12 +134,12 @@ class StaffPayoutService extends BaseService
 
         return DB::transaction(function () use ($dto, $unpaidVisits, $totalAmount) {
             $payout = parent::create([
-                'staff_id'    => $dto->staff_id,
-                'total_amount'=> $totalAmount,
+                'staff_id' => $dto->staff_id,
+                'total_amount' => $totalAmount,
                 'payout_date' => Carbon::today(),
-                'status'      => $dto->status ?? 'Completed',
-                'notes'       => $dto->notes ?? 'Monthly Payout',
-                'processed_by'=> Auth::id(),
+                'status' => $dto->status ?? 'Completed',
+                'notes' => $dto->notes ?? 'Monthly Payout',
+                'processed_by' => Auth::id(),
                 'processed_notes' => $dto->notes,
             ]);
 

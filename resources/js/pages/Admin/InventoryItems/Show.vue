@@ -156,7 +156,6 @@ function printItem() {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
   }
 
   .app-sidebar-header, .app-sidebar,
@@ -194,8 +193,6 @@ function printItem() {
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
-    transform: scale(0.98);
-    transform-origin: top left;
   }
 
   .p-6.space-y-6 { padding: 0 !important; margin: 0 !important; }
@@ -207,5 +204,54 @@ function printItem() {
   .font-medium { font-weight: 600 !important; }
 
   .border-b { border-bottom: 1px solid #ddd !important; padding-bottom: 0.7rem !important; margin-bottom: 0.7rem !important; }
+  
+  /* Responsive grid for print */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+  }
+  
+  /* Ensure content doesn't get cut off */
+  .print-document {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  /* Adjust for better readability */
+  .space-y-8 > div {
+    break-inside: avoid !important;
+  }
+  
+  /* Fix footer positioning */
+  .print-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    text-align: center !important;
+    padding: 10px !important;
+    font-size: 0.8rem !important;
+    color: #666 !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Ensure content doesn't get cut off at the bottom */
+  .print-document {
+    padding-bottom: 40px !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Add page margin for footer */
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+    margin-bottom: 2cm !important;
+  }
+  
+  /* Ensure the main content area doesn't overlap with footer */
+  .print-document > div:not(.print-footer) {
+    margin-bottom: 30px !important;
+  }
 }
 </style>

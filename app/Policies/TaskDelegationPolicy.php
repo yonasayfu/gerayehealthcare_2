@@ -30,7 +30,7 @@ class TaskDelegationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('view task delegations');
     }
 
     /**
@@ -38,7 +38,11 @@ class TaskDelegationPolicy
      */
     public function view(User $user, TaskDelegation $taskDelegation): bool
     {
-        return true;
+        if ($user->can('view task delegations')) {
+            return true;
+        }
+
+        return (bool) ($user->staff && $user->staff->id === $taskDelegation->assigned_to);
     }
 
     /**
@@ -46,7 +50,7 @@ class TaskDelegationPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->can('create task delegations');
     }
 
     /**
@@ -54,7 +58,7 @@ class TaskDelegationPolicy
      */
     public function update(User $user, TaskDelegation $taskDelegation): bool
     {
-        if ($user->hasRole(RoleEnum::ADMIN->value)) {
+        if ($user->can('edit task delegations')) {
             return true;
         }
 
@@ -62,7 +66,7 @@ class TaskDelegationPolicy
             return false;
         }
 
-        return $user->id === $taskDelegation->created_by || $user->staff->id === $taskDelegation->assigned_to;
+        return $user->staff && $user->staff->id === $taskDelegation->assigned_to;
     }
 
     /**
@@ -70,6 +74,6 @@ class TaskDelegationPolicy
      */
     public function delete(User $user, TaskDelegation $taskDelegation): bool
     {
-        return $user->hasRole(RoleEnum::ADMIN->value);
+        return $user->can('delete task delegations');
     }
 }

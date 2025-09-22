@@ -3,8 +3,8 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { format } from 'date-fns';
-import { Plus, Printer, Download, Check, Eye, Search } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Plus, Printer, Download, Check, Eye, Edit3, Trash2, Search } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 import Pagination from '@/components/Pagination.vue'
 import { useTableFilters } from '@/composables/useTableFilters'
 
@@ -49,6 +49,35 @@ function approveInvoice(id: number) {
   form.post(route('admin.invoices.approve', id));
 }
 
+// Delete functionality
+const showConfirm = ref(false);
+const invoiceToDelete = ref<number | null>(null);
+
+function confirmDelete(id: number) {
+  invoiceToDelete.value = id;
+  showConfirm.value = true;
+}
+
+function cancelDelete() {
+  showConfirm.value = false;
+  invoiceToDelete.value = null;
+}
+
+function proceedDelete() {
+  if (invoiceToDelete.value) {
+    const form = useForm({});
+    form.delete(route('admin.invoices.destroy', invoiceToDelete.value), {
+      onSuccess: () => {
+        showConfirm.value = false;
+        invoiceToDelete.value = null;
+      },
+      onError: () => {
+        showConfirm.value = false;
+        invoiceToDelete.value = null;
+      }
+    });
+  }
+}
 </script>
 
 <template>
@@ -163,6 +192,20 @@ function approveInvoice(id: number) {
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
+                  <Link
+                    :href="route('admin.invoices.edit', invoice.id)"
+                    class="btn-icon text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
+                    title="Edit Invoice"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <button
+                    @click="confirmDelete(invoice.id)"
+                    class="btn-icon text-red-600 hover:bg-red-50 dark:hover:bg-red-900"
+                    title="Delete Invoice"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
                   <button
                     v-if="invoice.status === 'Issued' || invoice.status === 'Pending'"
                     @click.prevent="approveInvoice(invoice.id)"
@@ -190,6 +233,20 @@ function approveInvoice(id: number) {
       </div>
       <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
         <p>Document Generated: {{ formattedGeneratedDate }}</p>
+      </div>
+    </div>
+    
+    <!-- Confirm Delete Modal -->
+    <div v-if="showConfirm" class="fixed inset-0 z-[60] flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/40" @click="cancelDelete" aria-hidden="true"></div>
+      <div role="dialog" aria-modal="true" aria-labelledby="confirm-title"
+           class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+        <h3 id="confirm-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Invoice</h3>
+        <p class="mt-2 text-sm text-gray-700 dark:text-gray-300">Are you sure you want to delete this invoice? This action cannot be undone.</p>
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" @click="cancelDelete" class="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Cancel</button>
+          <button type="button" @click="proceedDelete" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700">Delete</button>
+        </div>
       </div>
     </div>
   </AppLayout>

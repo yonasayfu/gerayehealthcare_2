@@ -5,6 +5,7 @@ import debounce from 'lodash/debounce'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Pagination from '@/components/Pagination.vue'
 import { ArrowUpDown, Edit3, Trash2, Eye, Printer, Download } from 'lucide-vue-next'
+import { format } from 'date-fns'
 
 // ————————————————
 // 1. Destructure props: use `assignee` here
@@ -154,6 +155,14 @@ const breadcrumbs = [
           </div>
       </div>
 
+      <!-- Print Header for Current View -->
+      <div class="hidden print:block text-center mb-4 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Task Delegations (Current View)</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+      </div>
+
       <div class="overflow-x-auto bg-white shadow rounded-lg">
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
@@ -254,6 +263,11 @@ const breadcrumbs = [
         </table>
       </div>
       
+      <!-- Print Footer -->
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
+      </div>
 
       <div class="flex justify-between items-center mt-6 print:hidden">
         <Pagination v-if="taskDelegations.data.length" :links="taskDelegations.links" />

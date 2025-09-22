@@ -12,7 +12,8 @@ class MessageRules
         return [
             'receiver_id' => ['required', 'integer', 'exists:users,id'],
             'message' => ['nullable', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,pdf,doc,docx,txt'],
+            // Allow common images and documents
+            'attachment' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,csv,xlsx,ppt,pptx'],
             'reply_to_id' => ['nullable', 'integer', 'exists:messages,id'],
             'priority' => ['nullable', 'string', 'in:low,normal,high,urgent'],
             'message_type' => ['nullable', 'string', 'in:text,file,image,system'],
@@ -51,8 +52,8 @@ class MessageRules
         return [
             'group_id' => ['required', 'integer', 'exists:groups,id'],
             'message' => ['nullable', 'string', 'max:5000'],
-            'attachment' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,pdf,doc,docx,txt'],
-            'reply_to_id' => ['nullable', 'integer', 'exists:messages,id'],
+            'attachment' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,gif,pdf,doc,docx,txt,csv,xlsx,ppt,pptx'],
+            'reply_to_id' => ['nullable', 'integer', 'exists:group_messages,id'],
             'priority' => ['nullable', 'string', 'in:low,normal,high,urgent'],
             'message_type' => ['nullable', 'string', 'in:text,file,image,system'],
         ];
@@ -74,6 +75,7 @@ class MessageRules
             'message_type.in' => 'Message type must be one of: text, file, image, system.',
             'group_id.required' => 'Please select a group for your message.',
             'group_id.exists' => 'The selected group does not exist.',
+            'context.in' => 'Messaging context must be direct or channel.',
         ];
     }
 
@@ -143,13 +145,18 @@ class MessageRules
             $errors[] = 'Either message content or an attachment is required.';
         }
 
-        // If message type is text but no message content
-        if (($data['message_type'] ?? 'text') === 'text' && empty($data['message'])) {
+        // Derive an implicit message_type when not provided
+        // - If an attachment is present and message is empty, treat as 'file'
+        // - Otherwise default to 'text'
+        $inferredType = $data['message_type'] ?? (empty($data['attachment']) ? 'text' : 'file');
+
+        // If inferred type is text but no message content
+        if ($inferredType === 'text' && empty($data['message'])) {
             $errors[] = 'Text messages must have content.';
         }
 
-        // If message type is file but no attachment
-        if (in_array($data['message_type'] ?? 'text', ['file', 'image']) && empty($data['attachment'])) {
+        // If file/image type but no attachment
+        if (in_array($inferredType, ['file', 'image']) && empty($data['attachment'])) {
             $errors[] = 'File and image messages must have an attachment.';
         }
 

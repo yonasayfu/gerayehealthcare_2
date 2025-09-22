@@ -61,7 +61,7 @@
         <!-- Font Awesome now bundled locally via Vite (@fortawesome/fontawesome-free) -->
         @routes
         
-        @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+        @vite(['resources/js/app.ts', "resources/js/Pages/{$page['component']}.vue"]) {{-- Corrected 'pages' to 'Pages' --}}
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

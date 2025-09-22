@@ -36,9 +36,19 @@ const typesForSelected = computed<string[]>(() => {
   const form = (props as any).form;
   const selectedCat: string | null = form?.item_category ?? null;
   const list = (selectedCat && itemTypes[selectedCat]) ? itemTypes[selectedCat] : [];
-  if (list.length > 0) return list;
-  // Fallback: show existing type so it remains visible even if category is custom
+  
+  // Always include the current type in the list so it remains visible when editing
   const currentType: string | null = form?.item_type ?? null;
+  
+  if (list.length > 0) {
+    // If we have predefined types, include the current type if it's not already in the list
+    if (currentType && !list.includes(currentType)) {
+      return [currentType, ...list];
+    }
+    return list;
+  }
+  
+  // Fallback: show existing type so it remains visible even if category is custom
   return currentType ? [currentType] : [];
 });
 

@@ -37,4 +37,33 @@ class InventoryItemFactory extends Factory
             'reorder_level' => $this->faker->numberBetween(5, 15),
         ];
     }
+
+    /**
+     * Indicate that the item is under maintenance.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function inMaintenance()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'Under Maintenance',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the item has low stock.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function lowStock()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'quantity_on_hand' => $this->faker->numberBetween(1, 5),
+                'reorder_level' => 10,
+            ];
+        });
+    }
 }

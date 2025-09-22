@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Services\Optimized;
+namespace App\Services\Optimized\Invoice;
 
 use App\Http\Config\ExportConfig;
 use App\Http\Traits\ExportableTrait;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\VisitService;
-use App\Services\Base\BaseService;
+use App\Services\Optimized\BaseService;
 use App\Services\Insurance\InsuranceClaimService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class InvoiceService extends BaseService
+class InvoiceService extends \App\Services\Optimized\BaseService
 {
     use ExportableTrait;
 
@@ -134,7 +134,7 @@ class InvoiceService extends BaseService
             $this->createInsuranceClaimIfEligible($invoice);
 
             // Clear related caches
-            $this->clearRelatedCaches($invoice);
+            $this->clearCaches();
 
             return $invoice->load(['items.visitService', 'patient']);
         });
@@ -155,7 +155,7 @@ class InvoiceService extends BaseService
                 ]);
 
             // Clear cache for updated invoices
-            $this->clearCachePattern('invoice_*');
+            $this->clearCaches();
 
             return $count;
         });
@@ -307,22 +307,6 @@ class InvoiceService extends BaseService
         return $this->create($invoiceData);
     }
 
-    /**
-     * Clear related caches when invoice data changes
-     */
-    protected function clearRelatedCaches(Invoice $invoice): void
-    {
-        $patterns = [
-            'invoice_*',
-            'financial_stats_*',
-            'pending_billables_*',
-            "patient_insurance_{$invoice->patient_id}",
-        ];
-
-        foreach ($patterns as $pattern) {
-            $this->clearCachePattern($pattern);
-        }
-    }
 
     public function export(Request $request)
     {

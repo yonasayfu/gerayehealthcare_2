@@ -25,7 +25,7 @@ class StaffService extends BaseService
             ->orWhere('email', 'ilike', "%{$search}%");
     }
 
-    public function create(array|object $data): Staff
+    public function create(array | object $data): Staff
     {
         $data = is_object($data) ? (array) $data : $data;
 
@@ -45,12 +45,12 @@ class StaffService extends BaseService
         }
 
         // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
-        $data = array_filter($data, fn ($v) => ! is_null($v));
+        $data = array_filter($data, fn($v) => !is_null($v));
 
         return parent::create($data);
     }
 
-    public function update(int $id, array|object $data): Staff
+    public function update(int $id, array | object $data): Staff
     {
         $data = is_object($data) ? (array) $data : $data;
 
@@ -76,7 +76,7 @@ class StaffService extends BaseService
         }
 
         // Avoid sending nulls that can overwrite NOT NULL columns unintentionally
-        $data = array_filter($data, fn ($v) => $v !== null);
+        $data = array_filter($data, fn($v) => $v !== null);
 
         return parent::update($id, $data);
     }
@@ -99,5 +99,17 @@ class StaffService extends BaseService
     public function printSingle(Staff $staff, Request $request)
     {
         return $this->handlePrintSingle($request, $staff, ExportConfig::getStaffConfig());
+    }
+
+    public function delete(int $id): void
+    {
+        $staff = $this->getById($id);
+
+        // Delete the photo if it exists
+        if ($staff->photo && Storage::disk('public')->exists($staff->photo)) {
+            Storage::disk('public')->delete($staff->photo);
+        }
+
+        parent::delete($id);
     }
 }

@@ -1,12 +1,58 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Printer, ArrowLeft, Edit3, Share2 } from 'lucide-vue-next'
-import { format } from 'date-fns'
 import ShowHeader from '@/components/ShowHeader.vue'
+import { Edit3, Printer, Share2, ChevronDown, Mail } from 'lucide-vue-next'
+import { format } from 'date-fns'
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu'
+import { useToast } from '@/components/ui/toast/use-toast'
 
-const props = defineProps<{ prescription: any }>()
+interface PrescriptionItem {
+  id: number
+  medication_name: string
+  dosage: string
+  frequency: string
+  duration: string
+  notes: string
+}
+
+interface Prescription {
+  id: number
+  patient_id: number
+  created_by_staff_id: number
+  prescribed_date: string
+  status: string
+  instructions: string
+  share_token: string
+  items: PrescriptionItem[]
+  patient?: {
+    full_name: string
+  }
+  created_by?: {
+    full_name: string
+  }
+}
+
+interface Props {
+  prescription: Prescription
+}
+
+const props = defineProps<Props>()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -15,36 +61,103 @@ const breadcrumbs = [
 ]
 
 const formattedDate = computed(() => {
-  const d = props.prescription?.prescribed_date
-  return d ? format(new Date(d), 'PPP') : '-'
+  if (!props.prescription?.prescribed_date) return '-'
+  try {
+    return format(new Date(props.prescription.prescribed_date), 'PPP')
+  } catch {
+    return props.prescription.prescribed_date
+  }
 })
 
 function printSingle() {
-  requestAnimationFrame(() => window.print())
+  setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100)
 }
 
-async function copyShareLink() {
-  try {
-    const res = await fetch(route('admin.prescriptions.shareLink', props.prescription.id), { headers: { 'Accept': 'application/json' } })
-    const data = await res.json()
-    await navigator.clipboard.writeText(data.url)
-    alert('Share link copied to clipboard!')
-  } catch (e) { alert('Failed to generate share link.') }
+// Share functionality
+function share(platform: string) {
+  const shareUrl = route('prescriptions.share', props.prescription.share_token)
+  const text = `Prescription for ${props.prescription.patient?.full_name || 'Patient'}`
+  
+  const urls: Record<string, string> = {
+    wa: `https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`,
+    tw: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+    tg: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`,
+  }
+  
+  if (urls[platform]) {
+    window.open(urls[platform], '_blank')
+  }
 }
 
-async function share(kind: 'wa'|'tw'|'tg') {
+function copyShareLink() {
+  const shareUrl = route('prescriptions.share', props.prescription.share_token)
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    const { toast } = useToast()
+    toast({ 
+      title: 'Link copied', 
+      description: 'Prescription link copied to clipboard',
+      variant: 'default'
+    })
+  })
+}
+
+// Email sharing functionality
+const isEmailShareOpen = ref(false)
+const isSendingEmail = ref(false)
+const emailSuccessMessage = ref('')
+const emailErrorMessage = ref('')
+
+const emailForm = ref({
+  email: '',
+  message: ''
+})
+
+async function sendEmailShare() {
+  if (!emailForm.value.email) {
+    emailErrorMessage.value = 'Email address is required'
+    return
+  }
+  
+  isSendingEmail.value = true
+  emailSuccessMessage.value = ''
+  emailErrorMessage.value = ''
+  
   try {
-    const res = await fetch(route('admin.prescriptions.shareLink', props.prescription.id), { headers: { 'Accept': 'application/json' } })
-    const data = await res.json()
-    const url = data.url
-    if (kind === 'wa') {
-      window.open(`https://wa.me/?text=${encodeURIComponent('View your prescription: ' + url)}`, '_blank')
-    } else if (kind === 'tw') {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('View your prescription')}&url=${encodeURIComponent(url)}`, '_blank')
-    } else if (kind === 'tg') {
-      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent('View your prescription')}`, '_blank')
+    const response = await fetch(route('admin.prescriptions.shareEmail', props.prescription.id), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+      },
+      body: JSON.stringify(emailForm.value)
+    })
+    
+    const data = await response.json()
+    
+    if (response.ok) {
+      emailSuccessMessage.value = data.message || 'Email sent successfully'
+      emailForm.value.email = ''
+      emailForm.value.message = ''
+      
+      // Close the dialog
+      isEmailShareOpen.value = false
+      
+      // Show success toast
+      const { toast } = useToast()
+      toast({ 
+        title: 'Email sent', 
+        description: 'Prescription shared via email successfully',
+        variant: 'default'
+      })
+    } else {
+      emailErrorMessage.value = data.message || 'Failed to send email'
     }
-  } catch (e) { alert('Failed to share link.') }
+  } catch (error) {
+    emailErrorMessage.value = 'An error occurred while sending the email'
+    console.error('Email share error:', error)
+  } finally {
+    isSendingEmail.value = false
+  }
 }
 </script>
 
@@ -60,6 +173,7 @@ async function share(kind: 'wa'|'tw'|'tg') {
           </template>
         </ShowHeader>
 
+        <div class="p-6 space-y-6">
           <div class="hidden print:block text-center mb-4 print:mb-2">
             <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
             <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -114,55 +228,94 @@ async function share(kind: 'wa'|'tw'|'tg') {
               </table>
             </div>
           </div>
+        </div>
 
-          <!-- Bottom actions (hidden in print) for consistency -->
-          <div class="mt-6 flex items-center justify-between gap-2 print:hidden">
-            <Link :href="route('admin.prescriptions.index')" class="btn-glass btn-glass-sm">
-              <ArrowLeft class="icon" />
-              <span class="hidden sm:inline">Back</span>
+        <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+          <div class="flex justify-end gap-2">
+            <Link :href="route('admin.prescriptions.edit', prescription.id)" class="btn-glass btn-glass-sm">
+              <Edit3 class="icon" />
+              <span class="hidden sm:inline">Edit</span>
             </Link>
-            <div class="flex items-center gap-2">
-              <Link :href="route('admin.prescriptions.edit', prescription.id)" class="btn-glass btn-glass-sm">
-                <Edit3 class="icon" />
-                <span class="hidden sm:inline">Edit</span>
-              </Link>
-              <button @click="printSingle" class="btn-glass btn-glass-sm">
-                <Printer class="icon" />
-                <span class="hidden sm:inline">Print</span>
-              </button>
-              <button @click="() => share('wa')" class="btn-glass btn-glass-sm">WhatsApp</button>
-              <button @click="() => share('tw')" class="btn-glass btn-glass-sm">Twitter</button>
-              <button @click="() => share('tg')" class="btn-glass btn-glass-sm">Telegram</button>
-              <button @click="copyShareLink" class="btn-glass btn-glass-sm">
-                <Share2 class="icon" />
-                <span class="hidden sm:inline">Share Link</span>
-              </button>
-            </div>
+            <button @click="printSingle" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print</span>
+            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger as-child>
+                <button class="btn-glass btn-glass-sm">
+                  <Share2 class="icon" />
+                  <span class="hidden sm:inline">Share</span>
+                  <ChevronDown class="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem @click="() => share('wa')">
+                  <span>WhatsApp</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="() => share('tw')">
+                  <span>Twitter</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="() => share('tg')">
+                  <span>Telegram</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="copyShareLink">
+                  <span>Copy Link</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem @click="isEmailShareOpen = true">
+                  <Mail class="w-4 h-4 mr-2" />
+                  <span>Email</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+        </div>
 
-          <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
-            <p>Generated on: {{ new Date().toLocaleString() }}</p>
-          </div>
+        <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+          <p>Generated on: {{ new Date().toLocaleString() }}</p>
         </div>
       </div>
     </div>
   </AppLayout>
-</template>
 
-<style>
-/* Professional A5 print layout for single prescription */
-@page {
-  size: A5 portrait;
-  margin: 12mm;
-}
-@media print {
-  html, body { background: #fff !important; }
-  .print-logo { display: inline-block; margin: 0 auto 6px auto; max-width: 100%; height: auto; }
-  .print-clinic-name { font-size: 16px; margin: 0; }
-  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
-  .print-table { font-size: 11px; border-collapse: collapse; }
-  .print-table th, .print-table td { border: 1px solid #d1d5db; padding: 6px 8px; }
-  /* Remove any hr that may appear as shadow in print */
-  hr { display: none !important; }
-}
-</style>
+  <!-- Email Share Dialog -->
+  <Dialog :open="isEmailShareOpen" @update:open="isEmailShareOpen = $event">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Share via Email</DialogTitle>
+        <DialogDescription>Send this prescription to an email address</DialogDescription>
+      </DialogHeader>
+      <div class="space-y-4">
+        <div v-if="emailSuccessMessage" class="text-sm text-green-600 bg-green-50 p-2 rounded">
+          {{ emailSuccessMessage }}
+        </div>
+        <div v-if="emailErrorMessage" class="text-sm text-red-600 bg-red-50 p-2 rounded">
+          {{ emailErrorMessage }}
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Email Address</label>
+          <input 
+            v-model="emailForm.email" 
+            type="email" 
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+            placeholder="recipient@example.com" 
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Message (Optional)</label>
+          <textarea 
+            v-model="emailForm.message" 
+            rows="3"
+            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800"
+            placeholder="Add a personal message..."
+          ></textarea>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" @click="isEmailShareOpen = false" :disabled="isSendingEmail">Cancel</Button>
+        <Button @click="sendEmailShare" :disabled="isSendingEmail">
+          {{ isSendingEmail ? 'Sending...' : 'Send Email' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</template>

@@ -15,7 +15,7 @@ class PartnerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'sales']);
+        return $user->can('view partners');
     }
 
     /**
@@ -23,7 +23,7 @@ class PartnerPolicy
      */
     public function view(User $user, Partner $partner): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'sales']);
+        return $user->can('view partners');
     }
 
     /**
@@ -31,7 +31,7 @@ class PartnerPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('create partners');
     }
 
     /**
@@ -39,7 +39,7 @@ class PartnerPolicy
      */
     public function update(User $user, Partner $partner): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit partners');
     }
 
     /**
@@ -47,7 +47,7 @@ class PartnerPolicy
      */
     public function delete(User $user, Partner $partner): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete partners');
     }
 
     /**
@@ -55,7 +55,7 @@ class PartnerPolicy
      */
     public function restore(User $user, Partner $partner): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('edit partners');
     }
 
     /**
@@ -63,6 +63,6 @@ class PartnerPolicy
      */
     public function forceDelete(User $user, Partner $partner): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete partners');
     }
 }

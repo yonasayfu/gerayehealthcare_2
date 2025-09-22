@@ -247,19 +247,9 @@ function onToggleSort(field: string) { toggleSort(field) }
         Showing {{ patients.from || 0 }}–{{ patients.to || 0 }} of {{ patients.total }}
       </p>
 
-      <div class="hidden print:block print-footer-caregiver">
-        <div class="left-content">
-          <p>Document ID: Patient List</p>
-          <p>Caregiver: [Caregiver Name/Signature]</p>
-        </div>
-        <div class="center-content">
-          <p>Geraye Home Care Services</p>
-          <p>Contact: +251-9XX-XXXXXX</p>
-        </div>
-        <div class="right-content">
-          <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
-          <p>Page <span class="pageNumber"></span> of <span class="totalPages"></span></p>
-        </div>
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500">
+        <hr class="my-2 border-gray-300 dark:border-gray-600">
+        <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 
     </div>

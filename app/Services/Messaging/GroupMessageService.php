@@ -16,14 +16,14 @@ class GroupMessageService
     public function listGroupMessages(Group $group, int $page = 1, int $perPage = 50)
     {
         return GroupMessage::with([
-            'sender:id,name',
+            'sender:id,name,profile_photo_url',
             'replyTo:id,message,sender_id,created_at',
             'reactions' => function ($query) {
                 $query->select('id', 'group_message_id', 'user_id', 'emoji');
             },
         ])
             ->where('group_id', $group->id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at')
             ->paginate($perPage, ['*'], 'page', $page);
     }
 
@@ -55,7 +55,7 @@ class GroupMessageService
             $group->touch();
             $this->clearGroupCaches($group->id);
 
-            return $msg;
+            return $msg->load('sender:id,name,profile_photo_url');
         });
     }
 
@@ -70,7 +70,29 @@ class GroupMessageService
 
     public function deleteMessage(Group $group, GroupMessage $message): void
     {
+        // Remove polymorphic reactions first to avoid FK constraint issues
+        if (method_exists($message, 'reactions')) {
+            $message->reactions()->delete();
+        }
+        if ($message->attachment_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($message->attachment_path);
+        }
+
         $message->delete();
+    }
+
+    public function pinMessage(GroupMessage $message): GroupMessage
+    {
+        $message->forceFill(['is_pinned' => true])->save();
+
+        return $message->fresh();
+    }
+
+    public function unpinMessage(GroupMessage $message): GroupMessage
+    {
+        $message->forceFill(['is_pinned' => false])->save();
+
+        return $message->fresh();
     }
 
     /**
@@ -99,12 +121,12 @@ class GroupMessageService
         $userId = Auth::id();
         $cacheKey = "user_groups_{$userId}";
 
-        return Cache::remember($cacheKey, 300, function () {
+        return Cache::remember($cacheKey, 60, function () {
             return Auth::user()->groups()
                 ->withCount('members')
                 ->with(['latestMessage' => function ($query) {
-                    $query->with('sender:id,name')->latest();
-                }])
+                    $query->with('sender:id,name,profile_photo_url')->latest();
+                }, 'users:id,name,email'])
                 ->orderBy('updated_at', 'desc')
                 ->get();
         });
@@ -119,21 +141,31 @@ class GroupMessageService
                 'description' => $data['description'] ?? null,
             ]);
 
-            foreach ($data['members'] as $memberId) {
-                $group->users()->attach($memberId, ['role' => 'member']);
+            $memberIds = collect($data['members'])
+                ->push(Auth::id())
+                ->unique()
+                ->values();
+
+            foreach ($memberIds as $memberId) {
+                $group->users()->attach($memberId, [
+                    'role' => $memberId === Auth::id() ? 'owner' : 'member',
+                ]);
             }
 
-            $group->users()->attach(Auth::id(), ['role' => 'owner']);
+            $this->clearGroupCaches($group->id, $memberIds->all());
 
-            return $group->load('users');
+            return $group
+                ->load(['users:id,name,email'])
+                ->loadCount('members');
         });
     }
 
-    protected function clearGroupCaches(int $groupId): void
+    protected function clearGroupCaches(int $groupId, ?array $userIds = null): void
     {
-        Cache::forget("group_member_{$groupId}_".Auth::id());
-        $memberIds = GroupMember::where('group_id', $groupId)->pluck('user_id');
+        $memberIds = $userIds ?? GroupMember::where('group_id', $groupId)->pluck('user_id')->all();
+
         foreach ($memberIds as $memberId) {
+            Cache::forget("group_member_{$groupId}_{$memberId}");
             Cache::forget("user_groups_{$memberId}");
         }
     }

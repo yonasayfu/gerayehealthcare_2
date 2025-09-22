@@ -44,7 +44,7 @@ const submit = () => {
       <!-- Form card -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
         <form @submit.prevent="submit" class="space-y-4">
-          <Form :form="form" v-bind="$props" />
+          <ServiceForm :form="form" />
           <!-- Footer actions: Cancel + Create (right aligned, no logic change) -->
           <div class="flex justify-end gap-2 pt-2">
             <Link :href="route('admin.services.index')" class="btn-glass btn-glass-sm">Cancel</Link>

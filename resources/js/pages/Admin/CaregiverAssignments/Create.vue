@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm, Link } from '@inertiajs/vue3'
+import { Save } from 'lucide-vue-next'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Form from './Form.vue'
 import type { BreadcrumbItemType } from '@/types'
@@ -63,6 +64,7 @@ function submit() {
               :disabled="form.processing"
               class="btn-glass btn-glass-sm"
             >
+              <Save class="icon" />
               {{ form.processing ? 'Creating...' : 'Save Assignment' }}
             </button>
           </div>

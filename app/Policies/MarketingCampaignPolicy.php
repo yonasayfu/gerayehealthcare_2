@@ -15,7 +15,7 @@ class MarketingCampaignPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'marketing']);
+        return $user->can('view marketing campaigns');
     }
 
     /**
@@ -23,7 +23,7 @@ class MarketingCampaignPolicy
      */
     public function view(User $user, MarketingCampaign $marketingCampaign): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'marketing']);
+        return $user->can('view marketing campaigns');
     }
 
     /**
@@ -31,7 +31,7 @@ class MarketingCampaignPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'marketing']);
+        return $user->can('create marketing campaigns');
     }
 
     /**
@@ -39,7 +39,7 @@ class MarketingCampaignPolicy
      */
     public function update(User $user, MarketingCampaign $marketingCampaign): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'marketing']);
+        return $user->can('edit marketing campaigns');
     }
 
     /**
@@ -47,7 +47,7 @@ class MarketingCampaignPolicy
      */
     public function delete(User $user, MarketingCampaign $marketingCampaign): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('delete marketing campaigns');
     }
 
     /**
@@ -55,7 +55,7 @@ class MarketingCampaignPolicy
      */
     public function restore(User $user, MarketingCampaign $marketingCampaign): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('edit marketing campaigns');
     }
 
     /**
@@ -63,6 +63,6 @@ class MarketingCampaignPolicy
      */
     public function forceDelete(User $user, MarketingCampaign $marketingCampaign): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('delete marketing campaigns');
     }
 }

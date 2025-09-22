@@ -4,141 +4,113 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleEnum;
 use App\Http\Requests\StoreMessageRequest;
+use App\Models\Group;
+use App\Models\GroupMember;
 use App\Models\Message;
 use App\Models\User;
 use App\Notifications\NewMessageReceived;
+use App\Services\Messaging\GroupMessageService;
 use App\Services\Messaging\MessageService;
+use App\Services\Messaging\TelegramInboxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class MessageController extends Controller
 {
     /**
-     * Fetches conversation list, selected conversation, and messages.
-     * Handles initial selection if no recipient is specified.
+     * Render the messaging inbox via Inertia.
+     */
+    public function index(Request $request, ?User $recipient = null): Response
+    {
+        $conversationId = $request->input('conversation_id');
+        $context = $request->input('context');
+
+        if ($recipient) {
+            $conversationId = $recipient->id;
+            $context = \App\Services\Messaging\TelegramInboxService::CONTEXT_DIRECT;
+        }
+
+        $payload = $this->inboxService()->buildPayload($request->user(), [
+            'context' => $context,
+            'conversation_id' => $conversationId,
+            'search' => $request->input('search', ''),
+        ]);
+
+        return \Inertia\Inertia::render('Admin/Messages/Index', [
+            'initialSections' => $payload['sections'],
+            'initialSelectedConversation' => $payload['selectedConversation'],
+            'initialMessages' => $payload['messages'],
+            'initialSearch' => $payload['search'],
+            'initialContext' => $payload['context'],
+            'messageRoutes' => [
+                'index' => 'messages.inbox',
+                'data' => 'messages.data',
+                'store' => 'messages.store',
+                'destroy' => 'messages.destroy',
+                'download' => 'messages.download',
+                'markRead' => 'messages.markRead',
+                'markUnread' => 'messages.markUnread',
+            'update' => 'messages.update',
+            'typing' => 'messages.typing',
+            'typingStatus' => 'messages.typingStatus',
+            'pin' => 'messages.pin',
+            'unpin' => 'messages.unpin',
+            'hide' => 'messages.hide',
+            'bulkDestroy' => 'messages.bulkDestroy',
+            'search' => 'messages.thread.search',
+            'groupStore' => 'groups.messages.store',
+            'groupDestroy' => 'groups.messages.destroy',
+            'groupDownload' => 'groups.messages.attachment',
+            'groupUpdate' => 'groups.messages.update',
+            'groupPin' => 'groups.messages.pin',
+            'groupUnpin' => 'groups.messages.unpin',
+            'groupSearch' => 'groups.messages.search',
+        ],
+        'canModerate' => $request->user()->hasAnyRole([
+            \App\Enums\RoleEnum::SUPER_ADMIN->value,
+            \App\Enums\RoleEnum::ADMIN->value,
+        ]) || $request->user()->can('delete all messages'),
+        ]);
+    }
+
+    /**
+     * Fetch conversation data as JSON (used by the SPA for async refresh).
      */
     public function getData(Request $request, ?User $recipient = null)
     {
-        $user = Auth::user();
-        $messages = [];
-        $selectedConversationUser = null;
-
         try {
-            // Limit conversation list to authorized counterparts, with admin override
-            $base = User::where('id', '!=', $user->id);
-
-            $conversationsQuery = (clone $base)->where(function ($q) use ($user) {
-                if ($user->hasRole(RoleEnum::SUPER_ADMIN->value) || $user->hasRole(RoleEnum::ADMIN->value)) {
-                    // Admins see all users
-                    return; // No additional filtering for admins
-                }
-
-                // Staff can chat with all other users (simplified for better UX)
-                if ($user->hasRole('staff') || $user->staff) {
-                    return; // No additional filtering for staff - they can see all users
-                }
-
-                // For other roles, show all users
-
-            });
-
-            // Also include any counterparts I already have messages with
-            $directIds = Message::query()
-                ->selectRaw('CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END as uid', [$user->id])
-                ->where(function ($q) use ($user) {
-                    $q->where('sender_id', $user->id)->orWhere('receiver_id', $user->id);
-                })
-                ->pluck('uid')
-                ->filter()
-                ->unique()
-                ->values();
-
-            if ($directIds->isNotEmpty()) {
-                $conversationsQuery = (clone $base)->where(function ($q) use ($conversationsQuery, $directIds) {
-                    $q->whereIn('id', $conversationsQuery->pluck('id'))
-                        ->orWhereIn('id', $directIds);
-                });
-            }
-
-            if ($request->filled('search')) {
-                $search = $request->input('search');
-                $conversationsQuery->where(function ($sq) use ($search) {
-                    $sq->where('name', 'ilike', "%{$search}%")
-                        ->orWhere('email', 'ilike', "%{$search}%");
-                });
-            }
-
-            $conversations = $conversationsQuery->orderBy('name', 'asc')->limit(100)->get();
-
-            // Optimized unread counts with caching
-            $cacheKey = "unread_counts_user_{$user->id}";
-            $unreadCounts = Cache::remember($cacheKey, 300, function () use ($user) {
-                return Message::selectRaw('sender_id, COUNT(*) as unread')
-                    ->where('receiver_id', $user->id)
-                    ->whereNull('read_at')
-                    ->groupBy('sender_id')
-                    ->pluck('unread', 'sender_id');
-            });
+            $conversationId = $request->input('conversation_id');
+            $context = $request->input('context');
 
             if ($recipient) {
-                $selectedConversationUser = $recipient;
-                // Ensure recipient appears in conversations for UI
-                if (! $conversations->contains('id', $recipient->id)) {
-                    $conversations->push($recipient);
-                }
-            } elseif ($conversations->isNotEmpty()) {
-                $selectedConversationUser = $conversations->first();
+                $conversationId = $recipient->id;
+                $context = TelegramInboxService::CONTEXT_DIRECT;
             }
 
-            if ($selectedConversationUser) {
-                Message::where('sender_id', $selectedConversationUser->id)
-                    ->where('receiver_id', $user->id)
-                    ->whereNull('read_at')
-                    ->update(['read_at' => now()]);
-
-                $messages = Message::where(function ($query) use ($user, $selectedConversationUser) {
-                    $query->where('sender_id', $user->id)
-                        ->where('receiver_id', $selectedConversationUser->id);
-                })->orWhere(function ($query) use ($user, $selectedConversationUser) {
-                    $query->where('sender_id', $selectedConversationUser->id)
-                        ->where('receiver_id', $user->id);
-                })->with(['sender', 'receiver', 'reactions', 'replyTo'])
-                    ->orderBy('created_at', 'asc')
-                    ->get();
-            }
-
-            // Shape conversations with unread counts for UI
-            $convData = $conversations->map(function ($u) use ($unreadCounts) {
-                return [
-                    'id' => $u->id,
-                    'name' => $u->name,
-                    'email' => $u->email,
-                    'profile_photo_url' => $u->profile_photo_url ?? null,
-                    'staff' => method_exists($u, 'staff') ? $u->staff : null,
-                    'unread' => (int) ($unreadCounts[$u->id] ?? 0),
-                ];
-            });
-
-            return response()->json([
-                'conversations' => $convData,
-                'selectedConversation' => $selectedConversationUser ? $selectedConversationUser->load('staff') : null,
-                'messages' => $messages,
+            $payload = $this->inboxService()->buildPayload($request->user(), [
+                'context' => $context,
+                'conversation_id' => $conversationId,
+                'search' => $request->input('search', ''),
             ]);
 
+            return response()->json($payload);
         } catch (\Throwable $e) {
             Log::error('Chat getData failed', [
                 'message' => $e->getMessage(),
                 'trace' => substr($e->getTraceAsString(), 0, 2000),
             ]);
 
-            // Fail-safe empty response instead of 500
             return response()->json([
-                'conversations' => [],
+                'sections' => [],
                 'selectedConversation' => null,
                 'messages' => [],
-            ]);
+                'search' => $request->input('search', ''),
+                'context' => $request->input('context', TelegramInboxService::CONTEXT_DIRECT),
+            ], 500);
         }
     }
 
@@ -153,6 +125,35 @@ class MessageController extends Controller
         }
 
         $validated = $request->validated();
+        $context = $validated['context'] ?? TelegramInboxService::CONTEXT_DIRECT;
+        $service = $this->inboxService();
+
+        if ($context === TelegramInboxService::CONTEXT_CHANNEL) {
+            $group = Group::findOrFail($validated['group_id']);
+            $this->ensureGroupMember($group, Auth::id());
+
+            $message = app(GroupMessageService::class)->storeMessage($group, [
+                'message' => $validated['message'] ?? null,
+                'attachment' => $request->file('attachment'),
+                'reply_to_id' => $validated['reply_to_id'] ?? null,
+                'priority' => $validated['priority'] ?? 'normal',
+                'message_type' => $validated['message_type'] ?? ($request->file('attachment') ? 'file' : 'text'),
+            ]);
+
+            $message->load(['sender', 'reactions', 'replyTo']);
+
+            broadcast(new \App\Events\NewMessage($message));
+
+            return response()->json([
+                'message' => $service->transformChannelMessage($message, Auth::id()),
+                'conversation' => $service->transformChannelConversation(
+                    $group->loadCount('members'),
+                    $service->isOrganizationChannel($group),
+                    optional($message->created_at)?->toIso8601String()
+                ),
+            ], 201);
+        }
+
         $recipient = User::findOrFail($validated['receiver_id']);
         $this->authorize('communicate', $recipient);
 
@@ -161,12 +162,20 @@ class MessageController extends Controller
             'attachment' => $request->file('attachment'),
         ]);
 
-        // Dispatch the notification to the recipient
         $recipient->notify(new NewMessageReceived($message->load('sender')));
 
         broadcast(new \App\Events\NewMessage($message));
 
-        return response()->noContent();
+        $message->load(['sender', 'receiver', 'messageReactions', 'replyTo']);
+
+        return response()->json([
+            'message' => $service->transformDirectMessage($message, Auth::id()),
+            'conversation' => $service->transformDirectConversation(
+                $recipient->fresh(['staff']),
+                0,
+                optional($message->created_at)?->toIso8601String()
+            ),
+        ], 201);
     }
 
     /**
@@ -186,10 +195,40 @@ class MessageController extends Controller
             return response()->json(['error' => 'Unauthorized to delete this message.'], 403);
         }
 
-        app(MessageService::class)->deleteMessage($message);
+        $hardDeleted = false;
+        try {
+            app(MessageService::class)->deleteMessage($message);
+            $hardDeleted = true;
+        } catch (\Throwable $e) {
+            // Fallback: hide for both sides so neither party sees it
+            $message->forceFill([
+                'deleted_for_sender_at' => now(),
+                'deleted_for_receiver_at' => now(),
+            ])->save();
+        }
 
-        // Broadcast the deletion event
+        // Broadcast the deletion event to update UIs real-time
         broadcast(new \App\Events\MessageDeleted($message));
+
+        return response()->noContent();
+    }
+
+    /**
+     * Hide a message for the current user only (soft delete per-user).
+     */
+    public function hide(Message $message)
+    {
+        $user = Auth::user();
+
+        abort_unless($message->sender_id === $user->id || $message->receiver_id === $user->id, 403);
+
+        if ($message->sender_id === $user->id) {
+            $message->forceFill(['deleted_for_sender_at' => now()])->save();
+        }
+
+        if ($message->receiver_id === $user->id) {
+            $message->forceFill(['deleted_for_receiver_at' => now()])->save();
+        }
 
         return response()->noContent();
     }
@@ -214,9 +253,13 @@ class MessageController extends Controller
         $data = $request->validate(['message' => ['required', 'string', 'max:5000']]);
         $message->update(['message' => $data['message']]);
 
+        $message->load(['sender', 'receiver', 'messageReactions', 'replyTo']);
+
         broadcast(new \App\Events\MessageUpdated($message));
 
-        return response()->json(['message' => 'Message updated successfully']);
+        return response()->json([
+            'message' => $this->inboxService()->transformDirectMessage($message, $user->id),
+        ]);
     }
 
     /**
@@ -253,7 +296,110 @@ class MessageController extends Controller
 
         $message->update(['read_at' => now()]);
 
+        return response()->json([
+            'message' => $this->inboxService()->transformDirectMessage(
+                $message->fresh(['sender', 'receiver', 'messageReactions', 'replyTo']),
+                Auth::id()
+            ),
+        ]);
+    }
+
+    public function pin(Message $message)
+    {
+        $user = Auth::user();
+
+        abort_unless($message->sender_id === $user->id
+            || $message->receiver_id === $user->id
+            || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+            || $user->hasRole(RoleEnum::ADMIN->value)
+            || $user->can('edit all messages'), 403);
+
+        $message = app(MessageService::class)->pinMessage($message)->load(['sender', 'receiver', 'messageReactions', 'replyTo']);
+
+        broadcast(new \App\Events\MessageUpdated($message));
+
+        return response()->json([
+            'message' => $this->inboxService()->transformDirectMessage($message, $user->id),
+        ]);
+    }
+
+    public function unpin(Message $message)
+    {
+        $user = Auth::user();
+
+        abort_unless($message->sender_id === $user->id
+            || $message->receiver_id === $user->id
+            || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+            || $user->hasRole(RoleEnum::ADMIN->value)
+            || $user->can('edit all messages'), 403);
+
+        $message = app(MessageService::class)->unpinMessage($message)->load(['sender', 'receiver', 'messageReactions', 'replyTo']);
+
+        broadcast(new \App\Events\MessageUpdated($message));
+
+        return response()->json([
+            'message' => $this->inboxService()->transformDirectMessage($message, $user->id),
+        ]);
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:messages,id'],
+        ]);
+
+        $user = Auth::user();
+        $service = app(MessageService::class);
+
+        $messages = Message::whereIn('id', $data['ids'])->get();
+
+        foreach ($messages as $message) {
+            $canDelete = $message->sender_id === $user->id
+                || $message->receiver_id === $user->id
+                || $user->hasRole(RoleEnum::SUPER_ADMIN->value)
+                || $user->hasRole(RoleEnum::ADMIN->value)
+                || $user->can('delete all messages');
+
+            if (! $canDelete) {
+                return response()->json(['error' => 'Unauthorized to delete one or more messages.'], 403);
+            }
+
+            $service->deleteMessage($message);
+            broadcast(new \App\Events\MessageDeleted($message));
+        }
+
         return response()->noContent();
+    }
+
+    public function searchThread(Request $request, User $user)
+    {
+        $this->authorize('communicate', $user);
+
+        $data = $request->validate([
+            'q' => ['required', 'string', 'max:255'],
+        ]);
+
+        $authId = Auth::id();
+        $messages = Message::query()
+            ->where(function ($query) use ($authId, $user) {
+                $query->where('sender_id', $authId)->where('receiver_id', $user->id);
+            })
+            ->orWhere(function ($query) use ($authId, $user) {
+                $query->where('sender_id', $user->id)->where('receiver_id', $authId);
+            })
+            ->whereNotNull('message')
+            ->where('message', 'ilike', '%'.$data['q'].'%')
+            ->with(['sender', 'receiver', 'messageReactions', 'replyTo'])
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        $service = $this->inboxService();
+
+        return response()->json([
+            'results' => $messages->map(fn (Message $message) => $service->transformDirectMessage($message, $authId))->values(),
+        ]);
     }
 
     /**
@@ -268,68 +414,19 @@ class MessageController extends Controller
 
         $message->update(['read_at' => null]);
 
-        return response()->noContent();
-    }
-
-    /**
-     * React to a direct message (emoji per user).
-     */
-    public function react(Request $request, Message $message)
-    {
-        // Ensure the authenticated user is part of the conversation
-        $user = Auth::user();
-        if ($message->sender_id !== $user->id && $message->receiver_id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized to react to this message.'], 403);
-        }
-        $data = $request->validate(['emoji' => ['required', 'string', 'max:16']]);
-        $reaction = \App\Models\Reaction::firstOrCreate([
-            'reactable_type' => Message::class,
-            'reactable_id' => $message->id,
-            'user_id' => $user->id,
-            'emoji' => $data['emoji'],
+        return response()->json([
+            'message' => $this->inboxService()->transformDirectMessage(
+                $message->fresh(['sender', 'receiver', 'messageReactions', 'replyTo']),
+                Auth::id()
+            ),
         ]);
-
-        broadcast(new \App\Events\MessageReacted($reaction));
-
-        return response()->noContent();
     }
+    // Reactions functionality has been removed (endpoint retired)
 
     /**
      * Indicate the current user is typing to a receiver (short-lived flag).
      */
-    public function typing(Request $request)
-    {
-        $validated = $request->validate([
-            'receiver_id' => ['required', 'integer', 'exists:users,id'],
-        ]);
-
-        $receiver = User::findOrFail($validated['receiver_id']);
-
-        // Simple authorization - users can indicate typing to any user they can message
-        if (! Auth::user()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $key = sprintf('typing:%d:%d', Auth::id(), $receiver->id);
-        Cache::put($key, true, now()->addSeconds(5));
-
-        return response()->noContent();
-    }
-
-    /**
-     * Check if the given user is typing to the authenticated user.
-     */
-    public function typingStatus(Request $request, User $user)
-    {
-        // Simple authorization - users can check typing status from any user
-        if (! Auth::user()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $key = sprintf('typing:%d:%d', $user->id, Auth::id());
-
-        return response()->json(['typing' => Cache::has($key)]);
-    }
+    // Typing indicators removed (endpoints retired)
 
     /**
      * Export a CSV of the conversation between the authenticated user and the given user.
@@ -372,5 +469,19 @@ class MessageController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    protected function inboxService(): TelegramInboxService
+    {
+        return app(TelegramInboxService::class);
+    }
+
+    protected function ensureGroupMember(Group $group, int $userId): void
+    {
+        $isMember = GroupMember::where('group_id', $group->id)
+            ->where('user_id', $userId)
+            ->exists();
+
+        abort_unless($isMember, 403, 'Unauthorized to interact with this channel.');
     }
 }

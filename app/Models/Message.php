@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Storage; // Import Storage facade
 
@@ -18,13 +19,24 @@ class Message extends Model
         'message',
         'reply_to_id',
         'read_at',
-        'attachment_path',      // Added
-        'attachment_filename',  // Added
-        'attachment_mime_type', // Added
+        'attachment_path',
+        'attachment_filename',
+        'attachment_mime_type',
+        'attachment_type',
+        'duration',
+        'edited_at',
+        'deleted_for_sender_at',
+        'deleted_for_receiver_at',
+        'is_pinned',
     ];
 
     protected $casts = [
         'read_at' => 'datetime',
+        'edited_at' => 'datetime',
+        'deleted_for_sender_at' => 'datetime',
+        'deleted_for_receiver_at' => 'datetime',
+        'is_pinned' => 'boolean',
+        'duration' => 'integer',
     ];
 
     // Add appends for attachment URL
@@ -45,9 +57,9 @@ class Message extends Model
         return $this->belongsTo(Message::class, 'reply_to_id');
     }
 
-    public function reactions(): MorphMany
+    public function messageReactions(): HasMany
     {
-        return $this->morphMany(Reaction::class, 'reactable');
+        return $this->hasMany(MessageReaction::class);
     }
 
     // Accessor for attachment URL

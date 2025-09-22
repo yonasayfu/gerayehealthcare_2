@@ -55,7 +55,16 @@ const getStoredAppearance = () => {
         return null;
     }
 
-    const raw = localStorage.getItem('appearance');
+    // Prefer localStorage, but fall back to cookie set by the server/layout
+    let raw = localStorage.getItem('appearance');
+    if (!raw) {
+        const cookieMatch = document.cookie
+            .split('; ')
+            .find((row) => row.startsWith('appearance='));
+        if (cookieMatch) {
+            raw = decodeURIComponent(cookieMatch.split('=')[1] || '');
+        }
+    }
     const normalized = normalizeAppearance(raw);
 
     // If we detect an old value (e.g., theme-dark), migrate it to canonical value
@@ -78,9 +87,11 @@ export function initializeTheme() {
         return;
     }
 
-    // Initialize theme from saved preference or default to system...
+    // Initialize theme from saved preference if present, otherwise keep server-provided theme
     const savedAppearance = getStoredAppearance();
-    updateTheme(savedAppearance || 'system');
+    if (savedAppearance) {
+        updateTheme(savedAppearance);
+    }
 
     // Set up system theme change listener...
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);

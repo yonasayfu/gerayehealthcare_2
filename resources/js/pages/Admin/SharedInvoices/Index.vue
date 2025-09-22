@@ -73,7 +73,15 @@ async function copyShareLink(id) {
 async function rotateLink(id) {
   if (!confirm('Rotate link? Existing public URL will stop working.')) return
   try {
-    await fetch(route('admin.shared-invoices.rotateShare', id), { method: 'POST', headers: { 'X-CSRF-TOKEN': (window as any).Laravel?.csrfToken || document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '' } })
+    const csrfToken = window.Laravel?.csrfToken || 
+      document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+      ''
+    await fetch(route('admin.shared-invoices.rotateShare', id), { 
+      method: 'POST', 
+      headers: { 
+        'X-CSRF-TOKEN': csrfToken 
+      } 
+    })
     alert('Link rotated.')
   } catch (e) {
     alert('Failed to rotate link.')
@@ -83,7 +91,15 @@ async function rotateLink(id) {
 async function expireLink(id) {
   if (!confirm('Expire link now? Public access will stop immediately.')) return
   try {
-    await fetch(route('admin.shared-invoices.expireShare', id), { method: 'POST', headers: { 'X-CSRF-TOKEN': (window as any).Laravel?.csrfToken || document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '' } })
+    const csrfToken = window.Laravel?.csrfToken || 
+      document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+      ''
+    await fetch(route('admin.shared-invoices.expireShare', id), { 
+      method: 'POST', 
+      headers: { 
+        'X-CSRF-TOKEN': csrfToken 
+      } 
+    })
     alert('Link expired.')
   } catch (e) {
     alert('Failed to expire link.')
@@ -94,7 +110,17 @@ async function setPin(id) {
   const pin = prompt('Enter PIN (leave blank to clear):')
   if (pin === null) return
   try {
-    await fetch(route('admin.shared-invoices.setPin', id), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': (window as any).Laravel?.csrfToken || document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || '' }, body: JSON.stringify({ pin }) })
+    const csrfToken = window.Laravel?.csrfToken || 
+      document.querySelector('meta[name=csrf-token]')?.getAttribute('content') || 
+      ''
+    await fetch(route('admin.shared-invoices.setPin', id), { 
+      method: 'POST', 
+      headers: { 
+        'Content-Type': 'application/json', 
+        'X-CSRF-TOKEN': csrfToken 
+      }, 
+      body: JSON.stringify({ pin }) 
+    })
     alert(pin ? 'PIN set.' : 'PIN cleared.')
   } catch (e) {
     alert('Failed to set PIN.')

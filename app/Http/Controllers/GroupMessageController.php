@@ -7,7 +7,9 @@ use App\Models\GroupMember;
 use App\Models\GroupMessage;
 use App\Models\Reaction;
 use App\Services\Messaging\GroupMessageService;
+use App\Services\Messaging\TelegramInboxService;
 use App\Services\Validation\Rules\MessageRules;
+use App\Http\Resources\GroupResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -17,8 +19,7 @@ class GroupMessageController extends Controller
     public function getGroups(Request $request)
     {
         $groups = app(GroupMessageService::class)->getUserGroups();
-        return response()->json(['data' => \App\Http\Resources\GroupResource::collection($groups)]);
-        return response()->json(['data' => $groups]);
+        return GroupResource::collection($groups);
     }
 
     protected function ensureMember(Group $group): void
@@ -59,13 +60,45 @@ class GroupMessageController extends Controller
     {
         $this->ensureMember($group);
 
-        $data = $request->validate(MessageRules::groupMessageRules(), MessageRules::messages());
+        // Ensure validation has the group_id expected by the shared rules
+        $request->merge(['group_id' => $group->id]);
+        $data = $request->validate(\App\Services\Validation\Rules\MessageRules::groupMessageRules(), \App\Services\Validation\Rules\MessageRules::messages());
         $data['attachment'] = $request->file('attachment');
 
         $msg = app(GroupMessageService::class)->storeMessage($group, $data);
         broadcast(new \App\Events\NewMessage($msg->load('sender')));
 
-        return response()->json(['data' => $msg->load('sender')], 201);
+        return response()->json(['message' => $msg->load('sender')], 201);
+    }
+
+    public function pin(Request $request, Group $group, GroupMessage $message)
+    {
+        $this->ensureMember($group);
+        abort_unless($message->group_id === $group->id, 404);
+
+        $userId = Auth::id();
+        $role = GroupMember::where('group_id', $group->id)->where('user_id', $userId)->value('role');
+        abort_unless($message->sender_id === $userId || in_array($role, ['owner', 'admin']), 403);
+
+        $updated = app(GroupMessageService::class)->pinMessage($message)->load('sender');
+        broadcast(new \App\Events\MessageUpdated($updated));
+
+        return response()->json(['data' => $updated]);
+    }
+
+    public function unpin(Request $request, Group $group, GroupMessage $message)
+    {
+        $this->ensureMember($group);
+        abort_unless($message->group_id === $group->id, 404);
+
+        $userId = Auth::id();
+        $role = GroupMember::where('group_id', $group->id)->where('user_id', $userId)->value('role');
+        abort_unless($message->sender_id === $userId || in_array($role, ['owner', 'admin']), 403);
+
+        $updated = app(GroupMessageService::class)->unpinMessage($message)->load('sender');
+        broadcast(new \App\Events\MessageUpdated($updated));
+
+        return response()->json(['data' => $updated]);
     }
 
     protected function clearGroupCaches($groupId)
@@ -79,23 +112,7 @@ class GroupMessageController extends Controller
             Cache::forget("user_groups_{$memberId}");
         }
     }
-
-    public function react(Request $request, Group $group, GroupMessage $message)
-    {
-        $this->ensureMember($group);
-        abort_unless($message->group_id === $group->id, 404);
-        $data = $request->validate(['emoji' => ['required', 'string', 'max:16']]);
-        $reaction = Reaction::firstOrCreate([
-            'reactable_type' => GroupMessage::class,
-            'reactable_id' => $message->id,
-            'user_id' => Auth::id(),
-            'emoji' => $data['emoji'],
-        ]);
-
-        broadcast(new \App\Events\MessageReacted($reaction));
-
-        return response()->noContent();
-    }
+    // Group reactions removed from UI
 
     public function update(Request $request, Group $group, GroupMessage $message)
     {
@@ -145,6 +162,31 @@ class GroupMessageController extends Controller
         $dl = app(GroupMessageService::class)->prepareDownload($group, $message);
 
         return \Illuminate\Support\Facades\Storage::disk('public')->download($dl['path'], $dl['name'], $dl['headers']);
+    }
+
+    public function search(Request $request, Group $group)
+    {
+        $this->ensureMember($group);
+
+        $data = $request->validate([
+            'q' => ['required', 'string', 'max:255'],
+        ]);
+
+        $messages = GroupMessage::query()
+            ->where('group_id', $group->id)
+            ->whereNotNull('message')
+            ->where('message', 'ilike', '%'.$data['q'].'%')
+            ->with(['sender'])
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get();
+
+        $service = app(GroupMessageService::class);
+        $inbox = app(TelegramInboxService::class);
+
+        return response()->json([
+            'results' => $messages->map(fn (GroupMessage $message) => $inbox->transformChannelMessage($message, Auth::id()))->values(),
+        ]);
     }
 
     public function createGroup(Request $request)

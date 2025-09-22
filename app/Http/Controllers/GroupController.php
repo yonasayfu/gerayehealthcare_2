@@ -5,21 +5,28 @@ namespace App\Http\Controllers;
 use App\Enums\RoleEnum;
 
 use App\Models\Group;
-use App\Models\GroupMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\Messaging\GroupMessageService;
+use App\Http\Resources\GroupResource;
 
 class GroupController extends Controller
 {
     public function index(Request $request)
     {
-        $userId = Auth::id();
-        $groups = Group::with(['members.user:id,name'])
-            ->whereHas('members', fn ($q) => $q->where('user_id', $userId))
-            ->orderBy('name')
-            ->get();
+        $groups = app(GroupMessageService::class)->getUserGroups();
 
-        return response()->json(['data' => $groups]);
+        if ($search = trim((string) $request->input('search', ''))) {
+            $groups = $groups->filter(function ($group) use ($search) {
+                return str_contains(strtolower($group->name), strtolower($search));
+            });
+        }
+
+        if ($groups->isNotEmpty()) {
+            $groups->load(['users:id,name,email']);
+        }
+
+        return GroupResource::collection($groups->values());
     }
 
     public function store(Request $request)
@@ -34,46 +41,13 @@ class GroupController extends Controller
             'members.*' => ['integer', 'exists:users,id'],
         ]);
 
-        // Create the group
-        $group = Group::create([
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'created_by' => Auth::id(),
-        ]);
+        $data['members'] = $data['members'] ?? [];
+        $group = app(GroupMessageService::class)->createGroup($data);
 
-        // Add the creator as owner
-        GroupMember::create([
-            'group_id' => $group->id,
-            'user_id' => Auth::id(),
-            'role' => 'owner',
-        ]);
-
-        // Add selected members
-        foreach (($data['members'] ?? []) as $uid) {
-            if ($uid === Auth::id()) {
-                continue;
-            } // Skip creator
-            GroupMember::firstOrCreate([
-                'group_id' => $group->id,
-                'user_id' => $uid,
-            ], [
-                'role' => 'member',
-            ]);
+        if ($request->expectsJson()) {
+            return (new GroupResource($group))->response()->setStatusCode(201);
         }
 
-        // Load the group with members for response
-        $group->load('members.user:id,name,email');
-
-        // For AJAX requests, return JSON response
-        if (request()->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Group created successfully!',
-                'data' => $group,
-            ], 201);
-        }
-
-        // For regular form submissions, return Inertia response
-        return back()->with('success', 'Group created successfully!')->with('group', $group);
+        return back()->with('success', 'Group created successfully!');
     }
 }

@@ -23,7 +23,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Staff Management
             'view staff', 'create staff', 'edit staff', 'delete staff', 'export staff',
-            'view staff schedules', 'manage staff schedules', 'approve leave requests',
+            'view staff schedules', 'manage staff schedules',
+            'view staff availabilities', 'create staff availabilities', 'edit staff availabilities', 'delete staff availabilities',
+            'view leave requests', 'create leave requests', 'edit leave requests', 'approve leave requests',
 
             // User & Role Management
             'view users', 'create users', 'edit users', 'delete users', 'export users',
@@ -42,22 +44,27 @@ class RolesAndPermissionsSeeder extends Seeder
             'view marketing campaigns', 'create marketing campaigns', 'edit marketing campaigns', 'delete marketing campaigns',
             'view marketing leads', 'create marketing leads', 'edit marketing leads', 'delete marketing leads',
             'view marketing budgets', 'create marketing budgets', 'edit marketing budgets', 'delete marketing budgets',
+            'manage marketing',
             'view marketing analytics', 'export marketing reports',
 
             // Insurance Management
-            'view insurance companies', 'create insurance companies', 'update insurance companies', 'delete insurance companies',
-            'view corporate clients', 'create corporate clients', 'update corporate clients', 'delete corporate clients',
-            'view insurance policies', 'create insurance policies', 'update insurance policies', 'delete insurance policies',
-            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'delete employee insurance records',
+            'view insurance companies', 'create insurance companies', 'update insurance companies', 'edit insurance companies', 'delete insurance companies',
+            'view corporate clients', 'create corporate clients', 'update corporate clients', 'edit corporate clients', 'delete corporate clients',
+            'view insurance policies', 'create insurance policies', 'update insurance policies', 'edit insurance policies', 'delete insurance policies',
+            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'edit employee insurance records', 'delete employee insurance records',
             'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
 
             // Inventory Management
-            'view inventory items', 'create inventory items', 'update inventory items', 'delete inventory items',
-            'view inventory requests', 'create inventory requests', 'update inventory requests', 'delete inventory requests',
-            'view inventory transactions', 'create inventory transactions', 'update inventory transactions', 'delete inventory transactions',
-            'view inventory alerts', 'create inventory alerts', 'update inventory alerts', 'delete inventory alerts',
-            'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records', 'delete inventory maintenance records',
+            'view inventory items', 'create inventory items', 'update inventory items', 'edit inventory items', 'delete inventory items',
+            'view inventory requests', 'create inventory requests', 'update inventory requests', 'edit inventory requests', 'delete inventory requests',
+            'view inventory transactions', 'create inventory transactions', 'update inventory transactions', 'edit inventory transactions', 'delete inventory transactions',
+            'view inventory alerts', 'create inventory alerts', 'update inventory alerts', 'edit inventory alerts', 'delete inventory alerts',
+            'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records', 'edit inventory maintenance records', 'delete inventory maintenance records',
+            'view suppliers', 'create suppliers', 'edit suppliers', 'delete suppliers',
             'export inventory reports', 'manage inventory suppliers',
+
+            // Service Catalog
+            'view services', 'create services', 'edit services', 'delete services',
 
             // Financial Management (Comprehensive)
             'view invoices', 'create invoices', 'edit invoices', 'delete invoices', 'export invoices',
@@ -67,9 +74,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage financial settings', 'approve financial transactions', 'view audit logs',
             'manage payment methods', 'view cash flow', 'manage financial accounts',
             'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
+            'reconcile payments',
 
             // Calendar & Events
-            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
+            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'edit ethiopian calendar days', 'delete ethiopian calendar days',
             'view events', 'create events', 'edit events', 'delete events',
             'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria', 'delete eligibility criteria',
             'view event recommendations', 'create event recommendations', 'edit event recommendations', 'delete event recommendations',
@@ -80,11 +88,14 @@ class RolesAndPermissionsSeeder extends Seeder
             // Analytics & Reporting
             'view analytics dashboard', 'view system reports', 'export system reports',
             'view performance metrics', 'view user analytics', 'view financial analytics',
-            'view executive dashboard', 'view operational reports',
+            'view executive dashboard', 'view operational reports', 'view reports',
 
             // System Administration
             'view system settings', 'edit system settings', 'manage system backups',
             'view system logs', 'manage system maintenance', 'view system health',
+
+            // Productivity & Search
+            'perform global search',
 
             // Communication & Messaging
             'view messages', 'send messages', 'delete messages', 'manage group messages', 'create groups', 'export messages',
@@ -96,11 +107,20 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Medical & Clinical (Healthcare specific)
             'view medical records', 'create medical records', 'edit medical records',
-            'view prescriptions', 'create prescriptions', 'edit prescriptions',
+            'view prescriptions', 'create prescriptions', 'edit prescriptions', 'delete prescriptions',
             'view appointments', 'create appointments', 'edit appointments', 'cancel appointments',
-            'view visit services', 'create visit services', 'edit visit services',
-            'view medical documents', 'upload medical documents', 'download medical documents',
+            'view visit services', 'create visit services', 'edit visit services', 'delete visit services',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'delete medical documents', 'upload medical documents', 'download medical documents',
             'view lab results', 'create lab results', 'edit lab results', 'delete lab results',
+
+            // Partnerships & Referrals
+            'view partners', 'create partners', 'edit partners', 'delete partners',
+            'view partner agreements', 'create partner agreements', 'edit partner agreements', 'delete partner agreements',
+            'view partner commissions', 'create partner commissions', 'edit partner commissions', 'delete partner commissions',
+            'view partner engagements', 'create partner engagements', 'edit partner engagements', 'delete partner engagements',
+            'view referrals', 'create referrals', 'edit referrals', 'delete referrals',
+            'view referral documents', 'create referral documents', 'edit referral documents', 'delete referral documents',
+            'view shared invoices', 'create shared invoices', 'edit shared invoices', 'delete shared invoices',
         ];
 
         foreach ($permissions as $permission) {
@@ -118,35 +138,50 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // --- Assign Permissions to Roles ---
         // Super Admin gets all permissions automatically via a Gate in AuthServiceProvider.
-        $superAdminRole->givePermissionTo(Permission::all());
+        $superAdminRole->syncPermissions(Permission::all());
 
         // CEO - Executive level access with strategic oversight
-        $ceoRole->givePermissionTo([
+        $ceoPermissions = [
             // Analytics & Reporting (Full Access)
             'view analytics dashboard', 'view system reports', 'export system reports',
             'view performance metrics', 'view user analytics', 'view financial analytics',
-            'view executive dashboard', 'view operational reports',
+            'view executive dashboard', 'view operational reports', 'view reports',
 
             // Financial Management (View & Export)
             'view financial reports', 'export financial reports',
             'view invoices', 'export invoices',
+            'view staff payouts', 'view revenue reports', 'view expense reports',
             'view exchange rates',
 
             // High-level Staff Management
-            'view staff', 'view staff schedules',
+            'view staff', 'view staff schedules', 'view staff availabilities',
+            'view leave requests', 'edit leave requests', 'approve leave requests',
 
             // Patient Management (Full Access)
             'view patients', 'create patients', 'edit patients', 'export patients',
 
             // Medical & Clinical Access
             'view medical records', 'view prescriptions', 'view appointments',
-            'view visit services', 'view medical documents', 'download medical documents',
+            'view visit services', 'view medical documents', 'download medical documents', 'view lab results',
+
+            // Insurance & Partnerships
+            'view insurance companies', 'view corporate clients', 'view insurance policies', 'view insurance claims', 'view employee insurance records',
+            'view ethiopian calendar days',
+            'view partners', 'view partner agreements', 'view partner commissions', 'view partner engagements',
+            'view referrals', 'view referral documents', 'view shared invoices',
+
+            // Operations Oversight
+            'view assignments', 'view services',
+            'view inventory items', 'view inventory requests', 'view inventory transactions', 'view inventory alerts', 'view inventory maintenance records', 'view suppliers',
 
             // Marketing Analytics
             'view marketing analytics', 'export marketing reports',
 
             // System Health Monitoring
             'view system health', 'view system logs',
+
+            // Enterprise Search
+            'perform global search',
 
             // Communication
             'view messages', 'send messages', 'view notifications', 'create groups', 'manage group messages', 'export messages',
@@ -157,13 +192,16 @@ class RolesAndPermissionsSeeder extends Seeder
             // Personal
             'view own profile', 'edit own profile', 'change own password',
             'view public content',
-        ]);
+        ];
+        $ceoRole->syncPermissions($ceoPermissions);
 
         // COO - Operational management with staff oversight
-        $cooRole->givePermissionTo([
+        $cooPermissions = [
             // Staff Management (Full Access)
             'view staff', 'create staff', 'edit staff', 'export staff',
-            'view staff schedules', 'manage staff schedules', 'approve leave requests',
+            'view staff schedules', 'manage staff schedules',
+            'view staff availabilities', 'create staff availabilities', 'edit staff availabilities', 'delete staff availabilities',
+            'view leave requests', 'edit leave requests', 'approve leave requests',
 
             // Patient Management
             'view patients', 'create patients', 'edit patients', 'export patients',
@@ -171,43 +209,90 @@ class RolesAndPermissionsSeeder extends Seeder
             // Assignment Management
             'view assignments', 'create assignments', 'edit assignments', 'delete assignments',
 
-            // Operational Reports
-            'view analytics dashboard', 'view operational reports', 'export system reports',
-            'view performance metrics',
-
-            // Inventory Management
-            'view inventory items', 'create inventory items', 'update inventory items',
-            'view inventory requests', 'create inventory requests', 'update inventory requests',
-            'view inventory transactions', 'view inventory alerts',
-            'export inventory reports',
-
-            // Event Management
-            'view events', 'create events', 'edit events',
-            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments',
-
             // Task Delegation Management
             'view task delegations', 'create task delegations', 'edit task delegations', 'delete task delegations',
 
-            // Communication
+            // Clinical Operations
+            'view medical records', 'create medical records', 'edit medical records',
+            'view prescriptions', 'create prescriptions', 'edit prescriptions', 'delete prescriptions',
+            'view visit services', 'create visit services', 'edit visit services', 'delete visit services',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'delete medical documents',
+            'view lab results', 'create lab results', 'edit lab results',
+
+            // Inventory & Suppliers
+            'view inventory items', 'create inventory items', 'update inventory items', 'edit inventory items', 'delete inventory items',
+            'view inventory requests', 'create inventory requests', 'update inventory requests', 'edit inventory requests', 'delete inventory requests',
+            'view inventory transactions', 'create inventory transactions', 'update inventory transactions', 'edit inventory transactions', 'delete inventory transactions',
+            'view inventory alerts', 'create inventory alerts', 'update inventory alerts', 'edit inventory alerts', 'delete inventory alerts',
+            'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records', 'edit inventory maintenance records', 'delete inventory maintenance records',
+            'view suppliers', 'create suppliers', 'edit suppliers', 'delete suppliers',
+            'manage inventory suppliers', 'export inventory reports',
+
+            // Service Catalog
+            'view services', 'create services', 'edit services',
+
+            // Event Management
+            'view events', 'create events', 'edit events', 'delete events',
+            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments', 'delete event staff assignments',
+            'view event participants', 'create event participants', 'edit event participants', 'delete event participants',
+            'view event recommendations', 'create event recommendations', 'edit event recommendations', 'delete event recommendations',
+            'view event broadcasts', 'create event broadcasts', 'edit event broadcasts', 'delete event broadcasts',
+            'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria', 'delete eligibility criteria',
+            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'delete ethiopian calendar days',
+
+            // Insurance Operations
+            'view insurance companies', 'create insurance companies', 'update insurance companies', 'edit insurance companies', 'delete insurance companies',
+            'view corporate clients', 'create corporate clients', 'update corporate clients', 'edit corporate clients', 'delete corporate clients',
+            'view insurance policies', 'create insurance policies', 'update insurance policies', 'edit insurance policies', 'delete insurance policies',
+            'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
+            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'edit employee insurance records', 'delete employee insurance records',
+
+            // Partnerships & Referrals
+            'view partners', 'create partners', 'edit partners', 'delete partners',
+            'view partner agreements', 'create partner agreements', 'edit partner agreements', 'delete partner agreements',
+            'view partner commissions', 'create partner commissions', 'edit partner commissions', 'delete partner commissions',
+            'view partner engagements', 'create partner engagements', 'edit partner engagements', 'delete partner engagements',
+            'view referrals', 'create referrals', 'edit referrals', 'delete referrals',
+            'view referral documents', 'create referral documents', 'edit referral documents', 'delete referral documents',
+            'view shared invoices', 'create shared invoices', 'edit shared invoices', 'delete shared invoices',
+
+            // Financial Operations
+            'view invoices', 'create invoices', 'edit invoices', 'delete invoices',
+            'view staff payouts', 'create staff payouts', 'edit staff payouts', 'delete staff payouts',
+            'view financial reports', 'export financial reports', 'manage budgets',
+            'view financial analytics', 'view revenue reports', 'view expense reports',
+            'reconcile payments',
+
+            // Marketing Insights
+            'view analytics dashboard', 'view operational reports', 'export system reports', 'view performance metrics',
+            'view marketing analytics', 'export marketing reports',
+
+            // Search & Communication
+            'perform global search',
             'view messages', 'send messages', 'manage group messages',
             'view notifications', 'send notifications',
 
             // Personal
             'view own profile', 'edit own profile', 'change own password',
             'view public content',
-        ]);
+        ];
+        $cooRole->syncPermissions($cooPermissions);
 
         // Admin - Administrative access with most permissions
-        $adminRole->givePermissionTo([
+        $adminPermissions = [
             // Patient Management
             'view patients', 'create patients', 'edit patients', 'delete patients', 'export patients',
 
-            // Staff Management (Limited)
-            'view staff', 'edit staff', 'export staff',
-            'view staff schedules',
+            // Staff Management
+            'view staff', 'create staff', 'edit staff', 'delete staff', 'export staff',
+            'view staff schedules', 'manage staff schedules',
+            'view staff availabilities', 'create staff availabilities', 'edit staff availabilities', 'delete staff availabilities',
+            'view leave requests', 'create leave requests', 'edit leave requests', 'approve leave requests',
 
-            // User Management
-            'view users', 'create users', 'edit users', 'export users',
+            // User & Role Management
+            'view users', 'create users', 'edit users', 'delete users', 'export users',
+            'view roles', 'create roles', 'edit roles', 'delete roles',
+            'assign roles', 'manage roles', 'manage permissions', 'manage users',
 
             // Assignment Management
             'view assignments', 'create assignments', 'edit assignments', 'delete assignments',
@@ -216,69 +301,101 @@ class RolesAndPermissionsSeeder extends Seeder
             'view task delegations', 'create task delegations', 'edit task delegations', 'delete task delegations',
 
             // Marketing & Campaign Management
-            'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents',
-            'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks',
-            'view marketing campaigns', 'create marketing campaigns', 'edit marketing campaigns',
-            'view marketing leads', 'create marketing leads', 'edit marketing leads',
-            'view marketing budgets', 'create marketing budgets', 'edit marketing budgets',
+            'view marketing campaigns', 'create marketing campaigns', 'edit marketing campaigns', 'delete marketing campaigns',
+            'view marketing leads', 'create marketing leads', 'edit marketing leads', 'delete marketing leads',
+            'view marketing budgets', 'create marketing budgets', 'edit marketing budgets', 'delete marketing budgets',
+            'manage marketing',
+            'view_any_campaign_contents', 'view_campaign_contents', 'create_campaign_contents', 'update_campaign_contents', 'delete_campaign_contents', 'restore_campaign_contents', 'force_delete_campaign_contents',
+            'view_any_marketing_tasks', 'view_marketing_tasks', 'create_marketing_tasks', 'update_marketing_tasks', 'delete_marketing_tasks', 'restore_marketing_tasks', 'force_delete_marketing_tasks',
+            'view marketing analytics', 'export marketing reports',
+
+            // Clinical & Medical Operations
+            'view medical records', 'create medical records', 'edit medical records',
+            'view prescriptions', 'create prescriptions', 'edit prescriptions', 'delete prescriptions',
+            'view appointments', 'create appointments', 'edit appointments', 'cancel appointments',
+            'view visit services', 'create visit services', 'edit visit services', 'delete visit services',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'delete medical documents', 'upload medical documents', 'download medical documents',
+            'view lab results', 'create lab results', 'edit lab results', 'delete lab results',
+
+            // Inventory & Suppliers
+            'view inventory items', 'create inventory items', 'update inventory items', 'edit inventory items', 'delete inventory items',
+            'view inventory requests', 'create inventory requests', 'update inventory requests', 'edit inventory requests', 'delete inventory requests',
+            'view inventory transactions', 'create inventory transactions', 'update inventory transactions', 'edit inventory transactions', 'delete inventory transactions',
+            'view inventory alerts', 'create inventory alerts', 'update inventory alerts', 'edit inventory alerts', 'delete inventory alerts',
+            'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records', 'edit inventory maintenance records', 'delete inventory maintenance records',
+            'view suppliers', 'create suppliers', 'edit suppliers', 'delete suppliers',
+            'manage inventory suppliers', 'export inventory reports',
+
+            // Service Catalog
+            'view services', 'create services', 'edit services', 'delete services',
 
             // Insurance Management
-            'view insurance companies', 'create insurance companies', 'update insurance companies',
-            'view corporate clients', 'create corporate clients', 'update corporate clients',
-            'view insurance policies', 'create insurance policies', 'update insurance policies',
-            'view employee insurance records', 'create employee insurance records', 'update employee insurance records',
-            'view insurance claims', 'create insurance claims', 'update insurance claims',
+            'view insurance companies', 'create insurance companies', 'update insurance companies', 'edit insurance companies', 'delete insurance companies',
+            'view corporate clients', 'create corporate clients', 'update corporate clients', 'edit corporate clients', 'delete corporate clients',
+            'view insurance policies', 'create insurance policies', 'update insurance policies', 'edit insurance policies', 'delete insurance policies',
+            'view insurance claims', 'create insurance claims', 'update insurance claims', 'delete insurance claims',
+            'view employee insurance records', 'create employee insurance records', 'update employee insurance records', 'edit employee insurance records', 'delete employee insurance records',
 
-            // Inventory Management
-            'view inventory items', 'create inventory items', 'update inventory items',
-            'view inventory requests', 'create inventory requests', 'update inventory requests',
-            'view inventory transactions', 'create inventory transactions', 'update inventory transactions',
-            'view inventory alerts', 'create inventory alerts', 'update inventory alerts',
-            'view inventory maintenance records', 'create inventory maintenance records', 'update inventory maintenance records',
+            // Partnerships & Referrals
+            'view partners', 'create partners', 'edit partners', 'delete partners',
+            'view partner agreements', 'create partner agreements', 'edit partner agreements', 'delete partner agreements',
+            'view partner commissions', 'create partner commissions', 'edit partner commissions', 'delete partner commissions',
+            'view partner engagements', 'create partner engagements', 'edit partner engagements', 'delete partner engagements',
+            'view referrals', 'create referrals', 'edit referrals', 'delete referrals',
+            'view referral documents', 'create referral documents', 'edit referral documents', 'delete referral documents',
+            'view shared invoices', 'create shared invoices', 'edit shared invoices', 'delete shared invoices',
 
-            // Financial Management (Limited)
-            'view invoices', 'create invoices', 'edit invoices',
-            'view exchange rates', 'create exchange rates', 'update exchange rates',
+            // Event Management
+            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days', 'edit ethiopian calendar days', 'delete ethiopian calendar days',
+            'view events', 'create events', 'edit events', 'delete events',
+            'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria', 'delete eligibility criteria',
+            'view event recommendations', 'create event recommendations', 'edit event recommendations', 'delete event recommendations',
+            'view event participants', 'create event participants', 'edit event participants', 'delete event participants',
+            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments', 'delete event staff assignments',
+            'view event broadcasts', 'create event broadcasts', 'edit event broadcasts', 'delete event broadcasts',
 
-            // Calendar & Events
-            'view ethiopian calendar days', 'create ethiopian calendar days', 'update ethiopian calendar days',
-            'view events', 'create events', 'edit events',
-            'view eligibility criteria', 'create eligibility criteria', 'edit eligibility criteria',
-            'view event recommendations', 'create event recommendations', 'edit event recommendations',
-            'view event participants', 'create event participants', 'edit event participants',
-            'view event staff assignments', 'create event staff assignments', 'edit event staff assignments',
-            'view event broadcasts', 'create event broadcasts', 'edit event broadcasts',
+            // Financial Management
+            'view invoices', 'create invoices', 'edit invoices', 'delete invoices', 'export invoices',
+            'view staff payouts', 'create staff payouts', 'edit staff payouts', 'delete staff payouts', 'export staff payouts',
+            'view financial reports', 'export financial reports', 'manage budgets',
+            'view financial analytics', 'view revenue reports', 'view expense reports',
+            'view exchange rates', 'create exchange rates', 'update exchange rates', 'delete exchange rates',
+            'manage payment methods', 'manage financial settings', 'view cash flow', 'manage financial accounts',
+            'view audit logs', 'approve financial transactions', 'reconcile payments',
 
-            // Medical & Clinical
-            'view medical records', 'create medical records', 'edit medical records',
-            'view prescriptions', 'create prescriptions', 'edit prescriptions',
-            'view appointments', 'create appointments', 'edit appointments', 'cancel appointments',
-            'view visit services', 'create visit services', 'edit visit services',
-            'view medical documents', 'upload medical documents', 'download medical documents',
+            // Reporting & Search
+            'view analytics dashboard', 'view system reports', 'export system reports',
+            'view performance metrics', 'view user analytics', 'view operational reports', 'view reports',
+            'perform global search',
 
             // Communication
-            'view messages', 'send messages', 'delete messages',
+            'view messages', 'send messages', 'delete messages', 'manage group messages', 'create groups', 'export messages',
             'view notifications', 'send notifications',
 
-            // System (Limited)
-            'view system settings',
+            // System Administration (Core)
+            'view system settings', 'edit system settings', 'manage system backups',
+            'view system logs', 'manage system maintenance', 'view system health',
 
             // Personal
             'view own profile', 'edit own profile', 'change own password',
             'view public content',
-        ]);
+        ];
+        $adminRole->syncPermissions($adminPermissions);
 
         // Staff - Limited operational access
-        $staffRole->givePermissionTo([
+        $staffPermissions = [
             // Patient Management (Limited)
             'view patients', 'edit patients',
+
+            // Leave Management
+            'create leave requests',
 
             // Medical & Clinical (Core Functions)
             'view medical records', 'create medical records', 'edit medical records',
             'view prescriptions', 'create prescriptions', 'edit prescriptions',
             'view appointments', 'create appointments', 'edit appointments',
             'view visit services', 'create visit services', 'edit visit services',
-            'view medical documents', 'upload medical documents', 'download medical documents',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'upload medical documents', 'download medical documents',
             'view lab results', 'create lab results', 'edit lab results',
 
             // Assignment Management (View Own)
@@ -303,16 +420,18 @@ class RolesAndPermissionsSeeder extends Seeder
             // Personal
             'view own profile', 'edit own profile', 'change own password',
             'view public content',
-        ]);
+        ];
+        $staffRole->syncPermissions($staffPermissions);
 
         // Guest - Very limited access to public content only
-        $guestRole->givePermissionTo([
+        $guestPermissions = [
             // Public Access Only
             'view public content',
             'access guest features',
 
             // Basic Profile (if registered as guest)
             'view own profile', 'edit own profile', 'change own password',
-        ]);
+        ];
+        $guestRole->syncPermissions($guestPermissions);
     }
 }

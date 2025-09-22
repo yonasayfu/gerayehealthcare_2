@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\User\UserService;
 use Illuminate\Http\Request;
+use App\Support\ModuleAccess;
 
 class UserController extends Controller
 {
@@ -15,19 +16,28 @@ class UserController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user());
+        $user = $request->user()->loadMissing(['roles', 'permissions']);
+
+        return (new UserResource($user))
+            ->additional([
+                'modules' => ModuleAccess::forUser($user),
+            ]);
     }
 
     public function update(UpdateUserRequest $request)
     {
         $user = $this->userService->update($request->user()->id, $request->validated());
+        $user->loadMissing(['roles', 'permissions']);
 
-        return new UserResource($user);
+        return (new UserResource($user))
+            ->additional([
+                'modules' => ModuleAccess::forUser($user),
+            ]);
     }
 
     public function index()
     {
-        $users = User::all();
+        $users = User::with(['roles', 'permissions'])->get();
 
         return UserResource::collection($users);
     }

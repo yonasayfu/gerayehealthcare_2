@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateInvoiceDTO;
 use App\Http\Controllers\Base\BaseController;
 use App\Models\Invoice;
+use App\Models\Partner;
 use App\Models\Patient;
 use App\Models\VisitService;
 use App\Services\Invoice\InvoiceService;
@@ -14,7 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use App\Models\Partner;
 
 class InvoiceController extends BaseController
 {
@@ -44,11 +44,54 @@ class InvoiceController extends BaseController
                 ->get();
         }
 
-        return Inertia::render($this->viewName.'/Create', [
+        return Inertia::render($this->viewName . '/Create', [
             'patients' => $patients,
             'selectedPatientId' => $selectedPatientId,
             'billableVisits' => $billableVisits,
         ]);
+    }
+
+    public function edit($id)
+    {
+        $invoice = $this->service->getById($id);
+
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+
+        $billableVisits = VisitService::where('patient_id', $invoice->patient_id)
+            ->select('id', 'service_description', 'scheduled_at', 'cost')
+            ->orderByDesc('scheduled_at')
+            ->get();
+
+        return Inertia::render($this->viewName . '/Edit', [
+            'invoice' => $invoice,
+            'patients' => $patients,
+            'billableVisits' => $billableVisits,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $data = $request->validate([
+            'patient_id' => ['required', 'integer', 'exists:patients,id'],
+            'invoice_date' => ['required', 'date'],
+            'due_date' => ['required', 'date', 'after:invoice_date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        $this->service->update($id, $data);
+
+        $invoice = $this->service->getById($id);
+
+        return redirect()->route('admin.invoices.show', $invoice->id)
+            ->with('banner', 'Invoice updated successfully')->with('bannerStyle', 'success');
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $this->service->delete($id);
+
+        return redirect()->route('admin.invoices.index')
+            ->with('banner', 'Invoice deleted successfully')->with('bannerStyle', 'success');
     }
 
     public function export(Request $request)
@@ -117,7 +160,7 @@ class InvoiceController extends BaseController
             ];
         })->values();
 
-        return Inertia::render($this->viewName.'/Incoming', [
+        return Inertia::render($this->viewName . '/Incoming', [
             'groups' => $groups,
         ]);
     }
