@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             DemoDataSeeder::class,
+            MedicalVisitSeeder::class,
+            InvoiceTestDataSeeder::class,
         ]);
 
         // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---

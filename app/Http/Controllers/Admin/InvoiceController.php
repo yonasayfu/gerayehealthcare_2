@@ -100,7 +100,7 @@ class InvoiceController extends BaseController
 
     public function export(Request $request)
     {
-        return $this->handlePrintAll($request, Invoice::class, ExportConfig::getInvoiceConfig());
+        return $this->handleExport($request, Invoice::class, ExportConfig::getInvoiceConfig());
     }
 
     public function printAll()
