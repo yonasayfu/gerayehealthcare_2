@@ -4,19 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Config\AdditionalExportConfigs;
 use App\Http\Controllers\Base\BaseController;
-use App\Http\Traits\ExportableTrait;
 use App\Models\MedicalDocument;
-use App\Models\Patient;
 use App\Models\MedicalVisit;
+use App\Models\Patient;
 use App\Services\MedicalDocument\MedicalDocumentService;
 use App\Services\Validation\Rules\MedicalDocumentRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MedicalDocumentController extends BaseController
 {
-    use ExportableTrait;
-
     public function __construct(MedicalDocumentService $service)
     {
         parent::__construct(
@@ -30,7 +28,7 @@ class MedicalDocumentController extends BaseController
 
     public function create()
     {
-        $patients = Patient::select('id','full_name','patient_code')->orderBy('full_name')->get();
+        $patients = Patient::select('id', 'full_name', 'patient_code')->orderBy('full_name')->get();
         return inertia('Admin/MedicalDocuments/Create', [
             'patients' => $patients,
         ]);
@@ -38,22 +36,37 @@ class MedicalDocumentController extends BaseController
 
     public function store(Request $request)
     {
-        if (! $request->filled('created_by_staff_id') && Auth::check() && Auth::user()->staff) {
+        // Ensure created_by_staff_id is set before validation
+        if (!$request->filled('created_by_staff_id') && Auth::check() && Auth::user()->staff) {
             $request->merge(['created_by_staff_id' => Auth::user()->staff->id]);
         }
         return parent::store($request);
     }
 
-    /**
-     * Return recent medical visits for a given patient (for selector population).
-     */
-    public function visitsForPatient(Patient $patient)
+    public function update(Request $request, $id)
     {
-        $visits = MedicalVisit::where('patient_id', $patient->id)
+        // Ensure created_by_staff_id is preserved during update
+        $medicalDocument = $this->service->getById($id);
+        if (!$request->filled('created_by_staff_id') && $medicalDocument->created_by_staff_id) {
+            $request->merge(['created_by_staff_id' => $medicalDocument->created_by_staff_id]);
+        }
+        return parent::update($request, $id);
+    }
+
+    /**
+     * Test method to return recent medical visits for a given patient ID (for selector population).
+     */
+    public function visitsForPatient($patientId)
+    {
+        Log::info('visitsForPatient called with patient ID: ' . $patientId);
+
+        $visits = MedicalVisit::where('patient_id', $patientId)
             ->orderByDesc('visit_date')
             ->select('id', 'visit_date', 'visit_type')
             ->limit(100)
             ->get();
+
+        Log::info('Found ' . $visits->count() . ' visits for patient ID ' . $patientId);
 
         return response()->json(['visits' => $visits]);
     }
@@ -90,7 +103,7 @@ class MedicalDocumentController extends BaseController
     public function edit($id)
     {
         $medicalDocument = MedicalDocument::with(['patient', 'visit'])->findOrFail($id);
-        $patients = Patient::select('id','full_name','patient_code')->orderBy('full_name')->get();
+        $patients = Patient::select('id', 'full_name', 'patient_code')->orderBy('full_name')->get();
 
         return inertia('Admin/MedicalDocuments/Edit', [
             'medicalDocument' => $medicalDocument,
