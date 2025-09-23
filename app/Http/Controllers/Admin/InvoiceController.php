@@ -13,11 +13,15 @@ use App\Services\Validation\Rules\InvoiceRules;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 
 class InvoiceController extends BaseController
 {
+    use ExportableTrait;
+
     public function __construct(InvoiceService $invoiceService)
     {
         parent::__construct(
@@ -96,22 +100,22 @@ class InvoiceController extends BaseController
 
     public function export(Request $request)
     {
-        return app(InvoiceService::class)->export($request);
+        return $this->handlePrintAll($request, Invoice::class, ExportConfig::getInvoiceConfig());
     }
 
     public function printAll()
     {
-        return app(InvoiceService::class)->printAll(request());
+        return $this->handlePrintAll(request(), Invoice::class, ExportConfig::getInvoiceConfig());
     }
 
     public function printCurrent()
     {
-        return app(InvoiceService::class)->printCurrent(request());
+        return $this->handlePrintCurrent(request(), Invoice::class, ExportConfig::getInvoiceConfig());
     }
 
     public function printSingle(Invoice $invoice)
     {
-        return app(InvoiceService::class)->printSingle($invoice, request());
+        return $this->handlePrintSingle($invoice, request(), ExportConfig::getInvoiceConfig());
     }
 
     // Public, signed URL PDF endpoint (no auth). Route is protected by 'signed' middleware.

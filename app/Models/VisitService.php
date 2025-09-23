@@ -90,6 +90,11 @@ class VisitService extends Model
         return $this->hasMany(InvoiceItem::class, 'visit_service_id');
     }
 
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
+    }
+
     /**
      * Get the URL for the prescription file.
      */
