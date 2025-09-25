@@ -53,6 +53,7 @@ class UserController extends BaseController
         ]);
 
         $user->syncRoles($validatedData['roles']);
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         return redirect()->route('admin.users.index')->with('banner', 'User role updated successfully.')->with('bannerStyle', 'success');
     }

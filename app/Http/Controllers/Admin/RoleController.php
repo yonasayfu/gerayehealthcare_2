@@ -100,6 +100,7 @@ class RoleController extends BaseController
 
             $role = $this->service->create(['name' => $validatedData['name']]);
             $role->syncPermissions($validatedData['permissions'] ?? []);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
             $request->session()->flash('banner', ucfirst($this->dataVariableName).' created successfully.');
             $request->session()->flash('bannerStyle', 'success');
@@ -125,6 +126,7 @@ class RoleController extends BaseController
 
             $this->service->update($id, ['name' => $validatedData['name']]);
             $role->syncPermissions($validatedData['permissions'] ?? []);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
             $request->session()->flash('banner', ucfirst($this->dataVariableName).' updated successfully.');
             $request->session()->flash('bannerStyle', 'success');

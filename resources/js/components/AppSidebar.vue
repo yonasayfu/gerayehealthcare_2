@@ -151,7 +151,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
       { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
       { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
-      { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
+      { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visit services' },
     ],
   },
   {
@@ -167,11 +167,11 @@ const allAdminNavItems: SidebarNavGroup[] = [
     icon: UserCog,
     items: [
       { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
-      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
-      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
-      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
-      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-      { title: 'Leave Requests', routeName: 'admin.leave-requests.index', icon: CalendarOff },
+      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff availabilities' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign, permission: 'view staff payouts' },
+      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt, permission: 'view invoices' },
+      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList, permission: 'view services' },
+      { title: 'Leave Requests', routeName: 'admin.leave-requests.index', icon: CalendarOff, permission: 'view leave requests' },
     ],
   },
   {
@@ -181,7 +181,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
       { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
       { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
-      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
+      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view inventory maintenance records' },
       { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
       { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
     ],
@@ -206,8 +206,8 @@ const allAdminNavItems: SidebarNavGroup[] = [
     icon: DollarSign,
     items: [
       { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt, permission: 'view invoices' },
-      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign, permission: 'view financial reports' },
-      { title: 'Financial Reports', routeName: 'admin.reports.revenue-ar', icon: BarChart, permission: 'view financial reports' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign, permission: 'view staff payouts' },
+      { title: 'Financial Reports', routeName: 'admin.reports.revenue-ar', icon: BarChart, permission: 'view reports' },
       
       { title: 'Budget Management', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage budgets' },
     ],
@@ -216,9 +216,9 @@ const allAdminNavItems: SidebarNavGroup[] = [
     group: 'Reports & Analytics',
     icon: BarChart,
     items: [
-      { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList, permission: 'view system reports' },
-      { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign, permission: 'view financial reports' },
-      { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart, permission: 'view marketing analytics' },
+      { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList, permission: 'view reports' },
+      { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign, permission: 'view reports' },
+      { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart, permission: 'view reports' },
       { title: 'Performance Metrics', routeName: 'admin.analytics.dashboard', icon: BarChart, permission: 'view analytics dashboard' },
     ],
   },
@@ -365,39 +365,49 @@ function safeHref(name?: string) {
   return '#';
 }
 
-const mainNavItems = computed<SidebarNavGroup[]>(() => {
-    if (!user.value) return [];
+function mergeGroups(primary: SidebarNavGroup[], extra: SidebarNavGroup[]): SidebarNavGroup[] {
+  const byGroup: Record<string, SidebarNavGroup> = {};
 
-    // For super admin, show everything
-    if (hasRole('super-admin')) {
-        // Ensure all groups are open for super admin
-        nextTick(() => {
-            const allGroupNames = allAdminNavItems.map((group: SidebarNavGroup) => group.group);
-            openGroups.value = allGroupNames;
-            areAllGroupsExpanded.value = true;
-
-            // Debug: Check if specific routes exist
-            console.log('Checking route existence:');
-            console.log('admin.marketing-campaigns.index exists:', hasRoute('admin.marketing-campaigns.index'));
-            console.log('admin.leave-requests.index exists:', hasRoute('admin.leave-requests.index'));
-
-            // Debug: Try to generate URLs
-            try {
-                console.log('admin.marketing-campaigns.index URL:', route('admin.marketing-campaigns.index'));
-            } catch (e) {
-                console.log('Error generating admin.marketing-campaigns.index URL:', e);
-            }
-
-            try {
-                console.log('admin.leave-requests.index URL:', route('admin.leave-requests.index'));
-            } catch (e) {
-                console.log('Error generating admin.leave-requests.index URL:', e);
-            }
-        });
-        return allAdminNavItems;
+  const addGroup = (g: SidebarNavGroup) => {
+    if (!byGroup[g.group]) {
+      byGroup[g.group] = { ...g, items: [...g.items] };
+      return;
     }
-    // For all other roles, dynamically filter based on permissions
-    return getFilteredNavItems();
+    // merge items (unique by routeName or title)
+    const seen = new Set((byGroup[g.group].items || []).map(i => `${i.routeName || ''}|${i.title}`));
+    for (const item of g.items) {
+      const key = `${item.routeName || ''}|${item.title}`;
+      if (!seen.has(key)) {
+        byGroup[g.group].items.push(item);
+        seen.add(key);
+      }
+    }
+  };
+
+  for (const g of primary) addGroup(g);
+  for (const g of extra) addGroup(g);
+
+  return Object.values(byGroup);
+}
+
+const mainNavItems = computed<SidebarNavGroup[]>(() => {
+  if (!user.value) return [];
+
+  // Build admin and staff collections
+  const adminGroups = hasRole('super-admin') ? allAdminNavItems : getFilteredNavItems();
+  const staffGroups = getStaffNavItems();
+
+  // Super-admin: expand all by default
+  if (hasRole('super-admin')) {
+    nextTick(() => {
+      const allGroupNames = adminGroups.map((group: SidebarNavGroup) => group.group);
+      openGroups.value = allGroupNames;
+      areAllGroupsExpanded.value = true;
+    });
+  }
+
+  // Merge, deduplicating overlapping groups/items
+  return mergeGroups(adminGroups, staffGroups);
 });
 
 // Legacy staff navigation for backward compatibility
