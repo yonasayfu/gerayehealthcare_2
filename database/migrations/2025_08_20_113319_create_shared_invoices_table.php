@@ -22,9 +22,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('shared_invoices', function (Blueprint $table) {
-            DB::statement("COMMENT ON TABLE shared_invoices IS 'Tracks invoices that are explicitly shared with partners for commission or collaboration purposes.'");
-        });
     }
 
     /**

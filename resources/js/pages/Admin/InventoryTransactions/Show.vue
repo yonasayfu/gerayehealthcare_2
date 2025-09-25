@@ -131,8 +131,8 @@ function printPage() {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4 landscape; /* Set page size to A4 */
-    margin: 0.5cm; /* Reduce margins significantly to give more space for content */
+    size: A4;
+    margin: 1cm;
   }
 
   /* Universal print adjustments */
@@ -142,25 +142,26 @@ function printPage() {
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    background: #fff !important;
   }
 
   /* Elements to hide during print */
   .print\:hidden {
     display: none !important;
   }
+  
   /* HIDE BREADCRUMBS AND TOP NAV (from AppSidebarLayout.vue) */
   .app-sidebar-header, .app-sidebar {
-      display: none !important;
+    display: none !important;
   }
+  
   /* Fallback/more general selectors if the above doesn't catch it all */
   body > header,
   body > nav,
   [role="banner"],
   [role="navigation"] {
-      display: none !important;
+    display: none !important;
   }
-
 
   /* Elements to show only during print */
   .hidden.print\:block {
@@ -169,44 +170,43 @@ function printPage() {
 
   /* Specific styles for the print header content (logo and clinic name) */
   .print-header-content {
-      padding-top: 0.5cm !important;
-      padding-bottom: 0.5cm !important;
-      margin-bottom: 0.8cm !important;
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+    text-align: center;
   }
 
   .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .print-clinic-name {
-      font-size: 1.8rem !important;
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
+    font-size: 1.8rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
   }
 
   .print-document-title {
-      font-size: 0.9rem !important;
-      color: #555 !important;
+    font-size: 0.9rem !important;
+    color: #555 !important;
   }
 
-  /* Target the main patient document container for scaling and layout */
-  .bg-white.dark\:bg-gray-900.shadow.rounded-lg {
+  /* Target the main document container for proper centering and layout */
+  .print-document {
     box-shadow: none !important;
     border-radius: 0 !important;
     border: none !important;
     padding: 1cm !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     width: 100% !important;
+    max-width: 210mm !important; /* A4 width */
     height: auto !important;
     overflow: visible !important;
-
-    transform: scale(0.98); /* Less aggressive scaling. Adjust if it goes to 2 pages */
-    transform-origin: top left;
   }
 
   /* Reduce overall top-level padding/margin if the wrapper div adds too much */
@@ -220,17 +220,34 @@ function printPage() {
     margin-top: 0.8rem !important;
     margin-bottom: 0.8rem !important;
   }
+  
   .space-y-6 > div:not(:first-child) {
     margin-top: 0.6rem !important;
     margin-bottom: 0.6rem !important;
   }
 
   /* TYPOGRAPHY ADJUSTMENTS */
-  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
-  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
-  .text-sm { font-size: 0.8rem !important; }
-  .text-xs { font-size: 0.75rem !important; }
-  .font-medium { font-weight: 600 !important; }
+  h2 { 
+    font-size: 1.3rem !important; 
+    margin-bottom: 0.6rem !important; 
+  }
+  
+  p { 
+    font-size: 0.85rem !important; 
+    line-height: 1.4 !important; 
+  }
+  
+  .text-sm { 
+    font-size: 0.8rem !important; 
+  }
+  
+  .text-xs { 
+    font-size: 0.75rem !important; 
+  }
+  
+  .font-medium { 
+    font-weight: 600 !important; 
+  }
 
   /* BORDER STYLES */
   .border-b {
@@ -260,6 +277,7 @@ function printPage() {
     border-right: 1px dashed #eee !important; /* Subtle dashed line */
     padding-right: 1.5rem !important; /* Space between content and line */
   }
+  
   .grid > div:nth-child(even) { /* Targets items in the right column */
     padding-left: 1.5rem !important; /* Space between line and content */
   }
@@ -275,6 +293,12 @@ function printPage() {
     white-space: normal !important;
     word-break: break-word !important;
     color: #333 !important;
+  }
+  
+  /* Footer adjustments */
+  .print-footer {
+    text-align: center;
+    margin-top: 1cm;
   }
 }
 </style>

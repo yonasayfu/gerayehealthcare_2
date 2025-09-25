@@ -29,7 +29,7 @@ class InventoryTransactionService extends BaseService
     protected function applySearch($query, $search)
     {
         return $query->where('transaction_type', 'like', "%$search%")
-            ->orWhereHas('item', fn ($q) => $q->where('name', 'like', "%$search%"));
+            ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
     }
 
     public function getAll(Request $request, array $with = [])
@@ -63,11 +63,6 @@ class InventoryTransactionService extends BaseService
     public function export(Request $request)
     {
         return $this->handleExport($request, $this->model, AdditionalExportConfigs::getInventoryTransactionConfig());
-    }
-
-    public function printAll(Request $request)
-    {
-        return $this->handlePrintAll($request, $this->model, AdditionalExportConfigs::getInventoryTransactionConfig());
     }
 
     public function printCurrent(Request $request)

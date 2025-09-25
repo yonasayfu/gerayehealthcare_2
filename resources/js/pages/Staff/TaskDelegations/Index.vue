@@ -21,7 +21,7 @@ const scope = ref<'assigned' | 'created'>((props as any).filters?.scope || 'assi
 
 // Search and pagination
 const search = ref(props.filters.search || '')
-const perPage = ref(props.filters.per_page || 15)
+const perPage = ref(props.filters.per_page || 5)
 const sortBy = ref(props.filters.sort_by || 'due_date')
 const sortOrder = ref(props.filters.sort_order || 'asc')
 

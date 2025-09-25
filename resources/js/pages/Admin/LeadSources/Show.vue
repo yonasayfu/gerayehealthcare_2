@@ -49,14 +49,14 @@ function destroy(id: number) {
   <AppLayout :breadcrumbs="breadcrumbs">
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-      <ShowHeader title="Lead Source Details" :subtitle="`Lead Source: ${leadSource.name}`">
+      <ShowHeader title="Lead Source Details" :subtitle="`Lead Source: ${leadSource.name}`" class="print:hidden">
         <template #actions>
           <Link :href="route('admin.lead-sources.index')" class="btn-glass btn-glass-sm">Back</Link>
         </template>
       </ShowHeader>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -120,153 +120,155 @@ function destroy(id: number) {
 </template>
 
 <style>
-/* Optimized Print Styles for A4 */
+/* Print styles based on CaregiverAssignment Show.vue */
 @media print {
   @page {
-    size: A4 landscape; /* Set page size to A4 */
-    margin: 0.5cm; /* Reduce margins significantly to give more space for content */
+    size: A4 landscape;
+    margin: 2cm;
   }
 
-  /* Universal print adjustments */
   body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color: #000 !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
   }
 
-  /* Elements to hide during print */
   .print\:hidden {
     display: none !important;
   }
-  /* HIDE BREADCRUMBS AND TOP NAV (from AppSidebarLayout.vue) */
-  .app-sidebar-header, .app-sidebar {
-      display: none !important;
-  }
-  /* Fallback/more general selectors if the above doesn't catch it all */
-  body > header,
-  body > nav,
-  [role="banner"],
-  [role="navigation"] {
-      display: none !important;
-  }
 
-
-  /* Elements to show only during print */
   .hidden.print\:block {
     display: block !important;
   }
 
-  /* Specific styles for the print header content (logo and clinic name) */
+  /* Print header styling */
   .print-header-content {
-      padding-top: 0.5cm !important;
-      padding-bottom: 0.5cm !important;
-      margin-bottom: 0.8cm !important;
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 1.5cm !important;
   }
 
   .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .print-clinic-name {
-      font-size: 1.8rem !important;
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
+    font-size: 1.8rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
   }
 
   .print-document-title {
-      font-size: 0.9rem !important;
-      color: #555 !important;
+    font-size: 0.9rem !important;
+    color: #555 !important;
   }
 
-  /* Target the main patient document container for scaling and layout */
-  .bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    border: none !important;
-    padding: 1cm !important;
-    margin: 0 !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-
-    transform: scale(0.98); /* Less aggressive scaling. Adjust if it goes to 2 pages */
-    transform-origin: top left;
-  }
-
-  /* Reduce overall top-level padding/margin if the wrapper div adds too much */
-  .p-6.space-y-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  /* Adjust spacing within sections for print */
+  /* Content adjustments */
   .space-y-8 > div:not(:first-child) {
-    margin-top: 0.8rem !important;
-    margin-bottom: 0.8rem !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
   }
+
   .space-y-6 > div:not(:first-child) {
-    margin-top: 0.6rem !important;
-    margin-bottom: 0.6rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 
-  /* TYPOGRAPHY ADJUSTMENTS */
-  h2 { font-size: 1.3rem !important; margin-bottom: 0.6rem !important; }
-  p { font-size: 0.85rem !important; line-height: 1.4 !important; }
-  .text-sm { font-size: 0.8rem !important; }
-  .text-xs { font-size: 0.75rem !important; }
-  .font-medium { font-weight: 600 !important; }
+  /* Typography adjustments */
+  h2 {
+    font-size: 1.3rem !important;
+    margin-bottom: 1rem !important;
+  }
 
-  /* BORDER STYLES */
+  p {
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .text-sm {
+    font-size: 0.85rem !important;
+  }
+
+  .text-xs {
+    font-size: 0.8rem !important;
+  }
+
+  .font-medium {
+    font-weight: 600 !important;
+  }
+
+  /* Border styles */
   .border-b {
     border-bottom: 1px solid #ddd !important;
-    padding-bottom: 0.7rem !important;
-    margin-bottom: 0.7rem !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 1rem !important;
   }
 
-  /* GRID LAYOUT FOR DATA FIELDS (Two-column "Label: Value" format) */
+  /* Fixed footer for print */
+  .print-footer {
+    position: fixed !important;
+    bottom: 1.5cm !important;
+    left: 2cm !important;
+    right: 2cm !important;
+    width: calc(100% - 4cm) !important;
+    background: #ffffff !important;
+    padding-top: 0.3rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Grid layout for data fields */
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* Force 2 equal columns */
-    gap: 0.8rem 0 !important; /* Vertical gap, horizontal gap is now handled by padding */
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.2rem 0 !important;
     page-break-inside: avoid !important;
   }
 
   /* Style individual data items within the grid for visual grouping */
-  .grid > div {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: baseline !important;
-    gap: 0.4rem !important; /* Gap between label and value */
-    padding: 0.1rem 0 !important;
+  .grid > div:nth-child(odd) {
+    border-right: 1px dashed #eee !important;
+    padding-right: 2.5rem !important;
   }
 
-  /* Add a subtle dashed vertical line between the two columns */
-  .grid > div:nth-child(odd) { /* Targets items in the left column */
-    border-right: 1px dashed #eee !important; /* Subtle dashed line */
-    padding-right: 1.5rem !important; /* Space between content and line */
-  }
-  .grid > div:nth-child(even) { /* Targets items in the right column */
-    padding-left: 1.5rem !important; /* Space between line and content */
+  .grid > div:nth-child(even) {
+    padding-left: 2.5rem !important;
   }
 
-  .grid > div p:first-child { /* The Label */
+  .grid > div p:first-child {
     font-weight: 600 !important;
     color: #000 !important;
     flex-shrink: 0 !important;
   }
 
-  .grid > div p:last-child { /* The Value */
+  .grid > div p:last-child {
     flex-grow: 1 !important;
     white-space: normal !important;
     word-break: break-word !important;
     color: #333 !important;
+  }
+
+  /* Hide elements not needed in print */
+  .btn-glass,
+  .liquidGlass-wrapper,
+  .border-t {
+    display: none !important;
+  }
+
+  /* Add padding to the main print container */
+  .print-document {
+    padding: 2cm !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent content overlap */
+  .print-document > div {
+    break-inside: avoid !important;
   }
 }
 </style>

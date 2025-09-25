@@ -78,4 +78,34 @@ class MarketingCampaign extends Model
     {
         return $this->belongsTo(Staff::class, 'created_by_staff_id');
     }
+
+    public function contents()
+    {
+        return $this->hasMany(CampaignContent::class);
+    }
+
+    public function metrics()
+    {
+        return $this->hasMany(CampaignMetric::class);
+    }
+
+    public function landingPages()
+    {
+        return $this->hasMany(LandingPage::class);
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(MarketingLead::class, 'source_campaign_id');
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(MarketingBudget::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(MarketingTask::class);
+    }
 }

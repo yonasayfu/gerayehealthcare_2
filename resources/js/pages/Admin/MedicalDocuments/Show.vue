@@ -48,7 +48,7 @@ async function destroy(id: number) {
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
       <ShowHeader title="Medical Document Details" :subtitle="`Document: ${props.medicalDocument.title || 'N/A'}`">
-        <template #actions>
+        <!-- <template #actions>
           <Link :href="route('admin.medical-documents.index')" class="btn-glass btn-glass-sm">Back</Link>
           <button @click="printSingleDocument" class="btn-glass btn-glass-sm">
             <Printer class="icon" />
@@ -62,7 +62,7 @@ async function destroy(id: number) {
             <Trash2 class="icon" />
             <span class="hidden sm:inline">Delete</span>
           </button>
-        </template>
+        </template> -->
       </ShowHeader>
 
       <div class="p-6 space-y-6">

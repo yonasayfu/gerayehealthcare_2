@@ -24,7 +24,7 @@ class CampaignContentController extends BaseController
             'Admin/CampaignContents',
             'campaignContents',
             CampaignContent::class,
-            null // Use full validated payload; DTO is incomplete and mismatched
+            null// Use full validated payload; DTO is incomplete and mismatched
         );
     }
 
@@ -35,7 +35,7 @@ class CampaignContentController extends BaseController
         $contentTypes = ['text', 'image', 'video'];
         $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
-        return Inertia::render($this->viewName.'/Create', [
+        return Inertia::render($this->viewName . '/Create', [
             'campaigns' => $campaigns,
             'platforms' => $platforms,
             'contentTypes' => $contentTypes,
@@ -51,7 +51,7 @@ class CampaignContentController extends BaseController
         $contentTypes = ['text', 'image', 'video'];
         $statuses = ['draft', 'scheduled', 'posted', 'failed'];
 
-        return Inertia::render($this->viewName.'/Edit', [
+        return Inertia::render($this->viewName . '/Edit', [
             lcfirst(class_basename($this->modelClass)) => $campaignContent,
             'campaigns' => $campaigns,
             'platforms' => $platforms,
@@ -66,7 +66,7 @@ class CampaignContentController extends BaseController
         // Eager-load relations so Show.vue can render names
         $campaignContent = $this->service->getById($id, ['campaign', 'platform']);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             lcfirst(class_basename($this->modelClass)) => $campaignContent,
         ]);
     }
@@ -76,11 +76,16 @@ class CampaignContentController extends BaseController
         $this->authorize('viewAny', CampaignContent::class);
         $data = $this->service->getAll($request);
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             $this->dataVariableName => $data,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'platform_id', 'content_type', 'status', 'scheduled_post_date_start', 'scheduled_post_date_end']),
             'campaigns' => MarketingCampaign::all(),
             'platforms' => MarketingPlatform::all(),
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        return $this->service->export($request);
     }
 }

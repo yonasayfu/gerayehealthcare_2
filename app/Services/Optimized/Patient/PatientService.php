@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Services\Optimized;
-
-use App\Services\Optimized\PerformanceOptimizedBaseService;
+namespace App\Services\Optimized\Patient;
 
 use App\Http\Config\ExportConfig;
 use App\Http\Traits\ExportableTrait;
 use App\Models\Patient;
+use App\Services\Optimized\BaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -36,7 +35,15 @@ class PatientService extends BaseService
      */
     public function getPatientsForSelect()
     {
-        return $this->getForSelect('full_name', 'id');
+        $cacheKey = 'patients_for_select';
+        return Cache::remember($cacheKey, 300, function () {
+            return $this->model->select('id', 'full_name')
+                ->orderBy('full_name')
+                ->get()
+                ->mapWithKeys(function ($patient) {
+                    return [$patient->id => $patient->full_name];
+                });
+        });
     }
 
     /**
@@ -44,7 +51,7 @@ class PatientService extends BaseService
      */
     public function getRecentPatients(int $limit = 10)
     {
-        return Cache::remember('patients_recent_'.$limit, 300, function () use ($limit) {
+        return Cache::remember('patients_recent_' . $limit, 300, function () use ($limit) {
             return $this->model->with(['visitServices' => function ($query) {
                 $query->latest()->limit(3);
             }, 'invoices' => function ($query) {
@@ -84,6 +91,11 @@ class PatientService extends BaseService
     public function export(Request $request)
     {
         return $this->handleExport($request, Patient::class, ExportConfig::getPatientConfig());
+    }
+
+    public function printAll(Request $request)
+    {
+        return $this->handlePrintAll($request, Patient::class, ExportConfig::getPatientConfig());
     }
 
     public function printCurrent(Request $request)

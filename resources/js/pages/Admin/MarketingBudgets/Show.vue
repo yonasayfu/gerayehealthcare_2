@@ -106,9 +106,9 @@ const { printCurrentView } = useExport({ routeName: 'admin.marketing-budgets', f
         </div>
 
         <div class="mt-6 flex flex-wrap gap-2 justify-end print:hidden">
-          <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">
+          <!-- <Link :href="route('admin.marketing-budgets.index')" class="btn-glass btn-glass-sm">
             
-          </Link>
+          </Link> -->
           <button @click="printCurrentView" class="btn-glass btn-glass-sm" title="Print this budget">
             Print Current
           </button>

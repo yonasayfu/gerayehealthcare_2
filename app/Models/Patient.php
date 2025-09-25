@@ -5,7 +5,8 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB; // Import DB facade for transactions
+use Illuminate\Support\Facades\DB;
+// Import DB facade for transactions
 
 class Patient extends Model
 {
@@ -63,7 +64,7 @@ class Patient extends Model
                     }
 
                     // Format the number with leading zeros, e.g., PAT-00001
-                    $patient->patient_code = 'PAT-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $patient->patient_code = 'PAT-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });
@@ -87,7 +88,7 @@ class Patient extends Model
      */
     public function getAgeAttribute()
     {
-        if (! $this->date_of_birth) {
+        if (!$this->date_of_birth) {
             return null;
         }
 
@@ -130,6 +131,14 @@ class Patient extends Model
     public function lead()
     {
         return $this->belongsTo(MarketingLead::class, 'lead_id');
+    }
+
+    /**
+     * Get all medical visits for this patient.
+     */
+    public function medicalVisits()
+    {
+        return $this->hasMany(MedicalVisit::class);
     }
 
     /**
@@ -178,12 +187,12 @@ class Patient extends Model
     public function referralDocuments()
     {
         return $this->hasManyThrough(
-            ReferralDocument::class,   // Final model
-            Referral::class,           // Intermediate model
-            'referred_patient_id',     // Foreign key on referrals table...
-            'referral_id',             // Foreign key on referral_documents table...
-            'id',                      // Local key on patients table
-            'id'                       // Local key on referrals table
+            ReferralDocument::class, // Final model
+            Referral::class, // Intermediate model
+            'referred_patient_id', // Foreign key on referrals table...
+            'referral_id', // Foreign key on referral_documents table...
+            'id', // Local key on patients table
+            'id' // Local key on referrals table
         );
     }
 }

@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Services\Messaging\MessageService;
 use Illuminate\Http\Request;
 
-class MessageController extends BaseApiController
+class MessageController extends \App\Http\Controllers\Controller
 {
     public function threads(Request $request)
     {

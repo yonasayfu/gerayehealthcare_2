@@ -3,26 +3,27 @@
 namespace App\Services\LeaveRequest;
 
 use App\Models\LeaveRequest;
+use App\Notifications\LeaveRequestStatusUpdated;
+use App\Notifications\LeaveRequestSubmitted;
 use App\Services\Base\BaseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Notifications\LeaveRequestStatusUpdated;
 
 class LeaveRequestService extends BaseService
 {
-    public function __construct(LeaveRequest $leaveRequest)
+    public function __construct()
     {
-        parent::__construct($leaveRequest);
+        parent::__construct(new LeaveRequest());
     }
 
     protected function applySearch($query, $search)
     {
         $query->where(function ($q) use ($search) {
-            $q->where('reason', 'ilike', '%'.$search.'%')
-                ->orWhere('status', 'ilike', '%'.$search.'%')
+            $q->where('reason', 'ilike', '%' . $search . '%')
+                ->orWhere('status', 'ilike', '%' . $search . '%')
                 ->orWhereHas('staff', function ($sq) use ($search) {
-                    $sq->where('first_name', 'ilike', '%'.$search.'%')
-                        ->orWhere('last_name', 'ilike', '%'.$search.'%');
+                    $sq->where('first_name', 'ilike', '%' . $search . '%')
+                        ->orWhere('last_name', 'ilike', '%' . $search . '%');
                 });
         });
     }
@@ -43,9 +44,9 @@ class LeaveRequestService extends BaseService
             $query->join('staff', 'leave_requests.staff_id', '=', 'staff.id')
                 ->orderBy('staff.first_name', $sortOrder)
                 ->select('leave_requests.*');
-            } else {
-                $query->orderBy($sortBy, $sortOrder);
-            }
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
         $perPage = (int) $request->input('per_page', 10);
 
@@ -58,13 +59,38 @@ class LeaveRequestService extends BaseService
         return $paginator;
     }
 
-    public function update(int $id, array|object $data): LeaveRequest
+    public function create(array | object $data): LeaveRequest
+    {
+        Log::info('LeaveRequest Create Service: Request received', [
+            'data' => $data,
+        ]);
+
+        $leaveRequest = parent::create($data);
+
+        Log::info('LeaveRequest Create Service: Successfully created', [
+            'leaveRequestId' => $leaveRequest->id,
+        ]);
+
+        // Notify admins about the new leave request
+        try {
+            $this->notifyAdminsAboutNewRequest($leaveRequest);
+        } catch (\Throwable $e) {
+            Log::error('Failed to send LeaveRequestSubmitted notification to admins', [
+                'leaveRequestId' => $leaveRequest->id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $leaveRequest;
+    }
+
+    public function update(int $id, array | object $data): LeaveRequest
     {
         $leaveRequest = $this->getById($id);
 
         Log::info('LeaveRequest Update Service: Request received', [
             'leaveRequestId' => $leaveRequest->id,
-            'status_from_data' => $data['status'],
+            'status_from_data' => $data['status'] ?? null,
             'admin_notes_from_data' => $data['admin_notes'] ?? null,
         ]);
 
@@ -99,5 +125,32 @@ class LeaveRequestService extends BaseService
         }
 
         return $freshLeaveRequest;
+    }
+
+    /**
+     * Notify admins about a new leave request
+     */
+    protected function notifyAdminsAboutNewRequest(LeaveRequest $leaveRequest): void
+    {
+        // Get users with admin roles who should be notified
+        $adminRoles = ['Super Admin', 'Admin', 'CEO', 'COO'];
+        $admins = \App\Models\User::role($adminRoles)->get();
+
+        Log::info('Notifying admins about new leave request', [
+            'leaveRequestId' => $leaveRequest->id,
+            'adminCount' => $admins->count(),
+        ]);
+
+        foreach ($admins as $admin) {
+            try {
+                $admin->notify(new LeaveRequestSubmitted($leaveRequest));
+            } catch (\Throwable $e) {
+                Log::error('Failed to send LeaveRequestSubmitted notification to admin', [
+                    'adminId' => $admin->id,
+                    'leaveRequestId' => $leaveRequest->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 }

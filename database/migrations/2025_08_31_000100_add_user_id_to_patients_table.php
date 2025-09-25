@@ -15,7 +15,11 @@ return new class extends Migration
         });
 
         // Best-effort backfill: match patients to users by email
-        DB::statement('UPDATE patients p SET user_id = u.id FROM users u WHERE p.user_id IS NULL AND p.email IS NOT NULL AND LOWER(p.email) = LOWER(u.email)');
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            DB::statement('UPDATE patients SET user_id = (SELECT id FROM users WHERE LOWER(users.email) = LOWER(patients.email)) WHERE user_id IS NULL AND email IS NOT NULL');
+        } else {
+            DB::statement('UPDATE patients p SET user_id = u.id FROM users u WHERE p.user_id IS NULL AND p.email IS NOT NULL AND LOWER(p.email) = LOWER(u.email)');
+        }
     }
 
     public function down(): void

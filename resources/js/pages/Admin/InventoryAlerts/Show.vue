@@ -97,7 +97,7 @@ const isDelegated = computed(() => !!props.inventoryAlert?.delegated_task_id || 
                 <User2 class="w-4 h-4 text-gray-500" />
                 <div>
                   <div class="text-gray-500 text-xs">Assigned To</div>
-                  <div class="font-medium">{{ inventoryAlert?.delegatedTask?.assignee?.name ?? '#' + (inventoryAlert?.delegatedTask?.assigned_to ?? '-') }}</div>
+                  <div class="font-medium">{{ inventoryAlert?.delegatedTask?.assignee?.full_name ?? inventoryAlert?.delegatedTask?.assignee?.first_name + ' ' + inventoryAlert?.delegatedTask?.assignee?.last_name ?? '#' + (inventoryAlert?.delegatedTask?.assigned_to ?? '-') }}</div>
                 </div>
               </div>
               <div class="flex items-center gap-2">

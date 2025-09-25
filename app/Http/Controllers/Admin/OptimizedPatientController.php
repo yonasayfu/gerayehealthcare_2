@@ -21,7 +21,7 @@ class OptimizedPatientController extends OptimizedBaseController
 
     protected $editWith = ['corporateClient', 'insurancePolicy'];
 
-    public function __construct(OptimizedPatientService $patientService)
+    public function __construct(PatientService $patientService)
     {
         $this->patientService = $patientService;
 
@@ -41,9 +41,9 @@ class OptimizedPatientController extends OptimizedBaseController
         $patients = $this->patientService->getAll($request, $this->indexWith);
 
         // Get cached statistics for the dashboard info
-        $statistics = $this->patientService->getStatistics();
+        $statistics = $this->patientService->getDashboardStats();
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             'patients' => $patients,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
             'statistics' => $statistics, // Additional dashboard data
@@ -55,33 +55,29 @@ class OptimizedPatientController extends OptimizedBaseController
         // Use optimized service with eager loading
         $patient = $this->patientService->getById($id, $this->showWith);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             'patient' => $patient,
         ]);
     }
 
     public function create()
     {
-        // Use cached form data
-        $formData = $this->patientService->getFormData();
-
-        return Inertia::render($this->viewName.'/Create', $formData);
+        return Inertia::render($this->viewName . '/Create');
     }
 
     public function edit($id)
     {
         // Use optimized service with eager loading
         $patient = $this->patientService->getById($id, $this->editWith);
-        $formData = $this->patientService->getFormData();
 
-        return Inertia::render($this->viewName.'/Edit', array_merge([
+        return Inertia::render($this->viewName . '/Edit', [
             'patient' => $patient,
-        ], $formData));
+        ]);
     }
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate(PatientRules::create());
+        $validatedData = $request->validate(PatientRules::store());
 
         // Use DTO for data transfer
         $dto = CreatePatientDTO::from($validatedData);
@@ -94,7 +90,8 @@ class OptimizedPatientController extends OptimizedBaseController
 
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate(PatientRules::update());
+        $model = Patient::find($id);
+        $validatedData = $request->validate(PatientRules::update($model));
 
         // Use DTO for data transfer
         $dto = CreatePatientDTO::from($validatedData);
@@ -132,7 +129,8 @@ class OptimizedPatientController extends OptimizedBaseController
 
     public function printSingle(Request $request, $id)
     {
-        return $this->patientService->printSingle($id, $request);
+        $patient = Patient::findOrFail($id);
+        return $this->patientService->printSingle($request, $patient);
     }
 
     // API endpoint for quick patient lookup (highly optimized)
@@ -145,7 +143,7 @@ class OptimizedPatientController extends OptimizedBaseController
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'patient_quick_search_'.md5($search);
+        $cacheKey = 'patient_quick_search_' . md5($search);
 
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return Patient::where('full_name', 'ilike', "%{$search}%")

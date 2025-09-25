@@ -21,7 +21,7 @@ class OptimizedStaffController extends OptimizedBaseController
 
     protected $editWith = ['user'];
 
-    public function __construct(OptimizedStaffService $staffService)
+    public function __construct(\App\Services\Optimized\StaffService $staffService)
     {
         $this->staffService = $staffService;
 
@@ -43,7 +43,7 @@ class OptimizedStaffController extends OptimizedBaseController
         // Get cached statistics for dashboard info
         $statistics = $this->staffService->getStatistics();
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             'staff' => $staff,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
             'statistics' => $statistics, // Additional dashboard data
@@ -55,7 +55,7 @@ class OptimizedStaffController extends OptimizedBaseController
         // Use optimized service with eager loading
         $staff = $this->staffService->getById($id, $this->showWith);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             'staff' => $staff,
         ]);
     }
@@ -65,7 +65,7 @@ class OptimizedStaffController extends OptimizedBaseController
         // Use cached form data
         $formData = $this->staffService->getFormData();
 
-        return Inertia::render($this->viewName.'/Create', $formData);
+        return Inertia::render($this->viewName . '/Create', $formData);
     }
 
     public function edit($id)
@@ -74,14 +74,14 @@ class OptimizedStaffController extends OptimizedBaseController
         $staff = $this->staffService->getById($id, $this->editWith);
         $formData = $this->staffService->getFormData();
 
-        return Inertia::render($this->viewName.'/Edit', array_merge([
+        return Inertia::render($this->viewName . '/Edit', array_merge([
             'staff' => $staff,
         ], $formData));
     }
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate(StaffRules::create());
+        $validatedData = $request->validate(StaffRules::store());
 
         // Use DTO for data transfer
         $dto = CreateStaffDTO::from($validatedData);
@@ -94,7 +94,9 @@ class OptimizedStaffController extends OptimizedBaseController
 
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate(StaffRules::update());
+        // Get the staff member first to pass to validation rules
+        $staff = $this->staffService->getById($id);
+        $validatedData = $request->validate(StaffRules::update($staff));
 
         // Use DTO for data transfer
         $dto = CreateStaffDTO::from($validatedData);
@@ -156,7 +158,7 @@ class OptimizedStaffController extends OptimizedBaseController
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'staff_quick_search_'.md5($search);
+        $cacheKey = 'staff_quick_search_' . md5($search);
 
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return Staff::where('first_name', 'ilike', "%{$search}%")

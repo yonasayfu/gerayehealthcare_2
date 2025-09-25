@@ -9,9 +9,11 @@ class BaseService
 {
     protected $model;
 
-    public function __construct($model)
+    public function __construct($model = null)
     {
-        $this->model = $model;
+        if ($model !== null) {
+            $this->model = $model;
+        }
     }
 
     public function getAll(Request $request, array $with = [])

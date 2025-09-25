@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\DTOs\CreateInventoryTransactionDTO;
 use App\Http\Controllers\Base\BaseController;
+use App\Models\InventoryItem;
 use App\Models\InventoryTransaction;
+use App\Models\Staff;
 use App\Services\InventoryTransaction\InventoryTransactionService;
 use App\Services\Validation\Rules\InventoryTransactionRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\InventoryItem;
-use App\Models\Staff;
 
 class InventoryTransactionController extends BaseController
 {
@@ -36,11 +36,6 @@ class InventoryTransactionController extends BaseController
         return app(InventoryTransactionService::class)->printCurrent(request());
     }
 
-    public function printAll(Request $request)
-    {
-        return app(InventoryTransactionService::class)->printAll($request);
-    }
-
     public function printSingle(InventoryTransaction $inventoryTransaction, Request $request)
     {
         return app(InventoryTransactionService::class)->printSingle($inventoryTransaction, $request);
@@ -55,7 +50,7 @@ class InventoryTransactionController extends BaseController
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
         $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
 
-        return Inertia::render($this->viewName.'/Edit', [
+        return Inertia::render($this->viewName . '/Edit', [
             lcfirst(class_basename($this->modelClass)) => $transaction,
             'staffList' => $staff,
             'inventoryItems' => $inventoryItems,
@@ -70,7 +65,7 @@ class InventoryTransactionController extends BaseController
         $staff = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
         $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
 
-        return Inertia::render($this->viewName.'/Create', [
+        return Inertia::render($this->viewName . '/Create', [
             'staffList' => $staff,
             'inventoryItems' => $inventoryItems,
         ]);

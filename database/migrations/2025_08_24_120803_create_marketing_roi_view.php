@@ -7,6 +7,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            // SQLite does not fully support complex views with PostgreSQL-specific functions like DATE_TRUNC and TO_CHAR.
+            // We will skip creating this view for SQLite environments, typically used for testing.
+            return;
+        }
+
         // Index to support date filtering on campaign metrics
         DB::statement('CREATE INDEX IF NOT EXISTS idx_campaign_metrics_date ON campaign_metrics (date);');
         DB::statement('CREATE INDEX IF NOT EXISTS idx_campaign_metrics_campaign_id ON campaign_metrics (campaign_id);');
@@ -45,6 +51,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement('DROP VIEW IF EXISTS marketing_roi_view;');
     }
 };

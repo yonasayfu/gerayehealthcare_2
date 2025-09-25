@@ -36,7 +36,7 @@ const filters = ref({
   end_date: props.filters.end_date || '',
   sort: props.filters.sort || 'start_time',
   direction: props.filters.direction || 'desc',
-  per_page: props.availabilities?.meta?.per_page || 10,
+  per_page: props.availabilities?.meta?.per_page || 5,
 })
 
 // Watch for changes and trigger API request
@@ -229,13 +229,18 @@ const serverError = computed(() => (form.errors as any)?.error)
             <h3 class="text-lg font-semibold">Filters</h3>
           </div>
           <div class="flex items-center gap-3">
-            <label class="text-sm text-muted-foreground">Per page</label>
-            <select v-model.number="filters.per_page" class="border rounded px-2 py-1 text-sm">
-              <option :value="5">5</option>
-              <option :value="10">10</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
+            
+          <div>
+    <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+    <select id="perPage" v-model="filters.per_page" class="rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+    </select>
+</div>
+        
             <button @click="resetFilters" type="button" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-100">Reset Filters</button>
           </div>
         </div>

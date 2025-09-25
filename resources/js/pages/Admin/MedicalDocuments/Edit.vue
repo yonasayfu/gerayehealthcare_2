@@ -5,13 +5,14 @@ import { Save, ArrowLeft, FileText } from 'lucide-vue-next'
 import Form from './Form.vue'
 import InputError from '@/components/InputError.vue'
 import axios from 'axios'
+import { computed } from 'vue' // Import computed
 
 const props = defineProps<{
   medicalDocument: {
     id: number
     title: string | null
     document_type: string
-    document_date: string | null
+    document_date: string | null // Backend date format might be different
     summary: string | null
     file_path?: string | null
     patient?: { id: number; full_name: string; patient_code: string }
@@ -26,12 +27,22 @@ const breadcrumbs = [
   { title: 'Edit', href: null },
 ]
 
+// Computed property to format document_date for the input type="date"
+const formattedDocumentDate = computed(() => {
+  if (props.medicalDocument.document_date) {
+    const date = new Date(props.medicalDocument.document_date);
+    // Format to YYYY-MM-DD
+    return date.toISOString().split('T')[0];
+  }
+  return '';
+});
+
 const form = useForm({
   patient_id: props.medicalDocument.patient?.id || '',
-  medical_visit_id: props.medicalDocument.medical_visit_id || '',
+  medical_visit_id: props.medicalDocument.medical_visit_id || '' as number | string, // Ensure type allows string for initial empty state
   document_type: props.medicalDocument.document_type || 'other',
   title: props.medicalDocument.title || '',
-  document_date: props.medicalDocument.document_date || '',
+  document_date: formattedDocumentDate.value, // Use the formatted date
   summary: props.medicalDocument.summary || '',
   file: null as File | null,
 })
@@ -42,23 +53,30 @@ const visits = ref<Array<{ id: number; visit_date: string; visit_type: string }>
 const loadingVisits = ref(false)
 
 async function fetchVisits(patientId: number | string | undefined) {
+  console.log('fetchVisits called with patientId:', patientId);
   if (!patientId) {
     visits.value = []
     return
   }
   try {
     loadingVisits.value = true
-    const { data } = await axios.get(`/dashboard/medical-documents/visits-for-patient/${patientId}`)
+    const { data } = await axios.get(route('admin.medical-documents.visitsForPatient', { patient: patientId }))
     visits.value = data.visits ?? []
+    console.log('Fetched visits:', visits.value);
+    console.log('Current medical_visit_id in form:', form.medical_visit_id);
   } catch (e) {
     visits.value = []
+    console.error('Error fetching visits:', e);
   } finally {
     loadingVisits.value = false
   }
 }
 
 onMounted(() => {
-  fetchVisits(form.patient_id)
+  console.log('Edit.vue mounted. medicalDocument:', props.medicalDocument);
+  console.log('Initial form.patient_id:', form.patient_id);
+  console.log('Initial form.medical_visit_id:', form.medical_visit_id);
+  fetchVisits(form.patient_id);
 })
 
 watch(() => form.patient_id, (val) => {
@@ -67,9 +85,34 @@ watch(() => form.patient_id, (val) => {
 })
 
 function submit() {
-  form.post(route('admin.medical-documents.update', props.medicalDocument.id), {
+  console.log('Form submission started in Edit.vue');
+  console.log('Form data before type conversion:', form.data());
+
+  // Ensure patient_id is a number if it's set
+  if (form.patient_id && typeof form.patient_id === 'string') {
+    form.patient_id = parseInt(form.patient_id, 10) || '';
+  }
+  
+  // Ensure medical_visit_id is a number if it's set
+  if (form.medical_visit_id && typeof form.medical_visit_id === 'string') {
+    form.medical_visit_id = parseInt(form.medical_visit_id, 10) || '';
+  }
+
+  console.log('Form data after type conversion:', form.data());
+
+  form.put(route('admin.medical-documents.update', props.medicalDocument.id), {
     forceFormData: true,
-    _method: 'put'
+    onSuccess: (page) => {
+      console.log('Form submission successful:', page);
+      // Inertia automatically handles redirect to index and flashing banner
+    },
+    onError: (errors) => {
+      console.error('Form submission errors:', errors);
+      alert('Form submission failed: ' + JSON.stringify(errors));
+    },
+    onFinish: () => {
+      console.log('Form submission finished');
+    }
   })
 }
 </script>

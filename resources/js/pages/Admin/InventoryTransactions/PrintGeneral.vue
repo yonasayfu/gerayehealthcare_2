@@ -80,8 +80,14 @@ const isList = Array.isArray(props.inventoryTransactions)
 .print-footer-spacer { height: 18mm; }
 
 @media print {
+  @page { size: A4; margin: 15mm; }
+  body { margin: 0; padding: 0; background: #fff; color: #000; -webkit-print-color-adjust: exact; }
   .print-document { width: auto; min-height: auto; margin: 0; padding: 0; }
   .print-footer { position: fixed; bottom: 0; left: 0; right: 0; }
+  .print-header h1 { font-size: 18pt; }
+  .print-header p { font-size: 9pt; }
+  .print-table th, .print-table td { font-size: 8pt; padding: 6pt; }
+  .details-section p { font-size: 8pt; }
 }
 </style>
 

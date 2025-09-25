@@ -2,6 +2,9 @@ import '../css/app.css';
 // Use local Font Awesome (no CDN dependency)
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
+// Add our test routes file
+import './test-routes';
+
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 

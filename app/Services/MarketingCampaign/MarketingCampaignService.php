@@ -7,6 +7,7 @@ use App\Http\Traits\ExportableTrait;
 use App\Models\MarketingCampaign;
 use App\Services\Base\BaseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MarketingCampaignService extends BaseService
 {
@@ -26,36 +27,41 @@ class MarketingCampaignService extends BaseService
 
     public function getAll(Request $request, array $with = [])
     {
-        $query = $this->model->with(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
+        try {
+            $query = $this->model->with(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
 
-        if ($request->has('search')) {
-            $this->applySearch($query, $request->input('search'));
-        }
+            if ($request->has('search')) {
+                $this->applySearch($query, $request->input('search'));
+            }
 
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('campaign_type')) {
-            $query->where('campaign_type', $request->input('campaign_type'));
-        }
-        if ($request->filled('start_date')) {
-            $query->where('start_date', '>=', $request->input('start_date'));
-        }
-        if ($request->filled('end_date')) {
-            $query->where('end_date', '<=', $request->input('end_date'));
-        }
+            if ($request->filled('platform_id')) {
+                $query->where('platform_id', $request->input('platform_id'));
+            }
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
+            }
+            if ($request->filled('campaign_type')) {
+                $query->where('campaign_type', $request->input('campaign_type'));
+            }
+            if ($request->filled('start_date')) {
+                $query->where('start_date', '>=', $request->input('start_date'));
+            }
+            if ($request->filled('end_date')) {
+                $query->where('end_date', '<=', $request->input('end_date'));
+            }
 
-        if ($request->has('sort')) {
-            $direction = $request->input('direction', 'asc');
-            $query->orderBy($request->input('sort'), $direction);
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
+            if ($request->has('sort')) {
+                $direction = $request->input('direction', 'asc');
+                $query->orderBy($request->input('sort'), $direction);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
 
-        return $query->paginate($request->input('per_page', 10));
+            return $query->paginate($request->input('per_page', 10));
+        } catch (\Exception $e) {
+            Log::error('Error in MarketingCampaignService getAll method: '.$e->getMessage());
+            throw $e;
+        }
     }
 
     public function create(array|object $data): MarketingCampaign
@@ -67,9 +73,14 @@ class MarketingCampaignService extends BaseService
 
     public function getById(int $id, array $with = []): MarketingCampaign
     {
-        $with = array_unique(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
+        try {
+            $with = array_unique(array_merge(['platform', 'assignedStaff', 'responsibleStaff', 'createdByStaff'], $with));
 
-        return $this->model->with($with)->findOrFail($id);
+            return $this->model->with($with)->findOrFail($id);
+        } catch (\Exception $e) {
+            Log::error('Error in MarketingCampaignService getById method: '.$e->getMessage());
+            throw $e;
+        }
     }
 
     public function printAll(Request $request)

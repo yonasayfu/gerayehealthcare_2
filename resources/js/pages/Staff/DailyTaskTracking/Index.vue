@@ -358,7 +358,7 @@ const goToKPIDashboard = () => {
                   </div>
                   <div class="flex items-center gap-1">
                     <User class="w-4 h-4" />
-                    {{ task.assignee.first_name }} {{ task.assignee.last_name }}
+                    {{ task.assignee?.first_name }} {{ task.assignee?.last_name }}
                   </div>
                   <div v-if="task.due_date" class="flex items-center gap-1">
                     <Calendar class="w-4 h-4" />

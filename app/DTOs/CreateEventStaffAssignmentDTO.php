@@ -14,7 +14,7 @@ class CreateEventStaffAssignmentDTO extends BaseDTO
     /**
      * Hydrate DTO from array, tolerant to snake_case or camelCase keys.
      */
-    public static function from(array $data): self
+    public static function from(array $data): static
     {
         $ref = new \ReflectionClass(self::class);
         $dto = $ref->newInstanceWithoutConstructor();

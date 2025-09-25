@@ -2,12 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Optimized\EventService;
-use App\Services\Optimized\InventoryItem\InventoryItemService;
-use App\Services\Optimized\Invoice\InvoiceService;
-use App\Services\Optimized\MarketingAnalytics\MarketingAnalyticsService;
-use App\Services\Optimized\Patient\PatientService;
-use App\Services\Optimized\Staff\StaffService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -118,12 +112,12 @@ class PerformanceBenchmarkCommand extends Command
         $this->info('⚡ Benchmarking Optimized Services...');
 
         $services = [
-            'PatientService' => OptimizedPatientService::class,
-            'StaffService' => OptimizedStaffService::class,
-            'InventoryService' => OptimizedInventoryItemService::class,
-            'InvoiceService' => OptimizedInvoiceService::class,
-            'MarketingAnalyticsService' => OptimizedMarketingAnalyticsService::class,
-            'EventService' => OptimizedEventService::class,
+            'PatientService' => \App\Services\Optimized\Patient\PatientService::class,
+            'StaffService' => \App\Services\Optimized\StaffService::class,
+            'InventoryService' => \App\Services\Optimized\InventoryItemService::class,
+            'InvoiceService' => \App\Services\Optimized\Invoice\InvoiceService::class,
+            'MarketingAnalyticsService' => \App\Services\MarketingAnalytics\MarketingAnalyticsService::class,
+            'EventService' => \App\Services\Optimized\EventService::class,
         ];
 
         $results = [];
@@ -177,7 +171,7 @@ class PerformanceBenchmarkCommand extends Command
         // Test DTO object pooling
         $dtoStart = memory_get_usage(true);
         for ($i = 0; $i < 1000; $i++) {
-            \App\DTOs\CreatePatientDTO::fromPool([
+            \App\DTOs\CreatePatientDTO::create([
                 'full_name' => "Test Patient {$i}",
                 'phone' => '123456789',
                 'age' => 30,
@@ -200,7 +194,7 @@ class PerformanceBenchmarkCommand extends Command
         $this->info('🎨 Analyzing Frontend Assets...');
 
         $manifestPath = public_path('build/manifest.json');
-        if (! file_exists($manifestPath)) {
+        if (!file_exists($manifestPath)) {
             return ['error' => 'Build manifest not found'];
         }
 
@@ -209,7 +203,7 @@ class PerformanceBenchmarkCommand extends Command
 
         foreach ($manifest as $key => $asset) {
             if (isset($asset['file'])) {
-                $filePath = public_path('build/'.$asset['file']);
+                $filePath = public_path('build/' . $asset['file']);
                 if (file_exists($filePath)) {
                     $assetSizes[$key] = round(filesize($filePath) / 1024, 2); // KB
                 }
@@ -222,7 +216,7 @@ class PerformanceBenchmarkCommand extends Command
             'asset_count' => count($assetSizes),
             'total_size_kb' => array_sum($assetSizes),
             'largest_asset' => max($assetSizes),
-            'chunks' => array_filter($assetSizes, fn ($size, $key) => str_contains($key, 'chunk'), ARRAY_FILTER_USE_BOTH),
+            'chunks' => array_filter($assetSizes, fn($size, $key) => str_contains($key, 'chunk'), ARRAY_FILTER_USE_BOTH),
         ];
     }
 
@@ -262,17 +256,17 @@ class PerformanceBenchmarkCommand extends Command
         $this->newLine();
 
         // Frontend Results
-        if (! isset($results['frontend']['error'])) {
+        if (!isset($results['frontend']['error'])) {
             $this->info('🎨 Frontend Assets:');
             $this->line("  Asset Count: {$results['frontend']['asset_count']}");
             $this->line("  Total Size: {$results['frontend']['total_size_kb']}KB");
-            $this->line('  Chunk Count: '.count($results['frontend']['chunks']));
+            $this->line('  Chunk Count: ' . count($results['frontend']['chunks']));
         }
     }
 
     protected function generateReport(array $results): void
     {
-        $reportPath = storage_path('logs/performance_benchmark_'.date('Y-m-d_H-i-s').'.json');
+        $reportPath = storage_path('logs/performance_benchmark_' . date('Y-m-d_H-i-s') . '.json');
 
         $report = [
             'timestamp' => now()->toISOString(),

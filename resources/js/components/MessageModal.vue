@@ -35,10 +35,10 @@ const handleAttachmentChange = (event: Event) => {
 
 const sendMessage = () => {
   if (!message.value.trim() && !attachment.value) return;
-  
+
   isSending.value = true;
   form.message = message.value;
-  
+
   form.post(route('messages.store'), {
     preserveScroll: true,
     onSuccess: () => {
@@ -77,32 +77,46 @@ onUnmounted(() => {
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center">
     <!-- Backdrop -->
     <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="close"></div>
-    
+
     <!-- Modal -->
     <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-md mx-4 border border-white/20 dark:border-gray-700/50 backdrop-blur-lg">
-      <div class="p-4 border-b border-white/20 dark:border-gray-700/50 flex justify-between items-center">
+      <div class="p-4 border-b border-white/20 dark:border-gray-700/50 flex items-center space-x-4">
+        <img :src="props.sender?.profile_photo_url || '/images/default-avatar.png'" alt="Avatar" class="w-10 h-10 rounded-full" />
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
           Message {{ senderName || 'User' }}
         </h3>
-        <Button variant="ghost" size="icon" @click="close">
+        <Button variant="ghost" size="icon" @click="close" class="ml-auto">
           <X class="h-5 w-5" />
         </Button>
       </div>
-      
-      <div class="p-4 space-y-4">
+
+      <div class="p-6 space-y-6">
         <div>
           <textarea
             v-model="message"
             placeholder="Type your message..."
-            class="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            class="w-full min-h-[120px] rounded-lg border border-input bg-background px-4 py-3 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-shadow duration-200 ease-in-out shadow-sm focus:shadow-md"
             @keydown.enter.exact.prevent="sendMessage"
             @keydown.enter.shift.exact="message += '\n'"
           />
+          <div class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-right">
+            {{ message.length }} / 2000
+          </div>
         </div>
-        
-        <div class="flex items-center justify-between">
-          <label class="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+
+        <div v-if="attachment" class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+          <div class="flex items-center space-x-3">
             <Paperclip class="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ attachment.name }}</span>
+          </div>
+          <Button variant="ghost" size="icon" @click="attachment = null; form.attachment = null">
+            <X class="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label class="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+            <Paperclip class="h-6 w-6 text-gray-500 dark:text-gray-400" />
             <Input
               type="file"
               class="hidden"
@@ -110,7 +124,7 @@ onUnmounted(() => {
               @change="handleAttachmentChange"
             />
           </label>
-          
+
           <Button
             @click="sendMessage"
             :disabled="isSending || (!message.trim() && !attachment)"

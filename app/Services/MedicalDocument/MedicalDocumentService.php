@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class MedicalDocumentService extends BaseService
 {
-    public function __construct(MedicalDocument $medicalDocument)
+    public function __construct()
     {
-        parent::__construct($medicalDocument);
+        parent::__construct(new MedicalDocument());
     }
 
     public function getAll(Request $request, array $with = [])
@@ -75,22 +75,30 @@ class MedicalDocumentService extends BaseService
      */
     public function update(int $id, array|object $data)
     {
+        \Illuminate\Support\Facades\Log::info('MedicalDocumentService update method called', ['id' => $id, 'data' => $data]);
+
         $payload = is_object($data) ? (array) $data : $data;
         $model = $this->model->findOrFail($id);
 
         if (isset($payload['file']) && $payload['file'] instanceof UploadedFile) {
+            \Illuminate\Support\Facades\Log::info('File detected for upload/replacement', ['file_name' => $payload['file']->getClientOriginalName()]);
             // Delete old file if exists
             if (! empty($model->file_path)) {
                 Storage::disk('public')->delete($model->file_path);
+                \Illuminate\Support\Facades\Log::info('Old file deleted', ['old_file_path' => $model->file_path]);
             }
             $payload['file_path'] = $payload['file']->store('medical_documents', 'public');
             unset($payload['file']);
+            \Illuminate\Support\Facades\Log::info('New file stored', ['new_file_path' => $payload['file_path']]);
         }
 
         // Avoid overwriting with nulls for missing fields
         $payload = array_filter($payload, fn ($v) => ! is_null($v));
+        \Illuminate\Support\Facades\Log::info('Payload after null filter', ['payload' => $payload]);
 
         $model->update($payload);
+        \Illuminate\Support\Facades\Log::info('Model updated in database', ['model_id' => $model->id, 'updated_attributes' => $payload]);
+
 
         return $model;
     }

@@ -146,7 +146,8 @@ const breadcrumbs = [
           </div>
           <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-gray-400 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
+
                 <option value="5">5</option>
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -191,7 +192,7 @@ const breadcrumbs = [
               <td class="px-6 py-4">{{ task.title }}</td>
               <td class="px-6 py-4">
                 <!-- 3. Use assignee relation -->
-                {{ task.assignee.first_name }} {{ task.assignee.last_name }}
+                {{ task.assignee?.first_name }} {{ task.assignee?.last_name }}
               </td>
               <td class="px-6 py-4" :class="(new Date(task.due_date) < new Date() && task.status !== 'Completed') ? 'text-red-600 font-medium' : ''">{{ new Date(task.due_date).toLocaleDateString() }}</td>
               <td class="px-6 py-4">

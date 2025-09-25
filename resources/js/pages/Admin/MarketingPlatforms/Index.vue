@@ -130,7 +130,7 @@ function toggleStatus(id: number) {
             <Link :href="route('admin.marketing-platforms.create')" class="btn-glass">
               <span>Add Marketing Platform</span>
             </Link>
-            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+            <button @click="openPrintCurrent" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
             </button>
@@ -153,7 +153,7 @@ function toggleStatus(id: number) {
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">>
+          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">>
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -233,10 +233,32 @@ function toggleStatus(id: number) {
 
       <Pagination v-if="marketingPlatforms.data.length > 0" :links="marketingPlatforms.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
+      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
             <hr class="my-2 border-gray-300">
             <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>
 </template>
+
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding-bottom: 8px;
+  }
+}
+</style>

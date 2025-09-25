@@ -7,6 +7,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            // SQLite does not fully support complex views with PostgreSQL-specific functions like DATE_TRUNC and TO_CHAR.
+            // We will skip creating this view for SQLite environments, typically used for testing.
+            return;
+        }
+
         // Indexes to support filtering by invoice_date and status
         DB::statement('CREATE INDEX IF NOT EXISTS idx_invoices_invoice_date ON invoices (invoice_date);');
         DB::statement('CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices (status);');
@@ -30,6 +36,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement('DROP VIEW IF EXISTS revenue_ar_view;');
     }
 };

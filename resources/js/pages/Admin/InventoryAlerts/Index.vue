@@ -109,7 +109,11 @@ const onPrintCurrent = () => {
             <Link :href="route('admin.inventory-alerts.create')" class="btn-glass">
               <span>Add Inventory Alert</span>
             </Link>
-            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+            <button @click="onPrintAll" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print All</span>
+            </button>
+            <button @click="onPrintCurrent" class="btn-glass btn-glass-sm">
               <Printer class="icon" />
               <span class="hidden sm:inline">Print Current</span>
             </button>
@@ -128,7 +132,7 @@ const onPrintCurrent = () => {
                 Show only active
               </label>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+                <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="25">25</option>

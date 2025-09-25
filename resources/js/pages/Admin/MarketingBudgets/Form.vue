@@ -32,6 +32,7 @@ const props = defineProps({
         id="campaign_id"
         v-model="props.form.campaign_id"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white"
+        required
       >
         <option value="">Select a Campaign</option>
         <option v-for="campaign in props.campaigns" :key="campaign.id" :value="campaign.id">{{ campaign.campaign_name }}</option>

@@ -19,6 +19,7 @@ class DemoDataSeeder extends Seeder
             VisitScenariosSeeder::class,
             InvoiceScenariosSeeder::class,
             InventoryScenariosSeeder::class,
+            MarketingDemoSeeder::class,
             // Add other scenario seeders here
         ]);
     }

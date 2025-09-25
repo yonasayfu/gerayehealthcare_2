@@ -193,7 +193,7 @@ async function setPin(id) {
           </div>
           <div class="flex items-center gap-2">
             <label for="perPage" class="text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+            <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="25">25</option>

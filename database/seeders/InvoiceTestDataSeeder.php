@@ -21,30 +21,36 @@ class InvoiceTestDataSeeder extends Seeder
     public function run(): void
     {
         // 1. Create a User and associated Staff member
-        $user = User::factory()->create([
-            'name' => 'Invoice Staff',
-            'email' => 'invoice.staff@example.com',
-            'password' => Hash::make('password'),
-        ]);
+        $user = User::updateOrCreate(
+            ['email' => 'invoice.staff@example.com'],
+            [
+                'name' => 'Invoice Staff',
+                'password' => Hash::make('password'),
+            ]
+        );
 
-        $staff = Staff::factory()->create([
-            'user_id' => $user->id,
-            'first_name' => 'Invoice',
-            'last_name' => 'Staff',
-            'email' => $user->email,
-            'phone' => '0911223344',
-            'position' => 'Nurse',
-            'department' => 'Medical',
-            'hire_date' => now(),
-        ]);
+        $staff = Staff::updateOrCreate(
+            ['email' => $user->email],
+            [
+                'user_id' => $user->id,
+                'first_name' => 'Invoice',
+                'last_name' => 'Staff',
+                'phone' => '0911223344',
+                'position' => 'Nurse',
+                'department' => 'Medical',
+                'hire_date' => now(),
+            ]
+        );
 
         // 2. Create a Patient
-        $patient = Patient::factory()->create([
-            'full_name' => 'Invoice Patient',
-            'email' => 'invoice.patient@example.com',
-            'phone_number' => '0988776655',
-            'registered_by_staff_id' => $staff->id,
-        ]);
+        $patient = Patient::updateOrCreate(
+            ['email' => 'invoice.patient@example.com'],
+            [
+                'full_name' => 'Invoice Patient',
+                'phone_number' => '0988776655',
+                'registered_by_staff_id' => $staff->id,
+            ]
+        );
 
         // 3. Create a Service
         $service = Service::factory()->create([

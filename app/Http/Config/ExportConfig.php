@@ -145,7 +145,7 @@ class ExportConfig
                     'Age' => [
                         'field' => 'date_of_birth',
                         'transform' => function ($value, $model) {
-                            return $value ? \Carbon\Carbon::parse($value)->age.' years' : '-';
+                            return $value ? \Carbon\Carbon::parse($value)->age . ' years' : '-';
                         },
                     ],
                     'Gender' => ['field' => 'gender', 'default' => '-'],
@@ -168,7 +168,7 @@ class ExportConfig
                     ['key' => 'fayda_id', 'label' => 'Fayda ID'],
                     ['key' => 'date_of_birth', 'label' => 'Date of Birth'],
                     ['key' => 'age', 'label' => 'Age', 'transform' => function ($value, $model) {
-                        return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age.' years' : '-';
+                        return $model->date_of_birth ? \Carbon\Carbon::parse($model->date_of_birth)->age . ' years' : '-';
                     }],
                     ['key' => 'gender', 'label' => 'Gender'],
                     ['key' => 'phone_number', 'label' => 'Phone Number'],
@@ -220,7 +220,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -252,7 +252,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -292,7 +292,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -332,7 +332,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->accountManager->first_name ?? '';
                             $ln = $model->accountManager->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -443,7 +443,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->signedBy->first_name ?? '';
                             $ln = $model->signedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -1031,7 +1031,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->staff->first_name ?? '';
                             $ln = $model->staff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -1068,7 +1068,7 @@ class ExportConfig
                     'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
                         $fn = $model->staff->first_name ?? '';
                         $ln = $model->staff->last_name ?? '';
-                        $full = trim($fn.' '.$ln);
+                        $full = trim($fn . ' ' . $ln);
 
                         return $full !== '' ? $full : '-';
                     }],
@@ -1104,7 +1104,7 @@ class ExportConfig
                     'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
                         $fn = $model->staff->first_name ?? '';
                         $ln = $model->staff->last_name ?? '';
-                        $full = trim($fn.' '.$ln);
+                        $full = trim($fn . ' ' . $ln);
 
                         return $full !== '' ? $full : '-';
                     }],
@@ -1142,7 +1142,7 @@ class ExportConfig
                     'staff' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
                         $fn = $model->staff->first_name ?? '';
                         $ln = $model->staff->last_name ?? '';
-                        $full = trim($fn.' '.$ln);
+                        $full = trim($fn . ' ' . $ln);
 
                         return $full !== '' ? $full : '-';
                     }],
@@ -1800,12 +1800,12 @@ class ExportConfig
                     ['field' => 'language', 'default' => '-'],
                     [
                         'field' => 'is_active',
-                        'transform' => function ($v) { return $v ? 'Yes' : 'No'; },
+                        'transform' => function ($v) {return $v ? 'Yes' : 'No';},
                     ],
                     ['field' => 'campaign.campaign_name', 'default' => '-'],
                     [
                         'field' => 'created_at',
-                        'transform' => function ($v) { return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-'; },
+                        'transform' => function ($v) {return $v ? \Carbon\Carbon::parse($v)->format('Y-m-d H:i') : '-';},
                     ],
                 ],
                 'with_relations' => ['campaign'],
@@ -2054,7 +2054,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -2089,7 +2089,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -2131,7 +2131,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -2174,7 +2174,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -2215,7 +2215,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedBy->first_name ?? '';
                             $ln = $model->performedBy->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -2409,7 +2409,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2448,7 +2448,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2488,7 +2488,7 @@ class ExportConfig
                     'staff_member' => [
                         'field' => 'staff.first_name',
                         'transform' => function ($value, $model) {
-                            return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
+                            return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
                         },
                     ],
                     'shift_start' => [
@@ -2524,7 +2524,7 @@ class ExportConfig
                 'fields' => [
                     'Patient Name' => ['field' => 'patient.full_name', 'default' => 'N/A'],
                     'Staff Member' => ['field' => 'staff.first_name', 'transform' => function ($value, $model) {
-                        return ($model->staff->first_name ?? '').' '.($model->staff->last_name ?? '');
+                        return ($model->staff->first_name ?? '') . ' ' . ($model->staff->last_name ?? '');
                     }],
                     'Shift Start' => ['field' => 'shift_start', 'transform' => function ($value, $model) {
                         return $value ? \Carbon\Carbon::parse($value)->format('F j, Y, g:i a') : 'N/A';
@@ -2583,13 +2583,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$'.number_format($value, 2);
+                            return '$' . number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value.' minutes';
+                            return $value . ' minutes';
                         },
                     ],
                     'is_active' => [
@@ -2623,13 +2623,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$'.number_format($value, 2);
+                            return '$' . number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value.' min';
+                            return $value . ' min';
                         },
                     ],
                     'is_active' => [
@@ -2664,13 +2664,13 @@ class ExportConfig
                     'price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$'.number_format($value, 2);
+                            return '$' . number_format($value, 2);
                         },
                     ],
                     'duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value.' min';
+                            return $value . ' min';
                         },
                     ],
                     'is_active' => [
@@ -2702,13 +2702,13 @@ class ExportConfig
                     'Price' => [
                         'field' => 'price',
                         'transform' => function ($value) {
-                            return '$'.number_format($value, 2);
+                            return '$' . number_format($value, 2);
                         },
                     ],
                     'Duration' => [
                         'field' => 'duration',
                         'transform' => function ($value) {
-                            return $value.' minutes';
+                            return $value . ' minutes';
                         },
                     ],
                     'Status' => [
@@ -3069,7 +3069,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -3120,7 +3120,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -3169,7 +3169,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->responsibleStaff->first_name ?? '';
                             $ln = $model->responsibleStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -3191,7 +3191,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->createdByStaff->first_name ?? '';
                             $ln = $model->createdByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : '-';
                         },
@@ -3258,7 +3258,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -3303,7 +3303,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -3350,7 +3350,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -3392,7 +3392,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -3432,7 +3432,7 @@ class ExportConfig
                         'transform' => function ($value, $model) {
                             $fn = $model->performedByStaff->first_name ?? '';
                             $ln = $model->performedByStaff->last_name ?? '';
-                            $full = trim($fn.' '.$ln);
+                            $full = trim($fn . ' ' . $ln);
 
                             return $full !== '' ? $full : 'N/A';
                         },
@@ -3829,6 +3829,163 @@ class ExportConfig
                 'document_title' => 'Staff Payout',
                 'filename_prefix' => 'staff_payout',
                 'with_relations' => ['staff'],
+            ],
+        ];
+    }
+
+    /**
+     * Get export/print configuration for CampaignContent model
+     */
+    public static function getCampaignContentConfig(): array
+    {
+        return [
+            'searchable_fields' => ['title', 'description', 'content_type', 'status', 'campaign.campaign_name', 'platform.name'],
+            'sortable_fields' => ['title', 'content_type', 'status', 'scheduled_post_date', 'actual_post_date', 'campaign_id', 'platform_id', 'created_at'],
+            'default_sort' => 'created_at',
+            'filename_prefix' => 'campaign-contents',
+
+            'csv' => [
+                'headers' => [
+                    '#', 'Title', 'Campaign', 'Platform', 'Content Type', 'Status', 'Scheduled Date', 'Actual Date',
+                ],
+                'fields' => [
+                    'index',
+                    'title',
+                    ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    ['field' => 'platform.name', 'default' => '-'],
+                    'content_type',
+                    'status',
+                    [
+                        'field' => 'scheduled_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                    [
+                        'field' => 'actual_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                ],
+                'with_relations' => ['campaign', 'platform'],
+                'filename_prefix' => 'campaign-contents',
+            ],
+
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'title' => 'All Campaign Contents - Geraye',
+                'document_title' => 'Campaign Contents Export',
+                'filename_prefix' => 'campaign-contents-all',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'title' => 'title',
+                    'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'content_type' => 'content_type',
+                    'status' => 'status',
+                    'scheduled_post_date' => [
+                        'field' => 'scheduled_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                    'actual_post_date' => [
+                        'field' => 'actual_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'content_type', 'label' => 'Content Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'scheduled_post_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_post_date', 'label' => 'Actual Date'],
+                ],
+            ],
+
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'title' => 'Campaign Contents (Current View) - Geraye',
+                'document_title' => 'Campaign Contents (Current View)',
+                'filename_prefix' => 'campaign-contents-current',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'title' => 'title',
+                    'campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'content_type' => 'content_type',
+                    'status' => 'status',
+                    'scheduled_post_date' => [
+                        'field' => 'scheduled_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                    'actual_post_date' => [
+                        'field' => 'actual_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                ],
+                'columns' => [
+                    ['key' => 'index', 'label' => '#'],
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'content_type', 'label' => 'Content Type'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'scheduled_post_date', 'label' => 'Scheduled Date'],
+                    ['key' => 'actual_post_date', 'label' => 'Actual Date'],
+                ],
+            ],
+
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'filename_prefix' => 'campaign-content-record',
+                'with_relations' => ['campaign', 'platform'],
+                'fields' => [
+                    'Title' => 'title',
+                    'Campaign' => ['field' => 'campaign.campaign_name', 'default' => '-'],
+                    'Platform' => ['field' => 'platform.name', 'default' => '-'],
+                    'Content Type' => 'content_type',
+                    'Description' => 'description',
+                    'Status' => 'status',
+                    'Scheduled Post Date' => [
+                        'field' => 'scheduled_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                    'Actual Post Date' => [
+                        'field' => 'actual_post_date',
+                        'transform' => function ($value) {
+                            return $value ? \Carbon\Carbon::parse($value)->format('Y-m-d') : '-';
+                        },
+                    ],
+                    'Media URL' => ['field' => 'media_url', 'default' => '-'],
+                ],
+                'columns' => [
+                    ['key' => 'title', 'label' => 'Title'],
+                    ['key' => 'campaign.campaign_name', 'label' => 'Campaign'],
+                    ['key' => 'platform.name', 'label' => 'Platform'],
+                    ['key' => 'content_type', 'label' => 'Content Type'],
+                    ['key' => 'description', 'label' => 'Description'],
+                    ['key' => 'status', 'label' => 'Status'],
+                    ['key' => 'scheduled_post_date', 'label' => 'Scheduled Post Date'],
+                    ['key' => 'actual_post_date', 'label' => 'Actual Post Date'],
+                    ['key' => 'media_url', 'label' => 'Media URL'],
+                ],
             ],
         ];
     }

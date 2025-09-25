@@ -4,24 +4,26 @@ namespace App\Notifications;
 
 use App\Models\LeaveRequest;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class LeaveRequestStatusUpdated extends Notification
 {
     use Queueable;
 
-    public function __construct(public LeaveRequest $leaveRequest) {}
+    public function __construct(public LeaveRequest $leaveRequest)
+    {}
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toArray(object $notifiable): array
     {
         return [
             'type' => 'leave_request_status',
-            'message_preview' => sprintf('Your leave request %s to %s is %s',
+            'message_preview' => sprintf('Your leave request from %s to %s is now %s',
                 $this->leaveRequest->start_date, $this->leaveRequest->end_date, $this->leaveRequest->status
             ),
             'leave_request_id' => $this->leaveRequest->id,
@@ -29,5 +31,16 @@ class LeaveRequestStatusUpdated extends Notification
             'url' => route('staff.leave-requests.index'),
         ];
     }
-}
 
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Leave Request Status Updated')
+            ->greeting('Hello ' . ($notifiable->name ?? 'Staff') . '!')
+            ->line(sprintf('Your leave request from %s to %s has been %s.',
+                $this->leaveRequest->start_date, $this->leaveRequest->end_date, strtolower($this->leaveRequest->status)))
+            ->line(sprintf('Admin Notes: %s', $this->leaveRequest->admin_notes ?? 'N/A'))
+            ->action('View Your Leave Requests', route('staff.leave-requests.index'))
+            ->line('Thank you for your patience.');
+    }
+}

@@ -93,34 +93,50 @@ watch(filters, () => {
 
 import { useExport } from '@/composables/useExport';
 
-const { exportData, printCurrentView, printAllRecords } = useExport({ routeName: 'admin.inventory-transactions', filters: props.filters });
+const { exportData } = useExport({ routeName: 'admin.inventory-transactions', filters: props.filters });
+
+function printPage() {
+  setTimeout(() => {
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Print failed:', error);
+      alert('Failed to open print dialog. Please try again.');
+    }
+  }, 100);
+}
 
 </script>
 
 <template>
   <Head title="Inventory Transactions" />
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="space-y-6 p-6">
-      <div class="flex items-center justify-between">
+    <div class="space-y-6 p-6 print:p-0 print:space-y-0">
+      <!-- Print header that only shows during print -->
+      <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
+        <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
+        <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
+        <p class="text-gray-600 dark:text-gray-400 print-document-title">Inventory Transactions List (Current View)</p>
+        <hr class="my-3 border-gray-300 print:my-2">
+        <p class="text-sm text-gray-500">Generated on: {{ new Date().toLocaleString() }}</p>
+      </div>
+
+      <div class="flex items-center justify-between print:hidden">
         <div>
           <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Inventory Transactions</h1>
           <p class="text-sm text-muted-foreground">View all movements and changes of inventory items.</p>
         </div>
         <div class="flex items-center gap-2">
           <Link :href="route('admin.inventory-transactions.create')" class="btn-glass">
-              <span>Create Transaction</span>
-            </Link>
+            <span>Create Transaction</span>
+          </Link>
           <button @click="exportData('csv')" class="btn-glass btn-glass-sm" title="Export CSV" aria-label="Export CSV">
             <Download class="h-4 w-4" />
             <span class="ml-2">CSV</span>
           </button>
-          <button @click="printCurrentView" class="btn-glass btn-glass-sm" title="Print current page" aria-label="Print current page">
+          <button @click="printPage" class="btn-glass btn-glass-sm" title="Print current page" aria-label="Print current page">
             <Printer class="h-4 w-4" />
             <span class="ml-2">Print Current</span>
-          </button>
-          <button @click="printAllRecords" class="btn-glass btn-glass-sm" title="Print all records" aria-label="Print all records">
-            <Printer class="h-4 w-4" />
-            <span class="ml-2">Print All</span>
           </button>
         </div>
       </div>
@@ -141,7 +157,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
         </div>
           <div>
             <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-            <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-white text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700">
+            <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
               <option value="5">5</option>
               <option value="10">10</option>
               <option value="25">25</option>
@@ -181,6 +197,7 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
                   <div class="inline-flex items-center justify-end space-x-2">
                     <Link :href="route('admin.inventory-transactions.show', transaction.id)" class="btn-icon text-indigo-600" title="View"><Eye class="w-4 h-4" /></Link>
                     <Link :href="route('admin.inventory-transactions.edit', transaction.id)" class="btn-icon text-blue-600" title="Edit"><Edit3 class="w-4 h-4" /></Link>
+                    <button @click="destroy(transaction.id)" class="btn-icon text-red-600" title="Delete"><Trash2 class="w-4 h-4" /></button>
                   </div>
                 </td>
               </tr>
@@ -204,23 +221,59 @@ const { exportData, printCurrentView, printAllRecords } = useExport({ routeName:
 
 <style>
 @media print {
-  @page { size: A4 landscape; margin: 0.5cm; }
-  .app-sidebar-header, .app-sidebar { display: none !important; }
-  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
-  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  @page { size: A4 landscape; margin: 12mm; }
+  
+  /* Hide AppLayout chrome while printing */
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+  
+  /* Ensure print-only blocks are visible */
+  .hidden.print\:block { display: block !important; }
+  
+  /* Hide elements during print */
+  .print\:hidden { display: none !important; }
+  
+  /* Print header styles */
+  .print-header-content {
+    padding-top: 0.5cm !important;
+    padding-bottom: 0.5cm !important;
+    margin-bottom: 0.8cm !important;
+    text-align: center;
+  }
+  
+  .print-logo {
+    max-width: 150px;
+    max-height: 50px;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .print-clinic-name {
+    font-size: 1.8rem !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .print-document-title {
+    font-size: 0.9rem !important;
+    color: #555 !important;
+  }
+  
+  /* Table styles for print */
   table { border-collapse: collapse; width: 100%; }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
   tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+  
+  /* General print adjustments */
+  html, body { 
+    background: #fff !important; 
+    color: #000 !important;
+    margin: 0 !important; 
+    padding: 0 !important; 
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 </style>
-<style>
-@media print {
-  @page { size: A4 landscape; margin: 12mm; }
-  /* Hide AppLayout chrome while printing */
-  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
-  /* Ensure print-only blocks are visible */
-  .hidden.print\:block { display: block !important; }
-}
-</style>
- 

@@ -22,9 +22,11 @@ class BaseController extends Controller
 
     protected $dtoClass; // New property for DTO class
 
+    protected $resourceClass; // New property for Resource class
+
     protected $routeName; // Optional override for route base name
 
-    public function __construct($service, $rulesClass, $viewName, $dataVariableName, $modelClass, $dtoClass = null)
+    public function __construct($service, $rulesClass, $viewName, $dataVariableName, $modelClass, $dtoClass = null, $resourceClass = null)
     {
         $this->service = $service;
         $this->rulesClass = $rulesClass;
@@ -32,11 +34,16 @@ class BaseController extends Controller
         $this->dataVariableName = $dataVariableName;
         $this->modelClass = $modelClass;
         $this->dtoClass = $dtoClass; // Assign the DTO class
+        $this->resourceClass = $resourceClass; // Assign the Resource class
     }
 
     public function index(Request $request)
     {
         $data = $this->service->getAll($request);
+
+        if ($this->resourceClass) {
+            $data = $this->resourceClass::collection($data);
+        }
 
         return Inertia::render($this->viewName.'/Index', [
             $this->dataVariableName => $data,
@@ -56,31 +63,56 @@ class BaseController extends Controller
 
     public function store(Request $request)
     {
+        Log::info('BaseController store method called', [
+            'controller' => get_class($this),
+            'service' => get_class($this->service),
+            'model_class' => $this->modelClass,
+            'dto_class' => $this->dtoClass,
+            'request_data' => $request->all()
+        ]);
+        
         try {
+            Log::info('Starting validation...');
             $validatedData = $this->validateRequest($request, 'store');
+            Log::info('Validation completed', ['validated_data' => $validatedData]);
 
             if ($this->dtoClass) {
+                Log::info('Preparing DTO data...');
                 $dtoData = $this->prepareDataForDTO($validatedData);
                 // For plain PHP DTOs (no static from() / toArray()), use the prepared array directly
                 $payload = $dtoData;
                 if ($this->dtoClass === \App\DTOs\CreateVisitServiceDTO::class && ! isset($payload['is_paid_to_staff'])) {
                     $payload['is_paid_to_staff'] = false;
                 }
+                Log::info('DTO data prepared', ['payload' => $payload]);
             } else {
                 $payload = $validatedData;
+                Log::info('Using validated data as payload', ['payload' => $payload]);
             }
 
-            $this->service->create($payload);
+            Log::info('Calling service create method...');
+            $result = $this->service->create($payload);
+            Log::info('Service create completed', ['result' => $result]);
 
             // Explicitly flash data to session
             $request->session()->flash('banner', ucfirst($this->dataVariableName).' created successfully.');
             $request->session()->flash('bannerStyle', 'success');
 
-            return redirect()->route('admin.'.$this->getRouteName().'.index');
+            $redirectRoute = 'admin.'.$this->getRouteName().'.index';
+            Log::info('Redirecting to route', ['route' => $redirectRoute]);
+            return redirect()->route($redirectRoute);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed in BaseController store', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
             return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
         } catch (\Exception $e) {
-            Log::error('Error in BaseController store method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Error in BaseController store method:', [
+                'message' => $e->getMessage(), 
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
 
             return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
@@ -102,6 +134,10 @@ class BaseController extends Controller
             }
         }
 
+        if ($this->resourceClass) {
+            $data = new $this->resourceClass($data);
+        }
+
         // Ensure the prop name matches the frontend's camelCase expectation
         $propName = lcfirst(class_basename($this->modelClass));
 
@@ -111,6 +147,11 @@ class BaseController extends Controller
     public function edit($id)
     {
         $data = $this->service->getById($id);
+
+        if ($this->resourceClass) {
+            $data = new $this->resourceClass($data);
+        }
+
         // Ensure the prop name matches the frontend's camelCase expectation
         $propName = lcfirst(class_basename($this->modelClass));
 

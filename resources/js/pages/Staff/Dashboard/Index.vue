@@ -4,6 +4,7 @@ import { Head, usePage } from '@inertiajs/vue3'
 import type { BreadcrumbItemType } from '@/types'
 import { computed } from 'vue'
 import { FileText, ClipboardList, CalendarDays } from 'lucide-vue-next'
+import LeaveRequestsWidget from '@/components/LeaveRequestsWidget.vue'
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -12,6 +13,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
 const page = usePage()
 const userRoles = computed(() => ((page.props as any)?.auth?.user?.roles || []).map((r: string) => r.toLowerCase()))
 const isStaff = computed(() => userRoles.value.includes('staff'))
+const isAdmin = computed(() => userRoles.value.some((role: string) => ['admin', 'super admin', 'ceo', 'coo'].includes(role)))
 </script>
 
 <template>
@@ -54,12 +56,17 @@ const isStaff = computed(() => userRoles.value.includes('staff'))
         </div>
       </div>
 
+      <!-- Admin specific widgets -->
+      <div v-if="isAdmin" class="grid gap-4 md:grid-cols-2">
+        <LeaveRequestsWidget />
+        <!-- Add more admin widgets here -->
+      </div>
+
       <!-- Staff specific section (placeholder) -->
-      <div v-if="isStaff" class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
+      <div v-if="isStaff && !isAdmin" class="rounded-xl border border-border bg-white p-4 shadow-sm dark:border-sidebar-border dark:bg-background">
         <h2 class="text-sm font-semibold text-gray-800 dark:text-white">My Upcoming Visits</h2>
         <p class="mt-2 text-xs text-muted-foreground">This section shows your next visits.</p>
       </div>
     </div>
   </AppLayout>
 </template>
-

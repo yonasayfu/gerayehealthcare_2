@@ -18,7 +18,7 @@ class CreateEventRecommendationDTO extends BaseDTO
     /**
      * Hydrate DTO from validated array data.
      */
-    public static function from(array $data): self
+    public static function from(array $data): static
     {
         $ref = new \ReflectionClass(self::class);
         $dto = $ref->newInstanceWithoutConstructor();

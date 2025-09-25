@@ -125,7 +125,18 @@ function exportReport(report: ReportDef, type: 'csv' | 'pdf') {
 
 <style scoped>
 .form-input {
-  @apply rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700;
+  border-radius: 0.375rem;
+  background-color: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+.dark .form-input {
+  background-color: #1f2937;
+  color: white;
+  border-color: #374151;
 }
 </style>
 

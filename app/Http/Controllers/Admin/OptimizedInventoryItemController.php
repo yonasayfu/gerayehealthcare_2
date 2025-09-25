@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\DTOs\CreateInventoryItemDTO;
 use App\Http\Controllers\Base\OptimizedBaseController;
 use App\Models\InventoryItem;
-use App\Services\Optimized\InventoryItem\InventoryItemService;
 use App\Services\Validation\Rules\InventoryItemRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +20,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
     protected $editWith = ['supplier'];
 
-    public function __construct(OptimizedInventoryItemService $inventoryService)
+    public function __construct(\App\Services\Optimized\InventoryItemService $inventoryService)
     {
         $this->inventoryService = $inventoryService;
 
@@ -45,7 +44,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         $lowStockItems = $this->inventoryService->getLowStockItems(5);
         $maintenanceDue = $this->inventoryService->getMaintenanceDueItems(7, 5);
 
-        return Inertia::render($this->viewName.'/Index', [
+        return Inertia::render($this->viewName . '/Index', [
             'inventoryItems' => $items,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'status', 'category']),
             'statistics' => $statistics,
@@ -59,7 +58,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         // Use optimized service with eager loading
         $item = $this->inventoryService->getById($id, $this->showWith);
 
-        return Inertia::render($this->viewName.'/Show', [
+        return Inertia::render($this->viewName . '/Show', [
             'inventoryItem' => $item,
         ]);
     }
@@ -69,7 +68,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         // Use cached form data
         $formData = $this->inventoryService->getFormData();
 
-        return Inertia::render($this->viewName.'/Create', $formData);
+        return Inertia::render($this->viewName . '/Create', $formData);
     }
 
     public function edit($id)
@@ -78,14 +77,14 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         $item = $this->inventoryService->getById($id, $this->editWith);
         $formData = $this->inventoryService->getFormData();
 
-        return Inertia::render($this->viewName.'/Edit', array_merge([
+        return Inertia::render($this->viewName . '/Edit', array_merge([
             'inventoryItem' => $item,
         ], $formData));
     }
 
     public function store(Request $request)
     {
-        $validatedData = $request->validate(InventoryItemRules::create());
+        $validatedData = $request->validate(InventoryItemRules::store());
 
         // Use DTO for data transfer
         $dto = CreateInventoryItemDTO::from($validatedData);
@@ -98,7 +97,9 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
     public function update(Request $request, $id)
     {
-        $validatedData = $request->validate(InventoryItemRules::update());
+        // Get the item first to pass to validation rules
+        $item = $this->inventoryService->getById($id);
+        $validatedData = $request->validate(InventoryItemRules::update($item));
 
         // Use DTO for data transfer
         $dto = CreateInventoryItemDTO::from($validatedData);
@@ -186,7 +187,7 @@ class OptimizedInventoryItemController extends OptimizedBaseController
         }
 
         // Cache quick searches for better performance
-        $cacheKey = 'inventory_quick_search_'.md5($search);
+        $cacheKey = 'inventory_quick_search_' . md5($search);
 
         $results = \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($search) {
             return InventoryItem::with('supplier:id,name')
@@ -226,8 +227,8 @@ class OptimizedInventoryItemController extends OptimizedBaseController
 
         $this->inventoryService->update($id, [
             'quantity_on_hand' => $newQuantity,
-            'notes' => ($item->notes ?? '')."\n".now()->format('Y-m-d H:i').': '.
-                      ($validated['reason'] ?? "Stock adjusted from {$oldQuantity} to {$newQuantity}"),
+            'notes' => ($item->notes ?? '') . "\n" . now()->format('Y-m-d H:i') . ': ' .
+            ($validated['reason'] ?? "Stock adjusted from {$oldQuantity} to {$newQuantity}"),
         ]);
 
         return response()->json([

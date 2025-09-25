@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm, Link, usePage } from '@inertiajs/vue3';
+import { Head, useForm, Link, usePage, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem, type LeaveRequestsPagination, type AppPageProps } from '@/types'; // Import AppPageProps
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,8 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Function to reload the page data
 const reloadPageData = () => {
-  const page = usePage<AppPageProps>(); // Explicitly type usePage
-  page.props.inertia.visit(route('staff.leave-requests.index'), {
+  router.get(route('staff.leave-requests.index'), {}, {
     preserveScroll: true,
     preserveState: true,
     only: ['leaveRequests'], // Only reload the leaveRequests prop
@@ -30,9 +29,6 @@ const reloadPageData = () => {
 };
 
 onMounted(() => {
-  // Reload data when the component is mounted (page load or navigation)
-  reloadPageData();
-
   // Add event listener to reload data when the window gains focus
   window.addEventListener('focus', reloadPageData);
 });
@@ -122,11 +118,13 @@ const statusColor = (status: string) => {
             <InputError :message="form.errors.end_date" class="mt-2" />
           </div>
           <div class="md:col-span-2">
-            <Label for="reason">Reason (Optional)</Label>
+            <Label for="reason">Reason <span class="text-red-500">*</span></Label>
             <textarea
               id="reason"
               v-model="form.reason"
               rows="3"
+              required
+              placeholder="Please provide a reason for your leave request..."
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             ></textarea>
             <InputError :message="form.errors.reason" class="mt-2" />

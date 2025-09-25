@@ -60,6 +60,11 @@ const user = computed(() => (page.props as any)?.auth?.user ?? null);
 // Normalize roles to lowercase for consistent checks
 const userRoles = computed(() => (user.value?.roles || []).map((r: string) => r.toLowerCase()));
 
+const hasRole = (role: string): boolean => {
+    if (!user.value) return false;
+    return userRoles.value?.includes(role.toLowerCase()) || false;
+}
+
 const can = (permission: string): boolean => {
     if (!user.value) return false;
 
@@ -71,14 +76,6 @@ const can = (permission: string): boolean => {
     // Check if user has the specific permission
     return user.value.permissions?.includes(permission) || false;
 }
-
-// Dynamic role checking - no longer hardcoded
-const hasRole = (role: string): boolean => {
-    if (!user.value) return false;
-    return userRoles.value?.includes(role.toLowerCase()) || false;
-}
-
-// Permission-based access helpers removed (unused)
 
 // Track open groups with localStorage persistence
 const SIDEBAR_STORAGE_KEY = 'sidebar-open-groups'
@@ -174,7 +171,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
       { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
       { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-      // { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
       { title: 'Leave Requests', routeName: 'admin.leave-requests.index', icon: CalendarOff },
     ],
   },
@@ -194,7 +190,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
     group: 'Marketing Management',
     icon: Megaphone,
     items: [
-      { title: 'Campaigns', routeName: 'admin.marketing-campaigns.index', icon: Megaphone, permission: 'manage marketing' },
+      { title: 'Campaigns', routeName: 'admin.marketing-campaigns.index', icon: Megaphone, permission: 'manage marketing' }, // Ensure user has 'manage marketing' permission to see this link
       { title: 'Leads', routeName: 'admin.marketing-leads.index', icon: Users, permission: 'manage marketing' },
       { title: 'Landing Pages', routeName: 'admin.landing-pages.index', icon: Globe2, permission: 'manage marketing' },
       { title: 'Platforms', routeName: 'admin.marketing-platforms.index', icon: Package, permission: 'manage marketing' },
@@ -276,27 +272,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
 ];
 
 // Dynamic navigation based on permissions, not hardcoded roles
-// Route helpers to avoid Ziggy exceptions and console noise
-function hasRoute(name?: string) {
-  if (!name) return false
-  try {
-    // ziggy-js exposes route().has
-    return (route as any)().has(name)
-  } catch {
-    const z: any = (window as any).Ziggy
-    return !!(z && z.routes && z.routes[name])
-  }
-}
-
-function safeHref(name?: string) {
-  if (!name) return '#'
-  if (hasRoute(name)) {
-    try { return route(name) } catch { return '#' }
-  }
-  // Silent fallback when route list hasn’t loaded this entry yet
-  return '#'
-}
-
 const getFilteredNavItems = (): SidebarNavGroup[] => {
     const filteredGroups: SidebarNavGroup[] = [];
 
@@ -311,13 +286,26 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
             // Always show dashboard
             if (item.routeName === 'dashboard') return true;
 
+            // Check if route exists
+            const routeExists = !item.routeName || hasRoute(item.routeName);
+            
             // If item has permission requirement, check it
-            if (item.permission) {
-                return can(item.permission);
+            const hasPermission = !item.permission || can(item.permission);
+            
+            // Item is visible if route exists and user has permission (if required)
+            const isVisible = routeExists && hasPermission;
+            
+            // Debug logging
+            if (item.title === 'Campaigns' || item.title === 'Leave Requests') {
+                console.log(`Sidebar item '${item.title}': routeExists=${routeExists}, hasPermission=${hasPermission}, isVisible=${isVisible}`);
+                console.log(`  Route name: ${item.routeName}`);
+                console.log(`  Permission: ${item.permission}`);
+                if (item.permission) {
+                    console.log(`  User permissions:`, user.value?.permissions);
+                }
             }
-
-            // If no permission specified, show to all authenticated users
-            return true;
+            
+            return isVisible;
         });
 
         // Only include group if it has visible items
@@ -332,14 +320,82 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
     return filteredGroups;
 };
 
+// Route helpers to avoid Ziggy exceptions and console noise
+function hasRoute(name?: string) {
+  if (!name) {
+    console.log('hasRoute called with no name');
+    return false;
+  }
+  
+  try {
+    // ziggy-js exposes route().has
+    const result = (route as any)().has(name);
+    console.log(`hasRoute Ziggy check for ${name}: ${result}`);
+    return result;
+  } catch (error) {
+    console.log(`hasRoute Ziggy error for ${name}:`, error);
+    const z: any = (window as any).Ziggy;
+    const result = !!(z && z.routes && z.routes[name]);
+    console.log(`hasRoute window.Ziggy check for ${name}: ${result}`);
+    return result;
+  }
+}
+
+function safeHref(name?: string) {
+  if (!name) {
+    console.log('safeHref called with no name');
+    return '#';
+  }
+  
+  const routeExists = hasRoute(name);
+  console.log(`safeHref checking route: ${name}, exists: ${routeExists}`);
+  
+  if (routeExists) {
+    try { 
+      const url = route(name);
+      console.log(`safeHref generated URL: ${url} for route: ${name}`);
+      return url;
+    } catch (error) {
+      console.log(`safeHref error generating URL for ${name}:`, error);
+      return '#';
+    }
+  }
+  
+  console.log(`safeHref route not found: ${name}`);
+  return '#';
+}
+
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
     if (!user.value) return [];
 
     // For super admin, show everything
     if (hasRole('super-admin')) {
+        // Ensure all groups are open for super admin
+        nextTick(() => {
+            const allGroupNames = allAdminNavItems.map((group: SidebarNavGroup) => group.group);
+            openGroups.value = allGroupNames;
+            areAllGroupsExpanded.value = true;
+
+            // Debug: Check if specific routes exist
+            console.log('Checking route existence:');
+            console.log('admin.marketing-campaigns.index exists:', hasRoute('admin.marketing-campaigns.index'));
+            console.log('admin.leave-requests.index exists:', hasRoute('admin.leave-requests.index'));
+
+            // Debug: Try to generate URLs
+            try {
+                console.log('admin.marketing-campaigns.index URL:', route('admin.marketing-campaigns.index'));
+            } catch (e) {
+                console.log('Error generating admin.marketing-campaigns.index URL:', e);
+            }
+
+            try {
+                console.log('admin.leave-requests.index URL:', route('admin.leave-requests.index'));
+            } catch (e) {
+                console.log('Error generating admin.leave-requests.index URL:', e);
+            }
+        });
         return allAdminNavItems;
     }
-
     // For all other roles, dynamically filter based on permissions
     return getFilteredNavItems();
 });
@@ -453,7 +509,7 @@ const toggleAllGroups = (event?: Event) => {
   // State will be saved automatically by the watcher
 }
 
-const isSidebarCollapsed = ref(false);
+const isSidebarCollapsed = ref(!(page.props as any)?.sidebarOpen);
 
 // Load sidebar state when component mounts
 onMounted(() => {
@@ -507,14 +563,20 @@ onMounted(() => {
                         }">
                         <SidebarMenu class="pl-4 mt-1 space-y-1">
                             <template v-for="item in group.items" :key="item.title">
-                                <SidebarMenuItem v-if="(!item.permission || can(item.permission)) && (!item.routeName || hasRoute(item.routeName))">
+                                <SidebarMenuItem>
                                     <SidebarMenuButton as-child>
                                         <Link 
-                                            :href="safeHref(item.routeName)" 
+                                            v-if="item.routeName && hasRoute(item.routeName)"
+                                            :href="route(item.routeName)" 
                                             class="gap-2 px-2 py-1.5 text-sm hover:bg-muted/30 rounded-md w-full flex items-center"
                                             preserve-scroll 
                                             preserve-state
-                                            @click.stop>
+                                            @click="(e: Event) => {
+                                              console.log(`Clicked on ${item.title}, route: ${item.routeName}`);
+                                              if (item.routeName) {
+                                                console.log(`Generated href: ${route(item.routeName)}`);
+                                              }
+                                            }">
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
                                             <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>

@@ -25,7 +25,7 @@ class OptimizedInvoiceController extends OptimizedBaseController
         'edit' => ['patient', 'items.visitService'],
     ];
 
-    public function __construct(OptimizedInvoiceService $invoiceService)
+    public function __construct(\App\Services\Optimized\Invoice\InvoiceService $invoiceService)
     {
         parent::__construct(
             $invoiceService,

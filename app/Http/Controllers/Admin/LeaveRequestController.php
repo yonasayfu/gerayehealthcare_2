@@ -15,9 +15,17 @@ class LeaveRequestController extends BaseController
             $leaveRequestService,
             LeaveRequestRules::class,
             'Admin/LeaveRequests',
-            'leaveRequests',
+            'leave-requests', // This should match the resource route name
             LeaveRequest::class,
             'App\\DTOs\\UpdateLeaveRequestDTO'
         );
+    }
+
+    // Override the route name method to ensure correct route naming
+    // The route in web.php is registered within the admin group which adds the 'admin.' prefix
+    // So the full route name will be 'admin.leave-requests'
+    protected function getRouteName()
+    {
+        return 'leave-requests';
     }
 }

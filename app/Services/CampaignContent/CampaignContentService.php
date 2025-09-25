@@ -2,12 +2,16 @@
 
 namespace App\Services\CampaignContent;
 
+use App\Http\Config\ExportConfig;
+use App\Http\Traits\ExportableTrait;
 use App\Models\CampaignContent;
 use App\Services\Base\BaseService;
 use Illuminate\Http\Request;
 
 class CampaignContentService extends BaseService
 {
+    use ExportableTrait;
+
     public function __construct(CampaignContent $campaignContent)
     {
         parent::__construct($campaignContent);
@@ -60,5 +64,10 @@ class CampaignContentService extends BaseService
 
         // Preserve current query string so pagination maintains filters/sort
         return $query->paginate($request->input('per_page', 5))->withQueryString();
+    }
+
+    public function export(Request $request)
+    {
+        return $this->handleExport($request, CampaignContent::class, ExportConfig::getCampaignContentConfig());
     }
 }

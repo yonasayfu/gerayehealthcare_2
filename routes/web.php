@@ -1,47 +1,42 @@
 <?php
 
 use App\Enums\RoleEnum;
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
-use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Admin\InvoiceController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\GroupController;
-use App\Http\Controllers\GroupMessageController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\CaregiverAssignmentController;
-use App\Http\Controllers\Admin\VisitServiceController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\EligibilityCriteriaController;
+use App\Http\Controllers\Admin\EventBroadcastController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\EventParticipantController;
+use App\Http\Controllers\Admin\EventRecommendationController;
+use App\Http\Controllers\Admin\EventStaffAssignmentController;
+use App\Http\Controllers\Admin\GlobalSearchController;
+use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\LeaveRequestController as AdminLeaveRequestController;
 use App\Http\Controllers\Admin\MedicalDocumentController;
+use App\Http\Controllers\Admin\PatientController;
 use App\Http\Controllers\Admin\PrescriptionController;
-use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReferralDocumentController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SharedInvoiceController;
 use App\Http\Controllers\Admin\StaffAvailabilityController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffPayoutController;
-use App\Http\Controllers\Admin\ServiceController;
-use App\Http\Controllers\Admin\EventController;
-use App\Http\Controllers\Admin\EligibilityCriteriaController;
-use App\Http\Controllers\Admin\EventRecommendationController;
-use App\Http\Controllers\Admin\EventParticipantController;
-use App\Http\Controllers\Admin\EventStaffAssignmentController;
-use App\Http\Controllers\Admin\EventBroadcastController;
-use App\Http\Controllers\Admin\AdminLeaveRequestController;
-use App\Http\Controllers\Admin\GlobalSearchController;
-use App\Http\Controllers\Admin\AdminTaskController;
-use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\TaskDelegationController as AdminTaskController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Staff\MyAvailabilityController;
-use App\Http\Controllers\Staff\MyVisitController;
-use App\Http\Controllers\Staff\MyEarningsController;
-use App\Http\Controllers\Staff\StaffLeaveRequestController;
-use App\Http\Controllers\Staff\StaffTaskController;
+use App\Http\Controllers\Admin\VisitServiceController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\GroupMessageController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Staff\DailyTaskTrackingController;
+use App\Http\Controllers\Staff\DashboardController as StaffDashboardController;
+use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestController;
+use App\Http\Controllers\Staff\MyAvailabilityController;
+use App\Http\Controllers\Staff\MyEarningsController;
+use App\Http\Controllers\Staff\MyVisitController;
+use App\Http\Controllers\Staff\TaskDelegationController;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -180,7 +175,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Message export - requires permission
     Route::get('/messages/threads/{user}/export', [MessageController::class, 'exportThreadCsv'])
-        ->middleware('custom_permission:export messages')
+        ->middleware('permission:export messages')
         ->name('messages.export');
 
     Route::get('/messages/threads/{user}/search', [MessageController::class, 'searchThread'])
@@ -266,7 +261,7 @@ Route::get('/api-docs/spec', function () {
 // =====================
 // Admin & Super Admin (dashboard base prefix)
 // =====================
-Route::middleware(['auth', 'verified'])
+Route::middleware(['auth', 'verified', 'custom_role:' . \App\Enums\RoleEnum::SUPER_ADMIN->value . ',' . \App\Enums\RoleEnum::ADMIN->value . ',' . \App\Enums\RoleEnum::CEO->value . ',' . \App\Enums\RoleEnum::COO->value])
     ->prefix('dashboard')
     ->name('admin.')
     ->group(function () {
@@ -304,6 +299,7 @@ Route::middleware(['auth', 'verified'])
         Route::get('marketing-budgets/print-current', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printCurrent'])->name('marketing-budgets.printCurrent');
         Route::get('marketing-budgets/{marketing_budget}/print', [\App\Http\Controllers\Admin\MarketingBudgetController::class, 'printSingle'])->name('marketing-budgets.printSingle');
         Route::resource('marketing-budgets', \App\Http\Controllers\Admin\MarketingBudgetController::class);
+        Route::get('campaign-contents/export/{type}', [\App\Http\Controllers\Admin\CampaignContentController::class, 'export'])->name('campaign-contents.export');
         Route::resource('campaign-contents', \App\Http\Controllers\Admin\CampaignContentController::class);
         Route::get('marketing-tasks/print-all', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printAll'])->name('marketing-tasks.printAll');
         Route::get('marketing-tasks/print-current', [\App\Http\Controllers\Admin\MarketingTaskController::class, 'printCurrent'])->name('marketing-tasks.printCurrent');
@@ -411,13 +407,24 @@ Route::middleware(['auth', 'verified'])
         ]);
 
         // Medical Documents
-        Route::middleware('can:view medical documents')->group(function () {
-            Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
-            Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
-            Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
-            Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
-            // Fetch medical visits for a patient (JSON)
-            Route::get('medical-documents/visits-for-patient/{patient}', [MedicalDocumentController::class, 'visitsForPatient'])->name('medical-documents.visitsForPatient');
+        // Route::middleware('can:view medical documents')->group(function () {
+        Route::get('medical-documents/export', [MedicalDocumentController::class, 'export'])->name('medical-documents.export');
+        Route::get('medical-documents/print-all', [MedicalDocumentController::class, 'printAll'])->name('medical-documents.printAll');
+        Route::get('medical-documents/print-current', [MedicalDocumentController::class, 'printCurrent'])->name('medical-documents.printCurrent');
+        Route::get('medical-documents/{medical_document}/print', [MedicalDocumentController::class, 'printSingle'])->name('medical-documents.printSingle');
+        // });
+        // Fetch medical visits for a patient (JSON) - moved outside middleware for accessibility
+        Route::get('medical-documents/visits-for-patient/{patient}', [MedicalDocumentController::class, 'visitsForPatient'])->name('medical-documents.visitsForPatient');
+        // Test route with explicit ID
+        Route::get('medical-documents/test-visits-for-patient/{patientId}', [MedicalDocumentController::class, 'testVisitsForPatient']);
+        // Debug route to test route model binding
+        Route::get('debug-patient/{patient}', function (\App\Models\Patient $patient) {
+            return response()->json(['patient_id' => $patient->id, 'patient_name' => $patient->full_name]);
+        });
+        // Test route for debugging
+        Route::get('test-patient/{id}', function ($id) {
+            $patient = \App\Models\Patient::find($id);
+            return response()->json(['patient' => $patient]);
         });
         Route::resource('medical-documents', MedicalDocumentController::class)->middleware([
             'can:view medical documents,medical_document',
@@ -494,7 +501,6 @@ Route::middleware(['auth', 'verified'])
 
         Route::middleware('can:view inventory transactions')->group(function () {
             Route::get('inventory-transactions/export', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'export'])->name('inventory-transactions.export');
-            Route::get('inventory-transactions/print-all', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printAll'])->name('inventory-transactions.printAll');
             Route::get('inventory-transactions/{inventory_transaction}/print', [App\Http\Controllers\Admin\InventoryTransactionController::class, 'printSingle'])->name('inventory-transactions.printSingle');
         });
         Route::resource('inventory-transactions', App\Http\Controllers\Admin\InventoryTransactionController::class)->middleware([
@@ -743,8 +749,8 @@ Route::middleware(['auth', 'verified'])
         Route::resource('employee-insurance-records', App\Http\Controllers\Insurance\EmployeeInsuranceRecordController::class)->middleware([
             'can:view employee insurance records,employee_insurance_record',
             'can:create employee insurance records',
-            'can:edit employee insurance records,employee_insurance_record',
-            'can:delete employee insurance records,employee_insurance_record',
+            'can:edit employee insurance records',
+            'can:delete employee insurance records',
         ]);
 
         Route::middleware('can:view insurance claims')->group(function () {
@@ -841,12 +847,13 @@ Route::middleware(['auth', 'verified'])
 
         // Admin Leave Requests
         Route::middleware('can:view leave requests')->group(function () {
-            Route::get('admin-leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
+            Route::get('leave-requests', [AdminLeaveRequestController::class, 'index'])->name('admin.leave-requests.index');
+            Route::get('leave-requests/export', [AdminLeaveRequestController::class, 'export'])->name('admin.leave-requests.export');
+            Route::get('leave-requests/print-all', [AdminLeaveRequestController::class, 'printAll'])->name('admin.leave-requests.printAll');
+            Route::get('leave-requests/print-current', [AdminLeaveRequestController::class, 'printCurrent'])->name('admin.leave-requests.printCurrent');
+            Route::get('leave-requests/{leave_request}/print', [AdminLeaveRequestController::class, 'printSingle'])->name('admin.leave-requests.printSingle');
         });
-        Route::resource('admin-leave-requests', AdminLeaveRequestController::class)
-            ->parameters(['admin-leave-requests' => 'leave_request'])
-            ->names('leave-requests')
-            ->only(['update'])
+        Route::resource('leave-requests', AdminLeaveRequestController::class)
             ->middleware([
                 'can:edit leave requests,leave_request',
             ]);
@@ -957,9 +964,9 @@ Route::middleware(['auth', 'verified', 'deny_roles:guest,patient'])
             ->only(['index', 'store']);
 
         // My Tasks
-        Route::get('my-tasks', [StaffTaskController::class, 'index'])->name('task-delegations.index');
-        Route::post('my-tasks', [StaffTaskController::class, 'store'])->name('task-delegations.store');
-        Route::patch('my-tasks/{task_delegation}', [StaffTaskController::class, 'update'])->name('task-delegations.update');
+        Route::get('my-tasks', [TaskDelegationController::class, 'index'])->name('task-delegations.index');
+        Route::post('my-tasks', [TaskDelegationController::class, 'store'])->name('task-delegations.store');
+        Route::patch('my-tasks/{task_delegation}', [TaskDelegationController::class, 'update'])->name('task-delegations.update');
         Route::get('my-tasks/count', function () {
             $staffId = Auth::user()?->staff?->id ?? null;
             if (!$staffId) {
@@ -996,6 +1003,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'bannerStyle' => 'success',
         ]);
     })->name('test.flash-message');
+
 });
 
 if (app()->environment('local')) {

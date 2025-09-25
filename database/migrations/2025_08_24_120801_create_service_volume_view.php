@@ -7,6 +7,12 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            // SQLite does not fully support complex views with PostgreSQL-specific functions like DATE_TRUNC and TO_CHAR.
+            // We will skip creating this view for SQLite environments, typically used for testing.
+            return;
+        }
+
         // Base index to support date filtering (noop if already exists in another migration)
         DB::statement('CREATE INDEX IF NOT EXISTS idx_visit_services_scheduled_at ON visit_services (scheduled_at);');
 
@@ -29,6 +35,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement('DROP VIEW IF EXISTS service_volume_view;');
     }
 };
