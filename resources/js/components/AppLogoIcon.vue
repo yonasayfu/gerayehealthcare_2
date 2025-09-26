@@ -2,6 +2,7 @@
 import type { HTMLAttributes } from 'vue';
 
 defineOptions({
+  name: 'AppLogoIcon',
   inheritAttrs: false,
 });
 
@@ -23,11 +24,3 @@ const logoPath = '/images/geraye_logo.jpeg';
     class="h-8 w-auto border-none"
   />
 </template>
-
-<script>
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'AppLogoIcon',
-});
-</script>

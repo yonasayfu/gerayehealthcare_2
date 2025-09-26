@@ -144,6 +144,7 @@ class LeaveRequestController extends Controller
             staff_id: $staff->id,
             start_date: $validated['start_date'],
             end_date: $validated['end_date'],
+            type: $validated['type'],
             reason: $validated['reason'],
             status: 'Pending',
             admin_notes: null

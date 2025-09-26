@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/InputError.vue';
-import { ref, onMounted, onBeforeUnmount } from 'vue'; // Import onMounted and onBeforeUnmount
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'; // Import onMounted and onBeforeUnmount
+import { usePage } from '@inertiajs/vue3';
 
 // Define the props passed from the controller
 const props = defineProps<{
@@ -31,6 +32,23 @@ const reloadPageData = () => {
 onMounted(() => {
   // Add event listener to reload data when the window gains focus
   window.addEventListener('focus', reloadPageData);
+
+  // Deep-link highlight support (e.g., from notification)
+  try {
+    const page = usePage();
+    const url = new URL((page.props as any).ziggy?.location || window.location.href);
+    const h = url.searchParams.get('highlight');
+    if (h) {
+      nextTick(() => {
+        const el = document.querySelector(`[data-leave-id="${h}"]`);
+        if (el) {
+          (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+          (el as HTMLElement).classList.add('ring-2','ring-amber-400');
+          setTimeout(() => (el as HTMLElement).classList.remove('ring-2','ring-amber-400'), 3000);
+        }
+      });
+    }
+  } catch {}
 });
 
 onBeforeUnmount(() => {
@@ -42,6 +60,7 @@ onBeforeUnmount(() => {
 const form = useForm({
   start_date: '',
   end_date: '',
+  type: 'Annual',
   reason: '',
 });
 
@@ -117,6 +136,15 @@ const statusColor = (status: string) => {
             <Input id="end_date" type="date" v-model="form.end_date" />
             <InputError :message="form.errors.end_date" class="mt-2" />
           </div>
+          <div>
+            <Label for="type">Leave Type</Label>
+            <select id="type" v-model="form.type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <option value="Annual">Annual</option>
+              <option value="Sick">Sick</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+            <InputError :message="form.errors.type" class="mt-2" />
+          </div>
           <div class="md:col-span-2">
             <Label for="reason">Reason <span class="text-red-500">*</span></Label>
             <textarea
@@ -148,13 +176,14 @@ const statusColor = (status: string) => {
                 <tr>
                   <th class="p-2">Start Date</th>
                   <th class="p-2">End Date</th>
+                  <th class="p-2">Type</th>
                   <th class="p-2">Reason</th>
                   <th class="p-2">Status</th>
                   <th class="p-2">Admin Notes</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t">
+                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t" :data-leave-id="request.id">
                   <td class="p-2">{{ formatDate(request.start_date) }}</td>
                   <td class="p-2">{{ formatDate(request.end_date) }}</td>
                   <td class="p-2">{{ request.reason || 'N/A' }}</td>

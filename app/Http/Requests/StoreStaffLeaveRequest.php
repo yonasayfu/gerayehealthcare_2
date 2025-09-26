@@ -24,6 +24,7 @@ class StoreStaffLeaveRequest extends FormRequest
         return [
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'type' => 'required|string|in:Annual,Sick,Unpaid',
             'reason' => 'required|string|max:1000',
         ];
     }
@@ -40,6 +41,8 @@ class StoreStaffLeaveRequest extends FormRequest
             'end_date.required' => 'Please select an end date for your leave.',
             'end_date.date' => 'Please enter a valid end date.',
             'end_date.after_or_equal' => 'End date must be on or after the start date.',
+            'type.required' => 'Please choose a leave type.',
+            'type.in' => 'Leave type must be one of: Annual, Sick, Unpaid.',
             'reason.required' => 'Please provide a reason for your leave request.',
             'reason.max' => 'The reason cannot exceed 1000 characters.',
         ];

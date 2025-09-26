@@ -859,11 +859,11 @@ Route::middleware(['auth', 'verified', 'custom_role:' . \App\Enums\RoleEnum::SUP
 
         // Admin Leave Requests
         Route::middleware('can:view leave requests')->group(function () {
-            Route::get('leave-requests', [AdminLeaveRequestController::class, 'index'])->name('admin.leave-requests.index');
-            Route::get('leave-requests/export', [AdminLeaveRequestController::class, 'export'])->name('admin.leave-requests.export');
-            Route::get('leave-requests/print-all', [AdminLeaveRequestController::class, 'printAll'])->name('admin.leave-requests.printAll');
-            Route::get('leave-requests/print-current', [AdminLeaveRequestController::class, 'printCurrent'])->name('admin.leave-requests.printCurrent');
-            Route::get('leave-requests/{leave_request}/print', [AdminLeaveRequestController::class, 'printSingle'])->name('admin.leave-requests.printSingle');
+            Route::get('leave-requests', [AdminLeaveRequestController::class, 'index'])->name('leave-requests.index');
+            Route::get('leave-requests/export', [AdminLeaveRequestController::class, 'export'])->name('leave-requests.export');
+            Route::get('leave-requests/print-all', [AdminLeaveRequestController::class, 'printAll'])->name('leave-requests.printAll');
+            Route::get('leave-requests/print-current', [AdminLeaveRequestController::class, 'printCurrent'])->name('leave-requests.printCurrent');
+            Route::get('leave-requests/{leave_request}/print', [AdminLeaveRequestController::class, 'printSingle'])->name('leave-requests.printSingle');
         });
         Route::resource('leave-requests', AdminLeaveRequestController::class)
             ->middleware([
@@ -925,8 +925,8 @@ Route::prefix('reconciliation')->name('reconciliation.')->middleware('can:reconc
     Route::post('{claimId}/process-payment', [App\Http\Controllers\Accountant\PaymentReconciliationController::class, 'processClaimPayment'])->name('processClaimPayment');
 });
 
-// Staff-Specific
-Route::middleware(['auth', 'verified', 'role:' . RoleEnum::STAFF->value])
+// Staff-Specific (also allow admin-level roles to submit/request)
+Route::middleware(['auth', 'verified', 'custom_role:' . RoleEnum::STAFF->value . ',' . RoleEnum::SUPER_ADMIN->value . ',' . RoleEnum::ADMIN->value . ',' . RoleEnum::CEO->value . ',' . RoleEnum::COO->value])
     ->prefix('dashboard')
     ->name('staff.')
     ->group(function () {

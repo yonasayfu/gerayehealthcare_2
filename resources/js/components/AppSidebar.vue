@@ -99,7 +99,7 @@ const loadSidebarState = () => {
       areAllGroupsExpanded.value = JSON.parse(expandedState)
     }
   } catch (error) {
-    console.warn('Failed to load sidebar state from localStorage:', error)
+    // ignore localStorage errors
     openGroups.value = []
     areAllGroupsExpanded.value = false
   }
@@ -111,7 +111,7 @@ const saveSidebarState = () => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(openGroups.value))
     localStorage.setItem(SIDEBAR_EXPAND_ALL_KEY, JSON.stringify(areAllGroupsExpanded.value))
   } catch (error) {
-    console.warn('Failed to save sidebar state to localStorage:', error)
+    // ignore localStorage errors
   }
 }
 
@@ -126,6 +126,7 @@ const tasksNavGroup: SidebarNavGroup = {
     icon: ClipboardList,
     items: [
         { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
+        { title: 'Request Leave', routeName: 'staff.leave-requests.index', icon: CalendarOff },
         { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList },
         { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
     ],
@@ -295,15 +296,7 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
             // Item is visible if route exists and user has permission (if required)
             const isVisible = routeExists && hasPermission;
             
-            // Debug logging
-            if (item.title === 'Campaigns' || item.title === 'Leave Requests') {
-                console.log(`Sidebar item '${item.title}': routeExists=${routeExists}, hasPermission=${hasPermission}, isVisible=${isVisible}`);
-                console.log(`  Route name: ${item.routeName}`);
-                console.log(`  Permission: ${item.permission}`);
-                if (item.permission) {
-                    console.log(`  User permissions:`, user.value?.permissions);
-                }
-            }
+            // no debug logging in production
             
             return isVisible;
         });
@@ -322,46 +315,56 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
 
 // Route helpers to avoid Ziggy exceptions and console noise
 function hasRoute(name?: string) {
-  if (!name) {
-    console.log('hasRoute called with no name');
-    return false;
-  }
-  
+  if (!name) return false;
+  // Prefer ziggy route() helper when available
   try {
-    // ziggy-js exposes route().has
-    const result = (route as any)().has(name);
-    console.log(`hasRoute Ziggy check for ${name}: ${result}`);
-    return result;
-  } catch (error) {
-    console.log(`hasRoute Ziggy error for ${name}:`, error);
-    const z: any = (window as any).Ziggy;
-    const result = !!(z && z.routes && z.routes[name]);
-    console.log(`hasRoute window.Ziggy check for ${name}: ${result}`);
-    return result;
-  }
+    const r = (window as any).route;
+    if (typeof r === 'function') {
+      const ctx = r();
+      if (ctx && typeof ctx.has === 'function') {
+        if (ctx.has(name)) return true; // only early return on true
+      }
+    }
+  } catch (_) {}
+  // Fallback to Inertia-provided Ziggy from page props
+  try {
+    const zFromPage: any = (page.props as any)?.ziggy;
+    if (zFromPage && zFromPage.routes) {
+      if (zFromPage.routes[name]) return true;
+    }
+  } catch (_) {}
+  // Final fallback to window.Ziggy if present
+  const z: any = (window as any).Ziggy;
+  if (z && z.routes && z.routes[name]) return true;
+
+  // Last resort: do not hide the item if uncertain
+  return true;
 }
 
 function safeHref(name?: string) {
-  if (!name) {
-    console.log('safeHref called with no name');
-    return '#';
-  }
+  if (!name) return '#';
   
   const routeExists = hasRoute(name);
-  console.log(`safeHref checking route: ${name}, exists: ${routeExists}`);
+  // no logging
   
   if (routeExists) {
     try { 
       const url = route(name);
-      console.log(`safeHref generated URL: ${url} for route: ${name}`);
       return url;
     } catch (error) {
-      console.log(`safeHref error generating URL for ${name}:`, error);
+      // swallow ziggy errors and try fallbacks
+      // Fallbacks for admin routes when Ziggy map is stale
+      if (name.startsWith('admin.')) {
+        const parts = name.replace(/^admin\./, '').split('.');
+        const base = parts[0];
+        if (base) {
+          const guess = `/dashboard/${base}`;
+          return guess;
+        }
+      }
       return '#';
     }
   }
-  
-  console.log(`safeHref route not found: ${name}`);
   return '#';
 }
 
@@ -565,7 +568,7 @@ onMounted(() => {
                     </div>
                     
                     <div 
-                        v-show="openGroups.includes(group.group)"
+                        v-if="openGroups.includes(group.group)"
                         class="overflow-hidden transition-all duration-200 ease-in-out"
                         :class="{
                             'max-h-96 opacity-100': openGroups.includes(group.group),
@@ -577,16 +580,11 @@ onMounted(() => {
                                     <SidebarMenuButton as-child>
                                         <Link 
                                             v-if="item.routeName && hasRoute(item.routeName)"
-                                            :href="route(item.routeName)" 
+                                            :href="safeHref(item.routeName)" 
                                             class="gap-2 px-2 py-1.5 text-sm hover:bg-muted/30 rounded-md w-full flex items-center"
                                             preserve-scroll 
                                             preserve-state
-                                            @click="(e: Event) => {
-                                              console.log(`Clicked on ${item.title}, route: ${item.routeName}`);
-                                              if (item.routeName) {
-                                                console.log(`Generated href: ${route(item.routeName)}`);
-                                              }
-                                            }">
+                                            >
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
                                             <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>

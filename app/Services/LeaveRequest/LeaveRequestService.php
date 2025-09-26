@@ -40,12 +40,34 @@ class LeaveRequestService extends BaseService
         $sortBy = $request->input('sort', $request->input('sort_by', 'created_at'));
         $sortOrder = $request->input('direction', $request->input('sort_order', 'desc'));
 
-        if ($sortBy === 'staff_first_name') {
+        // Department/Position filters
+        $department = $request->input('department');
+        $position = $request->input('position');
+        $type = $request->input('type');
+
+        $needsJoin = ($sortBy === 'staff_first_name') || !empty($department) || !empty($position);
+        if ($needsJoin) {
             $query->join('staff', 'leave_requests.staff_id', '=', 'staff.id')
-                ->orderBy('staff.first_name', $sortOrder)
                 ->select('leave_requests.*');
+
+            if (!empty($department)) {
+                $query->where('staff.department', 'ilike', '%' . $department . '%');
+            }
+            if (!empty($position)) {
+                $query->where('staff.position', 'ilike', '%' . $position . '%');
+            }
+
+            if ($sortBy === 'staff_first_name') {
+                $query->orderBy('staff.first_name', $sortOrder);
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
         } else {
             $query->orderBy($sortBy, $sortOrder);
+        }
+
+        if (!empty($type)) {
+            $query->where('type', $type);
         }
 
         $perPage = (int) $request->input('per_page', 10);
@@ -53,7 +75,7 @@ class LeaveRequestService extends BaseService
         // Ensure pagination links preserve current filters
         $paginator = $query->paginate($perPage);
         $paginator->appends($request->only([
-            'search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order',
+            'search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order', 'department', 'position', 'type',
         ]));
 
         return $paginator;

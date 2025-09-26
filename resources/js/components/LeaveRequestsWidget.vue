@@ -98,7 +98,7 @@ const formatDate = (dateString: string) => {
         class="w-full mt-2"
         as-child
       >
-        <Link :href="route('leave-requests.index')">
+        <Link :href="route('admin.leave-requests.index')">
           View All Requests
         </Link>
       </Button>

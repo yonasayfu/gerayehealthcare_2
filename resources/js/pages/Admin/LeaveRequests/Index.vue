@@ -16,6 +16,7 @@ import {
 import { ref, watch } from 'vue';
 import { ChevronUp, ChevronDown } from 'lucide-vue-next';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { usePage, nextTick, onMounted } from 'vue';
 
 // Define the LeaveRequest interface
 interface LeaveRequest {
@@ -67,14 +68,53 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Leave Requests', href: route('leave-requests.index') },
+  { title: 'Leave Requests', href: route('admin.leave-requests.index') },
 ];
 
 // Reactive variables for search and sort
 const searchInput = ref(props.filters.search || '');
+const department = ref(props.filters.department || '');
+const position = ref(props.filters.position || '');
+const typeFilter = ref((props.filters as any)?.type || 'All');
 const currentSortBy = ref(props.filters.sort_by);
 const currentSortOrder = ref(props.filters.sort_order);
 const perPage = ref<number>(Number(props.filters.per_page) || 5);
+
+// Safely check for a named route via Ziggy
+const hasRoute = (name: string): boolean => {
+  try {
+    const r: any = (route as any)();
+    return typeof r?.has === 'function' ? !!r.has(name) : false;
+  } catch {
+    return false;
+  }
+};
+
+// Inline Request Leave modal (HR/Admin convenience)
+const requestModalOpen = ref(false);
+const requestForm = useForm({
+  start_date: '',
+  end_date: '',
+  type: 'Annual',
+  reason: '',
+});
+
+const openRequestModal = () => {
+  requestModalOpen.value = true;
+};
+const closeRequestModal = () => {
+  requestModalOpen.value = false;
+};
+
+const submitRequestLeave = () => {
+  requestForm.post(route('staff.leave-requests.store'), {
+    preserveScroll: true,
+    onSuccess: () => {
+      requestForm.reset();
+      requestModalOpen.value = false;
+    },
+  });
+};
 
 // Watch for changes in searchInput and trigger search after a delay
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -97,12 +137,15 @@ watch(perPage, (newVal) => {
 // Function to apply filters (search and sort)
 const applyFilters = (options?: { preserveState?: boolean; preserveScroll?: boolean }) => {
   router.get(
-    route('leave-requests.index'),
+    route('admin.leave-requests.index'),
     {
       search: searchInput.value,
       sort_by: currentSortBy.value,
       sort_order: currentSortOrder.value,
       per_page: perPage.value,
+      department: department.value,
+      position: position.value,
+      type: typeFilter.value === 'All' ? undefined : typeFilter.value,
     },
     {
       preserveState: options?.preserveState ?? true,
@@ -111,6 +154,27 @@ const applyFilters = (options?: { preserveState?: boolean; preserveScroll?: bool
     }
   );
 };
+
+// Deep link highlight support
+const page = usePage();
+const highlightId = ref<number | null>(null);
+onMounted(() => {
+  try {
+    const url = new URL((page.props as any).ziggy?.location || window.location.href);
+    const h = url.searchParams.get('highlight');
+    if (h) {
+      highlightId.value = Number(h);
+      nextTick(() => {
+        const el = document.querySelector(`[data-leave-id="${h}"]`);
+        if (el) {
+          (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+          (el as HTMLElement).classList.add('ring-2','ring-amber-400');
+          setTimeout(() => (el as HTMLElement).classList.remove('ring-2','ring-amber-400'), 3000);
+        }
+      });
+    }
+  } catch {}
+});
 
 // Function to handle column sorting
 const sortColumn = (frontendColumnName: string) => {
@@ -162,7 +226,7 @@ const updateRequestStatus = () => {
     return;
   }
 
-  form.put(route('leave-requests.update', selectedRequest.value.id), {
+  form.put(route('admin.leave-requests.update', selectedRequest.value.id), {
     preserveScroll: true,
     
     // When the backend responds with Inertia::location, it automatically performs a new GET request
@@ -230,6 +294,10 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
             <p class="mt-1 text-sm text-muted-foreground">Review and manage all staff leave requests.</p>
           </div>
           <div class="flex items-center gap-2">
+            <!-- Quick action: Request Leave (inline modal) -->
+            <Button v-if="hasRoute('staff.leave-requests.store')" @click="openRequestModal" variant="default" size="sm">
+              Request Leave
+            </Button>
             <Button as-child variant="secondary" size="sm">
               <Link :href="route('dashboard')">
                 Back to Dashboard
@@ -237,6 +305,11 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
             </Button>
           </div>
         </div>
+      </div>
+
+      <!-- Context hint for admins submitting leave without a staff profile -->
+      <div class="rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900 text-sm">
+        HR tip: You can submit a leave request from here. If your account doesn’t have a staff profile yet, one will be created automatically using your user details.
       </div>
 
       <!-- Stats Cards -->
@@ -290,7 +363,24 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
             />
             <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1012 19.5a7.5 7.5 0 004.65-1.85z" /></svg>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <div class="w-full md:w-48">
+              <label for="department" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Department</label>
+              <input id="department" type="text" v-model="department" @keyup.enter="applyFilters()" placeholder="e.g. Administration" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700" />
+            </div>
+            <div class="w-full md:w-48">
+              <label for="position" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Position</label>
+              <input id="position" type="text" v-model="position" @keyup.enter="applyFilters()" placeholder="e.g. Nurse" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700" />
+            </div>
+            <div class="w-full md:w-40">
+              <label for="typeFilter" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Type</label>
+              <select id="typeFilter" @change="applyFilters()" v-model="typeFilter" class="mt-1 w-full rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
+                <option value="All">All</option>
+                <option value="Annual">Annual</option>
+                <option value="Sick">Sick</option>
+                <option value="Unpaid">Unpaid</option>
+              </select>
+            </div>
             <div>
               <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
               <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
@@ -300,6 +390,9 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
                   <option value="50">50</option>
                   <option value="100">100</option>
               </select>
+            </div>
+            <div>
+              <Button class="ml-2" size="sm" @click="applyFilters({ preserveScroll: true })">Apply</Button>
             </div>
           </div>
         </div>
@@ -334,6 +427,7 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
                     </div>
                   </th>
                   <th class="p-2">Days</th>
+                  <th class="p-2">Type</th>
                   <th class="p-2">Reason</th>
                   <th class="p-2 cursor-pointer select-none" @click="sortColumn('status')">
                     <div class="flex items-center">
@@ -357,10 +451,11 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t">
+                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t" :data-leave-id="request.id">
                   <td class="p-2">{{ request.staff.first_name }} {{ request.staff.last_name }}</td>
                   <td class="p-2">{{ formatDate(request.start_date) }} - {{ formatDate(request.end_date) }}</td>
                   <td class="p-2">{{ calculateLeaveDays(request.start_date, request.end_date) }}</td>
+                  <td class="p-2">{{ request.type || '—' }}</td>
                   <td class="p-2 max-w-xs truncate">{{ request.reason || 'N/A' }}</td>
                   <td class="p-2">
                     <span class="rounded-full px-2 py-1 text-xs font-medium" :class="statusColor(request.status)">
@@ -390,6 +485,51 @@ const calculateLeaveDays = (startDate: string, endDate: string) => {
         </div>
       </div>
     </div>
+
+    <!-- Request Leave Dialog (inline) -->
+    <Dialog :open="requestModalOpen" @update:open="requestModalOpen = $event">
+      <DialogContent class="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Request Leave</DialogTitle>
+          <DialogDescription>Fill in the dates and reason to submit your leave request.</DialogDescription>
+        </DialogHeader>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label for="request_start_date">Start Date</Label>
+              <Input id="request_start_date" type="date" v-model="requestForm.start_date" />
+            </div>
+            <div>
+              <Label for="request_end_date">End Date</Label>
+              <Input id="request_end_date" type="date" v-model="requestForm.end_date" />
+            </div>
+          </div>
+          <div>
+            <Label for="request_type">Leave Type</Label>
+            <select id="request_type" v-model="requestForm.type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <option value="Annual">Annual</option>
+              <option value="Sick">Sick</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+          </div>
+          <div>
+            <Label for="request_reason">Reason <span class="text-red-500">*</span></Label>
+            <textarea
+              id="request_reason"
+              v-model="requestForm.reason"
+              rows="3"
+              required
+              placeholder="Briefly describe the reason for your leave..."
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            ></textarea>
+          </div>
+        </div>
+        <DialogFooter class="gap-2">
+          <Button variant="outline" @click="closeRequestModal">Cancel</Button>
+          <Button :disabled="requestForm.processing" @click="submitRequestLeave">Submit</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
     <!-- Update Status Dialog -->
     <Dialog :open="isDialogOpen" @update:open="isDialogOpen = $event">
