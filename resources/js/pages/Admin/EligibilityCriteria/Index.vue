@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
-import AdminLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+import { confirmDialog } from '@/lib/confirm'
 
 const props = defineProps({
-    criteria: Object,
+    eligibilityCriteria: Object,
     filters: Object,
 });
 
@@ -43,10 +44,32 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
     });
 }, 500));
 
-function destroy(id) {
-    if (confirm('Are you sure you want to delete this eligibility criteria?')) {
-        router.delete(route('admin.eligibility-criteria.destroy', id));
-    }
+async function destroy(id) {
+    const ok = await confirmDialog({
+        title: 'Delete Eligibility Criteria',
+        message: 'Are you sure you want to delete this eligibility criteria?',
+        confirmText: 'Delete',
+        variant: 'danger',
+    })
+    if (!ok) return
+    router.delete(route('admin.eligibility-criteria.destroy', id))
+}
+
+function exportData(type: string) {
+    if (type !== 'csv') return;
+    const params: Record<string, any> = {
+        type: 'csv',
+        search: search.value || undefined,
+        sort: sortField.value || undefined,
+        direction: sortDirection.value || undefined,
+        per_page: perPage.value || undefined,
+    };
+    window.open(route('admin.eligibility-criteria.export', params), '_blank');
+}
+
+function printCurrentView() {
+    // Use native window.print for current UI print, as requested
+    window.print();
 }
 
 function toggleSort(field) {
@@ -62,34 +85,61 @@ function toggleSort(field) {
 <template>
     <Head title="Eligibility Criteria" />
 
-    <AdminLayout :breadcrumbs="breadcrumbs">
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-            <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Eligibility Criteria</h1>
-                    <p class="text-sm text-muted-foreground">Manage all eligibility criteria here.</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <Link :href="route('admin.eligibility-criteria.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-                        + Add Criteria
-                    </Link>
-                </div>
+            <!-- Print Header -->
+            <div class="hidden print:block text-center mb-4">
+                <img src="/images/geraye_logo.jpeg" alt="Geraye Health" class="mx-auto mb-2" style="height: 50px;" />
+                <h2 class="text-lg font-semibold">Eligibility Criteria</h2>
+                <p class="text-xs text-gray-500">Generated {{ formattedGeneratedDate }}</p>
+            </div>
+                  <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Eligibility Criteria</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage eligibility criteria</p>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-                <div class="relative w-full md:w-1/3">
-                    <input
-                        type="text"
-                        v-model="search"
-                        placeholder="Search criteria..."
-                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                    />
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                </div>
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.eligibility-criteria.create')" class="btn-glass">
+              <span>Add Eligibility Criteria</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+                  <!-- Search / per page -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search eligibility criteria..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
+          />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
+        </div>
 
                 <div>
-                    <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                     <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-gray-400 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
+
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -103,8 +153,8 @@ function toggleSort(field) {
                 <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
                     <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
                         <tr>
-                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('criteria_name')">
-                                Criteria Name <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                            <th class="px-6 py-3 cursor-pointer" @click="toggleSort('criteria_title')">
+                                Criteria Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('operator')">
                                 Operator <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
@@ -116,171 +166,62 @@ function toggleSort(field) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="criterion in criteria.data" :key="criterion.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-                            <td class="px-6 py-4">{{ criterion.criteria_name }}</td>
+                        <tr v-for="criterion in eligibilityCriteria.data" :key="criterion.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
+                            <td class="px-6 py-4">{{ criterion.criteria_title }}</td>
                             <td class="px-6 py-4">{{ criterion.operator }}</td>
                             <td class="px-6 py-4">{{ criterion.value }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
-                                    <Link
-                                        :href="route('admin.eligibility-criteria.show', criterion.id)"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-                                        title="View Details"
-                                    >
-                                        <Eye class="w-4 h-4" />
-                                    </Link>
-                                    <Link
-                                        :href="route('admin.eligibility-criteria.edit', criterion.id)"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
-                                        title="Edit"
-                                    >
-                                        <Edit3 class="w-4 h-4" />
-                                    </Link>
-                                    <button @click="destroy(criterion.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
-                                        <Trash2 class="w-4 h-4" />
-                                    </button>
-                                </div>
+                  <Link
+                    :href="route('admin.eligibility-criteria.show', criterion.id)"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </Link>
+                  <Link
+                    :href="route('admin.eligibility-criteria.edit', criterion.id)"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
+                    title="Edit"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <button
+                    @click="destroy(criterion.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
                             </td>
                         </tr>
-                        <tr v-if="criteria.data.length === 0">
+                        <tr v-if="eligibilityCriteria.data.length === 0">
                             <td colspan="4" class="text-center px-6 py-4 text-gray-400">No eligibility criteria found.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <Pagination v-if="criteria.data.length > 0" :links="criteria.links" class="mt-6 flex justify-center print:hidden" />
+            <Pagination v-if="eligibilityCriteria.data.length > 0" :links="eligibilityCriteria.links" class="mt-6 flex justify-center print:hidden" />
 
             <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
                 <hr class="my-2 border-gray-300">
                 <p>Document Generated: {{ formattedGeneratedDate }}</p>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style>
-/* Print-specific styles for Index.vue (Print Current View) */
 @media print {
-    @page {
-        size: A4 landscape;
-        margin: 0.5cm;
-    }
-
-    body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color: #000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-header-content {
-        display: block !important;
-        text-align: center;
-        padding-top: 0.5cm;
-        padding-bottom: 0.5cm;
-        margin-bottom: 0.8cm;
-    }
-    .print-logo {
-        max-width: 150px;
-        max-height: 50px;
-        margin-bottom: 0.5rem;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .print-clinic-name {
-        font-size: 1.6rem !important;
-        margin-bottom: 0.2rem !important;
-        line-height: 1.2 !important;
-        font-weight: bold;
-    }
-    .print-document-title {
-        font-size: 0.85rem !important;
-        color: #555 !important;
-    }
-    hr { border-color: #ccc !important; }
-
-    .space-y-6.p-6 {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        background-color: transparent !important;
-        overflow: visible !important;
-        padding: 1cm;
-        transform: scale(0.97);
-        transform-origin: top left;
-    }
-
-    .print-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        font-size: 0.8rem !important;
-        table-layout: fixed;
-    }
-
-    .print-table-header {
-        background-color: #f0f0f0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        text-transform: uppercase !important;
-    }
-
-    .print-table th, .print-table td {
-        border: 1px solid #ddd !important;
-        padding: 0.4rem 0.6rem !important;
-        color: #000 !important;
-        vertical-align: top !important;
-        word-break: break-word;
-    }
-
-    .print-table th {
-        font-weight: bold !important;
-        font-size: 0.7rem !important;
-        white-space: nowrap;
-    }
-
-    .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 30%; }
-    .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 25%; }
-    .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 20%; }
-
-    .print-table tbody tr:nth-child(even) {
-        background-color: #f9f9f9 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    .print-table tbody tr:last-child {
-        border-bottom: 1px solid #ddd !important;
-    }
-
-    .print-table th:last-child,
-    .print-table td:last-child {
-        display: none !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-footer {
-        display: block !important;
-        text-align: center;
-        margin-top: 1cm;
-        font-size: 0.75rem !important;
-        color: #666 !important;
-    }
-    .print-footer hr {
-        border-color: #ccc !important;
-    }
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
 }
 </style>

@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\EligibilityCriteria;
 use App\Models\Event;
 use App\Models\EventRecommendation;
-use App\Models\EligibilityCriteria;
 use App\Models\EventStaffAssignment;
+use Illuminate\Database\Seeder;
 
 class PagumeCampaignSeeder extends Seeder
 {
@@ -23,8 +23,8 @@ class PagumeCampaignSeeder extends Seeder
             'broadcast_status' => 'Published',
         ]);
 
-        EventRecommendation::factory()->count(6)->create(['event_id' => $event->id]);
-        EligibilityCriteria::factory()->count(6)->create(['event_id' => $event->id]);
-        EventStaffAssignment::factory()->count(6)->create(['event_id' => $event->id]);
+        EventRecommendation::factory()->count(3)->create(['event_id' => $event->id]);
+        EligibilityCriteria::factory()->count(3)->create(['event_id' => $event->id]);
+        EventStaffAssignment::factory()->count(3)->create(['event_id' => $event->id]);
     }
 }

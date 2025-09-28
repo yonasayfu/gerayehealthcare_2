@@ -5,16 +5,17 @@ namespace App\Mail;
 use App\Models\InsuranceClaim;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Mail\Mailables\Attachment;
 
 class InsuranceClaimEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public InsuranceClaim $claim;
+
     public string $pdfPath;
 
     /**
@@ -32,7 +33,7 @@ class InsuranceClaimEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Insurance Claim for Invoice ' . $this->claim->invoice->invoice_number,
+            subject: 'Insurance Claim for Invoice '.$this->claim->invoice->invoice_number,
         );
     }
 
@@ -42,7 +43,7 @@ class InsuranceClaimEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            html: '<p>Dear Sir/Madam,</p><p>Please find attached the insurance claim for invoice ' . $this->claim->invoice->invoice_number . '.</p><p>Regards,<br>Geraye Healthcare</p>',
+            html: '<p>Dear Sir/Madam,</p><p>Please find attached the insurance claim for invoice '.$this->claim->invoice->invoice_number.'.</p><p>Regards,<br>Geraye Healthcare</p>',
         );
     }
 
@@ -55,7 +56,7 @@ class InsuranceClaimEmail extends Mailable
     {
         return [
             Attachment::fromPath($this->pdfPath)
-                ->as('insurance_claim_' . $this->claim->invoice->invoice_number . '.pdf')
+                ->as('insurance_claim_'.$this->claim->invoice->invoice_number.'.pdf')
                 ->withMime('application/pdf'),
         ];
     }

@@ -1,0 +1,2321 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:whereNotNull\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/LinkStaffUsers.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:whereNull\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/LinkStaffUsers.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:whereNotIn\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/LinkStaffUsers.php
+
+		-
+			message: "#^Call to an undefined static method Spatie\\\\Permission\\\\Models\\\\Role\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Console/Commands/NormalizeRoleNames.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\DTOs\\\\CreatePatientDTO\\:\\:fromPool\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/PerformanceBenchmarkCommand.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/TestSystemHealthCommand.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:limit\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/TestSystemHealthCommand.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/TestSystemHealthCommand.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/TestSystemHealthCommand.php
+
+		-
+			message: "#^Call to an undefined static method Illuminate\\\\Support\\\\Facades\\\\Redis\\:\\:ping\\(\\)\\.$#"
+			count: 1
+			path: app/Console/Commands/TestSystemHealthCommand.php
+
+		-
+			message: "#^Unsafe usage of new static\\(\\)\\.$#"
+			count: 1
+			path: app/DTOs/BaseDTO.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/CampaignContentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingPlatform\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/CampaignContentController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Admin\\\\CaregiverAssignmentController\\:\\:handlePrintSingle\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/CaregiverAssignmentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:whereNull\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryAlert\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:whereNotNull\\(\\)\\.$#"
+			count: 3
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:whereNull\\(\\)\\.$#"
+			count: 6
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:count\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereBetween\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:count\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\TaskDelegation\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereBetween\\(\\)\\.$#"
+			count: 5
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to static method raw\\(\\) on an unknown class DB\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to static method table\\(\\) on an unknown class DB\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EligibilityCriteriaController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventBroadcastController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventBroadcastController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/EventBroadcastController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventParticipantController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventParticipantController.php
+
+		-
+			message: "#^Class App\\\\Http\\\\Controllers\\\\Admin\\\\CreateEventParticipantDTO not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/EventParticipantController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventRecommendationController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventRecommendationController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventStaffAssignmentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/EventStaffAssignmentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InventoryItemController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InventoryItemController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InventoryMaintenanceRecordController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/InventoryRequestController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/InventoryRequestController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InventoryRequestController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InvoiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/InvoiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/LandingPageController.php
+
+		-
+			message: "#^Method App\\\\Http\\\\Controllers\\\\Base\\\\BaseController\\:\\:__construct\\(\\) invoked with 7 parameters, 5\\-6 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/LandingPageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingBudgetController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingPlatform\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingBudgetController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\LandingPage\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingLeadController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingLeadController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingLeadController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/MarketingLeadController.php
+
+		-
+			message: "#^Method App\\\\Http\\\\Controllers\\\\Base\\\\BaseController\\:\\:__construct\\(\\) invoked with 7 parameters, 5\\-6 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/MarketingPlatformController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MedicalDocument\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/MedicalDocumentController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/MedicalDocumentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereDate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 4
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereDate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedDashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Services\\\\Validation\\\\Rules\\\\InventoryItemRules\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedInventoryItemController.php
+
+		-
+			message: "#^Static method App\\\\Services\\\\Validation\\\\Rules\\\\InventoryItemRules\\:\\:update\\(\\) invoked with 0 parameters, 1 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedInventoryItemController.php
+
+		-
+			message: "#^Variable \\$newQuantity might not be defined\\.$#"
+			count: 3
+			path: app/Http/Controllers/Admin/OptimizedInventoryItemController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:selectRaw\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedInvoiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedInvoiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedInvoiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedPatientController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Services\\\\Validation\\\\Rules\\\\PatientRules\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedPatientController.php
+
+		-
+			message: "#^Static method App\\\\Services\\\\Validation\\\\Rules\\\\PatientRules\\:\\:update\\(\\) invoked with 0 parameters, 1 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedPatientController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedStaffController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Services\\\\Validation\\\\Rules\\\\StaffRules\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedStaffController.php
+
+		-
+			message: "#^Static method App\\\\Services\\\\Validation\\\\Rules\\\\StaffRules\\:\\:update\\(\\) invoked with 0 parameters, 1 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/OptimizedStaffController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/PatientController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/PrescriptionController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/ReferralDocumentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/ReferralDocumentController.php
+
+		-
+			message: "#^Call to an undefined static method Spatie\\\\Permission\\\\Models\\\\Permission\\:\\:pluck\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/RoleController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/StaffAvailabilityController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Supplier\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/SupplierController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/SupplierController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryAlert\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/TaskDelegationController.php
+
+		-
+			message: "#^Call to static method error\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/TaskDelegationController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/VisitServiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Admin/VisitServiceController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Admin/VisitServiceController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\AnalyticsController\\:\\:errorResponse\\(\\)\\.$#"
+			count: 5
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\AnalyticsController\\:\\:successResponse\\(\\)\\.$#"
+			count: 5
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:whereRaw\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:whereNull\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:count\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:join\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:selectRaw\\(\\)\\.$#"
+			count: 5
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 3
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereBetween\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereDate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereHas\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:join\\(\\)\\.$#"
+			count: 3
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 6
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:whereHas\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:join\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:selectRaw\\(\\)\\.$#"
+			count: 5
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 9
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereBetween\\(\\)\\.$#"
+			count: 10
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereDate\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to static method where\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/AnalyticsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EmployeeInsuranceRecord\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BillingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BillingController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\BulkOperationsController\\:\\:errorResponse\\(\\)\\.$#"
+			count: 13
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\BulkOperationsController\\:\\:successResponse\\(\\)\\.$#"
+			count: 7
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/BulkOperationsController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MedicalDocument\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/DocumentController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/DocumentController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\InsuranceController\\:\\:errorResponse\\(\\)\\.$#"
+			count: 12
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\InsuranceController\\:\\:successResponse\\(\\)\\.$#"
+			count: 8
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:selectRaw\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:whereBetween\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceClaim\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:withCount\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to static method collection\\(\\) on an unknown class App\\\\Http\\\\Resources\\\\InsuranceCompanyResource\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Instantiated class App\\\\Http\\\\Resources\\\\InsuranceCompanyResource not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InsuranceController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\InventoryController\\:\\:errorResponse\\(\\)\\.$#"
+			count: 14
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\InventoryController\\:\\:successResponse\\(\\)\\.$#"
+			count: 8
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:selectRaw\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryItem\\:\\:whereRaw\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryRequest\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryTransaction\\:\\:create\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to static method collection\\(\\) on an unknown class App\\\\Http\\\\Resources\\\\InventoryItemResource\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to static method collection\\(\\) on an unknown class App\\\\Http\\\\Resources\\\\InventoryRequestResource\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Instantiated class App\\\\Http\\\\Resources\\\\InventoryItemResource not found\\.$#"
+			count: 3
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Instantiated class App\\\\Http\\\\Resources\\\\InventoryRequestResource not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/InventoryController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\MarketingController\\:\\:errorResponse\\(\\)\\.$#"
+			count: 13
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\MarketingController\\:\\:successResponse\\(\\)\\.$#"
+			count: 9
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:withCount\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to static method create\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to static method query\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to static method selectRaw\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to static method where\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 4
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to static method whereBetween\\(\\) on an unknown class App\\\\Models\\\\Lead\\.$#"
+			count: 3
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Parameter \\$lead of method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\MarketingController\\:\\:convertLead\\(\\) has invalid type App\\\\Models\\\\Lead\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MarketingController.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Http\\\\Controllers\\\\Api\\\\V1\\\\MessageController\\:\\:authorize\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:selectRaw\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Api/V1/PatientController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\PushToken\\:\\:updateOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/PushTokenController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\PushToken\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/PushTokenController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/VisitServiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Api/V1/VisitServiceController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Auth/RegisteredUserController.php
+
+		-
+			message: "#^Parameter \\$request of method App\\\\Http\\\\Controllers\\\\Auth\\\\RegisteredUserController\\:\\:store\\(\\) has invalid type App\\\\Http\\\\Requests\\\\StoreUserRequest\\.$#"
+			count: 1
+			path: app/Http/Controllers/Auth/RegisteredUserController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Group\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\GroupMember\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\GroupMember\\:\\:firstOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Group\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupMessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\GroupMember\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/GroupMessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\GroupMessage\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupMessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Reaction\\:\\:firstOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/GroupMessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/EmployeeInsuranceRecordController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/EmployeeInsuranceRecordController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/EmployeeInsuranceRecordController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsuranceClaimController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsuranceClaimController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsuranceClaimController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsuranceClaimController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsuranceCompanyController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsuranceCompanyController.php
+
+		-
+			message: "#^Class App\\\\DTOs\\\\UpdateInsuranceCompanyDTO not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsuranceCompanyController.php
+
+		-
+			message: "#^Method App\\\\Http\\\\Controllers\\\\Base\\\\BaseController\\:\\:__construct\\(\\) invoked with 7 parameters, 5\\-6 required\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsuranceCompanyController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsuranceCompanyService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CorporateClient\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsurancePolicyController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:select\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Insurance/InsurancePolicyController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Insurance/InsurancePolicyController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:selectRaw\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Message\\:\\:where\\(\\)\\.$#"
+			count: 3
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Reaction\\:\\:firstOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:findOrFail\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\User\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/MessageController.php
+
+		-
+			message: "#^Call to static method render\\(\\) on an unknown class App\\\\Http\\\\Controllers\\\\Inertia\\.$#"
+			count: 1
+			path: app/Http/Controllers/NotificationController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Reports/MarketingRoiController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Reports/RevenueARController.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Http/Controllers/Reports/ServiceVolumeController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Http/Controllers/Staff/DashboardController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\LeaveRequest\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/LeaveRequestController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MarketingCampaignController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MarketingLeadController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MarketingTaskController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\StaffAvailability\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyAvailabilityController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyAvailabilityController.php
+
+		-
+			message: "#^Class App\\\\Http\\\\Controllers\\\\Staff\\\\CreateStaffAvailabilityDTO not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyAvailabilityController.php
+
+		-
+			message: "#^Parameter \\$request of method App\\\\Http\\\\Controllers\\\\Staff\\\\MyAvailabilityController\\:\\:getEvents\\(\\) has invalid type App\\\\Http\\\\Requests\\\\GetEventsRequest\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyAvailabilityController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Service\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyVisitController.php
+
+		-
+			message: "#^Instantiated class App\\\\Http\\\\Controllers\\\\Staff\\\\UpdateVisitServiceDTO not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyVisitController.php
+
+		-
+			message: "#^Parameter \\$request of method App\\\\Http\\\\Controllers\\\\Staff\\\\MyVisitController\\:\\:checkIn\\(\\) has invalid type App\\\\Http\\\\Requests\\\\CheckInVisitRequest\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyVisitController.php
+
+		-
+			message: "#^Parameter \\$request of method App\\\\Http\\\\Controllers\\\\Staff\\\\MyVisitController\\:\\:checkOut\\(\\) has invalid type App\\\\Http\\\\Requests\\\\CheckOutVisitRequest\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyVisitController.php
+
+		-
+			message: "#^Parameter \\$request of method App\\\\Http\\\\Controllers\\\\Staff\\\\MyVisitController\\:\\:storeReport\\(\\) has invalid type App\\\\Http\\\\Requests\\\\StoreVisitReportRequest\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/MyVisitController.php
+
+		-
+			message: "#^Instantiated class App\\\\Http\\\\Controllers\\\\Staff\\\\CreateTaskDelegationDTO not found\\.$#"
+			count: 1
+			path: app/Http/Controllers/Staff/TaskDelegationController.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Service\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/CacheExpensiveQueries.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Http/Middleware/EnsureStaffLinked.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$patient\\.$#"
+			count: 2
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$shift_end\\.$#"
+			count: 1
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$shift_start\\.$#"
+			count: 1
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$staff\\.$#"
+			count: 2
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\CaregiverAssignmentResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Resources/CaregiverAssignmentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$claim_status\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$coverage_amount\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$insuranceCompany\\.$#"
+			count: 2
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$invoice\\.$#"
+			count: 2
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$paid_amount\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$payment_due_date\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$payment_received_at\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$policy\\.$#"
+			count: 2
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$processed_at\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsuranceClaimResource\\:\\:\\$submitted_at\\.$#"
+			count: 1
+			path: app/Http/Resources/InsuranceClaimResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$corporateClient\\.$#"
+			count: 2
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$coverage_percentage\\.$#"
+			count: 1
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$coverage_type\\.$#"
+			count: 1
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$insuranceCompany\\.$#"
+			count: 2
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$is_active\\.$#"
+			count: 1
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InsurancePolicyResource\\:\\:\\$service_type\\.$#"
+			count: 1
+			path: app/Http/Resources/InsurancePolicyResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$due_date\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$grand_total\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$insuranceCompany\\.$#"
+			count: 2
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$invoice_date\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$invoice_number\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$items\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$paid_at\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$patient\\.$#"
+			count: 2
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\InvoiceResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Resources/InvoiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$budget_range\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$converted_at\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$converted_to_patient\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$email\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$interest_level\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$notes\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$phone\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$source\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$timeline\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\LeadResource\\:\\:\\$updated_at\\.$#"
+			count: 1
+			path: app/Http/Resources/LeadResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$budget\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$conversion_rate\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$conversions_count\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$cost_per_lead\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$description\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$end_date\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$goals\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$roi\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$start_date\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$target_audience\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$total_spent\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$updated_at\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$utm_campaign\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$utm_content\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$utm_medium\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$utm_source\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MarketingCampaignResource\\:\\:\\$utm_term\\.$#"
+			count: 1
+			path: app/Http/Resources/MarketingCampaignResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$createdBy\\.$#"
+			count: 2
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$document_date\\.$#"
+			count: 1
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$document_type\\.$#"
+			count: 1
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$patient\\.$#"
+			count: 2
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$summary\\.$#"
+			count: 1
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MedicalDocumentResource\\:\\:\\$title\\.$#"
+			count: 1
+			path: app/Http/Resources/MedicalDocumentResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$attachment_filename\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$attachment_url\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$message\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$read_at\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$receiver\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$receiver_id\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$sender\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\MessageResource\\:\\:\\$sender_id\\.$#"
+			count: 1
+			path: app/Http/Resources/MessageResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientBriefResource\\:\\:\\$full_name\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientBriefResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientBriefResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientBriefResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$address\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$created_at\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$email\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$full_name\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\PatientResource\\:\\:\\$phone_number\\.$#"
+			count: 1
+			path: app/Http/Resources/PatientResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$category\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$description\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$duration\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\ServiceResource\\:\\:\\$price\\.$#"
+			count: 1
+			path: app/Http/Resources/ServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\UserResource\\:\\:\\$email\\.$#"
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\UserResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\UserResource\\:\\:\\$name\\.$#"
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\UserResource\\:\\:\\$roles\\.$#"
+			count: 1
+			path: app/Http/Resources/UserResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$check_in_time\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$check_out_time\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$id\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$patient\\.$#"
+			count: 2
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$prescription_file_url\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$scheduled_at\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$staff\\.$#"
+			count: 2
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$status\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$visit_notes\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Http\\\\Resources\\\\VisitServiceResource\\:\\:\\$vitals_file_url\\.$#"
+			count: 1
+			path: app/Http/Resources/VisitServiceResource.php
+
+		-
+			message: "#^Call to static method firstOrCreate\\(\\) on an unknown class App\\\\Listeners\\\\EventStaffAssignment\\.$#"
+			count: 1
+			path: app/Listeners/AssignStaffToEvent.php
+
+		-
+			message: "#^Call to static method create\\(\\) on an unknown class App\\\\Listeners\\\\InventoryAlert\\.$#"
+			count: 1
+			path: app/Listeners/CheckForLowStock.php
+
+		-
+			message: "#^Call to static method find\\(\\) on an unknown class App\\\\Listeners\\\\InventoryItem\\.$#"
+			count: 1
+			path: app/Listeners/CheckForLowStock.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:count\\(\\)\\.$#"
+			count: 1
+			path: app/Listeners/CreatePatientFromRecommendation.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:firstOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Listeners/CreatePatientFromRecommendation.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventParticipant\\:\\:firstOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Listeners/RegisterEventParticipant.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\GroupMessage\\:\\:\\$attachment_path\\.$#"
+			count: 1
+			path: app/Models/GroupMessage.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:latest\\(\\)\\.$#"
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\LandingPage\\:\\:lockForUpdate\\(\\)\\.$#"
+			count: 1
+			path: app/Models/LandingPage.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:lockForUpdate\\(\\)\\.$#"
+			count: 1
+			path: app/Models/MarketingCampaign.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingLead\\:\\:lockForUpdate\\(\\)\\.$#"
+			count: 1
+			path: app/Models/MarketingLead.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingTask\\:\\:lockForUpdate\\(\\)\\.$#"
+			count: 1
+			path: app/Models/MarketingTask.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Message\\:\\:\\$attachment_path\\.$#"
+			count: 1
+			path: app/Models/Message.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Patient\\:\\:\\$date_of_birth\\.$#"
+			count: 1
+			path: app/Models/Patient.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:lockForUpdate\\(\\)\\.$#"
+			count: 1
+			path: app/Models/Patient.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Staff\\:\\:\\$first_name\\.$#"
+			count: 1
+			path: app/Models/Staff.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Staff\\:\\:\\$last_name\\.$#"
+			count: 1
+			path: app/Models/Staff.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\Staff\\:\\:\\$photo\\.$#"
+			count: 1
+			path: app/Models/Staff.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\VisitService\\:\\:\\$prescription_file\\.$#"
+			count: 1
+			path: app/Models/VisitService.php
+
+		-
+			message: "#^Access to an undefined property App\\\\Models\\\\VisitService\\:\\:\\$vitals_file\\.$#"
+			count: 1
+			path: app/Models/VisitService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Policies/InsuranceClaimPolicy.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Policies/InvoicePolicy.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Policies/MedicalDocumentPolicy.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CaregiverAssignment\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Policies/MessagePolicy.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Policies/MessagePolicy.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:find\\(\\)\\.$#"
+			count: 1
+			path: app/Policies/VisitServicePolicy.php
+
+		-
+			message: "#^Class App\\\\Providers\\\\AssignStaffToEvent not found\\.$#"
+			count: 1
+			path: app/Providers/EventServiceProvider.php
+
+		-
+			message: "#^Class App\\\\Providers\\\\StaffAssignedToEvent not found\\.$#"
+			count: 1
+			path: app/Providers/EventServiceProvider.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CaregiverAssignment\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Rules/StaffIsAvailableForShift.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\StaffAvailability\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Rules/StaffIsAvailableForShift.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\StaffAvailability\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Rules/StaffIsAvailableForVisit.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Rules/StaffIsAvailableForVisit.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CampaignContent\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Event\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsuranceCompany\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InsurancePolicy\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Invoice\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingCampaign\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Partner\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\PartnerAgreement\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Referral\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Service\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/CachedDropdownService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/CaregiverAssignmentService.php
+
+		-
+			message: "#^Method App\\\\Services\\\\CaregiverAssignmentService\\:\\:handlePrintSingle\\(\\) invoked with 2 parameters, 3 required\\.$#"
+			count: 1
+			path: app/Services/CaregiverAssignmentService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EligibilityCriteriaService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EventBroadcastService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EventParticipantService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EventRecommendationService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EventService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/EventStaffAssignmentService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/GlobalSearchService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/GlobalSearchService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryAlert\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Services/InventoryAlertService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/InventoryAlertService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/InventoryMaintenanceRecordService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/InventoryTransactionService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/LandingPageService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Http\\\\Config\\\\AdditionalExportConfigs\\:\\:getCampaignMetricConfig\\(\\)\\.$#"
+			count: 2
+			path: app/Services/MarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereNotNull\\(\\)\\.$#"
+			count: 1
+			path: app/Services/MarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/MarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Services/MarketingAnalyticsService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/MarketingAnalyticsService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/MarketingBudgetService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/MarketingCampaignService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Http\\\\Config\\\\ExportConfig\\:\\:getMarketingPlatformConfig\\(\\)\\.$#"
+			count: 1
+			path: app/Services/MarketingPlatformService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/MarketingPlatformService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/MarketingTaskService.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Services\\\\OptimizedEventService\\:\\:clearCachePattern\\(\\)\\.$#"
+			count: 4
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventBroadcast\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventParticipant\\:\\:insert\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventParticipant\\:\\:where\\(\\)\\.$#"
+			count: 3
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventStaffAssignment\\:\\:insert\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\EventStaffAssignment\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedEventService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryAlert\\:\\:updateOrCreate\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedInventoryItemService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\InventoryTransaction\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedInventoryItemService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Supplier\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedInventoryItemService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedInventoryItemService.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Services\\\\OptimizedInvoiceService\\:\\:clearCachePattern\\(\\)\\.$#"
+			count: 2
+			path: app/Services/OptimizedInvoiceService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedInvoiceService.php
+
+		-
+			message: "#^Call to an undefined method App\\\\Services\\\\OptimizedMarketingAnalyticsService\\:\\:clearCachePattern\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Http\\\\Config\\\\AdditionalExportConfigs\\:\\:getCampaignMetricConfig\\(\\)\\.$#"
+			count: 2
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\MarketingLead\\:\\:when\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Patient\\:\\:whereNotNull\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedMarketingAnalyticsService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedPatientService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/OptimizedStaffService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Partner\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Services/Partner/PartnerService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/Partner/PartnerService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\PartnerAgreement\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Services/PartnerAgreement/PartnerAgreementService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/PartnerAgreement/PartnerAgreementService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\PartnerCommission\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Services/PartnerCommission/PartnerCommissionService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/PartnerCommission/PartnerCommissionService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/PartnerEngagement/PartnerEngagementService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Services/PatientService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Services/PatientService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/PatientService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Referral\\:\\:findOrFail\\(\\)\\.$#"
+			count: 1
+			path: app/Services/Referral/ReferralService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/Referral/ReferralService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\ReferralDocument\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Services/ReferralDocumentService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/ReferralDocumentService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/ServiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\SharedInvoice\\:\\:create\\(\\)\\.$#"
+			count: 1
+			path: app/Services/SharedInvoiceService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/SharedInvoiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:select\\(\\)\\.$#"
+			count: 1
+			path: app/Services/StaffAvailabilityService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\StaffAvailability\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Services/StaffAvailabilityService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:has\\(\\)\\.$#"
+			count: 1
+			path: app/Services/StaffPayoutService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Services/StaffPayoutService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:whereIn\\(\\)\\.$#"
+			count: 1
+			path: app/Services/StaffPayoutService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/StaffService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CaregiverAssignment\\:\\:create\\(\\)\\.$#"
+			count: 2
+			path: app/Services/VisitServiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\CaregiverAssignment\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Services/VisitServiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\Staff\\:\\:find\\(\\)\\.$#"
+			count: 2
+			path: app/Services/VisitServiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\StaffAvailability\\:\\:where\\(\\)\\.$#"
+			count: 1
+			path: app/Services/VisitServiceService.php
+
+		-
+			message: "#^Call to an undefined static method App\\\\Models\\\\VisitService\\:\\:where\\(\\)\\.$#"
+			count: 2
+			path: app/Services/VisitServiceService.php
+
+		-
+			message: "#^Call to static method info\\(\\) on an unknown class Log\\.$#"
+			count: 1
+			path: app/Services/VisitServiceService.php

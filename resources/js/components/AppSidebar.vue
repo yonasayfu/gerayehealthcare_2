@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { usePage, Link } from '@inertiajs/vue3'
 import NavUser from '@/components/NavUser.vue'
 import AppLogo from './AppLogo.vue'
@@ -16,11 +16,25 @@ import type { FunctionalComponent } from 'vue';
 import type { LucideProps } from 'lucide-vue-next';
 import {
   LayoutGrid, UserPlus, UserCog, CalendarClock, Stethoscope, MessageCircle,
-  Receipt, ShieldCheck, PackageCheck, ClipboardList, Hospital, ArrowBigRight,
-  Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder, ChevronDown,
-  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Search, Warehouse, Package, FileText, Wrench, Bell,
-  ChevronUp, Minimize2, Maximize2, GitFork, BarChart
+  Receipt, ShieldCheck, ClipboardList, ArrowBigRight,
+  Megaphone, Globe2, CalendarDays, Users, BookOpen, Folder,
+  ChevronRight, CalendarCheck, UserCheck, Settings, DollarSign, CalendarOff, Warehouse, Package, FileText, Wrench, Bell,
+  Minimize2, Maximize2, GitFork, BarChart, Pill, FlaskConical, CheckSquare
 } from 'lucide-vue-next'
+
+interface Props {
+  unreadCount?: number;
+  inventoryAlertCount?: number;
+  myTasksCount?: number;
+  myTodoCount?: number;
+}
+
+withDefaults(defineProps<Props>(), {
+  unreadCount: 0,
+  inventoryAlertCount: 0,
+  myTasksCount: 0,
+  myTodoCount: 0,
+});
 
 interface SidebarNavItem {
   title: string;
@@ -37,63 +51,135 @@ interface SidebarNavGroup {
   superAdminOnly?: boolean;
 }
 
-import { type AppPageProps } from '@/types';
+// Removed AppPageProps missing type import to satisfy TS
 
-const props = defineProps<{
-  unreadCount?: number;
-  inventoryAlertCount?: number; // Add this line
-}>()
+// no props currently used in sidebar
 
-const page = usePage<AppPageProps>();
-const user = computed(() => page.props.auth.user);
-const userRoles = computed(() => user.value?.roles || []);
+const page = usePage();
+const user = computed(() => (page.props as any)?.auth?.user ?? null);
+// Normalize roles to lowercase for consistent checks
+const userRoles = computed(() => (user.value?.roles || []).map((r: string) => r.toLowerCase()));
+
+// Module access shared from backend (ModuleAccess::forUser)
+type ModuleAccess = { key: string; access_level: 'view'|'manage'|'full'; };
+const modules = computed<ModuleAccess[]>(() => (page.props as any)?.modules || []);
+const routeLenient = computed<boolean>(() => {
+  const v = (page.props as any)?.sidebarLenientRoutes
+  return typeof v === 'boolean' ? v : true
+})
+const moduleMap = computed<Record<string, 'view'|'manage'|'full'>>(() => {
+  const m: Record<string, 'view'|'manage'|'full'> = {};
+  for (const mod of modules.value) m[mod.key] = mod.access_level;
+  return m;
+});
+const levelRank = { view: 1, manage: 2, full: 3 } as const;
+const hasModule = (keys: string | string[], min: 'view'|'manage'|'full' = 'view'): boolean => {
+  const arr = Array.isArray(keys) ? keys : [keys];
+  return arr.some(k => {
+    const lvl = moduleMap.value[k];
+    return lvl ? levelRank[lvl] >= levelRank[min] : false;
+  });
+};
+
+const hasRole = (role: string): boolean => {
+    if (!user.value) return false;
+    return userRoles.value?.includes(role.toLowerCase()) || false;
+}
 
 const can = (permission: string): boolean => {
     if (!user.value) return false;
-    if (user.value.roles.includes('Super Admin')) return true;
-    if (user.value.permissions === null) return false;
-    return user.value.permissions.includes(permission);
+
+    // Check if user is super admin
+    if (userRoles.value?.some((role: string) => role === 'super-admin')) {
+        return true;
+    }
+
+    // Check if user has the specific permission
+    return user.value.permissions?.includes(permission) || false;
 }
 
-const isSuperAdmin = computed(() => userRoles.value.includes('Super Admin'))
-const isAdmin = computed(() => userRoles.value.includes('Admin'))
-const isStaff = computed(() => userRoles.value.includes('Staff'))
+// Track open groups with localStorage persistence
+const SIDEBAR_STORAGE_KEY = 'sidebar-open-groups'
+const SIDEBAR_EXPAND_ALL_KEY = 'sidebar-expand-all'
 
-// Track open groups
+// Initialize from localStorage or empty array
 const openGroups = ref<string[]>([])
 const areAllGroupsExpanded = ref(false)
+
+// Load sidebar state from localStorage on component mount
+const loadSidebarState = () => {
+  try {
+    const stored = localStorage.getItem(SIDEBAR_STORAGE_KEY)
+    const expandedState = localStorage.getItem(SIDEBAR_EXPAND_ALL_KEY)
+    
+    if (stored) {
+      openGroups.value = JSON.parse(stored)
+    }
+    
+    if (expandedState) {
+      areAllGroupsExpanded.value = JSON.parse(expandedState)
+    }
+  } catch (error) {
+    // ignore localStorage errors
+    openGroups.value = []
+    areAllGroupsExpanded.value = false
+  }
+}
+
+// Save sidebar state to localStorage
+const saveSidebarState = () => {
+  try {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(openGroups.value))
+    localStorage.setItem(SIDEBAR_EXPAND_ALL_KEY, JSON.stringify(areAllGroupsExpanded.value))
+  } catch (error) {
+    // ignore localStorage errors
+  }
+}
+
+// Watch for changes and save to localStorage
+watch([openGroups, areAllGroupsExpanded], () => {
+  saveSidebarState()
+}, { deep: true })
+
+// Common Tasks group visible to all roles
+const tasksNavGroup: SidebarNavGroup = {
+    group: 'Tasks',
+    icon: ClipboardList,
+    items: [
+        { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
+        { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
+        { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
+    ],
+};
 
 const communicationNavGroup: SidebarNavGroup = {
     group: 'Communication',
     icon: MessageCircle,
-    items: [],
+    items: [
+        // Make Messages visible to all authenticated users and point to the actual route
+        { title: 'Messages', routeName: 'messages.inbox', icon: MessageCircle },
+    ]
 };
 
+// Notifications are handled by the NotificationBell component in the header
+
 const allAdminNavItems: SidebarNavGroup[] = [
+  tasksNavGroup,
   {
     group: 'Patient Management',
     icon: UserPlus,
     items: [
-      { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
       { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
       { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
-      { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visits' },
+      { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visit services' },
     ],
   },
-  communicationNavGroup,
   {
-    group: 'Marketing Management',
-    icon: Megaphone,
+    group: 'Medical Records',
+    icon: FileText,
     items: [
-      { title: 'Campaigns', routeName: 'admin.marketing-campaigns.index', icon: Megaphone, permission: 'manage marketing' },
-      { title: 'Leads', routeName: 'admin.marketing-leads.index', icon: Users, permission: 'manage marketing' },
-      { title: 'Landing Pages', routeName: 'admin.landing-pages.index', icon: Globe2, permission: 'manage marketing' },
-      { title: 'Platforms', routeName: 'admin.marketing-platforms.index', icon: Package, permission: 'manage marketing' },
-      { title: 'Lead Sources', routeName: 'admin.lead-sources.index', icon: GitFork, permission: 'manage marketing' },
-      { title: 'Budgets', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage marketing' },
-      { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
-      { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'manage marketing' },
-      { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
+      { title: 'Medical Documents', routeName: 'admin.medical-documents.index', icon: Folder, permission: 'view medical documents' },
+      { title: 'Prescriptions', routeName: 'admin.prescriptions.index', icon: FileText, permission: 'view prescriptions' },
     ],
   },
   {
@@ -101,12 +187,59 @@ const allAdminNavItems: SidebarNavGroup[] = [
     icon: UserCog,
     items: [
       { title: 'Staff', routeName: 'admin.staff.index', icon: UserCog, permission: 'view staff' },
-      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff' },
-      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign },
-      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt },
-      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList },
-      { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
-      { title: 'Leave Requests', routeName: 'admin.admin-leave-requests.index', icon: CalendarOff },
+      { title: 'Staff Availability', routeName: 'admin.staff-availabilities.index', icon: CalendarCheck, permission: 'view staff availabilities' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign, permission: 'view staff payouts' },
+      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt, permission: 'view invoices' },
+      { title: 'Services', routeName: 'admin.services.index', icon: ClipboardList, permission: 'view services' },
+      { title: 'Leave Requests', routeName: 'admin.leave-requests.index', icon: CalendarOff, permission: 'view leave requests' },
+    ],
+  },
+  {
+    group: 'Inventory Management',
+    icon: Warehouse,
+    items: [
+      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
+      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
+      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
+      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view inventory maintenance records' },
+      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
+      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+    ],
+  },
+  {
+    group: 'Marketing Management',
+    icon: Megaphone,
+    items: [
+      { title: 'Campaigns', routeName: 'admin.marketing-campaigns.index', icon: Megaphone, permission: 'manage marketing' }, // Ensure user has 'manage marketing' permission to see this link
+      { title: 'Leads', routeName: 'admin.marketing-leads.index', icon: Users, permission: 'manage marketing' },
+      { title: 'Landing Pages', routeName: 'admin.landing-pages.index', icon: Globe2, permission: 'manage marketing' },
+      { title: 'Platforms', routeName: 'admin.marketing-platforms.index', icon: Package, permission: 'manage marketing' },
+      { title: 'Lead Sources', routeName: 'admin.lead-sources.index', icon: GitFork, permission: 'manage marketing' },
+      { title: 'Budgets', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage marketing' },
+      { title: 'Content', routeName: 'admin.campaign-contents.index', icon: BookOpen, permission: 'manage marketing' },
+      { title: 'Tasks', routeName: 'admin.marketing-tasks.index', icon: ClipboardList, permission: 'view_any_marketing_tasks' },
+      { title: 'Analytics', routeName: 'admin.marketing-analytics.dashboard-data', icon: BarChart, permission: 'view marketing analytics' },
+    ],
+  },
+  {
+    group: 'Financial Management',
+    icon: DollarSign,
+    items: [
+      { title: 'Invoices', routeName: 'admin.invoices.index', icon: Receipt, permission: 'view invoices' },
+      { title: 'Staff Payouts', routeName: 'admin.staff-payouts.index', icon: DollarSign, permission: 'view staff payouts' },
+      { title: 'Financial Reports', routeName: 'admin.reports.revenue-ar', icon: BarChart, permission: 'view reports' },
+      
+      { title: 'Budget Management', routeName: 'admin.marketing-budgets.index', icon: DollarSign, permission: 'manage budgets' },
+    ],
+  },
+  {
+    group: 'Reports & Analytics',
+    icon: BarChart,
+    items: [
+      { title: 'Service Volume', routeName: 'admin.reports.service-volume', icon: ClipboardList, permission: 'view reports' },
+      { title: 'Revenue & AR', routeName: 'admin.reports.revenue-ar', icon: DollarSign, permission: 'view reports' },
+      { title: 'Marketing ROI', routeName: 'admin.reports.marketing-roi', icon: BarChart, permission: 'view reports' },
+      { title: 'Performance Metrics', routeName: 'admin.analytics.dashboard', icon: BarChart, permission: 'view analytics dashboard' },
     ],
   },
   {
@@ -117,6 +250,7 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Eligibility Criteria', routeName: 'admin.eligibility-criteria.index', icon: ClipboardList, permission: 'view eligibility criteria' },
       { title: 'Event Recommendations', routeName: 'admin.event-recommendations.index', icon: Users, permission: 'view event recommendations' },
       { title: 'Event Staff Assignments', routeName: 'admin.event-staff-assignments.index', icon: UserCog, permission: 'view event staff assignments' },
+      { title: 'Event Participants', routeName: 'admin.event-participants.index', icon: Users, permission: 'view event participants' },
       { title: 'Event Broadcasts', routeName: 'admin.event-broadcasts.index', icon: Megaphone, permission: 'view event broadcasts' },
     ],
   },
@@ -129,27 +263,23 @@ const allAdminNavItems: SidebarNavGroup[] = [
       { title: 'Insurance Policies', routeName: 'admin.insurance-policies.index', icon: FileText, permission: 'view insurance policies' },
       { title: 'Employee Insurance Records', routeName: 'admin.employee-insurance-records.index', icon: ClipboardList, permission: 'view employee insurance records' },
       { title: 'Insurance Claims', routeName: 'admin.insurance-claims.index', icon: Receipt, permission: 'view insurance claims' },
-      { title: 'Exchange Rates', routeName: 'admin.exchange-rates.index', icon: DollarSign, permission: 'view exchange rates' },
       { title: 'Ethiopian Calendar Days', routeName: 'admin.ethiopian-calendar-days.index', icon: CalendarDays, permission: 'view ethiopian calendar days' },
     ],
   },
   {
-    group: 'Inventory Management',
-    icon: Warehouse,
+    group: 'Partnerships',
+    icon: Users,
     items: [
-      { title: 'Inventory Items', routeName: 'admin.inventory-items.index', icon: Package, permission: 'view inventory items' },
-      { title: 'Suppliers', routeName: 'admin.suppliers.index', icon: UserPlus, permission: 'view suppliers' },
-      { title: 'Requests', routeName: 'admin.inventory-requests.index', icon: FileText, permission: 'view inventory requests' },
-      { title: 'Maintenance', routeName: 'admin.inventory-maintenance-records.index', icon: Wrench, permission: 'view maintenance records' },
-      { title: 'Transactions', routeName: 'admin.inventory-transactions.index', icon: ClipboardList, permission: 'view inventory transactions' },
-      { title: 'Alerts', routeName: 'admin.inventory-alerts.index', icon: Bell, permission: 'view inventory alerts' },
+      { title: 'Partners', routeName: 'admin.partners.index', icon: Users, permission: 'view partners' },
+      { title: 'Agreements', routeName: 'admin.partner-agreements.index', icon: FileText, permission: 'view partner agreements' },
+      { title: 'Referrals', routeName: 'admin.referrals.index', icon: ArrowBigRight, permission: 'view referrals' },
+      { title: 'Commissions', routeName: 'admin.partner-commissions.index', icon: DollarSign, permission: 'view partner commissions' },
+      { title: 'Engagements', routeName: 'admin.partner-engagements.index', icon: ClipboardList, permission: 'view partner engagements' },
+      { title: 'Referral Documents', routeName: 'admin.referral-documents.index', icon: Folder, permission: 'view referral documents' },
+      { title: 'Shared Invoices', routeName: 'admin.shared-invoices.index', icon: Receipt, permission: 'view shared invoices' },
     ],
   },
-  {
-    group: 'Integrations',
-    icon: Globe2,
-    items: [],
-  },
+  communicationNavGroup,
     {
       group: 'System Management',
       icon: Settings,
@@ -161,35 +291,206 @@ const allAdminNavItems: SidebarNavGroup[] = [
   }
 ];
 
+// Dynamic navigation based on permissions, not hardcoded roles
+const getFilteredNavItems = (): SidebarNavGroup[] => {
+    const filteredGroups: SidebarNavGroup[] = [];
+
+    for (const group of allAdminNavItems) {
+        // Gate groups by module access when available
+        const gate: Record<string, string[] | undefined> = {
+          'Tasks': ['tasking'],
+          'Patient Management': ['patients'],
+          'Medical Records': ['clinical','medical-documents'],
+          'Administrative Tools': ['staff-ops','system'],
+          'Inventory Management': ['inventory'],
+          'Marketing Management': ['marketing'],
+          'Financial Management': ['financial'],
+          'Reports & Analytics': ['dashboards','reports'],
+          'Events Management': ['events'],
+          'Insurance': ['insurance'],
+          'Partnerships': ['partnerships'],
+          'Communication': ['communication'],
+        };
+        const required = gate[group.group];
+        if (required && !hasModule(required, 'view')) {
+          continue;
+        }
+        // Skip super admin only groups unless user is super admin
+        if (group.superAdminOnly && !hasRole('super-admin')) {
+            continue;
+        }
+
+        // Filter items based on permissions
+        const filteredItems = group.items.filter(item => {
+            // Hide admin.* routes for non-admin-level roles
+            const isAdminRoute = !!item.routeName && item.routeName.startsWith('admin.');
+            const isAdminLevel = hasRole('super-admin') || hasRole('admin') || hasRole('ceo') || hasRole('coo');
+            if (isAdminRoute && !isAdminLevel) return false;
+            // Always show dashboard
+            if (item.routeName === 'dashboard') return true;
+
+            // Check if route exists
+            const routeExists = !item.routeName || hasRoute(item.routeName);
+            
+            // If item has permission requirement, check it
+            const hasPermission = !item.permission || can(item.permission);
+            
+            // Item is visible if route exists and user has permission (if required)
+            const isVisible = routeExists && hasPermission;
+            
+            // no debug logging in production
+            
+            return isVisible;
+        });
+
+        // Only include group if it has visible items
+        if (filteredItems.length > 0) {
+            filteredGroups.push({
+                ...group,
+                items: filteredItems
+            });
+        }
+    }
+
+    return filteredGroups;
+};
+
+// Route helpers to avoid Ziggy exceptions and console noise
+function hasRoute(name?: string) {
+  if (!name) return false;
+  // Prefer ziggy route() helper when available
+  try {
+    const r = (window as any).route;
+    if (typeof r === 'function') {
+      const ctx = r();
+      if (ctx && typeof ctx.has === 'function') {
+        if (ctx.has(name)) return true; // only early return on true
+      }
+    }
+  } catch (_) {}
+  // Fallback to Inertia-provided Ziggy from page props
+  try {
+    const zFromPage: any = (page.props as any)?.ziggy;
+    if (zFromPage && zFromPage.routes) {
+      if (zFromPage.routes[name]) return true;
+    }
+  } catch (_) {}
+  // Final fallback to window.Ziggy if present
+  const z: any = (window as any).Ziggy;
+  if (z && z.routes && z.routes[name]) return true;
+
+  // Last resort: configurable (lenient by default)
+  return routeLenient.value;
+}
+
+function safeHref(name?: string) {
+  if (!name) return '#';
+  
+  const routeExists = hasRoute(name);
+  // no logging
+  
+  if (routeExists) {
+    try { 
+      const url = route(name);
+      return url;
+    } catch (error) {
+      // swallow ziggy errors and try fallbacks
+      // Fallbacks for admin routes when Ziggy map is stale
+      if (name.startsWith('admin.')) {
+        const parts = name.replace(/^admin\./, '').split('.');
+        const base = parts[0];
+        if (base) {
+          const guess = `/dashboard/${base}`;
+          return guess;
+        }
+      }
+      return '#';
+    }
+  }
+  return '#';
+}
+
+function mergeGroups(primary: SidebarNavGroup[], extra: SidebarNavGroup[]): SidebarNavGroup[] {
+  const byGroup: Record<string, SidebarNavGroup> = {};
+
+  const addGroup = (g: SidebarNavGroup) => {
+    if (!byGroup[g.group]) {
+      byGroup[g.group] = { ...g, items: [...g.items] };
+      return;
+    }
+    // merge items (unique by routeName or title)
+    const seen = new Set((byGroup[g.group].items || []).map(i => `${i.routeName || ''}|${i.title}`));
+    for (const item of g.items) {
+      const key = `${item.routeName || ''}|${item.title}`;
+      if (!seen.has(key)) {
+        byGroup[g.group].items.push(item);
+        seen.add(key);
+      }
+    }
+  };
+
+  for (const g of primary) addGroup(g);
+  for (const g of extra) addGroup(g);
+
+  return Object.values(byGroup);
+}
+
 const mainNavItems = computed<SidebarNavGroup[]>(() => {
-    if (isSuperAdmin.value) {
-        return allAdminNavItems;
-    }
-    if (isAdmin.value) {
-        return allAdminNavItems.filter(group => !group.superAdminOnly);
-    }
-    if (isStaff.value) {
-        return [
-            {
-                group: 'My Tools',
-                icon: UserCheck,
-                items: [
-                    { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
-                    { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
-                    { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
-                    { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
-                    { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
-                    { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
-                    { title: 'My Campaigns', routeName: 'staff.marketing-campaigns.index', icon: Megaphone },
-                    { title: 'My Leads', routeName: 'staff.marketing-leads.index', icon: Users },
-                    { title: 'My Marketing Tasks', routeName: 'staff.marketing-tasks.index', icon: ClipboardList },
-                ]
-            },
-            communicationNavGroup,
-        ];
-    }
-    return [];
+  if (!user.value) return [];
+
+  // Build admin and staff collections
+  const adminGroups = hasRole('super-admin') ? allAdminNavItems : getFilteredNavItems();
+  const staffGroups = getStaffNavItems();
+
+  // Super-admin: expand all by default
+  if (hasRole('super-admin')) {
+    nextTick(() => {
+      const allGroupNames = adminGroups.map((group: SidebarNavGroup) => group.group);
+      openGroups.value = allGroupNames;
+      areAllGroupsExpanded.value = true;
+    });
+  }
+
+  // Merge, deduplicating overlapping groups/items
+  return mergeGroups(adminGroups, staffGroups);
 });
+
+// Legacy staff navigation for backward compatibility
+const getStaffNavItems = (): SidebarNavGroup[] => {
+    if (!hasRole('staff')) return [];
+
+    const staffGroups: SidebarNavGroup[] = [
+        {
+            group: 'Patient Care',
+            icon: UserPlus,
+            items: [
+                { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
+                { title: 'My Patients', routeName: 'staff.my-patients.index', icon: Users },
+            ]
+        },
+        {
+            group: 'My Tools',
+            icon: UserCheck,
+            items: [
+                { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
+                { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
+                { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
+                { title: 'My Documents', routeName: 'staff.my-documents.index', icon: FileText },
+            ]
+        },
+        // Clinical Tools group removed for staff until staff-specific routes exist
+        communicationNavGroup,
+    ];
+
+    // Filter staff groups based on permissions
+    return staffGroups.map(group => ({
+        ...group,
+        items: group.items.filter(item => {
+            if (item.permission) return can(item.permission);
+            return true;
+        })
+    })).filter(group => group.items.length > 0);
+};
 
 // Toggle group - only this should affect group opening/closing
 const toggleGroup = (groupName: string, event?: Event) => {
@@ -222,16 +523,11 @@ const toggleGroup = (groupName: string, event?: Event) => {
       const allGroupNames = mainNavItems.value.map((group: SidebarNavGroup) => group.group);
       openGroups.value = allGroupNames;
     }
+    // State will be saved automatically by the watcher
   });
 }
 
-// Function to close a specific group
-const closeGroup = (groupName: string) => {
-  const currentIndex = openGroups.value.indexOf(groupName);
-  if (currentIndex > -1) {
-    openGroups.value.splice(currentIndex, 1);
-  }
-};
+// closeGroup removed (unused)
 
 // Toggle expand/collapse all with single button
 const toggleAllGroups = (event?: Event) => {
@@ -252,23 +548,22 @@ const toggleAllGroups = (event?: Event) => {
     areAllGroupsExpanded.value = true
   }
   
-  // Ensure the state is preserved
-  nextTick(() => {
-    if (areAllGroupsExpanded.value) {
-      const allGroupNames = mainNavItems.value.map((group: SidebarNavGroup) => group.group);
-      openGroups.value = allGroupNames;
-    }
-  });
+  // State will be saved automatically by the watcher
 }
 
-const isSidebarCollapsed = ref(false);
+const isSidebarCollapsed = ref(!(page.props as any)?.sidebarOpen);
+
+// Load sidebar state when component mounts
+onMounted(() => {
+  loadSidebarState()
+})
 </script>
 
 <template>
   <Sidebar 
     collapsible="icon" 
     v-model:collapsed="isSidebarCollapsed"
-    class="sidebar"
+    class="sidebar bg-sidebar text-sidebar-foreground"
   >
     <SidebarHeader>
         <SidebarMenu>
@@ -302,7 +597,7 @@ const isSidebarCollapsed = ref(false);
                     </div>
                     
                     <div 
-                        v-show="openGroups.includes(group.group)"
+                        v-if="openGroups.includes(group.group)"
                         class="overflow-hidden transition-all duration-200 ease-in-out"
                         :class="{
                             'max-h-96 opacity-100': openGroups.includes(group.group),
@@ -310,17 +605,20 @@ const isSidebarCollapsed = ref(false);
                         }">
                         <SidebarMenu class="pl-4 mt-1 space-y-1">
                             <template v-for="item in group.items" :key="item.title">
-                                <SidebarMenuItem v-if="!item.permission || can(item.permission)">
+                                <SidebarMenuItem>
                                     <SidebarMenuButton as-child>
                                         <Link 
-                                            :href="item.routeName ? route(item.routeName) : '#'" 
+                                            v-if="item.routeName && hasRoute(item.routeName)"
+                                            :href="safeHref(item.routeName)" 
                                             class="gap-2 px-2 py-1.5 text-sm hover:bg-muted/30 rounded-md w-full flex items-center"
                                             preserve-scroll 
                                             preserve-state
-                                            @click.stop>
+                                            >
                                             <component :is="item.icon" class="h-4 w-4 flex-shrink-0" />
                                             <span class="truncate">{{ item.title }}</span>
-                                            <span v-if="item.title === 'Alerts' && inventoryAlertCount > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount }}</span>
+                                            <span v-if="item.title === 'Alerts' && (inventoryAlertCount || 0) > 0" class="ml-auto text-xs bg-red-500 text-white rounded-full px-2">{{ inventoryAlertCount || 0 }}</span>
+                                            <span v-if="item.title === 'My Tasks' && (myTasksCount || 0) > 0" class="ml-auto text-xs bg-indigo-600 text-white rounded-full px-2">{{ myTasksCount || 0 }}</span>
+                                            <span v-if="item.title === 'My To‑Do' && (myTodoCount || 0) > 0" class="ml-auto text-xs bg-indigo-600 text-white rounded-full px-2">{{ myTodoCount || 0 }}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -336,7 +634,7 @@ const isSidebarCollapsed = ref(false);
         <SidebarMenu>
             <SidebarMenuItem>
                 <SidebarMenuButton 
-                    @click.stop="(event) => toggleAllGroups(event)"
+                    @click.stop="(event: Event) => toggleAllGroups(event)"
                     class="w-full justify-between px-2 py-2 text-sm hover:bg-muted/30 rounded-md"
                     :aria-expanded="areAllGroupsExpanded"
                 >

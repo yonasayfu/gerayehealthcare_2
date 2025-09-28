@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm, Link, usePage } from '@inertiajs/vue3';
+import { Head, useForm, Link, usePage, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem, type LeaveRequestsPagination, type AppPageProps } from '@/types'; // Import AppPageProps
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/InputError.vue';
-import { ref, onMounted, onBeforeUnmount } from 'vue'; // Import onMounted and onBeforeUnmount
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'; // Import onMounted and onBeforeUnmount
+import { usePage } from '@inertiajs/vue3';
 
 // Define the props passed from the controller
 const props = defineProps<{
   leaveRequests: LeaveRequestsPagination;
+  leavePolicy?: { annual_days: number; used_days: number; remaining_days: number; pending_days: number; year: number };
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,8 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 // Function to reload the page data
 const reloadPageData = () => {
-  const page = usePage<AppPageProps>(); // Explicitly type usePage
-  page.props.inertia.visit(route('staff.leave-requests.index'), {
+  router.get(route('staff.leave-requests.index'), {}, {
     preserveScroll: true,
     preserveState: true,
     only: ['leaveRequests'], // Only reload the leaveRequests prop
@@ -29,11 +30,25 @@ const reloadPageData = () => {
 };
 
 onMounted(() => {
-  // Reload data when the component is mounted (page load or navigation)
-  reloadPageData();
-
   // Add event listener to reload data when the window gains focus
   window.addEventListener('focus', reloadPageData);
+
+  // Deep-link highlight support (e.g., from notification)
+  try {
+    const page = usePage();
+    const url = new URL((page.props as any).ziggy?.location || window.location.href);
+    const h = url.searchParams.get('highlight');
+    if (h) {
+      nextTick(() => {
+        const el = document.querySelector(`[data-leave-id="${h}"]`);
+        if (el) {
+          (el as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'center' });
+          (el as HTMLElement).classList.add('ring-2','ring-amber-400');
+          setTimeout(() => (el as HTMLElement).classList.remove('ring-2','ring-amber-400'), 3000);
+        }
+      });
+    }
+  } catch {}
 });
 
 onBeforeUnmount(() => {
@@ -45,6 +60,7 @@ onBeforeUnmount(() => {
 const form = useForm({
   start_date: '',
   end_date: '',
+  type: 'Annual',
   reason: '',
 });
 
@@ -83,6 +99,29 @@ const statusColor = (status: string) => {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6">
+      <!-- Leave Balance & Policy -->
+      <div class="rounded-xl border border-border bg-white p-6 shadow-sm dark:border-sidebar-border dark:bg-background">
+        <h2 class="text-lg font-semibold">Leave Balance ({{ props.leavePolicy?.year ?? new Date().getFullYear() }})</h2>
+        <p class="text-sm text-muted-foreground mb-3">Annual allocation: {{ props.leavePolicy?.annual_days ?? 20 }} days</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Used</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.used_days ?? 0 }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Pending</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.pending_days ?? 0 }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Remaining</div>
+            <div class="text-lg font-semibold">{{ props.leavePolicy?.remaining_days ?? (props.leavePolicy?.annual_days || 20) }}</div>
+          </div>
+          <div class="p-3 rounded-md bg-gray-50 dark:bg-gray-800">
+            <div class="text-muted-foreground">Policy</div>
+            <div class="text-xs">Standard policy: {{ props.leavePolicy?.annual_days ?? 20 }} days/year, prorated and subject to approval.</div>
+          </div>
+        </div>
+      </div>
       <div class="rounded-xl border border-border bg-white p-6 shadow-sm dark:border-sidebar-border dark:bg-background">
         <h2 class="text-lg font-semibold">Request Time Off</h2>
         <p class="mt-1 text-sm text-muted-foreground">Fill out the form below to submit a new leave request.</p>
@@ -97,12 +136,23 @@ const statusColor = (status: string) => {
             <Input id="end_date" type="date" v-model="form.end_date" />
             <InputError :message="form.errors.end_date" class="mt-2" />
           </div>
+          <div>
+            <Label for="type">Leave Type</Label>
+            <select id="type" v-model="form.type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+              <option value="Annual">Annual</option>
+              <option value="Sick">Sick</option>
+              <option value="Unpaid">Unpaid</option>
+            </select>
+            <InputError :message="form.errors.type" class="mt-2" />
+          </div>
           <div class="md:col-span-2">
-            <Label for="reason">Reason (Optional)</Label>
+            <Label for="reason">Reason <span class="text-red-500">*</span></Label>
             <textarea
               id="reason"
               v-model="form.reason"
               rows="3"
+              required
+              placeholder="Please provide a reason for your leave request..."
               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
             ></textarea>
             <InputError :message="form.errors.reason" class="mt-2" />
@@ -121,18 +171,19 @@ const statusColor = (status: string) => {
         </div>
         <div class="p-5">
           <div v-if="leaveRequests.data.length > 0" class="overflow-x-auto">
-            <table class="min-w-full text-left text-sm">
+            <table class="min-w-full text-left text-sm print-table">
               <thead>
                 <tr>
                   <th class="p-2">Start Date</th>
                   <th class="p-2">End Date</th>
+                  <th class="p-2">Type</th>
                   <th class="p-2">Reason</th>
                   <th class="p-2">Status</th>
                   <th class="p-2">Admin Notes</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t">
+                <tr v-for="request in leaveRequests.data" :key="request.id" class="border-t" :data-leave-id="request.id">
                   <td class="p-2">{{ formatDate(request.start_date) }}</td>
                   <td class="p-2">{{ formatDate(request.end_date) }}</td>
                   <td class="p-2">{{ request.reason || 'N/A' }}</td>

@@ -2,221 +2,90 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreCampaignContentRequest;
-use App\Http\Requests\UpdateCampaignContentRequest;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\CampaignContent;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
+use App\Services\CampaignContent\CampaignContentService;
+use App\Services\Validation\Rules\CampaignContentRules;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\CampaignContentsExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class CampaignContentController extends Controller
+class CampaignContentController extends BaseController
 {
     use AuthorizesRequests;
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(CampaignContentService $campaignContentService)
+    {
+        parent::__construct(
+            $campaignContentService,
+            CampaignContentRules::class,
+            'Admin/CampaignContents',
+            'campaignContents',
+            CampaignContent::class,
+            null// Use full validated payload; DTO is incomplete and mismatched
+        );
+    }
+
+    public function create()
+    {
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $contentTypes = ['text', 'image', 'video'];
+        $statuses = ['draft', 'scheduled', 'posted', 'failed'];
+
+        return Inertia::render($this->viewName . '/Create', [
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+            'contentTypes' => $contentTypes,
+            'statuses' => $statuses,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $campaignContent = $this->service->getById($id);
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $platforms = MarketingPlatform::select('id', 'name')->orderBy('name')->get();
+        $contentTypes = ['text', 'image', 'video'];
+        $statuses = ['draft', 'scheduled', 'posted', 'failed'];
+
+        return Inertia::render($this->viewName . '/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $campaignContent,
+            'campaigns' => $campaigns,
+            'platforms' => $platforms,
+            'contentTypes' => $contentTypes,
+            'statuses' => $statuses,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $this->authorize('view', CampaignContent::class);
+        // Eager-load relations so Show.vue can render names
+        $campaignContent = $this->service->getById($id, ['campaign', 'platform']);
+
+        return Inertia::render($this->viewName . '/Show', [
+            lcfirst(class_basename($this->modelClass)) => $campaignContent,
+        ]);
+    }
+
+    public function index(Request $request)
     {
         $this->authorize('viewAny', CampaignContent::class);
+        $data = $this->service->getAll($request);
 
-        $query = CampaignContent::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('content_type')) {
-            $query->where('content_type', $request->input('content_type'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('scheduled_post_date_start')) {
-            $query->where('scheduled_post_date', '>=', $request->input('scheduled_post_date_start'));
-        }
-        if ($request->filled('scheduled_post_date_end')) {
-            $query->where('scheduled_post_date', '<=', $request->input('scheduled_post_date_end'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $campaignContents = $query->with(['campaign', 'platform'])
-                                   ->paginate($request->input('per_page', 5))
-                                   ->withQueryString();
-
-        return Inertia::render('Admin/CampaignContents/Index', [
-            'campaignContents' => $campaignContents,
+        return Inertia::render($this->viewName . '/Index', [
+            $this->dataVariableName => $data,
             'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'platform_id', 'content_type', 'status', 'scheduled_post_date_start', 'scheduled_post_date_end']),
             'campaigns' => MarketingCampaign::all(),
             'platforms' => MarketingPlatform::all(),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $this->authorize('create', CampaignContent::class);
-
-        return Inertia::render('Admin/CampaignContents/Create', [
-            'campaigns' => MarketingCampaign::all(),
-            'platforms' => MarketingPlatform::all(),
-            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
-            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
-        ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCampaignContentRequest $request)
-    {
-        $this->authorize('create', CampaignContent::class);
-
-        CampaignContent::create($request->validated());
-
-        return redirect()->route('admin.campaign-contents.index')->with('success', 'Campaign Content created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(CampaignContent $campaignContent)
-    {
-        $this->authorize('view', $campaignContent);
-
-        $campaignContent->load(['campaign', 'platform']);
-
-        return Inertia::render('Admin/CampaignContents/Show', [
-            'campaignContent' => $campaignContent,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(CampaignContent $campaignContent)
-    {
-        $this->authorize('update', $campaignContent);
-
-        $campaignContent->load(['campaign', 'platform']);
-
-        return Inertia::render('Admin/CampaignContents/Edit', [
-            'campaignContent' => $campaignContent,
-            'campaigns' => MarketingCampaign::all(),
-            'platforms' => MarketingPlatform::all(),
-            'contentTypes' => ['Text', 'Image', 'Video', 'Article', 'Post'],
-            'statuses' => ['Draft', 'Scheduled', 'Posted', 'Failed'],
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCampaignContentRequest $request, CampaignContent $campaignContent)
-    {
-        $this->authorize('update', $campaignContent);
-
-        $campaignContent->update($request->validated());
-
-        return redirect()->route('admin.campaign-contents.index')->with('success', 'Campaign Content updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CampaignContent $campaignContent)
-    {
-        $this->authorize('delete', $campaignContent);
-
-        $campaignContent->delete();
-
-        return back()->with('success', 'Campaign Content deleted successfully.');
-    }
-
     public function export(Request $request)
     {
-        $this->authorize('viewAny', CampaignContent::class);
-
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new CampaignContentsExport, 'campaign-contents.csv');
-        } elseif ($type === 'pdf') {
-            $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
-            $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'));
-            return $pdf->download('campaign-contents.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
-    }
-
-    public function printAll(Request $request)
-    {
-        $this->authorize('viewAny', CampaignContent::class);
-
-        $campaignContents = CampaignContent::with(['campaign', 'platform'])->get();
-        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
-        return $pdf->stream('campaign-contents.pdf');
-    }
-
-    public function printCurrent(Request $request)
-    {
-        $this->authorize('viewAny', CampaignContent::class);
-
-        $query = CampaignContent::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('content_type')) {
-            $query->where('content_type', $request->input('content_type'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('scheduled_post_date_start')) {
-            $query->where('scheduled_post_date', '>=', $request->input('scheduled_post_date_start'));
-        }
-        if ($request->filled('scheduled_post_date_end')) {
-            $query->where('scheduled_post_date', '<=', $request->input('scheduled_post_date_end'));
-        }
-
-        $campaignContents = $query->with(['campaign', 'platform'])->get();
-
-        $pdf = Pdf::loadView('pdf.campaign-contents', compact('campaignContents'))->setPaper('a4', 'landscape');
-        return $pdf->stream('campaign-contents-current.pdf');
+        return $this->service->export($request);
     }
 }

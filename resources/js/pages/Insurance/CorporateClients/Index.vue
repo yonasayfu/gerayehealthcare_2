@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
 
-import type { CorporateClientPagination } from '@/types';
+ 
 
 const props = defineProps<{
-  corporateClients: CorporateClientPagination;
+  corporateClients: { // Define a more robust type for corporateClients
+    data: Array<any>;
+    links: Array<any>;
+    current_page: number;
+    from: number;
+    last_page: number;
+    per_page: number;
+    to: number;
+    total: number;
+  };
   filters: {
     search?: string;
     sort?: string;
@@ -18,6 +28,8 @@ const props = defineProps<{
     per_page?: number;
   };
 }>()
+
+// Expect backend to provide data; remove mutation of readonly props to satisfy TS lints.
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -51,30 +63,20 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this corporate client?')) {
-    router.delete(route('admin.corporate-clients.destroy', id))
-  }
-}
-
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.corporate-clients.export', { type }), '_blank');
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Corporate Client',
+    message: 'Are you sure you want to delete this corporate client?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.corporate-clients.destroy', id))
 }
 
 function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-    }
-  }, 100);
+  setTimeout(() => { try { window.print(); } catch (error) { console.error('Print failed:', error); } }, 100);
 }
-
-const printAllClients = () => {
-    window.open(route('admin.corporate-clients.printAll', { type: 'pdf' }), '_blank');
-};
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -92,27 +94,19 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Corporate Clients</h1>
-          <p class="text-sm text-muted-foreground">Manage all corporate clients here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.corporate-clients.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Client
-          </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllClients" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Corporate Clients</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Manage all corporate clients here.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <Link :href="route('admin.corporate-clients.create')" class="btn-glass btn-glass-sm">+ Add Client</Link>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="h-4 w-4" /> Print Current
+            </button>
+          </div>
         </div>
       </div>
 
@@ -122,14 +116,14 @@ function toggleSort(field: string) {
             type="text"
             v-model="search"
             placeholder="Search clients..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
+            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 pl-9"
           />
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -223,140 +217,22 @@ function toggleSort(field: string) {
 </template>
 
 <style>
-/* Print-specific styles for Index.vue (Print Current View) */
 @media print {
-  @page {
-    size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
-  }
+  @page { size: A4 landscape; margin: 0.5cm; }
 
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
+  /* Hide app chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
 
-  /* Hide elements */
-  .print\:hidden {
-    display: none !important;
-  }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
 
-  /* Specific styles for the print header content (logo and clinic name) */
-  .print-header-content {
-      display: block !important; /* Show header */
-      text-align: center;
-      padding-top: 0.5cm;
-      padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
-  }
-  .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-  }
-  .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
-      font-weight: bold;
-  }
-  .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
-  }
-  hr { border-color: #ccc !important; }
+  /* Table + header/footer behavior */
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
 
-  /* Main content container adjustments */
-  .space-y-6.p-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Table specific print styles */
-  .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background-color: transparent !important; /* No background color */
-    overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
-    transform: scale(0.97); /* Slight scale down to fit wide tables */
-    transform-origin: top left;
-  }
-
-  .print-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
-  }
-
-  .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    text-transform: uppercase !important;
-  }
-
-  .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
-    color: #000 !important;
-    vertical-align: top !important; /* Align content to top of cell */
-    word-break: break-word; /* Allow long words to break */
-  }
-
-  .print-table th {
-    font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
-    white-space: nowrap; /* Keep header text on one line if possible */
-  }
-
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Organization Name */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Contact Person */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Contact Email */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Contact Phone */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* TIN Number */
-  .print-table th:nth-child(6), .print-table td:nth-child(6) { width: 15%; } /* Trade License Number */
-  .print-table th:nth-child(7), .print-table td:nth-child(7) { width: 10%; } /* Address */
-
-
-  .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  /* Hide actions column for print */
-  .print-table th:last-child,
-  .print-table td:last-child {
-    display: none !important;
-  }
-
-  /* Hide sort arrows on print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Print Footer */
-  .print-footer {
-    display: block !important;
-    text-align: center;
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
-  }
-  .print-footer hr {
-    border-color: #ccc !important;
-  }
+  .print-clinic-name { font-size: 16px; margin: 0; }
+  .print-document-title { font-size: 12px; margin: 2px 0 0 0; }
 }
 </style>

@@ -2,33 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingCampaign;
-use App\Models\Staff;
-use App\Models\CampaignContent;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class MarketingTask extends Model
 {
     use HasFactory;
+
     protected static function booted()
     {
         static::creating(function ($task) {
             if (empty($task->task_code)) {
                 DB::transaction(function () use ($task) {
                     $latestTask = static::lockForUpdate()
-                                            ->whereNotNull('task_code')
-                                            ->orderBy('id', 'desc')
-                                            ->first();
+                        ->whereNotNull('task_code')
+                        ->orderBy('id', 'desc')
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestTask && preg_match('/TASK-(\d+)/', $latestTask->task_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
-                    $task->task_code = 'TASK-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $task->task_code = 'TASK-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });
@@ -43,6 +40,7 @@ class MarketingTask extends Model
         'task_type',
         'title',
         'description',
+        'expected_results',
         'scheduled_at',
         'completed_at',
         'status',

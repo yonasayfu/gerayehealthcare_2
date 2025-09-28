@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class InventoryAlert extends Model
 {
@@ -16,10 +16,16 @@ class InventoryAlert extends Model
         'message',
         'is_active',
         'triggered_at',
+        'delegated_task_id',
     ];
 
     public function item()
     {
         return $this->belongsTo(InventoryItem::class);
+    }
+
+    public function delegatedTask()
+    {
+        return $this->belongsTo(TaskDelegation::class, 'delegated_task_id');
     }
 }

@@ -4,6 +4,9 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
+import ShowHeader from '@/components/ShowHeader.vue'
+import { confirmDialog } from '@/lib/confirm'
+import { useExport } from '@/composables/useExport'
 
 interface MarketingLead {
   id: number;
@@ -38,21 +41,17 @@ const breadcrumbs: BreadcrumbItemType[] = [
   { title: props.marketingLead.first_name + ' ' + props.marketingLead.last_name, href: route('admin.marketing-leads.show', props.marketingLead.id) },
 ]
 
-function printPage() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog. Please check your browser settings or try again.');
-    }
-  }, 100);
-}
+const { printCurrentView } = useExport({ routeName: 'admin.marketing-leads', filters: {} })
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing lead?')) {
-    router.delete(route('admin.marketing-leads.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Lead',
+    message: 'Are you sure you want to delete this marketing lead?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-leads.destroy', id))
 }
 </script>
 
@@ -60,19 +59,16 @@ function destroy(id: number) {
   <Head :title="`Lead: ${marketingLead.first_name} ${marketingLead.last_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-            <h3 class="text-xl font-semibold">
-                Marketing Lead Details: {{ marketingLead.first_name }} {{ marketingLead.last_name }}
-            </h3>
-            <Link :href="route('admin.marketing-leads.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <ShowHeader title="Marketing Lead Details" :subtitle="`Marketing Lead: ${marketingLead.first_name} ${marketingLead.last_name}`">
+        <template #actions>
+          <Link :href="route('admin.marketing-leads.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -82,103 +78,103 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Lead Identification</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Lead Identification</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Full Name:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.first_name }} {{ marketingLead.last_name }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.first_name }} {{ marketingLead.last_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Lead Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.lead_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.lead_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.status ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Contact Information</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Contact Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Email:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.email ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.email ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.phone ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.phone ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Country:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.country ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.country ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Campaign & Conversion Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Campaign & Conversion Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Source Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.source_campaign?.campaign_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.source_campaign?.campaign_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Landing Page:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.landing_page?.page_title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.landing_page?.page_title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Lead Score:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.lead_score ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.lead_score ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Assigned Staff:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.assigned_staff?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.assigned_staff?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Converted Patient:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.converted_patient?.full_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.converted_patient?.full_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Conversion Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.conversion_date ? format(new Date(marketingLead.conversion_date), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.conversion_date ? format(new Date(marketingLead.conversion_date), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">UTM Parameters</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">UTM Parameters</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_source ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_source ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_campaign ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_campaign ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">UTM Medium:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.utm_medium ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.utm_medium ?? '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes & Timestamps</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Notes & Timestamps</h2>
                   <div class="grid grid-cols-1 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div class="col-span-full">
                       <p class="text-sm text-muted-foreground">Notes:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingLead.notes ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingLead.notes ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Created At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingLead.created_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingLead.created_at), 'PPP p') }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Updated At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ format(new Date(marketingLead.updated_at), 'PPP p') }}</p>
+                      <p class="font-medium text-foreground">{{ format(new Date(marketingLead.updated_at), 'PPP p') }}</p>
                     </div>
                   </div>
                 </div>
@@ -191,22 +187,14 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.marketing-leads.edit', marketingLead.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Lead
-              </Link>
-              <button @click="destroy(marketingLead.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Lead
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          
+          <button @click="printCurrentView" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.marketing-leads.edit', marketingLead.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
   </AppLayout>
@@ -216,7 +204,7 @@ function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  php_js_checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+          coverage: none
+          extensions: mbstring, dom, curl, fileinfo, sqlite
+
+      - name: Install PHP dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare Laravel app
+        run: |
+          cp .env.example .env || true
+          php artisan key:generate --no-interaction
+          mkdir -p database
+          touch database/database.sqlite
+          php artisan migrate --force || true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: PHP - Pint (code style)
+        run: ./vendor/bin/pint --test
+
+      - name: PHP - Static analysis (PHPStan)
+        run: |
+          curl -sSL -o phpstan.phar https://github.com/phpstan/phpstan/releases/latest/download/phpstan.phar
+          php phpstan.phar analyse app --no-progress --level=1
+
+      - name: PHP - Tests
+        run: php artisan test --no-interaction
+
+      - name: JS/TS - ESLint
+        run: npx eslint . --max-warnings=0
+        continue-on-error: true
+
+      - name: JS/TS - Type Check
+        run: npx vue-tsc --noEmit -p tsconfig.json
+        continue-on-error: true
+
+      - name: Prettier - Check
+        run: npm run format:check
+        continue-on-error: true
+

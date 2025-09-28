@@ -3,12 +3,14 @@ import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next' // Import icons
 import { format } from 'date-fns' // For date formatting
+import ShowHeader from '@/components/ShowHeader.vue'
 
 interface MarketingTask {
   id: number;
   task_code: string;
   title: string;
   description: string;
+  expected_results?: string;
   task_type: string;
   status: string;
   scheduled_at: string;
@@ -52,19 +54,19 @@ function destroy(id: number) {
   <Head :title="`Marketing Task: ${marketingTask.title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Marketing Task Details: {{ marketingTask.title }}
-            </h3>
-            <Link :href="route('admin.marketing-tasks.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <ShowHeader title="Marketing Task Details" :subtitle="`Marketing Task: ${marketingTask.title || marketingTask.task_code || marketingTask.id}`">
+        <template #actions>
+          <span v-if="marketingTask.assigned_to_staff?.user?.name" class="inline-flex items-center rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200 text-xs px-2 py-1">
+            Assigned to: {{ marketingTask.assigned_to_staff.user.name }}
+          </span>
+          <Link :href="route('admin.marketing-tasks.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -74,59 +76,64 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Task Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Task Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Task Code:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_code ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.task_code ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Title:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Task Type:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.task_type ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.task_type ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.status ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.status ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Campaign:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.campaign?.campaign_name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.campaign?.campaign_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Assigned To:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.assigned_to_staff?.user?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.assigned_to_staff?.user?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Related Content:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.related_content?.title ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.related_content?.title ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Doctor:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.doctor?.user?.name ?? '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.doctor?.user?.name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Scheduled At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.scheduled_at ? format(new Date(marketingTask.scheduled_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.scheduled_at ? format(new Date(marketingTask.scheduled_at), 'PPP p') : '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Completed At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.completed_at ? format(new Date(marketingTask.completed_at), 'PPP p') : '-' }}</p>
+                      <p class="font-medium text-foreground">{{ marketingTask.completed_at ? format(new Date(marketingTask.completed_at), 'PPP p') : '-' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Description</h2>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.description ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Description</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.description ?? '-' }}</p>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Notes</h2>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ marketingTask.notes ?? '-' }}</p>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Expected Results</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.expected_results ?? '-' }}</p>
+                </div>
+
+                <div>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Notes</h2>
+                  <p class="font-medium text-foreground">{{ marketingTask.notes ?? '-' }}</p>
                 </div>
 
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
@@ -137,22 +144,14 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.marketing-tasks.edit', marketingTask.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Task
-              </Link>
-              <button @click="destroy(marketingTask.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Task
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.marketing-tasks.edit', marketingTask.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
 
@@ -163,7 +162,7 @@ function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

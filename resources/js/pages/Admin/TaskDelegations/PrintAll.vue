@@ -65,7 +65,7 @@ onMounted(() => {
         <tbody>
           <tr v-for="task in tasks" :key="task.id">
             <td>{{ task.title }}</td>
-            <td>{{ task.assignee.first_name }} {{ task.assignee.last_name }}</td>
+            <td>{{ task.assignee?.first_name }} {{ task.assignee?.last_name }}</td>
             <td>{{ task.due_date ? format(new Date(task.due_date), 'PPP') : '-' }}</td>
             <td>{{ task.status }}</td>
             <td>{{ task.notes ?? '-' }}</td>

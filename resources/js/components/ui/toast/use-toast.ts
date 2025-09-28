@@ -18,7 +18,7 @@ export function useToast() {
 
     setTimeout(() => {
       toasts.value = toasts.value.filter(t => t.id !== id)
-    }, 5000)
+    }, 3000)
   }
 
   onUnmounted(() => {

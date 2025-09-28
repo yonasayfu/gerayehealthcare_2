@@ -1,0 +1,23 @@
+
+   Illuminate\Contracts\Container\BindingResolutionException 
+
+  Target class [App\Http\Controllers\Admin\OptimizedStaffService] does not exist.
+
+  at vendor/laravel/framework/src/Illuminate/Container/Container.php:1162
+    1158▕ 
+    1159▕         try {
+    1160▕             $reflector = new ReflectionClass($concrete);
+    1161▕         } catch (ReflectionException $e) {
+  ➜ 1162▕             throw new BindingResolutionException("Target class [$concrete] does not exist.", 0, $e);
+    1163▕         }
+    1164▕ 
+    1165▕         // If the type is not instantiable, the developer is attempting to resolve
+    1166▕         // an abstract type such as an Interface or Abstract Class and there is
+
+  1   [internal]:0
+      Illuminate\Foundation\Console\RouteListCommand::{closure:Illuminate\Foundation\Console\RouteListCommand::getRoutes():117}(Object(Illuminate\Routing\Route))
+      [2m+20 vendor frames [22m
+
+  22  [internal]:0
+      Illuminate\Foundation\Console\RouteListCommand::{closure:Illuminate\Foundation\Console\RouteListCommand::getRoutes():117}(Object(Illuminate\Routing\Route))
+

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdminLayout from '@/layouts/AppLayout.vue'
-import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Printer, Edit3 } from 'lucide-vue-next'
 import { format } from 'date-fns'
+import ShowHeader from '@/components/ShowHeader.vue'
 
 const props = defineProps<{
   eventRecommendation: any;
@@ -25,31 +26,25 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event recommendation?')) {
-    router.delete(route('admin.event-recommendations.destroy', id))
-  }
-}
+// Delete removed per UI policy; keeping page lean
 </script>
 
 <template>
   <Head :title="`Event Recommendation: ${eventRecommendation.patient_name}`" />
 
-  <AdminLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+  <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="space-y-6 p-6">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Event Recommendation Details: {{ eventRecommendation.patient_name }}
-            </h3>
-            <Link :href="route('admin.event-recommendations.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <ShowHeader title="Event Recommendation Details" :subtitle="eventRecommendation.patient_name">
+        <template #actions>
+          <Link :href="route('admin.event-recommendations.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
+                <!-- Print Header (Logo + Titles) -->
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
                     <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
@@ -66,11 +61,11 @@ function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Source:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.source }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.source_channel }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Recommended By:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.recommended_by ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.recommended_by_name ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Patient Name:</p>
@@ -78,7 +73,7 @@ function destroy(id: number) {
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Patient Phone:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.patient_phone ?? '-' }}</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ eventRecommendation.phone_number ?? '-' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
@@ -91,6 +86,43 @@ function destroy(id: number) {
                   </div>
                 </div>
 
+                <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Eligibility</h2>
+                  <div class="flex items-center gap-3">
+                    <span
+                      v-if="eventRecommendation.eligibility?.status === 'eligible'"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                    >Eligible</span>
+                    <span
+                      v-else-if="eventRecommendation.eligibility?.status === 'ineligible'"
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                    >Ineligible</span>
+                    <span
+                      v-else
+                      class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                    >Unknown</span>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                      Checked {{ eventRecommendation.eligibility?.checked ?? 0 }}/{{ eventRecommendation.eligibility?.total ?? 0 }} rules
+                    </span>
+                  </div>
+
+                  <div v-if="eventRecommendation.eligibility?.failed?.length" class="mt-3">
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">Failed Rules:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+                      <li v-for="fr in eventRecommendation.eligibility.failed" :key="fr.title + fr.operator + fr.expected">
+                        {{ fr.title }} {{ fr.operator }} {{ fr.expected }} (actual: {{ fr.actual ?? '-' }})
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div v-if="eventRecommendation.eligibility?.missing?.length" class="mt-3">
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-1">Missing Data For:</p>
+                    <ul class="list-disc list-inside text-sm text-gray-600 dark:text-gray-300">
+                      <li v-for="m in eventRecommendation.eligibility.missing" :key="m">{{ m }}</li>
+                    </ul>
+                  </div>
+                </div>
+
                 <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print:text-xs">
                     <hr class="my-2 border-gray-300">
                     <p>Document Generated: {{ format(new Date(), 'PPP p') }}</p>
@@ -99,33 +131,25 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.event-recommendations.edit', eventRecommendation.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Recommendation
-              </Link>
-              <button @click="destroy(eventRecommendation.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Recommendation
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.event-recommendations.edit', eventRecommendation.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
 
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 <style>
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

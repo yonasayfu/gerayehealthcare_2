@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class NotificationController extends Controller
 {
@@ -36,14 +38,25 @@ class NotificationController extends Controller
     public function markAsRead(DatabaseNotification $notification)
     {
         // Authorization: Ensure the notification belongs to the authenticated user
-$user = Auth::user();
-Log::info('User roles:', ['roles' => $user->roles->pluck('name')]);
+        $user = Auth::user();
+        Log::info('User roles:', ['roles' => $user->roles->pluck('name')]);
 
-if ($notification->notifiable_id !== Auth::id()) {
-    abort(403, 'Unauthorized action.');
-}
+        if ($notification->notifiable_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
 
         $notification->markAsRead();
+
+        return response()->noContent();
+    }
+
+    /**
+     * Mark all notifications as read for the authenticated user.
+     */
+    public function markAllRead(Request $request)
+    {
+        $user = Auth::user();
+        $user->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->noContent();
     }

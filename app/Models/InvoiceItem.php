@@ -15,6 +15,7 @@ class InvoiceItem extends Model
         'visit_service_id',
         'description',
         'cost',
+        'quantity',
     ];
 
     /**

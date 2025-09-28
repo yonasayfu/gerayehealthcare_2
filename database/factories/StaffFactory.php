@@ -25,9 +25,9 @@ class StaffFactory extends Factory
             'user_id' => function (array $attributes) {
                 return \App\Models\User::updateOrCreate([
                     'email' => $attributes['email']], [
-                    'name' => $attributes['first_name'] . ' ' . $attributes['last_name'],
-                    'password' => bcrypt('password'),
-                ])->id;
+                        'name' => $attributes['first_name'].' '.$attributes['last_name'],
+                        'password' => bcrypt('password'),
+                    ])->id;
             },
         ];
     }

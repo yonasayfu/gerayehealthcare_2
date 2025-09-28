@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import ShowHeader from '@/components/ShowHeader.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
-import AdminLayout from '@/layouts/AppLayout.vue'
+import { confirmDialog } from '@/lib/confirm'
+import AppLayout from '@/layouts/AppLayout.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 
@@ -25,27 +27,35 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this event participant?')) {
-    router.delete(route('admin.event-participants.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Event Participant',
+    message: 'Are you sure you want to delete this event participant?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.event-participants.destroy', id))
 }
 </script>
 
 <template>
   <Head :title="`Event Participant: ${participant.id}`" />
 
-  <AdminLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+  <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Event Participant Details: {{ participant.id }}
-            </h3>
-            <Link :href="route('admin.event-participants.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
+      <!-- compact liquid glass header (now full-width and same sizing as main card) -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div class="print:hidden">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Event Participant Details</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Event Participant: {{ participant?.id }}</p>
+          </div>
+          <!-- top actions intentionally removed to avoid duplication; see footer -->
         </div>
+      </div>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
@@ -61,12 +71,12 @@ function destroy(id: number) {
                   <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Participant Information</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
-                      <p class="text-sm text-muted-foreground">Event ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.event_id }}</p>
+                      <p class="text-sm text-muted-foreground">Event:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.event?.title ?? ('#' + participant.event_id) }}</p>
                     </div>
                     <div>
-                      <p class="text-sm text-muted-foreground">Patient ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.patient_id }}</p>
+                      <p class="text-sm text-muted-foreground">Patient:</p>
+                      <p class="font-medium text-gray-900 dark:text-white">{{ participant.patient?.full_name ?? ('#' + participant.patient_id) }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
@@ -83,33 +93,25 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.event-participants.edit', participant.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Participant
-              </Link>
-              <button @click="destroy(participant.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Participant
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.event-participants.edit', participant.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
 
-  </AdminLayout>
+  </AppLayout>
 </template>
 
 <style>
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

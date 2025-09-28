@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\MarketingPlatform;
+use Illuminate\Database\Seeder;
 
 class MarketingPlatformsTableSeeder extends Seeder
 {
@@ -13,6 +12,6 @@ class MarketingPlatformsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingPlatform::factory(6)->create();
+        MarketingPlatform::factory(3)->create();
     }
 }

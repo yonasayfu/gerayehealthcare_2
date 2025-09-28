@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import ShowHeader from '@/components/ShowHeader.vue'
+import { confirmDialog } from '@/lib/confirm'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import type { BreadcrumbItemType } from '@/types'
 import { format } from 'date-fns'
@@ -11,7 +13,7 @@ const props = defineProps<{
 
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: route('dashboard') },
-  { title: 'Inventory Items', href: route('admin.inventory-requests.index') },
+  { title: 'Inventory Requests', href: route('admin.inventory-requests.index') },
   { title: `Request #${props.inventoryRequest.id}`, href: route('admin.inventory-requests.show', props.inventoryRequest.id) },
 ]
 
@@ -26,10 +28,15 @@ function printPage() {
   }, 100);
 }
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this inventory request?')) {
-    router.delete(route('admin.inventory-requests.destroy', id))
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Inventory Request',
+    message: 'Are you sure you want to delete this request?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.inventory-requests.destroy', id))
 }
 </script>
 
@@ -37,19 +44,16 @@ function destroy(id: number) {
   <Head :title="`Inventory Request: #${inventoryRequest.id}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t">
-            <h3 class="text-xl font-semibold">
-                Inventory Request Details: #{{ inventoryRequest.id }}
-            </h3>
-            <Link :href="route('admin.inventory-requests.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <ShowHeader title="Inventory Request Details" :subtitle="`Inventory Request: #${inventoryRequest.id}`">
+        <template #actions>
+          <Link :href="route('admin.inventory-requests.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -59,69 +63,69 @@ function destroy(id: number) {
                 </div>
 
                 <div class="border-b pb-4 mb-4 print:pb-2 print:mb-2">
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Request Details</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Request Details</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Request ID:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">#{{ inventoryRequest.id }}</p>
+                      <p class="font-medium text-foreground">#{{ inventoryRequest.id }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Requester:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.requester.first_name }} {{ inventoryRequest.requester.last_name }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.requester.first_name }} {{ inventoryRequest.requester.last_name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Approver:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.approver ? inventoryRequest.approver.first_name + ' ' + inventoryRequest.approver.last_name : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.approver ? inventoryRequest.approver.first_name + ' ' + inventoryRequest.approver.last_name : 'N/A' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Item:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.item.name }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.item.name }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Quantity Requested:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.quantity_requested }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.quantity_requested }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Quantity Approved:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.quantity_approved ?? 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.quantity_approved ?? 'N/A' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Status:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.status }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.status }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Priority:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.priority }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.priority }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Needed By Date:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.needed_by_date ? format(new Date(inventoryRequest.needed_by_date), 'PPP') : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.needed_by_date ? format(new Date(inventoryRequest.needed_by_date), 'PPP') : 'N/A' }}</p>
                     </div>
                     <div class="lg:col-span-3">
                       <p class="text-sm text-muted-foreground">Reason:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.reason ?? 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.reason ?? 'N/A' }}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 print:mb-2">Timestamps</h2>
+                  <h2 class="text-lg font-semibold text-foreground mb-4 print:mb-2">Timestamps</h2>
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-6 print:gap-y-2 print:gap-x-4">
                     <div>
                       <p class="text-sm text-muted-foreground">Requested At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.created_at ? format(new Date(inventoryRequest.created_at), 'PPP p') : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.created_at ? format(new Date(inventoryRequest.created_at), 'PPP p') : 'N/A' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Approved At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.approved_at ? format(new Date(inventoryRequest.approved_at), 'PPP p') : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.approved_at ? format(new Date(inventoryRequest.approved_at), 'PPP p') : 'N/A' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Fulfilled At:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.fulfilled_at ? format(new Date(inventoryRequest.fulfilled_at), 'PPP p') : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.fulfilled_at ? format(new Date(inventoryRequest.fulfilled_at), 'PPP p') : 'N/A' }}</p>
                     </div>
                     <div>
                       <p class="text-sm text-muted-foreground">Last Updated:</p>
-                      <p class="font-medium text-gray-900 dark:text-white">{{ inventoryRequest.updated_at ? format(new Date(inventoryRequest.updated_at), 'PPP p') : 'N/A' }}</p>
+                      <p class="font-medium text-foreground">{{ inventoryRequest.updated_at ? format(new Date(inventoryRequest.updated_at), 'PPP p') : 'N/A' }}</p>
                     </div>
                   </div>
                 </div>
@@ -134,22 +138,14 @@ function destroy(id: number) {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.inventory-requests.edit', inventoryRequest.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Request
-              </Link>
-              <button @click="destroy(inventoryRequest.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Request
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.inventory-requests.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.inventory-requests.edit', inventoryRequest.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
   </AppLayout>
@@ -159,7 +155,7 @@ function destroy(id: number) {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

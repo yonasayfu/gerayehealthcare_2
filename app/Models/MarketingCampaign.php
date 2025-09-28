@@ -2,32 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingPlatform;
-use App\Models\Staff;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class MarketingCampaign extends Model
 {
     use HasFactory;
+
     protected static function booted()
     {
         static::creating(function ($campaign) {
             if (empty($campaign->campaign_code)) {
                 DB::transaction(function () use ($campaign) {
                     $latestCampaign = static::lockForUpdate()
-                                            ->whereNotNull('campaign_code')
-                                            ->orderBy('id', 'desc')
-                                            ->first();
+                        ->whereNotNull('campaign_code')
+                        ->orderBy('id', 'desc')
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestCampaign && preg_match('/CAM-(\d+)/', $latestCampaign->campaign_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
-                    $campaign->campaign_code = 'CAM-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $campaign->campaign_code = 'CAM-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });
@@ -44,10 +42,12 @@ class MarketingCampaign extends Model
         'start_date',
         'end_date',
         'status',
+        'urgency',
         'utm_campaign',
         'utm_source',
         'utm_medium',
         'assigned_staff_id',
+        'responsible_staff_id',
         'created_by_staff_id',
         'goals',
     ];
@@ -69,8 +69,43 @@ class MarketingCampaign extends Model
         return $this->belongsTo(Staff::class, 'assigned_staff_id');
     }
 
+    public function responsibleStaff()
+    {
+        return $this->belongsTo(Staff::class, 'responsible_staff_id');
+    }
+
     public function createdByStaff()
     {
         return $this->belongsTo(Staff::class, 'created_by_staff_id');
+    }
+
+    public function contents()
+    {
+        return $this->hasMany(CampaignContent::class);
+    }
+
+    public function metrics()
+    {
+        return $this->hasMany(CampaignMetric::class);
+    }
+
+    public function landingPages()
+    {
+        return $this->hasMany(LandingPage::class);
+    }
+
+    public function leads()
+    {
+        return $this->hasMany(MarketingLead::class, 'source_campaign_id');
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(MarketingBudget::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(MarketingTask::class);
     }
 }

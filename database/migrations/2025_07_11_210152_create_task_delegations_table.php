@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('task_delegations', function (Blueprint $table) {
@@ -12,7 +13,7 @@ return new class extends Migration {
             $table->string('title');
             $table->foreignId('assigned_to')->constrained('staff')->cascadeOnDelete();
             $table->date('due_date');
-            $table->enum('status', ['Pending','In Progress','Completed'])->default('Pending');
+            $table->enum('status', ['Pending', 'In Progress', 'Completed'])->default('Pending');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

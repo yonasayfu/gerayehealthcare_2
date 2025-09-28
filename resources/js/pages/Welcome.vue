@@ -42,6 +42,14 @@ import { Head, Link } from '@inertiajs/vue3';
                     <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">
                         Laravel has an incredibly rich ecosystem. <br />We suggest starting with the following.
                     </p>
+                    <div class="mt-4 mb-6 rounded-md bg-[#fff7ed] dark:bg-[#1a140c] border border-[#fde68a] dark:border-[#3e341e] p-4">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="text-sm text-[#7c2d12] dark:text-[#f59e0b]">
+                                Have a suggestion? Recommend an event for someone.
+                            </div>
+                            <Link :href="route('public.event-recommendations.form')" class="btn-glass btn-glass-sm">Recommend an Event</Link>
+                        </div>
+                    </div>
                     <ul class="mb-4 flex flex-col lg:mb-6">
                         <li
                             class="relative flex items-center gap-4 py-2 before:absolute before:top-1/2 before:bottom-0 before:left-[0.4rem] before:border-l before:border-[#e3e3e0] dark:before:border-[#3E3E3A]"

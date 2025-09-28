@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Factories;
 
 use App\Models\Staff; // Import Staff model
@@ -14,18 +15,48 @@ class PatientFactory extends Factory
         return [
             'full_name' => $this->faker->name,
             'fayda_id' => $this->faker->unique()->numerify('##############'),
-            
+
             'date_of_birth' => $this->faker->date,
             'gender' => $this->faker->randomElement(['Male', 'Female']),
             'address' => $this->faker->address,
             'phone_number' => $this->faker->unique()->phoneNumber,
             'email' => $this->faker->unique()->safeEmail,
-            'emergency_contact' => $this->faker->name . ' - ' . $this->faker->phoneNumber,
+            'emergency_contact' => $this->faker->name.' - '.$this->faker->phoneNumber,
             'source' => $this->faker->randomElement(['TikTok', 'Website', 'Referral', 'Walk-in']),
-            
-            'geolocation' => $this->faker->latitude . ',' . $this->faker->longitude,
+
+            'geolocation' => $this->faker->latitude.','.$this->faker->longitude,
             'registered_by_staff_id' => $staffId, // Assign a random staff member
             'registered_by_caregiver_id' => null, // Set to null to avoid foreign key violation
         ];
+    }
+
+    /**
+     * Indicate that the patient has insurance.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function withInsurance()
+    {
+        return $this->afterCreating(function (\App\Models\Patient $patient) {
+            $insurancePolicy = \App\Models\InsurancePolicy::inRandomOrder()->first() ?? \App\Models\InsurancePolicy::factory()->create();
+            \App\Models\EmployeeInsuranceRecord::factory()->create([
+                'patient_id' => $patient->id,
+                'policy_id' => $insurancePolicy->id,
+            ]);
+        });
+    }
+
+    /**
+     * Indicate that the patient was registered by the police.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function registeredByPolice()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'source' => 'Police',
+            ];
+        });
     }
 }

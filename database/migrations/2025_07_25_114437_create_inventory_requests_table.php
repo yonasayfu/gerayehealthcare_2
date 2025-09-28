@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('inventory_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('requester_id')->constrained('staff');
-            $table->foreignId('approver_id')->nullable()->constrained('staff');
+            $table->foreignId('requester_id')->nullable()->constrained('staff')->onDelete('set null');
+            $table->foreignId('approver_id')->nullable()->constrained('staff')->onDelete('set null');
             $table->foreignId('item_id')->constrained('inventory_items');
             $table->integer('quantity_requested')->default(1);
             $table->integer('quantity_approved')->nullable();

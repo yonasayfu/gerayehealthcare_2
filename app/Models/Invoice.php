@@ -13,27 +13,17 @@ class Invoice extends Model
 
     protected $fillable = [
         'patient_id',
-        'service_id', // Added service_id
         'invoice_number',
         'invoice_date',
         'due_date',
         'subtotal',
         'tax_amount',
         'grand_total',
+        'amount',
         'status',
         'paid_at',
         'insurance_company_id',
     ];
-
-    public function service(): BelongsTo
-    {
-        return $this->belongsTo(Service::class);
-    }
-
-    public function visitService(): BelongsTo
-    {
-        return $this->belongsTo(VisitService::class, 'service_id');
-    }
 
     protected $casts = [
         'invoice_date' => 'date',
@@ -52,7 +42,7 @@ class Invoice extends Model
         static::creating(function ($invoice) {
             $latestInvoice = self::latest('id')->first();
             $nextId = $latestInvoice ? $latestInvoice->id + 1 : 1;
-            $invoice->invoice_number = 'INV-' . str_pad($nextId, 5, '0', STR_PAD_LEFT);
+            $invoice->invoice_number = 'INV-'.str_pad($nextId, 5, '0', STR_PAD_LEFT);
         });
     }
 
@@ -75,5 +65,10 @@ class Invoice extends Model
     public function insuranceCompany(): BelongsTo
     {
         return $this->belongsTo(InsuranceCompany::class);
+    }
+
+    public function sharedInvoices(): HasMany
+    {
+        return $this->hasMany(SharedInvoice::class);
     }
 }

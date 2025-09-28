@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\CampaignContent;
 use App\Models\MarketingCampaign;
 use App\Models\Staff;
-use App\Models\CampaignContent;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

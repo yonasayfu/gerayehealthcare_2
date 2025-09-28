@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\MarketingBudget;
 use App\Models\MarketingCampaign;
 use App\Models\MarketingPlatform;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +26,7 @@ class MarketingBudgetFactory extends Factory
         return [
             'campaign_id' => MarketingCampaign::inRandomOrder()->first()->id ?? MarketingCampaign::factory()->create()->id,
             'platform_id' => MarketingPlatform::inRandomOrder()->first()->id ?? MarketingPlatform::factory()->create()->id,
-            'budget_name' => $this->faker->sentence(3) . ' Budget',
+            'budget_name' => $this->faker->sentence(3).' Budget',
             'description' => $this->faker->paragraph(),
             'allocated_amount' => $allocatedAmount,
             'spent_amount' => $spentAmount,

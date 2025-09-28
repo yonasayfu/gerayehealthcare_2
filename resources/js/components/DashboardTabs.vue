@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, defineEmits } from 'vue'
-import { Button } from '@/components/ui/button'
+// Button not used here
 
 const tabs = ['Overview', 'Analytics', 'Reports', 'Notifications']
 const activeTab = ref('Overview')

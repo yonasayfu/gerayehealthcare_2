@@ -4,11 +4,11 @@ namespace App\Exports;
 
 use App\Models\LeadSource;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class LeadSourcesExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class LeadSourcesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
     public function collection()
     {

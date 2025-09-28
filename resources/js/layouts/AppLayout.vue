@@ -4,8 +4,10 @@ import type { BreadcrumbItemType } from '@/types';
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { eventBus } from '@/lib/eventBus'; // Import eventBus
-import { Bell, MessageSquareText } from 'lucide-vue-next'; // Import icons
 import { formatDistanceToNow } from 'date-fns'; // For time formatting
+import Toast from '@/components/Toast.vue';
+import ConfirmModal from '@/components/ConfirmModal.vue';
+import MessageModal from '@/components/MessageModal.vue';
 
 interface Props {
   breadcrumbs?: BreadcrumbItemType[];
@@ -18,7 +20,21 @@ withDefaults(defineProps<Props>(), {
 const notifications = ref<any[]>([]);
 const unreadCount = ref(0);
 const inventoryAlertCount = ref(0); // New ref for inventory alerts
+const myTasksCount = ref(0);
+const myTodoCount = ref(0);
 const showNotifications = ref(false);
+
+// Message modal state
+const showMessageModal = ref(false);
+const messageModalData = ref<{ senderName?: string; senderId?: number }>({});
+
+// Global confirm modal state
+const confirmOpen = ref(false)
+const confirmTitle = ref<string>('Are you sure?')
+const confirmMessage = ref<string>('')
+const confirmOkText = ref<string>('Confirm')
+const confirmCancelText = ref<string>('Cancel')
+let confirmResolve: ((v: boolean) => void) | null = null
 
 const fetchNotifications = async () => {
   try {
@@ -32,11 +48,16 @@ const fetchNotifications = async () => {
 
 const fetchInventoryAlertCount = async () => {
   try {
-    const response = await axios.get(route('admin.inventory-alerts.count'));
-    inventoryAlertCount.value = response.data.count;
-    
+    const response = await axios.get(route('inventory-alerts.count.public'));
+    inventoryAlertCount.value = response.data.count ?? 0;
   } catch (error) {
-    console.error('Error fetching inventory alert count:', error);
+    try {
+      const response = await axios.get('/dashboard/inventory-alerts/count');
+      inventoryAlertCount.value = response.data.count ?? 0;
+    } catch (e) {
+      console.warn('Inventory alerts not available:', e);
+      inventoryAlertCount.value = 0;
+    }
   }
 };
 
@@ -52,21 +73,97 @@ const markAsRead = async (notificationId: string, conversationId: number | null 
   }
 };
 
+const fetchMyTasksCount = async () => {
+  try {
+    const response = await axios.get(route('staff.task-delegations.count'));
+    myTasksCount.value = response.data.count ?? 0;
+  } catch (e) {
+    myTasksCount.value = 0;
+  }
+};
+
+const fetchMyTodoCount = async () => {
+  try {
+    const response = await axios.get(route('staff.my-todo.count'));
+    myTodoCount.value = response.data.count ?? 0;
+  } catch (e) {
+    myTodoCount.value = 0;
+  }
+};
+
+// Handle message modal events
+const openMessageModal = (data: { senderName?: string; senderId?: number }) => {
+  messageModalData.value = data;
+  showMessageModal.value = true;
+};
+
+const closeMessageModal = () => {
+  showMessageModal.value = false;
+  messageModalData.value = {};
+};
+
 onMounted(() => {
   fetchNotifications();
-  fetchInventoryAlertCount(); // Fetch inventory alert count on mount
-  // Optionally, poll for new notifications every X seconds
-  // setInterval(fetchNotifications, 30000); // e.g., every 30 seconds
+  fetchInventoryAlertCount();
+  fetchMyTasksCount();
+  fetchMyTodoCount();
+  // REMOVED: Continuous polling that was killing performance
+  // Only fetch on page load, not continuously
+
+  eventBus.on('confirm:open', (payload) => {
+    confirmTitle.value = payload.title || 'Are you sure?'
+    confirmMessage.value = payload.message || ''
+    confirmOkText.value = payload.confirmText || 'Confirm'
+    confirmCancelText.value = payload.cancelText || 'Cancel'
+    confirmResolve = payload.__resolve
+    confirmOpen.value = true
+  });
+  
+  // Listen for message modal events
+  window.addEventListener('open-message-modal', (event: CustomEvent) => {
+    openMessageModal(event.detail);
+  });
 });
 
 onUnmounted(() => {
   // Clear any intervals if set
+  // Optionally, remove listeners if needed (mitt keeps a single instance)
+  window.removeEventListener('open-message-modal', openMessageModal as any);
 });
+
+function handleConfirmCancel() {
+  confirmOpen.value = false
+  confirmResolve?.(false)
+  confirmResolve = null
+}
+
+function handleConfirmOk() {
+  confirmOpen.value = false
+  confirmResolve?.(true)
+  confirmResolve = null
+}
 </script>
 
 <template>
-  <AppSidebarLayout :breadcrumbs="breadcrumbs" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount">
+  <AppSidebarLayout :breadcrumbs="breadcrumbs" :unread-count="unreadCount" :inventory-alert-count="inventoryAlertCount" :my-tasks-count="myTasksCount" :my-todo-count="myTodoCount">
+    <Toast />
     <slot />
+    <ConfirmModal
+      :open="confirmOpen"
+      :title="confirmTitle"
+      :message="confirmMessage"
+      :confirm-text="confirmOkText"
+      :cancel-text="confirmCancelText"
+      @update:open="(v:boolean)=>{ if(!v) handleConfirmCancel() }"
+      @confirm="handleConfirmOk"
+      @cancel="handleConfirmCancel"
+    />
+    <MessageModal 
+      v-if="showMessageModal" 
+      :sender-name="messageModalData.senderName"
+      :sender-id="messageModalData.senderId"
+      @close="closeMessageModal"
+    />
   </AppSidebarLayout>
 </template>
 
@@ -88,5 +185,37 @@ onUnmounted(() => {
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #4a5568; /* Gray-700 */
+}
+
+/* Global print defaults to standardize all Index/Show prints */
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide application chrome */
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+
+  /* Header block styling (used by many pages) */
+  .print-header-content { padding-top: 0.5cm !important; padding-bottom: 0.5cm !important; margin-bottom: 0.8cm !important; }
+  .print-logo { max-width: 150px; max-height: 50px; margin: 0 auto 0.5rem auto; display: block; }
+  .print-clinic-name { font-size: 1.8rem !important; margin-bottom: 0.2rem !important; line-height: 1.2 !important; }
+  .print-document-title { font-size: 0.9rem !important; color: #555 !important; }
+
+  /* Table defaults (applies when pages use .print-table) */
+  table.print-table { width: 100% !important; border-collapse: collapse !important; margin: 0 !important; }
+  .print-table th, .print-table td { border: 1px solid #ccc !important; padding: 4px 6px !important; font-size: 10px !important; text-align: left !important; }
+  .print-table thead { background-color: #f3f4f6 !important; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
 }
 </style>

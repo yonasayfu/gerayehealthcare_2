@@ -1,0 +1,554 @@
+openapi: 3.0.3
+info:
+  title: Geraye Healthcare API
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000/api/v1
+paths:
+  /login:
+    post:
+      summary: Login and obtain access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+              required: [email, password]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string }
+        '401': { description: Invalid credentials }
+
+  /logout:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Revoke current access token
+      responses:
+        '200': { description: Logged out }
+
+  /me:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get current user
+      responses:
+        '200':
+          description: OK
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Update current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string }
+      responses:
+        '200': { description: Updated }
+
+  /patients/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get patient profile for current user
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Update self patient profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                full_name: { type: string }
+                phone_number: { type: string }
+                address: { type: string }
+      responses:
+        '200': { description: Updated }
+
+  /visit-services/my-schedule:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get my visit schedule (staff) or my visits (patient)
+      parameters:
+        - in: query
+          name: date
+          schema: { type: string, format: date }
+        - in: query
+          name: per_page
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: OK }
+
+  /visit-services:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create a new visit (appointment)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patient_id: { type: integer, nullable: true }
+                scheduled_at: { type: string, format: date-time }
+                service_description: { type: string }
+              required: [scheduled_at]
+      responses:
+        '200': { description: Created }
+
+  /visit-services/{id}:
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Update a visit (reschedule or edit description)
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scheduled_at: { type: string, format: date-time }
+                service_description: { type: string }
+      responses:
+        '200': { description: Updated }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Cancel a visit (sets status to Cancelled)
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+
+  /visit-services/{id}/check-in:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Check in to a visit service (staff only)
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+              required: [latitude, longitude]
+      responses:
+        '200': { description: Checked in }
+        '403': { description: Forbidden }
+
+  /visit-services/{id}/check-out:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Check out from a visit service (staff only)
+      parameters:
+        - in: path
+          required: true
+          name: id
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+              required: [latitude, longitude]
+      responses:
+        '200': { description: Checked out }
+        '403': { description: Forbidden }
+
+  /caregiver-assignments/my-active:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Active assignments for current staff
+      responses:
+        '200': { description: OK }
+
+  /caregiver-assignments/my-patients:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Unique patients for current staff
+      responses:
+        '200': { description: OK }
+
+  /services:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List active services
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: per_page
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /messages/threads:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List message threads with unread counts
+      responses:
+        '200': { description: OK }
+
+  /messages/threads/{userId}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get messages in a thread; marks received as read
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /messages/threads/{userId}/messages:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Send a direct message
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+                attachment: { type: string, format: binary }
+      responses:
+        '200': { description: Sent }
+
+  /messages/{messageId}:
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete a direct message (sender or admin)
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '403': { description: Forbidden }
+
+  /messages/{messageId}/download:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Download a direct message attachment (sender/receiver/admin)
+      parameters:
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+
+  /groups:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my groups
+      responses:
+        '200': { description: OK }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create group with initial members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                members:
+                  type: array
+                  items: { type: integer }
+              required: [name, members]
+      responses:
+        '201': { description: Created }
+
+  /groups/{groupId}/messages:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List group messages
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: per_page
+          schema: { type: integer, default: 50 }
+      responses:
+        '200': { description: OK }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Send a group message
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+                attachment: { type: string, format: binary }
+      responses:
+        '201': { description: Created }
+
+  /groups/{groupId}/messages/{messageId}:
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Update my group message
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: { type: string }
+              required: [message]
+      responses:
+        '200': { description: Updated }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Delete a group message (sender or group admin/owner)
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: No Content }
+        '403': { description: Forbidden }
+
+  /groups/{groupId}/messages/{messageId}/attachment:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Download a group message attachment (group member)
+      parameters:
+        - in: path
+          name: groupId
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: messageId
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+        '404': { description: Not Found }
+
+  /notifications:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List notifications (with unread count in meta)
+      responses:
+        '200': { description: OK }
+
+  /notifications/{id}/read:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Mark notification as read
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204': { description: No Content }
+
+  /push-tokens:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Register a device push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+                platform: { type: string }
+                device_name: { type: string }
+              required: [token]
+      responses:
+        '200': { description: OK }
+    delete:
+      security: [{ bearerAuth: [] }]
+      summary: Unregister a device push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+              required: [token]
+      responses:
+        '204': { description: No Content }
+
+  /documents/my:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my medical documents (patient) or created by me (staff)
+      responses:
+        '200': { description: OK }
+
+  /documents:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Upload a medical document (staff only)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                patient_id: { type: integer }
+                document_type: { type: string }
+                title: { type: string }
+                document_date: { type: string, format: date }
+                summary: { type: string }
+                file: { type: string, format: binary }
+              required: [patient_id, document_type, title, document_date, file]
+      responses:
+        '200': { description: Created }
+
+  /documents/{id}/download:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Download a medical document (authorized users only)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+        '404': { description: Not found }
+
+  /invoices/my:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my invoices
+      responses:
+        '200': { description: OK }
+
+  /invoices/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get invoice details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+
+  /insurance/policies/my:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my insurance policies
+      responses:
+        '200': { description: OK }
+
+  /insurance/claims/my:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List my insurance claims
+      responses:
+        '200': { description: OK }
+
+  /insurance/claims/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get claim details
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

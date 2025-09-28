@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Download, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -86,37 +86,21 @@ watch([search, sortField, sortDirection, perPage, campaignId, platformId, status
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing budget?')) {
-    router.delete(route('admin.marketing-budgets.destroy', id))
-  }
+import { confirmDialog } from '@/lib/confirm'
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Budget',
+    message: 'Are you sure you want to delete this marketing budget?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-budgets.destroy', id))
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.marketing-budgets.export', { type }), '_blank');
-}
+import { useExport } from '@/composables/useExport';
 
-function printCurrentView() {
-  const params: Record<string, string | number> = {
-    search: search.value,
-    direction: sortDirection.value,
-    per_page: perPage.value,
-    campaign_id: campaignId.value,
-    platform_id: platformId.value,
-    status: status.value,
-    period_start: periodStart.value,
-    period_end: periodEnd.value,
-  };
-
-  if (sortField.value) {
-    params.sort = sortField.value;
-  }
-  window.open(route('admin.marketing-budgets.printCurrent', params), '_blank');
-}
-
-const printAllBudgets = () => {
-    window.open(route('admin.marketing-budgets.printAll'), '_blank');
-};
+const { exportData, printCurrentView } = useExport({ routeName: 'admin.marketing-budgets', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -134,44 +118,52 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Marketing Budgets</h1>
-          <p class="text-sm text-muted-foreground">Manage all marketing budgets here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.marketing-budgets.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Budget
-          </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllBudgets" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Marketing Budgets</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage marketing budgets</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.marketing-budgets.create')" class="btn-glass">
+              <span>Add Marketing Budget</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 
+            <!-- Search / per page -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <div class="relative w-full md:w-1/3">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
           <input
-            type="text"
             v-model="search"
-            placeholder="Search budgets..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 pr-10"
+            type="text"
+            placeholder="Search marketing budgets..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
           />
-          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
         </div>
 
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -207,6 +199,9 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('spent_amount')">
                 Spent <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
+              <th class="px-6 py-3">
+                Remaining
+              </th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('period_start')">
                 Start Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -226,6 +221,7 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ budget.platform?.name ?? '-' }}</td>
               <td class="px-6 py-4">{{ budget.allocated_amount }}</td>
               <td class="px-6 py-4">{{ budget.spent_amount }}</td>
+              <td class="px-6 py-4">{{ (budget.allocated_amount - budget.spent_amount).toFixed(2) }}</td>
               <td class="px-6 py-4">{{ budget.period_start ? format(new Date(budget.period_start), 'PPP') : '-' }}</td>
               <td class="px-6 py-4">{{ budget.period_end ? format(new Date(budget.period_end), 'PPP') : '-' }}</td>
               <td class="px-6 py-4">{{ budget.status }}</td>
@@ -233,38 +229,50 @@ function toggleSort(field: string) {
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.marketing-budgets.show', budget.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.marketing-budgets.edit', budget.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(budget.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button
+                    @click="destroy(budget.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
             </tr>
             <tr v-if="marketingBudgets.data.length === 0">
-              <td colspan="9" class="text-center px-6 py-4 text-gray-400">No marketing budgets found.</td>
+              <td colspan="10" class="text-center px-6 py-4 text-gray-400">No marketing budgets found.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <Pagination v-if="marketingBudgets.data.length > 0" :links="marketingBudgets.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>
 </template>
 
+<style>
+@media print {
+  @page { size: A4 landscape; margin: 0.5cm; }
+  .app-sidebar-header, .app-sidebar { display: none !important; }
+  body > header, body > nav, [role="banner"], [role="navigation"] { display: none !important; }
+  html, body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
+}
+</style>

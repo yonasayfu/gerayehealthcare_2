@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use App\Models\LeadSource;
-use App\Models\MarketingCampaign;
-use App\Models\MarketingLead;
-use Illuminate\Support\Facades\DB; // Import DB facade for transactions
+use Illuminate\Support\Facades\DB;
+// Import DB facade for transactions
 
 class Patient extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'full_name',
         'fayda_id',
         'date_of_birth',
+        'ethiopian_date_of_birth',
         'gender',
         'address',
         'phone_number',
@@ -55,13 +54,13 @@ class Patient extends Model
                 // Use a transaction to ensure atomic generation of sequential patient code
                 DB::transaction(function () use ($patient) {
                     $latestPatient = Patient::lockForUpdate() // Lock the table row for update
-                                            ->whereNotNull('patient_code')
-                                            ->orderBy('id', 'desc') // Order by ID to get the latest
-                                            ->first();
+                        ->whereNotNull('patient_code')
+                        ->orderBy('id', 'desc') // Order by ID to get the latest
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestPatient && preg_match('/PAT-(\d+)/', $latestPatient->patient_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
                     // Format the number with leading zeros, e.g., PAT-00001
@@ -92,7 +91,7 @@ class Patient extends Model
         if (!$this->date_of_birth) {
             return null;
         }
-    
+
         // Use Carbon to calculate age from date_of_birth to now
         return Carbon::parse($this->date_of_birth)->age;
     }
@@ -103,6 +102,11 @@ class Patient extends Model
      * @var array
      */
     protected $appends = ['age'];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the staff member who registered the patient.
@@ -129,4 +133,66 @@ class Patient extends Model
         return $this->belongsTo(MarketingLead::class, 'lead_id');
     }
 
+    /**
+     * Get all medical visits for this patient.
+     */
+    public function medicalVisits()
+    {
+        return $this->hasMany(MedicalVisit::class);
+    }
+
+    /**
+     * Get the employee insurance records for this patient.
+     */
+    public function employeeInsuranceRecords()
+    {
+        return $this->hasMany(EmployeeInsuranceRecord::class);
+    }
+
+    /**
+     * Get the active employee insurance record for this patient.
+     */
+    public function activeInsuranceRecord()
+    {
+        return $this->hasOne(EmployeeInsuranceRecord::class)->where('verified', true)->latest();
+    }
+
+    /**
+     * Get insurance claims for this patient.
+     */
+    public function insuranceClaims()
+    {
+        return $this->hasMany(InsuranceClaim::class);
+    }
+
+    /**
+     * Get visit services for this patient.
+     */
+    public function visitServices()
+    {
+        return $this->hasMany(VisitService::class);
+    }
+
+    /**
+     * Get invoices for this patient.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * All referral documents associated with this patient via referrals.
+     */
+    public function referralDocuments()
+    {
+        return $this->hasManyThrough(
+            ReferralDocument::class, // Final model
+            Referral::class, // Intermediate model
+            'referred_patient_id', // Foreign key on referrals table...
+            'referral_id', // Foreign key on referral_documents table...
+            'id', // Local key on patients table
+            'id' // Local key on referrals table
+        );
+    }
 }

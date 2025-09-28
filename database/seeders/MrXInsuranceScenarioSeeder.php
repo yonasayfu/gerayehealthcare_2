@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Patient;
 use App\Models\CorporateClient;
+use App\Models\EmployeeInsuranceRecord;
+use App\Models\InsuranceClaim;
 use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use App\Models\EmployeeInsuranceRecord;
+use App\Models\Invoice;
+use App\Models\Patient;
 use App\Models\Service;
 use App\Models\Staff;
 use App\Models\VisitService;
-use App\Models\Invoice;
-use App\Models\InsuranceClaim;
+use Illuminate\Database\Seeder;
 
 class MrXInsuranceScenarioSeeder extends Seeder
 {
@@ -29,12 +29,12 @@ class MrXInsuranceScenarioSeeder extends Seeder
 
         $aslmNgo = CorporateClient::firstOrCreate(
             ['organization_name' => 'ASLM NGO'],
-            ['organization_name_amharic' => 'ኤ.ኤስ.ኤል.ኤም. የሲቪል ማህበራት ድርጅት', 'contact_person' => 'Tigist Worku', 'contact_email' => 'info@aslmngo.org', 'contact_phone' => '+251944556677', 'tin_number' => '0012345678', 'trade_license_number' => 'TL/001/2015', 'address' => 'Addis Ababa']
+            ['contact_person' => 'Tigist Worku', 'contact_email' => 'info@aslmngo.org', 'contact_phone' => '+251944556677', 'tin_number' => '0012345678', 'trade_license_number' => 'TL/001/2015', 'address' => 'Addis Ababa']
         );
 
         $physiotherapyService = Service::firstOrCreate(
             ['name' => 'Physiotherapy'],
-            ['description' => 'Physical therapy services', 'price' => 1000.00, 'duration' => 60, 'is_active' => true]
+            ['description' => 'Physical therapy services', 'category' => 'Physiotherapy', 'price' => 1000.00, 'duration' => 60, 'is_active' => true]
         );
 
         $nyalaAslmPolicy = InsurancePolicy::firstOrCreate(
@@ -123,7 +123,6 @@ class MrXInsuranceScenarioSeeder extends Seeder
         $invoice = Invoice::firstOrCreate(
             [
                 'patient_id' => $mrX->id,
-                'service_id' => $visitService->id, // Link to visit service
                 'invoice_date' => now()->toDateString(),
             ],
             [
@@ -136,6 +135,15 @@ class MrXInsuranceScenarioSeeder extends Seeder
                 'insurance_company_id' => $nyalaInsurance->id,
             ]
         );
+
+        // Ensure an invoice item exists for the visit service
+        if (! $invoice->items()->where('visit_service_id', $visitService->id)->exists()) {
+            $invoice->items()->create([
+                'visit_service_id' => $visitService->id,
+                'description' => $visitService->service_description ?? 'Service',
+                'cost' => $totalAmount,
+            ]);
+        }
 
         // Step 5: Insurance Claim Creation
         $insuranceClaim = InsuranceClaim::firstOrCreate(

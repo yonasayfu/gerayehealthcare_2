@@ -2,150 +2,104 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\DTOs\CreateStaffAvailabilityDTO;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
+use App\Models\VisitService;
+use App\Services\StaffAvailability\StaffAvailabilityService;
+use App\Services\Validation\Rules\StaffAvailabilityRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class StaffAvailabilityController extends Controller
+class StaffAvailabilityController extends BaseController
 {
-    /**
-     * Fetch availability events for the FullCalendar component.
-     * Responds with JSON.
-     */
-public function getCalendarEvents(Request $request)
+    public function __construct(StaffAvailabilityService $staffAvailabilityService)
     {
-        $request->validate([
-            'start' => 'required|date',
-            'end' => 'required|date|after_or_equal:start',
-        ]);
-
-        $query = \App\Models\StaffAvailability::with('staff')
-            ->where('start_time', '>=', $request->start)
-            ->where('end_time', '<=', $request->end);
-
-        if ($request->filled('staff_id')) {
-            $query->where('staff_id', $request->staff_id);
-        }
-
-        $availabilities = $query->get();
-
-        $events = $availabilities->map(function ($availability) {
-            return [
-                'id' => $availability->id,
-                'title' => $availability->staff->first_name . ' (' . $availability->status . ')',
-                'start' => $availability->start_time->format('Y-m-d H:i:s'),
-                'end' => $availability->end_time->format('Y-m-d H:i:s'),
-                'backgroundColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'borderColor' => $availability->status === 'Available' ? '#28a745' : '#dc3545',
-                'extendedProps' => [
-                    'staff_name' => $availability->staff->first_name . ' ' . $availability->staff->last_name,
-                    'status' => $availability->status,
-                ]
-            ];
-        });
-
-        return response()->json($events);
+        parent::__construct(
+            $staffAvailabilityService,
+            StaffAvailabilityRules::class,
+            'Admin/StaffAvailabilities',
+            'availabilities',
+            StaffAvailability::class,
+            CreateStaffAvailabilityDTO::class
+        );
     }
 
-    /**
-     * Display a paginated list view for admins.
-     * Responds with an Inertia view.
-     */
     public function index(Request $request)
     {
-        $query = StaffAvailability::with('staff');
-
-        // Filtering logic
-        if ($request->filled('staff_id')) {
-            $query->where('staff_id', $request->staff_id);
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        if ($request->filled('start_date')) {
-            $query->whereDate('start_time', '>=', $request->start_date);
-        }
-        if ($request->filled('end_date')) {
-            $query->whereDate('end_time', '<=', $request->end_date);
-        }
-
-        // Sorting logic
-        if ($request->filled('sort')) {
-            $query->orderBy($request->sort, $request->get('direction', 'asc'));
-        } else {
-            $query->orderBy('start_time', 'desc');
-        }
+        $data = $this->service->getAll($request);
+        $staffList = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
 
         return Inertia::render('Admin/StaffAvailabilities/Index', [
-            'availabilities' => $query->paginate($request->get('per_page', 15))->withQueryString(),
-            'filters' => $request->only(['staff_id', 'status', 'start_date', 'end_date', 'sort', 'direction']),
-            'staffList' => Staff::orderBy('first_name')->get(['id', 'first_name', 'last_name']),
+            'availabilities' => $data,
+            'filters' => $request->only(['staff_id', 'status', 'start_date', 'end_date', 'sort', 'direction', 'per_page']),
+            'staffList' => $staffList,
         ]);
     }
 
-    /**
-     * Store a new availability slot.
-     */
-public function store(Request $request)
+    public function create()
+    {
+        $staffList = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render('Admin/StaffAvailabilities/Create', [
+            'staffList' => $staffList,
+        ]);
+    }
+
+    public function edit($id)
+    {
+        $availability = $this->service->getById($id);
+        $staffList = Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+
+        return Inertia::render('Admin/StaffAvailabilities/Edit', [
+            'staffAvailability' => $availability,
+            'staffList' => $staffList,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $availability = StaffAvailability::with('staff')->findOrFail($id);
+
+        return Inertia::render('Admin/StaffAvailabilities/Show', [
+            'staffAvailability' => $availability,
+        ]);
+    }
+
+    public function getCalendarEvents(Request $request)
+    {
+        return $this->service->getCalendarEvents($request);
+    }
+
+    public function availableStaff(Request $request)
     {
         $request->validate([
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+        ]);
+
+        $available = $this->service->getAvailableStaff($request->input('start_time'), $request->input('end_time'));
+
+        return response()->json($available);
+    }
+
+    public function visitConflicts(Request $request)
+    {
+        $validated = $request->validate([
             'staff_id' => 'required|exists:staff,id',
             'start_time' => 'required|date',
-            'end_time' => 'required|date|after_or_equal:start_time',
-            'status' => 'required|string|in:Available,Unavailable',
+            'end_time' => 'required|date|after:start_time',
         ]);
 
-        // Check for overlapping availability
-        $overlap = StaffAvailability::where('staff_id', $request->staff_id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->exists();
+        $count = VisitService::where('staff_id', $validated['staff_id'])
+            ->where('status', '!=', 'Cancelled')
+            ->whereBetween('scheduled_at', [$validated['start_time'], $validated['end_time']])
+            ->count();
 
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
-        $availability = StaffAvailability::create($request->only(['staff_id', 'start_time', 'end_time', 'status']));
-
-        return back()->with('success', 'Availability slot created.');
-    }
-
-    /**
-     * Update an existing availability slot.
-     */
-public function update(Request $request, StaffAvailability $availability)
-    {
-        $request->validate([
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after_or_equal:start_time',
-            'status' => 'required|string|in:Available,Unavailable',
+        return response()->json([
+            'hasConflicts' => $count > 0,
+            'count' => $count,
         ]);
-
-        // Check for overlapping availability
-        $overlap = StaffAvailability::where('staff_id', $availability->staff_id)
-            ->where('end_time', '>', $request->start_time)
-            ->where('start_time', '<', $request->end_time)
-            ->where('id', '<>', $availability->id)
-            ->exists();
-
-        if ($overlap) {
-            return back()->withErrors(['error' => 'Conflict: Overlapping availability slot exists.'])->withInput();
-        }
-
-        $availability->update($request->only(['start_time', 'end_time', 'status']));
-
-        return back()->with('success', 'Availability slot updated.');
-    }
-
-    /**
-     * Remove an availability slot (cancellation).
-     */
-    public function destroy(StaffAvailability $availability)
-    {
-        $availability->delete();
-
-        return back()->with('success', 'Availability slot cancelled.');
     }
 }

@@ -18,7 +18,7 @@ class InventoryItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word . ' Item',
+            'name' => $this->faker->word.' Item',
             'description' => $this->faker->sentence,
             'item_category' => $this->faker->randomElement(['Medical Equipment', 'Office Supplies', 'Diagnostic Tools', 'Furniture']),
             'item_type' => $this->faker->word,
@@ -36,5 +36,34 @@ class InventoryItemFactory extends Factory
             'quantity_on_hand' => $this->faker->numberBetween(0, 20), // More likely to be low
             'reorder_level' => $this->faker->numberBetween(5, 15),
         ];
+    }
+
+    /**
+     * Indicate that the item is under maintenance.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function inMaintenance()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'Under Maintenance',
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the item has low stock.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function lowStock()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'quantity_on_hand' => $this->faker->numberBetween(1, 5),
+                'reorder_level' => 10,
+            ];
+        });
     }
 }

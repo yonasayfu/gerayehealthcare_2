@@ -24,7 +24,7 @@ class CaregiverAssignmentFactory extends Factory
         return [
             // This now creates a new Patient and a new non-admin Staff member for each assignment.
             'patient_id' => Patient::factory(),
-            'staff_id' => Staff::factory()->state(['role' => 'Nurse']), 
+            'staff_id' => Staff::factory()->state(['role' => 'Nurse']),
             'shift_start' => $shift_start,
             'shift_end' => $shift_end,
             'status' => $this->faker->randomElement(['Assigned', 'In Progress', 'Completed', 'Cancelled']),

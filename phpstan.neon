@@ -1,0 +1,18 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 1
+    paths:
+        - app
+    tmpDir: var/phpstan
+    excludePaths:
+        - tests/*
+        - app/Http/Controllers/Api/*
+        - app/DTOs/CreateEventBroadcastDTO.php
+        - app/DTOs/CreateEventRecommendationDTO.php
+        - app/DTOs/CreateEventStaffAssignmentDTO.php
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Return type .+::from\(\) is not covariant with return type static\(.+\)::from\(\)\.#'
+

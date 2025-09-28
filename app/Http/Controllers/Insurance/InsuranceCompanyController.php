@@ -2,184 +2,132 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Http\Controllers\Controller;
+use App\DTOs\CreateInsuranceCompanyDTO;
+use App\DTOs\UpdateInsuranceCompanyDTO;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait; // Corrected namespace
 use App\Models\InsuranceCompany;
+use App\Services\Insurance\InsuranceCompanyService;
+use App\Services\Validation\Rules\InsuranceCompanyRules;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Response;
-use Inertia\Inertia;
 
-class InsuranceCompanyController extends Controller
+class InsuranceCompanyController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    use ExportableTrait;
+
+    public function __construct(InsuranceCompanyService $insuranceCompanyService)
     {
-        $query = InsuranceCompany::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('contact_email', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insuranceCompanies = $query->paginate($request->input('per_page', 5))->withQueryString();
-
-        return Inertia::render('Insurance/Companies/Index', [
-            'insuranceCompanies' => $insuranceCompanies,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
-        ]);
+        parent::__construct(
+            $insuranceCompanyService,
+            InsuranceCompanyRules::class,
+            'Insurance/Companies',
+            'insuranceCompanies',
+            InsuranceCompany::class,
+            CreateInsuranceCompanyDTO::class,
+            UpdateInsuranceCompanyDTO::class
+        );
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Export all insurance companies as CSV or PDF depending on request type.
      */
-    public function create()
-    {
-        return Inertia::render('Insurance/Companies/Create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
-        ]);
-
-        InsuranceCompany::create($validated);
-
-        return Redirect::route('admin.insurance-companies.index');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $insuranceCompany = InsuranceCompany::findOrFail($id);
-        return Inertia::render('Insurance/Companies/Show', [
-            'insuranceCompany' => $insuranceCompany,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        $insuranceCompany = InsuranceCompany::findOrFail($id);
-        return Inertia::render('Insurance/Companies/Edit', [
-            'insuranceCompany' => $insuranceCompany,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $insuranceCompany = InsuranceCompany::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_amharic' => 'nullable|string|max:255',
-            'contact_person' => 'nullable|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
-            'contact_phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
-            'address_amharic' => 'nullable|string',
-        ]);
-
-        $insuranceCompany->update($validated);
-
-        return Redirect::route('admin.insurance-companies.index');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $insuranceCompany = InsuranceCompany::findOrFail($id);
-
-        $insuranceCompany->delete();
-
-        return Redirect::route('admin.insurance-companies.index');
-    }
-
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $insuranceCompanies = InsuranceCompany::select('name', 'contact_person', 'contact_email', 'contact_phone', 'address')->get();
+        $config = $this->buildExportConfig();
 
-        if ($type === 'csv') {
-            $csvData = "Name,Contact Person,Contact Email,Contact Phone,Address\n";
-            foreach ($insuranceCompanies as $company) {
-                $csvData .= "\"{$company->name}\",\"{$company->contact_person}\",\"{$company->contact_email}\",\"{$company->contact_phone}\",\"{$company->address}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename=\"insurance_companies.csv\"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.insurance_companies', ['insuranceCompanies' => $insuranceCompanies])->setPaper('a4', 'landscape');
-            return $pdf->stream('insurance_companies.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, InsuranceCompany::class, $config);
     }
 
-    public function printSingle(InsuranceCompany $insuranceCompany)
-    {
-        $pdf = Pdf::loadView('pdf.insurance_company_single', ['insuranceCompany' => $insuranceCompany])->setPaper('a4', 'portrait');
-        return $pdf->stream("insurance_company-{$insuranceCompany->id}.pdf");
-    }
-
-    public function printCurrent(Request $request)
-    {
-        $query = InsuranceCompany::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('contact_email', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insuranceCompanies = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/Companies/PrintCurrent', ['insuranceCompanies' => $insuranceCompanies->items()]);
-    }
-
+    /**
+     * Print all insurance companies (PDF) with current filters applied.
+     */
     public function printAll(Request $request)
     {
-        $insuranceCompanies = InsuranceCompany::orderBy('name')->get();
+        $config = $this->buildExportConfig();
 
-        $pdf = Pdf::loadView('pdf.insurance_companies', ['insuranceCompanies' => $insuranceCompanies])->setPaper('a4', 'landscape');
-        return $pdf->stream('insurance_companies.pdf');
+        return $this->handlePrintAll($request, InsuranceCompany::class, $config);
+    }
+
+    /**
+     * Print current page/view (PDF with pagination and current filters).
+     */
+    public function printCurrent(Request $request)
+    {
+        $config = $this->buildExportConfig();
+
+        return $this->handlePrintCurrent($request, InsuranceCompany::class, $config);
+    }
+
+    /**
+     * Print a single insurance company (PDF).
+     */
+    public function printSingle(Request $request, $id)
+    {
+        $model = InsuranceCompany::findOrFail($id);
+        $config = $this->buildExportConfig();
+
+        return $this->handlePrintSingle($request, $model, $config);
+    }
+
+    /**
+     * Export/print configuration for Insurance Companies.
+     */
+    private function buildExportConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'contact_person', 'label' => 'Contact Person'],
+            ['key' => 'contact_email', 'label' => 'Contact Email'],
+            ['key' => 'contact_phone', 'label' => 'Contact Phone'],
+            ['key' => 'address', 'label' => 'Address'],
+        ];
+
+        $csvHeaders = ['Name', 'Contact Person', 'Contact Email', 'Contact Phone', 'Address'];
+        $csvFieldsMap = [
+            'Name' => 'name',
+            'Contact Person' => 'contact_person',
+            'Contact Email' => 'contact_email',
+            'Contact Phone' => 'contact_phone',
+            'Address' => 'address',
+        ];
+        $csvFields = [];
+        foreach ($csvHeaders as $label) {
+            $csvFields[] = $csvFieldsMap[$label] ?? '';
+        }
+
+        return [
+            'csv' => [
+                'headers' => $csvHeaders,
+                'fields' => $csvFields,
+                'filename_prefix' => 'insurance_companies',
+            ],
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Companies',
+                'filename_prefix' => 'insurance_companies',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Companies List',
+                'filename_prefix' => 'insurance_companies',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'columns' => $pdfColumns,
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Companies (Current View)',
+                'filename_prefix' => 'insurance_companies_current',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Company Details',
+                'filename_prefix' => 'insurance_company',
+            ],
+        ];
     }
 }

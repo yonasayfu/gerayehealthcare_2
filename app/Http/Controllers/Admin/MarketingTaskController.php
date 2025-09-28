@@ -2,228 +2,142 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingTaskRequest;
-use App\Http\Requests\UpdateMarketingTaskRequest;
+use App\DTOs\CreateMarketingTaskDTO;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\MarketingTask;
-use App\Models\MarketingCampaign;
-use App\Models\Staff;
-use App\Models\CampaignContent;
+use App\Services\CachedDropdown\CachedDropdownService;
+use App\Services\MarketingTask\MarketingTaskService;
+use App\Services\Validation\Rules\MarketingTaskRules;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\MarketingTasksExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class MarketingTaskController extends Controller
+class MarketingTaskController extends BaseController
 {
     use AuthorizesRequests;
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(MarketingTaskService $marketingTaskService)
     {
-        $this->authorize('viewAny', MarketingTask::class);
+        parent::__construct(
+            $marketingTaskService,
+            MarketingTaskRules::class,
+            'Admin/MarketingTasks',
+            'marketingTasks',
+            MarketingTask::class,
+            CreateMarketingTaskDTO::class
+        );
+    }
 
-        $query = MarketingTask::query();
+    /**
+     * Provide list data needed by filters on index (campaigns, staffs, task types).
+     */
+    public function index(Request $request)
+    {
+        $data = $this->service->getAll($request);
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%")
-                  ->orWhere('task_code', 'ilike', "%{$search}%");
-        }
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffs = CachedDropdownService::getStaffWithUsers();
 
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('assigned_to_staff_id')) {
-            $query->where('assigned_to_staff_id', $request->input('assigned_to_staff_id'));
-        }
-        if ($request->filled('doctor_id')) {
-            $query->where('doctor_id', $request->input('doctor_id'));
-        }
-        if ($request->filled('task_type')) {
-            $query->where('task_type', $request->input('task_type'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('scheduled_at_start')) {
-            $query->where('scheduled_at', '>=', $request->input('scheduled_at_start'));
-        }
-        if ($request->filled('scheduled_at_end')) {
-            $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
-        }
+        // Task types and statuses: align with factory and UI options
+        $taskTypes = [
+            'Email Campaign',
+            'Social Media Post',
+            'Ad Creation',
+            'Content Writing',
+            'SEO Optimization',
+        ];
+        $filters = $request->only([
+            'search',
+            'sort',
+            'direction',
+            'per_page',
+            'campaign_id',
+            'assigned_to_staff_id',
+            'task_type',
+        ]);
 
-        $marketingTasks = $query->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])
-                                 ->paginate($request->input('per_page', 5))
-                                 ->withQueryString();
-
-                return Inertia::render('Admin/MarketingTasks/Index', [
-            'marketingTasks' => $marketingTasks,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'campaign_id', 'assigned_to_staff_id', 'doctor_id', 'task_type', 'status', 'scheduled_at_start', 'scheduled_at_end', 'related_content_id']),
-            'campaigns' => MarketingCampaign::all(),
-            'staffs' => Staff::with('user')->get(),
-            'campaignContents' => CampaignContent::all(),
-            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
-            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
+        return Inertia::render($this->viewName.'/Index', [
+            $this->dataVariableName => $data,
+            'campaigns' => $campaigns,
+            'staffs' => $staffs,
+            'taskTypes' => $taskTypes,
+            'filters' => $filters,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Provide dropdown datasets for create form, similar to Patient module pattern.
      */
     public function create()
     {
-        $this->authorize('create', MarketingTask::class);
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffMembers = CachedDropdownService::getStaffWithUsers();
+        $contents = CachedDropdownService::getCampaignContent();
 
-                return Inertia::render('Admin/MarketingTasks/Create', [
-            'campaigns' => MarketingCampaign::all(),
-            'staffs' => Staff::with('user')->get(),
-            'campaignContents' => CampaignContent::all(),
-            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
-            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
+        $taskTypes = [
+            'Email Campaign',
+            'Social Media Post',
+            'Ad Creation',
+            'Content Writing',
+            'SEO Optimization',
+        ];
+        $statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
+
+        return Inertia::render($this->viewName.'/Create', [
+            'campaigns' => $campaigns,
+            'staffMembers' => $staffMembers,
+            'contents' => $contents,
+            'taskTypes' => $taskTypes,
+            'statuses' => $statuses,
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Provide dropdown datasets and record for edit form.
      */
-    public function store(StoreMarketingTaskRequest $request)
+    public function edit($id)
     {
-        $this->authorize('create', MarketingTask::class);
+        $data = $this->service->getById($id);
 
-        MarketingTask::create($request->validated());
+        // OPTIMIZED: Use cached dropdown service
+        $campaigns = CachedDropdownService::getMarketingCampaigns();
+        $staffs = CachedDropdownService::getStaffWithUsers();
+        $campaignContents = CachedDropdownService::getCampaignContent();
 
-        return redirect()->route('admin.marketing-tasks.index')->with('success', 'Marketing Task created successfully.');
-    }
+        $taskTypes = [
+            'Email Campaign',
+            'Social Media Post',
+            'Ad Creation',
+            'Content Writing',
+            'SEO Optimization',
+        ];
+        $statuses = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(MarketingTask $marketingTask)
-    {
-        $this->authorize('view', $marketingTask);
-
-        $marketingTask->load(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user']);
-
-                return Inertia::render('Admin/MarketingTasks/Show', [
-            'marketingTask' => $marketingTask,
+        return Inertia::render($this->viewName.'/Edit', [
+            'marketingTask' => $data,
+            'campaigns' => $campaigns,
+            'staffs' => $staffs,
+            'campaignContents' => $campaignContents,
+            'taskTypes' => $taskTypes,
+            'statuses' => $statuses,
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Print current view via centralized export system.
      */
-    public function edit(MarketingTask $marketingTask)
-    {
-        $this->authorize('update', $marketingTask);
-
-        $marketingTask->load(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user']);
-
-                return Inertia::render('Admin/MarketingTasks/Edit', [
-            'marketingTask' => $marketingTask,
-            'campaigns' => MarketingCampaign::all(),
-            'staffs' => Staff::with('user')->get(),
-            'campaignContents' => CampaignContent::all(),
-            'taskTypes' => ['Email Campaign', 'Social Media Post', 'Ad Creation', 'Content Writing', 'SEO Optimization'],
-            'statuses' => ['Pending', 'In Progress', 'Completed', 'Cancelled'],
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingTaskRequest $request, MarketingTask $marketingTask)
-    {
-        $this->authorize('update', $marketingTask);
-
-        $marketingTask->update($request->validated());
-
-        return redirect()->route('admin.marketing-tasks.index')->with('success', 'Marketing Task updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MarketingTask $marketingTask)
-    {
-        $this->authorize('delete', $marketingTask);
-
-        $marketingTask->delete();
-
-        return back()->with('success', 'Marketing Task deleted successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        $this->authorize('viewAny', MarketingTask::class);
-
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new MarketingTasksExport, 'marketing-tasks.csv');
-        } elseif ($type === 'pdf') {
-            $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-            $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
-            return $pdf->download('marketing-tasks.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
-    }
-
-    public function printAll(Request $request)
-    {
-        $this->authorize('viewAny', MarketingTask::class);
-
-        $marketingTasks = MarketingTask::with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-        $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-tasks.pdf');
-    }
-
     public function printCurrent(Request $request)
     {
-        $this->authorize('viewAny', MarketingTask::class);
+        return $this->service->printCurrent($request);
+    }
 
-        $query = MarketingTask::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('title', 'ilike', "%{$search}%")
-                  ->orWhere('description', 'ilike', "%{$search}%")
-                  ->orWhere('task_code', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('campaign_id')) {
-            $query->where('campaign_id', $request->input('campaign_id'));
-        }
-        if ($request->filled('assigned_to_staff_id')) {
-            $query->where('assigned_to_staff_id', $request->input('assigned_to_staff_id'));
-        }
-        if ($request->filled('doctor_id')) {
-            $query->where('doctor_id', $request->input('doctor_id'));
-        }
-        if ($request->filled('task_type')) {
-            $query->where('task_type', $request->input('task_type'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('scheduled_at_start')) {
-            $query->where('scheduled_at', '>=', $request->input('scheduled_at_start'));
-        }
-        if ($request->filled('scheduled_at_end')) {
-            $query->where('scheduled_at', '<=', $request->input('scheduled_at_end'));
-        }
-
-        $marketingTasks = $query->with(['campaign', 'assignedToStaff.user', 'relatedContent', 'doctor.user'])->get();
-
-        $pdf = Pdf::loadView('pdf.marketing-tasks', compact('marketingTasks'))->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-tasks-current.pdf');
+    /**
+     * Print all records via centralized export system.
+     */
+    public function printAll(Request $request)
+    {
+        return $this->service->printAll($request);
     }
 }

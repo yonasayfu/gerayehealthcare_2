@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class InventoryMaintenanceRecord extends Model
 {
@@ -13,7 +13,7 @@ class InventoryMaintenanceRecord extends Model
         'item_id',
         'scheduled_date',
         'actual_date',
-        'performed_by',
+        'performed_by_staff_id', // Changed to foreign key
         'cost',
         'description',
         'next_due_date',
@@ -23,5 +23,10 @@ class InventoryMaintenanceRecord extends Model
     public function item()
     {
         return $this->belongsTo(InventoryItem::class);
+    }
+
+    public function performedByStaff()
+    {
+        return $this->belongsTo(Staff::class, 'performed_by_staff_id');
     }
 }

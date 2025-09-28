@@ -4,9 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Message;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class NewMessageReceived extends Notification
 {
@@ -14,8 +12,6 @@ class NewMessageReceived extends Notification
 
     /**
      * The incoming message instance.
-     *
-     * @var \App\Models\Message
      */
     public Message $message;
 
@@ -50,6 +46,8 @@ class NewMessageReceived extends Notification
             'message_preview' => $this->message->message, // Show full message
             'message_id' => $this->message->id,
             'conversation_id' => $this->message->sender_id, // The sender is the conversation partner
+            'url' => null, // No URL for message notifications - handled by event
+            'type' => 'new_message',
         ];
     }
 }

@@ -2,218 +2,155 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Config\AdditionalExportConfigs;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait;
 use App\Models\InventoryItem;
+use App\Models\Supplier;
+use App\Services\InventoryItem\InventoryItemService;
+use App\Services\Validation\Rules\InventoryItemRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use League\Csv\Writer;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-class InventoryItemController extends Controller
+class InventoryItemController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    use ExportableTrait;
+
+    public function __construct(InventoryItemService $inventoryItemService)
     {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        if ($request->has('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $perPage = $request->input('per_page', 10);
-        $inventoryItems = $query->paginate($perPage);
-
-        return Inertia::render('Admin/InventoryItems/Index', [
-            'inventoryItems' => $inventoryItems,
-            'filters' => $request->all('search', 'sort', 'direction', 'per_page'),
-        ]);
+        parent::__construct(
+            $inventoryItemService,
+            InventoryItemRules::class,
+            'Admin/InventoryItems',
+            'inventoryItems',
+            InventoryItem::class
+        );
     }
 
-    public function export(Request $request): StreamedResponse
-    {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        $inventoryItems = $query->get();
-
-        $csv = Writer::createFromString('');
-        $csv->insertOne(['ID', 'Name', 'Description', 'Category', 'Type', 'Serial Number', 'Purchase Date', 'Warranty Expiry', 'Supplier ID', 'Assigned To Type', 'Assigned To ID', 'Last Maintenance Date', 'Next Maintenance Due', 'Maintenance Schedule', 'Notes', 'Status']);
-
-        foreach ($inventoryItems as $item) {
-            $csv->insertOne($item->toArray());
-        }
-
-        return response()->streamDownload(function () use ($csv) {
-            echo $csv->toString();
-        }, 'inventory_items.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_items.csv"',
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return Inertia::render('Admin/InventoryItems/Create');
+        return Inertia::render('Admin/InventoryItems/Create', [
+            'suppliers' => Supplier::query()->select('id', 'name')->orderBy('name')->get(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function edit($id)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'item_category' => 'nullable|string|max:255',
-            'item_type' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255|unique:inventory_items',
-            'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'assigned_to_type' => 'nullable|string|max:50',
-            'assigned_to_id' => 'nullable|integer',
-            'last_maintenance_date' => 'nullable|date',
-            'next_maintenance_due' => 'nullable|date|after_or_equal:last_maintenance_date',
-            'maintenance_schedule' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'status' => 'required|string|max:255',
+        $data = $this->service->getById($id);
+        $propName = lcfirst(class_basename($this->modelClass));
+
+        return Inertia::render('Admin/InventoryItems/Edit', [
+            $propName => $data,
+            'suppliers' => Supplier::query()->select('id', 'name')->orderBy('name')->get(),
         ]);
-
-        InventoryItem::create($validated);
-
-        return redirect()->route('admin.inventory-items.index')->with('success', 'Inventory item created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Export all records as CSV or PDF based on request type param.
      */
-    public function show(InventoryItem $inventoryItem)
+    public function export(Request $request)
     {
-        return Inertia::render('Admin/InventoryItems/Show', [
-            'inventoryItem' => $inventoryItem,
-        ]);
+        $config = $this->buildExportConfig();
+
+        return $this->handleExport($request, InventoryItem::class, $config);
     }
 
+    /**
+     * Print all records (PDF).
+     */
     public function printAll(Request $request)
     {
-        $query = InventoryItem::query();
+        $config = $this->buildExportConfig();
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        if ($request->has('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $inventoryItems = $query->get();
-
-        return Inertia::render('Admin/InventoryItems/PrintAll', [
-            'inventoryItems' => $inventoryItems,
-            'filters' => $request->all('search', 'sort', 'direction'),
-        ]);
-    }
-
-    public function printSingle(InventoryItem $inventoryItem)
-    {
-        return Inertia::render('Admin/InventoryItems/PrintSingle', [
-            'inventoryItem' => $inventoryItem,
-        ]);
-    }
-
-    public function generateSinglePdf(InventoryItem $inventoryItem)
-    {
-        $pdf = Pdf::loadView('pdf.inventory_items_single_pdf', ['inventoryItem' => $inventoryItem]);
-        return $pdf->stream('inventory_item_' . $inventoryItem->id . '.pdf');
-    }
-
-    public function generatePdf(Request $request)
-    {
-        $query = InventoryItem::query();
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%$search%")
-                  ->orWhere('serial_number', 'like', "%$search%");
-        }
-
-        if ($request->has('sort')) {
-            $sortField = $request->input('sort');
-            $sortDirection = $request->input('direction', 'asc');
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $inventoryItems = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory-items', ['inventoryItems' => $inventoryItems]);
-        return $pdf->stream('inventory-items.pdf');
+        return $this->handlePrintAll($request, InventoryItem::class, $config);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Print current page/view (PDF with pagination and current filters).
      */
-    public function edit(InventoryItem $inventoryItem)
+    public function printCurrent(Request $request)
     {
-        return Inertia::render('Admin/InventoryItems/Edit', [
-            'inventoryItem' => $inventoryItem,
-        ]);
-    }
+        $config = $this->buildExportConfig();
 
-    public function update(Request $request, InventoryItem $inventoryItem)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'item_category' => 'nullable|string|max:255',
-            'item_type' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255|unique:inventory_items,serial_number,' . $inventoryItem->id,
-            'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date|after_or_equal:purchase_date',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'assigned_to_type' => 'nullable|string|max:50',
-            'assigned_to_id' => 'nullable|integer',
-            'last_maintenance_date' => 'nullable|date',
-            'next_maintenance_due' => 'nullable|date|after_or_equal:last_maintenance_date',
-            'maintenance_schedule' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'status' => 'required|string|max:255',
-        ]);
-
-        $inventoryItem->update($validated);
-
-        return redirect()->route('admin.inventory-items.index')->with('success', 'Inventory item updated successfully.');
+        return $this->handlePrintCurrent($request, InventoryItem::class, $config);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Print a single record by id.
      */
-    public function destroy(InventoryItem $inventoryItem)
+    public function printSingle(Request $request, $id)
     {
-        $inventoryItem->delete();
+        $model = InventoryItem::findOrFail($id);
+        $config = $this->buildExportConfig();
 
-        return redirect()->route('admin.inventory-items.index')->with('success', 'Inventory item deleted successfully.');
+        return $this->handlePrintSingle($request, $model, $config);
+    }
+
+    /**
+     * Normalize AdditionalExportConfigs for Inventory Items to ExportableTrait schema.
+     */
+    private function buildExportConfig(): array
+    {
+        $raw = AdditionalExportConfigs::getInventoryItemConfig();
+
+        // Map CSV config
+        $csvHeaders = $raw['csv_headers'] ?? ['Name', 'Category', 'Type', 'Serial Number', 'Purchase Date', 'Warranty Expiry', 'Status'];
+        $csvFieldsMap = $raw['csv_fields'] ?? [];
+        $csvFields = [];
+        foreach ($csvHeaders as $label) {
+            $spec = $csvFieldsMap[$label] ?? null;
+            if ($spec === null) {
+                continue;
+            }
+            // Support string path or array spec with field/transform/default
+            $csvFields[] = $spec;
+        }
+
+        // Columns for PDF views
+        $pdfColumns = $raw['pdf_columns'] ?? [
+            ['key' => 'name', 'label' => 'Name'],
+            ['key' => 'item_category', 'label' => 'Category'],
+            ['key' => 'item_type', 'label' => 'Type'],
+            ['key' => 'serial_number', 'label' => 'Serial Number'],
+            ['key' => 'status', 'label' => 'Status'],
+            ['key' => 'purchase_date', 'label' => 'Purchase Date'],
+            ['key' => 'warranty_expiry', 'label' => 'Warranty Expiry'],
+        ];
+
+        return [
+            'csv' => [
+                'headers' => $csvHeaders,
+                'fields' => $csvFields,
+                'filename_prefix' => 'inventory_items',
+            ],
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Inventory Items List',
+                'filename_prefix' => 'inventory_items',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Inventory Items List',
+                'filename_prefix' => 'inventory_items',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'columns' => $pdfColumns,
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Inventory Items (Current View)',
+                'filename_prefix' => 'inventory_items_current',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Inventory Item Details',
+                'filename_prefix' => 'inventory_item',
+                // columns optional for single; the Blade can render fields of the model
+            ],
+        ];
     }
 }

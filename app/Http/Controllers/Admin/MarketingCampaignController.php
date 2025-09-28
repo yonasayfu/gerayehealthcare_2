@@ -2,235 +2,177 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingCampaignRequest;
-use App\Http\Requests\UpdateMarketingCampaignRequest;
+use App\DTOs\CreateMarketingCampaignDTO;
+use App\DTOs\UpdateMarketingCampaignDTO;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Resources\MarketingCampaignResource;
 use App\Models\MarketingCampaign;
+use App\Models\MarketingPlatform;
+use App\Models\Staff;
+use App\Services\MarketingCampaign\MarketingCampaignService;
+use App\Services\Validation\Rules\MarketingCampaignRules;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Response;
 
-class MarketingCampaignController extends Controller
+class MarketingCampaignController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(MarketingCampaignService $marketingCampaignService)
     {
-        $query = MarketingCampaign::query();
+        parent::__construct(
+            $marketingCampaignService,
+            MarketingCampaignRules::class,
+            'Admin/MarketingCampaigns',
+            'marketingCampaigns',
+            MarketingCampaign::class,
+            CreateMarketingCampaignDTO::class,
+            MarketingCampaignResource::class
+        );
+    }
 
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('campaign_name', 'ilike', "%{$search}%")
-                  ->orWhere('campaign_code', 'ilike', "%{$search}%")
-                  ->orWhere('utm_campaign', 'ilike', "%{$search}%");
-        }
+    public function index(Request $request)
+    {
+        $data = $this->service->getAll($request, [
+            'platform', 
+            'assignedStaff', 
+            'responsibleStaff', 
+            'createdByStaff'
+        ]);
 
-        // Filtering
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('campaign_type')) {
-            $query->where('campaign_type', $request->input('campaign_type'));
-        }
-        if ($request->filled('start_date')) {
-            $query->where('start_date', '>=', $request->input('start_date'));
-        }
-        if ($request->filled('end_date')) {
-            $query->where('end_date', '<=', $request->input('end_date'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $marketingCampaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                                    ->paginate($request->input('per_page', 5))
-                                    ->withQueryString();
-
-        return Inertia::render('Admin/MarketingCampaigns/Index', [
-            'marketingCampaigns' => $marketingCampaigns,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'platform_id', 'status', 'campaign_type', 'start_date', 'end_date']),
+        return Inertia::render($this->viewName.'/Index', [
+            $this->dataVariableName => $this->resourceClass::collection($data),
+            'filters' => $request->only([
+                'search', 'sort', 'direction', 'per_page',
+                'sort_by', 'sort_order', 'active_only',
+                'campaign_id', 'platform_id', 'status', 'period_start', 'period_end',
+                'is_active', 'language',
+            ]),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    public function show($id)
+    {
+        try {
+            $data = $this->service->getById($id, [
+                'platform', 
+                'assignedStaff', 
+                'responsibleStaff', 
+                'createdByStaff',
+                'contents',
+                'metrics',
+                'landingPages',
+                'leads',
+                'budgets',
+                'tasks'
+            ]);
+
+            return Inertia::render($this->viewName.'/Show', [
+                'marketingCampaign' => new $this->resourceClass($data),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in MarketingCampaignController show method: '.$e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function create()
     {
-        //
-    }
+        $platforms = MarketingPlatform::query()->select('id', 'name')->orderBy('name')->get();
+        $staffMembers = Staff::query()->select('id')
+            ->selectRaw("CONCAT(first_name, ' ', last_name) as full_name")
+            ->orderBy('first_name')
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMarketingCampaignRequest $request)
-    {
-        $data = $request->validated();
+        $campaignTypes = ['Awareness', 'Lead Gen', 'Conversion'];
+        $statuses = ['Draft', 'Active', 'Paused', 'Completed'];
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            $staffMember = \App\Models\Staff::where('user_id', $user->id)->first();
-
-            if ($staffMember) {
-                $data['created_by_staff_id'] = $staffMember->id;
-            }
-        }
-
-        MarketingCampaign::create($data);
-
-        return redirect()->route('admin.marketing-campaigns.index')->with('success', 'Marketing Campaign created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-
-        return Inertia::render('Admin/MarketingCampaigns/Show', [
-            'marketingCampaign' => $marketingCampaign,
+        return Inertia::render('Admin/MarketingCampaigns/Create', [
+            'platforms' => $platforms,
+            'staffMembers' => $staffMembers,
+            'campaignTypes' => $campaignTypes,
+            'statuses' => $statuses,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MarketingCampaign $marketingCampaign)
+    public function printAll()
     {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-
-        return Inertia::render('Admin/MarketingCampaigns/Edit', [
-            'marketingCampaign' => $marketingCampaign,
-        ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingCampaignRequest $request, MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->update($request->validated());
-
-        return redirect()->route('admin.marketing-campaigns.index')->with('success', 'Marketing Campaign updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->delete();
-
-        return back()->with('success', 'Marketing Campaign deleted successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        $type = $request->get('type');
-        $campaigns = MarketingCampaign::with(['platform', 'assignedStaff', 'createdByStaff'])->get();
-
-        if ($type === 'csv') {
-            $csvData = "Campaign Code,Campaign Name,Platform,Type,Status,Start Date,End Date,Budget Allocated,Budget Spent,Assigned Staff,Created By\n";
-            foreach ($campaigns as $campaign) {
-                $row = [
-                    $campaign->campaign_code ?? '-',
-                    $campaign->campaign_name ?? '-',
-                    $campaign->platform->name ?? '-',
-                    $campaign->campaign_type ?? '-',
-                    $campaign->status ?? '-',
-                    $campaign->start_date ?? '-',
-                    $campaign->end_date ?? '-',
-                    (string)($campaign->budget_allocated ?? '0'),
-                    (string)($campaign->budget_spent ?? '0'),
-                    $campaign->assignedStaff->full_name ?? '-',
-                    $campaign->createdByStaff->full_name ?? '-',
-                ];
-                // Escape each value for CSV (e.g., double quotes inside values)
-                $escapedRow = array_map(function($value) {
-                    $value = str_replace('"', '""', (string) $value);
-                    return '"' . $value . '"';
-                }, $row);
-                $csvData .= implode(',', $escapedRow) . "
-";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="marketing_campaigns.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.marketing.campaigns', ['campaigns' => $campaigns])->setPaper('a4', 'landscape');
-            return $pdf->stream('marketing_campaigns.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
-    }
-
-    public function printSingle(MarketingCampaign $marketingCampaign)
-    {
-        $marketingCampaign->load(['platform', 'assignedStaff', 'createdByStaff']);
-        $pdf = Pdf::loadView('pdf.marketing.campaigns-single', ['campaign' => $marketingCampaign])->setPaper('a4', 'portrait');
-        return $pdf->stream("marketing_campaign_" . $marketingCampaign->campaign_code . ".pdf");
+        return app(MarketingCampaignService::class)->printAll(request());
     }
 
     public function printCurrent(Request $request)
     {
-        $query = MarketingCampaign::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('campaign_name', 'ilike', "%{$search}%")
-                  ->orWhere('campaign_code', 'ilike', "%{$search}%")
-                  ->orWhere('utm_campaign', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('platform_id')) {
-            $query->where('platform_id', $request->input('platform_id'));
-        }
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('campaign_type')) {
-            $query->where('campaign_type', $request->input('campaign_type'));
-        }
-        if ($request->filled('start_date')) {
-            $query->where('start_date', '>=', $request->input('start_date'));
-        }
-        if ($request->filled('end_date')) {
-            $query->where('end_date', '<=', $request->input('end_date'));
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $campaigns = $query->with(['platform', 'assignedStaff', 'createdByStaff'])
-                           ->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Admin/MarketingCampaigns/PrintCurrent', ['campaigns' => $campaigns->items()]);
+        return app(MarketingCampaignService::class)->printCurrent($request);
     }
 
-    public function printAll(Request $request)
+    public function printSingle(Request $request, MarketingCampaign $marketing_campaign)
     {
-        $campaigns = MarketingCampaign::with(['platform', 'assignedStaff', 'createdByStaff'])->orderBy('campaign_name')->get();
+        return app(MarketingCampaignService::class)->printSingle($request, $marketing_campaign);
+    }
 
-        $pdf = Pdf::loadView('pdf.marketing.campaigns', ['campaigns' => $campaigns])->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing_campaigns_all.pdf');
+    /**
+     * Override edit to provide select option lists to the Edit view.
+     */
+    public function edit($id)
+    {
+        $data = $this->service->getById($id);
+
+        $platforms = MarketingPlatform::query()->select('id', 'name')->orderBy('name')->get();
+        $staffMembers = Staff::query()->select('id')
+            ->selectRaw("CONCAT(first_name, ' ', last_name) as full_name")
+            ->orderBy('first_name')
+            ->get();
+
+        $campaignTypes = ['Awareness', 'Lead Gen', 'Conversion'];
+        $statuses = ['Draft', 'Active', 'Paused', 'Completed'];
+
+        return Inertia::render('Admin/MarketingCampaigns/Edit', [
+            'marketingCampaign' => new MarketingCampaignResource($data),
+            'platforms' => $platforms,
+            'staffMembers' => $staffMembers,
+            'campaignTypes' => $campaignTypes,
+            'statuses' => $statuses,
+        ]);
+    }
+
+    /**
+     * Override update to use UpdateMarketingCampaignDTO and avoid nulling campaign_code.
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $model = $this->service->getById($id);
+            $validatedData = $this->validateRequest($request, 'update', $model);
+
+            // Instantiate Update DTO explicitly
+            $dto = new UpdateMarketingCampaignDTO(
+                campaign_name: $validatedData['campaign_name'],
+                campaign_code: $model->campaign_code, // keep existing code
+                utm_campaign: $validatedData['utm_campaign'] ?? null,
+                platform_id: $validatedData['platform_id'] ?? null,
+                campaign_type: $validatedData['campaign_type'] ?? null,
+                status: $validatedData['status'] ?? null,
+                start_date: $validatedData['start_date'] ?? null,
+                end_date: $validatedData['end_date'] ?? null,
+                description: $validatedData['description'] ?? null,
+                assigned_staff_id: $validatedData['assigned_staff_id'] ?? null,
+                created_by_staff_id: null,
+                urgency: $validatedData['urgency'] ?? null,
+                responsible_staff_id: $validatedData['responsible_staff_id'] ?? null,
+            );
+
+            $payload = method_exists($dto, 'toArray') ? $dto->toArray() : (array) $dto;
+
+            // Ensure campaign_code is not unintentionally updated to null
+            $payload['campaign_code'] = $model->campaign_code;
+
+            $this->service->update($id, $payload);
+
+            return redirect()->route('admin.'.'marketing-campaigns'.'.index')
+                ->with('banner', ucfirst('marketingCampaigns').' updated successfully.')->with('bannerStyle', 'success');
+        } catch (
+Exception $e) {
+            Log::error('Error in MarketingCampaignController update method: '.$e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

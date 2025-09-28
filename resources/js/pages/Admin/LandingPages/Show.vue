@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/layouts/AppLayout.vue'
+import ShowHeader from '@/components/ShowHeader.vue'
 import { Printer, Edit3, Trash2 } from 'lucide-vue-next'
 import { format } from 'date-fns'
 import type { BreadcrumbItemType } from '@/types'
@@ -59,16 +60,13 @@ const formatJson = (json: Record<string, any>) => {
   <Head :title="`Landing Page: ${landingPage.page_title}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-    <div class="bg-white border border-4 rounded-lg shadow relative m-10 print:border-0 print:shadow-none print:m-0">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
 
-        <div class="flex items-start justify-between p-5 border-b rounded-t print:hidden">
-            <h3 class="text-xl font-semibold">
-                Landing Page Details: {{ landingPage.page_title }}
-            </h3>
-            <Link :href="route('admin.landing-pages.index')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </Link>
-        </div>
+      <ShowHeader title="Landing Page Details" :subtitle="`Landing Page: ${landingPage.page_title}`">
+        <template #actions>
+          <Link :href="route('admin.landing-pages.index')" class="btn-glass btn-glass-sm">Back</Link>
+        </template>
+      </ShowHeader>
 
         <div class="p-6 space-y-6">
             <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
@@ -166,22 +164,14 @@ const formatJson = (json: Record<string, any>) => {
             </div>
         </div>
 
-        <div class="p-6 border-t border-gray-200 rounded-b print:hidden">
-            <div class="flex flex-wrap gap-2">
-              <button @click="printPage" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md focus:ring-4 focus:ring-gray-300">
-                <Printer class="h-4 w-4" /> Print Document
-              </button>
-              <Link
-                :href="route('admin.landing-pages.edit', landingPage.id)"
-                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-              >
-                Edit Page
-              </Link>
-              <button @click="destroy(landingPage.id)" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-md transition">
-                <Trash2 class="w-4 h-4" /> Delete Page
-              </button>
-            </div>
+              <!-- footer actions (single source of actions, right aligned) -->
+      <div class="p-6 border-t border-gray-200 dark:border-gray-700 rounded-b print:hidden">
+        <div class="flex justify-end gap-2">
+          <Link :href="route('admin.landing-pages.index')" class="btn-glass btn-glass-sm">Back to List</Link>
+          <button @click="printPage" class="btn-glass btn-glass-sm">Print Current</button>
+          <Link :href="route('admin.landing-pages.edit', landingPage.id)" class="btn-glass btn-glass-sm">Edit</Link>
         </div>
+      </div>
 
     </div>
   </AppLayout>
@@ -191,7 +181,7 @@ const formatJson = (json: Record<string, any>) => {
 /* Optimized Print Styles for A4 */
 @media print {
   @page {
-    size: A4; /* Set page size to A4 */
+    size: A4 landscape; /* Set page size to A4 */
     margin: 0.5cm; /* Reduce margins significantly to give more space for content */
   }
 

@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+
+defineOptions({
+  name: 'AppLogo',
+})
 </script>
 
 <template>

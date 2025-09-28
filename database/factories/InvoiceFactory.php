@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Patient;
-use App\Models\VisitService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,17 +17,60 @@ class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
+        $invoiceDate = $this->faker->dateTimeBetween('-12 months', 'now');
+        $dueDate = (clone $invoiceDate)->modify('+'.$this->faker->numberBetween(7, 45).' days');
+        $subtotal = $this->faker->randomFloat(2, 100, 2000);
+        $tax = round($subtotal * $this->faker->randomFloat(3, 0.00, 0.15), 2);
+        $grandTotal = $subtotal + $tax;
+        $isPaid = $this->faker->boolean(65);
+        $received = $isPaid
+            ? $grandTotal
+            : $this->faker->randomFloat(2, 0, max(0.0, $grandTotal - 50));
+        $paidAt = $isPaid ? $this->faker->dateTimeBetween($invoiceDate, '+2 months') : null;
+
         return [
             'patient_id' => Patient::factory(),
-            'service_id' => VisitService::factory(),
-            'amount' => $this->faker->randomFloat(2, 100, 1000),
-            'status' => $this->faker->randomElement(['Pending', 'Paid']),
-            'paid_at' => $this->faker->dateTime,
-            'invoice_date' => $this->faker->date(),
-            'due_date' => $this->faker->date(),
-            'subtotal' => $this->faker->randomFloat(2, 100, 1000),
-            'tax_amount' => $this->faker->randomFloat(2, 0, 100),
-            'grand_total' => $this->faker->randomFloat(2, 100, 1000),
+            'amount' => $received, // total received so far
+            'status' => $isPaid ? 'Paid' : 'Pending',
+            'paid_at' => $paidAt,
+            'invoice_date' => $invoiceDate,
+            'due_date' => $dueDate,
+            'subtotal' => $subtotal,
+            'tax_amount' => $tax,
+            'grand_total' => $grandTotal,
         ];
+    }
+
+    /**
+     * Indicate that the invoice is paid.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function paid()
+    {
+        return $this->state(function (array $attributes) {
+            $grandTotal = $attributes['grand_total'] ?? $this->faker->randomFloat(2, 100, 2000);
+            return [
+                'status' => 'Paid',
+                'amount' => $grandTotal,
+                'paid_at' => now(),
+            ];
+        });
+    }
+
+    /**
+     * Indicate that the invoice is pending.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function pending()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'Pending',
+                'amount' => 0,
+                'paid_at' => null,
+            ];
+        });
     }
 }

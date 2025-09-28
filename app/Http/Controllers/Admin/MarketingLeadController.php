@@ -2,225 +2,120 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMarketingLeadRequest;
-use App\Http\Requests\UpdateMarketingLeadRequest;
+use App\DTOs\CreateMarketingLeadDTO;
+use App\DTOs\UpdateMarketingLeadDTO;
+use App\Http\Controllers\Base\BaseController;
+use App\Models\LandingPage;
+use App\Models\MarketingCampaign;
 use App\Models\MarketingLead;
+use App\Models\Patient;
+use App\Models\Staff;
+use App\Services\MarketingLead\MarketingLeadService;
+use App\Services\Validation\Rules\MarketingLeadRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\MarketingLeadsExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Log;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-use App\Models\MarketingCampaign;
-use App\Models\LandingPage;
-use App\Models\Staff;
-use App\Models\Patient;
-
-class MarketingLeadController extends Controller
+class MarketingLeadController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(MarketingLeadService $marketingLeadService)
     {
-        Log::info('MarketingLeadController@index called.');
-        $query = MarketingLead::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
-                  ->orWhere('lead_code', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('source_campaign_id')) {
-            $query->where('source_campaign_id', $request->input('source_campaign_id'));
-        }
-        if ($request->filled('landing_page_id')) {
-            $query->where('landing_page_id', $request->input('landing_page_id'));
-        }
-        if ($request->filled('assigned_staff_id')) {
-            $query->where('assigned_staff_id', $request->input('assigned_staff_id'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $marketingLeads = $query->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient'])
-                               ->paginate($request->input('per_page', 5))
-                               ->withQueryString();
-
-        // Temporarily dump data for debugging
-        // dd($marketingLeads->toArray());
-
-        return Inertia::render('Admin/MarketingLeads/Index', [
-            'marketingLeads' => $marketingLeads,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'status', 'source_campaign_id', 'landing_page_id', 'assigned_staff_id']),
-        ]);
+        parent::__construct(
+            $marketingLeadService,
+            MarketingLeadRules::class,
+            'Admin/MarketingLeads',
+            'marketingLeads',
+            MarketingLead::class,
+            CreateMarketingLeadDTO::class
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return Inertia::render('Admin/MarketingLeads/Create', [
-            'campaigns' => MarketingCampaign::all(),
-            'landingPages' => LandingPage::all(),
-            'staffMembers' => Staff::all(),
-            'patients' => Patient::all(),
-            'statuses' => ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'],
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $landingPages = LandingPage::select('id', 'page_title')->orderBy('page_title')->get();
+        $staffMembers = Staff::select('id', 'first_name', 'last_name')
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'full_name' => trim(($s->first_name ?? '').' '.($s->last_name ?? '')),
+            ]);
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
+
+        $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
+        $countries = [
+            'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark',
+        ];
+
+        return Inertia::render($this->viewName.'/Create', [
+            'campaigns' => $campaigns,
+            'landingPages' => $landingPages,
+            'staffMembers' => $staffMembers,
+            'patients' => $patients,
+            'statuses' => $statuses,
+            'countries' => $countries,
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreMarketingLeadRequest $request)
+    public function edit($id)
     {
-        MarketingLead::create($request->validated());
+        $marketingLead = $this->service->getById($id);
+        $campaigns = MarketingCampaign::select('id', 'campaign_name')->orderBy('campaign_name')->get();
+        $landingPages = LandingPage::select('id', 'page_title')->orderBy('page_title')->get();
+        $staffMembers = Staff::select('id', 'first_name', 'last_name')
+            ->orderBy('first_name')
+            ->get()
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'full_name' => trim(($s->first_name ?? '').' '.($s->last_name ?? '')),
+            ]);
+        $patients = Patient::select('id', 'full_name')->orderBy('full_name')->get();
 
-        return redirect()->route('admin.marketing-leads.index')->with('success', 'Marketing Lead created successfully.');
-    }
+        $statuses = ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'];
+        $countries = [
+            'Ethiopia', 'United States', 'United Kingdom', 'Canada', 'Germany', 'France', 'Italy', 'Spain', 'Kenya', 'South Africa',
+            'UAE', 'Saudi Arabia', 'India', 'China', 'Japan', 'Australia', 'Netherlands', 'Sweden', 'Norway', 'Denmark',
+        ];
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(MarketingLead $marketingLead)
-    {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
-
-        return Inertia::render('Admin/MarketingLeads/Show', [
-            'marketingLead' => $marketingLead,
+        return Inertia::render($this->viewName.'/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $marketingLead,
+            'campaigns' => $campaigns,
+            'landingPages' => $landingPages,
+            'staffMembers' => $staffMembers,
+            'patients' => $patients,
+            'statuses' => $statuses,
+            'countries' => $countries,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(MarketingLead $marketingLead)
+    public function update(Request $request, $id)
     {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
+        // validate using rules class
+        $model = $this->service->getById($id);
+        $validatedData = $request->validate(MarketingLeadRules::update($model));
 
-        return Inertia::render('Admin/MarketingLeads/Edit', [
-            'marketingLead' => $marketingLead,
-            'campaigns' => MarketingCampaign::all(),
-            'landingPages' => LandingPage::all(),
-            'staffMembers' => Staff::all(),
-            'patients' => Patient::all(),
-            'statuses' => ['New', 'Contacted', 'Qualified', 'Disqualified', 'Converted'],
-        ]);
-    }
+        // Build Update DTO explicitly to ensure lead_code is never included
+        $dto = new UpdateMarketingLeadDTO(
+            $validatedData['first_name'] ?? $model->first_name,
+            $validatedData['last_name'] ?? $model->last_name,
+            $validatedData['email'] ?? $model->email,
+            $validatedData['phone'] ?? $model->phone,
+            $validatedData['country'] ?? $model->country,
+            $validatedData['utm_source'] ?? $model->utm_source,
+            $validatedData['utm_campaign'] ?? $model->utm_campaign,
+            $validatedData['utm_medium'] ?? $model->utm_medium,
+            $validatedData['landing_page_id'] ?? $model->landing_page_id,
+            $validatedData['lead_score'] ?? $model->lead_score,
+            $validatedData['status'] ?? $model->status,
+            $validatedData['assigned_staff_id'] ?? $model->assigned_staff_id,
+            $validatedData['converted_patient_id'] ?? $model->converted_patient_id,
+            $validatedData['conversion_date'] ?? ($model->conversion_date?->format('Y-m-d') ?? null),
+            $validatedData['notes'] ?? $model->notes,
+        );
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateMarketingLeadRequest $request, MarketingLead $marketingLead)
-    {
-        $marketingLead->update($request->validated());
+        $this->service->update($id, method_exists($dto, 'toArray') ? $dto->toArray() : (array) $dto);
 
-        return redirect()->route('admin.marketing-leads.index')->with('success', 'Marketing Lead updated successfully.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(MarketingLead $marketingLead)
-    {
-        $marketingLead->delete();
-
-        return back()->with('success', 'Marketing Lead deleted successfully.');
-    }
-
-    public function export(Request $request, $type)
-    {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->get();
-
-        if ($type === 'csv') {
-            return Excel::download(new MarketingLeadsExport($leads), 'marketing-leads.csv');
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.marketing-leads', ['leads' => $leads])->setPaper('a4', 'landscape');
-            return $pdf->stream('marketing-leads.pdf');
-        }
-
-        return redirect()->back()->with('error', 'Invalid export type.');
-    }
-
-    public function printSingle(MarketingLead $marketingLead)
-    {
-        $marketingLead->load(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
-        $pdf = Pdf::loadView('pdf.marketing-lead-single', ['lead' => $marketingLead])->setPaper('a4', 'portrait');
-        return $pdf->stream("marketing-lead-{$marketingLead->lead_code}.pdf");
-    }
-
-    public function printAll(Request $request)
-    {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->get();
-
-        $pdf = Pdf::loadView('pdf.marketing-leads', ['leads' => $leads])->setPaper('a4', 'landscape');
-        return $pdf->stream('marketing-leads.pdf');
-    }
-
-    public function printCurrent(Request $request)
-    {
-        $query = $this->getFilteredQuery($request);
-        $leads = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Admin/MarketingLeads/PrintCurrent', ['leads' => $leads->items()]);
-    }
-
-    private function getFilteredQuery(Request $request)
-    {
-        $query = MarketingLead::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'ilike', "%{$search}%")
-                  ->orWhere('last_name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%")
-                  ->orWhere('lead_code', 'ilike', "%{$search}%");
-            });
-        }
-
-        // Filtering
-        if ($request->filled('status')) {
-            $query->where('status', $request->input('status'));
-        }
-        if ($request->filled('source_campaign_id')) {
-            $query->where('source_campaign_id', $request->input('source_campaign_id'));
-        }
-        if ($request->filled('landing_page_id')) {
-            $query->where('landing_page_id', $request->input('landing_page_id'));
-        }
-        if ($request->filled('assigned_staff_id')) {
-            $query->where('assigned_staff_id', $request->input('assigned_staff_id'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        return $query->with(['sourceCampaign', 'landingPage', 'assignedStaff', 'convertedPatient']);
+        return redirect()->route('admin.marketing-leads.index')->with('banner', 'Marketing lead updated successfully.')->with('bannerStyle', 'success');
     }
 }

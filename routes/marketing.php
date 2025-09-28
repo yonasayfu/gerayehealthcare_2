@@ -1,19 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CampaignContentController as AdminCampaignContentController;
+use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
+use App\Http\Controllers\Admin\LeadSourceController as AdminLeadSourceController;
+use App\Http\Controllers\Admin\MarketingAnalyticsController as AdminMarketingAnalyticsController;
+use App\Http\Controllers\Admin\MarketingBudgetController as AdminMarketingBudgetController;
 use App\Http\Controllers\Admin\MarketingCampaignController as AdminMarketingCampaignController;
 use App\Http\Controllers\Admin\MarketingLeadController as AdminMarketingLeadController;
-use App\Http\Controllers\Admin\MarketingAnalyticsController as AdminMarketingAnalyticsController;
-use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
 use App\Http\Controllers\Admin\MarketingPlatformController as AdminMarketingPlatformController;
-use App\Http\Controllers\Admin\LeadSourceController as AdminLeadSourceController;
-use App\Http\Controllers\Admin\MarketingBudgetController as AdminMarketingBudgetController;
-use App\Http\Controllers\Admin\CampaignContentController as AdminCampaignContentController;
 use App\Http\Controllers\Admin\MarketingTaskController as AdminMarketingTaskController;
 use App\Http\Controllers\Staff\MarketingCampaignController as StaffMarketingCampaignController;
 use App\Http\Controllers\Staff\MarketingLeadController as StaffMarketingLeadController;
 use App\Http\Controllers\Staff\MarketingTaskController as StaffMarketingTaskController;
-
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Routes
@@ -23,17 +22,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('marketing-campaigns/print-current', [AdminMarketingCampaignController::class, 'printCurrent'])->name('marketing-campaigns.printCurrent');
         Route::get('marketing-campaigns/{marketing_campaign}/print', [AdminMarketingCampaignController::class, 'printSingle'])->name('marketing-campaigns.printSingle');
         Route::resource('marketing-campaigns', AdminMarketingCampaignController::class);
-        Route::get('marketing-leads/export', [AdminMarketingLeadController::class, 'export'])->name('marketing-leads.export');
-        Route::get('marketing-leads/print-all', [AdminMarketingLeadController::class, 'printAll'])->name('marketing-leads.printAll');
         Route::resource('marketing-leads', AdminMarketingLeadController::class);
         Route::get('landing-pages/export/{type}', [AdminLandingPageController::class, 'export'])->name('landing-pages.export');
         Route::get('landing-pages/print-all', [AdminLandingPageController::class, 'printAll'])->name('landing-pages.printAll');
         Route::get('landing-pages/print-current', [AdminLandingPageController::class, 'printCurrent'])->name('landing-pages.printCurrent');
         Route::resource('landing-pages', AdminLandingPageController::class);
+        Route::get('marketing-platforms/print-current', [AdminMarketingPlatformController::class, 'printCurrent'])->name('marketing-platforms.printCurrent');
         Route::resource('marketing-platforms', AdminMarketingPlatformController::class);
         Route::resource('lead-sources', AdminLeadSourceController::class);
+        // Marketing Budgets export/print routes
+        Route::get('marketing-budgets/export/{type}', [AdminMarketingBudgetController::class, 'export'])->name('marketing-budgets.export');
+        Route::get('marketing-budgets/print-all', [AdminMarketingBudgetController::class, 'printAll'])->name('marketing-budgets.printAll');
+        Route::get('marketing-budgets/print-current', [AdminMarketingBudgetController::class, 'printCurrent'])->name('marketing-budgets.printCurrent');
+        Route::get('marketing-budgets/{marketing_budget}/print', [AdminMarketingBudgetController::class, 'printSingle'])->name('marketing-budgets.printSingle');
         Route::resource('marketing-budgets', AdminMarketingBudgetController::class);
         Route::resource('campaign-contents', AdminCampaignContentController::class);
+        // Marketing Tasks print routes
+        Route::get('marketing-tasks/print-all', [AdminMarketingTaskController::class, 'printAll'])->name('marketing-tasks.printAll');
+        Route::get('marketing-tasks/print-current', [AdminMarketingTaskController::class, 'printCurrent'])->name('marketing-tasks.printCurrent');
         Route::resource('marketing-tasks', AdminMarketingTaskController::class);
 
         // Analytics Routes
@@ -43,6 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('traffic-source-distribution', [AdminMarketingAnalyticsController::class, 'trafficSourceDistribution'])->name('traffic-source-distribution');
             Route::get('conversion-funnel', [AdminMarketingAnalyticsController::class, 'conversionFunnel'])->name('conversion-funnel');
             Route::get('generate-report', [AdminMarketingAnalyticsController::class, 'generateReport'])->name('generate-report');
+            Route::get('budget-pacing', [AdminMarketingAnalyticsController::class, 'budgetPacing'])->name('budget-pacing');
+            Route::get('staff-performance', [AdminMarketingAnalyticsController::class, 'staffPerformance'])->name('staff-performance');
+            Route::get('task-sla', [AdminMarketingAnalyticsController::class, 'taskSla'])->name('task-sla');
         });
 
         // Additional Admin actions

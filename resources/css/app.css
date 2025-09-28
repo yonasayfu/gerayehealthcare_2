@@ -2,10 +2,40 @@
 
 @import 'tw-animate-css';
 
+@import './print.css';
+
+@import './responsive-fixes.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
 @custom-variant dark (&:is(.dark *));
+
+/* Local Instrument Sans font faces to avoid external CDNs */
+@font-face {
+    font-family: 'Instrument Sans';
+    src: url('/fonts/instrument-sans-latin-400-normal.woff2') format('woff2'),
+         url('/fonts/instrument-sans-latin-400-normal.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Instrument Sans';
+    src: url('/fonts/instrument-sans-latin-500-normal.woff2') format('woff2'),
+         url('/fonts/instrument-sans-latin-500-normal.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Instrument Sans';
+    src: url('/fonts/instrument-sans-latin-600-normal.woff2') format('woff2'),
+         url('/fonts/instrument-sans-latin-600-normal.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
 
 @theme inline {
     --font-sans: Instrument Sans, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -67,6 +97,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -101,6 +132,14 @@
     --input: hsl(214.3 31.8% 91.4%);
     --ring: hsl(222.2 84% 4.9%);
     --radius: 0.5rem;
+
+    /* Sidebar tokens */
+    --sidebar-background: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(222.2 84% 4.9%);
+    --sidebar-accent: hsl(210 40% 96.1%);
+    --sidebar-accent-foreground: hsl(222.2 47.4% 11.2%);
+    --sidebar-border: hsl(214.3 31.8% 91.4%);
+    --sidebar-ring: hsl(222.2 84% 4.9%);
 }
 
 .theme-dark {
@@ -124,12 +163,352 @@
     --input: hsl(217.2 32.6% 17.5%);
     --ring: hsl(212.7 26.8% 83.9%);
     --radius: 0.5rem;
+
+    /* Sidebar tokens */
+    --sidebar-background: hsl(222.2 84% 5.5%);
+    --sidebar-foreground: hsl(210 40% 98%);
+    --sidebar-accent: hsl(217.2 32.6% 17.5%);
+    --sidebar-accent-foreground: hsl(210 40% 98%);
+    --sidebar-border: hsl(217.2 32.6% 17.5%);
+    --sidebar-ring: hsl(212.7 26.8% 83.9%);
 }
 
+:root {
+    /* semantic colors — change once to theme whole app */
+    --ui-bg: 255, 255, 255;
+    --ui-text: 15, 23, 42;
+    --accent: 79, 70, 229;
+    /* indigo-600 (example) */
+    --glass-alpha: 0.65;
 
+    /* sizes */
+    --btn-padding-y: .625rem;
+    /* 10px */
+    --btn-padding-x: 1rem;
+    /* 16px */
+    --btn-font-size: .95rem;
+    /* ~15px */
+    --btn-radius: .5rem;
+    /* 8px */
+}
 
-@layer base {
-    body {
-        @apply bg-background text-foreground;
+.btn-glass {
+    padding: var(--btn-padding-y) var(--btn-padding-x);
+    font-size: var(--btn-font-size);
+    border-radius: var(--btn-radius);
+    font-weight: 600;
+    gap: .625rem;
+    background: linear-gradient(180deg, rgba(var(--ui-bg), var(--glass-alpha)), rgba(var(--ui-bg), 0.45));
+    color: rgb(var(--ui-text));
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    -webkit-backdrop-filter: blur(8px) saturate(140%);
+    backdrop-filter: blur(8px) saturate(140%);
+    transition: transform .12s, box-shadow .12s;
+}
+
+.btn-glass:focus {
+    box-shadow: 0 0 0 4px rgba(var(--accent), 0.12);
+    outline: none;
+}
+
+/* small / compact (table action column) */
+.btn-glass-sm {
+    padding: .4rem .6rem;
+    font-size: .85rem;
+}
+
+/* primary variant example */
+.btn-primary {
+    background: linear-gradient(180deg, rgba(79, 70, 229, 0.95), rgba(67, 56, 202, 0.95));
+    color: #fff;
+    border: 1px solid rgba(67, 56, 202, 0.9);
+}
+
+.dark .btn-glass {
+    color: #f8fafc;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn-glass {
+        transition: none;
+        transform: none;
     }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed;
+    }
+
+    /* Filled variants */
+    .btn-primary {
+        /* Teal/Cyan: primary actions (Create/Save/Schedule) */
+        @apply text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-300;
+    }
+
+    .btn-success {
+        /* Green: success/export */
+        @apply text-white bg-green-600 hover:bg-green-700 focus:ring-green-300;
+    }
+
+    .btn-info {
+        /* Blue: info/print-all */
+        @apply text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300;
+    }
+
+    .btn-dark {
+        /* Slate: neutral emphasis (print current) */
+        @apply text-white bg-slate-700 hover:bg-slate-800 focus:ring-slate-300;
+    }
+
+    .btn-danger {
+        /* Destructive */
+        @apply text-white bg-red-600 hover:bg-red-700 focus:ring-red-300;
+    }
+
+    /* Outline/neutral */
+    .btn-outline {
+        @apply border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800;
+    }
+
+    /* Icon-only small button */
+    .btn-icon {
+        @apply inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900;
+    }
+
+    /* Glass button utility used by CRUD action buttons (liquid / macOS Tahoe inspired) */
+    .btn-glass {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .5rem .75rem;
+        border-radius: .5rem;
+        font-size: .875rem;
+        font-weight: 600;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-backdrop-filter: blur(8px) saturate(140%);
+        backdrop-filter: blur(8px) saturate(140%);
+        transition: background-color .15s, border-color .15s, transform .08s, box-shadow .12s;
+        background: linear-gradient(180deg, rgba(255, 255, 255, .65), rgba(255, 255, 255, .45));
+        color: #0f172a;
+        /* gray-900 */
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08), inset 0 2px 6px rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-glass:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08);
+    }
+
+    .btn-glass:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-glass:active {
+        transform: translateY(0);
+    }
+
+    /* Liquid highlight */
+    .btn-glass::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.12) 100%);
+        mix-blend-mode: screen;
+        transform: translateX(-40%) rotate(-8deg);
+        opacity: .85;
+        filter: blur(6px);
+    }
+
+    /* small variant */
+    .btn-glass-sm {
+        padding: .35rem .6rem;
+        font-size: .8125rem;
+        gap: .375rem;
+    }
+
+    /* Dark variant */
+    .dark .btn-glass {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6), inset 0 2px 8px rgba(255, 255, 255, 0.02);
+    }
+
+    .dark .btn-glass::after {
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0.01) 60%, rgba(255, 255, 255, 0.04) 100%);
+        opacity: .6;
+    }
+
+    /* Icon sizing helper */
+    .btn-glass svg,
+    .btn-glass .icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* LIQUID GLASS STYLES (macOS Tahoe / liquid glass) */
+    .liquidGlass-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        padding: 0.75rem;
+        -webkit-backdrop-filter: blur(12px) saturate(150%);
+        backdrop-filter: blur(12px) saturate(150%);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08), inset 0 6px 18px rgba(255, 255, 255, 0.45);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    .dark .liquidGlass-wrapper {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45), inset 0 6px 18px rgba(255, 255, 255, 0.02);
+    }
+
+    .liquidGlass-wrapper:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.12);
+    }
+
+    /* stronger highlight pseudo-element */
+    .liquidGlass-wrapper::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.06) 35%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0) 100%);
+        mix-blend-mode: screen;
+        filter: blur(8px);
+        transform: translateX(-30%) rotate(-6deg);
+        opacity: .95;
+        z-index: 0;
+    }
+
+    /* subtle inner shine */
+    .liquidGlass-inner-shine {
+        position: absolute;
+        top: -25%;
+        left: -10%;
+        width: 140%;
+        height: 80%;
+        pointer-events: none;
+        background: radial-gradient(600px 160px at 20% 10%, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.02) 35%, transparent 60%);
+        transform: rotate(-6deg);
+        z-index: 1;
+    }
+
+    /* content sits above layers */
+    .liquidGlass-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* make sure .btn-glass is above inner shine */
+    .liquidGlass-content .btn-glass {
+        position: relative;
+        z-index: 3;
+    }
+
+    /* Search glass hover effect */
+    .search-glass {
+        position: relative;
+        border-radius: 0.5rem;
+    }
+    
+    .search-glass::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: inherit;
+        background: linear-gradient(120deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
+        filter: blur(8px);
+        z-index: 0;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .search-glass:hover::before,
+    .search-glass:focus-within::before {
+        opacity: 1;
+        transform: translateY(-4px) scale(1.02);
+    }
+
+    /* fallback for browsers that ignore backdrop-filter */
+    @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+        .liquidGlass-wrapper {
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        .dark .liquidGlass-wrapper {
+            background: rgba(17, 24, 39, 0.85);
+        }
+    }
+}
+
+/* Performance fallbacks and reduced-effects for liquidGlass */
+@layer components {
+  /* Opt-in class to reduce transparency/blurs globally within a container */
+  .reduced-transparency .liquidGlass-wrapper {
+    -webkit-backdrop-filter: blur(4px) saturate(120%);
+    backdrop-filter: blur(4px) saturate(120%);
+    background: linear-gradient(180deg, rgba(255,255,255, 0.9), rgba(255,255,255, 0.6));
+    box-shadow: 0 6px 16px rgba(2, 6, 23, 0.06);
+  }
+
+  .reduced-transparency .liquidGlass-wrapper::before,
+  .reduced-transparency .liquidGlass-inner-shine {
+    display: none; /* drop extra highlight layers */
+  }
+
+  /* Attribute-driven lightweight variant without changing markup structure */
+  .liquidGlass-wrapper[data-variant="lite"] {
+    -webkit-backdrop-filter: blur(6px) saturate(130%);
+    backdrop-filter: blur(6px) saturate(130%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.4));
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.07);
+  }
+
+  .dark .liquidGlass-wrapper[data-variant="lite"] {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+    box-shadow: 0 8px 22px rgba(2, 6, 23, 0.4);
+  }
+
+  /* Small screens: tone down heavy effects to keep scrolling responsive */
+  @media (max-width: 640px) {
+    .liquidGlass-wrapper {
+      -webkit-backdrop-filter: blur(6px) saturate(130%);
+      backdrop-filter: blur(6px) saturate(130%);
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06), inset 0 4px 12px rgba(255, 255, 255, 0.35);
+    }
+
+    .liquidGlass-wrapper::before { opacity: .8; filter: blur(6px); }
+    .liquidGlass-inner-shine { display: none; }
+  }
+
+  /* Respect users who reduce motion: remove hover lifts and animated highlight */
+  @media (prefers-reduced-motion: reduce) {
+    .liquidGlass-wrapper { transition: none; }
+    .liquidGlass-wrapper:hover { transform: none; box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08); }
+  }
+
+  /* Utility: completely disable backdrop-filter if needed via class */
+  .no-backdrop-filter .liquidGlass-wrapper {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .dark.no-backdrop-filter .liquidGlass-wrapper {
+    background: rgba(17, 24, 39, 0.85);
+  }
 }

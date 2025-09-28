@@ -1,0 +1,13 @@
+<?php
+
+namespace App\DTOs;
+
+class CreateEventParticipantDTO extends BaseDTO
+{
+    public function __construct(
+        public int $event_id,
+        public int $patient_id,
+        public ?string $status,
+        public ?string $notes
+    ) {}
+}

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Edit3, Trash2, Shield } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
-import debounce from 'lodash/debounce';
+import { Edit3, Trash2, Shield, Eye } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { confirmDialog } from '@/lib/confirm';
+import Pagination from '@/components/Pagination.vue';
+import { useTableFilters } from '@/composables/useTableFilters'
 
 const props = defineProps<{
   users: {
@@ -26,25 +28,23 @@ const breadcrumbs = [
   { title: 'User Management', href: route('admin.users.index') },
 ];
 
-const search = ref(props.filters.search || '');
-const perPage = ref(props.filters.per_page || '5');
-
-watch([search, perPage], debounce((newValues) => {
-    router.get(route('admin.users.index'), {
-        search: newValues[0],
-        per_page: newValues[1],
-    }, {
-        preserveState: true,
-        replace: true,
-    });
-}, 300));
-
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this user? This will also delete their associated staff profile.')) {
-    router.delete(route('admin.users.destroy', id), {
-      preserveScroll: true,
-    });
+const { search, perPage } = useTableFilters({
+  routeName: 'admin.users.index',
+  initial: {
+    search: props.filters?.search,
+    per_page: Number(props.filters?.per_page ?? 5),
   }
+})
+
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete User',
+    message: 'Are you sure you want to delete this user? This will also delete their associated staff profile.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.users.destroy', id));
 }
 </script>
 
@@ -52,14 +52,17 @@ function destroy(id: number) {
   <Head title="User Management" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">User Management</h1>
-          <p class="text-sm text-muted-foreground">Assign roles and manage all system users.</p>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">User Management</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Assign roles and manage all system users.</p>
+          </div>
+          <Link :href="route('admin.users.create')" class="btn-glass btn-glass-sm">
+            + Add New Staff User
+          </Link>
         </div>
-        <Link :href="route('admin.users.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-          + Add New Staff User
-        </Link>
       </div>
 
        <!-- Filters -->
@@ -77,10 +80,9 @@ function destroy(id: number) {
         </div>
         <div>
           <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Items per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 text-sm">
+          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
-            <option value="5">5</option>
             <option value="25">25</option>
             <option value="50">50</option>
           </select>
@@ -88,7 +90,7 @@ function destroy(id: number) {
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
               <th class="px-6 py-3">User Name</th>
@@ -111,11 +113,26 @@ function destroy(id: number) {
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="inline-flex items-center justify-end space-x-2">
-                  <Link :href="route('admin.users.edit', user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-gray-700" title="Edit Role">
-                    <Edit3 class="w-4 h-4 text-blue-600" />
+                  <Link
+                    :href="route('admin.users.show', user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(user.id)" class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-gray-700" title="Delete User">
-                    <Trash2 class="w-4 h-4 text-red-600" />
+                  <Link
+                    :href="route('admin.users.edit', user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
+                    title="Edit"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <button
+                    @click="destroy(user.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
+                    <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
               </td>
@@ -126,23 +143,7 @@ function destroy(id: number) {
           </tbody>
         </table>
       </div>
-       <!-- Pagination Links -->
-      <div class="flex justify-end" v-if="users.links.length > 3">
-        <div class="flex items-center space-x-1">
-          <Link
-            v-for="(link, i) in users.links"
-            :key="i"
-            :href="link.url || '#'"
-            v-html="link.label"
-            :class="[
-              'px-3 py-1 rounded-md text-sm',
-              link.active ? 'bg-primary-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700',
-              !link.url && 'cursor-not-allowed text-gray-400'
-            ]"
-            :disabled="!link.url"
-          />
-        </div>
-      </div>
+      <Pagination :links="users.links" />
     </div>
   </AppLayout>
 </template>

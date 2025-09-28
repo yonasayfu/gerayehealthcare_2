@@ -11,7 +11,6 @@ class CorporateClient extends Model
 
     protected $fillable = [
         'organization_name',
-        'organization_name_amharic',
         'contact_person',
         'contact_email',
         'contact_phone',

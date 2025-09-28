@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('category', 100); // Add missing field
             $table->decimal('price', 10, 2);
-            $table->integer('duration')->nullable()->comment('Duration in minutes');
+            $table->integer('duration')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

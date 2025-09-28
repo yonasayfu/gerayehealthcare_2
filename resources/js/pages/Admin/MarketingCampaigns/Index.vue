@@ -2,7 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search, Download } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
@@ -25,7 +25,7 @@ interface MarketingCampaign {
 // Define a type for pagination data
 interface MarketingCampaignPagination {
   data: MarketingCampaign[];
-  links: any[]; // Adjust with a more specific type if available
+  links: any[];
   current_page: number;
   from: number;
   last_page: number;
@@ -90,23 +90,21 @@ watch([search, sortField, sortDirection, perPage, platformId, status, campaignTy
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this marketing campaign?')) {
-    router.delete(route('admin.marketing-campaigns.destroy', id))
-  }
+import { confirmDialog } from '@/lib/confirm'
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Marketing Campaign',
+    message: 'Are you sure you want to delete this marketing campaign?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.marketing-campaigns.destroy', id))
 }
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.marketing-campaigns.export', { type }), '_blank');
-}
+import { useExport } from '@/composables/useExport';
 
-function printCurrentView() {
-  window.print();
-}
-
-const printAllCampaigns = () => {
-    window.open(route('admin.marketing-campaigns.printAll'), '_blank');
-};
+const { printCurrentView, isProcessing, exportData } = useExport({ routeName: 'admin.marketing-campaigns', filters: props.filters });
 
 function toggleSort(field: string) {
   if (sortField.value === field) {
@@ -124,44 +122,52 @@ function toggleSort(field: string) {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6 print:p-0 print:space-y-0">
 
-      <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Marketing Campaigns</h1>
-          <p class="text-sm text-muted-foreground">Manage all marketing campaigns here.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.marketing-campaigns.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Campaign
-          </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
-          </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllCampaigns" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+            <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Marketing Campaigns</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage marketing campaigns</p>
+            </div>
+
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.marketing-campaigns.create')" class="btn-glass">
+              <span>Add Marketing Campaign</span>
+            </Link>
+            <button @click="exportData('csv')" class="btn-glass btn-glass-sm">
+              <Download class="icon" />
+              <span class="hidden sm:inline">Export CSV</span>
+            </button>
+            <button @click="printCurrentView" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
         </div>
       </div>
 
+            <!-- Search / per page -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <div class="relative w-full md:w-1/3">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
           <input
-            type="text"
             v-model="search"
-            placeholder="Search campaigns..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 pr-10"
+            type="text"
+            placeholder="Search marketing campaigns..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
           />
-          <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
         </div>
 
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="25">25</option>
@@ -197,6 +203,8 @@ function toggleSort(field: string) {
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('status')">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
+              <th class="px-6 py-3">Urgency</th>
+              <th class="px-6 py-3">Responsible Staff</th>
               <th class="px-6 py-3 cursor-pointer" @click="toggleSort('start_date')">
                 Start Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
@@ -213,25 +221,31 @@ function toggleSort(field: string) {
               <td class="px-6 py-4">{{ campaign.platform?.name ?? '-' }}</td>
               <td class="px-6 py-4">{{ campaign.campaign_type ?? '-' }}</td>
               <td class="px-6 py-4">{{ campaign.status ?? '-' }}</td>
+              <td class="px-6 py-4">{{ campaign.urgency ?? '-' }}</td>
+              <td class="px-6 py-4">{{ campaign.responsible_staff?.full_name ?? '-' }}</td>
               <td class="px-6 py-4">{{ campaign.start_date ? format(new Date(campaign.start_date), 'PPP') : '-' }}</td>
               <td class="px-6 py-4">{{ campaign.end_date ? format(new Date(campaign.end_date), 'PPP') : '-' }}</td>
               <td class="px-6 py-4 text-right print:hidden">
                 <div class="inline-flex items-center justify-end space-x-2">
                   <Link
                     :href="route('admin.marketing-campaigns.show', campaign.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                     title="View Details"
                   >
                     <Eye class="w-4 h-4" />
                   </Link>
                   <Link
                     :href="route('admin.marketing-campaigns.edit', campaign.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
                     title="Edit"
                   >
                     <Edit3 class="w-4 h-4" />
                   </Link>
-                  <button @click="destroy(campaign.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
+                  <button
+                    @click="destroy(campaign.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
                     <Trash2 class="w-4 h-4" />
                   </button>
                 </div>
@@ -245,153 +259,7 @@ function toggleSort(field: string) {
       </div>
 
       <Pagination v-if="marketingCampaigns.data.length > 0" :links="marketingCampaigns.links" class="mt-6 flex justify-center print:hidden" />
-      
-      <div class="print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
 
     </div>
   </AppLayout>
 </template>
-
-<style>
-/* Print-specific styles for Index.vue (Print Current View) */
-@media print {
-  @page {
-    size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    padding-bottom: 2cm !important; /* Add padding for fixed footer */
-    overflow: visible !important;
-  }
-
-  /* Hide elements */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Specific styles for the print header content (logo and clinic name) */
-  .print-header-content {
-      display: block !important; /* Show header */
-      text-align: center;
-      padding-top: 0.5cm;
-      padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
-  }
-  .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-  }
-  .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
-      font-weight: bold;
-  }
-  .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
-  }
-  hr { border-color: #ccc !important; }
-
-  /* Main content container adjustments */
-  .space-y-6.p-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  /* Table specific print styles */
-  .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background-color: transparent !important; /* No background color */
-    overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
-    page-break-after: auto !important;
-  }
-
-  .print-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
-  }
-
-  .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    text-transform: uppercase !important;
-  }
-
-  .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
-    color: #000 !important;
-    vertical-align: top !important; /* Align content to top of cell */
-    word-break: break-word; /* Allow long words to break */
-  }
-
-  .print-table th {
-    font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
-    white-space: nowrap; /* Keep header text on one line if possible */
-  }
-
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Campaign Name */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Campaign Code */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Platform */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Type */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* Status */
-  .print-table th:nth-child(6), .print-table td:nth-child(6) { width: 15%; } /* Start Date */
-  .print-table th:nth-child(7), .print-table td:nth-child(7) { width: 10%; } /* End Date */
-
-
-  .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  /* Hide actions column for print */
-  .print-table th:last-child,
-  .print-table td:last-child {
-    display: none !important;
-  }
-
-  /* Hide sort arrows on print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Print Footer */
-  .print-footer {
-    display: block !important;
-    text-align: center;
-    position: relative; /* Changed from fixed */
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
-  }
-  .print-footer hr {
-    border-color: #ccc !important;
-  }
-}
-</style>

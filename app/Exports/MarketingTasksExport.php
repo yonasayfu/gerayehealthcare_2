@@ -4,11 +4,11 @@ namespace App\Exports;
 
 use App\Models\MarketingTask;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class MarketingTasksExport implements FromCollection, WithHeadings, WithMapping, ShouldAutoSize
+class MarketingTasksExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping
 {
     public function collection()
     {

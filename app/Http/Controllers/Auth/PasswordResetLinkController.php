@@ -7,17 +7,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class PasswordResetLinkController extends Controller
 {
     /**
      * Show the password reset link request page.
      */
-    public function create(Request $request): Response
+    public function create()
     {
         return Inertia::render('auth/ForgotPassword', [
-            'status' => $request->session()->get('status'),
+            'status' => request()->session()->get('status'),
         ]);
     }
 
@@ -28,14 +27,27 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-        ]);
+        try {
+            // Manual validation since we don't have a specific request class
+            $validated = $request->validate([
+                'email' => 'required|email',
+            ]);
 
-        Password::sendResetLink(
-            $request->only('email')
-        );
+            $status = Password::sendResetLink(
+                ['email' => $validated['email']]
+            );
 
-        return back()->with('status', __('A reset link will be sent if the account exists.'));
+            if ($status === Password::RESET_LINK_SENT) {
+                return back()->with('status', __('A reset link has been sent to your email address.'));
+            }
+
+            return back()->with('status', __('A reset link will be sent if the account exists.'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors());
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'email' => __('Unable to send reset link. Please try again.'),
+            ]);
+        }
     }
 }

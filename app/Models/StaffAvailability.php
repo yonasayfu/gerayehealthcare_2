@@ -23,7 +23,6 @@ class StaffAvailability extends Model
         'end_time' => 'datetime',
     ];
 
-
     public function staff(): BelongsTo
     {
         return $this->belongsTo(Staff::class);

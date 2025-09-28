@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import { confirmDialog } from '@/lib/confirm'
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Edit3, Trash2 } from 'lucide-vue-next';
 
@@ -18,12 +19,17 @@ const breadcrumbs = [
   { title: 'Role Management', href: route('admin.roles.index') },
 ];
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this role? This action cannot be undone.')) {
-    router.delete(route('admin.roles.destroy', id), {
-      preserveScroll: true,
-    });
-  }
+async function destroy(id: number) {
+  const ok = await confirmDialog({
+    title: 'Delete Role',
+    message: 'Are you sure you want to delete this role? This action cannot be undone.',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+  })
+  if (!ok) return
+  router.delete(route('admin.roles.destroy', id), {
+    preserveScroll: true,
+  });
 }
 </script>
 
@@ -31,18 +37,21 @@ function destroy(id: number) {
   <Head title="Role Management" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Role Management</h1>
-          <p class="text-sm text-muted-foreground">Create and manage user roles and their permissions.</p>
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Role Management</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Create and manage user roles and their permissions.</p>
+          </div>
+          <Link :href="route('admin.roles.create')" class="btn-glass btn-glass-sm">
+            + Add New Role
+          </Link>
         </div>
-        <Link :href="route('admin.roles.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-          + Add New Role
-        </Link>
       </div>
 
       <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg">
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200">
+        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground">
             <tr>
               <th class="px-6 py-3">Role Name</th>
@@ -62,9 +71,9 @@ function destroy(id: number) {
                 </div>
                 <div v-else class="flex flex-wrap gap-1">
                   <span v-for="permission in role.permissions" :key="permission.id" class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full dark:bg-blue-900 dark:text-blue-200">
-                    {{ permission.name }}
+                    {{ permission.name.replace(/-/g, ' ') }}
                   </span>
-                   <span v-if="role.permissions.length === 0" class="text-gray-400 italic">No permissions assigned</span>
+                   <span v-if="!role.permissions || role.permissions.length === 0" class="text-gray-400 italic">No permissions assigned</span>
                 </div>
               </td>
               <td class="px-6 py-4 text-right">

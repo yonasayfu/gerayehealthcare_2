@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\MarketingTask;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MarketingTaskSeeder extends Seeder
@@ -13,6 +12,6 @@ class MarketingTaskSeeder extends Seeder
      */
     public function run(): void
     {
-        MarketingTask::factory()->count(6)->create();
+        MarketingTask::factory()->count(3)->create();
     }
 }

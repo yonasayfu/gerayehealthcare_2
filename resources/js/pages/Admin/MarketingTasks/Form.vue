@@ -39,7 +39,7 @@ const formattedCompletedAt = computed({
       <TextInput
         id="title"
         type="text"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.title"
         required
         autofocus
@@ -52,7 +52,7 @@ const formattedCompletedAt = computed({
       <TextInput
         id="task_code"
         type="text"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.task_code"
         disabled
       />
@@ -143,7 +143,7 @@ const formattedCompletedAt = computed({
       <TextInput
         id="scheduled_at"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedScheduledAt"
       />
       <InputError class="mt-2" :message="props.form.errors.scheduled_at" />
@@ -154,7 +154,7 @@ const formattedCompletedAt = computed({
       <TextInput
         id="completed_at"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedCompletedAt"
       />
       <InputError class="mt-2" :message="props.form.errors.completed_at" />
@@ -169,6 +169,17 @@ const formattedCompletedAt = computed({
         v-model="props.form.description"
       ></textarea>
       <InputError class="mt-2" :message="props.form.errors.description" />
+    </div>
+
+    <div class="col-span-full">
+      <label for="expected_results" class="block text-sm font-medium text-gray-900 dark:text-white">Expected Results</label>
+      <textarea
+        id="expected_results"
+        rows="3"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50 p-2.5"
+        v-model="props.form.expected_results"
+      ></textarea>
+      <InputError class="mt-2" :message="props.form.errors.expected_results" />
     </div>
 
     <div class="col-span-full">

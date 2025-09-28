@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* hidden scrollbar */
+  .scrollbar-hidden::-webkit-scrollbar {
+    @apply hidden;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* custom outline */
+  .default-outline {
+    border-radius: 4px;
+  }
+
+  .default-outline:focus-visible {
+    outline: 2px solid rgba(17, 24, 39, 0.85);
+    outline-offset: 0;
+  }
+
+  .dark .default-outline:focus-visible {
+    outline-color: rgba(229, 231, 235, 0.85);
+  }
+
+  /* custom range slider input */
+  .slider {
+    appearance: none;
+    outline: none;
+    height: 6px;
+    border-radius: 4px;
+    background-color: #d1d5db; /* Tailwind gray-300 */
+  }
+
+  .slider::-webkit-slider-thumb {
+    appearance: none;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    margin-top: -2px;
+    border-radius: 9999px;
+    background-color: #a5b4fc; /* Tailwind indigo-300 */
+  }
+
+  .slider::-moz-range-thumb {
+    appearance: none;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background-color: #a5b4fc; /* Tailwind indigo-300 */
+  }
+
+  .slider::-moz-range-progress {
+    height: 6px;
+    border-radius: 4px;
+    background-color: #a5b4fc; /* Tailwind indigo-300 */
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    border-radius: 4px;
+    height: 6px;
+    cursor: pointer;
+  }
+
+  .video-slider {
+    background: transparent !important;
+  }
+
+  .video-slider::-moz-range-thumb {
+    width: 0px;
+    height: 0px;
+  }
+
+  .video-slider::-webkit-slider-thumb {
+    width: 0px;
+    height: 0px;
+  }
+}

@@ -65,7 +65,7 @@ return [
     |
     */
 
-   'timezone' => 'Africa/Addis_Ababa',
+    'timezone' => 'Africa/Addis_Ababa',
 
     /*
     |--------------------------------------------------------------------------
@@ -172,7 +172,7 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 

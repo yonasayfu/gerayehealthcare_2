@@ -1,13 +1,22 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
-import { ref, watch, computed } from 'vue'
+import { Head, router } from '@inertiajs/vue3'
+import { ref, watch, computed, onMounted } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+// no icon imports needed on this page
 import debounce from 'lodash/debounce'
-import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
-
+import EthiopianDatePicker from '@/components/EthiopianDatePicker.vue'; // Correct import for the component
+import { useEthiopianDate } from '@/composables/useEthiopianDate';
 import type { EthiopianCalendarDayPagination } from '@/types';
+
+const gregorianInput = ref('');
+const ethiopianInput = ref(''); // This will store the Ethiopian date string from the picker
+const ethiopianPickerGregorianModel = ref(''); // This will be the v-model for EthiopianDatePicker
+const convertedGregorianDate = ref('');
+const convertedEthiopianDate = ref('');
+const conversionError = ref('');
+
+const { convertGregorianToEthiopian, convertEthiopianToGregorian, convertGregorianToEthiopianApi } = useEthiopianDate();
 
 const props = defineProps<{
   ethiopianCalendarDays: EthiopianCalendarDayPagination;
@@ -30,8 +39,23 @@ const sortField = ref(props.filters.sort || '')
 const sortDirection = ref(props.filters.direction || 'asc')
 const perPage = ref(props.filters.per_page || 5)
 
-const formattedGeneratedDate = computed(() => {
-  return format(new Date(), 'PPP p');
+// formatted date not displayed on this page
+
+const currentEthiopianDate = ref('');
+const showEthiopianDate = ref(false); // New ref for toggling visibility
+
+async function getCurrentEthiopianDate() {
+    const todayGregorian = new Date();
+    const ethiopian = await convertGregorianToEthiopian({ year: todayGregorian.getFullYear(), month: todayGregorian.getMonth() + 1, day: todayGregorian.getDate() });
+    if (ethiopian) {
+      currentEthiopianDate.value = `${ethiopian.year}-${String(ethiopian.month).padStart(2, '0')}-${String(ethiopian.day).padStart(2, '0')}`;
+    } else {
+      currentEthiopianDate.value = 'N/A'; // Or handle error appropriately
+    }
+}
+
+onMounted(() => {
+  getCurrentEthiopianDate();
 });
 
 watch([search, sortField, sortDirection, perPage], debounce(() => {
@@ -51,37 +75,55 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
   })
 }, 500))
 
-function destroy(id: number) {
-  if (confirm('Are you sure you want to delete this ethiopian calendar day?')) {
-    router.delete(route('admin.ethiopian-calendar-days.destroy', id))
-  }
-}
+// no table actions on this view; remove unused actions
 
-function exportData(type: 'csv' | 'pdf') {
-  window.open(route('admin.ethiopian-calendar-days.export', { type }), '_blank');
-}
+async function convertDate(type: 'gregorian' | 'ethiopian') {
+  conversionError.value = '';
+  convertedGregorianDate.value = '';
+  convertedEthiopianDate.value = '';
 
-function printCurrentView() {
-  setTimeout(() => {
-    try {
-      window.print();
-    } catch (error) {
-      console.error('Print failed:', error);
-      alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
+  try {
+    if (type === 'gregorian' && gregorianInput.value) {
+      try {
+        const ethiopianDate = await convertGregorianToEthiopianApi(gregorianInput.value);
+        if (ethiopianDate) {
+          convertedEthiopianDate.value = ethiopianDate;
+        } else {
+          conversionError.value = 'Failed to convert Gregorian date to Ethiopian.';
+        }
+      } catch (error: any) {
+        conversionError.value = error.message || 'An unexpected error occurred during Gregorian to Ethiopian conversion.';
+        console.error('Gregorian to Ethiopian conversion error:', error);
+      }
+    } else if (type === 'ethiopian' && ethiopianInput.value) {
+      try {
+        const dateParts = ethiopianInput.value.split('-').map(Number);
+        if (dateParts.length !== 3 || isNaN(dateParts[0]) || isNaN(dateParts[1]) || isNaN(dateParts[2])) {
+          throw new Error('Invalid Ethiopian date format. Please use YYYY-MM-DD.');
+        }
+        const gregorian = await convertEthiopianToGregorian({ year: dateParts[0], month: dateParts[1], day: dateParts[2] });
+        if (gregorian) {
+          convertedGregorianDate.value = `${gregorian.year}-${String(gregorian.month).padStart(2, '0')}-${String(gregorian.day).padStart(2, '0')}`;
+        } else {
+          conversionError.value = 'Failed to convert Ethiopian date to Gregorian.';
+        }
+      } catch (e: any) {
+        conversionError.value = e.message || 'Invalid Ethiopian date for conversion.';
+        console.error('Frontend conversion error:', e);
+      }
+    } else {
+      conversionError.value = 'Please enter a date to convert.';
     }
-  }, 100);
-}
-
-const printAllDays = () => {
-    window.open(route('admin.ethiopian-calendar-days.printAll', { type: 'pdf' }), '_blank');
-};
-
-function toggleSort(field: string) {
-  if (sortField.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortField.value = field
-    sortDirection.value = 'asc'
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      conversionError.value = error.response.data.message;
+    } else if (error.response && error.response.data && error.response.data.error) {
+      conversionError.value = error.response.data.error;
+    }
+    else {
+      conversionError.value = 'An unexpected error occurred during conversion.';
+    }
+    console.error('Conversion error:', error);
   }
 }
 </script>
@@ -98,255 +140,50 @@ function toggleSort(field: string) {
           <p class="text-sm text-muted-foreground">Manage all ethiopian calendar days here.</p>
         </div>
         <div class="flex flex-wrap gap-2">
-          <Link :href="route('admin.ethiopian-calendar-days.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-            + Add Day
-          </Link>
-          <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Download class="h-4 w-4" /> CSV
+          <button @click="showEthiopianDate = !showEthiopianDate" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:outline-none focus:border-gray-400 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+            {{ showEthiopianDate ? 'Hide Ethiopian Date' : 'Show Ethiopian Date' }}
           </button>
-          <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <FileText class="h-4 w-4" /> PDF
-          </button>
-          <button @click="printAllDays" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print All
-          </button>
-          <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-            <Printer class="h-4 w-4" /> Print Current View
-          </button>
+         
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-        <div class="relative w-full md:w-1/3">
-          <input
-            type="text"
-            v-model="search"
-            placeholder="Search days..."
-            class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-          />
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-        </div>
-
-        <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
+      <div v-if="showEthiopianDate" class="rounded-lg bg-blue-50 p-4 shadow-md flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden mt-4">
+        <p class="text-base font-semibold text-blue-800 dark:text-blue-200">Today's Date: {{ new Date().toLocaleDateString() }} (Gregorian) / {{ currentEthiopianDate }} (Ethiopian)</p>
       </div>
 
-      <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
-        <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
-            <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
-            <h1 class="font-bold text-gray-800 dark:text-white print-clinic-name">Geraye Home Care Services</h1>
-            <p class="text-gray-600 dark:text-gray-400 print-document-title">Ethiopian Calendar Days List (Current View)</p>
-            <hr class="my-3 border-gray-300 print:my-2">
+      <!-- Date Conversion Section -->
+      <div class="rounded-lg bg-gray-50 p-4 shadow-md print:hidden mt-4">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Date Conversion</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="gregorianConvertInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gregorian Date to Convert</label>
+            <input type="date" id="gregorianConvertInput" v-model="gregorianInput" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+            <button @click="convertDate('gregorian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:outline-none focus:border-gray-400 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+              Convert to Ethiopian
+            </button>
+            <p v-if="convertedEthiopianDate" class="mt-2 text-sm text-green-600 dark:text-green-400">Converted Ethiopian: {{ convertedEthiopianDate }}</p>
+          </div>
+          <div>
+            <label for="ethiopianConvertInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ethiopian Date to Convert</label>
+            <EthiopianDatePicker
+                id="ethiopianConvertInput"
+                v-model="ethiopianPickerGregorianModel"
+                @update:ethiopianDate="ethiopianInput = $event"
+            />
+            <button @click="convertDate('ethiopian')" class="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-300 focus:outline-none focus:border-gray-400 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+              Convert to Gregorian
+            </button>
+            <p v-if="convertedGregorianDate" class="mt-2 text-sm text-green-600 dark:text-green-400">Converted Gregorian: {{ convertedGregorianDate }}</p>
+          </div>
         </div>
+        <p v-if="conversionError" class="mt-4 text-sm text-red-600 dark:text-red-400">{{ conversionError }}</p>
+      </div>
+
+     
+
+     
         
-        <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
-          <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
-            <tr>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('gregorian_date')">
-                Gregorian Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('ethiopian_date')">
-                Ethiopian Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('description')">
-                Description <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('is_holiday')">
-                Is Holiday <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 cursor-pointer" @click="toggleSort('region')">
-                Region <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
-              </th>
-              <th class="px-6 py-3 text-right print:hidden">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="day in ethiopianCalendarDays.data" :key="day.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-              <td class="px-6 py-4">{{ day.gregorian_date }}</td>
-              <td class="px-6 py-4">{{ day.ethiopian_date ?? '-' }}</td>
-              <td class="px-6 py-4">{{ day.description ?? '-' }}</td>
-              <td class="px-6 py-4">{{ day.is_holiday ? 'Yes' : 'No' }}</td>
-              <td class="px-6 py-4">{{ day.region ?? '-' }}</td>
-              <td class="px-6 py-4 text-right print:hidden">
-                <div class="inline-flex items-center justify-end space-x-2">
-                  <Link
-                    :href="route('admin.ethiopian-calendar-days.show', day.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-                    title="View Details"
-                  >
-                    <Eye class="w-4 h-4" />
-                  </Link>
-                  <Link
-                    :href="route('admin.ethiopian-calendar-days.edit', day.id)"
-                    class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
-                    title="Edit"
-                  >
-                    <Edit3 class="w-4 h-4" />
-                  </Link>
-                  <button @click="destroy(day.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
-                    <Trash2 class="w-4 h-4" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="ethiopianCalendarDays.data.length === 0">
-              <td colspan="6" class="text-center px-6 py-4 text-gray-400">No ethiopian calendar days found.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <Pagination v-if="ethiopianCalendarDays.data.length > 0" :links="ethiopianCalendarDays.links" class="mt-6 flex justify-center print:hidden" />
       
-      <div class="hidden print:block text-center mt-4 text-sm text-gray-500 print-footer">
-            <hr class="my-2 border-gray-300">
-            <p>Document Generated: {{ formattedGeneratedDate }}</p> </div>
-
-    </div>
+     </div>
   </AppLayout>
 </template>
-
-<style>
-/* Print-specific styles for Index.vue (Print Current View) */
-@media print {
-  @page {
-    size: A4 landscape; /* Landscape is often better for tables */
-    margin: 0.5cm;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color: #000 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-
-  /* Hide elements */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Specific styles for the print header content (logo and clinic name) */
-  .print-header-content {
-      display: block !important; /* Show header */
-      text-align: center;
-      padding-top: 0.5cm;
-      padding-bottom: 0.5cm;
-      margin-bottom: 0.8cm;
-  }
-  .print-logo {
-      max-width: 150px; /* Adjust as needed */
-      max-height: 50px; /* Adjust as needed */
-      margin-bottom: 0.5rem;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-  }
-  .print-clinic-name {
-      font-size: 1.6rem !important; /* Slightly smaller than show view */
-      margin-bottom: 0.2rem !important;
-      line-height: 1.2 !important;
-      font-weight: bold;
-  }
-  .print-document-title {
-      font-size: 0.85rem !important;
-      color: #555 !important;
-  }
-  hr { border-color: #ccc !important; }
-
-  /* Main content container adjustments */
-  .space-y-6.p-6 {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Table specific print styles */
-  .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    background-color: transparent !important; /* No background color */
-    overflow: visible !important; /* Essential to prevent clipping */
-    padding: 1cm; /* Inner padding for the table */
-    transform: scale(0.97); /* Slight scale down to fit wide tables */
-    transform-origin: top left;
-  }
-
-  .print-table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-    font-size: 0.8rem !important; /* Adjust table body font size */
-    table-layout: fixed; /* Helps with column width distribution */
-  }
-
-  .print-table-header {
-    background-color: #f0f0f0 !important; /* Light grey header background */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    text-transform: uppercase !important;
-  }
-
-  .print-table th, .print-table td {
-    border: 1px solid #ddd !important; /* Subtle borders for all cells */
-    padding: 0.4rem 0.6rem !important; /* Adjust cell padding */
-    color: #000 !important;
-    vertical-align: top !important; /* Align content to top of cell */
-    word-break: break-word; /* Allow long words to break */
-  }
-
-  .print-table th {
-    font-weight: bold !important;
-    font-size: 0.7rem !important; /* Header font size */
-    white-space: nowrap; /* Keep header text on one line if possible */
-  }
-
-  /* Adjust column widths if needed, target by nth-child or specific content */
-  .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 18%; } /* Gregorian Date */
-  .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 12%; } /* Ethiopian Date */
-  .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 15%; } /* Description */
-  .print-table th:nth-child(4), .print-table td:nth-child(4) { width: 8%; }  /* Is Holiday */
-  .print-table th:nth-child(5), .print-table td:nth-child(5) { width: 10%; } /* Region */
-
-
-  .print-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9 !important; /* Subtle zebra striping */
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-  .print-table tbody tr:last-child {
-    border-bottom: 1px solid #ddd !important;
-  }
-
-  /* Hide actions column for print */
-  .print-table th:last-child,
-  .print-table td:last-child {
-    display: none !important;
-  }
-
-  /* Hide sort arrows on print */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  /* Print Footer */
-  .print-footer {
-    display: block !important;
-    text-align: center;
-    margin-top: 1cm;
-    font-size: 0.75rem !important;
-    color: #666 !important;
-  }
-  .print-footer hr {
-    border-color: #ccc !important;
-  }
-}
-</style>

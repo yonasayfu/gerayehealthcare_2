@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\CaregiverAssignment;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CaregiverAssignmentSeeder extends Seeder
@@ -13,6 +12,6 @@ class CaregiverAssignmentSeeder extends Seeder
      */
     public function run(): void
     {
-        CaregiverAssignment::factory(6)->create();
+        CaregiverAssignment::factory(3)->create();
     }
 }

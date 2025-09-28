@@ -3,13 +3,51 @@
 namespace Database\Seeders;
 
 use App\Models\LeaveRequest;
+use App\Models\Staff;
+use Carbon\Carbon;
+use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 
 class LeaveRequestSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Create 25 leave requests for various staff members
-        LeaveRequest::factory()->count(6)->create();
+        $faker = Faker::create();
+
+        if (Staff::count() === 0) {
+            Staff::factory()->count(3)->create(); // Limit staff to 3
+        }
+
+        $staffIds = Staff::pluck('id');
+
+        foreach ($staffIds as $staffId) {
+            // Create 1 or 2 pending leave requests for each staff member
+            for ($i = 0; $i < rand(1, 2); $i++) {
+                $startDate = Carbon::now()->addDays(rand(10, 90));
+                LeaveRequest::create([
+                    'staff_id' => $staffId,
+                    'start_date' => $startDate->toDateString(),
+                    'end_date' => $startDate->copy()->addDays(rand(1, 5))->toDateString(),
+                    'reason' => $faker->sentence,
+                    'status' => 'Pending',
+                ]);
+            }
+        }
+
+        // Admin perspective: Approve or deny some of the pending requests
+        $pendingRequests = LeaveRequest::where('status', 'Pending')->get();
+
+        foreach ($pendingRequests as $request) {
+            if ($faker->boolean(75)) { // 75% chance to process the request
+                $newStatus = $faker->randomElement(['Approved', 'Denied']);
+                $request->update([
+                    'status' => $newStatus,
+                    'admin_notes' => $newStatus === 'Denied' ? $faker->paragraph : null,
+                ]);
+            }
+        }
     }
 }

@@ -6,14 +6,13 @@ use App\Enums\RoleEnum;
 use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\StaffAvailability;
-use App\Models\User;
 use App\Models\VisitService;
+use App\Rules\StaffIsAvailableForVisit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
-use App\Rules\StaffIsAvailableForVisit;
-use Spatie\Permission\Models\Role; // <-- THIS IS THE MISSING LINE
+use Spatie\Permission\Models\Role;
+use Tests\TestCase; // <-- THIS IS THE MISSING LINE
 
 class StaffAvailabilityTest extends TestCase
 {
@@ -26,8 +25,7 @@ class StaffAvailabilityTest extends TestCase
         Role::create(['name' => RoleEnum::ADMIN->value]);
     }
 
-    
-   #[Test]
+    #[Test]
     public function it_prevents_scheduling_a_visit_during_an_unavailable_slot(): void
     {
         // 1. ARRANGE: Create a staff member and mark them as unavailable for a specific time
@@ -36,7 +34,7 @@ class StaffAvailabilityTest extends TestCase
             'staff_id' => $staff->id,
             'start_time' => '2025-08-15 10:00:00',
             // THIS IS THE FIX: The end time is now after the start time
-            'end_time' => '2025-08-15 12:00:00', 
+            'end_time' => '2025-08-15 12:00:00',
             'status' => 'Unavailable',
         ]);
 

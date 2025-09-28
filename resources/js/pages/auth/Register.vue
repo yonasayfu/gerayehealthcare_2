@@ -23,7 +23,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthBase title="Create an account" description="Enter your details below to create your account">
+    <AuthBase title="Create a patient/guest account" description="Employees are invited by admins. Patients and guests can register here.">
         <Head title="Register" />
 
         <form @submit.prevent="submit" class="flex flex-col gap-6">
@@ -68,7 +68,7 @@ const submit = () => {
                     <InputError :message="form.errors.password_confirmation" />
                 </div>
 
-                <Button type="submit" class="mt-2 w-full" tabindex="5" :disabled="form.processing">
+                <Button type="submit"  class="btn-glass btn-glass-sm" tabindex="5" :disabled="form.processing" title="Creates a patient/guest account for accessing bills, messages and results.">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Create account
                 </Button>

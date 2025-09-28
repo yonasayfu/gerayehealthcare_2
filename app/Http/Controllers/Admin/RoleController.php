@@ -2,23 +2,58 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Base\BaseController;
+use App\Services\Role\RoleService;
+use App\Services\Validation\Rules\RoleRules;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
-class RoleController extends Controller
+class RoleController extends BaseController
 {
+    public function __construct(RoleService $roleService)
+    {
+        parent::__construct(
+            $roleService,
+            RoleRules::class,
+            'Admin/Roles',
+            'roles',
+            Role::class
+        );
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        return Inertia::render('Admin/Roles/Index', [
-            // Eager load the permissions associated with each role
-            'roles' => Role::with('permissions')->paginate(10),
+        $data = $this->service->getAll($request, ['permissions']); // Eager load permissions
+
+        // Transform the data to ensure permissions are properly formatted
+        if (isset($data['data'])) {
+            $data['data'] = collect($data['data'])->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'permissions' => $role->permissions->map(function ($permission) {
+                        return [
+                            'id' => $permission->id,
+                            'name' => $permission->name,
+                        ];
+                    }),
+                ];
+            });
+        }
+
+        return Inertia::render($this->viewName.'/Index', [
+            $this->dataVariableName => $data,
+            'filters' => $request->only([
+                'search', 'sort', 'direction', 'per_page',
+                'sort_by', 'sort_order', 'active_only',
+                'campaign_id', 'platform_id', 'status', 'period_start', 'period_end',
+                'is_active', 'language',
+            ]),
         ]);
     }
 
@@ -27,75 +62,82 @@ class RoleController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Roles/Create', [
-            // Pass all available permissions to the form
-            'permissions' => Permission::all()->pluck('name'),
+        $allPermissions = Permission::pluck('name')->toArray();
+
+        return Inertia::render($this->viewName.'/Create', [
+            'permissions' => $allPermissions,
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
+    {
+        $role = $this->service->getById($id);
+        $role->load('permissions'); // Ensure permissions are loaded
+        $allPermissions = Permission::pluck('name')->toArray();
+
+        return Inertia::render($this->viewName.'/Edit', [
+            'role' => [
+                'id' => $role->id,
+                'name' => $role->name,
+                'permissions' => $role->permissions->map(function ($permission) {
+                    return ['name' => $permission->name];
+                }),
+            ],
+            'allPermissions' => $allPermissions,
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(\Illuminate\Http\Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:roles,name',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'string|exists:permissions,name', // Validate each permission
-        ]);
+        try {
+            $validatedData = $this->validateRequest($request, 'store');
 
-        $role = Role::create(['name' => $request->name]);
+            $role = $this->service->create(['name' => $validatedData['name']]);
+            $role->syncPermissions($validatedData['permissions'] ?? []);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
+            $request->session()->flash('banner', ucfirst($this->dataVariableName).' created successfully.');
+            $request->session()->flash('bannerStyle', 'success');
+
+            return redirect()->route('admin.'.$this->getRouteName().'.index');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
+        } catch (\Exception $e) {
+            Log::error('Error in RoleController store method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+            return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
-
-        return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Role $role)
-    {
-        // Eager load the permissions for the role being edited
-        $role->load('permissions');
-
-        return Inertia::render('Admin/Roles/Edit', [
-            'role' => $role,
-            'allPermissions' => Permission::all()->pluck('name'),
-        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Role $role)
+    public function update(\Illuminate\Http\Request $request, $id)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('roles')->ignore($role->id)],
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'string|exists:permissions,name',
-        ]);
+        try {
+            $role = $this->service->getById($id);
+            $validatedData = $this->validateRequest($request, 'update', $role);
 
-        $role->update(['name' => $request->name]);
-        $role->syncPermissions($request->permissions ?? []);
+            $this->service->update($id, ['name' => $validatedData['name']]);
+            $role->syncPermissions($validatedData['permissions'] ?? []);
+            app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
-    }
+            $request->session()->flash('banner', ucfirst($this->dataVariableName).' updated successfully.');
+            $request->session()->flash('bannerStyle', 'success');
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Role $role)
-    {
-        // Prevent deletion of essential roles
-        if (in_array($role->name, ['Super Admin', 'Admin', 'Staff'])) {
-            return back()->with('error', "Cannot delete essential system role.");
+            return redirect()->route('admin.'.$this->getRouteName().'.index');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput()->with('banner', 'Validation failed. Please check your input.')->with('bannerStyle', 'danger');
+        } catch (\Exception $e) {
+            Log::error('Error in RoleController update method:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+            return back()->withInput()->with('banner', 'An unexpected error occurred: '.$e->getMessage())->with('bannerStyle', 'danger');
         }
-
-        $role->delete();
-
-        return back()->with('success', 'Role deleted successfully.');
     }
 }

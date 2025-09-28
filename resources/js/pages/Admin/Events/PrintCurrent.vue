@@ -1,5 +1,5 @@
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -51,5 +51,5 @@ const printPage = () => {
                 </div>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>

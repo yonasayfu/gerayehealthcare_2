@@ -3,35 +3,36 @@ import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{
   form: ReturnType<typeof useForm>;
+  departments?: string[];
 }>();
 
 const emit = defineEmits(['submit']);
 </script>
 
 <template>
-  <form @submit.prevent="emit('submit')" class="space-y-8">
+  <div class="space-y-8">
     <!-- User Account Details Section -->
     <div class="space-y-4">
       <h3 class="font-medium text-lg text-gray-900 dark:text-white">User Account Details</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">User Name</label>
-          <input id="name" type="text" v-model="form.name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="name" type="text" v-model="form.name" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
         </div>
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Login Email</label>
-          <input id="email" type="email" v-model="form.email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="email" type="email" v-model="form.email" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</div>
         </div>
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-          <input id="password" type="password" v-model="form.password" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="password" type="password" v-model="form.password" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
         </div>
         <div>
           <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
-          <input id="password_confirmation" type="password" v-model="form.password_confirmation" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="password_confirmation" type="password" v-model="form.password_confirmation" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
         </div>
       </div>
     </div>
@@ -42,35 +43,43 @@ const emit = defineEmits(['submit']);
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
-          <input id="first_name" type="text" v-model="form.first_name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="first_name" type="text" v-model="form.first_name" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.first_name" class="text-red-500 text-sm mt-1">{{ form.errors.first_name }}</div>
         </div>
         <div>
           <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
-          <input id="last_name" type="text" v-model="form.last_name" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="last_name" type="text" v-model="form.last_name" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.last_name" class="text-red-500 text-sm mt-1">{{ form.errors.last_name }}</div>
         </div>
         <div>
           <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-          <input id="phone" type="text" v-model="form.phone" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="phone" type="text" v-model="form.phone" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.phone" class="text-red-500 text-sm mt-1">{{ form.errors.phone }}</div>
         </div>
         <div>
           <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Position / Job Title</label>
-          <input id="position" type="text" v-model="form.position" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="position" type="text" v-model="form.position" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.position" class="text-red-500 text-sm mt-1">{{ form.errors.position }}</div>
         </div>
         <div>
           <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label>
-          <input id="department" type="text" v-model="form.department" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <template v-if="props.departments && props.departments.length">
+            <select id="department" v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800">
+              <option value="">Select department</option>
+              <option v-for="dept in props.departments" :key="dept" :value="dept">{{ dept }}</option>
+            </select>
+          </template>
+          <template v-else>
+            <input id="department" type="text" v-model="form.department" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
+          </template>
           <div v-if="form.errors.department" class="text-red-500 text-sm mt-1">{{ form.errors.department }}</div>
         </div>
         <div>
           <label for="hire_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Hire Date</label>
-          <input id="hire_date" type="date" v-model="form.hire_date" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"/>
+          <input id="hire_date" type="date" v-model="form.hire_date" class="shadow-sm border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5 bg-white dark:bg-gray-800"/>
           <div v-if="form.errors.hire_date" class="text-red-500 text-sm mt-1">{{ form.errors.hire_date }}</div>
         </div>
       </div>
     </div>
-  </form>
+  </div>
 </template>

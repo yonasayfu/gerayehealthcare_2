@@ -2,6 +2,7 @@
 import type { HTMLAttributes } from 'vue';
 
 defineOptions({
+  name: 'AppLogoIcon',
   inheritAttrs: false,
 });
 

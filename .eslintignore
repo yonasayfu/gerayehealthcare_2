@@ -1,0 +1,7 @@
+.history/
+vendor/
+public/
+stats.html
+node_modules/
+storage/
+var/

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('staff_payouts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
+            $table->foreignId('staff_id')->nullable()->constrained('staff')->onDelete('set null');
             $table->decimal('total_amount', 10, 2);
             $table->date('payout_date');
             $table->string('status')->default('Completed');

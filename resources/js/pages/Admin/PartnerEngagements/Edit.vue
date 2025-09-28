@@ -1,0 +1,72 @@
+<script setup lang="ts">
+import { Head, useForm, Link, router } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import Form from './Form.vue'
+import FormActions from '@/components/FormActions.vue'
+import type { BreadcrumbItemType } from '@/types'
+
+const props = defineProps<{
+  partnerEngagement: {
+    id: number
+    partner_id: number
+    staff_id: number
+    engagement_type: string
+    summary: string
+    engagement_date: string
+    follow_up_date: string | null
+  },
+  partners: Array<{ id: number; name: string }>,
+  staff: Array<{ id: number; name: string }>,
+}>()
+
+const breadcrumbs: BreadcrumbItemType[] = [
+  { title: 'Dashboard', href: route('admin.partner-engagements.index') },
+  { title: 'Partner Engagements', href: route('admin.partner-engagements.index') },
+  { title: 'Edit', href: route('admin.partner-engagements.edit', { partner_engagement: props.partnerEngagement.id }) },
+]
+
+const form = useForm({
+  _method: 'PUT', // Method spoofing for PUT request
+  partner_id: props.partnerEngagement.partner_id,
+  staff_id: props.partnerEngagement.staff_id,
+  engagement_type: props.partnerEngagement.engagement_type,
+  summary: props.partnerEngagement.summary,
+  engagement_date: props.partnerEngagement.engagement_date,
+  follow_up_date: props.partnerEngagement.follow_up_date,
+});
+
+function submit() {
+  form.post(route('admin.partner-engagements.update', { partner_engagement: props.partnerEngagement.id }), {
+    preserveScroll: true,
+  });
+}
+</script>
+
+<template>
+  <Head title="Edit Partner Engagement" />
+
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="space-y-6 p-6">
+
+      <!-- Liquid-glass header: Back button removed -->
+      <div class="liquidGlass-wrapper print:hidden w-full rounded-t-lg">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+        <div class="liquidGlass-content flex items-center justify-between p-6">
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Partner Engagement</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Update partner engagement information below.</p>
+          </div>
+          <!-- intentionally no Back button here -->
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm p-6">
+        <form @submit.prevent="submit" class="space-y-4">
+          <Form :form="form" v-bind="$props" />
+
+          <FormActions :cancel-href="route('admin.partner-engagements.index')" submit-text="Save Changes" :processing="form.processing" />
+        </form>
+      </div>
+    </div>
+  </AppLayout>
+</template>

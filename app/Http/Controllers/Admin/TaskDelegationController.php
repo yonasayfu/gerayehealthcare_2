@@ -2,151 +2,110 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\BaseController;
+use App\Models\Staff;
 use App\Models\TaskDelegation;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Response as LaravelResponse;
+use App\Services\TaskDelegation\TaskDelegationService;
+use App\Services\Validation\Rules\TaskDelegationRules;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class TaskDelegationController extends Controller
+class TaskDelegationController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function __construct(TaskDelegationService $taskDelegationService)
     {
-        $search = $request->input('search');
-        $sortBy = $request->input('sort_by', 'due_date');
-        $sortOrder = $request->input('sort_order', 'asc');
-        $perPage = $request->input('per_page', 15);
-
-        $query = TaskDelegation::with('assignee');
-
-        if ($search) {
-            $query->where('title', 'like', "%{$search}%");
-        }
-
-        if (in_array($sortBy, ['title', 'due_date', 'status'])) {
-            $query->orderBy($sortBy, $sortOrder);
-        }
-
-        $tasks = $query->paginate($perPage)
-            ->withQueryString();
-
-        return Inertia::render('Admin/TaskDelegations/Index', [
-            'taskDelegations' => $tasks,
-            'filters' => $request->only(['search', 'sort_by', 'sort_order', 'per_page']),
-        ]);
+        parent::__construct(
+            $taskDelegationService,
+            TaskDelegationRules::class,
+            'Admin/TaskDelegations',
+            'taskDelegations',
+            TaskDelegation::class,
+            null
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
+        $prefill = [
+            'title' => request()->query('title'),
+            'assigned_to' => request()->query('assigned_to'),
+            'due_date' => request()->query('due_date'),
+            'status' => request()->query('status'),
+            'notes' => request()->query('notes'),
+            'task_category' => request()->query('task_category'),
+            'partner_id' => request()->query('partner_id'),
+        ];
+
         return Inertia::render('Admin/TaskDelegations/Create', [
-            'staffList' => \App\Models\Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
+            'staff' => Staff::all(['id', 'first_name', 'last_name']),
+            'prefill' => $prefill,
+            'returnTo' => request()->query('return_to'),
+            'inventoryAlertId' => request()->query('inventory_alert_id'),
+            'partners' => \App\Models\Partner::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function edit($id)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_to' => 'required|exists:staff,id',
-            'due_date' => 'required|date',
-            'status' => 'required|in:Pending,In Progress,Completed',
-            'notes' => 'nullable|string',
-        ]);
+        $taskDelegation = $this->service->getById($id);
 
-        TaskDelegation::create($data);
+        // Ensure the due_date is properly formatted for the frontend
+        $taskDelegationArray = $taskDelegation->toArray();
 
-        return redirect()
-            ->route('admin.task-delegations.index', $request->only(['search', 'sort_by', 'sort_order', 'per_page']))
-            ->with('success', 'Task assigned successfully.');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TaskDelegation $task_delegation)
-    {
         return Inertia::render('Admin/TaskDelegations/Edit', [
-            'task' => $task_delegation,
-            'staffList' => \App\Models\Staff::select('id', 'first_name', 'last_name')->orderBy('first_name')->get(),
+            'taskDelegation' => $taskDelegationArray,
+            'staff' => Staff::all(['id', 'first_name', 'last_name']),
+            'partners' => \App\Models\Partner::select('id', 'name')->orderBy('name')->get(),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, TaskDelegation $task_delegation)
+    public function store(\Illuminate\Http\Request $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_to' => 'required|exists:staff,id',
-            'due_date' => 'required|date',
-            'status' => 'required|in:Pending,In Progress,Completed',
-            'notes' => 'nullable|string',
-        ]);
+        // Validate using base rules
+        $validatedData = $this->validateRequest($request, 'store');
 
-        $task_delegation->update($data);
+        if (empty($validatedData['assigned_to'])) {
+            return back()->withErrors(['assigned_to' => 'The assigned to field is required.'])->withInput();
+        }
 
-        return redirect()
-            ->route('admin.task-delegations.index', $request->only(['search', 'sort_by', 'sort_order', 'per_page']))
-            ->with('success', 'Task updated successfully.');
-    }
+        // Create the task via service
+        $created = $this->service->create($validatedData);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TaskDelegation $task_delegation)
-    {
-        $task_delegation->delete();
-
-        return back()->with('success', 'Task deleted successfully.');
-    }
-public function show(TaskDelegation $task_delegation)
-{
-    return Inertia::render('Admin/TaskDelegations/Show', [
-        'task' => $task_delegation->load('assignee'),
-    ]);
-}
-    /**
-     * Export the listing to CSV or PDF.
-     */
-    public function export(Request $request)
-    {
-        $type = $request->get('type');
-        $tasks = TaskDelegation::with('assignee')->get();
-
-        if ($type === 'csv') {
-            // Build CSV string
-            $csv = "Title,Assigned To,Due Date,Status,Notes\n";
-            foreach ($tasks as $t) {
-                $name = "{$t->assignee->first_name} {$t->assignee->last_name}";
-                $csv .= "\"{$t->title}\",\"{$name}\",\"{$t->due_date}\",\"{$t->status}\",\"" . str_replace('"', '""', $t->notes) . "\"\n";
+        // If this came from an Inventory Alert, link it
+        $inventoryAlertId = $request->input('inventory_alert_id');
+        if ($inventoryAlertId) {
+            try {
+                \App\Models\InventoryAlert::where('id', $inventoryAlertId)
+                    ->update(['delegated_task_id' => $created->id]);
+            } catch (\Throwable $e) {
+                Log::error('Failed to link InventoryAlert to TaskDelegation', [
+                    'inventory_alert_id' => $inventoryAlertId,
+                    'task_id' => $created->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
-            return LaravelResponse::make(
-                $csv,
-                200,
-                [
-                    'Content-Type' => 'text/csv',
-                    'Content-Disposition' => 'attachment; filename="tasks.csv"',
-                ]
-            );
         }
 
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.task_delegations', ['tasks' => $tasks])
-                ->setPaper('a4', 'landscape');
-            return $pdf->stream('tasks.pdf');
+        // Redirect back to return_to if provided, else index
+        $returnTo = $request->input('return_to');
+        if ($returnTo) {
+            return redirect()->to($returnTo)->with('banner', 'Task delegation created and linked successfully.')->with('bannerStyle', 'success');
         }
 
-        return abort(400, 'Invalid export type');
+        return redirect()->route('admin.' . $this->getRouteName() . '.index')
+            ->with('banner', ucfirst($this->dataVariableName) . ' created successfully.')->with('bannerStyle', 'success');
+    }
+
+    public function update(\Illuminate\Http\Request $request, $id)
+    {
+        $taskDelegation = $this->service->getById($id);
+        $this->authorize('update', $taskDelegation);
+
+        $validatedData = $this->validateRequest($request, 'update', $taskDelegation);
+
+        $this->service->update($id, $validatedData);
+
+        return redirect()->route('admin.' . $this->getRouteName() . '.index')
+            ->with('banner', ucfirst($this->dataVariableName) . ' updated successfully.')->with('bannerStyle', 'success');
     }
 }

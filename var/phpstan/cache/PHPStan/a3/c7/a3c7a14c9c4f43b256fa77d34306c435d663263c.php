@@ -1,0 +1,9 @@
+<?php
+
+declare(strict_types=1);
+
+// variadic-method-Illuminate\Database\Eloquent\Relations\Concerns\InteractsWithPivotTable-withPivot-/Users/yonassayfu/VSProject/gerayehealthcare/vendor/composer/../laravel/framework/src/Illuminate/Database/Eloquent/Relations/Concerns/InteractsWithPivotTable.php
+return \PHPStan\Cache\CacheItem::__set_state([
+    'variableKey' => '1755555652-v4',
+    'data' => true,
+]);

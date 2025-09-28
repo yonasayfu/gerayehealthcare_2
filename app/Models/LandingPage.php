@@ -2,31 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\MarketingCampaign;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class LandingPage extends Model
 {
     use HasFactory;
+
     protected static function booted()
     {
         static::creating(function ($landingPage) {
             if (empty($landingPage->page_code)) {
                 DB::transaction(function () use ($landingPage) {
                     $latestLandingPage = static::lockForUpdate()
-                                            ->whereNotNull('page_code')
-                                            ->orderBy('id', 'desc')
-                                            ->first();
+                        ->whereNotNull('page_code')
+                        ->orderBy('id', 'desc')
+                        ->first();
 
                     $nextNumber = 1;
                     if ($latestLandingPage && preg_match('/LP-(\d+)/', $latestLandingPage->page_code, $matches)) {
-                        $nextNumber = (int)$matches[1] + 1;
+                        $nextNumber = (int) $matches[1] + 1;
                     }
 
-                    $landingPage->page_code = 'LP-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+                    $landingPage->page_code = 'LP-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
                 });
             }
         });
@@ -45,6 +44,7 @@ class LandingPage extends Model
         'submissions',
         'conversion_rate',
         'is_active',
+        'notes',
     ];
 
     protected $casts = [

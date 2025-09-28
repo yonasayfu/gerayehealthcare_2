@@ -2,186 +2,152 @@
 
 namespace App\Http\Controllers\Insurance;
 
-use App\Http\Controllers\Controller;
+use App\DTOs\CreateInsurancePolicyDTO;
+use App\Http\Controllers\Base\BaseController;
+use App\Http\Traits\ExportableTrait;
+use App\Models\CorporateClient;
+use App\Models\InsuranceCompany;
 use App\Models\InsurancePolicy;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\Insurance\InsurancePolicyService;
+use App\Services\Validation\Rules\InsurancePolicyRules;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Response;
 use Inertia\Inertia;
 
-class InsurancePolicyController extends Controller
+class InsurancePolicyController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    use ExportableTrait;
+
+    public function __construct(InsurancePolicyService $insurancePolicyService)
     {
-        $query = InsurancePolicy::query();
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('service_type', 'ilike', "%{$search}%")
-                  ->orWhere('coverage_type', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insurancePolicies = $query->paginate($request->input('per_page', 5))->withQueryString();
-
-        return Inertia::render('Insurance/Policies/Index', [
-            'insurancePolicies' => $insurancePolicies,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page']),
-        ]);
+        parent::__construct(
+            $insurancePolicyService,
+            InsurancePolicyRules::class,
+            'Insurance/Policies',
+            'insurancePolicies',
+            InsurancePolicy::class,
+            CreateInsurancePolicyDTO::class
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return Inertia::render('Insurance/Policies/Create');
-    }
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'corporate_client_id' => 'required|exists:corporate_clients,id',
-            'service_type' => 'nullable|string|max:255',
-            'service_type_amharic' => 'nullable|string|max:255',
-            'coverage_percentage' => 'required|numeric|min:0|max:100',
-            'coverage_type' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        InsurancePolicy::create($validated);
-
-        return Redirect::route('admin.insurance-policies.index');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $insurancePolicy = InsurancePolicy::findOrFail($id);
-        return Inertia::render('Insurance/Policies/Show', [
-            'insurancePolicy' => $insurancePolicy,
+        return Inertia::render($this->viewName.'/Create', [
+            'insuranceCompanies' => $insuranceCompanies,
+            'corporateClients' => $corporateClients,
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit($id)
     {
-        $insurancePolicy = InsurancePolicy::findOrFail($id);
-        return Inertia::render('Insurance/Policies/Edit', [
-            'insurancePolicy' => $insurancePolicy,
+        $insurancePolicy = $this->service->getById($id);
+        $insuranceCompanies = InsuranceCompany::select('id', 'name')->orderBy('name')->get();
+        $corporateClients = CorporateClient::select('id', 'organization_name')->orderBy('organization_name')->get();
+
+        return Inertia::render($this->viewName.'/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $insurancePolicy,
+            'insuranceCompanies' => $insuranceCompanies,
+            'corporateClients' => $corporateClients,
+        ]);
+    }
+
+    public function show($id)
+    {
+        // Eager-load related company and client so Show.vue has the data
+        $insurancePolicy = InsurancePolicy::with([
+            'insuranceCompany:id,name',
+            'corporateClient:id,organization_name',
+        ])->findOrFail($id);
+
+        return Inertia::render($this->viewName.'/Show', [
+            lcfirst(class_basename($this->modelClass)) => $insurancePolicy,
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Export all insurance policies (CSV/PDF based on request type).
+     * Even if UI hides CSV/PDF, keeping this prevents route errors.
      */
-    public function update(Request $request, string $id)
-    {
-        $insurancePolicy = InsurancePolicy::findOrFail($id);
-
-        $validated = $request->validate([
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'corporate_client_id' => 'required|exists:corporate_clients,id',
-            'service_type' => 'nullable|string|max:255',
-            'service_type_amharic' => 'nullable|string|max:255',
-            'coverage_percentage' => 'required|numeric|min:0|max:100',
-            'coverage_type' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
-            'notes' => 'nullable|string',
-        ]);
-
-        $insurancePolicy->update($validated);
-
-        return Redirect::route('admin.insurance-policies.index');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $insurancePolicy = InsurancePolicy::findOrFail($id);
-
-        $insurancePolicy->delete();
-
-        return Redirect::route('admin.insurance-policies.index');
-    }
-
     public function export(Request $request)
     {
-        $type = $request->get('type');
-        $insurancePolicies = InsurancePolicy::select('service_type', 'coverage_percentage', 'coverage_type', 'is_active')->get();
+        $config = $this->buildExportConfig();
 
-        if ($type === 'csv') {
-            $csvData = "Service Type,Coverage Percentage,Coverage Type,Is Active\n";
-            foreach ($insurancePolicies as $policy) {
-                $csvData .= "\"{$policy->service_type}\",\"{$policy->coverage_percentage}\",\"{$policy->coverage_type}\",\"{$policy->is_active}\"\n";
-            }
-
-            return Response::make($csvData, 200, [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="insurance_policies.csv"',
-            ]);
-        }
-
-        if ($type === 'pdf') {
-            $pdf = Pdf::loadView('pdf.insurance_policies', ['insurancePolicies' => $insurancePolicies])->setPaper('a4', 'landscape');
-            return $pdf->stream('insurance_policies.pdf');
-        }
-
-        return abort(400, 'Invalid export type');
+        return $this->handleExport($request, InsurancePolicy::class, $config);
     }
 
-    public function printSingle(InsurancePolicy $insurancePolicy)
-    {
-        $pdf = Pdf::loadView('pdf.insurance_policy_single', ['insurancePolicy' => $insurancePolicy])->setPaper('a4', 'portrait');
-        return $pdf->stream("insurance_policy-{$insurancePolicy->id}.pdf");
-    }
-
+    /**
+     * Print current page/view of insurance policies.
+     */
     public function printCurrent(Request $request)
     {
-        $query = InsurancePolicy::query();
+        $config = $this->buildExportConfig();
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('service_type', 'ilike', "%{$search}%")
-                  ->orWhere('coverage_type', 'ilike', "%{$search}%");
-        }
-
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $insurancePolicies = $query->paginate($request->input('per_page', 5))->appends($request->except('page'));
-
-        return Inertia::render('Insurance/Policies/PrintCurrent', ['insurancePolicies' => $insurancePolicies->items()]);
+        return $this->handlePrintCurrent($request, InsurancePolicy::class, $config);
     }
 
-    public function printAll(Request $request)
+    /**
+     * Print a single insurance policy.
+     */
+    public function printSingle(Request $request, $id)
     {
-        $insurancePolicies = InsurancePolicy::orderBy('service_type')->get();
+        $model = InsurancePolicy::with(['insuranceCompany:id,name', 'corporateClient:id,organization_name'])->findOrFail($id);
+        $config = $this->buildExportConfig();
 
-        $pdf = Pdf::loadView('pdf.insurance_policies', ['insurancePolicies' => $insurancePolicies])->setPaper('a4', 'landscape');
-        return $pdf->stream('insurance_policies.pdf');
+        return $this->handlePrintSingle($request, $model, $config);
+    }
+
+    /**
+     * Export/print configuration for Insurance Policies.
+     */
+    private function buildExportConfig(): array
+    {
+        $pdfColumns = [
+            ['key' => 'insurance_company.name', 'label' => 'Insurance Company'],
+            ['key' => 'corporate_client.organization_name', 'label' => 'Corporate Client'],
+            ['key' => 'service_type', 'label' => 'Service Type'],
+            ['key' => 'coverage_percentage', 'label' => 'Coverage %'],
+            ['key' => 'coverage_type', 'label' => 'Coverage Type'],
+            ['key' => 'is_active', 'label' => 'Active'],
+        ];
+
+        $csvHeaders = ['Insurance Company', 'Corporate Client', 'Service Type', 'Coverage %', 'Coverage Type', 'Active'];
+        $csvFields = ['insurance_company.name', 'corporate_client.organization_name', 'service_type', 'coverage_percentage', 'coverage_type', 'is_active'];
+
+        return [
+            'csv' => [
+                'headers' => $csvHeaders,
+                'fields' => $csvFields,
+                'filename_prefix' => 'insurance_policies',
+            ],
+            'pdf' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Policies',
+                'filename_prefix' => 'insurance_policies',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'all_records' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Policies List',
+                'filename_prefix' => 'insurance_policies',
+                'orientation' => 'landscape',
+                'include_index' => true,
+                'columns' => $pdfColumns,
+            ],
+            'current_page' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Policies (Current View)',
+                'filename_prefix' => 'insurance_policies_current',
+                'orientation' => 'landscape',
+                'columns' => $pdfColumns,
+            ],
+            'single_record' => [
+                'view' => 'pdf-layout',
+                'document_title' => 'Insurance Policy Details',
+                'filename_prefix' => 'insurance_policy',
+            ],
+        ];
     }
 }

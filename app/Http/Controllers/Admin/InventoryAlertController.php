@@ -2,165 +2,85 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\DTOs\CreateInventoryAlertDTO;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\InventoryAlert;
-use Illuminate\Http\Request;
+use App\Services\InventoryAlert\InventoryAlertService;
+use App\Services\Validation\Rules\InventoryAlertRules;
 use Inertia\Inertia;
-use League\Csv\Writer;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\InventoryItem;
 
-class InventoryAlertController extends Controller
+class InventoryAlertController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function __construct(InventoryAlertService $inventoryAlertService)
     {
-        $search = $request->input('search');
-        $perPage = $request->input('per_page', 5);
+        parent::__construct(
+            $inventoryAlertService,
+            InventoryAlertRules::class,
+            'Admin/InventoryAlerts',
+            'inventoryAlerts',
+            InventoryAlert::class,
+            CreateInventoryAlertDTO::class
+        );
+    }
 
-        $query = InventoryAlert::with('item');
+    public function show($id)
+    {
+        $alert = $this->service->getById($id, ['item', 'delegatedTask.assignee']);
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
-        }
-
-        $inventoryAlerts = $query->paginate($perPage);
-
-        return Inertia::render('Admin/InventoryAlerts/Index', [
-            'inventoryAlerts' => $inventoryAlerts,
-            'filters' => [
-                'search' => $request->input('search'),
-                'per_page' => $request->input('per_page', 10),
-            ],
+        return \Inertia\Inertia::render('Admin/InventoryAlerts/Show', [
+            'inventoryAlert' => $alert,
+            'returnTo' => request()->input('return_to'),
         ]);
-    }
-
-    public function export(): StreamedResponse
-    {
-        $inventoryAlerts = InventoryAlert::with('item')->get();
-
-        $csv = Writer::createFromString('');
-        $csv->insertOne(['ID', 'Item', 'Alert Type', 'Threshold Value', 'Message', 'Is Active', 'Triggered At']);
-
-        foreach ($inventoryAlerts as $alert) {
-            $csv->insertOne([
-                $alert->id,
-                $alert->item->name ?? 'N/A',
-                $alert->alert_type,
-                $alert->threshold_value,
-                $alert->message,
-                $alert->is_active ? 'Yes' : 'No',
-                $alert->triggered_at,
-            ]);
-        }
-
-        return response()->streamDownload(function () use ($csv) {
-            echo $csv->toString();
-        }, 'inventory_alerts.csv', [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="inventory_alerts.csv"',
-        ]);
-    }
-
-    public function printAll(Request $request)
-    {
-        $query = InventoryAlert::with('item');
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
-        }
-
-        $inventoryAlerts = $query->get();
-
-        return Inertia::render('Admin/InventoryAlerts/PrintAll', [
-            'inventoryAlerts' => $inventoryAlerts,
-        ]);
-    }
-
-    public function printSingle(InventoryAlert $inventoryAlert)
-    {
-        return Inertia::render('Admin/InventoryAlerts/PrintSingle', [
-            'inventoryAlert' => $inventoryAlert->load('item'),
-        ]);
-    }
-
-    public function generatePdf(Request $request)
-    {
-        $query = InventoryAlert::with('item');
-
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('alert_type', 'like', "%$search%")
-                  ->orWhere('message', 'like', "%$search%")
-                  ->orWhereHas('item', fn($q) => $q->where('name', 'like', "%$search%"));
-        }
-
-        $inventoryAlerts = $query->get();
-
-        $pdf = Pdf::loadView('pdf.inventory-alerts', ['inventoryAlerts' => $inventoryAlerts])->setPaper('a4', 'landscape');
-        return $pdf->stream('inventory_alerts.pdf');
-    }
-
-    public function create()
-    {
-        return Inertia::render('Admin/InventoryAlerts/Create');
-    }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'item_id' => 'nullable|exists:inventory_items,id',
-            'alert_type' => 'required|string|max:255',
-            'threshold_value' => 'nullable|string|max:255',
-            'message' => 'required|string',
-            'is_active' => 'boolean',
-        ]);
-
-        InventoryAlert::create($validated);
-
-        return redirect()->route('admin.inventory-alerts.index')->with('success', 'Inventory alert created successfully.');
-    }
-
-    public function edit(InventoryAlert $inventoryAlert)
-    {
-        return Inertia::render('Admin/InventoryAlerts/Edit', [
-            'inventoryAlert' => $inventoryAlert->load('item'),
-        ]);
-    }
-
-    public function update(Request $request, InventoryAlert $inventoryAlert)
-    {
-        $validated = $request->validate([
-            'item_id' => 'nullable|exists:inventory_items,id',
-            'alert_type' => 'required|string|max:255',
-            'threshold_value' => 'nullable|string|max:255',
-            'message' => 'required|string',
-            'is_active' => 'boolean',
-        ]);
-
-        $inventoryAlert->update($validated);
-
-        return redirect()->route('admin.inventory-alerts.index')->with('success', 'Inventory alert updated successfully.');
-    }
-
-    public function destroy(InventoryAlert $inventoryAlert)
-    {
-        $inventoryAlert->delete();
-
-        return redirect()->route('admin.inventory-alerts.index')->with('success', 'Inventory alert deleted successfully.');
     }
 
     public function count()
     {
-        $count = InventoryAlert::where('is_active', true)->count();
-        return response()->json(['count' => $count]);
+        return response()->json(['count' => $this->service->count()]);
+    }
+
+    public function printAll()
+    {
+        return app(InventoryAlertService::class)->printAll(request());
+    }
+
+    public function printCurrent()
+    {
+        return app(InventoryAlertService::class)->printCurrent(request());
+    }
+
+    public function printSingle(InventoryAlert $inventory_alert)
+    {
+        return app(InventoryAlertService::class)->printSingle($inventory_alert, request());
+    }
+
+    /**
+     * Normalize Edit view to include populated selects for items and types.
+     */
+    public function edit($id)
+    {
+        $alert = $this->service->getById($id);
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
+        $alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue Return'];
+
+        return Inertia::render($this->viewName.'/Edit', [
+            lcfirst(class_basename($this->modelClass)) => $alert,
+            'inventoryItems' => $inventoryItems,
+            'alertTypes' => $alertTypes,
+        ]);
+    }
+
+    /**
+     * Provide populated selects for Create view to normalize dropdown data.
+     */
+    public function create()
+    {
+        $inventoryItems = InventoryItem::select('id', 'name')->orderBy('name')->get();
+        $alertTypes = ['Low Stock', 'Maintenance Due', 'Warranty Expiry', 'Overdue Return'];
+
+        return Inertia::render($this->viewName.'/Create', [
+            'inventoryItems' => $inventoryItems,
+            'alertTypes' => $alertTypes,
+        ]);
     }
 }

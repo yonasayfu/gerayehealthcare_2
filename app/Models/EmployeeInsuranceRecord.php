@@ -21,4 +21,20 @@ class EmployeeInsuranceRecord extends Model
         'verified',
         'verified_at',
     ];
+
+    /**
+     * Get the patient that owns this insurance record.
+     */
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
+    /**
+     * Get the insurance policy for this record.
+     */
+    public function policy()
+    {
+        return $this->belongsTo(InsurancePolicy::class, 'policy_id');
+    }
 }

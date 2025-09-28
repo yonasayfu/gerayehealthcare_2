@@ -2,123 +2,68 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\User;
-use App\Models\Staff;
+use App\Services\User\UserService;
+use App\Services\Validation\Rules\UserRules;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(UserService $userService)
+    {
+        parent::__construct(
+            $userService,
+            UserRules::class,
+            'Admin/Users',
+            'users',
+            User::class
+        );
+    }
+
     public function index(Request $request)
     {
-        $query = User::with('roles');
+        $data = $this->service->getAll($request, ['roles']);
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-        }
-
-        return Inertia::render('Admin/Users/Index', [
-            'users' => $query->paginate($request->get('per_page', 5))->withQueryString(), // Default to 5
-            'filters' => $request->only(['search', 'per_page']),
+        return Inertia::render($this->viewName.'/Index', [
+            $this->dataVariableName => $data,
+            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'sort_by', 'sort_order']),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource (Staff Registration).
-     */
-    public function create()
+    public function edit($id)
     {
-        return Inertia::render('Admin/Users/Create');
-    }
+        $user = $this->service->getById($id);
+        $roles = Role::all()->pluck('name');
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'position' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:255',
-            'hire_date' => 'nullable|date',
-        ]);
-
-        DB::transaction(function () use ($request) {
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            $user->staff()->create([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'position' => $request->position,
-                'department' => $request->department,
-                'hire_date' => $request->hire_date,
-            ]);
-
-            $user->assignRole('Staff');
-        });
-
-        return redirect()->route('admin.users.index')->with('success', 'New staff user created successfully.');
-    }
-
-    /**
-     * Show the form for editing the specified resource (Assigning Roles).
-     */
-    public function edit(User $user)
-    {
-        $user->load('roles');
-        
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user,
-            'roles' => Role::all()->pluck('name'),
+            'roles' => $roles,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage (Assigning Roles).
-     */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'role' => 'required|string|exists:roles,name',
+        $user = $this->service->getById($id);
+        $validatedData = $request->validate([
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'string|exists:roles,name',
         ]);
 
-        $user->syncRoles([$request->role]);
+        $user->syncRoles($validatedData['roles']);
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return redirect()->route('admin.users.index')->with('success', 'User role updated successfully.');
+        return redirect()->route('admin.users.index')->with('banner', 'User role updated successfully.')->with('bannerStyle', 'success');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(User $user)
+    public function show($id)
     {
-        if ($user->hasRole('Super Admin') && $user->id === auth()->id()) {
-            return back()->with('error', 'You cannot delete your own Super Admin account.');
-        }
+        $user = User::with('roles')->findOrFail($id);
 
-        $user->delete();
-
-        return back()->with('success', 'User deleted successfully.');
+        return Inertia::render('Admin/Users/Show', [
+            'user' => $user,
+        ]);
     }
 }

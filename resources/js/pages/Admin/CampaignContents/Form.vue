@@ -15,7 +15,10 @@ const props = defineProps({
 
 const formattedScheduledPostDate = computed({
   get: () => {
-    return props.form.scheduled_post_date ? format(new Date(props.form.scheduled_post_date), "yyyy-MM-dd'T'HH:mm") : '';
+    if (!props.form.scheduled_post_date) return '';
+    // Handle both date string and Date object
+    const date = new Date(props.form.scheduled_post_date);
+    return isNaN(date.getTime()) ? '' : format(date, "yyyy-MM-dd'T'HH:mm");
   },
   set: (value) => {
     props.form.scheduled_post_date = value;
@@ -24,12 +27,34 @@ const formattedScheduledPostDate = computed({
 
 const formattedActualPostDate = computed({
   get: () => {
-    return props.form.actual_post_date ? format(new Date(props.form.actual_post_date), "yyyy-MM-dd'T'HH:mm") : '';
+    if (!props.form.actual_post_date) return '';
+    // Handle both date string and Date object
+    const date = new Date(props.form.actual_post_date);
+    return isNaN(date.getTime()) ? '' : format(date, "yyyy-MM-dd'T'HH:mm");
   },
   set: (value) => {
     props.form.actual_post_date = value;
   },
 });
+
+// Handle JSON validation for engagement_metrics
+const handleEngagementMetricsInput = (event) => {
+  const value = event.target.value;
+  props.form.engagement_metrics = value;
+  
+  // Try to parse JSON to validate it
+  if (value.trim() !== '') {
+    try {
+      JSON.parse(value);
+      // Clear any previous JSON errors
+      if (props.form.errors.engagement_metrics && props.form.errors.engagement_metrics.includes('json')) {
+        delete props.form.errors.engagement_metrics;
+      }
+    } catch (e) {
+      // This is just client-side validation, server will handle actual validation
+    }
+  }
+};
 </script>
 
 <template>
@@ -39,7 +64,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="title"
         type="text"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.title"
         required
         autofocus
@@ -92,7 +117,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="media_url"
         type="url"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="props.form.media_url"
       />
       <InputError class="mt-2" :message="props.form.errors.media_url" />
@@ -116,7 +141,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="scheduled_post_date"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedScheduledPostDate"
       />
       <InputError class="mt-2" :message="props.form.errors.scheduled_post_date" />
@@ -127,7 +152,7 @@ const formattedActualPostDate = computed({
       <TextInput
         id="actual_post_date"
         type="datetime-local"
-        class="mt-1 block w-full shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
+        class="mt-1 block w-full shadow-sm bg-white dark:bg-gray-800 border border-gray-300 text-gray-900 dark:text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 p-2.5"
         v-model="formattedActualPostDate"
       />
       <InputError class="mt-2" :message="props.form.errors.actual_post_date" />
@@ -150,7 +175,9 @@ const formattedActualPostDate = computed({
         id="engagement_metrics"
         rows="6"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-cyan-300 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 dark:bg-gray-800 dark:text-white bg-gray-50 p-2.5"
-        v-model="props.form.engagement_metrics"
+        :value="props.form.engagement_metrics"
+        @input="handleEngagementMetricsInput"
+        placeholder='{"likes": 100, "shares": 50, "comments": 25}'
       ></textarea>
       <InputError class="mt-2" :message="props.form.errors.engagement_metrics" />
     </div>

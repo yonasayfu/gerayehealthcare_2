@@ -13,50 +13,50 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Call other seeders first to ensure roles and base data exist
         $this->call([
-            RolesAndPermissionsSeeder::class,
-            StaffSeeder::class, // Staff must be seeded before Patients
-            PatientSeeder::class,
-            CaregiverAssignmentSeeder::class,
-            ServiceSeeder::class, 
-            LeaveRequestSeeder::class,
-            InventorySeeder::class,
-            MarketingModuleMainSeeder::class,
-            MarketingRelatedSeeder::class,
-            CampaignContentSeeder::class,
-            MarketingTaskSeeder::class,
-            LeadSourceSeeder::class,
-            MrXInsuranceScenarioSeeder::class,
-            PagumeCampaignSeeder::class,
+            DemoDataSeeder::class,
+            MedicalVisitSeeder::class,
+            InvoiceTestDataSeeder::class,
         ]);
 
-        // Create sample data using factories
-        \App\Models\VisitService::factory(6)->create();
-        \App\Models\Message::factory(6)->create();
-
-        // --- THE FIX IS HERE ---
+        // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---
         // Use updateOrCreate to safely create or update the admin users.
         // This prevents duplicate email errors on subsequent seeding.
 
-        // Create or find the Super Admin user
-        $superAdminUser = User::updateOrCreate(
+        // Create or find the Legacy Super Admin user (if not created by TestUsersSeeder)
+        $legacySuperAdminUser = User::updateOrCreate(
             ['email' => 'superadmin@geraye.com'],
             [
-                'name' => 'Super Admin',
+                'name' => 'Legacy Super Admin',
                 'password' => bcrypt('password'),
             ]
         );
-        $superAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
+        $legacySuperAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
 
-        // Create or find the Admin user
-        $adminUser = User::updateOrCreate(
+        // Create or find the Legacy Admin user (if not created by TestUsersSeeder)
+        $legacyAdminUser = User::updateOrCreate(
             ['email' => 'admin@geraye.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Legacy Admin User',
                 'password' => bcrypt('password'),
             ]
         );
-        $adminUser->assignRole(RoleEnum::ADMIN->value);
+        $legacyAdminUser->assignRole(RoleEnum::ADMIN->value);
+
+        // Seed 2 initial messages to demo notifications
+        $staff = \App\Models\Staff::with('user')->first();
+        $patient = \App\Models\Patient::with('user')->first();
+        if ($staff && $staff->user && $patient && $patient->user) {
+            \App\Models\Message::firstOrCreate([
+                'sender_id' => $staff->user->id,
+                'receiver_id' => $patient->user->id,
+                'message' => 'Welcome to Geraye! Let us know how we can help.',
+            ]);
+            \App\Models\Message::firstOrCreate([
+                'sender_id' => $patient->user->id,
+                'receiver_id' => $staff->user->id,
+                'message' => 'Thank you doctor. I will send my information shortly.',
+            ]);
+        }
     }
 }

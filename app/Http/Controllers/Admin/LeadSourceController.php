@@ -2,169 +2,77 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreLeadSourceRequest;
-use App\Http\Requests\UpdateLeadSourceRequest;
+use App\DTOs\UpdateLeadSourceDTO;
+use App\Http\Controllers\Base\BaseController;
 use App\Models\LeadSource;
+use App\Services\LeadSource\LeadSourceService;
+use App\Services\Validation\Rules\LeadSourceRules;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Exports\LeadSourcesExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
 
-class LeadSourceController extends Controller
+class LeadSourceController extends BaseController
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request): \Inertia\Response
+    public function __construct(LeadSourceService $leadSourceService)
     {
-        $query = LeadSource::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('category', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-
-        // Sorting
-        if ($request->filled('sort') && !empty($request->input('sort'))) {
-            $query->orderBy($request->input('sort'), $request->input('direction', 'asc'));
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $leadSources = $query->paginate($request->input('per_page', 5))
-                             ->withQueryString();
-
-        return Inertia::render('Admin/LeadSources/Index', [
-            'leadSources' => $leadSources,
-            'filters' => $request->only(['search', 'sort', 'direction', 'per_page', 'is_active']),
-        ]);
+        parent::__construct(
+            $leadSourceService,
+            LeadSourceRules::class,
+            'Admin/LeadSources',
+            'leadSources',
+            LeadSource::class,
+            UpdateLeadSourceDTO::class
+        );
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Provide categories to Create view
      */
     public function create()
     {
-        $categories = ['Online', 'Offline', 'Referral', 'Event', 'Other']; // Define your categories here
+        $categories = $this->getCategories();
+
         return Inertia::render('Admin/LeadSources/Create', [
             'categories' => $categories,
         ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Provide categories to Edit view along with the record
      */
-    public function store(StoreLeadSourceRequest $request)
+    public function edit($id)
     {
-        LeadSource::create($request->validated());
+        $data = $this->service->getById($id);
+        $propName = lcfirst(class_basename($this->modelClass));
+        $categories = $this->getCategories();
 
-        return redirect()->route('admin.lead-sources.index')->with('success', 'Lead Source created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(LeadSource $leadSource)
-    {
-        return Inertia::render('Admin/LeadSources/Show', [
-            'leadSource' => $leadSource,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(LeadSource $leadSource)
-    {
-        $categories = ['Online', 'Offline', 'Referral', 'Event', 'Other']; // Define your categories here
         return Inertia::render('Admin/LeadSources/Edit', [
-            'leadSource' => $leadSource,
+            $propName => $data,
             'categories' => $categories,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateLeadSourceRequest $request, LeadSource $leadSource)
+    public function toggleStatus(Request $request, $id)
     {
-        $leadSource->update($request->validated());
+        $this->service->toggleStatus($id);
 
-        return redirect()->route('admin.lead-sources.index')->with('success', 'Lead Source updated successfully.');
+        return back()->with('banner', 'Status updated successfully.')->with('bannerStyle', 'success');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Temporary category source; replace with table-driven categories if needed.
+     *
+     * @return array<string>
      */
-    public function destroy(LeadSource $leadSource)
+    private function getCategories(): array
     {
-        $leadSource->delete();
-
-        return back()->with('success', 'Lead Source deleted successfully.');
-    }
-
-    public function toggleStatus(LeadSource $leadSource)
-    {
-        $leadSource->is_active = !$leadSource->is_active;
-        $leadSource->save();
-
-        return back()->with('success', 'Lead Source status updated successfully.');
-    }
-
-    public function export(Request $request)
-    {
-        $type = $request->input('type');
-        if ($type === 'csv') {
-            return Excel::download(new LeadSourcesExport, 'lead-sources.csv');
-        } elseif ($type === 'pdf') {
-            $leadSources = LeadSource::all();
-            $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
-            return $pdf->stream('lead-sources.pdf');
-        }
-        return redirect()->back()->with('error', 'Invalid export type.');
-    }
-
-    public function printAll(Request $request)
-    {
-        $leadSources = LeadSource::all();
-        $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
-        return $pdf->stream('lead-sources.pdf');
-    }
-
-    public function printSingle(LeadSource $leadSource)
-    {
-        $pdf = Pdf::loadView('pdf.lead-source-single', ['leadSource' => $leadSource])->setPaper('a4', 'portrait');
-        return $pdf->stream("lead-source-{$leadSource->id}.pdf");
-    }
-
-    public function printCurrent(Request $request)
-    {
-        $query = LeadSource::query();
-
-        // Search
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('category', 'ilike', "%{$search}%");
-        }
-
-        // Filtering
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->input('is_active'));
-        }
-
-        $leadSources = $query->get();
-
-        $pdf = Pdf::loadView('pdf.lead-sources', compact('leadSources'))->setPaper('a4', 'landscape');
-        return $pdf->stream('lead-sources-current.pdf');
+        return [
+            'Website',
+            'Referral',
+            'Social Media',
+            'Walk-in',
+            'Phone Inquiry',
+            'Email Campaign',
+            'Other',
+        ];
     }
 }

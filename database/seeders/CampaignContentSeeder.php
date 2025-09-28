@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\CampaignContent;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CampaignContentSeeder extends Seeder
@@ -13,6 +12,6 @@ class CampaignContentSeeder extends Seeder
      */
     public function run(): void
     {
-        CampaignContent::factory()->count(6)->create();
+        CampaignContent::factory()->count(3)->create();
     }
 }

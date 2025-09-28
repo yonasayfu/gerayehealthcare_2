@@ -17,10 +17,17 @@ class StaffPayout extends Model
         'payout_date',
         'status',
         'notes',
+        'requested_by',
+        'processed_by',
+        'processed_notes',
+        'reverted_by',
+        'reverted_reason',
+        'reverted_at',
     ];
 
     protected $casts = [
         'payout_date' => 'date',
+        'reverted_at' => 'datetime',
     ];
 
     /**

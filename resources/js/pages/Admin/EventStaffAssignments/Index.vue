@@ -1,16 +1,47 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3'
+import { confirmDialog } from '@/lib/confirm'
 import { ref, watch, computed } from 'vue'
-import AdminLayout from '@/layouts/AppLayout.vue'
-import { Download, FileText, Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { Edit3, Trash2, Printer, ArrowUpDown, Eye, Search } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
 import Pagination from '@/components/Pagination.vue'
 import { format } from 'date-fns'
+// Removed exports; using window.print for current view
 
-const props = defineProps({
-    assignments: Object,
-    filters: Object,
-});
+interface Assignment {
+  id: number;
+  event_id: number;
+  staff_id: number;
+  role: string;
+  notes?: string;
+  event?: { title?: string };
+  event_title?: string;
+  staff?: { full_name?: string };
+  staff_first_name?: string;
+  staff_last_name?: string;
+}
+
+interface Filters {
+  search?: string;
+  sort?: string;
+  direction?: 'asc' | 'desc';
+  per_page?: number;
+  event_id?: number | '';
+  staff_id?: number | '';
+  role?: string;
+}
+
+interface AssignmentsPagination {
+  data: Assignment[];
+  links: any[]; // Adjust with actual pagination link type if available
+  // Add other pagination properties like current_page, last_page, total, etc.
+}
+
+const props = defineProps<{
+    assignments: AssignmentsPagination;
+    filters: Filters;
+}>();
 
 const breadcrumbs = [
     { title: 'Dashboard', href: route('dashboard') },
@@ -21,13 +52,44 @@ const search = ref(props.filters.search || '');
 const sortField = ref(props.filters.sort || '');
 const sortDirection = ref(props.filters.direction || 'asc');
 const perPage = ref(props.filters.per_page || 5);
+const selectedEventId = ref<number | ''>(props.filters.event_id ?? '');
+const selectedStaffId = ref<number | ''>(props.filters.staff_id ?? '');
+const selectedRole = ref<string>(props.filters.role ?? '');
+
+// Derive filter options from current page data to avoid extra props
+const eventOptions = computed(() => {
+  const map = new Map<number, string>();
+  props.assignments.data.forEach((a: any) => {
+    const id = a.event_id;
+    const title = a.event?.title ?? a.event_title ?? `Event #${id}`;
+    if (id != null && !map.has(id)) map.set(id, title);
+  });
+  return Array.from(map.entries()).map(([id, title]) => ({ id, title }));
+});
+
+const staffOptions = computed(() => {
+  const map = new Map<number, string>();
+  props.assignments.data.forEach((a: any) => {
+    const id = a.staff_id;
+    const name = a.staff?.full_name
+      ?? (a.staff_first_name && a.staff_last_name ? `${a.staff_first_name} ${a.staff_last_name}` : `Staff #${id}`);
+    if (id != null && !map.has(id)) map.set(id, name);
+  });
+  return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+});
+
+const roleOptions = computed(() => {
+  const set = new Set<string>();
+  props.assignments.data.forEach((a: any) => { if (a.role) set.add(a.role); });
+  return Array.from(set.values());
+});
 
 const formattedGeneratedDate = computed(() => {
     return format(new Date(), 'PPP p');
 });
 
-watch([search, sortField, sortDirection, perPage], debounce(() => {
-    const params = {
+watch([search, sortField, sortDirection, perPage, selectedEventId, selectedStaffId, selectedRole], debounce(() => {
+    const params: Record<string, string | number> = { // Explicitly type params
         search: search.value,
         direction: sortDirection.value,
         per_page: perPage.value,
@@ -37,38 +99,39 @@ watch([search, sortField, sortDirection, perPage], debounce(() => {
         params.sort = sortField.value;
     }
 
+    if (selectedEventId.value !== '') params.event_id = Number(selectedEventId.value);
+    if (selectedStaffId.value !== '') params.staff_id = Number(selectedStaffId.value);
+    if (selectedRole.value) params.role = selectedRole.value;
+
     router.get(route('admin.event-staff-assignments.index'), params, {
         preserveState: true,
         replace: true,
     });
 }, 500));
 
-function destroy(id) {
-    if (confirm('Are you sure you want to delete this event staff assignment?')) {
-        router.delete(route('admin.event-staff-assignments.destroy', id));
+async function destroy(id: number) { // Explicitly type id
+    const ok = await confirmDialog({
+        title: 'Delete Event Staff Assignment',
+        message: 'Are you sure you want to delete this event staff assignment?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+    })
+    if (!ok) return
+    router.delete(route('admin.event-staff-assignments.destroy', id))
+}
+
+function printPage() {
+  setTimeout(() => {
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Print failed:', error);
+      alert('Failed to open print dialog. Please try again.');
     }
+  }, 100);
 }
 
-function exportData(type) {
-    window.open(route('admin.event-staff-assignments.export', { type }), '_blank');
-}
-
-function printCurrentView() {
-    setTimeout(() => {
-        try {
-            window.print();
-        } catch (error) {
-            console.error('Print failed:', error);
-            alert('Failed to open print dialog for current view. Please check your browser settings or try again.');
-        }
-    }, 100);
-}
-
-const printAllAssignments = () => {
-    window.open(route('admin.event-staff-assignments.export', { type: 'pdf' }), '_blank');
-};
-
-function toggleSort(field) {
+function toggleSort(field: string) { // Explicitly type field
     if (sortField.value === field) {
         sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
     } else {
@@ -76,51 +139,63 @@ function toggleSort(field) {
         sortDirection.value = 'asc';
     }
 }
+
+
+function truncate(str: string | undefined, n = 60): string {
+  if (!str) return '';
+  return str.length > n ? `${str.slice(0, n)}…` : str;
+}
+
+
 </script>
 
 <template>
     <Head title="Event Staff Assignments" />
 
-    <AdminLayout :breadcrumbs="breadcrumbs">
+    <AppLayout :breadcrumbs="breadcrumbs">
         <div class="space-y-6 p-6 print:p-0 print:space-y-0">
-            <div class="rounded-lg bg-muted/40 p-4 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-                <div>
-                    <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Event Staff Assignments</h1>
-                    <p class="text-sm text-muted-foreground">Manage all event staff assignments here.</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <Link :href="route('admin.event-staff-assignments.create')" class="inline-flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm px-4 py-2 rounded-md transition">
-                        + Add Assignment
-                    </Link>
-                    <button @click="exportData('csv')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Download class="h-4 w-4" /> CSV
-                    </button>
-                    <button @click="exportData('pdf')" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <FileText class="h-4 w-4" /> PDF
-                    </button>
-                    <button @click="printAllAssignments" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print All
-                    </button>
-                    <button @click="printCurrentView" class="inline-flex items-center gap-1 text-sm px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200">
-                        <Printer class="h-4 w-4" /> Print Current View
-                    </button>
-                </div>
+                  <!-- Liquid glass header with search card (no logic changed) -->
+      <div class="liquidGlass-wrapper print:hidden">
+        <div class="liquidGlass-inner-shine" aria-hidden="true"></div>
+
+        <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
+          <div class="flex items-center gap-4">
+            <div class="print:hidden">
+              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Event Staff Assignments</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Manage event staff assignments</p>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-                <div class="relative w-full md:w-1/3">
-                    <input
-                        type="text"
-                        v-model="search"
-                        placeholder="Search assignments..."
-                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5"
-                    />
-                    <Search class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-                </div>
+            <!-- (removed header search) -->
+          </div>
+
+          <div class="flex items-center gap-2 print:hidden">
+            <Link :href="route('admin.event-staff-assignments.create')" class="btn-glass">
+              <span>Add Event Staff Assignment</span>
+            </Link>
+            <button @click="printPage" class="btn-glass btn-glass-sm">
+              <Printer class="icon" />
+              <span class="hidden sm:inline">Print Current</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+                  <!-- Search / per page -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+        <!-- keep original input size & rounded-lg but wrap with a subtle liquid-glass outer effect -->
+        <div class="search-glass relative w-full md:w-1/3">
+          <input
+            v-model="search"
+            type="text"
+            placeholder="Search event staff assignments..."
+            class="shadow-sm bg-white border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full pl-3 pr-10 py-2.5 dark:bg-gray-800 dark:border-gray-700 dark:placeholder-gray-400 dark:text-gray-100 relative z-10"
+          />
+          <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
+        </div>
 
                 <div>
                     <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Pagination per page:</label>
-                    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                    <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="25">25</option>
@@ -128,6 +203,31 @@ function toggleSort(field) {
                         <option value="100">100</option>
                     </select>
                 </div>
+            </div>
+
+            <!-- Filters Row -->
+            <div class="flex flex-col md:flex-row gap-4 items-center print:hidden">
+              <div class="w-full md:w-1/3">
+                <label class="block text-xs text-gray-600 mb-1">Event</label>
+                <select v-model="selectedEventId" class="w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                  <option :value="''">All Events</option>
+                  <option v-for="e in eventOptions" :key="e.id" :value="e.id">{{ e.title }}</option>
+                </select>
+              </div>
+              <div class="w-full md:w-1/3">
+                <label class="block text-xs text-gray-600 mb-1">Staff</label>
+                <select v-model="selectedStaffId" class="w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                  <option :value="''">All Staff</option>
+                  <option v-for="s in staffOptions" :key="s.id" :value="s.id">{{ s.name }}</option>
+                </select>
+              </div>
+              <div class="w-full md:w-1/3">
+                <label class="block text-xs text-gray-600 mb-1">Role</label>
+                <select v-model="selectedRole" class="w-full rounded-md border-gray-300 dark:bg-gray-800 dark:text-white">
+                  <option value="">All Roles</option>
+                  <option v-for="r in roleOptions" :key="r" :value="r">{{ r }}</option>
+                </select>
+              </div>
             </div>
 
             <div class="overflow-x-auto bg-white dark:bg-gray-900 shadow rounded-lg print:shadow-none print:rounded-none print:bg-transparent">
@@ -142,46 +242,57 @@ function toggleSort(field) {
                     <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
                         <tr>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('event_id')">
-                                Event ID <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                                Event <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('staff_id')">
-                                Staff ID <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
+                                Staff <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
                             <th class="px-6 py-3 cursor-pointer" @click="toggleSort('role')">
                                 Role <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
                             </th>
+                            <th class="px-6 py-3">Notes</th>
                             <th class="px-6 py-3 text-right print:hidden">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="assignment in assignments.data" :key="assignment.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 print-table-row">
-                            <td class="px-6 py-4">{{ assignment.event_id }}</td>
-                            <td class="px-6 py-4">{{ assignment.staff_id }}</td>
+                            <td class="px-6 py-4">{{ assignment.event?.title ?? assignment.event_title ?? assignment.event_id }}</td>
+                            <td class="px-6 py-4">
+                              {{ assignment.staff?.full_name
+                                  ?? (assignment.staff_first_name && assignment.staff_last_name
+                                        ? `${assignment.staff_first_name} ${assignment.staff_last_name}`
+                                        : assignment.staff_id) }}
+                            </td>
                             <td class="px-6 py-4">{{ assignment.role }}</td>
+                            <td class="px-6 py-4">{{ truncate(assignment.notes, 60) }}</td>
                             <td class="px-6 py-4 text-right print:hidden">
                                 <div class="inline-flex items-center justify-end space-x-2">
-                                    <Link
-                                        :href="route('admin.event-staff-assignments.show', assignment.id)"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500"
-                                        title="View Details"
-                                    >
-                                        <Eye class="w-4 h-4" />
-                                    </Link>
-                                    <Link
-                                        :href="route('admin.event-staff-assignments.edit', assignment.id)"
-                                        class="inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 text-blue-600"
-                                        title="Edit"
-                                    >
-                                        <Edit3 class="w-4 h-4" />
-                                    </Link>
-                                    <button @click="destroy(assignment.id)" class="text-red-600 hover:text-red-800 inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-red-100 dark:hover:bg-red-900" title="Delete">
-                                        <Trash2 class="w-4 h-4" />
-                                    </button>
-                                </div>
+                  <Link
+                    :href="route('admin.event-staff-assignments.show', assignment.id)"
+                    class="inline-flex items-center p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="View Details"
+                  >
+                    <Eye class="w-4 h-4" />
+                  </Link>
+                  <Link
+                    :href="route('admin.event-staff-assignments.edit', assignment.id)"
+                    class="inline-flex items-center p-2 rounded-md text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-gray-700"
+                    title="Edit"
+                  >
+                    <Edit3 class="w-4 h-4" />
+                  </Link>
+                  <button
+                    @click="destroy(assignment.id)"
+                    class="inline-flex items-center p-2 rounded-md text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-gray-700"
+                    title="Delete"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
                             </td>
                         </tr>
                         <tr v-if="assignments.data.length === 0">
-                            <td colspan="4" class="text-center px-6 py-4 text-gray-400">No event staff assignments found.</td>
+                            <td colspan="5" class="text-center px-6 py-4 text-gray-400">No event staff assignments found.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -194,131 +305,16 @@ function toggleSort(field) {
                 <p>Document Generated: {{ formattedGeneratedDate }}</p>
             </div>
         </div>
-    </AdminLayout>
+    </AppLayout>
 </template>
 
 <style>
-/* Print-specific styles for Index.vue (Print Current View) */
 @media print {
-    @page {
-        size: A4 landscape;
-        margin: 0.5cm;
-    }
-
-    body {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color: #000 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: visible !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-header-content {
-        display: block !important;
-        text-align: center;
-        padding-top: 0.5cm;
-        padding-bottom: 0.5cm;
-        margin-bottom: 0.8cm;
-    }
-    .print-logo {
-        max-width: 150px;
-        max-height: 50px;
-        margin-bottom: 0.5rem;
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .print-clinic-name {
-        font-size: 1.6rem !important;
-        margin-bottom: 0.2rem !important;
-        line-height: 1.2 !important;
-        font-weight: bold;
-    }
-    .print-document-title {
-        font-size: 0.85rem !important;
-        color: #555 !important;
-    }
-    hr { border-color: #ccc !important; }
-
-    .space-y-6.p-6 {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .overflow-x-auto.bg-white.dark\:bg-gray-900.shadow.rounded-lg {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        background-color: transparent !important;
-        overflow: visible !important;
-        padding: 1cm;
-        transform: scale(0.97);
-        transform-origin: top left;
-    }
-
-    .print-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        font-size: 0.8rem !important;
-        table-layout: fixed;
-    }
-
-    .print-table-header {
-        background-color: #f0f0f0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        text-transform: uppercase !important;
-    }
-
-    .print-table th, .print-table td {
-        border: 1px solid #ddd !important;
-        padding: 0.4rem 0.6rem !important;
-        color: #000 !important;
-        vertical-align: top !important;
-        word-break: break-word;
-    }
-
-    .print-table th {
-        font-weight: bold !important;
-        font-size: 0.7rem !important;
-        white-space: nowrap;
-    }
-
-    .print-table th:nth-child(1), .print-table td:nth-child(1) { width: 30%; }
-    .print-table th:nth-child(2), .print-table td:nth-child(2) { width: 25%; }
-    .print-table th:nth-child(3), .print-table td:nth-child(3) { width: 20%; }
-
-    .print-table tbody tr:nth-child(even) {
-        background-color: #f9f9f9 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    .print-table tbody tr:last-child {
-        border-bottom: 1px solid #ddd !important;
-    }
-
-    .print-table th:last-child,
-    .print-table td:last-child {
-        display: none !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print-footer {
-        display: block !important;
-        text-align: center;
-        margin-top: 1cm;
-        font-size: 0.75rem !important;
-        color: #666 !important;
-    }
-    .print-footer hr {
-        border-color: #ccc !important;
-    }
+  @page { size: A4 landscape; margin: 12mm; }
+  .app-sidebar, .app-sidebar-header, header[role="banner"], nav[role="navigation"] { display: none !important; }
+  table { border-collapse: collapse; width: 100%; }
+  thead { display: table-header-group; }
+  tfoot { display: table-footer-group; }
+  tr, td, th { page-break-inside: avoid; break-inside: avoid; }
 }
 </style>
