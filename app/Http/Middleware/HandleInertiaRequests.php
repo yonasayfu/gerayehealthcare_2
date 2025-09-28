@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use App\Support\ModuleAccess;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -32,6 +33,7 @@ class HandleInertiaRequests extends Middleware
                 $permissions = $user->getAllPermissions()->pluck('name')->toArray();
             }
         }
+        $modules = $user ? ModuleAccess::forUser($user) : [];
 
         $flashData = [
             'banner' => $request->session()->get('banner'),
@@ -48,11 +50,15 @@ class HandleInertiaRequests extends Middleware
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'staff_id' => optional($user->staff)->id,
                     'roles' => $roles,
                     'permissions' => $permissions,
                     'profile_photo_url' => $user->profile_photo_url ?? null,
                 ] : null,
             ],
+            'modules' => $modules,
+            // Allow toggling conservative route checks in Sidebar (default true = lenient)
+            'sidebarLenientRoutes' => true,
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

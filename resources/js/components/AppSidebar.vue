@@ -60,6 +60,27 @@ const user = computed(() => (page.props as any)?.auth?.user ?? null);
 // Normalize roles to lowercase for consistent checks
 const userRoles = computed(() => (user.value?.roles || []).map((r: string) => r.toLowerCase()));
 
+// Module access shared from backend (ModuleAccess::forUser)
+type ModuleAccess = { key: string; access_level: 'view'|'manage'|'full'; };
+const modules = computed<ModuleAccess[]>(() => (page.props as any)?.modules || []);
+const routeLenient = computed<boolean>(() => {
+  const v = (page.props as any)?.sidebarLenientRoutes
+  return typeof v === 'boolean' ? v : true
+})
+const moduleMap = computed<Record<string, 'view'|'manage'|'full'>>(() => {
+  const m: Record<string, 'view'|'manage'|'full'> = {};
+  for (const mod of modules.value) m[mod.key] = mod.access_level;
+  return m;
+});
+const levelRank = { view: 1, manage: 2, full: 3 } as const;
+const hasModule = (keys: string | string[], min: 'view'|'manage'|'full' = 'view'): boolean => {
+  const arr = Array.isArray(keys) ? keys : [keys];
+  return arr.some(k => {
+    const lvl = moduleMap.value[k];
+    return lvl ? levelRank[lvl] >= levelRank[min] : false;
+  });
+};
+
 const hasRole = (role: string): boolean => {
     if (!user.value) return false;
     return userRoles.value?.includes(role.toLowerCase()) || false;
@@ -126,8 +147,7 @@ const tasksNavGroup: SidebarNavGroup = {
     icon: ClipboardList,
     items: [
         { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
-        { title: 'Request Leave', routeName: 'staff.leave-requests.index', icon: CalendarOff },
-        { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList },
+        { title: 'Task Delegations', routeName: 'admin.task-delegations.index', icon: ClipboardList, permission: 'view task delegations' },
         { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
     ],
 };
@@ -149,7 +169,6 @@ const allAdminNavItems: SidebarNavGroup[] = [
     group: 'Patient Management',
     icon: UserPlus,
     items: [
-      { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
       { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
       { title: 'Caregiver Assignments', routeName: 'admin.assignments.index', icon: CalendarClock, permission: 'view assignments' },
       { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visit services' },
@@ -277,6 +296,25 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
     const filteredGroups: SidebarNavGroup[] = [];
 
     for (const group of allAdminNavItems) {
+        // Gate groups by module access when available
+        const gate: Record<string, string[] | undefined> = {
+          'Tasks': ['tasking'],
+          'Patient Management': ['patients'],
+          'Medical Records': ['clinical','medical-documents'],
+          'Administrative Tools': ['staff-ops','system'],
+          'Inventory Management': ['inventory'],
+          'Marketing Management': ['marketing'],
+          'Financial Management': ['financial'],
+          'Reports & Analytics': ['dashboards','reports'],
+          'Events Management': ['events'],
+          'Insurance': ['insurance'],
+          'Partnerships': ['partnerships'],
+          'Communication': ['communication'],
+        };
+        const required = gate[group.group];
+        if (required && !hasModule(required, 'view')) {
+          continue;
+        }
         // Skip super admin only groups unless user is super admin
         if (group.superAdminOnly && !hasRole('super-admin')) {
             continue;
@@ -284,6 +322,10 @@ const getFilteredNavItems = (): SidebarNavGroup[] => {
 
         // Filter items based on permissions
         const filteredItems = group.items.filter(item => {
+            // Hide admin.* routes for non-admin-level roles
+            const isAdminRoute = !!item.routeName && item.routeName.startsWith('admin.');
+            const isAdminLevel = hasRole('super-admin') || hasRole('admin') || hasRole('ceo') || hasRole('coo');
+            if (isAdminRoute && !isAdminLevel) return false;
             // Always show dashboard
             if (item.routeName === 'dashboard') return true;
 
@@ -337,8 +379,8 @@ function hasRoute(name?: string) {
   const z: any = (window as any).Ziggy;
   if (z && z.routes && z.routes[name]) return true;
 
-  // Last resort: do not hide the item if uncertain
-  return true;
+  // Last resort: configurable (lenient by default)
+  return routeLenient.value;
 }
 
 function safeHref(name?: string) {
@@ -422,11 +464,8 @@ const getStaffNavItems = (): SidebarNavGroup[] => {
             group: 'Patient Care',
             icon: UserPlus,
             items: [
-                { title: 'Dashboard', routeName: 'dashboard', icon: LayoutGrid },
-                { title: 'Patients', routeName: 'admin.patients.index', icon: UserPlus, permission: 'view patients' },
                 { title: 'My Visits', routeName: 'staff.my-visits.index', icon: Stethoscope },
-                { title: 'Visit Services', routeName: 'admin.visit-services.index', icon: Stethoscope, permission: 'view visit services' },
-                { title: 'Appointments', routeName: 'admin.appointments.index', icon: CalendarDays, permission: 'view appointments' },
+                { title: 'My Patients', routeName: 'staff.my-patients.index', icon: Users },
             ]
         },
         {
@@ -435,20 +474,11 @@ const getStaffNavItems = (): SidebarNavGroup[] => {
             items: [
                 { title: 'My Earnings', routeName: 'staff.my-earnings.index', icon: DollarSign },
                 { title: 'My Availability', routeName: 'staff.my-availability.index', icon: UserCheck },
-                { title: 'My Tasks', routeName: 'staff.task-delegations.index', icon: ClipboardList },
-                { title: 'My To‑Do', routeName: 'staff.my-todo.index', icon: CheckSquare },
                 { title: 'My Leave Requests', routeName: 'staff.leave-requests.index', icon: CalendarOff },
+                { title: 'My Documents', routeName: 'staff.my-documents.index', icon: FileText },
             ]
         },
-        {
-            group: 'Clinical Tools',
-            icon: Stethoscope,
-            items: [
-                { title: 'Medical Records', routeName: 'admin.medical-records.index', icon: FileText, permission: 'view medical records' },
-                { title: 'Prescriptions', routeName: 'admin.prescriptions.index', icon: Pill, permission: 'view prescriptions' },
-                { title: 'Lab Results', routeName: 'admin.lab-results.index', icon: FlaskConical, permission: 'view lab results' },
-            ]
-        },
+        // Clinical Tools group removed for staff until staff-specific routes exist
         communicationNavGroup,
     ];
 
@@ -456,7 +486,6 @@ const getStaffNavItems = (): SidebarNavGroup[] => {
     return staffGroups.map(group => ({
         ...group,
         items: group.items.filter(item => {
-            if (item.routeName === 'dashboard') return true;
             if (item.permission) return can(item.permission);
             return true;
         })

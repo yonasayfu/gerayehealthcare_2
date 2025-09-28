@@ -32,7 +32,7 @@ Applies to default configuration. Fine-grained access is controlled via Spatie p
 - Insurance: `view insurance companies`, `view insurance policies`, `view employee insurance records`, `view insurance claims`
 - Ethiopian Calendar: `view ethiopian calendar days`
 - Events: `view events`, `view eligibility criteria`, `view event recommendations`, `view event staff assignments`, `view event participants`, `view event broadcasts`
-- Marketing: `manage marketing` (UI), plus granular: `view marketing campaigns`, `view marketing leads`, `view marketing analytics` (API)
+- Marketing: `manage marketing` (UI), plus granular: `view marketing campaigns`, `view marketing leads`, `view marketing analytics` (API). Admin marketing routes are enforced with `can:manage marketing`; analytics endpoints use `can:view marketing analytics`.
 - Reports: `view reports`
 - Analytics (admin analytics dashboard): `view analytics dashboard`
 - Global Search: `perform global search`
@@ -44,6 +44,7 @@ Applies to default configuration. Fine-grained access is controlled via Spatie p
 - Links render only if the user has the exact permission used by the backend route.
 - Staff-only tools (My Tasks, My Visits, My Availability, My Earnings, My Leave Requests) require the Staff role and render independently of admin modules.
 - System Management (Roles/Users) renders only for Super Admin by default: `manage roles`, `manage users`.
+ - Route presence fallback in the sidebar is configurable via `sidebarLenientRoutes` (default: true/lenient).
 
 ## API Protection
 
@@ -53,9 +54,9 @@ Applies to default configuration. Fine-grained access is controlled via Spatie p
 
 - When a user has multiple roles (e.g., CEO + Staff), the sidebar merges Admin and Staff groups, deduplicating overlapping links.
 - Super Admin always sees all modules; Staff tools are additionally shown if the Super Admin also has the Staff role.
+ - Non-staff admin users receive friendly banners on staff-only pages requiring a Staff profile (My Availability, My Patients, My Documents, My Visits actions).
 
 ## Next Steps / Validation
 
 - Verify role/permission assignment UI updates reflect in Inertia `auth.user.permissions` promptly (navigate or reload to refresh sidebar).
 - Optionally add server-side `can:` middleware to marketing routes for stricter enforcement.
-

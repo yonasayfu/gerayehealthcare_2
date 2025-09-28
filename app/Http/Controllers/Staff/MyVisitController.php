@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\DTOs\UpdateVisitServiceDTO;
 use App\Http\Requests\VisitService\CheckInRequest as WebCheckInRequest;
 use App\Http\Requests\VisitService\CheckOutRequest as WebCheckOutRequest;
 use App\Http\Requests\StoreVisitReportRequest;
@@ -48,7 +49,11 @@ class MyVisitController extends Controller
      */
     public function checkIn(WebCheckInRequest $request, VisitService $visit)
     {
-        if ($visit->staff_id !== Auth::user()->staff->id) {
+        $staff = Auth::user()->staff;
+        if (! $staff) {
+            return redirect()->route('dashboard')->with('banner', 'Your account is not linked to a staff profile.')->with('bannerStyle', 'danger');
+        }
+        if ($visit->staff_id !== $staff->id) {
             abort(403);
         }
 
@@ -69,7 +74,11 @@ class MyVisitController extends Controller
      */
     public function checkOut(WebCheckOutRequest $request, VisitService $visit)
     {
-        if ($visit->staff_id !== Auth::user()->staff->id) {
+        $staff = Auth::user()->staff;
+        if (! $staff) {
+            return redirect()->route('dashboard')->with('banner', 'Your account is not linked to a staff profile.')->with('bannerStyle', 'danger');
+        }
+        if ($visit->staff_id !== $staff->id) {
             abort(403);
         }
 
@@ -99,7 +108,11 @@ class MyVisitController extends Controller
     public function showReportForm(VisitService $visit)
     {
         // Security check
-        if ($visit->staff_id !== Auth::user()->staff->id) {
+        $staff = Auth::user()->staff;
+        if (! $staff) {
+            return redirect()->route('dashboard')->with('banner', 'Your account is not linked to a staff profile.')->with('bannerStyle', 'danger');
+        }
+        if ($visit->staff_id !== $staff->id) {
             abort(403);
         }
 
@@ -115,7 +128,11 @@ class MyVisitController extends Controller
     public function storeReport(StoreVisitReportRequest $request, VisitService $visit)
     {
         // Security check
-        if ($visit->staff_id !== Auth::user()->staff->id) {
+        $staff = Auth::user()->staff;
+        if (! $staff) {
+            return redirect()->route('dashboard')->with('banner', 'Your account is not linked to a staff profile.')->with('bannerStyle', 'danger');
+        }
+        if ($visit->staff_id !== $staff->id) {
             abort(403);
         }
 
@@ -132,7 +149,7 @@ class MyVisitController extends Controller
                 prescription_file: $request->file('prescription_file'),
                 vitals_file: $request->file('vitals_file'),
                 status: $visit->status,
-                cost: $validated['cost'],
+                cost: $validated['cost'] ?? null,
                 is_paid_to_staff: $visit->is_paid_to_staff,
                 is_invoiced: $visit->is_invoiced,
                 service_id: $validated['service_id'],
