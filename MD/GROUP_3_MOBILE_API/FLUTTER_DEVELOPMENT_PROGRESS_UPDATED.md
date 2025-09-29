@@ -170,14 +170,14 @@
 ---
 
 ### **Phase 7: Notifications (Week 7)** 
-**Status**: ⏳ **PENDING** | **Progress**: 0% | **ETA**: 1 week
+**Status**: ⚙️ **IN PROGRESS** | **Progress**: 75% | **ETA**: 1 week
 
-#### **Planned Tasks** ⏳
-- ⏳ Push notification integration
-- ⏳ In-app notification system
-- ⏳ Notification history and management
-- ⏳ Real-time notification delivery
-- ⏳ Notification preferences integration
+#### **Updates**
+- ✅ Push notification token registration (FCM + API sync)
+- ✅ Notification history fetched from `/api/v1/notifications`
+- ✅ In-app persona-aware badge counts
+ - ✅ Notification preference toggles (persisted via `/api/v1/notifications/preferences`)
+- ⏳ Real-time delivery polish
 
 ---
 

@@ -70,6 +70,32 @@ class TestUsersSeeder extends Seeder
                 ],
             ],
             [
+                'name' => 'Doctor User',
+                'email' => 'doctor@gerayehealthcare.com',
+                'password' => 'password',
+                'role' => RoleEnum::STAFF,
+                'staff_data' => [
+                    'first_name' => 'Doctor',
+                    'last_name' => 'User',
+                    'position' => 'Senior Doctor',
+                    'department' => 'Clinical',
+                    'phone' => '+251911000007',
+                ],
+            ],
+            [
+                'name' => 'Nurse User',
+                'email' => 'nurse@gerayehealthcare.com',
+                'password' => 'password',
+                'role' => RoleEnum::STAFF,
+                'staff_data' => [
+                    'first_name' => 'Nurse',
+                    'last_name' => 'User',
+                    'position' => 'Senior Nurse',
+                    'department' => 'Clinical',
+                    'phone' => '+251911000008',
+                ],
+            ],
+            [
                 'name' => 'Staff User',
                 'email' => 'staff@gerayehealthcare.com',
                 'password' => 'password',

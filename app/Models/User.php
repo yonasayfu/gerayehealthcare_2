@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles; // <-- Ensure this import is present
+use Illuminate\Database\Eloquent\Relations\HasOne as RelationsHasOne;
 
 class User extends Authenticatable
 {
@@ -58,5 +59,10 @@ class User extends Authenticatable
     public function groups()
     {
         return $this->belongsToMany(Group::class, 'group_members');
+    }
+
+    public function notificationSettings(): RelationsHasOne
+    {
+        return $this->hasOne(NotificationSetting::class);
     }
 }

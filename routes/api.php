@@ -17,8 +17,20 @@ use App\Http\Controllers\Api\V1\ModuleController;
 use App\Http\Controllers\GroupMessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\App;
 
 Route::prefix('v1')->group(function () {
+    // Public health endpoint for uptime checks
+    Route::get('/system/health', function () {
+        return response()->json([
+            'status' => 'ok',
+            'env' => \Illuminate\Support\Facades\App::environment(),
+            'app' => config('app.name'),
+            'version' => config('app.version') ?? null,
+            'time' => now()->toIso8601String(),
+        ]);
+    });
+
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -29,6 +41,23 @@ Route::prefix('v1')->group(function () {
         });
 
         Route::get('/modules', ModuleController::class);
+
+        // Generic incremental sync stub (mobile offline sync download)
+        Route::get('/sync/changes', function (Request $request) {
+            $since = $request->query('since');
+            return response()->json([
+                'data' => [
+                    'users' => [],
+                    'conversations' => [],
+                    'messages' => [],
+                ],
+                'meta' => [
+                    'since' => $since,
+                    'generated_at' => now()->toIso8601String(),
+                ],
+            ]);
+        });
+
 
         // Profile endpoints
         Route::get('/me', [UserController::class, 'me']);
@@ -163,13 +192,20 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/{notification}/read', [ApiNotificationController::class, 'markRead'])
             ->middleware('permission:view notifications');
 
+        Route::get('/notification-settings', [\App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'show']);
+        Route::put('/notification-settings', [\App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'update']);
+
+        // Mobile alias for notification preferences
+        Route::get('/notifications/preferences', [\App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'show']);
+        Route::put('/notifications/preferences', [\App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'update']);
+        Route::patch('/notifications/preferences', [\App\Http\Controllers\Api\V1\NotificationSettingsController::class, 'update']);
+
         // Push tokens
         Route::post('/push-tokens', [PushTokenController::class, 'store']);
         Route::delete('/push-tokens', [PushTokenController::class, 'destroy']);
 
-        // Documents
-        Route::get('/documents/my', [ApiDocumentController::class, 'my'])
-            ->middleware('permission:view medical documents');
+        // Documents (self): allow authenticated users; controller limits scope
+        Route::get('/documents/my', [ApiDocumentController::class, 'my']);
         Route::get('/documents/{document}/download', [ApiDocumentController::class, 'download'])
             ->middleware('permission:download medical documents');
         Route::post('/documents', [ApiDocumentController::class, 'store'])
