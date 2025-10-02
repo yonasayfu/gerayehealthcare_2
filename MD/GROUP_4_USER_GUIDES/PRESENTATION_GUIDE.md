@@ -45,7 +45,7 @@ WEB APPLICATION                    MOBILE APPLICATION
 🖨️ Print & export capabilities    📴 Offline capability
 
 SHARED BACKEND
-🔗 Laravel API with MySQL Database
+🔗 Laravel API with Postgrsql Database
 🔐 Unified Authentication & RBAC
 ☁️ Cloud-ready deployment
 ```
@@ -142,7 +142,7 @@ CLINICAL MOBILITY
 ✅ Bedside patient care documentation
 ✅ Mobile prescription writing
 ✅ Photo capture & documentation
-✅ Voice-to-text note taking (Not Implmented)
+
 
 PATIENT ENGAGEMENT
 ✅ Guest appointment booking
@@ -246,7 +246,7 @@ AUTHENTICATION
 
 BACKEND TECHNOLOGY
 • Laravel 11 (PHP Framework)
-• MySQL Database with optimized indexes
+• Postgrsql Database with optimized indexes
 • RESTful API architecture
 • Spatie Permissions for RBAC
 • Queue system for background processing

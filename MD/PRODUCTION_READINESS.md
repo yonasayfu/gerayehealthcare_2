@@ -1,5 +1,15 @@
 # Geraye Healthcare — Production Readiness
 
+## 🌐 Deployment Platform: Laravel Cloud
+
+Laravel Cloud is the recommended hosting platform for this Laravel application, providing:
+- Automatic PostgreSQL database provisioning
+- Built-in queue workers and scheduler
+- Zero-downtime deployments
+- Automatic SSL certificates
+- Integrated monitoring and logging
+- Redis caching (optional)
+
 ## 1) Environment Configuration (Backend)
 - `APP_ENV=production`
 - `APP_DEBUG=false`
@@ -50,5 +60,59 @@ Run after deploy (CI/CD or once on boot):
 
 ## 8) Logging & Monitoring
 - `LOG_CHANNEL=stack`, `LOG_LEVEL=info`
-- Enable APM/metrics in your hosting (Render/AWS) and set monitors on health endpoint.
+- Laravel Cloud provides built-in logging and monitoring
+- Set up health check monitors on `/api/v1/system/health` endpoint
+- Configure alert notifications for downtime or errors
+
+## 9) Laravel Cloud Specific Steps
+
+### Initial Setup
+1. **Create Project** in Laravel Cloud console
+2. **Connect Repository** (GitHub/GitLab)
+3. **Configure Environment Variables** via dashboard
+4. **Database** provisioned automatically (PostgreSQL)
+5. **Deploy** automatically on push to main branch
+
+### Post-Deployment Commands
+Run these via Laravel Cloud CLI or dashboard:
+```bash
+php artisan migrate --force
+php artisan db:seed --class=RolesAndPermissionsSeeder
+php artisan db:seed --class=TestUsersSeeder
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan storage:link
+```
+
+### Queue & Scheduler Configuration
+- **Enable Queue Workers** in dashboard
+  - Command: `php artisan queue:work --sleep=3 --tries=3`
+- **Enable Scheduler** (automatic)
+  - Runs Laravel scheduler every minute
+
+### Domain & SSL
+- Add custom domain in dashboard
+- Update DNS records as instructed
+- SSL certificate provisioned automatically (Let's Encrypt)
+
+### Mobile API Configuration
+- API endpoint: `https://your-domain.com/api/v1`
+- Or subdomain: `https://api.your-domain.com/api/v1`
+- Configure `SANCTUM_STATEFUL_DOMAINS` with your domain
+- Update Flutter app API base URL
+
+### Scaling & Performance
+- Laravel Cloud handles scaling automatically
+- Consider Redis for caching if high traffic
+- Database connection pooling included
+- CDN for static assets (optional)
+
+## 10) Security Hardening
+- Rotate test user passwords immediately after seeding
+- Set strong `APP_KEY` (Laravel Cloud generates automatically)
+- Configure `TRUSTED_PROXIES` (usually `*` for Laravel Cloud)
+- Enable 2FA for admin users
+- Review and restrict API rate limits
+- Backup strategy (Laravel Cloud provides automatic backups)
 

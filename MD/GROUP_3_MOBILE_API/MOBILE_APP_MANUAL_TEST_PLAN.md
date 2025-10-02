@@ -3,12 +3,53 @@
 ## 1. Prerequisites
 - **Backend**: Laravel API running locally (default `php artisan serve --host=127.0.0.1 --port=8000`).
   - Ensure `.env` has `SANCTUM_STATEFUL_DOMAINS=127.0.0.1:8000` and migration/seed run (`php artisan migrate --seed`).
+
+
 - **Mobile**: Flutter >=3.0 SDK installed, iOS/Android emulator (or physical device) configured.
+  - Ensure `pub get` and `flutter pub run build_runner build` run before testing.
+
+## 2. Test Cases
+
+### 2.1. Login
+- **Test Case**: Login with valid credentials
+  - **Steps**:
+    1. Enter valid email and password
+    2. Click on the login button
+  - **Expected Result**: User is logged in successfully and redirected to the dashboard
+
+
+- **Test Case**: Login with invalid credentials
+  - **Steps**:
+    1. Enter invalid email and password
+    2. Click on the login button
+
 - **Accounts**: seeded credentials
   - Super Admin: `superadmin@gerayehealthcare.com / SuperAdmin123!`
   - Doctor: `doctor@gerayehealthcare.com / Doctor123!`
  - Nurse: `nurse@gerayehealthcare.com / Nurse123!`
   - Patient: `patient@gerayehealthcare.com / Patient123!`
+
+### 2.2. Dashboard
+- **Test Case**: Dashboard visibility
+  - **Steps**:
+    1. Login with valid credentials
+    2. Verify that the dashboard is visible
+  - **Expected Result**: Dashboard is visible with appropriate data
+
+### 2.3. Messaging
+- **Test Case**: Send message
+  - **Steps**:
+    1. Login with valid credentials
+    2. Click on the messaging tab
+    3. Select a recipient
+    4. Enter a message
+    5. Click on the send button
+- **Accounts**: seeded credentials
+  - Super Admin: `superadmin@gerayehealthcare.com / SuperAdmin123!`
+  - Doctor: `doctor@gerayehealthcare.com / Doctor123!`
+ - Nurse: `nurse@gerayehealthcare.com / Nurse123!`
+  - Patient: `patient@gerayehealthcare.com / Patient123!`
+
 
 | Persona | Focus Areas |
 | --- | --- |
@@ -19,12 +60,18 @@
 
 Tick boxes in the tracker once each persona scenario has been exercised during regression.
 
+
+
+
+
 ## 2. Environment Setup
 1. Start Laravel backend:
    ```bash
    cd /Users/yonassayfu/VSProject/gerayehealthcare
    php artisan serve --host=127.0.0.1 --port=8000
    ```
+
+
 2. Launch Flutter app (Android example):
    ```bash
    cd /Users/yonassayfu/VSProject/gerayehealthcare/gerayehealthcare-mobile-app
@@ -32,7 +79,85 @@ Tick boxes in the tracker once each persona scenario has been exercised during r
    ```
    > For iOS simulator: `flutter run -d ios`
 
+
+
 3. Confirm app boots to the login screen without errors.
+
+
+
+## 2.1 API Direct Test (cURL)
+Use these commands to validate the backend quickly.
+
+1) Health Check
+```bash
+curl -s http://127.0.0.1:8000/api/v1/system/health | jq
+```
+
+2) Login (get token)
+```bash
+TOKEN=$(curl -s -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"doctor@gerayehealthcare.com","password":"password"}' \
+  http://127.0.0.1:8000/api/v1/login | jq -r .access_token)
+echo $TOKEN
+```
+
+3) Me + Modules
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/v1/me | jq
+```
+
+
+
+
+4) Notifications & Preferences
+```bash
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/v1/notifications | jq
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1:8000/api/v1/notifications/preferences | jq
+curl -s -X PUT -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+  -d '{"enable_push":true,"enable_email":false}' \
+  http://127.0.0.1:8000/api/v1/notifications/preferences | jq
+```
+
+
+5) Visit Check-in / Check-out (replace :id)
+```bash
+VISIT_ID=1
+curl -s -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+  -d '{"latitude":0.0,"longitude":0.0,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+  http://127.0.0.1:8000/api/v1/visit-services/$VISIT_ID/check-in | jq
+
+curl -s -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+  -d '{"latitude":0.0,"longitude":0.0,"timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' \
+  http://127.0.0.1:8000/api/v1/visit-services/$VISIT_ID/check-out | jq
+```
+
+
+
+6) Patient Self-Service (as patient user)
+```bash
+PTOKEN=$(curl -s -X POST -H 'Content-Type: application/json' \
+  -d '{"email":"patient@gerayehealthcare.com","password":"password"}' \
+  http://127.0.0.1:8000/api/v1/login | jq -r .access_token)
+curl -s -H "Authorization: Bearer $PTOKEN" http://127.0.0.1:8000/api/v1/patients/me | jq
+curl -s -H "Authorization: Bearer $PTOKEN" http://127.0.0.1:8000/api/v1/documents/my | jq
+curl -s -H "Authorization: Bearer $PTOKEN" http://127.0.0.1:8000/api/v1/invoices/my | jq
+```
+
+
+
+7) Push Token Register / Unregister
+```bash
+curl -s -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+  -d '{"token":"FAKE_DEBUG_TOKEN","platform":"android","device_name":"emulator"}' \
+  http://127.0.0.1:8000/api/v1/push-tokens | jq
+curl -s -X DELETE -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" \
+  -d '{"token":"FAKE_DEBUG_TOKEN"}' \
+  http://127.0.0.1:8000/api/v1/push-tokens -w "\n%{http_code}\n"
+```
+
+
+
 
 ## 3. Persona Scenarios
 ### 3.1 Super Admin Smoke Test
@@ -65,6 +190,10 @@ Tick boxes in the tracker once each persona scenario has been exercised during r
 2. Open "My Documents"; verify your documents (prescriptions, doctor notes, lab) list or empty state.
 3. Open "My Invoices"; verify invoices list with status/total.
 4. Attempt to access another patient’s document by ID (should be blocked). Download remains restricted by policy.
+
+## 2.2 Queue & Scheduler (Optional)
+- For local queue processing: `php artisan queue:work --tries=3 --sleep=3`
+- Scheduler (cron) to run tasks like auto-checkout: `* * * * * php artisan schedule:run`
 
 ### 3.5 Unsupported Role Guard
 1. Temporarily assign `admin@...` to a role outside the four personas (e.g., `admin`).
