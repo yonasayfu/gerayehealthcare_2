@@ -15,12 +15,15 @@ class TestUsersSeeder extends Seeder
      */
     public function run(): void
     {
+        $defaultPassword = env('TEST_USER_PASSWORD', 'password');
+        $superAdminPassword = env('TEST_SUPERADMIN_PASSWORD', 'SuperAdmin123!');
+
         // Create test users for each role with predictable credentials
         $testUsers = [
             [
                 'name' => 'Super Admin',
                 'email' => 'superadmin@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $superAdminPassword,
                 'role' => RoleEnum::SUPER_ADMIN,
                 'staff_data' => [
                     'first_name' => 'Super',
@@ -33,7 +36,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'CEO User',
                 'email' => 'ceo@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::CEO,
                 'staff_data' => [
                     'first_name' => 'CEO',
@@ -46,7 +49,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'COO User',
                 'email' => 'coo@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::COO,
                 'staff_data' => [
                     'first_name' => 'COO',
@@ -59,7 +62,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'Admin User',
                 'email' => 'admin@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::ADMIN,
                 'staff_data' => [
                     'first_name' => 'Admin',
@@ -72,7 +75,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'Doctor User',
                 'email' => 'doctor@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::STAFF,
                 'staff_data' => [
                     'first_name' => 'Doctor',
@@ -85,7 +88,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'Nurse User',
                 'email' => 'nurse@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::STAFF,
                 'staff_data' => [
                     'first_name' => 'Nurse',
@@ -98,7 +101,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'Staff User',
                 'email' => 'staff@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::STAFF,
                 'staff_data' => [
                     'first_name' => 'Staff',
@@ -111,7 +114,7 @@ class TestUsersSeeder extends Seeder
             [
                 'name' => 'Guest User',
                 'email' => 'guest@gerayehealthcare.com',
-                'password' => 'password',
+                'password' => $defaultPassword,
                 'role' => RoleEnum::GUEST,
                 'staff_data' => null, // Guests don't have staff records
             ],

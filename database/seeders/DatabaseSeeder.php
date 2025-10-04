@@ -13,6 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $defaultPassword = env('TEST_USER_PASSWORD', 'password');
+        $superAdminPassword = env('TEST_SUPERADMIN_PASSWORD', 'SuperAdmin123!');
+
         $this->call([
             DemoDataSeeder::class,
             MedicalVisitSeeder::class,
@@ -28,7 +31,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'superadmin@geraye.com'],
             [
                 'name' => 'Legacy Super Admin',
-                'password' => bcrypt('password'),
+                'password' => bcrypt($superAdminPassword),
             ]
         );
         $legacySuperAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
@@ -38,7 +41,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@geraye.com'],
             [
                 'name' => 'Legacy Admin User',
-                'password' => bcrypt('password'),
+                'password' => bcrypt($defaultPassword),
             ]
         );
         $legacyAdminUser->assignRole(RoleEnum::ADMIN->value);
