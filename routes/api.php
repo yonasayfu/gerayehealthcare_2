@@ -8,12 +8,20 @@ use App\Http\Controllers\Api\V1\DocumentController as ApiDocumentController;
 use App\Http\Controllers\Api\V1\MessageController as ApiMessageController;
 use App\Http\Controllers\Api\V1\NotificationController as ApiNotificationController;
 use App\Http\Controllers\Api\V1\PatientController;
+use App\Http\Controllers\Api\V1\MarketingController as ApiMarketingController;
+use App\Http\Controllers\Api\V1\InventoryController as ApiInventoryController;
+use App\Http\Controllers\Api\V1\InsuranceController as ApiInsuranceController;
+use App\Http\Controllers\Api\V1\AnalyticsController as ApiAnalyticsController;
 use App\Http\Controllers\Api\V1\PushTokenController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\StaffController;
+use App\Http\Controllers\Api\V1\EmergencyController as ApiEmergencyController;
+use App\Http\Controllers\Api\V1\BulkOperationsController as ApiBulkOperationsController;
 use App\Http\Controllers\Api\V1\PrescriptionController as ApiPrescriptionController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\VisitServiceController as ApiVisitServiceController;
 use App\Http\Controllers\Api\V1\ModuleController;
+use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\GroupMessageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -43,20 +51,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/modules', ModuleController::class);
 
         // Generic incremental sync stub (mobile offline sync download)
-        Route::get('/sync/changes', function (Request $request) {
-            $since = $request->query('since');
-            return response()->json([
-                'data' => [
-                    'users' => [],
-                    'conversations' => [],
-                    'messages' => [],
-                ],
-                'meta' => [
-                    'since' => $since,
-                    'generated_at' => now()->toIso8601String(),
-                ],
-            ]);
-        });
+        Route::get('/sync/changes', [SyncController::class, 'changes']);
 
 
         // Profile endpoints
@@ -67,15 +62,37 @@ Route::prefix('v1')->group(function () {
             ->middleware('permission:view users')
             ->name('users.index');
 
-        Route::apiResource('patients', PatientController::class)
-            ->only(['index', 'show'])
+        Route::get('/patients', [PatientController::class, 'index'])
             ->middleware('permission:view patients');
+        Route::get('/patients/{patient}', [PatientController::class, 'show'])
+            ->middleware('permission:view patients');
+        Route::post('/patients', [PatientController::class, 'store'])
+            ->middleware('permission:create patients');
+        Route::patch('/patients/{patient}', [PatientController::class, 'update'])
+            ->middleware('permission:edit patients');
+        Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])
+            ->middleware('permission:delete patients');
+
+        Route::get('/staff', [StaffController::class, 'index'])
+            ->middleware('permission:view staff');
+        Route::get('/staff/{staff}', [StaffController::class, 'show'])
+            ->middleware('permission:view staff');
+        Route::post('/staff', [StaffController::class, 'store'])
+            ->middleware('permission:create staff');
+        Route::patch('/staff/{staff}', [StaffController::class, 'update'])
+            ->middleware('permission:edit staff');
+        Route::delete('/staff/{staff}', [StaffController::class, 'destroy'])
+            ->middleware('permission:delete staff');
 
         // Patient self endpoints
         Route::get('/patients/me', [PatientController::class, 'me']);
         Route::patch('/patients/me', [PatientController::class, 'updateMe']);
 
         // Visit services for mobile staff usage
+        Route::get('/visit-services', [ApiVisitServiceController::class, 'index'])
+            ->middleware(['throttle:60,1', 'permission:view visit services']);
+        Route::get('/visit-services/{visitService}', [ApiVisitServiceController::class, 'show'])
+            ->middleware(['throttle:60,1', 'permission:view visit services']);
         Route::get('/visit-services/my-schedule', [ApiVisitServiceController::class, 'mySchedule'])
             ->middleware(['throttle:60,1', 'permission:view visit services']);
         Route::post('/visit-services', [ApiVisitServiceController::class, 'store'])
@@ -222,91 +239,98 @@ Route::prefix('v1')->group(function () {
 
         // Marketing APIs
         Route::prefix('marketing')->group(function () {
-            Route::get('/campaigns', [App\Http\Controllers\Api\V1\MarketingController::class, 'campaigns'])
+            Route::get('/campaigns', [ApiMarketingController::class, 'campaigns'])
                 ->middleware('permission:view marketing campaigns');
-            Route::post('/campaigns', [App\Http\Controllers\Api\V1\MarketingController::class, 'createCampaign'])
+            Route::post('/campaigns', [ApiMarketingController::class, 'createCampaign'])
                 ->middleware('permission:manage marketing');
-            Route::put('/campaigns/{campaign}', [App\Http\Controllers\Api\V1\MarketingController::class, 'updateCampaign'])
+            Route::put('/campaigns/{campaign}', [ApiMarketingController::class, 'updateCampaign'])
                 ->middleware('permission:manage marketing');
-            Route::delete('/campaigns/{campaign}', [App\Http\Controllers\Api\V1\MarketingController::class, 'deleteCampaign'])
+            Route::delete('/campaigns/{campaign}', [ApiMarketingController::class, 'deleteCampaign'])
                 ->middleware('permission:manage marketing');
-            Route::get('/campaigns/{campaign}/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'campaignLeads'])
+            Route::get('/campaigns/{campaign}/leads', [ApiMarketingController::class, 'campaignLeads'])
                 ->middleware('permission:view marketing leads');
 
-            Route::get('/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'leads'])
+            Route::get('/leads', [ApiMarketingController::class, 'leads'])
                 ->middleware('permission:view marketing leads');
-            Route::post('/leads', [App\Http\Controllers\Api\V1\MarketingController::class, 'createLead'])
+            Route::post('/leads', [ApiMarketingController::class, 'createLead'])
                 ->middleware('permission:manage marketing');
-            Route::post('/leads/{lead}/convert', [App\Http\Controllers\Api\V1\MarketingController::class, 'convertLead'])
+            Route::post('/leads/{lead}/convert', [ApiMarketingController::class, 'convertLead'])
                 ->middleware('permission:manage marketing');
 
-            Route::get('/analytics', [App\Http\Controllers\Api\V1\MarketingController::class, 'analytics'])
+            Route::get('/analytics', [ApiMarketingController::class, 'analytics'])
                 ->middleware('permission:view marketing analytics');
+        });
+
+        // Emergency APIs
+        Route::prefix('emergency')->group(function () {
+            Route::get('/incidents', [ApiEmergencyController::class, 'incidents']);
+            Route::get('/contacts', [ApiEmergencyController::class, 'contacts']);
+            Route::post('/alerts', [ApiEmergencyController::class, 'alert']);
         });
 
         // Inventory APIs
         Route::prefix('inventory')->group(function () {
-            Route::get('/items', [App\Http\Controllers\Api\V1\InventoryController::class, 'items'])
+            Route::get('/items', [ApiInventoryController::class, 'items'])
                 ->middleware('permission:view inventory items');
-            Route::post('/items', [App\Http\Controllers\Api\V1\InventoryController::class, 'createItem'])
+            Route::post('/items', [ApiInventoryController::class, 'createItem'])
                 ->middleware('permission:create inventory items');
-            Route::put('/items/{item}', [App\Http\Controllers\Api\V1\InventoryController::class, 'updateItem'])
+            Route::put('/items/{item}', [ApiInventoryController::class, 'updateItem'])
                 ->middleware('permission:update inventory items');
-            Route::delete('/items/{item}', [App\Http\Controllers\Api\V1\InventoryController::class, 'deleteItem'])
+            Route::delete('/items/{item}', [ApiInventoryController::class, 'deleteItem'])
                 ->middleware('permission:delete inventory items');
-            Route::post('/items/{item}/adjust-stock', [App\Http\Controllers\Api\V1\InventoryController::class, 'adjustStock'])
+            Route::post('/items/{item}/adjust-stock', [ApiInventoryController::class, 'adjustStock'])
                 ->middleware('permission:update inventory items');
 
-            Route::get('/requests', [App\Http\Controllers\Api\V1\InventoryController::class, 'requests'])
+            Route::get('/requests', [ApiInventoryController::class, 'requests'])
                 ->middleware('permission:view inventory requests');
-            Route::post('/requests', [App\Http\Controllers\Api\V1\InventoryController::class, 'createRequest'])
+            Route::post('/requests', [ApiInventoryController::class, 'createRequest'])
                 ->middleware('permission:create inventory requests');
 
-            Route::get('/analytics', [App\Http\Controllers\Api\V1\InventoryController::class, 'analytics'])
+            Route::get('/analytics', [ApiInventoryController::class, 'analytics'])
                 ->middleware('permission:export inventory reports');
         });
 
         // Insurance APIs
         Route::prefix('insurance')->group(function () {
-            Route::get('/companies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'companies'])
+            Route::get('/companies', [ApiInsuranceController::class, 'companies'])
                 ->middleware('permission:view insurance companies');
-            Route::post('/companies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createCompany'])
+            Route::post('/companies', [ApiInsuranceController::class, 'createCompany'])
                 ->middleware('permission:create insurance companies');
 
-            Route::get('/policies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'policies'])
+            Route::get('/policies', [ApiInsuranceController::class, 'policies'])
                 ->middleware('permission:view insurance policies');
-            Route::post('/policies', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createPolicy'])
+            Route::post('/policies', [ApiInsuranceController::class, 'createPolicy'])
                 ->middleware('permission:create insurance policies');
 
-            Route::get('/claims', [App\Http\Controllers\Api\V1\InsuranceController::class, 'claims'])
+            Route::get('/claims', [ApiInsuranceController::class, 'claims'])
                 ->middleware('permission:view insurance claims');
-            Route::post('/claims', [App\Http\Controllers\Api\V1\InsuranceController::class, 'createClaim'])
+            Route::post('/claims', [ApiInsuranceController::class, 'createClaim'])
                 ->middleware('permission:create insurance claims');
-            Route::put('/claims/{claim}/status', [App\Http\Controllers\Api\V1\InsuranceController::class, 'updateClaimStatus'])
+            Route::put('/claims/{claim}/status', [ApiInsuranceController::class, 'updateClaimStatus'])
                 ->middleware('permission:update insurance claims');
 
-            Route::get('/analytics', [App\Http\Controllers\Api\V1\InsuranceController::class, 'analytics'])
+            Route::get('/analytics', [ApiInsuranceController::class, 'analytics'])
                 ->middleware('permission:view financial analytics');
         });
 
         // Analytics APIs
         Route::prefix('analytics')->middleware('permission:view analytics dashboard')->group(function () {
-            Route::get('/dashboard', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'dashboard']);
-            Route::get('/patients', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'patients']);
-            Route::get('/visits', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'visits']);
-            Route::get('/revenue', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'revenue']);
-            Route::get('/staff', [App\Http\Controllers\Api\V1\AnalyticsController::class, 'staff']);
+            Route::get('/dashboard', [ApiAnalyticsController::class, 'dashboard']);
+            Route::get('/patients', [ApiAnalyticsController::class, 'patients']);
+            Route::get('/visits', [ApiAnalyticsController::class, 'visits']);
+            Route::get('/revenue', [ApiAnalyticsController::class, 'revenue']);
+            Route::get('/staff', [ApiAnalyticsController::class, 'staff']);
         });
 
         // Bulk Operations APIs
         Route::prefix('bulk')->middleware('permission:manage users')->group(function () {
-            Route::post('/patients', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createPatients']);
-            Route::put('/patients', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'updatePatients']);
-            Route::post('/staff', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createStaff']);
-            Route::post('/inventory-items', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'createInventoryItems']);
-            Route::delete('/delete', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'bulkDelete']);
-            Route::post('/export', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'bulkExport']);
-            Route::get('/operations/{operationId}/status', [App\Http\Controllers\Api\V1\BulkOperationsController::class, 'getOperationStatus']);
+            Route::post('/patients', [ApiBulkOperationsController::class, 'createPatients']);
+            Route::put('/patients', [ApiBulkOperationsController::class, 'updatePatients']);
+            Route::post('/staff', [ApiBulkOperationsController::class, 'createStaff']);
+            Route::post('/inventory-items', [ApiBulkOperationsController::class, 'createInventoryItems']);
+            Route::delete('/delete', [ApiBulkOperationsController::class, 'bulkDelete']);
+            Route::post('/export', [ApiBulkOperationsController::class, 'bulkExport']);
+            Route::get('/operations/{operationId}/status', [ApiBulkOperationsController::class, 'getOperationStatus']);
         });
     });
 

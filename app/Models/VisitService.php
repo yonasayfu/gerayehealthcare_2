@@ -21,14 +21,35 @@ class VisitService extends Model
         'check_in_time',
         'check_out_time',
         'visit_notes',
+        'service_type',
+        'priority',
+        'visit_location',
+        'patient_location',
+        'gps_coordinates',
+        'patient_condition',
+        'treatment_provided',
+        'medications_administered',
+        'follow_up_required',
+        'follow_up_date',
+        'follow_up_notes',
+        'payment_status',
+        'payment_method',
+        'insurance_claim_id',
+        'rating',
+        'feedback',
+        'cancellation_reason',
+        'cancelled_at',
+        'cancelled_by',
         'service_description',
         'prescription_file',
         'vitals_file',
         'status',
         'check_in_latitude',
         'check_in_longitude',
+        'check_in_location',
         'check_out_latitude',
         'check_out_longitude',
+        'check_out_location',
         'cost',
         'is_paid_to_staff',
     ];
@@ -36,14 +57,19 @@ class VisitService extends Model
     // Ensure safe defaults for DB NOT NULL columns
     protected $attributes = [
         'is_paid_to_staff' => false,
+        'follow_up_required' => false,
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'check_in_time' => 'datetime',
         'check_out_time' => 'datetime',
+        'follow_up_date' => 'date',
+        'cancelled_at' => 'datetime',
         'is_paid_to_staff' => 'boolean',
         'cost' => 'decimal:2',
+        'rating' => 'decimal:2',
+        'follow_up_required' => 'boolean',
     ];
 
     /**

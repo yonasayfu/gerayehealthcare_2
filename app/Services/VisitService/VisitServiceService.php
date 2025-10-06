@@ -44,6 +44,34 @@ class VisitServiceService extends BaseService
             $this->applySearch($query, $request->input('search'));
         }
 
+        if ($request->filled('patient_id')) {
+            $query->where('patient_id', $request->input('patient_id'));
+        }
+
+        if ($request->filled('staff_id')) {
+            $query->where('staff_id', $request->input('staff_id'));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('service_type')) {
+            $query->where('service_type', $request->input('service_type'));
+        }
+
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->input('priority'));
+        }
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('scheduled_at', '>=', $request->input('start_date'));
+        }
+
+        if ($request->filled('end_date')) {
+            $query->whereDate('scheduled_at', '<=', $request->input('end_date'));
+        }
+
         if ($request->has('sort')) {
             $direction = $request->input('direction', 'asc');
             $query->orderBy($request->input('sort'), $direction);

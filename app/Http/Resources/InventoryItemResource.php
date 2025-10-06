@@ -14,58 +14,40 @@ class InventoryItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $quantity = $this->quantity_on_hand ?? 0;
+        $reorderLevel = $this->reorder_level ?? 0;
+
         return [
             'id' => $this->id,
-            'item_code' => $this->item_code,
             'name' => $this->name,
             'description' => $this->description,
-            'category' => $this->category,
-            'unit' => $this->unit,
-            'quantity' => $this->quantity,
-            'minimum_quantity' => $this->minimum_quantity,
-            'reorder_level' => $this->reorder_level,
-            'unit_price' => $this->unit_price,
-            'supplier_id' => $this->supplier_id,
-            'location' => $this->location,
-            'barcode' => $this->barcode,
-            'expiry_date' => $this->expiry_date?->toDateString(),
-            'is_active' => $this->is_active,
+            'category' => $this->item_category,
+            'type' => $this->item_type,
+            'serial_number' => $this->serial_number,
+            'status' => $this->status,
+            'quantity_on_hand' => $quantity,
+            'reorder_level' => $reorderLevel,
+            'is_low_stock' => $quantity <= $reorderLevel,
+            'purchase_date' => $this->purchase_date?->toDateString(),
+            'warranty_expiry' => $this->warranty_expiry?->toDateString(),
+            'assigned_to_type' => $this->assigned_to_type,
+            'assigned_to_id' => $this->assigned_to_id,
+            'last_maintenance_date' => $this->last_maintenance_date?->toDateString(),
+            'next_maintenance_due' => $this->next_maintenance_due?->toDateString(),
+            'maintenance_schedule' => $this->maintenance_schedule,
             'notes' => $this->notes,
-            
-            // Computed attributes
-            'is_low_stock' => $this->quantity <= $this->reorder_level,
-            'stock_status' => $this->getStockStatus(),
-            
-            // Relationships
+            'supplier_id' => $this->supplier_id,
             'supplier' => $this->whenLoaded('supplier', function () {
                 return [
                     'id' => $this->supplier->id,
                     'name' => $this->supplier->name,
                     'contact_person' => $this->supplier->contact_person,
                     'phone' => $this->supplier->phone,
+                    'email' => $this->supplier->email,
                 ];
             }),
-            
-            // Timestamps
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
-    }
-
-    /**
-     * Get stock status
-     */
-    protected function getStockStatus(): string
-    {
-        if ($this->quantity <= 0) {
-            return 'out_of_stock';
-        }
-        if ($this->quantity <= $this->reorder_level) {
-            return 'low_stock';
-        }
-        if ($this->quantity <= $this->minimum_quantity) {
-            return 'critical';
-        }
-        return 'in_stock';
     }
 }

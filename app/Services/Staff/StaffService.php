@@ -25,6 +25,45 @@ class StaffService extends BaseService
             ->orWhere('email', 'ilike', "%{$search}%");
     }
 
+    public function getAll(Request $request, array $with = [])
+    {
+        $query = $this->model->with($with);
+
+        if ($request->filled('search')) {
+            $this->applySearch($query, $request->input('search'));
+        }
+
+        if ($request->filled('specialization') && $request->input('specialization') !== 'all') {
+            $specialization = $request->input('specialization');
+            $query->where(function ($q) use ($specialization) {
+                $q->where('position', 'ilike', "%{$specialization}%")
+                    ->orWhere('department', 'ilike', "%{$specialization}%");
+            });
+        }
+
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('availability_status') && $request->input('availability_status') !== 'all') {
+            $availability = $request->input('availability_status');
+            if ($availability === 'available') {
+                $query->where('status', 'Active');
+            } elseif ($availability === 'offline') {
+                $query->where('status', 'Inactive');
+            }
+        }
+
+        if ($request->filled('sort')) {
+            $direction = $request->input('direction', 'asc');
+            $query->orderBy($request->input('sort'), $direction);
+        } else {
+            $query->orderBy('last_name')->orderBy('first_name');
+        }
+
+        return $query->paginate($request->input('per_page', 20))->withQueryString();
+    }
+
     public function create(array | object $data): Staff
     {
         $data = is_object($data) ? (array) $data : $data;

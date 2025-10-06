@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\StoreVisitServiceRequest;
 use App\Http\Requests\Api\V1\UpdateVisitServiceRequest;
 use App\Http\Requests\VisitService\CheckInRequest;
@@ -12,41 +11,79 @@ use App\Models\Patient;
 use App\Models\VisitService;
 use App\Services\VisitService\VisitServiceService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Gate;
 
-class VisitServiceController extends Controller
+class VisitServiceController extends BaseApiController
 {
-    public function __construct(private VisitServiceService $visitServiceService)
+    public function __construct(private readonly VisitServiceService $visitServiceService)
     {
     }
+
+    public function index(Request $request)
+    {
+        $visits = $this->visitServiceService->getAll($request);
+        $resource = VisitServiceResource::collection($visits)->response()->getData(true);
+
+        return $this->successResponse([
+            'visits' => $resource['data'] ?? [],
+            'pagination' => [
+                'current_page' => $visits->currentPage(),
+                'last_page' => $visits->lastPage(),
+                'per_page' => $visits->perPage(),
+                'total' => $visits->total(),
+                'from' => $visits->firstItem(),
+                'to' => $visits->lastItem(),
+                'has_more' => $visits->hasMorePages(),
+            ],
+        ]);
+    }
+
+    public function show(VisitService $visitService)
+    {
+        $visitService->load(['patient', 'staff']);
+        $payload = (new VisitServiceResource($visitService))->response()->getData(true);
+
+        return $this->successResponse([
+            'visit' => $payload['data'] ?? null,
+        ]);
+    }
+
     public function store(StoreVisitServiceRequest $request)
     {
-        // Determine patient_id: if not provided, infer from user email
-        $patientId = $request->validated()['patient_id'] ?? null;
+        $validated = $request->validated();
+        $patientId = $validated['patient_id'] ?? null;
+
         if (! $patientId) {
             $patientId = optional(Patient::where('email', $request->user()->email)->first())->id;
         }
 
         if (! Gate::forUser($request->user())->allows('create', [VisitService::class, $patientId])) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return $this->forbiddenResponse();
         }
 
         try {
-            $payload = [
+            $payload = array_merge($validated, [
                 'patient_id' => $patientId,
-                'staff_id' => optional($request->user()->staff)->id, // if staff books for themselves
-                'scheduled_at' => $request->validated()['scheduled_at'],
-                'service_description' => $request->validated()['service_description'] ?? null,
-                'status' => 'Scheduled',
-            ];
-            $visit = $this->visitServiceService->create($payload);
+                'staff_id' => $validated['staff_id'] ?? optional($request->user()->staff)->id,
+                'status' => $validated['status'] ?? 'Scheduled',
+                'priority' => $validated['priority'] ?? 'normal',
+                'service_type' => $validated['service_type'] ?? 'general',
+            ]);
 
-            return new VisitServiceResource($visit->load(['patient', 'staff']));
+            if (! array_key_exists('follow_up_required', $payload)) {
+                $payload['follow_up_required'] = false;
+            }
+
+            $visit = $this->visitServiceService->create($payload)->load(['patient', 'staff']);
+            $resource = (new VisitServiceResource($visit))->response()->getData(true);
+
+            return $this->createdResponse([
+                'visit' => $resource['data'] ?? null,
+            ], 'Visit scheduled successfully');
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
+            return $this->errorResponse($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
@@ -56,26 +93,43 @@ class VisitServiceController extends Controller
 
         try {
             $validated = $request->validated();
-            // Ensure staff_id is present when scheduled_at changes so availability validation runs
             if (isset($validated['scheduled_at']) && ! isset($validated['staff_id'])) {
                 $validated['staff_id'] = $visitService->staff_id;
             }
-            $updated = $this->visitServiceService->update($visitService->id, $validated);
 
-            return new VisitServiceResource($updated->fresh(['patient', 'staff']));
+            if (! array_key_exists('follow_up_required', $validated)) {
+                $validated['follow_up_required'] = $visitService->follow_up_required;
+            }
+
+            $validated['service_type'] = $validated['service_type'] ?? $visitService->service_type ?? 'general';
+            $validated['priority'] = $validated['priority'] ?? $visitService->priority ?? 'normal';
+
+            $updated = $this->visitServiceService->update($visitService->id, $validated)->fresh(['patient', 'staff']);
+            $resource = (new VisitServiceResource($updated))->response()->getData(true);
+
+            return $this->successResponse([
+                'message' => 'Visit updated successfully',
+                'visit' => $resource['data'] ?? null,
+            ]);
         } catch (\Throwable $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-            ], 422);
+            return $this->errorResponse($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 
     public function destroy(Request $request, VisitService $visitService)
     {
         $this->authorize('cancel', $visitService);
-        $visitService->update(['status' => 'Cancelled']);
 
-        return response()->noContent();
+        $visitService->update([
+            'status' => 'Cancelled',
+            'cancellation_reason' => $request->input('cancellation_reason'),
+            'cancelled_at' => now(),
+            'cancelled_by' => optional($request->user())->id,
+        ]);
+
+        return $this->successResponse([
+            'message' => 'Visit cancelled successfully',
+        ]);
     }
 
     public function mySchedule(Request $request)
@@ -86,37 +140,46 @@ class VisitServiceController extends Controller
             ->when($user->staff, function ($q) use ($user) {
                 $q->where('staff_id', $user->staff->id);
             }, function ($q) use ($user) {
-                // If not staff, scope by patient user_id
                 $q->whereHas('patient', function ($pq) use ($user) {
                     $pq->where('user_id', $user->id);
                 });
             });
 
-        // Optional date filter: ?date=YYYY-MM-DD
         if ($request->filled('date')) {
             $query->whereDate('scheduled_at', $request->input('date'));
         }
 
         $visits = $query->orderBy('scheduled_at', 'asc')->paginate($request->integer('per_page', 10));
+        $resource = VisitServiceResource::collection($visits)->response()->getData(true);
 
-        return VisitServiceResource::collection($visits);
+        return $this->successResponse([
+            'visits' => $resource['data'] ?? [],
+            'pagination' => [
+                'current_page' => $visits->currentPage(),
+                'last_page' => $visits->lastPage(),
+                'per_page' => $visits->perPage(),
+                'total' => $visits->total(),
+                'from' => $visits->firstItem(),
+                'to' => $visits->lastItem(),
+                'has_more' => $visits->hasMorePages(),
+            ],
+        ]);
     }
 
     public function checkIn(CheckInRequest $request, VisitService $visitService)
     {
-        // Prefer client-reported timestamp if present and reasonable; otherwise use server time
         $now = now();
         $clientTs = $request->input('timestamp');
         $checkInTime = $now;
+
         if ($clientTs) {
             try {
                 $parsed = Carbon::parse($clientTs);
-                // Reject future > 5 minutes or past > 12 hours to avoid bad clocks
                 if ($parsed->lte($now->copy()->addMinutes(5)) && $parsed->gte($now->copy()->subHours(12))) {
                     $checkInTime = $parsed;
                 }
             } catch (\Throwable $e) {
-                // ignore and use server time
+                // Ignore parsing errors, use server time
             }
         }
 
@@ -127,7 +190,12 @@ class VisitServiceController extends Controller
             'status' => $visitService->status === 'Scheduled' ? 'In Progress' : $visitService->status,
         ]);
 
-        return new VisitServiceResource($visitService->fresh(['patient', 'staff']));
+        $resource = (new VisitServiceResource($visitService->fresh(['patient', 'staff'])))->response()->getData(true);
+
+        return $this->successResponse([
+            'message' => 'Visit checked in successfully',
+            'visit' => $resource['data'] ?? null,
+        ]);
     }
 
     public function checkOut(CheckOutRequest $request, VisitService $visitService)
@@ -135,6 +203,7 @@ class VisitServiceController extends Controller
         $now = now();
         $clientTs = $request->input('timestamp');
         $outTime = $now;
+
         if ($clientTs) {
             try {
                 $parsed = Carbon::parse($clientTs);
@@ -142,15 +211,15 @@ class VisitServiceController extends Controller
                     $outTime = $parsed;
                 }
             } catch (\Throwable $e) {
-                // ignore and use server time
+                // Ignore parsing errors, use server time
             }
         }
 
         $checkIn = $visitService->check_in_time ? Carbon::parse($visitService->check_in_time) : $outTime;
-        // Ensure non-negative and clamp duration if outTime < checkIn due to user error
         if ($outTime->lt($checkIn)) {
             $outTime = $checkIn;
         }
+
         $durationHours = max(0, $checkIn->floatDiffInRealHours($outTime));
         $hourlyRate = optional($visitService->staff)->hourly_rate ?? 0;
         $earned = round($durationHours * (float) $hourlyRate, 2);
@@ -163,6 +232,11 @@ class VisitServiceController extends Controller
             'cost' => $earned,
         ]);
 
-        return new VisitServiceResource($visitService->fresh(['patient', 'staff']));
+        $resource = (new VisitServiceResource($visitService->fresh(['patient', 'staff'])))->response()->getData(true);
+
+        return $this->successResponse([
+            'message' => 'Visit checked out successfully',
+            'visit' => $resource['data'] ?? null,
+        ]);
     }
 }

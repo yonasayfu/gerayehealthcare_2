@@ -16,39 +16,34 @@ class InventoryRequestResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'request_code' => $this->request_code,
-            'requested_by' => $this->requested_by,
-            'inventory_item_id' => $this->inventory_item_id,
+            'item_id' => $this->item_id,
+            'requester_id' => $this->requester_id,
+            'approver_id' => $this->approver_id,
             'quantity_requested' => $this->quantity_requested,
             'quantity_approved' => $this->quantity_approved,
-            'purpose' => $this->purpose,
+            'reason' => $this->reason,
             'priority' => $this->priority,
             'status' => $this->status,
-            'requested_date' => $this->requested_date?->toDateTimeString(),
-            'approved_by' => $this->approved_by,
-            'approved_date' => $this->approved_date?->toDateTimeString(),
-            'fulfilled_date' => $this->fulfilled_date?->toDateTimeString(),
-            'notes' => $this->notes,
-            'rejection_reason' => $this->rejection_reason,
-            
-            // Relationships
-            'item' => new InventoryItemResource($this->whenLoaded('item')),
+            'needed_by_date' => $this->needed_by_date?->toDateString(),
+            'approved_at' => $this->approved_at?->toDateTimeString(),
+            'fulfilled_at' => $this->fulfilled_at?->toDateTimeString(),
+            'item' => $this->whenLoaded('item', fn () => new InventoryItemResource($this->item)),
             'requester' => $this->whenLoaded('requester', function () {
                 return [
                     'id' => $this->requester->id,
-                    'name' => $this->requester->name,
-                    'email' => $this->requester->email,
+                    'first_name' => $this->requester->first_name,
+                    'last_name' => $this->requester->last_name,
+                    'email' => $this->requester->user?->email,
                 ];
             }),
             'approver' => $this->whenLoaded('approver', function () {
                 return [
                     'id' => $this->approver->id,
-                    'name' => $this->approver->name,
-                    'email' => $this->approver->email,
+                    'first_name' => $this->approver->first_name,
+                    'last_name' => $this->approver->last_name,
+                    'email' => $this->approver->user?->email,
                 ];
             }),
-            
-            // Timestamps
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
         ];

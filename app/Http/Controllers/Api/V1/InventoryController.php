@@ -24,47 +24,45 @@ class InventoryController extends BaseApiController
         try {
             $query = InventoryItem::query();
 
-            // Search functionality
-            if ($request->has('search')) {
-                $search = $request->get('search');
+            if ($request->filled('search')) {
+                $search = $request->string('search');
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ILIKE', "%{$search}%")
                         ->orWhere('description', 'ILIKE', "%{$search}%")
-                        ->orWhere('sku', 'ILIKE', "%{$search}%");
+                        ->orWhere('serial_number', 'ILIKE', "%{$search}%");
                 });
             }
 
-            // Filter by category
-            if ($request->has('category')) {
-                $query->where('category', $request->get('category'));
+            if ($request->filled('category')) {
+                $query->where('item_category', $request->input('category'));
             }
 
-            // Filter by status
-            if ($request->has('status')) {
-                $query->where('status', $request->get('status'));
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
             }
 
-            // Filter by low stock
             if ($request->boolean('low_stock')) {
-                $query->whereRaw('current_stock <= reorder_level');
+                $query->whereColumn('quantity_on_hand', '<=', 'reorder_level');
             }
 
-            // Filter by supplier
-            if ($request->has('supplier_id')) {
-                $query->where('supplier_id', $request->get('supplier_id'));
+            if ($request->filled('supplier_id')) {
+                $query->where('supplier_id', $request->input('supplier_id'));
             }
 
-            // Sort options
-            $sortBy = $request->get('sort_by', 'name');
-            $sortOrder = $request->get('sort_order', 'asc');
+            $allowedSorts = ['name', 'status', 'quantity_on_hand', 'reorder_level', 'created_at'];
+            $sortBy = $request->input('sort_by', 'name');
+            $sortOrder = $request->input('sort_order', 'asc');
+            if (! in_array($sortBy, $allowedSorts, true)) {
+                $sortBy = 'name';
+            }
+            $sortOrder = strtolower($sortOrder) === 'desc' ? 'desc' : 'asc';
             $query->orderBy($sortBy, $sortOrder);
 
-            $items = $query->with(['supplier', 'transactions' => function ($q) {
-                $q->latest()->limit(5);
-            }])->paginate($request->get('per_page', 15));
+            $items = $query->with('supplier')->paginate($request->integer('per_page', 20));
+            $resource = InventoryItemResource::collection($items)->response()->getData(true);
 
             return $this->successResponse([
-                'items' => InventoryItemResource::collection($items->items()),
+                'items' => $resource['data'] ?? [],
                 'pagination' => [
                     'current_page' => $items->currentPage(),
                     'last_page' => $items->lastPage(),
@@ -259,30 +257,35 @@ class InventoryController extends BaseApiController
         try {
             $query = InventoryRequest::query();
 
-            // Filter by status
-            if ($request->has('status')) {
-                $query->where('status', $request->get('status'));
+            if ($request->filled('status')) {
+                $query->where('status', $request->input('status'));
             }
 
-            // Filter by requester
-            if ($request->has('requested_by')) {
-                $query->where('requested_by', $request->get('requested_by'));
+            if ($request->filled('requester_id')) {
+                $query->where('requester_id', $request->input('requester_id'));
             }
 
-            // Filter by date range
-            if ($request->has('start_date')) {
-                $query->where('created_at', '>=', $request->get('start_date'));
-            }
-            if ($request->has('end_date')) {
-                $query->where('created_at', '<=', $request->get('end_date'));
+            if ($request->filled('start_date')) {
+                $query->whereDate('created_at', '>=', $request->input('start_date'));
             }
 
-            $requests = $query->with(['requester', 'approver', 'items.inventoryItem'])
-                ->orderBy('created_at', 'desc')
-                ->paginate($request->get('per_page', 15));
+            if ($request->filled('end_date')) {
+                $query->whereDate('created_at', '<=', $request->input('end_date'));
+            }
+
+            $requests = $query
+                ->with([
+                    'item.supplier',
+                    'requester.user',
+                    'approver.user',
+                ])
+                ->orderByDesc('created_at')
+                ->paginate($request->integer('per_page', 20));
+
+            $resource = InventoryRequestResource::collection($requests)->response()->getData(true);
 
             return $this->successResponse([
-                'requests' => InventoryRequestResource::collection($requests->items()),
+                'requests' => $resource['data'] ?? [],
                 'pagination' => [
                     'current_page' => $requests->currentPage(),
                     'last_page' => $requests->lastPage(),

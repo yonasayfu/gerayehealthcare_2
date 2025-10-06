@@ -20,9 +20,27 @@ class Patient extends Model
         'ethiopian_date_of_birth',
         'gender',
         'address',
+        'city',
+        'state',
+        'country',
+        'postal_code',
         'phone_number',
         'email', // Ensure 'email' is fillable if you want to store it
         'emergency_contact',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relationship',
+        'medical_history',
+        'allergies',
+        'current_medications',
+        'insurance_provider',
+        'insurance_policy_number',
+        'preferred_language',
+        'blood_type',
+        'height',
+        'weight',
+        'status',
+        'notes',
         'source',
         'geolocation',
         'patient_code', // It's good to keep this fillable too, in case you manually set it sometimes
@@ -40,6 +58,8 @@ class Patient extends Model
     protected $casts = [
         'date_of_birth' => 'date',
         'acquisition_date' => 'datetime',
+        'height' => 'float',
+        'weight' => 'float',
     ];
 
     /**

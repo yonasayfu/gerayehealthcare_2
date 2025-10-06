@@ -14,6 +14,14 @@ class PatientResource extends JsonResource
      */
     public function toArray($request)
     {
+        $contact = [];
+        if (empty($this->emergency_contact_name) && is_string($this->emergency_contact)) {
+            $decoded = json_decode($this->emergency_contact, true);
+            if (is_array($decoded)) {
+                $contact = $decoded;
+            }
+        }
+
         return [
             'id' => $this->id,
             'patient_code' => $this->patient_code,
@@ -23,9 +31,29 @@ class PatientResource extends JsonResource
             'ethiopian_date_of_birth' => $this->ethiopian_date_of_birth,
             'gender' => $this->gender,
             'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'country' => $this->country,
+            'postal_code' => $this->postal_code,
             'phone_number' => $this->phone_number,
             'email' => $this->email,
             'emergency_contact' => $this->emergency_contact,
+            'emergency_contact_name' => $this->emergency_contact_name ?? ($contact['name'] ?? null),
+            'emergency_contact_phone' => $this->emergency_contact_phone ?? ($contact['phone'] ?? null),
+            'emergency_contact_relationship' => $this->emergency_contact_relationship ?? ($contact['relationship'] ?? null),
+            'medical_history' => $this->medical_history,
+            'allergies' => $this->allergies,
+            'current_medications' => $this->current_medications,
+            'insurance_provider' => $this->insurance_provider,
+            'insurance_policy_number' => $this->insurance_policy_number,
+            'preferred_language' => $this->preferred_language,
+            'blood_type' => $this->blood_type,
+            'height' => $this->height,
+            'weight' => $this->weight,
+            'status' => $this->status,
+            'notes' => $this->notes,
+            'lead_source' => $this->source,
+            'assigned_staff_id' => $this->registered_by_staff_id,
             'source' => $this->source,
             'geolocation' => $this->geolocation,
             'registered_by_staff_id' => $this->registered_by_staff_id,
