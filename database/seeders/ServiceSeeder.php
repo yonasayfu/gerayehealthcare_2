@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Service;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ServiceSeeder extends Seeder
 {
@@ -12,12 +12,22 @@ class ServiceSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('services')->insert([
-            ['name' => 'Chronic patients care and follow up', 'category' => 'Chronic Care', 'price' => 100.00],
-            ['name' => 'Routine Health Care Service', 'category' => 'Routine Care', 'price' => 75.00],
-            ['name' => 'Specialty care by specialists', 'category' => 'Specialty Care', 'price' => 200.00],
-            ['name' => 'Special care and nursing services', 'category' => 'Nursing Services', 'price' => 120.00],
-            ['name' => 'Medical Consultation Service', 'category' => 'Consultation', 'price' => 90.00],
+        Service::factory()->create([
+            'name' => 'General Consultation',
+            'category' => 'Consultation',
+            'price' => 500,
+        ]);
+
+        Service::factory()->create([
+            'name' => 'Wound Dressing',
+            'category' => 'Procedure',
+            'price' => 300,
+        ]);
+
+        Service::factory()->create([
+            'name' => 'IV-Infusion',
+            'category' => 'Procedure',
+            'price' => 700,
         ]);
     }
 }

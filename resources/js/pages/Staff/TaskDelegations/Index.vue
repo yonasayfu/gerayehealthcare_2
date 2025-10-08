@@ -128,7 +128,7 @@ function updateStatus(id: number, status: string) {
   <Head title="My Tasks" />
 
   <AppLayout>
-    <section class="p-6 space-y-6 bg-white rounded-lg shadow">
+    <section class="surface-panel p-6 space-y-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 class="text-xl font-semibold">My Tasks</h1>
@@ -151,21 +151,12 @@ function updateStatus(id: number, status: string) {
         </div>
         <div class="flex items-center gap-2">
           <label class="text-sm text-gray-700">Per Page:</label>
-          <select
-            v-model="perPage"
-            class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white/50 backdrop-blur-sm"
-          >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-          </select>
+          <PerPageSelect v-model="perPage" />
         </div>
       </div>
 
       <!-- New Task Form -->
-      <div class="border rounded-xl p-4 bg-gradient-to-br from-white/80 to-cyan-50/50 backdrop-blur-sm shadow-sm">
+      <div class="surface-subtle border rounded-xl p-4 shadow-sm">
         <h2 class="text-lg font-medium mb-3 text-cyan-800">Create New Task</h2>
         <form @submit.prevent="submitNew" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-3">

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\RoleEnum;
 use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -14,39 +13,58 @@ class StaffSeeder extends Seeder
      */
     public function run(): void
     {
-        $samples = [
-            ['first' => 'Yonas', 'last' => 'Sayfu', 'position' => 'Doctor'],
-            ['first' => 'Sara', 'last' => 'Bekele', 'position' => 'Nurse'],
-            ['first' => 'Mikael', 'last' => 'Tesfaye', 'position' => 'Caregiver'],
-            ['first' => 'Lily', 'last' => 'Abebe', 'position' => 'Therapist'],
-        ];
-
-        foreach ($samples as $s) {
-            $email = strtoupper(substr($s['first'], 0, 1)).preg_replace('/\s+/', '', $s['last']).'@example.com';
-            $fullName = $s['first'].' '.$s['last'];
-
-            $user = User::updateOrCreate(
-                ['email' => $email],
+        // Create CEO Staff
+        $ceoUser = User::where('email', 'ceo@geraye.com')->first();
+        if ($ceoUser) {
+            Staff::updateOrCreate(
+                ['email' => $ceoUser->email],
                 [
-                    'name' => $fullName,
-                    'password' => bcrypt('password'),
+                    'first_name' => 'CEO',
+                    'last_name' => 'User',
+                    'user_id' => $ceoUser->id,
+                    'position' => 'CEO',
                 ]
             );
-            $user->assignRole(RoleEnum::STAFF->value);
+        }
 
+        // Create COO Staff
+        $cooUser = User::where('email', 'coo@geraye.com')->first();
+        if ($cooUser) {
             Staff::updateOrCreate(
-                ['email' => $email],
+                ['email' => $cooUser->email],
                 [
-                    'first_name' => $s['first'],
-                    'last_name' => $s['last'],
-                    'phone' => '+2519'.rand(10000000, 99999999),
-                    'position' => $s['position'],
-                    'department' => 'Medical',
-                    'role' => $s['position'],
-                    'status' => 'Active',
-                    'hire_date' => now()->subYears(rand(0, 5))->toDateString(),
-                    'photo' => 'images/staff/placeholder.jpg',
-                    'user_id' => $user->id,
+                    'first_name' => 'COO',
+                    'last_name' => 'User',
+                    'user_id' => $cooUser->id,
+                    'position' => 'COO',
+                ]
+            );
+        }
+
+        // Create Admin Staff
+        $adminUser = User::where('email', 'admin@geraye.com')->first();
+        if ($adminUser) {
+            Staff::updateOrCreate(
+                ['email' => $adminUser->email],
+                [
+                    'first_name' => 'Admin',
+                    'last_name' => 'User',
+                    'user_id' => $adminUser->id,
+                    'position' => 'Admin',
+                ]
+            );
+        }
+
+        // Create Staff
+        $staffUser = User::where('email', 'staff@geraye.com')->first();
+        if ($staffUser) {
+            Staff::updateOrCreate(
+                ['email' => $staffUser->email],
+                [
+                    'first_name' => 'Staff',
+                    'last_name' => 'User',
+                    'user_id' => $staffUser->id,
+                    'position' => 'Nurse',
                 ]
             );
         }

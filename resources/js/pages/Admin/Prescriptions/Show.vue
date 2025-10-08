@@ -53,6 +53,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { toast } = useToast()
 
 const breadcrumbs = [
   { title: 'Dashboard', href: route('dashboard') },
@@ -73,32 +74,99 @@ function printSingle() {
   setTimeout(() => { try { window.print(); } catch (e) { console.error('Print failed', e); } }, 100)
 }
 
-// Share functionality
-function share(platform: string) {
-  const shareUrl = route('prescriptions.share', props.prescription.share_token)
-  const text = `Prescription for ${props.prescription.patient?.full_name || 'Patient'}`
-  
-  const urls: Record<string, string> = {
-    wa: `https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`,
-    tw: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
-    tg: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`,
-  }
-  
-  if (urls[platform]) {
-    window.open(urls[platform], '_blank')
+// Share link management
+type ShareLinkMeta = { url: string; expires_at?: string | null }
+const shareLinkMeta = ref<ShareLinkMeta | null>(props.prescription?.share_token
+  ? { url: route('public.prescriptions.show', { token: props.prescription.share_token }) as string }
+  : null)
+const isLoadingShareLink = ref(false)
+
+async function fetchShareLink(force = false): Promise<ShareLinkMeta | null> {
+  if (!force && shareLinkMeta.value) return shareLinkMeta.value
+  if (isLoadingShareLink.value) return shareLinkMeta.value
+
+  isLoadingShareLink.value = true
+  try {
+    const response = await fetch(route('admin.prescriptions.shareLink', props.prescription.id), {
+      headers: {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to generate share link (${response.status})`)
+    }
+
+    const data = (await response.json()) as ShareLinkMeta
+    if (!data?.url) {
+      throw new Error('Share link response missing url')
+    }
+
+    shareLinkMeta.value = data
+    return data
+  } catch (error) {
+    console.error('Share link error:', error)
+    toast({
+      title: 'Unable to prepare share link',
+      description: 'Please try again or refresh the page.',
+      variant: 'destructive',
+    })
+    return null
+  } finally {
+    isLoadingShareLink.value = false
   }
 }
 
-function copyShareLink() {
-  const shareUrl = route('prescriptions.share', props.prescription.share_token)
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    const { toast } = useToast()
-    toast({ 
-      title: 'Link copied', 
+// Share functionality
+async function share(platform: 'wa' | 'tw' | 'tg') {
+  const link = await fetchShareLink()
+  if (!link?.url) return
+
+  const text = `Prescription for ${props.prescription.patient?.full_name || 'Patient'}`
+  const shareTargets: Record<'wa' | 'tw' | 'tg', string> = {
+    wa: `https://wa.me/?text=${encodeURIComponent(`${text} ${link.url}`)}`,
+    tw: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link.url)}`,
+    tg: `https://t.me/share/url?url=${encodeURIComponent(link.url)}&text=${encodeURIComponent(text)}`,
+  }
+
+  const targetUrl = shareTargets[platform]
+  if (targetUrl) {
+    window.open(targetUrl, '_blank', 'noopener')
+  }
+}
+
+async function copyShareLink() {
+  const link = await fetchShareLink()
+  if (!link?.url) return
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(link.url)
+    } else {
+      const temp = document.createElement('textarea')
+      temp.value = link.url
+      temp.style.position = 'fixed'
+      temp.style.opacity = '0'
+      document.body.appendChild(temp)
+      temp.select()
+      document.execCommand('copy')
+      document.body.removeChild(temp)
+    }
+
+    toast({
+      title: 'Link copied',
       description: 'Prescription link copied to clipboard',
-      variant: 'default'
+      variant: 'default',
     })
-  })
+  } catch (error) {
+    console.error('Copy link error:', error)
+    toast({
+      title: 'Copy failed',
+      description: 'Could not copy the link. Please try again.',
+      variant: 'destructive',
+    })
+  }
 }
 
 // Email sharing functionality
@@ -143,7 +211,6 @@ async function sendEmailShare() {
       isEmailShareOpen.value = false
       
       // Show success toast
-      const { toast } = useToast()
       toast({ 
         title: 'Email sent', 
         description: 'Prescription shared via email successfully',

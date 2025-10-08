@@ -54,7 +54,7 @@ function printSingleAssignment() {
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-6">
 
-      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
+      <div class="surface-panel relative m-10">
         <ShowHeader title="Assignment Details" :subtitle="`Assignment #${assignment.id}`">
           <template #actions>
             <Link :href="route('admin.assignments.index')" class="btn-glass btn-glass-sm">Back</Link>
@@ -63,7 +63,7 @@ function printSingleAssignment() {
       </div>
 
         <div class="p-6 space-y-6">
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="surface-panel p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">
@@ -94,21 +94,21 @@ function printSingleAssignment() {
                     <div class="space-y-4 md:col-span-2 border-t dark:border-gray-700 pt-6">
                          <h3 class="font-semibold text-lg text-gray-800 dark:text-white print:mb-2">Shift Details</h3>
                          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                            <div class="flex items-center gap-3 p-3 surface-muted rounded-lg">
                                 <Calendar class="w-5 h-5 text-muted-foreground" />
                                 <div>
                                     <p class="text-sm text-muted-foreground">Shift Start Date</p>
                                     <p class="font-medium">{{ formatDate(assignment.shift_start) }}</p>
                                 </div>
                             </div>
-                             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                             <div class="flex items-center gap-3 p-3 surface-muted rounded-lg">
                                 <Clock class="w-5 h-5 text-muted-foreground" />
                                 <div>
                                     <p class="text-sm text-muted-foreground">Shift Start Time</p>
                                     <p class="font-medium">{{ formatTime(assignment.shift_start) }}</p>
                                 </div>
                             </div>
-                             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                             <div class="flex items-center gap-3 p-3 surface-muted rounded-lg">
                                 <BadgeCheck class="w-5 h-5 text-muted-foreground" />
                                  <div>
                                     <p class="text-sm text-muted-foreground">Status</p>

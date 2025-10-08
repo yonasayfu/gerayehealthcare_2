@@ -63,7 +63,7 @@ function goToPageNumber(page: number) {
     end_date: String(filters.value.end_date || ''),
     sort: String(filters.value.sort || ''),
     direction: String(filters.value.direction || ''),
-    per_page: String(filters.value.per_page || 10),
+    per_page: String(filters.value.per_page || 5),
     page: String(page),
   })
   router.get(`${base}?${params.toString()}`, {}, { preserveState: true, replace: true })
@@ -78,7 +78,7 @@ function resetFilters() {
     end_date: '',
     sort: 'start_time',
     direction: 'desc',
-    per_page: 10,
+    per_page: 5,
   }
 }
 
@@ -222,26 +222,18 @@ const serverError = computed(() => (form.errors as any)?.error)
         </button>
       </div>
 
-      <div class="rounded-lg border border-border bg-white dark:bg-gray-900 p-4 shadow-sm">
+      <div class="surface-panel p-4">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
             <Filter class="h-5 w-5 text-muted-foreground" />
             <h3 class="text-lg font-semibold">Filters</h3>
           </div>
           <div class="flex items-center gap-3">
-            
-          <div>
-    <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-    <select id="perPage" v-model="filters.per_page" class="rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-    </select>
-</div>
-        
-            <button @click="resetFilters" type="button" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-100">Reset Filters</button>
+            <div>
+              <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+              <PerPageSelect v-model="filters.per_page" id="perPage" />
+            </div>
+            <button @click="resetFilters" type="button" class="btn-glass btn-glass-sm">Reset Filters</button>
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

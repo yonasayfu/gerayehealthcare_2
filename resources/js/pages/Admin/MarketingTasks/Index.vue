@@ -232,15 +232,9 @@ function clearFilters() {
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
         </div>
         <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-          <select id="perPage" v-model="perPage" class="rounded-md border-cyan-600 bg-cyan-600 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <PerPageSelect v-model="perPage" id="perPage" />
+          </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 print:hidden">

@@ -18,7 +18,7 @@ export function useTableFilters(opts: TableFilterOptions) {
   const search = ref(opts.initial?.search ?? '')
   const sort = ref(opts.initial?.sort ?? '')
   const direction = ref<Direction>(opts.initial?.direction ?? 'asc')
-  const perPage = ref<number>(opts.initial?.per_page ?? 10)
+  const perPage = ref<number>(opts.initial?.per_page ?? 5)
 
   const apply = debounce(() => {
     const params: Record<string, string | number> = {
@@ -43,4 +43,3 @@ export function useTableFilters(opts: TableFilterOptions) {
 
   return { search, sort, direction, perPage, apply, toggleSort }
 }
-

@@ -214,15 +214,9 @@ function changePage(url: string) {
         </div>
 
        <div>
-    <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-    <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-gray-50 text-gray-900 sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-    </select>
-</div>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <PerPageSelect v-model="perPage" id="perPage" />
+          </div>
       </div>
 
       <!-- Staff table with improved styling -->

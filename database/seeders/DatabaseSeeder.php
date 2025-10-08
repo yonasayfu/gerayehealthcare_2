@@ -17,9 +17,7 @@ class DatabaseSeeder extends Seeder
         $superAdminPassword = env('TEST_SUPERADMIN_PASSWORD', 'SuperAdmin123!');
 
         $this->call([
-            DemoDataSeeder::class,
-            MedicalVisitSeeder::class,
-            InvoiceTestDataSeeder::class,
+            UnifiedDemoDataSeeder::class,
         ]);
 
         // --- LEGACY ADMIN USERS (Kept for backward compatibility) ---

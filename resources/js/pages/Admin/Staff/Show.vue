@@ -38,7 +38,7 @@ function deleteStaff() {
   <Head :title="`Staff: ${props.staff.first_name} ${props.staff.last_name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow relative m-10">
+        <div class="surface-panel relative m-10">
 
       <ShowHeader title="Staff Member Details" :subtitle="`Staff Member: ${staff.first_name} ${staff.last_name}`">
         <template #actions>
@@ -47,7 +47,7 @@ function deleteStaff() {
       </ShowHeader>
 
         <div class="p-6 space-y-6">
-            <div class="print-document bg-card text-card-foreground shadow rounded-lg p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
+            <div class="print-document surface-panel p-8 space-y-8 print:shadow-none print:rounded-none print:p-0 print:m-0 print:w-auto print:h-auto print:flex-shrink-0">
 
                 <div class="hidden print:block text-center mb-4 print:mb-2 print-header-content">
                     <img src="/images/geraye_logo.jpeg" alt="Geraye Logo" class="print-logo">

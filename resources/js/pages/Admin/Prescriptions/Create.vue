@@ -36,7 +36,7 @@ function submit() {
 
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="space-y-6 p-4 sm:p-6">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="surface-panel overflow-hidden">
         <div class="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">
             <div>
@@ -46,7 +46,7 @@ function submit() {
             <div class="flex-shrink-0">
               <Link 
                 :href="route('admin.prescriptions.index')" 
-                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+                class="btn-glass btn-glass-sm"
               >
                 <ArrowLeft class="w-4 h-4 mr-2" />
                 Back to Prescriptions
@@ -58,17 +58,17 @@ function submit() {
         <div class="px-4 py-5 sm:p-6">
           <form @submit.prevent="submit" class="space-y-6">
             <Form :form="form" :patients="props.patients" :staff="props.staff" />
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-[hsl(215_28%_32%)]">
               <Link 
                 :href="route('admin.prescriptions.index')" 
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+                class="btn-glass btn-glass-sm"
               >
                 Cancel
               </Link>
               <button 
                 type="submit" 
                 :disabled="form.processing" 
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-75"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-75"
               >
                 <Save class="w-4 h-4 mr-2" />
                 {{ form.processing ? 'Saving...' : 'Save Prescription' }}

@@ -56,6 +56,7 @@ import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import axios from 'axios';
 import ErrorFallback from './components/ErrorFallback.vue'; // Import ErrorFallback component
+import PerPageSelect from './components/PerPageSelect.vue';
 
 axios.defaults.withCredentials = true; // Crucial for sending cookies with requests
 
@@ -97,7 +98,8 @@ axios.get('/sanctum/csrf-cookie').then(() => {
                 // Ensure Ziggy uses the server-provided route list (@routes)
                  
                 .use(ZiggyVue, (window as any).Ziggy)
-                .component('AppLayout', AppLayout);
+                .component('AppLayout', AppLayout)
+                .component('PerPageSelect', PerPageSelect);
                 
             // Global error handling
             app.config.errorHandler = (err, instance, info) => {

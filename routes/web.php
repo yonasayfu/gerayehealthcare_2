@@ -35,6 +35,8 @@ use App\Http\Controllers\Staff\LeaveRequestController as StaffLeaveRequestContro
 use App\Http\Controllers\Staff\MyAvailabilityController;
 use App\Http\Controllers\Staff\MyEarningsController;
 use App\Http\Controllers\Staff\MyVisitController;
+use App\Http\Controllers\Staff\PersonalSubtaskController;
+use App\Http\Controllers\Staff\PersonalTaskController;
 use App\Http\Controllers\Staff\TaskDelegationController;
 use Inertia\Inertia;
 
@@ -990,6 +992,15 @@ Route::middleware(['auth', 'verified', 'deny_roles:guest,patient'])
                 ->count();
             return response()->json(['count' => $count]);
         })->name('task-delegations.count');
+
+        // My To-Do (personal tasks managed by each authenticated team member)
+        Route::resource('my-todo', PersonalTaskController::class)
+            ->only(['index', 'store', 'update', 'destroy'])
+            ->parameters(['my-todo' => 'my_todo']);
+
+        Route::resource('my-todo.subtasks', PersonalSubtaskController::class)
+            ->only(['store', 'update', 'destroy'])
+            ->parameters(['my-todo' => 'my_todo', 'subtasks' => 'subtask']);
 
         // Daily Task Tracking
         Route::get('daily-tasks', [DailyTaskTrackingController::class, 'index'])->name('daily-tasks.index');

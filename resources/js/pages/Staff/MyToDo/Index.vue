@@ -55,7 +55,7 @@ function switchFilter(f: 'all'|'today'|'upcoming'|'important'|'completed') {
 <template>
   <Head title="My To-Do" />
   <AppLayout>
-    <section class="p-6 space-y-6 bg-white rounded-lg shadow">
+    <section class="surface-panel p-6 space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-xl font-semibold">My To‑Do</h1>
         <div class="inline-flex rounded-md border overflow-hidden">
@@ -69,7 +69,7 @@ function switchFilter(f: 'all'|'today'|'upcoming'|'important'|'completed') {
       </div>
 
       <!-- Add Task -->
-      <div class="border rounded-xl p-4 bg-gradient-to-br from-white/80 to-cyan-50/50 backdrop-blur-sm shadow-sm">
+      <div class="surface-subtle border rounded-xl p-4 shadow-sm">
         <form @submit.prevent="submitNew" class="space-y-4">
           <div class="flex gap-2">
             <input 

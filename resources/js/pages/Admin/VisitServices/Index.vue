@@ -140,16 +140,9 @@ const formatDate = (dateString: string | null) => {
           <Search class="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-400 z-20" />
         </div>
          <div>
-          <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
-              <select id="perPage" v-model="perPage" class="rounded-md border-gray-300 bg-gray-400 text-white sm:text-sm px-2 py-1 dark:bg-gray-800 dark:text-gray-700 dark:border-gray-700">
-
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </select>
-        </div>
+            <label for="perPage" class="mr-2 text-sm text-gray-700 dark:text-gray-300">Per Page:</label>
+            <PerPageSelect v-model="perPage" id="perPage" />
+          </div>
       </div>
 
       <!-- Data Table -->
