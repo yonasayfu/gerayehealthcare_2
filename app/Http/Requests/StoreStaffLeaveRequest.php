@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use App\Models\LeaveRequest;
 
 class StoreStaffLeaveRequest extends FormRequest
 {
@@ -46,5 +48,39 @@ class StoreStaffLeaveRequest extends FormRequest
             'reason.required' => 'Please provide a reason for your leave request.',
             'reason.max' => 'The reason cannot exceed 1000 characters.',
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            if ($this->start_date && $this->end_date) {
+                $staffId = Auth::user()->staff->id ?? null;
+                
+                if ($staffId) {
+                    // Check for overlapping leave requests
+                    $overlappingRequest = LeaveRequest::where('staff_id', $staffId)
+                        ->where('status', '!=', 'Denied')
+                        ->where(function ($query) {
+                            $query->whereBetween('start_date', [$this->start_date, $this->end_date])
+                                ->orWhereBetween('end_date', [$this->start_date, $this->end_date])
+                                ->orWhere(function ($q) {
+                                    $q->where('start_date', '<=', $this->start_date)
+                                        ->where('end_date', '>=', $this->end_date);
+                                });
+                        })
+                        ->exists();
+
+                    if ($overlappingRequest) {
+                        $validator->errors()->add('start_date', 'You already have a leave request for these dates or overlapping dates.');
+                    }
+                }
+            }
+        });
     }
 }

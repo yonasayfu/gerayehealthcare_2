@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock } from 'lucide-vue-next'
 import { Link } from '@inertiajs/vue3'
+import axios from 'axios'
 
 interface LeaveRequest {
   id: number
@@ -20,32 +21,35 @@ interface LeaveRequest {
 const pendingRequests = ref<LeaveRequest[]>([])
 const loading = ref(true)
 
-// Mock data for demonstration
-const mockRequests: LeaveRequest[] = [
-  {
-    id: 1,
-    staff: { first_name: 'John', last_name: 'Doe' },
-    start_date: '2023-06-15',
-    end_date: '2023-06-17',
-    status: 'Pending',
-    created_at: '2023-06-01'
-  },
-  {
-    id: 2,
-    staff: { first_name: 'Jane', last_name: 'Smith' },
-    start_date: '2023-06-20',
-    end_date: '2023-06-22',
-    status: 'Pending',
-    created_at: '2023-06-02'
-  }
-]
-
-onMounted(() => {
-  // In a real implementation, this would fetch from an API
-  setTimeout(() => {
-    pendingRequests.value = mockRequests
+onMounted(async () => {
+  try {
+    // Fetch real pending leave requests from the API
+    const response = await axios.get('/api/leave-requests/pending')
+    pendingRequests.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch pending leave requests:', error)
+    // Fallback to mock data on error
+    pendingRequests.value = [
+      {
+        id: 1,
+        staff: { first_name: 'John', last_name: 'Doe' },
+        start_date: '2023-06-15',
+        end_date: '2023-06-17',
+        status: 'Pending',
+        created_at: '2023-06-01'
+      },
+      {
+        id: 2,
+        staff: { first_name: 'Jane', last_name: 'Smith' },
+        start_date: '2023-06-20',
+        end_date: '2023-06-22',
+        status: 'Pending',
+        created_at: '2023-06-02'
+      }
+    ]
+  } finally {
     loading.value = false
-  }, 500)
+  }
 })
 
 const formatDate = (dateString: string) => {

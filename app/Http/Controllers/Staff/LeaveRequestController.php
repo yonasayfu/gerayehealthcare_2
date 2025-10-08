@@ -62,6 +62,7 @@ class LeaveRequestController extends Controller
             $startOfYear = Carbon::now()->copy()->startOfYear();
             $endOfYear = Carbon::now()->copy()->endOfYear();
 
+            // Calculate used days (approved leaves within the current calendar year)
             $approvedLeaves = $staff->leaveRequests()
                 ->where('status', 'Approved')
                 ->where(function ($q) use ($startOfYear, $endOfYear) {
