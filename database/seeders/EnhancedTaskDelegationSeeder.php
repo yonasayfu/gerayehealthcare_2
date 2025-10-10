@@ -16,7 +16,7 @@ class EnhancedTaskDelegationSeeder extends Seeder
         $users = User::all();
 
         if ($staffMembers->isEmpty() || $users->isEmpty()) {
-            echo "No staff members or users found. Please run StaffSeeder and TestUsersSeeder first.\n";
+            echo "No staff members or users found. Please run StaffSeeder and CoreUserSeeder first.\n";
             return;
         }
 

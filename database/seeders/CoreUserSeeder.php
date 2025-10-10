@@ -3,12 +3,14 @@
 namespace Database\Seeders;
 
 use App\Enums\RoleEnum;
+use App\Models\Patient;
 use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
-class TestUsersSeeder extends Seeder
+class CoreUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -18,17 +20,16 @@ class TestUsersSeeder extends Seeder
         $defaultPassword = env('TEST_USER_PASSWORD', 'password');
         $superAdminPassword = env('TEST_SUPERADMIN_PASSWORD', 'SuperAdmin123!');
 
-        // Create test users for each role with predictable credentials
-        $testUsers = [
+        $users = [
             [
                 'name' => 'Super Admin',
                 'email' => 'superadmin@gerayehealthcare.com',
                 'password' => $superAdminPassword,
                 'role' => RoleEnum::SUPER_ADMIN,
-                'staff_data' => [
+                'staff' => [
                     'first_name' => 'Super',
                     'last_name' => 'Admin',
-                    'position' => 'System Administrator',
+                    'position' => 'Chief Technology Officer',
                     'department' => 'IT',
                     'phone' => '+251911000001',
                 ],
@@ -38,7 +39,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'ceo@gerayehealthcare.com',
                 'password' => $defaultPassword,
                 'role' => RoleEnum::CEO,
-                'staff_data' => [
+                'staff' => [
                     'first_name' => 'CEO',
                     'last_name' => 'User',
                     'position' => 'Chief Executive Officer',
@@ -51,7 +52,7 @@ class TestUsersSeeder extends Seeder
                 'email' => 'coo@gerayehealthcare.com',
                 'password' => $defaultPassword,
                 'role' => RoleEnum::COO,
-                'staff_data' => [
+                'staff' => [
                     'first_name' => 'COO',
                     'last_name' => 'User',
                     'position' => 'Chief Operating Officer',
@@ -64,10 +65,10 @@ class TestUsersSeeder extends Seeder
                 'email' => 'admin@gerayehealthcare.com',
                 'password' => $defaultPassword,
                 'role' => RoleEnum::ADMIN,
-                'staff_data' => [
+                'staff' => [
                     'first_name' => 'Admin',
                     'last_name' => 'User',
-                    'position' => 'System Administrator',
+                    'position' => 'Systems Administrator',
                     'department' => 'Administration',
                     'phone' => '+251911000005',
                 ],
@@ -76,10 +77,10 @@ class TestUsersSeeder extends Seeder
                 'name' => 'Doctor User',
                 'email' => 'doctor@gerayehealthcare.com',
                 'password' => $defaultPassword,
-                'role' => RoleEnum::STAFF,
-                'staff_data' => [
-                    'first_name' => 'Doctor',
-                    'last_name' => 'User',
+                'role' => RoleEnum::DOCTOR,
+                'staff' => [
+                    'first_name' => 'Daniel',
+                    'last_name' => 'Bekele',
                     'position' => 'Senior Doctor',
                     'department' => 'Clinical',
                     'phone' => '+251911000007',
@@ -89,11 +90,11 @@ class TestUsersSeeder extends Seeder
                 'name' => 'Nurse User',
                 'email' => 'nurse@gerayehealthcare.com',
                 'password' => $defaultPassword,
-                'role' => RoleEnum::STAFF,
-                'staff_data' => [
-                    'first_name' => 'Nurse',
-                    'last_name' => 'User',
-                    'position' => 'Senior Nurse',
+                'role' => RoleEnum::NURSE,
+                'staff' => [
+                    'first_name' => 'Nardos',
+                    'last_name' => 'Abebe',
+                    'position' => 'Lead Nurse',
                     'department' => 'Clinical',
                     'phone' => '+251911000008',
                 ],
@@ -103,12 +104,34 @@ class TestUsersSeeder extends Seeder
                 'email' => 'staff@gerayehealthcare.com',
                 'password' => $defaultPassword,
                 'role' => RoleEnum::STAFF,
-                'staff_data' => [
-                    'first_name' => 'Staff',
-                    'last_name' => 'User',
-                    'position' => 'Senior Nurse',
-                    'department' => 'Emergency',
+                'staff' => [
+                    'first_name' => 'Selam',
+                    'last_name' => 'Hailemariam',
+                    'position' => 'Field Nurse',
+                    'department' => 'Home Care',
                     'phone' => '+251911000006',
+                ],
+            ],
+            [
+                'name' => 'Patient Demo',
+                'email' => 'patient@gerayehealthcare.com',
+                'password' => $defaultPassword,
+                'role' => RoleEnum::PATIENT,
+                'patient' => [
+                    'full_name' => 'Patient Demo',
+                    'gender' => 'Female',
+                    'phone_number' => '+251911000009',
+                    'address' => 'Bole, Addis Ababa',
+                    'city' => 'Addis Ababa',
+                    'state' => 'Addis Ababa',
+                    'country' => 'Ethiopia',
+                    'preferred_language' => 'English',
+                    'blood_type' => 'O+',
+                    'status' => 'Active',
+                    'source' => 'Mobile Onboarding',
+                    'emergency_contact_name' => 'Marta Bekele',
+                    'emergency_contact_phone' => '+251911000010',
+                    'emergency_contact_relationship' => 'Sister',
                 ],
             ],
             [
@@ -116,12 +139,10 @@ class TestUsersSeeder extends Seeder
                 'email' => 'guest@gerayehealthcare.com',
                 'password' => $defaultPassword,
                 'role' => RoleEnum::GUEST,
-                'staff_data' => null, // Guests don't have staff records
             ],
         ];
 
-        foreach ($testUsers as $userData) {
-            // Create or update user
+        foreach ($users as $userData) {
             $user = User::updateOrCreate(
                 ['email' => $userData['email']],
                 [
@@ -131,36 +152,60 @@ class TestUsersSeeder extends Seeder
                 ]
             );
 
-            // Assign role
             $user->syncRoles([$userData['role']->value]);
 
-            // Create staff record if provided
-            if ($userData['staff_data']) {
+            if (!empty($userData['staff'])) {
+                $staffData = $userData['staff'];
                 Staff::updateOrCreate(
                     ['user_id' => $user->id],
-                    array_merge($userData['staff_data'], [
+                    [
+                        'first_name' => $staffData['first_name'],
+                        'last_name' => $staffData['last_name'],
                         'email' => $userData['email'],
-                        'role' => $userData['staff_data']['position'],
+                        'phone' => $staffData['phone'],
+                        'position' => $staffData['position'],
+                        'department' => $staffData['department'],
+                        'role' => $staffData['position'],
                         'status' => 'Active',
-                        'hire_date' => now()->subYears(rand(1, 5))->toDateString(),
-                        'hourly_rate' => $this->getHourlyRateByPosition($userData['staff_data']['position']),
-                    ])
+                        'hire_date' => Carbon::now()->subYears(3)->toDateString(),
+                        'hourly_rate' => $this->getHourlyRateByPosition($staffData['position']),
+                    ]
+                );
+            }
+
+            if (!empty($userData['patient'])) {
+                $patientData = $userData['patient'];
+                $registeredBy = Staff::where('email', 'doctor@gerayehealthcare.com')->first()
+                    ?? Staff::whereNotNull('id')->first();
+
+                Patient::updateOrCreate(
+                    ['user_id' => $user->id],
+                    array_merge(
+                        $patientData,
+                        [
+                            'user_id' => $user->id,
+                            'email' => $userData['email'],
+                            'fayda_id' => 'GHC-'.now()->format('ymd').'-'.$user->id,
+                            'date_of_birth' => Carbon::now()->subYears(32)->subMonths(3)->toDateString(),
+                            'acquisition_date' => now()->subDays(10),
+                            'registered_by_staff_id' => $registeredBy?->id,
+                        ]
+                    )
                 );
             }
         }
     }
 
-    /**
-     * Get hourly rate based on position
-     */
     private function getHourlyRateByPosition(string $position): float
     {
         $rates = [
-            'Chief Executive Officer' => 150.00,
-            'Chief Operating Officer' => 130.00,
-            'System Administrator' => 80.00,
-            'Senior Doctor' => 120.00,
-            'Senior Nurse' => 60.00,
+            'Chief Technology Officer' => 150.00,
+            'Chief Executive Officer' => 160.00,
+            'Chief Operating Officer' => 145.00,
+            'Systems Administrator' => 85.00,
+            'Senior Doctor' => 125.00,
+            'Lead Nurse' => 65.00,
+            'Field Nurse' => 55.00,
         ];
 
         return $rates[$position] ?? 50.00;

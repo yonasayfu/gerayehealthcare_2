@@ -133,7 +133,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $ceoRole = Role::firstOrCreate(['name' => RoleEnum::CEO->value]);
         $cooRole = Role::firstOrCreate(['name' => RoleEnum::COO->value]);
         $adminRole = Role::firstOrCreate(['name' => RoleEnum::ADMIN->value]);
+        $doctorRole = Role::firstOrCreate(['name' => RoleEnum::DOCTOR->value]);
+        $nurseRole = Role::firstOrCreate(['name' => RoleEnum::NURSE->value]);
         $staffRole = Role::firstOrCreate(['name' => RoleEnum::STAFF->value]);
+        $patientRole = Role::firstOrCreate(['name' => RoleEnum::PATIENT->value]);
         $guestRole = Role::firstOrCreate(['name' => RoleEnum::GUEST->value]);
 
         // --- Assign Permissions to Roles ---
@@ -422,6 +425,65 @@ class RolesAndPermissionsSeeder extends Seeder
             'view public content',
         ];
         $staffRole->syncPermissions($staffPermissions);
+
+        // Doctor - Clinical leadership access
+        $doctorPermissions = [
+            'view patients', 'create patients', 'edit patients', 'export patients',
+            'view medical records', 'create medical records', 'edit medical records',
+            'view prescriptions', 'create prescriptions', 'edit prescriptions', 'delete prescriptions',
+            'view appointments', 'create appointments', 'edit appointments', 'cancel appointments',
+            'view visit services', 'create visit services', 'edit visit services', 'delete visit services',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'upload medical documents', 'download medical documents', 'delete medical documents',
+            'view lab results', 'create lab results', 'edit lab results',
+            'view assignments', 'create assignments', 'edit assignments',
+            'view task delegations', 'create task delegations', 'edit task delegations',
+            'view inventory items', 'view inventory alerts',
+            'view messages', 'send messages', 'manage group messages', 'create groups',
+            'view notifications', 'send notifications',
+            'view events', 'view event participants', 'create event participants', 'edit event participants', 'view event staff assignments',
+            'view invoices', 'view financial reports',
+            'view analytics dashboard', 'view system reports',
+            'view own profile', 'edit own profile', 'change own password', 'view public content',
+        ];
+        $doctorRole->syncPermissions($doctorPermissions);
+
+        // Nurse - Enhanced clinical operations
+        $nursePermissions = [
+            'view patients', 'edit patients',
+            'create leave requests',
+            'view medical records', 'create medical records', 'edit medical records',
+            'view prescriptions', 'create prescriptions', 'edit prescriptions',
+            'view appointments', 'create appointments', 'edit appointments',
+            'view visit services', 'create visit services', 'edit visit services',
+            'view medical documents', 'create medical documents', 'edit medical documents', 'upload medical documents', 'download medical documents',
+            'view lab results', 'create lab results', 'edit lab results',
+            'view assignments',
+            'view task delegations',
+            'view inventory items', 'view inventory requests', 'create inventory requests', 'view inventory alerts',
+            'view messages', 'send messages',
+            'view notifications',
+            'view events', 'view event participants', 'view event staff assignments',
+            'view invoices',
+            'view own profile', 'edit own profile', 'change own password', 'view public content',
+        ];
+        $nurseRole->syncPermissions($nursePermissions);
+
+        // Patient - Self-service portal access
+        $patientPermissions = [
+            'view patients',
+            'view visit services',
+            'view medical records',
+            'view prescriptions',
+            'view appointments',
+            'view medical documents', 'download medical documents', 'upload medical documents',
+            'view invoices', 'view shared invoices',
+            'view messages', 'send messages',
+            'view notifications',
+            'view events',
+            'view own profile', 'edit own profile', 'change own password',
+            'view public content',
+        ];
+        $patientRole->syncPermissions($patientPermissions);
 
         // Guest - Very limited access to public content only
         $guestPermissions = [

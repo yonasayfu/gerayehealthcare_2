@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         // Use updateOrCreate to safely create or update the admin users.
         // This prevents duplicate email errors on subsequent seeding.
 
-        // Create or find the Legacy Super Admin user (if not created by TestUsersSeeder)
+        // Create or find the Legacy Super Admin user (if not created by CoreUserSeeder)
         $legacySuperAdminUser = User::updateOrCreate(
             ['email' => 'superadmin@geraye.com'],
             [
@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
         );
         $legacySuperAdminUser->assignRole(RoleEnum::SUPER_ADMIN->value);
 
-        // Create or find the Legacy Admin user (if not created by TestUsersSeeder)
+        // Create or find the Legacy Admin user (if not created by CoreUserSeeder)
         $legacyAdminUser = User::updateOrCreate(
             ['email' => 'admin@geraye.com'],
             [

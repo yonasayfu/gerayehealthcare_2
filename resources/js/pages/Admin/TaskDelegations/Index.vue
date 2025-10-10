@@ -115,7 +115,7 @@ const breadcrumbs = [
         <div class="liquidGlass-content flex items-center justify-between p-4 gap-4">
           <div class="flex items-center gap-4">
             <div class="print:hidden">
-              <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Task Delegations</h1>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Task Delegations</h1>
               <p class="text-sm text-gray-600 dark:text-gray-300">Manage task delegations</p>
             </div>
 
@@ -162,19 +162,19 @@ const breadcrumbs = [
         <table class="w-full text-left text-sm text-gray-800 dark:text-gray-200 print-table">
           <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase text-muted-foreground print-table-header">
             <tr>
-              <th @click="toggleSort('title')" class="px-6 py-3 cursor-pointer">
+              <th @click="toggleSort('title')" class="px-6 py-3 cursor-pointer dark:text-gray-300">
                 Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3">Assigned To</th>
-              <th @click="toggleSort('due_date')" class="px-6 py-3 cursor-pointer">
+              <th class="px-6 py-3 dark:text-gray-300">Assigned To</th>
+              <th @click="toggleSort('due_date')" class="px-6 py-3 cursor-pointer dark:text-gray-300">
                 Due Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th @click="toggleSort('priority_level')" class="px-6 py-3 cursor-pointer">
+              <th @click="toggleSort('priority_level')" class="px-6 py-3 cursor-pointer dark:text-gray-300">
                 Priority <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th class="px-6 py-3">Status</th>
-              <th class="px-6 py-3">Created By</th>
-              <th class="px-6 py-3 text-right print:hidden">Actions</th>
+              <th class="px-6 py-3 dark:text-gray-300">Status</th>
+              <th class="px-6 py-3 dark:text-gray-300">Created By</th>
+              <th class="px-6 py-3 text-right print:hidden dark:text-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -193,11 +193,11 @@ const breadcrumbs = [
                 <span
                     class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
                     :class="{
-                      'bg-gray-100 text-gray-800': task.priority_level <= 1, // Low
-                      'bg-yellow-100 text-yellow-800': task.priority_level === 2, // Medium
-                      'bg-orange-100 text-orange-800': task.priority_level === 3, // Normal
-                      'bg-red-100 text-red-800': task.priority_level === 4, // High
-                      'bg-purple-100 text-purple-800': task.priority_level === 5, // Critical
+                      'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': task.priority_level <= 1, // Low
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200': task.priority_level === 2, // Medium
+                      'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-200': task.priority_level === 3, // Normal
+                      'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200': task.priority_level === 4, // High
+                      'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200': task.priority_level === 5, // Critical
                     }"
                   >
                     {{ 
@@ -212,9 +212,9 @@ const breadcrumbs = [
                 <span
                   class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
                   :class="{
-                    'bg-yellow-100 text-yellow-800': task.status === 'Pending',
-                    'bg-blue-100 text-blue-800': task.status === 'In Progress',
-                    'bg-green-100 text-green-800': task.status === 'Completed',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200': task.status === 'Pending',
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200': task.status === 'In Progress',
+                    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200': task.status === 'Completed',
                   }"
                 >
                   {{ task.status }}
@@ -250,7 +250,7 @@ const breadcrumbs = [
               </td>
             </tr>
             <tr v-if="!taskDelegations.data.length">
-              <td colspan="6" class="py-6 text-center text-muted-foreground">
+              <td colspan="6" class="py-6 text-center text-muted-foreground dark:text-gray-400">
                 No tasks found.
               </td>
             </tr>
@@ -264,7 +264,7 @@ const breadcrumbs = [
         <p>Printed on: {{ format(new Date(), 'PPP p') }}</p>
       </div>
 
-      <div class="flex justify-between items-center mt-6 print:hidden">
+      <div class="flex justify-between items-center mt-6 print:hidden dark:text-gray-300">
         <Pagination v-if="taskDelegations.data.length" :links="taskDelegations.links" />
       </div>
     </div>

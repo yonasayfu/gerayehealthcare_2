@@ -131,7 +131,7 @@ function updateStatus(id: number, status: string) {
     <section class="surface-panel p-6 space-y-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-xl font-semibold">My Tasks</h1>
+          <h1 class="text-xl font-semibold dark:text-white">My Tasks</h1>
           <p class="text-sm text-gray-600">Manage your assigned tasks and create new ones</p>
         </div>
         <div class="inline-flex rounded-md border overflow-hidden">
@@ -267,24 +267,24 @@ function updateStatus(id: number, status: string) {
         <table class="w-full text-left text-sm print-table">
           <thead class="bg-cyan-100/50 text-cyan-900">
             <tr>
-              <th @click="toggleSort('title')" class="px-4 py-3 cursor-pointer hover:bg-cyan-200/50 rounded-tl-lg">
-                Title <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              <th @click="toggleSort('title')" class="px-6 py-3 cursor-pointer dark:text-gray-300">
+                Title <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th @click="toggleSort('due_date')" class="px-4 py-3 cursor-pointer hover:bg-cyan-200/50">
-                Due Date <ArrowUpDown class="inline w-4 h-4 ml-1" />
+              <th @click="toggleSort('due_date')" class="px-6 py-3 cursor-pointer dark:text-gray-300">
+                Due Date <ArrowUpDown class="inline w-4 h-4 ml-1 print:hidden" />
               </th>
-              <th @click="toggleSort('status')" class="px-4 py-3 cursor-pointer hover:bg-cyan-200/50">
+              <th @click="toggleSort('status')" class="px-4 py-3 cursor-pointer hover:bg-cyan-200/50 dark:text-gray-300">
                 Status <ArrowUpDown class="inline w-4 h-4 ml-1" />
               </th>
-              <th class="px-4 py-3">Assigned To</th>
-              <th class="px-4 py-3">
+              <th class="px-6 py-3 dark:text-gray-300">Assigned To</th>
+              <th class="px-4 py-3 dark:text-gray-300">
                 <div class="flex items-center gap-1">
                   <Tag class="w-4 h-4" />
                   Category
                 </div>
               </th>
-              <th class="px-4 py-3">Transfer</th>
-              <th class="px-4 py-3 text-right rounded-tr-lg">Actions</th>
+              <th class="px-4 py-3 dark:text-gray-300">Transfer</th>
+              <th class="px-4 py-3 text-right rounded-tr-lg dark:text-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -300,8 +300,8 @@ function updateStatus(id: number, status: string) {
                     v-if="t.priority_level > 3" 
                     class="w-4 h-4" 
                     :class="{
-                      'text-red-500': t.priority_level === 5,
-                      'text-orange-500': t.priority_level === 4
+                      'text-red-500 dark:text-red-400': t.priority_level === 5,
+                      'text-orange-500 dark:text-orange-400': t.priority_level === 4
                     }" 
                   />
                 </div>
@@ -368,7 +368,7 @@ function updateStatus(id: number, status: string) {
               </td>
             </tr>
             <tr v-if="!props.taskDelegations.data.length">
-              <td colspan="7" class="py-8 text-center text-muted-foreground">
+              <td colspan="7" class="py-8 text-center text-muted-foreground dark:text-gray-400">
                 No tasks found. Create a new task above or check back later.
               </td>
             </tr>

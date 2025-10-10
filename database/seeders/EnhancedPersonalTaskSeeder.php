@@ -14,7 +14,7 @@ class EnhancedPersonalTaskSeeder extends Seeder
         $users = User::all();
 
         if ($users->isEmpty()) {
-            echo "No users found. Please run TestUsersSeeder first.\n";
+            echo "No users found. Please run CoreUserSeeder first.\n";
             return;
         }
 

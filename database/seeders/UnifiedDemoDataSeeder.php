@@ -13,12 +13,16 @@ class UnifiedDemoDataSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
-            UserSeeder::class,
-            StaffSeeder::class,
-            PatientSeeder::class,
-            ServiceSeeder::class,
-            VisitSeeder::class,
-            InvoiceSeeder::class,
+            CoreUserSeeder::class,
+            ClinicalModuleSeeder::class,
+            TaskModuleSeeder::class,
+            CommunicationModuleSeeder::class,
+            InventoryModuleSeeder::class,
+            FinancialModuleSeeder::class,
+            MarketingModuleSeeder::class,
+            InsuranceModuleSeeder::class,
+            PartnershipModuleSeeder::class,
+            EventsModuleSeeder::class,
         ]);
     }
 }

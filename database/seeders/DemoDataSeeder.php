@@ -13,7 +13,7 @@ class DemoDataSeeder extends Seeder
     {
         $this->call([
             RolesAndPermissionsSeeder::class,
-            TestUsersSeeder::class,
+            CoreUserSeeder::class,
             StaffScenariosSeeder::class,
             PatientScenariosSeeder::class,
             VisitScenariosSeeder::class,

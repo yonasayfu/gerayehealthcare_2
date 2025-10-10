@@ -423,7 +423,7 @@ watch([rangeStart, rangeEnd], () => {
         <Tooltip text="MTD: Month-To-Date starting from the 1st"><button class="px-3 py-1 rounded border" :class="rangePreset==='MTD' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800'" @click="applyRange('MTD')">MTD</button></Tooltip>
         <Tooltip text="Last 30: Rolling last 30 calendar days"><button class="px-3 py-1 rounded border" :class="rangePreset==='LAST_30' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800'" @click="applyRange('LAST_30')">Last 30</button></Tooltip>
         <Tooltip text="YTD: Year-To-Date starting Jan 1"><button class="px-3 py-1 rounded border" :class="rangePreset==='YTD' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800'" @click="applyRange('YTD')">YTD</button></Tooltip>
-        <span class="ml-3 text-sm text-muted-foreground">Range: {{ rangeStart }} → {{ rangeEnd }}</span>
+        <span class="ml-3 text-sm text-muted-foreground dark:text-gray-400">Range: {{ rangeStart }} → {{ rangeEnd }}</span>
       </div>
 
       <div v-if="currentTab === 'Overview'">
@@ -517,7 +517,7 @@ watch([rangeStart, rangeEnd], () => {
         <!-- Row 2: Bar Chart, Pie Chart, and Table -->
         <div class="grid gap-4 grid-cols-1 lg:grid-cols-3 mt-4">
           <div class="col-span-full lg:col-span-1">
-            <h3 class="text-lg font-medium">Monthly Patient Registrations Overview</h3>
+            <h3 class="text-lg font-medium dark:text-white">Monthly Patient Registrations Overview</h3>
             <div class="relative h-[420px] mt-4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <Bar :data="barChartData" :options="barChartOptions" />
               <div v-if="!hasChartData" class="absolute inset-0 flex items-center justify-center text-gray-500">
@@ -528,7 +528,7 @@ watch([rangeStart, rangeEnd], () => {
 
           <!-- Make table take remaining space next to chart -->
           <div class="col-span-full lg:col-span-2">
-            <h3 class="text-lg font-medium">Recent Appointments</h3>
+            <h3 class="text-lg font-medium dark:text-white">Recent Appointments</h3>
             <div class="mt-4 overflow-x-auto">
               <table class="min-w-full bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
                 <thead class="bg-gray-100 dark:bg-gray-700">
@@ -574,10 +574,10 @@ watch([rangeStart, rangeEnd], () => {
                   </tr>
                 </tbody>
               </table>
-              <div v-if="!pagedAppointments.length && !upcomingVisits.length" class="py-8 text-center text-sm text-muted-foreground">No appointments found for the selected range.</div>
+              <div v-if="!pagedAppointments.length && !upcomingVisits.length" class="py-8 text-center text-sm text-muted-foreground dark:text-gray-400">No appointments found for the selected range.</div>
               <!-- Pagination Controls -->
               <div class="flex items-center justify-between py-2">
-                <div class="text-sm text-muted-foreground">Page {{ page }} of {{ Math.max(1, Math.ceil(sortedAppointments.length / pageSize)) }}</div>
+                <div class="text-sm text-muted-foreground dark:text-gray-400">Page {{ page }} of {{ Math.max(1, Math.ceil(sortedAppointments.length / pageSize)) }}</div>
                 <div class="space-x-2">
                   <button class="px-3 py-1 rounded border" :disabled="page<=1" @click="page = Math.max(1, page-1)">Prev</button>
                   <button class="px-3 py-1 rounded border" :disabled="page>=Math.ceil(sortedAppointments.length / pageSize)" @click="page = Math.min(Math.ceil(sortedAppointments.length / pageSize), page+1)">Next</button>
@@ -589,10 +589,10 @@ watch([rangeStart, rangeEnd], () => {
 
         <!-- Top Services (by volume/revenue) as bar chart -->
         <div class="mt-6">
-          <h3 class="text-lg font-semibold">Top Services ({{ rangeStart }} → {{ rangeEnd }})</h3>
+          <h3 class="text-lg font-semibold dark:text-white">Top Services ({{ rangeStart }} → {{ rangeEnd }})</h3>
           <div class="relative h-[320px] mt-4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <Bar :data="topServicesChartData" :options="topServicesChartOptions" />
-            <div v-if="!topServices.length" class="absolute inset-0 flex items-center justify-center text-gray-500">
+            <div v-if="!topServices.length" class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
               No service data for selected range
             </div>
           </div>
@@ -602,19 +602,19 @@ watch([rangeStart, rangeEnd], () => {
         <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Tooltip text="Accounts Receivable: Invoices outstanding for 0-30 days">
             <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div class="text-sm text-muted-foreground">AR 0–30 days</div>
+              <div class="text-sm text-muted-foreground dark:text-gray-400">AR 0–30 days</div>
               <div class="text-2xl font-semibold">{{ (superAdminStats as any).arAging?.['0_30'] ?? 0 }}</div>
             </div>
           </Tooltip>
           <Tooltip text="Accounts Receivable: Invoices outstanding for 31-60 days">
             <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div class="text-sm text-muted-foreground">AR 31–60 days</div>
+              <div class="text-sm text-muted-foreground dark:text-gray-400">AR 31–60 days</div>
               <div class="text-2xl font-semibold">{{ (superAdminStats as any).arAging?.['31_60'] ?? 0 }}</div>
             </div>
           </Tooltip>
           <Tooltip text="Accounts Receivable: Invoices outstanding for 61+ days">
             <div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-              <div class="text-sm text-muted-foreground">AR 61+ days</div>
+              <div class="text-sm text-muted-foreground dark:text-gray-400">AR 61+ days</div>
               <div class="text-2xl font-semibold">{{ (superAdminStats as any).arAging?.['61_plus'] ?? 0 }}</div>
             </div>
           </Tooltip>
@@ -622,7 +622,7 @@ watch([rangeStart, rangeEnd], () => {
 
         <!-- Upcoming Visits (Next 24h) -->
         <div v-if="!recentAppointments.length && upcomingVisits.length" class="mt-6">
-          <h3 class="text-lg font-semibold">Upcoming Visits (Next 24h)</h3>
+          <h3 class="text-lg font-semibold dark:text-white">Upcoming Visits (Next 24h)</h3>
           <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div class="overflow-x-auto">
               <table class="min-w-full">
@@ -661,49 +661,49 @@ watch([rangeStart, rangeEnd], () => {
       </div>
 
       <div v-else-if="currentTab === 'Reports'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-        <h3 class="text-xl font-semibold mb-2">Operational Reports</h3>
-        <p class="text-muted-foreground mb-4">Range: {{ rangeStart }} → {{ rangeEnd }}</p>
+        <h3 class="text-xl font-semibold mb-2 dark:text-white">Operational Reports</h3>
+        <p class="text-muted-foreground mb-4 dark:text-white">Range: {{ rangeStart }} → {{ rangeEnd }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Revenue vs AR -->
           <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-            <h4 class="text-lg font-medium mb-2">Revenue vs Accounts Receivable</h4>
+            <h4 class="text-lg font-medium mb-2 dark:text-white">Revenue vs Accounts Receivable</h4>
             <div class="relative h-[300px]">
               <Bar :data="reportRevenueArChart" :options="barChartOptions" />
-              <div v-if="!(reportRevenueArChart?.datasets?.length && reportRevenueArChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500">No data for selected range</div>
+              <div v-if="!(reportRevenueArChart?.datasets?.length && reportRevenueArChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400">No data for selected range</div>
             </div>
           </div>
 
           <!-- Service Volume -->
           <div class="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-            <h4 class="text-lg font-medium mb-2">Service Volume (Visits)</h4>
+            <h4 class="text-lg font-medium mb-2 dark:text-white">Service Volume (Visits)</h4>
             <div class="relative h-[300px]">
               <Bar :data="reportServiceChart" :options="barChartOptions" />
-              <div v-if="!(reportServiceChart?.datasets?.length && reportServiceChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500">No data for selected range</div>
+              <div v-if="!(reportServiceChart?.datasets?.length && reportServiceChart.labels?.length)" class="absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400">No data for selected range</div>
             </div>
           </div>
         </div>
       </div>
 
       <div v-else-if="currentTab === 'Notifications'" class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-        <h3 class="text-xl font-semibold mb-2">System Notifications</h3>
-        <p class="text-muted-foreground mb-4">Unread: {{ unreadCount }}</p>
+        <h3 class="text-xl font-semibold mb-2 dark:text-white">System Notifications</h3>
+        <p class="text-muted-foreground mb-4 dark:text-white">Unread: {{ unreadCount }}</p>
 
         <ul class="mt-4 space-y-3" v-if="notifications.length">
           <li v-for="n in notifications" :key="n.id" class="p-3 bg-white dark:bg-gray-700 rounded-md shadow-sm">
             <div class="flex items-start space-x-3">
               <Bell class="h-5 w-5 text-blue-500 mt-0.5" />
               <div>
-                <p class="font-medium">{{ (n.data && (n.data.title || n.data.subject)) || n.type }}</p>
+                <p class="font-medium dark:text-white">{{ (n.data && (n.data.title || n.data.subject)) || n.type }}</p>
                 <p v-if="n.data && (n.data.message || n.data.body)" class="text-sm text-gray-700 dark:text-gray-300">
                   {{ n.data.message || n.data.body }}
                 </p>
-                <p class="text-xs text-muted-foreground mt-1">{{ formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) }}</p>
+                <p class="text-xs text-muted-foreground mt-1 dark:text-gray-400">{{ formatDistanceToNow(new Date(n.created_at), { addSuffix: true }) }}</p>
               </div>
             </div>
           </li>
         </ul>
-        <p v-else class="text-sm text-muted-foreground">No unread notifications.</p>
+        <p v-else class="text-sm text-muted-foreground dark:text-gray-400">No unread notifications.</p>
       </div>
       </div>
     
