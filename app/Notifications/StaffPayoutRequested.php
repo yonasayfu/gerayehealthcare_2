@@ -32,5 +32,16 @@ class StaffPayoutRequested extends Notification
             'message' => sprintf('Payout request from %s for %0.2f', $this->staffName, $this->amount),
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toDatabase($notifiable);
+
+        return [
+            'title' => 'Payout request submitted',
+            'body' => $payload['message'] ?? 'A staff payout has been requested.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

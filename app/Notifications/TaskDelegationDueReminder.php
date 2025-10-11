@@ -6,6 +6,7 @@ use App\Models\TaskDelegation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TaskDelegationDueReminder extends Notification implements ShouldQueue
 {
@@ -37,5 +38,16 @@ class TaskDelegationDueReminder extends Notification implements ShouldQueue
             'kind' => $this->kind,
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => $payload['sender_name'] ?? 'Task reminder',
+            'body' => Str::limit($payload['message_preview'] ?? 'You have tasks that need attention.', 140),
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

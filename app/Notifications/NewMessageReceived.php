@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Message;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class NewMessageReceived extends Notification
 {
@@ -48,6 +49,18 @@ class NewMessageReceived extends Notification
             'conversation_id' => $this->message->sender_id, // The sender is the conversation partner
             'url' => null, // No URL for message notifications - handled by event
             'type' => 'new_message',
+        ];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'New message from '.$payload['sender_name'],
+            'body' => Str::limit($payload['message_preview'] ?? '', 120),
+            'data' => $payload,
+            'channel' => 'message',
         ];
     }
 }

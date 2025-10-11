@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TaskDelegationAssigned extends Notification implements ShouldQueue
 {
@@ -74,5 +75,17 @@ class TaskDelegationAssigned extends Notification implements ShouldQueue
 
         return $mail->action('View Task', url(route('staff.task-delegations.index')))
             ->line('Thank you.');
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'New task assigned',
+            'body' => Str::limit($payload['message_preview'] ?? 'You have a new assignment.', 140),
+            'data' => $payload,
+            'channel' => 'general',
+        ];
     }
 }

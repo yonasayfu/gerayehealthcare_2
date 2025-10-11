@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TaskDelegationResponded extends Notification implements ShouldQueue
 {
@@ -38,6 +39,18 @@ class TaskDelegationResponded extends Notification implements ShouldQueue
             'acceptance_status' => $status,
             'actor_name' => $this->actor->name ?? 'A staff member',
             'assignee_name' => $assigneeName,
+        ];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'Task response',
+            'body' => Str::limit($payload['message_preview'] ?? 'A task response was recorded.', 140),
+            'data' => $payload,
+            'channel' => 'general',
         ];
     }
 }

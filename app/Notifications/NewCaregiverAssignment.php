@@ -59,4 +59,16 @@ class NewCaregiverAssignment extends Notification
             'url' => route('staff.my-visits.index'),
         ];
     }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'New caregiver assignment',
+            'body' => $payload['message'] ?? 'You have a new caregiver assignment.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
 }

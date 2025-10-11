@@ -36,6 +36,18 @@ class LeaveRequestSubmitted extends Notification
         ];
     }
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'New leave request submitted',
+            'body' => $payload['message_preview'] ?? 'A team member submitted a leave request.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         $staff = $this->leaveRequest->staff;

@@ -30,5 +30,16 @@ class PersonalTaskReminder extends Notification implements ShouldQueue
             'due_date' => $this->task->due_date,
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'Task reminder',
+            'body' => $payload['message_preview'] ?? 'You have a task to review.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

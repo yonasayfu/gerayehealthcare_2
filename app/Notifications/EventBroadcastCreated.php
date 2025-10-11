@@ -31,5 +31,16 @@ class EventBroadcastCreated extends Notification implements ShouldQueue
             'url' => route('admin.event-broadcasts.show', $this->broadcast->id),
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => $payload['title'] ?? 'Event Broadcast',
+            'body' => $payload['message'] ?? 'A new broadcast has been scheduled.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

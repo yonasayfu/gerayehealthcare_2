@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ModuleController;
 use App\Http\Controllers\Api\V1\PatientController;
+use App\Http\Controllers\Api\V1\PushTokenController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\API\LeaveRequestController;
 
@@ -28,6 +29,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('/user', [UserController::class, 'update']);
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/modules', ModuleController::class);
+        Route::post('/push-tokens', [PushTokenController::class, 'store']);
+        Route::delete('/push-tokens', [PushTokenController::class, 'destroy']);
 
         Route::get('/patients/me', [PatientController::class, 'me']);
         Route::patch('/patients/me', [PatientController::class, 'updateMe']);

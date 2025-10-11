@@ -16,7 +16,9 @@ use App\Listeners\CheckForLowStock;
 use App\Listeners\CreatePatientFromRecommendation;
 use App\Listeners\RegisterEventParticipant;
 use App\Listeners\SendCaregiverAssignmentNotification;
+use App\Listeners\SendPushNotificationListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -53,6 +55,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         MessageUpdated::class => [
             // Add listener for message updates
+        ],
+        NotificationSent::class => [
+            SendPushNotificationListener::class,
         ],
     ];
 

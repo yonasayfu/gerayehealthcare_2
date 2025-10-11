@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TaskDelegationTransferred extends Notification implements ShouldQueue
 {
@@ -47,6 +48,18 @@ class TaskDelegationTransferred extends Notification implements ShouldQueue
             'status' => $this->task->status,
             'actor_name' => $actorName,
             'assignee_name' => $assigneeName,
+        ];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'Task transferred',
+            'body' => Str::limit($payload['message_preview'] ?? 'A task has been transferred.', 140),
+            'data' => $payload,
+            'channel' => 'general',
         ];
     }
 }

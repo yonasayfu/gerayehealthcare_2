@@ -28,5 +28,16 @@ class MarketingTaskAssigned extends Notification implements ShouldQueue
             'url' => route('admin.marketing-tasks.show', $this->task->id),
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => $payload['title'] ?? 'Marketing task assigned',
+            'body' => $payload['message'] ?? 'You have a new marketing task.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

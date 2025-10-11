@@ -30,5 +30,16 @@ class EventParticipantAssigned extends Notification implements ShouldQueue
             'url' => route('admin.events.show', $this->participant->event_id),
         ];
     }
-}
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => $payload['title'] ?? 'Event Registration',
+            'body' => $payload['message'] ?? 'You have been registered for a new event.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+}

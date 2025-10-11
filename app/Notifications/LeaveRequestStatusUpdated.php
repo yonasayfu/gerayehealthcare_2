@@ -33,6 +33,18 @@ class LeaveRequestStatusUpdated extends Notification
         ];
     }
 
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'Leave request ' . strtolower($this->leaveRequest->status),
+            'body' => $payload['message_preview'] ?? 'Your leave request has been updated.',
+            'data' => $payload,
+            'channel' => 'general',
+        ];
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)

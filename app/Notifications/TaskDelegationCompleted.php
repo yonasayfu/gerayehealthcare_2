@@ -7,6 +7,7 @@ use App\Models\TaskDelegation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class TaskDelegationCompleted extends Notification implements ShouldQueue
 {
@@ -38,6 +39,18 @@ class TaskDelegationCompleted extends Notification implements ShouldQueue
             'due_date' => $this->task->due_date,
             'status' => $this->task->status,
             'assignee_name' => $assigneeName,
+        ];
+    }
+
+    public function toPush(object $notifiable): array
+    {
+        $payload = $this->toArray($notifiable);
+
+        return [
+            'title' => 'Task completed',
+            'body' => Str::limit($payload['message_preview'] ?? 'A task was completed.', 140),
+            'data' => $payload,
+            'channel' => 'general',
         ];
     }
 }
